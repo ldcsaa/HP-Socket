@@ -9,24 +9,23 @@
 #include "../../../Common/Src/WaitFor.h"
 
 #ifdef _WIN64
-		#ifdef _DEBUG
-			#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_UD.lib")
-		#else
-			#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_U.lib")
-		#endif
+	#ifdef _DEBUG
+		#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_UD.lib")
 	#else
-		#ifdef _DEBUG
-			#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_UD.lib")
-		#else
-			#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_U.lib")
-		#endif
+		#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_U.lib")
+	#endif
+#else
+	#ifdef _DEBUG
+		#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_UD.lib")
+	#else
+		#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_U.lib")
+	#endif
 #endif
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS = _T("0.0.0.0");
-const USHORT CServerDlg::PORT = 5555;
-
+const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
+const USHORT CServerDlg::PORT		= 5555;
 
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(CServerDlg::IDD, pParent), m_Server(this)

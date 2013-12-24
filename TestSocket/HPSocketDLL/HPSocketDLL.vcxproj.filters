@@ -94,7 +94,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Src\bufferpool.h">
-      <Filter>Common\socket</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -141,7 +141,7 @@
       <Filter>Common\socket</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Src\bufferpool.cpp">
-      <Filter>Common\socket</Filter>
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

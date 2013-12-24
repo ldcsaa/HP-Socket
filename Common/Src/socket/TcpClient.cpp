@@ -1,12 +1,12 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.1
+ * Version	: 3.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
- * WeiBo	: http://weibo.com/u/1402935851
+ * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -185,7 +185,7 @@ BOOL CTcpClient::CreateWorkerThread()
 #endif
 	WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 {
-	TRACE1("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 
 	CTcpClient* pClient	= (CTcpClient*)pv;
 	HANDLE hEvents[]	= {pClient->m_evSocket, pClient->m_evBuffer, pClient->m_evWorker};
@@ -222,7 +222,7 @@ BOOL CTcpClient::CreateWorkerThread()
 			ASSERT(FALSE);
 	}
 
-	TRACE1("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
 	return 0;
 }
@@ -326,7 +326,7 @@ BOOL CTcpClient::ReadData()
 		{
 			if(FireReceive(m_dwConnID, m_rcBuffer, rc) == ISocketListener::HR_ERROR)
 			{
-				TRACE1("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
+				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
 				SetLastError(CE_DATA_PROC_ERROR, __FUNCTION__, ERROR_FUNCTION_FAILED);
 				FireError(m_dwConnID, SO_RECEIVE, ERROR_FUNCTION_FAILED);
@@ -419,7 +419,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 		{
 			if(FireSend(m_dwConnID, pItem->Ptr(), rc) == ISocketListener::HR_ERROR)
 			{
-				TRACE1("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
+				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
 				ASSERT(FALSE);
 			}
 
@@ -545,7 +545,7 @@ void CTcpClient::SetLastError(EnClientError code, LPCSTR func, int ec)
 {
 	m_enLastError = code;
 
-	TRACE3("%s --> Error: %d, EC: %d\n", func, code, ec);
+	TRACE("%s --> Error: %d, EC: %d\n", func, code, ec);
 }
 
 BOOL CTcpClient::GetLocalAddress(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
@@ -559,13 +559,13 @@ LPCTSTR CTcpClient::GetLastErrorDesc()
 {
 	switch(m_enLastError)
 	{
-	case CE_OK:					return _T("成功");
+	case CE_OK:						return _T("成功");
 	case CE_ILLEGAL_STATE:			return _T("当前状态不允许操作");
 	case CE_INVALID_PARAM:			return _T("非法参数");
-	case CE_SOCKET_CREATE_FAIL:	return _T("创建 Client Socket 失败");
+	case CE_SOCKET_CREATE_FAIL:		return _T("创建 Client Socket 失败");
 	case CE_SOCKET_PREPARE_FAIL:	return _T("设置 Client Socket 失败");
 	case CE_CONNECT_SERVER_FAIL:	return _T("连接服务器失败");
-	case CE_WORKER_CREATE_FAIL:	return _T("创建工作线程失败");
+	case CE_WORKER_CREATE_FAIL:		return _T("创建工作线程失败");
 	case CE_NETWORK_ERROR:			return _T("网络错误");
 	case CE_DATA_PROC_ERROR:		return _T("数据处理错误");
 	default: ASSERT(FALSE);			return _T("");

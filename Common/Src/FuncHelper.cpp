@@ -1,5 +1,5 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Version	: 2.3.2
  * Author	: Bruce Liang

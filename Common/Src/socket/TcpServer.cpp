@@ -1,12 +1,12 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.1
+ * Version	: 3.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
- * WeiBo	: http://weibo.com/u/1402935851
+ * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,14 +41,14 @@
 const DWORD	CTcpServer::MAX_WORKER_THREAD_COUNT			= 500;
 const DWORD	CTcpServer::MIN_SOCKET_BUFFER_SIZE			= 64;
 const DWORD	CTcpServer::DEFAULT_WORKER_THREAD_COUNT		= min((::GetCpuCount() * 2 + 2), MAX_WORKER_THREAD_COUNT);
-const DWORD	CTcpServer::DEFAULT_ACCEPT_SOCKET_COUNT		= 1 * DEFAULT_WORKER_THREAD_COUNT;
+const DWORD	CTcpServer::DEFAULT_SOCKET_LISTEN_QUEUE		= 300;
+const DWORD	CTcpServer::DEFAULT_ACCEPT_SOCKET_COUNT		= DEFAULT_SOCKET_LISTEN_QUEUE;
 const DWORD	CTcpServer::DEFAULT_SOCKET_BUFFER_SIZE		= 4 * 1024 - sizeof(TBufferObj);
-const DWORD	CTcpServer::DEFAULT_SOCKET_LISTEN_QUEUE		= 30;
 const DWORD CTcpServer::DEFAULT_FREE_SOCKETOBJ_LOCK_TIME= 3 * 1000;
-const DWORD	CTcpServer::DEFAULT_FREE_SOCKETOBJ_POOL		= 100;
-const DWORD	CTcpServer::DEFAULT_FREE_BUFFEROBJ_POOL		= 200;
-const DWORD	CTcpServer::DEFAULT_FREE_SOCKETOBJ_HOLD		= 300;
-const DWORD	CTcpServer::DEFAULT_FREE_BUFFEROBJ_HOLD		= 600;
+const DWORD	CTcpServer::DEFAULT_FREE_SOCKETOBJ_POOL		= 150;
+const DWORD	CTcpServer::DEFAULT_FREE_SOCKETOBJ_HOLD		= 450;
+const DWORD	CTcpServer::DEFAULT_FREE_BUFFEROBJ_POOL		= 300;
+const DWORD	CTcpServer::DEFAULT_FREE_BUFFEROBJ_HOLD		= 900;
 const DWORD	CTcpServer::DEFALUT_KEEPALIVE_TIME			= 5 * 1000;
 const DWORD	CTcpServer::DEFALUT_KEEPALIVE_INTERVAL		= 3 * 1000;
 const DWORD	CTcpServer::DEFAULT_MAX_SHUTDOWN_WAIT_TIME	= 15 * 1000;
@@ -57,7 +57,7 @@ void CTcpServer::SetLastError(EnServerError code, LPCSTR func, int ec)
 {
 	m_enLastError = code;
 
-	TRACE3("%s --> Error: %d, EC: %d\n", func, code, ec);
+	TRACE("%s --> Error: %d, EC: %d\n", func, code, ec);
 }
 
 BOOL CTcpServer::Start(LPCTSTR pszBindAddress, USHORT usPort)
@@ -260,7 +260,7 @@ void CTcpServer::CloseListenSocket()
 
 void CTcpServer::DisconnectClientSocket()
 {
-	CReentrantWriteLock locallock(m_csClientSocket);
+	CReentrantReadLock locallock(m_csClientSocket);
 
 	for(TSocketObjPtrMapI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
 		Disconnect(it->first);
@@ -274,14 +274,14 @@ void CTcpServer::ReleaseClientSocket()
 	{
 		TSocketObj* pSocketObj = it->second;
 
-		CloseSocketObj(pSocketObj);
+		CloseClientSocketObj(pSocketObj);
 		DeleteSocketObj(pSocketObj);
 	}
 
 	m_mpClientSocket.clear();
 }
 
-TSocketObj*	CTcpServer::GetFreeSocketObj()
+TSocketObj*	CTcpServer::GetFreeSocketObj(CONNID dwConnID, SOCKET soClient)
 {
 	TSocketObj* pSocketObj = nullptr;
 
@@ -300,31 +300,36 @@ TSocketObj*	CTcpServer::GetFreeSocketObj()
 		}
 	}
 
-	if(!pSocketObj) pSocketObj	= CreateSocketObj();
-	pSocketObj->extra			= nullptr;
+	if(!pSocketObj) pSocketObj = CreateSocketObj();
+	pSocketObj->Reset(dwConnID, soClient);
 
 	return pSocketObj;
 }
 
-void CTcpServer::AddFreeSocketObj(CONNID dwConnID)
+void CTcpServer::AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
 {
-	BOOL bDone = FALSE;
-	TSocketObj* pSocketObj = nullptr;
+	BOOL bDone				= FALSE;
+	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);;
 
+	if(TUdpSocketObj::IsValid(pSocketObj))
 	{
 		CReentrantWriteLock locallock(m_csClientSocket);
-		pSocketObj = FindSocketObj(dwConnID);
 
-		if(pSocketObj != nullptr)
+		if(TSocketObj::IsValid(pSocketObj))
 		{
-			m_mpClientSocket.erase(dwConnID);
+			TSocketObj::Invalid(pSocketObj);
 			bDone = TRUE;
 		}
 	}
 
 	if(bDone)
 	{
-		CloseSocketObj(pSocketObj);
+		CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+
+		{
+			CReentrantWriteLock locallock(m_csClientSocket);
+			m_mpClientSocket.erase(dwConnID);
+		}
 
 		{
 			CCriSecLock locallock(m_csFreeSocket);
@@ -471,18 +476,16 @@ TSocketObj* CTcpServer::FindSocketObj(CONNID dwConnID)
 	return pSocketObj;
 }
 
-void CTcpServer::CloseSocketObj(TSocketObj* pSocketObj, int iShutdownFlag)
+void CTcpServer::CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode, int iShutdownFlag)
 {
-	if(TSocketObj::IsValid(pSocketObj))
-	{
-		CCriSecLock locallock(pSocketObj->crisec);
+	ASSERT(TSocketObj::IsExist(pSocketObj));
 
-		if(pSocketObj->socket != INVALID_SOCKET)
-		{
-			::ManualCloseSocket(pSocketObj->socket, iShutdownFlag);
-			pSocketObj->socket = INVALID_SOCKET;
-		}
-	}
+	if(enFlag == SCF_CLOSE)
+		FireClose(pSocketObj->connID);
+	else if(enFlag == SCF_ERROR)
+		FireError(pSocketObj->connID, enOperation, iErrorCode);
+
+	::ManualCloseSocket(pSocketObj->socket, iShutdownFlag);
 }
 
 BOOL CTcpServer::GetListenAddress(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
@@ -498,7 +501,7 @@ BOOL CTcpServer::GetClientAddress(CONNID dwConnID, LPTSTR lpszAddress, int& iAdd
 
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
+	if(TSocketObj::IsExist(pSocketObj))
 	{
 		ADDRESS_FAMILY usFamily;
 		return ::sockaddr_IN_2_A(pSocketObj->clientAddr, usFamily, lpszAddress, iAddressLen, usPort);
@@ -511,7 +514,7 @@ BOOL CTcpServer::SetConnectionExtra(CONNID dwConnID, PVOID pExtra)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
+	if(TSocketObj::IsExist(pSocketObj))
 	{
 		pSocketObj->extra = pExtra;
 		return TRUE;
@@ -526,7 +529,7 @@ BOOL CTcpServer::GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra)
 
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
+	if(TSocketObj::IsExist(pSocketObj))
 	{
 		*ppExtra = pSocketObj->extra;
 		return TRUE;
@@ -545,7 +548,7 @@ BOOL CTcpServer::GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)
 	BOOL isOK				= TRUE;
 	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
+	if(TSocketObj::IsExist(pSocketObj))
 		dwPeriod = GetTimeGap32(pSocketObj->connTime);
 	else
 		isOK = FALSE;
@@ -779,10 +782,7 @@ void CTcpServer::ForceDisconnect(CONNID dwConnID)
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
 	if(TSocketObj::IsValid(pSocketObj))
-	{
-		FireClose(dwConnID);
-		AddFreeSocketObj(dwConnID);
-	}
+		AddFreeSocketObj(dwConnID, SCF_CLOSE);
 }
 
 void CTcpServer::HandleIo(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode)
@@ -798,8 +798,7 @@ void CTcpServer::HandleIo(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* p
 
 	if(dwBytes == 0 && pBufferObj->operation != SO_ACCEPT)
 	{
-		FireClose(dwConnID);
-		AddFreeSocketObj(dwConnID);
+		AddFreeSocketObj(dwConnID, SCF_CLOSE);
 		AddFreeBufferObj(pBufferObj);
 		return;
 	}
@@ -858,9 +857,7 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 
 	SOCKET socket			= pBufferObj->client;
 	CONNID dwConnID			= ::GenerateConnectionID(m_dwConnID);
-	TSocketObj* pSocketObj	= GetFreeSocketObj();
-	pSocketObj->socket		= socket;
-	pSocketObj->connID		= dwConnID;
+	TSocketObj* pSocketObj	= GetFreeSocketObj(dwConnID, socket);
 
 	memcpy(&pSocketObj->clientAddr, pRemoteSockAddr, sizeof(SOCKADDR_IN));
 	AddClientSocketObj(dwConnID, pSocketObj);
@@ -877,7 +874,7 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 	}
 	else
 	{
-		AddFreeSocketObj(dwConnID);
+		AddFreeSocketObj(dwConnID, SCF_NONE);
 		AddFreeBufferObj(pBufferObj);
 	}
 }
@@ -886,7 +883,7 @@ void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 {
 	if(FireSend(dwConnID, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len) == ISocketListener::HR_ERROR)
 	{
-		TRACE1("<S-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", dwConnID);
+		TRACE("<S-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", dwConnID);
 		ASSERT(FALSE);
 	}
 
@@ -899,9 +896,8 @@ void CTcpServer::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferO
 		DoReceive(dwConnID, pSocketObj, pBufferObj);
 	else
 	{
-		TRACE1("<S-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", dwConnID);
-		FireError(dwConnID, SO_RECEIVE, ERROR_FUNCTION_FAILED);
-		AddFreeSocketObj(dwConnID);
+		TRACE("<S-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", dwConnID);
+		AddFreeSocketObj(dwConnID, SCF_ERROR, SO_RECEIVE, ERROR_FUNCTION_FAILED);
 		AddFreeBufferObj(pBufferObj);
 	}
 }
@@ -926,7 +922,7 @@ BOOL CTcpServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(pSocketObj == nullptr)
+	if(!TSocketObj::IsValid(pSocketObj))
 		return FALSE;
 
 	int result = DoSend(dwConnID, pSocketObj, pBuffer, iLength);
@@ -968,10 +964,7 @@ int CTcpServer::DoSend(CONNID dwConnID, TSocketObj* pSocketObj, const BYTE* pBuf
 void CTcpServer::CheckError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	if(iErrorCode != WSAENOTSOCK && iErrorCode != ERROR_OPERATION_ABORTED)
-	{
-		FireError(dwConnID, enOperation, iErrorCode);
-		AddFreeSocketObj(dwConnID);
-	}
+		AddFreeSocketObj(dwConnID, SCF_ERROR, enOperation, iErrorCode);
 }
 
 LPCTSTR CTcpServer::GetLastErrorDesc()
