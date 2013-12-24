@@ -1,4 +1,4 @@
 hpsocket
 ========
 
-High Performance Client &amp; Server Socket Component
+High Performance TCP/UDP Socket Component
