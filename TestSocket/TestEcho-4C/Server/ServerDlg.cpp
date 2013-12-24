@@ -10,9 +10,8 @@
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS = _T("0.0.0.0");
-const USHORT CServerDlg::PORT = 5555;
-
+const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
+const USHORT CServerDlg::PORT		= 5555;
 
 CServerDlg* CServerDlg::m_spThis					= nullptr;
 HP_TcpPullServer CServerDlg::m_spServer				= nullptr;
@@ -252,7 +251,6 @@ En_HP_HandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
 
 	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	//if(bPass) m_mpPkgInfo[dwConnID] = new TPkgInfo(true, sizeof(TPkgHeader));
 	if(bPass) ::HP_Server_SetConnectionExtra(m_spServer, dwConnID, new TPkgInfo(true, sizeof(TPkgHeader)));
 
 	return bPass ? HP_HR_OK : HP_HR_ERROR;
@@ -332,7 +330,6 @@ En_HP_HandleResult CServerDlg::OnError(CONNID dwConnID, En_HP_SocketOperation en
 En_HP_HandleResult CServerDlg::OnServerShutdown()
 {
 	::PostOnShutdown();
-	//::ClearPtrMap(m_mpPkgInfo);
 
 	return HP_HR_OK;
 }
@@ -340,38 +337,17 @@ En_HP_HandleResult CServerDlg::OnServerShutdown()
 TPkgInfo* CServerDlg::FindPkgInfo(CONNID dwConnID)
 {
 	PVOID pInfo = nullptr;
-
 	::HP_Server_GetConnectionExtra(m_spServer, dwConnID, &pInfo);
-
-	/*
-	auto it = m_mpPkgInfo.find(dwConnID);
-
-	if(it != m_mpPkgInfo.end())
-		pInfo = it->second;
-	*/
 
 	return (TPkgInfo*)pInfo;
 }
 
 void CServerDlg::RemovePkgInfo(CONNID dwConnID)
 {
-	CCriSecLock locallock(m_spThis->m_csPkgInfo);
+	//CCriSecLock locallock(m_spThis->m_csPkgInfo);
 
-	PVOID pInfo = nullptr;
-
-	if(::HP_Server_GetConnectionExtra(m_spServer, dwConnID, &pInfo) && pInfo != nullptr)
-	{
-		::HP_Server_SetConnectionExtra(m_spServer, dwConnID, nullptr);
-		delete (TPkgInfo*)pInfo;
-	}
-
-	/*
 	TPkgInfo* pInfo = FindPkgInfo(dwConnID);
+	ASSERT(pInfo != nullptr);
 
-	if(pInfo != nullptr)
-	{
-		m_mpPkgInfo.erase(dwConnID);
-		delete pInfo;
-	}
-	*/
+	delete pInfo;
 }

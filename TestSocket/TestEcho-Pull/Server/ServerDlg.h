@@ -67,10 +67,8 @@ private:
 
 	EnAppState m_enState;
 	CString m_strAddress;
-
-	//hash_map<CONNID, TPkgInfo*> m_mpPkgInfo;
 	
-	CCriSec m_csPkgInfo;
+	//CCriSec m_csPkgInfo;
 
 	CTcpPullServerWrapper m_Server;
 };

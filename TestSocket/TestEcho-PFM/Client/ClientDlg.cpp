@@ -9,17 +9,17 @@
 #include "../../../Common/Src/WaitFor.h"
 
 #ifdef _WIN64
-		#ifdef _DEBUG
-			#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_UD.lib")
-		#else
-			#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_U.lib")
-		#endif
+	#ifdef _DEBUG
+		#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_UD.lib")
 	#else
-		#ifdef _DEBUG
-			#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_UD.lib")
-		#else
-			#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_U.lib")
-		#endif
+		#pragma comment(lib, "../../Bin/HPSocket/x64/HPSocket_U.lib")
+	#endif
+#else
+	#ifdef _DEBUG
+		#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_UD.lib")
+	#else
+		#pragma comment(lib, "../../Bin/HPSocket/x86/HPSocket_U.lib")
+	#endif
 #endif
 
 // CClientDlg dialog
