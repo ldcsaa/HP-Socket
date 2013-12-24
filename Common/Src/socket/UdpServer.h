@@ -1,12 +1,12 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.1
+ * Version	: 3.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
- * WeiBo	: http://weibo.com/u/1402935851
+ * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,8 +39,8 @@ public:
 	static const DWORD DEFAULT_WORKER_THREAD_COUNT;
 	static const DWORD DEFAULT_FREE_SOCKETOBJ_LOCK_TIME;
 	static const DWORD DEFAULT_FREE_SOCKETOBJ_POOL;
-	static const DWORD DEFAULT_FREE_BUFFEROBJ_POOL;
 	static const DWORD DEFAULT_FREE_SOCKETOBJ_HOLD;
+	static const DWORD DEFAULT_FREE_BUFFEROBJ_POOL;
 	static const DWORD DEFAULT_FREE_BUFFEROBJ_HOLD;
 	static const DWORD DEFAULT_MAX_DATAGRAM_SIZE;
 	static const DWORD DEFAULT_DETECT_ATTEMPTS;
@@ -165,15 +165,16 @@ private:
 	void Reset();
 
 	TUdpBufferObj*	GetFreeBufferObj(int iLen = -1);
-	TUdpSocketObj*	GetFreeSocketObj();
+	TUdpSocketObj*	GetFreeSocketObj(CONNID dwConnID);
 	void			AddFreeBufferObj(TUdpBufferObj* pBufferObj);
-	void			AddFreeSocketObj(CONNID dwConnID);
+	void			AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	TUdpBufferObj*	CreateBufferObj();
 	TUdpSocketObj*	CreateSocketObj();
 	void			DeleteBufferObj(TUdpBufferObj* pBufferObj);
 	void			DeleteSocketObj(TUdpSocketObj* pSocketObj);
 
 	void			AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
+	void			CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
 
 	CONNID			FindConnectionID(SOCKADDR_IN* pAddr);

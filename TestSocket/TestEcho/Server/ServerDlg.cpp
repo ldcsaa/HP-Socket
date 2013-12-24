@@ -10,12 +10,8 @@
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS = _T("0.0.0.0");
-const USHORT CServerDlg::PORT = 5555;
-
-#define DEFAULT_ADDRESS	_T("192.168.1.150")
-#define DEFAULT_CONN_ID	_T("0")
-
+const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
+const USHORT CServerDlg::PORT		= 5555;
 
 CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CServerDlg::IDD, pParent), m_Server(this)

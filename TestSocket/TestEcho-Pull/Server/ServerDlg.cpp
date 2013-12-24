@@ -10,8 +10,8 @@
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS = _T("0.0.0.0");
-const USHORT CServerDlg::PORT = 5555;
+const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
+const USHORT CServerDlg::PORT		= 5555;
 
 CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CServerDlg::IDD, pParent), m_Server(this)
@@ -225,7 +225,6 @@ ISocketListener::EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soC
 
 	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	//if(bPass) m_mpPkgInfo[dwConnID] = new TPkgInfo(true, sizeof(TPkgHeader));
 	if(bPass) m_Server->SetConnectionExtra(dwConnID, new TPkgInfo(true, sizeof(TPkgHeader)));
 
 	return bPass ? ISocketListener::HR_OK : ISocketListener::HR_ERROR;
@@ -305,7 +304,6 @@ ISocketListener::EnHandleResult CServerDlg::OnError(CONNID dwConnID, EnSocketOpe
 ISocketListener::EnHandleResult CServerDlg::OnServerShutdown()
 {
 	::PostOnShutdown();
-	//::ClearPtrMap(m_mpPkgInfo);
 
 	return ISocketListener::HR_OK;
 }
@@ -316,35 +314,15 @@ TPkgInfo* CServerDlg::FindPkgInfo(CONNID dwConnID)
 
 	m_Server->GetConnectionExtra(dwConnID, &pInfo);
 
-	/*
-	auto it = m_mpPkgInfo.find(dwConnID);
-
-	if(it != m_mpPkgInfo.end())
-		pInfo = it->second;
-	*/
-
 	return (TPkgInfo*)pInfo;
 }
 
 void CServerDlg::RemovePkgInfo(CONNID dwConnID)
 {
-	CCriSecLock locallock(m_csPkgInfo);
+	//CCriSecLock locallock(m_csPkgInfo);
 
-	PVOID pInfo = nullptr;
-
-	if(m_Server->GetConnectionExtra(dwConnID, &pInfo) && pInfo != nullptr)
-	{
-		m_Server->SetConnectionExtra(dwConnID, nullptr);
-		delete (TPkgInfo*)pInfo;
-	}
-
-	/*
 	TPkgInfo* pInfo = FindPkgInfo(dwConnID);
+	ASSERT(pInfo != nullptr);
 
-	if(pInfo != nullptr)
-	{
-		m_mpPkgInfo.erase(dwConnID);
-		delete pInfo;
-	}
-	*/
+	delete pInfo;
 }

@@ -1,4 +1,65 @@
 ==========================================================================================
+v3.1.2 更新：
+==========================================================================================
+
+> 修改 Server 组件的 OnClose() / OnError() 事件的触发规则：
+-----------------
+1、以前版本的 TCP/UDP Server 组件中，当关闭一个连接时可能会同时触发一个 OnClose() 事件和若干个 OnError() 事件
+2. 由于存在上述可能性，所以应用程序需要对 OnClose() / OnError() 的处理事件代码段进行同步
+3、从 v3.1.2 开始，当多个 OnClose() / OnError() 事件同时发生时，组件只会向应用程序通知第一个事件，后续事件则忽略
+4. 因此，应用程序在处理 OnClose() / OnError() 事件时不必处理同步，减少了出错的可能和编写同步及检测代码的负担
+
+	示例代码一：
+	--------------------------------------------------------------------------------------
+	ISocketListener::EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
+	{
+		// 以前版本：有可能存在并发的 OnClose()/OnError()，要把代码放在临界区中并检测返回值
+
+		CCriSecLock locallock(m_csPkgInfo);	// <-- 临界区
+
+		PVOID pInfo = nullptr;
+
+		if(m_Server->GetConnectionExtra(dwConnID, &pInfo) && pInfo != nullptr)	// <-- 检测返回值
+		{
+			m_Server->SetConnectionExtra(dwConnID, nullptr);
+			delete pInfo;
+		}
+	}
+
+	示例代码二：
+	--------------------------------------------------------------------------------------
+	ISocketListener::EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
+	{
+		// v3.1.2 版本：只会接收到一个 OnClose()/OnError() 事件，能安全地移除临界区代码和检测代码
+
+		PVOID pInfo = nullptr;
+		m_Server->GetConnectionExtra(dwConnID, &pInfo);
+		ASSERT(pInfo != nullptr);
+
+		delete pInfo;
+	}
+
+> 其它更新：
+-----------------
+1、调整 TCP Server 默认参数：
+	1) DEFAULT_SOCKET_LISTEN_QUEUE	: 300
+	2) DEFAULT_ACCEPT_SOCKET_COUNT	: 300
+	3) DEFAULT_FREE_SOCKETOBJ_POOL	: 150
+	4) DEFAULT_FREE_SOCKETOBJ_HOLD	: 450
+	5) DEFAULT_FREE_BUFFEROBJ_POOL	: 300
+	6) DEFAULT_FREE_BUFFEROBJ_HOLD	: 900
+
+2、调整 UDP Server 默认参数：
+	1) DEFAULT_FREE_SOCKETOBJ_POOL	: 150
+	2) DEFAULT_FREE_SOCKETOBJ_HOLD	: 450
+	3) DEFAULT_FREE_BUFFEROBJ_POOL	: 300
+	4) DEFAULT_FREE_BUFFEROBJ_HOLD	: 900
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v3.1.1 及以前版本的应用程序可以安全升级到 HP-Socket v3.1.2
+
+==========================================================================================
 v3.1.1 更新：
 ==========================================================================================
 
@@ -52,7 +113,6 @@ v3.1.1 更新：
 4、IPullServer 删除方法 Get/SetFreePullBufferPool()、Get/SetFreePullBufferHold()
 5、HPSocket.dll 和 HPSocket4C.dll 使用 /MT(d) 选项重新编译，消除对运行时库的依赖
 6、增加示例工程 TestEcho-4C，展示 HPSocket4C.dll 的使用方法
-
 
 > 升级说明：
 -----------------

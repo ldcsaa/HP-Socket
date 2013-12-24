@@ -1,12 +1,12 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.1
+ * Version	: 3.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
- * WeiBo	: http://weibo.com/u/1402935851
+ * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,6 +61,13 @@ private:
 	int		m_iResult;
 };
 
+enum EnSocketCloseFlag
+{
+	SCF_NONE	= 0,
+	SCF_CLOSE	= 1,
+	SCF_ERROR	= 2
+};
+
 /* 数据缓冲区基础结构 */
 struct TBufferObjBase
 {
@@ -94,14 +101,29 @@ struct TSocketObjBase
 	CONNID		connID;
 	SOCKADDR_IN	clientAddr;
 	PVOID		extra;
+	BOOL		valid;
 
 	union
 	{
 		DWORD	freeTime;
 		DWORD	connTime;
 	};
-	
-	static BOOL IsValid(TSocketObjBase* pSocketObj) {return pSocketObj != nullptr;}
+
+	static BOOL IsExist(TSocketObjBase* pSocketObj)
+		{return pSocketObj != nullptr;}
+
+	static BOOL IsValid(TSocketObjBase* pSocketObj)
+		{return IsExist(pSocketObj) && pSocketObj->valid == TRUE;}
+
+	static void Invalid(TSocketObjBase* pSocketObj)
+		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
+
+	void Reset(CONNID dwConnID)
+	{
+		connID	= dwConnID;
+		valid	= TRUE;
+		extra	= nullptr;
+	}
 };
 
 /* 数据缓冲区结构 */
@@ -110,14 +132,23 @@ struct TSocketObj : public TSocketObjBase
 	SOCKET		socket;
 	CCriSec		crisec;
 
-	static BOOL IsValid(TSocketObj* pSocketObj)
-		{return __super::IsValid(pSocketObj) && pSocketObj->socket != INVALID_SOCKET;}
+	void Reset(CONNID dwConnID, SOCKET soClient)
+	{
+		__super::Reset(dwConnID);
+		socket = soClient;
+	}
 };
 
 /* UDP 数据缓冲区结构 */
 struct TUdpSocketObj : public TSocketObjBase
 {
-	volatile DWORD detectFails;
+	volatile DWORD	detectFails;
+
+	void Reset(CONNID dwConnID)
+	{
+		__super::Reset(dwConnID);
+		detectFails = 0;
+	}
 };
 
 /* 数据缓冲区结构链表 */
