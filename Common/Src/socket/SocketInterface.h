@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.2
+ * Version	: 3.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -23,6 +23,8 @@
  */
  
 #pragma once
+
+#include <winsock2.h>
 
 /************************************************************************
 名称：连接 ID 数据类型
@@ -155,7 +157,7 @@ public:
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
 	*			HR_ERROR			-- 终止启动通信服务组件
 	*/
-	virtual EnHandleResult OnPrepareListen(UINT_PTR soListen)			= 0;
+	virtual EnHandleResult OnPrepareListen(SOCKET soListen)				= 0;
 
 	/*
 	* 名称：关闭通信组件通知
@@ -185,7 +187,7 @@ public:
 	* 返回值：	HR_OK / HR_IGNORE	-- 接受连接
 	*			HR_ERROR			-- 拒绝连接
 	*/
-	virtual EnHandleResult OnAccept(CONNID dwConnID, UINT_PTR soClient)	= 0;
+	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient)	= 0;
 };
 
 /************************************************************************
@@ -197,8 +199,8 @@ class CTcpServerListener : public ITcpServerListener
 public:
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareListen(UINT_PTR soListen)						{return HR_IGNORE;}
-	virtual EnHandleResult OnAccept(CONNID dwConnID, UINT_PTR soClient)				{return HR_IGNORE;}
+	virtual EnHandleResult OnPrepareListen(SOCKET soListen)							{return HR_IGNORE;}
+	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient)				{return HR_IGNORE;}
 	virtual EnHandleResult OnServerShutdown()										{return HR_IGNORE;}
 };
 
@@ -243,7 +245,7 @@ class CUdpServerListener : public IUdpServerListener
 public:
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareListen(UINT_PTR soListen)						{return HR_IGNORE;}
+	virtual EnHandleResult OnPrepareListen(SOCKET soListen)							{return HR_IGNORE;}
 	virtual EnHandleResult OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)	{return HR_IGNORE;}
 	virtual EnHandleResult OnServerShutdown()										{return HR_IGNORE;}
 };
@@ -266,7 +268,7 @@ public:
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
 	*			HR_ERROR			-- 终止启动通信客户端组件
 	*/
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, UINT_PTR socket)	= 0;
+	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)		= 0;
 
 	/*
 	* 名称：连接完成通知
@@ -297,7 +299,7 @@ class CTcpClientListener : public ITcpClientListener
 public:
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, UINT_PTR socket)		{return HR_IGNORE;}
+	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)			{return HR_IGNORE;}
 	virtual EnHandleResult OnConnect(CONNID dwConnID)								{return HR_IGNORE;}
 };
 
@@ -329,7 +331,7 @@ class CUdpClientListener : public IUdpClientListener
 public:
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, UINT_PTR socket)		{return HR_IGNORE;}
+	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)			{return HR_IGNORE;}
 	virtual EnHandleResult OnConnect(CONNID dwConnID)								{return HR_IGNORE;}
 };
 

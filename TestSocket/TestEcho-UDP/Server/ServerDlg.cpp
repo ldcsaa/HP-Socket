@@ -56,8 +56,9 @@ BOOL CServerDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 
 	CString strTitle;
-	GetWindowText(strTitle);
-	strTitle.Format(_T("%s - (%s:%d)"), strTitle, ADDRESS, PORT);
+	CString strOriginTitle;
+	GetWindowText(strOriginTitle);
+	strTitle.Format(_T("%s - (%s:%d)"), strOriginTitle, ADDRESS, PORT);
 	SetWindowText(strTitle);
 
 	::SetMainWnd(this);
@@ -135,6 +136,9 @@ void CServerDlg::OnBnClickedStart()
 	//m_Server.SetMaxShutdownWaitTime(100000000);
 	//m_Server.SetMaxDatagramSize(50);
 	//m_Server.SetDetectAttempts(0);
+
+	//m_Server.SetDetectAttempts(0);
+	//m_Server.SetDetectInterval(0);
 
 	m_Address.GetWindowText(m_strAddress);
 	m_strAddress.Trim();

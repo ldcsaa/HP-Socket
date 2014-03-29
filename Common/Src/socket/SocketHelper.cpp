@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.2
+ * Version	: 3.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -38,47 +38,10 @@
 
 BOOL IsIPAddress(LPCTSTR lpszAddress)
 {
-	if(!lpszAddress)
+	if(!lpszAddress || lpszAddress[0] == '\0')
 		return FALSE;
 
-	int len = (int)lstrlen(lpszAddress) + 1;
-	
-	if(len < 7 || len > 15)
-		return false;
-
-	int iDotIndex = 0;
-	int iDotCount = 0;
-
-	for(int i = 0; i < len; ++i)
-	{
-		TCHAR c = lpszAddress[i];
-		if((c < '0' || c > '9') && c != '.' && c != '\0')
-			return FALSE;
-		else if(c == '.' || c == '\0')
-		{
-			int iSubLen = i - iDotIndex;
-
-			if(iSubLen < 1 || iSubLen > 3)
-				return FALSE;
-
-			TCHAR szSub[4] = {0};
-			_tcsncpy(szSub, lpszAddress + iDotIndex, iSubLen);
-
-			int iSub = _ttoi(szSub);
-
-			if(iSub < 0 || iSub > 255)
-				return FALSE;
-
-			if(c == '.')
-			{
-				iDotIndex = i + 1;
-				if(++iDotCount > 3)
-					return FALSE;
-			}
-		}
-	}
-
-	return (iDotCount == 3);
+	return ::inet_addr(CT2A(lpszAddress)) != INADDR_NONE;
 }
 
 BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
@@ -101,10 +64,10 @@ BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
 	}
 	else
 	{
-		hostent* host = ::gethostbyname(CT2A(lpszHost));
+		IN_ADDR addr;
 
-		if(host)
-			isOK = sockaddr_IN_2_IP(*(SOCKADDR_IN*)(*host->h_addr_list), lpszIP, iIPLen);
+		if(GetOptimalIPByHostName(lpszHost, addr))
+			isOK = sockaddr_IN_2_IP(addr, lpszIP, iIPLen);
 		else
 			isOK = FALSE;
 	}
@@ -112,10 +75,60 @@ BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
 	return isOK;
 }
 
-BOOL sockaddr_IN_2_IP(const SOCKADDR_IN& addr, LPTSTR lpszAddress, int& iAddressLen)
+BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr)
+{
+	addr.s_addr		= 0;
+	hostent* host	= ::gethostbyname(CT2A(lpszHost));
+
+	if(host)
+	{
+		IN_ADDR inAddr;
+		ULONG addrs[3]  = {0};
+		char** pptr		= nullptr;
+
+		if(host->h_addrtype == AF_INET)
+		{
+			for(pptr = host->h_addr_list; *pptr != nullptr; ++pptr)
+			{
+				inAddr.s_addr	= *(ULONG*)*pptr;
+				UCHAR a			= inAddr.s_net;
+				UCHAR b			= inAddr.s_host;
+
+				if(addrs[0] == 0 && a == 127)
+				{
+					addrs[0] = inAddr.s_addr;
+					break;
+				}
+				else if	(	addrs[1] == 0							&& 
+							(
+								(a == 10)							||
+								(a == 172 && b >= 16 && b <= 31)	||
+								(a == 192 && b == 168)
+							)
+						)
+					addrs[1] = inAddr.s_addr;
+				else if(addrs[2] == 0)
+					addrs[2] = inAddr.s_addr;
+			}
+
+			for(int i = 0; i < 3; i++)
+			{
+				if(addrs[i] != 0)
+				{
+					addr.s_addr = addrs[i];
+					break;
+				}
+			}
+		}
+	}
+
+	return addr.s_addr != 0;
+}
+
+BOOL sockaddr_IN_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen)
 {
 	BOOL isOK		= TRUE;
-	char* lpszIP	= inet_ntoa(addr.sin_addr);
+	char* lpszIP	= inet_ntoa(addr);
 	int iIPLen		= (int)strlen(lpszIP);
 
 	if(iIPLen > 0)
@@ -136,7 +149,7 @@ BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR l
 	usFamily = addr.sin_family;
 	usPort	 = ntohs(addr.sin_port);
 
-	return sockaddr_IN_2_IP(addr, lpszAddress, iAddressLen);
+	return sockaddr_IN_2_IP(addr.sin_addr, lpszAddress, iAddressLen);
 }
 
 BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, SOCKADDR_IN& addr)

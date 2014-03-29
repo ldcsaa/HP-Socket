@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.2
+ * Version	: 3.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,7 +24,6 @@
  
 #pragma once
 
-#include <winsock2.h>
 #include <ws2tcpip.h>
 #include <mswsock.h>
 #include <malloc.h>
@@ -211,8 +210,10 @@ typedef TSockAddrMap::const_iterator							TSockAddrMapCI;
 BOOL IsIPAddress(LPCTSTR lpszAddress);
 /* 通过主机名获取 IP 地址 */
 BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLenth);
+/* 通过主机名获取最优的 IP 地址 */
+BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr);
 /* 获取 SOCKADDR_IN 结构的 IP 地址 */
-BOOL sockaddr_IN_2_IP(const SOCKADDR_IN& addr, LPTSTR lpszAddress, int& iAddressLen);
+BOOL sockaddr_IN_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen);
 /* 把 SOCKADDR_IN 结构转换为地址数据 */
 BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 /* 把地址数据转换为 SOCKADDR_IN 结构 */
