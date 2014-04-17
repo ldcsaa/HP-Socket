@@ -40,12 +40,12 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	virtual ISocketListener::EnHandleResult OnPrepareSocket(CONNID dwConnID, SOCKET socket);
-	virtual ISocketListener::EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual ISocketListener::EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual ISocketListener::EnHandleResult OnClose(CONNID dwConnID);
-	virtual ISocketListener::EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual ISocketListener::EnHandleResult OnConnect(CONNID dwConnID);
+	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket);
+	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(CONNID dwConnID);
+	virtual EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnConnect(CONNID dwConnID);
 private:
 	BOOL CheckParams();
 private:

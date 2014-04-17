@@ -1,4 +1,109 @@
 ==========================================================================================
+v3.2.1 更新：
+==========================================================================================
+
+> 增加 TcpAgent / TcpPullAgent 通信组件：
+-----------------
+1、对于代理服务器或中转服务器等应用场景，服务器自身也作为客户端向其它服务器发起大规模连接
+2、TcpClient / TcpPullClient 基于 Event Select 通信模型，每个组件对象管理一个 Socket，并开启一个线程，不适合上述应用场景
+3、TcpAgent / TcpPullAgent 基于 IOCP 通信模型，一个组件对象管理多个 Socket，适合用作代理服务器或中转服务器的客户端通信组件
+4、TcpAgent / TcpPullAgent 的使用方式依然简单，提供以下接口方法：
+
+	1) 通知接口方法：
+		OnPrepareConnect(CONNID dwConnID, SOCKET socket)
+		OnConnect(CONNID dwConnID)
+		OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+		OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)	//（Push 模型）
+		OnReceive(CONNID dwConnID, int iLength)						//（Pull 模型）
+		OnClose(CONNID dwConnID)
+		OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+		OnAgentShutdown()
+		
+	2) 主要操作方法：
+		Start(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)
+		Stop()
+		Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)
+		Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
+		Disconnect(CONNID dwConnID, BOOL bForce = TRUE)
+		Fetch(CONNID dwConnID, BYTE* pData, int iLength)	//（Pull 模型）
+
+5、增加 TcpAgent / TcpPullAgent 使用示例：
+	1) Agent-PFM
+	2) Agent-Pull
+	3) Agent-4C
+
+> 增加 HPSocket for Java SDK：
+-----------------
+1、提供 Java 开发包：hpsocket-3.2.1.jar（通过 JNA 实现，目前只支持 Windows 平台）
+2、运行环境：JDK 1.6+，JVM 运行在 server 模式（"java -server"，在 client 模式下某些回调函数不能正常触发）
+3、增加示例工程 TestEcho-4J，展示 HPSocket4J 的使用方法（包括 PULL 模型示例和性能测试示例）
+4、MBCS 和 Unicode 版本分布位于包 org.jessma.hpsocket.mbcs 和 org.jessma.hpsocket.unicode
+5、HPSocket for Java SDK 提供以下通信组件：
+
+	1) TcpServer：TCP 通信服务端组件，支持 PUSH/PULL 模型
+	2) TcpClient：TCP 通信客户端组件，支持 PUSH/PULL 模型
+	3) TcpAgent ：TCP 通信 Agent 组件，支持 PUSH/PULL 模型
+	4) UdpServer：UDP 通信服务端组件，支持 PUSH 模型
+	5) UdpClient：UDP 通信客户端组件，支持 PUSH 模型
+ 
+6、HPSocket4J 的使用方法（以 TcpAgent 为例）：
+
+	/* 0: 应用程序加入 hpsocket-3.2.1.jar 和 jna-4.1.0.jar */
+	
+	/* 1: 创建通信组件对象 */
+	TcpAgent agent = TcpAgent.create(Mode.PUSH);
+	
+	/* 2: 设置回调函数对象 */
+	// （可选）
+	agent.setCallBackOnPrepareConnect(new OnPrepareConnectImpl());
+	// （可选）
+	agent.setCallBackOnConnect(new OnConnectImpl());
+	// （必须）PUSH 模型需要设置 OnReceive 回调函数对象
+	agent.setCallBackOnReceive(new OnReceiveImpl());
+	// （必须）PULL 模型需要设置 OnPullReceive 回调函数对象
+	// agent.setCallBackOnPullReceive(new OnPullReceiveImpl());
+	// （可选）
+	agent.setCallBackOnSend(new OnSendImpl());
+	// （必须）
+	agent.setCallBackOnClose(new OnCloseImpl());
+	// （必须）
+	agent.setCallBackOnError(new OnErrorImpl());
+	// （可选）
+	agent.setCallBackOnAgentShutdown(new OnAgentShutdownImpl());
+	
+	/* 3：启动通信组件 */
+	agent.start("127.0.0.1", false);
+	
+	/* 4：连接服务器 */
+	agent.connect("localhost", (short)5555, pdwConnID);
+	
+	/* 5：处理通信数据 */
+	// 响应 OnReceive / OnPullReceive 事件接收数据
+	// 使用	agent.send(dwConnID, data, data.length) 发送数据
+	
+	/* 6：关闭通信组件 */
+	agent.stop();
+	
+	/* 7：销毁通信组件 */
+	TcpAgent.destroy(agent);
+
+> 其它更新：
+-----------------
+1、IServer 的 GetClientAddress() 方法改名为 GetRemoteAddress()
+2、EnServerError / EnClientError 枚举类型合并为 EnSocketError
+3、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
+4、公共代码包 vc-common-src 更新为 v2.3.3（参考：vc-common-src v2.3.3 的 Change Log）
+5、增加 HPSocket for C# SDK（由 int 2e 提供）
+6、代码整理优化
+	
+> 升级说明：
+-----------------
+1、HP-Socket v3.2.1 在功能上兼容 HP-Socket v3.1.3 及以前版本
+2、由于代码作了一些重构，需要根据提示修改程序代码
+3、EnServerError / EnClientError 枚举类型合并为 EnSocketError，注意一些枚举值发生了变化
+4、不需要使用 TcpAgent / TcpPullAgent 的用户可以暂不更新
+
+==========================================================================================
 v3.1.3 更新：
 ==========================================================================================
 

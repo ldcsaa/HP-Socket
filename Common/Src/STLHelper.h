@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.2
+ * Version	: 2.3.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -61,6 +61,36 @@ typedef list<unsigned long>			ulong_list;
 typedef list<unsigned __int64>		uint64_list;
 typedef list<float>					float_list;
 typedef list<double>				double_list;
+typedef stack<short>				short_stack;
+typedef stack<int>					int_stack;
+typedef stack<long>					long_stack;
+typedef stack<__int64>				int64_stack;
+typedef stack<unsigned short>		ushort_stack;
+typedef stack<unsigned int>			uint_stack;
+typedef stack<unsigned long>		ulong_stack;
+typedef stack<unsigned __int64>		uint64_stack;
+typedef stack<float>				float_stack;
+typedef stack<double>				double_stack;
+typedef queue<short>				short_queue;
+typedef queue<int>					int_queue;
+typedef queue<long>					long_queue;
+typedef queue<__int64>				int64_queue;
+typedef queue<unsigned short>		ushort_queue;
+typedef queue<unsigned int>			uint_queue;
+typedef queue<unsigned long>		ulong_queue;
+typedef queue<unsigned __int64>		uint64_queue;
+typedef queue<float>				float_queue;
+typedef queue<double>				double_queue;
+typedef deque<short>				short_deque;
+typedef deque<int>					int_deque;
+typedef deque<long>					long_deque;
+typedef deque<__int64>				int64_deque;
+typedef deque<unsigned short>		ushort_deque;
+typedef deque<unsigned int>			uint_deque;
+typedef deque<unsigned long>		ulong_deque;
+typedef deque<unsigned __int64>		uint64_deque;
+typedef deque<float>				float_deque;
+typedef deque<double>				double_deque;
 typedef vector<short>				short_vector;
 typedef vector<int>					int_vector;
 typedef vector<long>				long_vector;
@@ -86,6 +116,18 @@ typedef list<INT_PTR>				int_ptr_list;
 typedef list<LONG_PTR>				long_ptr_list;
 typedef list<UINT_PTR>				uint_ptr_list;
 typedef list<ULONG_PTR>				ulong_ptr_list;
+typedef stack<INT_PTR>				int_ptr_stack;
+typedef stack<LONG_PTR>				long_ptr_stack;
+typedef stack<UINT_PTR>				uint_ptr_stack;
+typedef stack<ULONG_PTR>			ulong_ptr_stack;
+typedef queue<INT_PTR>				int_ptr_queue;
+typedef queue<LONG_PTR>				long_ptr_queue;
+typedef queue<UINT_PTR>				uint_ptr_queue;
+typedef queue<ULONG_PTR>			ulong_ptr_queue;
+typedef deque<INT_PTR>				int_ptr_deque;
+typedef deque<LONG_PTR>				long_ptr_deque;
+typedef deque<UINT_PTR>				uint_ptr_deque;
+typedef deque<ULONG_PTR>			ulong_ptr_deque;
 typedef vector<INT_PTR>				int_ptr_vector;
 typedef vector<LONG_PTR>			long_ptr_vector;
 typedef vector<UINT_PTR>			uint_ptr_vector;

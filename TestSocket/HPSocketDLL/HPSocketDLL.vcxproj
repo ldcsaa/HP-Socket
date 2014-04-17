@@ -321,7 +321,9 @@
     <ClInclude Include="..\..\Common\Src\socket\HPSocket.h" />
     <ClInclude Include="..\..\Common\Src\socket\SocketHelper.h" />
     <ClInclude Include="..\..\Common\Src\socket\SocketInterface.h" />
+    <ClInclude Include="..\..\Common\Src\socket\TcpAgent.h" />
     <ClInclude Include="..\..\Common\Src\socket\TcpClient.h" />
+    <ClInclude Include="..\..\Common\Src\socket\TcpPullAgent.h" />
     <ClInclude Include="..\..\Common\Src\socket\TcpPullClient.h" />
     <ClInclude Include="..\..\Common\Src\socket\TcpPullServer.h" />
     <ClInclude Include="..\..\Common\Src\socket\TcpServer.h" />
@@ -339,7 +341,9 @@
     <ClCompile Include="..\..\Common\Src\RWLock.cpp" />
     <ClCompile Include="..\..\Common\Src\socket\HPSocket.cpp" />
     <ClCompile Include="..\..\Common\Src\socket\SocketHelper.cpp" />
+    <ClCompile Include="..\..\Common\Src\socket\TcpAgent.cpp" />
     <ClCompile Include="..\..\Common\Src\socket\TcpClient.cpp" />
+    <ClCompile Include="..\..\Common\Src\socket\TcpPullAgent.cpp" />
     <ClCompile Include="..\..\Common\Src\socket\TcpPullClient.cpp" />
     <ClCompile Include="..\..\Common\Src\socket\TcpPullServer.cpp" />
     <ClCompile Include="..\..\Common\Src\socket\TcpServer.cpp" />

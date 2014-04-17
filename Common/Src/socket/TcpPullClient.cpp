@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,7 +25,7 @@
 #include "stdafx.h"
 #include "TcpPullClient.h"
 
-ISocketListener::EnHandleResult CTcpPullClient::FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CTcpPullClient::FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	m_lsBuffer.Cat(pData, iLength);
 	m_iTotalLength += iLength;
@@ -33,7 +33,7 @@ ISocketListener::EnHandleResult CTcpPullClient::FireReceive(CONNID dwConnID, con
 	return __super::FireReceive(dwConnID, m_iTotalLength);
 }
 
-IPullSocket::EnFetchResult CTcpPullClient::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
+EnFetchResult CTcpPullClient::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
 {
 	ASSERT(pData != nullptr && iLength > 0);
 
@@ -42,8 +42,8 @@ IPullSocket::EnFetchResult CTcpPullClient::Fetch(CONNID dwConnID, BYTE* pData, i
 		m_lsBuffer.Fetch(pData, iLength);
 		m_iTotalLength -= iLength;
 
-		return IPullSocket::FR_OK;
+		return FR_OK;
 	}
 
-	return IPullSocket::FR_LENGTH_TOO_LONG;
+	return FR_LENGTH_TOO_LONG;
 }

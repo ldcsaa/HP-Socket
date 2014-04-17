@@ -42,13 +42,13 @@ public:
 	void Statistics();
 	void Reset(BOOL bResetClientCount = TRUE);
 private:
-	virtual ISocketListener::EnHandleResult OnPrepareListen(SOCKET soListen);
-	virtual ISocketListener::EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual ISocketListener::EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual ISocketListener::EnHandleResult OnClose(CONNID dwConnID);
-	virtual ISocketListener::EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual ISocketListener::EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient);
-	virtual ISocketListener::EnHandleResult OnServerShutdown();
+	virtual EnHandleResult OnPrepareListen(SOCKET soListen);
+	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(CONNID dwConnID);
+	virtual EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient);
+	virtual EnHandleResult OnServerShutdown();
 
 private:
 	CListBox m_Info;

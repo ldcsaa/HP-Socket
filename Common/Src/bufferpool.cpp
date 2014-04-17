@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.2
+ * Version	: 2.3.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -360,11 +360,13 @@ void CBufferPool::CompressFreeBuffer(int size)
 {
 	CCriSecLock locallock(m_csFreeBuffer);
 
+	DWORD now = ::TimeGetTime();
+
 	while(m_lsFreeBuffer.Size() > size)
 	{
 		TBuffer* pBuffer = m_lsFreeBuffer.Front();
 
-		if(::GetTimeGap32(pBuffer->freeTime) >= m_dwBufferLockTime)
+		if(now - pBuffer->freeTime >= m_dwBufferLockTime)
 		{
 			m_lsFreeBuffer.PopFront();
 			TBuffer::Destruct(pBuffer);

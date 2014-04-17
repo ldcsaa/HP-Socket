@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -27,17 +27,17 @@
 #include "TcpServer.h"
 #include "../bufferpool.h"
 
-class CTcpPullServer : public IPullServer, public CTcpServer
+class CTcpPullServer : public IPullSocket, public CTcpServer
 {
 public:
 	virtual EnFetchResult Fetch(CONNID dwConnID, BYTE* pData, int iLength);
 
 protected:
-	virtual ISocketListener::EnHandleResult FireAccept(CONNID dwConnID, SOCKET soClient);
-	virtual ISocketListener::EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual ISocketListener::EnHandleResult FireClose(CONNID dwConnID);
-	virtual ISocketListener::EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual ISocketListener::EnHandleResult FireServerShutdown();
+	virtual EnHandleResult FireAccept(CONNID dwConnID, SOCKET soClient);
+	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult FireClose(CONNID dwConnID);
+	virtual EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult FireServerShutdown();
 
 	virtual BOOL CheckParams()
 	{

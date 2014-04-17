@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -67,7 +67,7 @@ BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
 		IN_ADDR addr;
 
 		if(GetOptimalIPByHostName(lpszHost, addr))
-			isOK = sockaddr_IN_2_IP(addr, lpszIP, iIPLen);
+			isOK = IN_ADDR_2_IP(addr, lpszIP, iIPLen);
 		else
 			isOK = FALSE;
 	}
@@ -125,7 +125,7 @@ BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr)
 	return addr.s_addr != 0;
 }
 
-BOOL sockaddr_IN_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen)
+BOOL IN_ADDR_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen)
 {
 	BOOL isOK		= TRUE;
 	char* lpszIP	= inet_ntoa(addr);
@@ -149,7 +149,7 @@ BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR l
 	usFamily = addr.sin_family;
 	usPort	 = ntohs(addr.sin_port);
 
-	return sockaddr_IN_2_IP(addr.sin_addr, lpszAddress, iAddressLen);
+	return IN_ADDR_2_IP(addr.sin_addr, lpszAddress, iAddressLen);
 }
 
 BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, SOCKADDR_IN& addr)
@@ -338,12 +338,14 @@ int SSO_UDP_ConnReset(SOCKET sock, BOOL bNewBehavior)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CONNID GenerateConnectionID(volatile CONNID& dwSeed)
+CONNID GenerateConnectionID()
 {
-	CONNID dwConnID	= ::InterlockedIncrement(&dwSeed);
+	static volatile CONNID s_dwConnID = 0;
+
+	CONNID dwConnID	= ::InterlockedIncrement(&s_dwConnID);
 	
 	if(dwConnID == 0)
-		dwConnID = ::InterlockedIncrement(&dwSeed);
+		dwConnID = ::InterlockedIncrement(&s_dwConnID);
 
 	return dwConnID;
 }
@@ -378,6 +380,31 @@ int PostAccept(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBuf
 						nullptr,
 						&pBufferObj->ov
 					)
+	)
+	{
+		result = ::WSAGetLastError();
+		if(result == WSA_IO_PENDING)
+			result = NO_ERROR;
+	}
+
+	return result;
+}
+
+int PostConnect(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj)
+{
+	int result				= NO_ERROR;
+	pBufferObj->client		= soClient;
+	pBufferObj->operation	= SO_CONNECT;
+
+	if(!pfnConnectEx	(
+							soClient,
+							(SOCKADDR*)&soAddrIN,
+							sizeof(SOCKADDR_IN),
+							nullptr,
+							0,
+							nullptr,
+							&pBufferObj->ov
+						)
 	)
 	{
 		result = ::WSAGetLastError();
@@ -439,8 +466,9 @@ int PostReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 int PostSendTo(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
+	int iAddrLen			= sizeof(SOCKADDR_IN);
+	DWORD dwBytes			= 0;
 	pBufferObj->operation	= SO_SEND;
-	DWORD dwBytes;
 
 	if(::WSASendTo	(
 						sock,
@@ -448,8 +476,8 @@ int PostSendTo(SOCKET sock, TUdpBufferObj* pBufferObj)
 						1,
 						&dwBytes,
 						0,
-						(sockaddr*)&pBufferObj->clientAddr,
-						pBufferObj->addrLen,
+						(sockaddr*)&pBufferObj->remoteAddr,
+						iAddrLen,
 						&pBufferObj->ov,
 						nullptr
 					) == SOCKET_ERROR)
@@ -465,11 +493,11 @@ int PostSendTo(SOCKET sock, TUdpBufferObj* pBufferObj)
 int PostReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
-	pBufferObj->addrLen		= sizeof(SOCKADDR_IN);
-	pBufferObj->operation	= SO_RECEIVE;
+	int iAddrLen			= sizeof(SOCKADDR_IN);
 	DWORD dwBytes, dwFlag	= 0;
+	pBufferObj->operation	= SO_RECEIVE;
 
-	::ZeroMemory(&pBufferObj->clientAddr, pBufferObj->addrLen);
+	::ZeroMemory(&pBufferObj->remoteAddr, iAddrLen);
 
 	if(::WSARecvFrom(
 						sock,
@@ -477,8 +505,8 @@ int PostReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
 						1,
 						&dwBytes,
 						&dwFlag,
-						(sockaddr*)&pBufferObj->clientAddr,
-						&pBufferObj->addrLen,
+						(sockaddr*)&pBufferObj->remoteAddr,
+						&iAddrLen,
 						&pBufferObj->ov,
 						nullptr
 					) == SOCKET_ERROR)
@@ -489,4 +517,29 @@ int PostReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
 	}
 
 	return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
+{
+	switch(enCode)
+	{
+	case SE_OK:						return _T("SUCCESS");
+	case SE_ILLEGAL_STATE:			return _T("Illegal State");
+	case SE_INVALID_PARAM:			return _T("Invalid Parameter");
+	case SE_SOCKET_CREATE:			return _T("Create SOCKET Fail");
+	case SE_SOCKET_BIND:			return _T("Bind SOCKET Fail");
+	case SE_SOCKET_PREPARE:			return _T("Prepare SOCKET Fail");
+	case SE_SOCKET_LISTEN:			return _T("Listen SOCKET Fail");
+	case SE_CP_CREATE:				return _T("Create IOCP Fail");
+	case SE_WORKER_THREAD_CREATE:	return _T("Create Worker Thread Fail");
+	case SE_DETECT_THREAD_CREATE:	return _T("Create Detector Thread Fail");
+	case SE_SOCKE_ATTACH_TO_CP:		return _T("Attach SOCKET to IOCP Fail");
+	case SE_CONNECT_SERVER:			return _T("Connect to Server Fail");
+	case SE_NETWORK:				return _T("Network Error");
+	case SE_DATA_PROC:				return _T("Process Data Error");
+	case SE_DATA_SEND:				return _T("Send Data Error");
+	default: ASSERT(FALSE);			return _T("UNKNOWN ERROR");
+	}
 }

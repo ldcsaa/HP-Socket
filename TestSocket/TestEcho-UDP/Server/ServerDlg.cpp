@@ -206,7 +206,7 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
 {
 	TCHAR szAddress[40];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
@@ -214,17 +214,17 @@ ISocketListener::EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
 
 	m_Server.GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)
+EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)
 {
 	BOOL bPass = TRUE;
 	TCHAR szAddress[40];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server.GetClientAddress(dwConnID, szAddress, iAddressLen, usPort);
+	m_Server.GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
 
 	if(!m_strAddress.IsEmpty())
 	{
@@ -234,45 +234,45 @@ ISocketListener::EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCK
 
 	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	return bPass ? ISocketListener::HR_OK : ISocketListener::HR_ERROR;
+	return bPass ? HR_OK : HR_ERROR;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	//static int t = 0;
-	//if(++t % 3 == 0) return ISocketListener::HR_ERROR;
+	//if(++t % 3 == 0) return HR_ERROR;
 
 	::PostOnSend(dwConnID, pData, iLength);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	//static int t = 0;
-	//if(++t % 3 == 0) return ISocketListener::HR_ERROR;
+	//if(++t % 3 == 0) return HR_ERROR;
 
 	::PostOnReceive(dwConnID, pData, iLength);
 
 	if(m_Server.Send(dwConnID, pData, iLength))
-		return ISocketListener::HR_OK;
+		return HR_OK;
 	else
-		return ISocketListener::HR_ERROR;
+		return HR_ERROR;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
+EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
 {
 	::PostOnClose(dwConnID);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	::PostOnError(dwConnID, enOperation, iErrorCode);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnServerShutdown()
+EnHandleResult CServerDlg::OnServerShutdown()
 {
 	::PostOnShutdown();
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -32,8 +32,6 @@
 	#define _beginthreadex	::CreateThread
 #endif
 
-volatile CONNID CUdpClient::sm_dwConnID = 0;
-
 BOOL CUdpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
 {
 	if(!CheckParams() || !CheckStarting())
@@ -44,7 +42,7 @@ BOOL CUdpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 
 	if(CreateClientSocket())
 	{
-		if(FirePrepareConnect(m_dwConnID, m_soClient) != ISocketListener::HR_ERROR)
+		if(FirePrepareConnect(m_dwConnID, m_soClient) != HR_ERROR)
 		{
 			if(ConnectToServer(pszRemoteAddress, usPort))
 			{
@@ -53,19 +51,19 @@ BOOL CUdpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 					if(CreateDetectorThread())
 						isOK = TRUE;
 					else
-						SetLastError(CE_DETECTOR_CREATE_FAIL, __FUNCTION__, ERROR_CREATE_FAILED);
+						SetLastError(SE_DETECT_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
 				}
 				else
-					SetLastError(CE_WORKER_CREATE_FAIL, __FUNCTION__, ERROR_CREATE_FAILED);
+					SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
 			}
 			else
-				SetLastError(CE_CONNECT_SERVER_FAIL, __FUNCTION__, ::WSAGetLastError());
+				SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
 		}
 		else
-			SetLastError(CE_SOCKET_PREPARE_FAIL, __FUNCTION__, ERROR_FUNCTION_FAILED);
+			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_FUNCTION_FAILED);
 	}
 	else
-		SetLastError(CE_SOCKET_CREATE_FAIL, __FUNCTION__, ::WSAGetLastError());
+		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
 
 	if(!isOK) Stop();
 
@@ -85,7 +83,7 @@ BOOL CUdpClient::CheckParams()
 					if((int)m_dwDetectInterval >= 0)
 						return TRUE;
 
-	SetLastError(CE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
+	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
 }
 
@@ -95,7 +93,7 @@ BOOL CUdpClient::CheckStarting()
 		m_enState = SS_STARTING;
 	else
 	{
-		SetLastError(CE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
 		return FALSE;
 	}
 
@@ -108,7 +106,7 @@ BOOL CUdpClient::CheckStoping()
 		m_enState = SS_STOPING;
 	else
 	{
-		SetLastError(CE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
 		return FALSE;
 	}
 
@@ -125,10 +123,10 @@ BOOL CUdpClient::CreateClientSocket()
 		VERIFY(::SSO_UDP_ConnReset(m_soClient, FALSE) == NO_ERROR);
 #endif
 
-		m_evSocket	= ::WSACreateEvent();
+		m_evSocket = ::WSACreateEvent();
 		ASSERT(m_evSocket != WSA_INVALID_EVENT);
 
-		m_dwConnID	= ::GenerateConnectionID(sm_dwConnID);
+		m_dwConnID = ::GenerateConnectionID();
 
 		return TRUE;
 	}
@@ -154,17 +152,17 @@ BOOL CUdpClient::ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort)
 	{
 		if(::WSAEventSelect(m_soClient, m_evSocket, FD_CONNECT | FD_CLOSE) != SOCKET_ERROR)
 		{
-			int rc = connect(m_soClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
+			int rc = ::connect(m_soClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
 			isOK = (rc == NO_ERROR || (rc == SOCKET_ERROR && ::WSAGetLastError() == WSAEWOULDBLOCK));
 		}
 	}
 	else
 	{
-		if(connect(m_soClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN)) != SOCKET_ERROR)
+		if(::connect(m_soClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN)) != SOCKET_ERROR)
 		{
 			if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 			{
-				if(FireConnect(m_dwConnID) != ISocketListener::HR_ERROR)
+				if(FireConnect(m_dwConnID) != HR_ERROR)
 				{
 					VERIFY(NeedDetectorThread() || DetectConnection() == NO_ERROR);
 
@@ -192,7 +190,7 @@ BOOL CUdpClient::CreateWorkerThread()
 #endif
 	WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 {
-	TRACE1("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 
 	CUdpClient* pClient	= (CUdpClient*)pv;
 	HANDLE hEvents[]	= {pClient->m_evSocket, pClient->m_evBuffer, pClient->m_evWorker};
@@ -229,7 +227,7 @@ BOOL CUdpClient::CreateWorkerThread()
 			ASSERT(FALSE);
 	}
 
-	TRACE1("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
 	return 0;
 }
@@ -262,7 +260,7 @@ BOOL CUdpClient::ProcessNetworkEvent()
 BOOL CUdpClient::HandleError()
 {
 	int iCode = ::WSAGetLastError();
-	SetLastError(CE_NETWORK_ERROR, __FUNCTION__, iCode);
+	SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 
 	VERIFY(::WSAResetEvent(m_evSocket));
 	FireError(m_dwConnID, SO_UNKNOWN, iCode);
@@ -279,7 +277,7 @@ BOOL CUdpClient::HandleRead(WSANETWORKEVENTS& events)
 		bContinue = ReadData();
 	else
 	{
-		SetLastError(CE_NETWORK_ERROR, __FUNCTION__, iCode);
+		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireError(m_dwConnID, SO_RECEIVE, iCode);
 		bContinue = FALSE;
 	}
@@ -296,7 +294,7 @@ BOOL CUdpClient::HandleWrite(WSANETWORKEVENTS& events)
 		bContinue = SendData();
 	else
 	{
-		SetLastError(CE_NETWORK_ERROR, __FUNCTION__, iCode);
+		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireError(m_dwConnID, SO_SEND, iCode);
 		bContinue = FALSE;
 	}
@@ -313,7 +311,7 @@ BOOL CUdpClient::HandleConnect(WSANETWORKEVENTS& events)
 	{
 		if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 		{
-			if(FireConnect(m_dwConnID) != ISocketListener::HR_ERROR)
+			if(FireConnect(m_dwConnID) != HR_ERROR)
 			{
 				VERIFY(NeedDetectorThread() || DetectConnection() == NO_ERROR);
 
@@ -328,7 +326,7 @@ BOOL CUdpClient::HandleConnect(WSANETWORKEVENTS& events)
 
 	if(iCode != 0)
 	{
-		SetLastError(CE_NETWORK_ERROR, __FUNCTION__, iCode);
+		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireError(m_dwConnID, SO_CONNECT, iCode);
 		bContinue = FALSE;
 	}
@@ -344,7 +342,7 @@ BOOL CUdpClient::HandleClosse(WSANETWORKEVENTS& events)
 		FireClose(m_dwConnID);
 	else
 	{
-		SetLastError(CE_NETWORK_ERROR, __FUNCTION__, iCode);
+		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireError(m_dwConnID, SO_UNKNOWN, iCode);
 	}
 
@@ -359,11 +357,11 @@ BOOL CUdpClient::ReadData()
 
 		if(rc > 0)
 		{
-			if(FireReceive(m_dwConnID, m_rcBuffer, rc) == ISocketListener::HR_ERROR)
+			if(FireReceive(m_dwConnID, m_rcBuffer, rc) == HR_ERROR)
 			{
-				TRACE1("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
+				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
-				SetLastError(CE_DATA_PROC_ERROR, __FUNCTION__, ERROR_FUNCTION_FAILED);
+				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_FUNCTION_FAILED);
 				FireError(m_dwConnID, SO_RECEIVE, ERROR_FUNCTION_FAILED);
 
 				return FALSE;
@@ -377,7 +375,7 @@ BOOL CUdpClient::ReadData()
 				break;
 			else
 			{
-				SetLastError(CE_NETWORK_ERROR, __FUNCTION__, code);
+				SetLastError(SE_NETWORK, __FUNCTION__, code);
 				FireError(m_dwConnID, SO_RECEIVE, code);
 
 				return FALSE;
@@ -386,7 +384,7 @@ BOOL CUdpClient::ReadData()
 		else if(rc == 0)
 		{
 			m_dwDetectFails = 0;
-			TRACE1("<C-CNNID: %Iu> recv 0 bytes (detect package)\n", m_dwConnID);
+			TRACE("<C-CNNID: %Iu> recv 0 bytes (detect package)\n", m_dwConnID);
 		}
 		else
 			ASSERT(FALSE);
@@ -411,9 +409,9 @@ BOOL CUdpClient::SendData()
 			{
 				ASSERT(rc == itPtr->Size());
 
-				if(FireSend(m_dwConnID, itPtr->Ptr(), rc) == ISocketListener::HR_ERROR)
+				if(FireSend(m_dwConnID, itPtr->Ptr(), rc) == HR_ERROR)
 				{
-					TRACE1("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
+					TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
 					ASSERT(FALSE);
 				}
 			}
@@ -429,7 +427,7 @@ BOOL CUdpClient::SendData()
 				}
 				else
 				{
-					SetLastError(CE_NETWORK_ERROR, __FUNCTION__, iCode);
+					SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 					FireError(m_dwConnID, SO_SEND, iCode);
 
 					return FALSE;
@@ -471,7 +469,7 @@ int CUdpClient::DetectConnection()
 			result = NO_ERROR;
 	}
 
-	TRACE1("<C-CNNID: %Iu> send 0 bytes (detect package)\n", m_dwConnID);
+	TRACE("<C-CNNID: %Iu> send 0 bytes (detect package)\n", m_dwConnID);
 
 	return result;
 }
@@ -496,7 +494,7 @@ BOOL CUdpClient::CreateDetectorThread()
 #endif
 	WINAPI CUdpClient::DetecotrThreadProc(LPVOID pv)
 {
-	TRACE1("---------------> Client Detecotr Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Client Detecotr Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 
 	CUdpClient* pClient	= (CUdpClient*)pv;
 	DWORD retval		= WAIT_TIMEOUT;
@@ -523,7 +521,7 @@ BOOL CUdpClient::CreateDetectorThread()
 		ASSERT(retval == WAIT_TIMEOUT || retval == WAIT_OBJECT_0);
 	}
 
-	TRACE1("---------------> Client Detecotr Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Client Detecotr Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
 	return 0;
 }
@@ -619,13 +617,13 @@ BOOL CUdpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 
 	if(!HasStarted())
 	{
-		SetLastError(CE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
 	if(!pBuffer || iLength <= 0 || iLength > (int)m_dwMaxDatagramSize)
 	{
-		SetLastError(CE_INVALID_PARAM, __FUNCTION__, ERROR_INCORRECT_SIZE);
+		SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INCORRECT_SIZE);
 		return FALSE;
 	}
 
@@ -634,7 +632,7 @@ BOOL CUdpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 
 		if(!HasStarted())
 		{
-			SetLastError(CE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
+			SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 			return FALSE;
 		}
 
@@ -648,11 +646,12 @@ BOOL CUdpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 	return TRUE;
 }
 
-void CUdpClient::SetLastError(EnClientError code, LPCSTR func, int ec)
+void CUdpClient::SetLastError(EnSocketError code, LPCSTR func, int ec)
 {
-	m_enLastError = code;
+	TRACE("%s --> Error: %d, EC: %d\n", func, code, ec);
 
-	TRACE3("%s --> Error: %d, EC: %d\n", func, code, ec);
+	m_enLastError = code;
+	::SetLastError(ec);
 }
 
 BOOL CUdpClient::GetLocalAddress(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
@@ -660,22 +659,4 @@ BOOL CUdpClient::GetLocalAddress(LPTSTR lpszAddress, int& iAddressLen, USHORT& u
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
 	return ::GetSocketLocalAddress(m_soClient, lpszAddress, iAddressLen, usPort);
-}
-
-LPCTSTR CUdpClient::GetLastErrorDesc()
-{
-	switch(m_enLastError)
-	{
-	case CE_OK:						return _T("成功");
-	case CE_ILLEGAL_STATE:			return _T("当前状态不允许操作");
-	case CE_INVALID_PARAM:			return _T("非法参数");
-	case CE_SOCKET_CREATE_FAIL:		return _T("创建 Client Socket 失败");
-	case CE_SOCKET_PREPARE_FAIL:	return _T("设置 Client Socket 失败");
-	case CE_CONNECT_SERVER_FAIL:	return _T("连接服务器失败");
-	case CE_WORKER_CREATE_FAIL:		return _T("创建工作线程失败");
-	case CE_DETECTOR_CREATE_FAIL:	return _T("创建监测线程失败");
-	case CE_NETWORK_ERROR:			return _T("网络错误");
-	case CE_DATA_PROC_ERROR:		return _T("数据处理错误");
-	default: ASSERT(FALSE);			return _T("");
-	}
 }

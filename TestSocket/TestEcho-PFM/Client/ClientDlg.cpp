@@ -250,7 +250,6 @@ void CClientDlg::OnBnClickedStart()
 	m_llExpectReceived	= (LONGLONG)m_iTestTimes * (LONGLONG)m_iThreadCount * (LONGLONG)m_iDataLen;
 
 	m_vtClients.Clear();
-	m_sendBuffer.Malloc(m_iDataLen, true);
 
 	for(int i = 0; i < m_iThreadCount; i++)
 	{
@@ -262,7 +261,6 @@ void CClientDlg::OnBnClickedStart()
 		{
 			::LogClientStartFail((*pSocket)->GetLastError(), (*pSocket)->GetLastErrorDesc());
 			m_vtClients.Clear();
-			m_sendBuffer.Free();
 			SetAppState(ST_STOPED);
 			return;
 		}
@@ -277,20 +275,20 @@ void CClientDlg::OnBnClickedStart()
 	::LogMsg(strMsg);
 
 	::WaitWithMessageLoop(dwSendDelay * 1000);
-
+	m_sendBuffer.Malloc(m_iDataLen, true);
 	SetAppState(ST_STARTED);
 
 	m_dwBeginTickCount = ::TimeGetTime();
 
 	BOOL bTerminated = FALSE;
-	for(int i = 0; !bTerminated && i < m_iTestTimes; i++)
+	for(int i = 0; i < m_iTestTimes; i++)
 	{
-		for(int j = 0; !bTerminated && j < m_iThreadCount; j++)
+		for(int j = 0; j < m_iThreadCount; j++)
 		{
 			CTcpClientWrapper* pSocket = m_vtClients[j];
 			if(!(*pSocket)->Send((*pSocket)->GetConnectionID(), m_sendBuffer, (int)m_sendBuffer.Size()))
 			{
-				::LogClientSendFail(i + 1, j + 1, (*pSocket)->GetLastError(), (*pSocket)->GetLastErrorDesc());
+				::LogClientSendFail(i + 1, j + 1, ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(SE_DATA_SEND));
 				bTerminated = TRUE;
 				break;
 			}
@@ -299,9 +297,14 @@ void CClientDlg::OnBnClickedStart()
 				::WaitWithMessageLoop(m_iThreadInterv);
 		}
 
+		if(bTerminated)
+			break;
+
 		if(m_iTestInterv > 0 && i + 1 < m_iTestTimes)
 			::WaitWithMessageLoop(m_iTestInterv);
 	}
+
+	m_sendBuffer.Free();
 }
 
 void CClientDlg::OnBnClickedStop()
@@ -353,36 +356,36 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnPrepareSocket(CONNID dwConnID, SOCKET socket)
+EnHandleResult CClientDlg::OnPrepareConnect(CONNID dwConnID, SOCKET socket)
 {
 	//VERIFY(::SSO_SendBuffSize(socket, SO_MAX_MSG_SIZE / 4) == 0);
 	//VERIFY(::SSO_RecvBuffSize(socket, SO_MAX_MSG_SIZE * 4) == 0);
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG
 	::PostOnSend(dwConnID, pData, iLength);
 #endif
 
-#if (WINVER < 0x0502)
+#if (_WIN32_WINNT <= _WIN32_WINNT_WS03)
 	::InterlockedExchangeAdd((volatile LONG*)&m_llTotalSent, iLength);
 #else
 	::InterlockedExchangeAdd64(&m_llTotalSent, iLength);
 #endif
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG
 	::PostOnReceive(dwConnID, pData, iLength);
 #endif
 
-#if (WINVER < 0x0502)
+#if (_WIN32_WINNT <= _WIN32_WINNT_WS03)
 	::InterlockedExchangeAdd((volatile LONG*)&m_llTotalReceived, iLength);
 #else
 	::InterlockedExchangeAdd64(&m_llTotalReceived, iLength);
@@ -395,23 +398,23 @@ ISocketListener::EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, const BYT
 	}
 
 	ASSERT(m_llTotalReceived <= m_llExpectReceived);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnClose(CONNID dwConnID)
+EnHandleResult CClientDlg::OnClose(CONNID dwConnID)
 {
 	::PostOnClose(dwConnID);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	::PostOnError(dwConnID, enOperation, iErrorCode);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
+EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
 {
 	::LogOnConnect2(dwConnID);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }

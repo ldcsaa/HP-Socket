@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.2
+ * Version	: 2.3.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -36,7 +36,7 @@ DWORD TimeGetTime();
 **********************************/
 DWORD GetTimeGap32(DWORD dwOriginal);
 
-#if _WIN32_WINNT >= 0x0600
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
 /**********************************
 描述: 获取当前时间与原始时间的时间差
 参数: 

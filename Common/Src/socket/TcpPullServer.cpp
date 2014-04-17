@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,17 +25,17 @@
 #include "stdafx.h"
 #include "TcpPullServer.h"
 
-ISocketListener::EnHandleResult CTcpPullServer::FireAccept(CONNID dwConnID, SOCKET soClient)
+EnHandleResult CTcpPullServer::FireAccept(CONNID dwConnID, SOCKET soClient)
 {
-	ISocketListener::EnHandleResult result = __super::FireAccept(dwConnID, soClient);
+	EnHandleResult result = __super::FireAccept(dwConnID, soClient);
 
-	if(result != ISocketListener::HR_ERROR)
+	if(result != HR_ERROR)
 		m_bfPool.PutCacheBuffer(dwConnID);
 
 	return result;
 }
 
-ISocketListener::EnHandleResult CTcpPullServer::FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CTcpPullServer::FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	TBuffer* pBuffer = m_bfPool[dwConnID];
 
@@ -56,41 +56,41 @@ ISocketListener::EnHandleResult CTcpPullServer::FireReceive(CONNID dwConnID, con
 		if(len > 0) return __super::FireReceive(dwConnID, len);
 	}
 
-	return ISocketListener::HR_IGNORE;
+	return HR_IGNORE;
 }
 
-ISocketListener::EnHandleResult CTcpPullServer::FireClose(CONNID dwConnID)
+EnHandleResult CTcpPullServer::FireClose(CONNID dwConnID)
 {
-	ISocketListener::EnHandleResult result = __super::FireClose(dwConnID);
+	EnHandleResult result = __super::FireClose(dwConnID);
 
 	m_bfPool.PutFreeBuffer(dwConnID);
 
 	return result;
 }
 
-ISocketListener::EnHandleResult CTcpPullServer::FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CTcpPullServer::FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
-	ISocketListener::EnHandleResult result = __super::FireError(dwConnID, enOperation, iErrorCode);
+	EnHandleResult result = __super::FireError(dwConnID, enOperation, iErrorCode);
 
 	m_bfPool.PutFreeBuffer(dwConnID);
 
 	return result;
 }
 
-ISocketListener::EnHandleResult CTcpPullServer::FireServerShutdown()
+EnHandleResult CTcpPullServer::FireServerShutdown()
 {
-	ISocketListener::EnHandleResult result = __super::FireServerShutdown();
+	EnHandleResult result = __super::FireServerShutdown();
 
 	m_bfPool.Clear();
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-IPullSocket::EnFetchResult CTcpPullServer::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
+EnFetchResult CTcpPullServer::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
 {
 	ASSERT(pData != nullptr && iLength > 0);
 
-	EnFetchResult result	= IPullSocket::FR_DATA_NOT_FOUND;
+	EnFetchResult result	= FR_DATA_NOT_FOUND;
 	TBuffer* pBuffer		= m_bfPool[dwConnID];
 
 	if(pBuffer != nullptr && pBuffer->IsValid())
@@ -102,10 +102,10 @@ IPullSocket::EnFetchResult CTcpPullServer::Fetch(CONNID dwConnID, BYTE* pData, i
 			if(pBuffer->Length() >= iLength)
 			{
 				pBuffer->Fetch(pData, iLength);
-				result = IPullSocket::FR_OK;
+				result = FR_OK;
 			}
 			else
-				result = IPullSocket::FR_LENGTH_TOO_LONG;
+				result = FR_LENGTH_TOO_LONG;
 		}
 	}
 

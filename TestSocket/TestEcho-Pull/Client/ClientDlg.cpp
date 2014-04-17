@@ -150,7 +150,7 @@ void CClientDlg::OnBnClickedSend()
 	if(m_Client->Send(m_Client->GetConnectionID(), buffer->Ptr(), (int)buffer->Size()))
 		::LogSend(m_Client->GetConnectionID(), strContent);
 	else
-		::LogSendFail(m_Client->GetConnectionID(), m_Client->GetLastError(), m_Client->GetLastErrorDesc());
+		::LogSendFail(m_Client->GetConnectionID(), ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(SE_DATA_SEND));
 }
 
 
@@ -210,7 +210,7 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
+EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
 {
 	TCHAR szAddress[40];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
@@ -221,19 +221,19 @@ ISocketListener::EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
 	::PostOnConnect(dwConnID, szAddress, usPort);
 	SetAppState(ST_STARTED);
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	//static int t = 0;
-	//if(++t % 3 == 0) return ISocketListener::HR_ERROR;
+	//if(++t % 3 == 0) return HR_ERROR;
 
 	::PostOnSend(dwConnID, pData, iLength);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, int iLength)
+EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, int iLength)
 {
 	int required = m_pkgInfo.length;
 	int remain = iLength;
@@ -243,8 +243,8 @@ ISocketListener::EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, int iLeng
 		remain -= required;
 		CBufferPtr buffer(required);
 
-		IPullSocket::EnFetchResult result = m_Client->Fetch(dwConnID, buffer, (int)buffer.Size());
-		if(result == IPullSocket::FR_OK)
+		EnFetchResult result = m_Client->Fetch(dwConnID, buffer, (int)buffer.Size());
+		if(result == FR_OK)
 		{
 			if(m_pkgInfo.is_header)
 			{
@@ -268,19 +268,19 @@ ISocketListener::EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, int iLeng
 		}
 	}
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnClose(CONNID dwConnID)
+EnHandleResult CClientDlg::OnClose(CONNID dwConnID)
 {
 	::PostOnClose(dwConnID);
 	SetAppState(ST_STOPED);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CClientDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	::PostOnError(dwConnID, enOperation, iErrorCode);
 	SetAppState(ST_STOPED);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }

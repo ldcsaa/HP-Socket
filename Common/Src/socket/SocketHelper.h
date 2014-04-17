@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -84,21 +84,20 @@ struct TBufferObj : public TBufferObjBase
 /* UDP 数据缓冲区结构 */
 struct TUdpBufferObj : public TBufferObjBase
 {
-	SOCKADDR_IN	clientAddr;
-	int			addrLen;
+	SOCKADDR_IN	remoteAddr;
 };
 
 /* 数据缓冲区结构链表 */
-typedef list<TBufferObj*>		TBufferObjPtrList;
+typedef deque<TBufferObj*>		TBufferObjPtrList;
 
 /* Udp 数据缓冲区结构链表 */
-typedef list<TUdpBufferObj*>	TUdpBufferObjPtrList;
+typedef deque<TUdpBufferObj*>	TUdpBufferObjPtrList;
 
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
 {
 	CONNID		connID;
-	SOCKADDR_IN	clientAddr;
+	SOCKADDR_IN	remoteAddr;
 	PVOID		extra;
 	BOOL		valid;
 
@@ -151,7 +150,7 @@ struct TUdpSocketObj : public TSocketObjBase
 };
 
 /* 数据缓冲区结构链表 */
-typedef list<TSocketObj*>					TSocketObjPtrList;
+typedef deque<TSocketObj*>					TSocketObjPtrList;
 /* 数据缓冲区结构哈希表 */
 typedef hash_map<CONNID, TSocketObj*>		TSocketObjPtrMap;
 /* 数据缓冲区结构哈希表迭代器 */
@@ -160,7 +159,7 @@ typedef TSocketObjPtrMap::iterator			TSocketObjPtrMapI;
 typedef TSocketObjPtrMap::const_iterator	TSocketObjPtrMapCI;
 
 /* UDP 数据缓冲区结构链表 */
-typedef list<TUdpSocketObj*>				TUdpSocketObjPtrList;
+typedef deque<TUdpSocketObj*>				TUdpSocketObjPtrList;
 /* UDP 数据缓冲区结构哈希表 */
 typedef hash_map<CONNID, TUdpSocketObj*>	TUdpSocketObjPtrMap;
 /* UDP 数据缓冲区结构哈希表迭代器 */
@@ -181,11 +180,7 @@ struct sockaddr_hash_func
 	//HASH_MAP函数。
 	size_t operator() (const SOCKADDR_IN* pA) const
 	{
-		return	(	(pA->sin_family << 16) | ntohs(pA->sin_port)) ^
-				(	(pA->sin_addr.s_net << 24)	| 
-					(pA->sin_addr.s_host << 16)	| 
-					(pA->sin_addr.s_lh << 8)	| 
-					pA->sin_addr.s_impno		);
+		return	((pA->sin_family << 16) | ntohs(pA->sin_port)) ^ pA->sin_addr.s_addr;
 	}
 
 	//比较函数。
@@ -206,24 +201,26 @@ typedef TSockAddrMap::const_iterator							TSockAddrMapCI;
 /******************************************** 公共帮助方法 ********************************************/
 /*****************************************************************************************************/
 
+/* 获取错误描述文本 */
+LPCTSTR GetSocketErrorDesc(EnSocketError enCode);
 /* 检查字符串是否符合 IP 地址格式 */
 BOOL IsIPAddress(LPCTSTR lpszAddress);
 /* 通过主机名获取 IP 地址 */
-BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLenth);
+BOOL GetIPAddress(LPCTSTR lpszHost, __out LPTSTR lpszIP, __inout int& iIPLenth);
 /* 通过主机名获取最优的 IP 地址 */
-BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr);
-/* 获取 SOCKADDR_IN 结构的 IP 地址 */
-BOOL sockaddr_IN_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen);
+BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, __out IN_ADDR& addr);
+/* 获取 IN_ADDR 结构的 IP 地址 */
+BOOL IN_ADDR_2_IP(const IN_ADDR& addr, __out LPTSTR lpszAddress, __inout int& iAddressLen);
 /* 把 SOCKADDR_IN 结构转换为地址数据 */
-BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
+BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, __out ADDRESS_FAMILY& usFamily, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 /* 把地址数据转换为 SOCKADDR_IN 结构 */
-BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, SOCKADDR_IN& addr);
+BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, __out SOCKADDR_IN& addr);
 /* 获取 Socket 的本地或远程地址信息 */
-BOOL GetSocketAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort, BOOL bLocal = TRUE);
+BOOL GetSocketAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort, BOOL bLocal = TRUE);
 /* 获取 Socket 的本地地址信息 */
-BOOL GetSocketLocalAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
+BOOL GetSocketLocalAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 /* 获取 Socket 的远程地址信息 */
-BOOL GetSocketRemoteAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
+BOOL GetSocketRemoteAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 
 /* 获取 Socket 的某个扩展函数的指针 */
 PVOID GetExtensionFuncPtr					(SOCKET sock, GUID guid);
@@ -261,11 +258,13 @@ int SSO_UDP_ConnReset		(SOCKET sock, BOOL bNewBehavior = TRUE);
 ************************************************************************/
 
 /* 生成 Connection ID */
-CONNID GenerateConnectionID	(volatile CONNID& dwSeed);
+CONNID GenerateConnectionID	();
 /* 关闭 Socket */
 int ManualCloseSocket		(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE, BOOL bReuseAddress = FALSE);
 /* 投递 AccceptEx() */
 int PostAccept				(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj);
+/* 投递 ConnectEx() */
+int PostConnect				(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj);
 /* 投递 WSASend() */
 int PostSend				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 /* 投递 WSARecv() */

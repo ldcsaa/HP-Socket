@@ -96,6 +96,12 @@
     <ClInclude Include="..\..\Common\Src\bufferpool.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Common\Src\socket\TcpPullAgent.h">
+      <Filter>Common\socket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Src\socket\TcpAgent.h">
+      <Filter>Common\socket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -142,6 +148,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Src\bufferpool.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Src\socket\TcpAgent.cpp">
+      <Filter>Common\socket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Src\socket\TcpPullAgent.cpp">
+      <Filter>Common\socket</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

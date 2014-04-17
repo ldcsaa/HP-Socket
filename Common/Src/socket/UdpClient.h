@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -39,9 +39,9 @@ public:
 	virtual BOOL			HasStarted		()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState		()	{return m_enState;}
 	virtual CONNID			GetConnectionID	()	{return m_dwConnID;};
-	virtual EnClientError	GetLastError	()	{return m_enLastError;}
 	virtual BOOL			GetLocalAddress	(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
-	virtual LPCTSTR			GetLastErrorDesc();
+	virtual EnSocketError	GetLastError	()	{return m_enLastError;}
+	virtual LPCTSTR			GetLastErrorDesc()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	{m_dwMaxDatagramSize = dwMaxDatagramSize;}
@@ -59,19 +59,19 @@ public:
 	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
 
 protected:
-	virtual ISocketListener::EnHandleResult FirePrepareConnect(CONNID dwConnID, SOCKET socket)
+	virtual EnHandleResult FirePrepareConnect(CONNID dwConnID, SOCKET socket)
 		{return m_psoListener->OnPrepareConnect(dwConnID, socket);}
-	virtual ISocketListener::EnHandleResult FireConnect(CONNID dwConnID)
+	virtual EnHandleResult FireConnect(CONNID dwConnID)
 		{return m_psoListener->OnConnect(dwConnID);}
-	virtual ISocketListener::EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
+	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
-	virtual ISocketListener::EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnReceive(dwConnID, pData, iLength);}
-	virtual ISocketListener::EnHandleResult FireReceive(CONNID dwConnID, int iLength)
+	virtual EnHandleResult FireReceive(CONNID dwConnID, int iLength)
 		{return m_psoListener->OnReceive(dwConnID, iLength);}
-	virtual ISocketListener::EnHandleResult FireClose(CONNID dwConnID)
+	virtual EnHandleResult FireClose(CONNID dwConnID)
 		{return m_psoListener->OnClose(dwConnID);}
-	virtual ISocketListener::EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+	virtual EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 		{return m_psoListener->OnError(dwConnID, enOperation, iErrorCode);}
 
 	virtual void Reset();
@@ -100,7 +100,7 @@ private:
 	int DetectConnection	();
 	BOOL NeedDetectorThread	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
 
-	void SetLastError		(EnClientError code, LPCSTR func, int ec);
+	void SetLastError		(EnSocketError code, LPCSTR func, int ec);
 
 	static 
 #ifndef _WIN32_WCE
@@ -125,8 +125,6 @@ private:
 	static const DWORD DEFAULT_DETECT_ATTEMPTS			= 3;
 	static const DWORD DEFAULT_DETECT_INTERVAL			= 10;
 
-	static volatile CONNID	sm_dwConnID;
-
 public:
 	CUdpClient(IUdpClientListener* psoListener)
 	: m_psoListener			(psoListener)
@@ -140,7 +138,7 @@ public:
 	, m_dwDetectorID		(0)
 	, m_bAsyncConnect		(FALSE)
 	, m_enState				(SS_STOPED)
-	, m_enLastError			(CE_OK)
+	, m_enLastError			(SE_OK)
 	, m_dwDetectFails		(0)
 	, m_dwMaxDatagramSize	(DEFAULT_MAX_DATAGRAM_SIZE)
 	, m_dwFreeBufferPoolSize(DEFAULT_FREE_BUFFER_POOL_SIZE)
@@ -190,7 +188,7 @@ private:
 	CBufferPtr		m_rcBuffer;
 
 	volatile EnServiceState	m_enState;
-	volatile EnClientError	m_enLastError;
+	volatile EnSocketError	m_enLastError;
 	volatile DWORD			m_dwDetectFails;
 
 private:

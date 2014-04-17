@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.2
+ * Version	: 2.3.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,7 +28,7 @@ Optional Macros:
 
 Windows:
 ++++++++++++++++++++++
-_WIN32_WINNT		: Windows NT 版本	（默认：_WIN32_WINNT_WINXP）
+_WIN32_WINNT		: Windows NT 版本	（默认：_WIN32_WINNT_WINXP / _WIN32_WINNT_WIN7）
 WINVER				: Windows 版本		（默认：_WIN32_WINNT）
 _USE_MFC			: 使用 MFC
 _WINSOCK_SUPPORT	: 支持 Windows Socket
@@ -205,11 +205,15 @@ Windows 95
 #else	// Windows NT
 
 	#ifndef WIN32_LEAN_AND_MEAN
-		#define WIN32_LEAN_AND_MEAN					// 从 Windows 头文件中排除极少使用的资料
+		#define WIN32_LEAN_AND_MEAN						// 从 Windows 头文件中排除极少使用的资料
 	#endif
 
 	#ifndef _WIN32_WINNT
-		#define _WIN32_WINNT	_WIN32_WINNT_WINXP	// 默认系统版本为 Windows XP
+		#if defined (_WIN64)
+			#define _WIN32_WINNT	_WIN32_WINNT_WIN7	// 64 位系统默认版本为 Windows 7
+		#else
+			#define _WIN32_WINNT	_WIN32_WINNT_WINXP	// 32 位系统默认版本为 Windows XP
+		#endif
 	#endif
 
 	#ifndef WINVER

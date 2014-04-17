@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -84,15 +84,15 @@ public:
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength);
 	virtual BOOL			HasStarted					()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState					()	{return m_enState;}
-	virtual EnServerError	GetLastError				()	{return m_enLastError;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);
 	virtual BOOL			DisconnectLongConnections	(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetListenAddress			(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
-	virtual BOOL			GetClientAddress			(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
+	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 
-	virtual LPCTSTR	GetLastErrorDesc	();
 	virtual DWORD	GetConnectionCount	();
 	virtual BOOL	GetConnectPeriod	(CONNID dwConnID, DWORD& dwPeriod);
+	virtual EnSocketError	GetLastError()	{return m_enLastError;}
+	virtual LPCTSTR	GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
@@ -121,21 +121,21 @@ public:
 	virtual DWORD GetMaxShutdownWaitTime	()	{return m_dwMaxShutdownWaitTime;}
 
 protected:
-	virtual ISocketListener::EnHandleResult FirePrepareListen(SOCKET soListen)
+	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
 		{return m_psoListener->OnPrepareListen(soListen);}
-	virtual ISocketListener::EnHandleResult FireAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)
+	virtual EnHandleResult FireAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)
 		{return m_psoListener->OnAccept(dwConnID, pSockAddr);}
-	virtual ISocketListener::EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
+	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
-	virtual ISocketListener::EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnReceive(dwConnID, pData, iLength);}
-	virtual ISocketListener::EnHandleResult FireReceive(CONNID dwConnID, int iLength)
+	virtual EnHandleResult FireReceive(CONNID dwConnID, int iLength)
 		{return m_psoListener->OnReceive(dwConnID, iLength);}
-	virtual ISocketListener::EnHandleResult FireClose(CONNID dwConnID)
+	virtual EnHandleResult FireClose(CONNID dwConnID)
 		{return m_psoListener->OnClose(dwConnID);}
-	virtual ISocketListener::EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+	virtual EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 		{return m_psoListener->OnError(dwConnID, enOperation, iErrorCode);}
-	virtual ISocketListener::EnHandleResult FireServerShutdown()
+	virtual EnHandleResult FireServerShutdown()
 		{return m_psoListener->OnServerShutdown();}
 
 	virtual BOOL CheckParams();
@@ -159,7 +159,6 @@ private:
 	void CompressFreeBuffer(size_t size);
 	void WaitForWorkerThreadEnd();
 	void WaitForDetectorThreadEnd();
-	void TerminateWorkerThread();
 	void CloseCompletePort();
 
 	void Reset();
@@ -180,7 +179,7 @@ private:
 	CONNID			FindConnectionID(SOCKADDR_IN* pAddr);
 
 private:
-	void SetLastError(EnServerError code, LPCSTR func, int ec);
+	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 
 private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
@@ -195,8 +194,8 @@ private:
 	void HandleSend			(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 	void HandleReceive		(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 	BOOL DoAccept			();
-	BOOL DoSend				(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLen);
-	BOOL DoReceive			(TUdpBufferObj* pBufferObj);
+	int DoSend				(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLen);
+	int DoReceive			(TUdpBufferObj* pBufferObj);
 
 	void DetectConnections	();
 	BOOL NeedDetectorThread	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
@@ -224,9 +223,8 @@ private:
 	vector<HANDLE>			m_vtWorkerThreads;
 
 	volatile EnServiceState	m_enState;
-	volatile CONNID			m_dwConnID;
 
-	EnServerError	m_enLastError;
+	EnSocketError	m_enLastError;
 
 	SOCKET			m_soListen;
 	HANDLE			m_hCompletePort;

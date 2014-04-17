@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.1.3
+ * Version	: 3.2.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -56,9 +56,54 @@ enum EnSocketOperation
 {
 	SO_UNKNOWN	= 0,	// Unknown
 	SO_ACCEPT	= 1,	// Acccept
-	SO_CONNECT	= 2,	// Connnect
+	SO_CONNECT	= 2,	// Connect
 	SO_SEND		= 3,	// Send
 	SO_RECEIVE	= 4,	// Receive
+};
+
+/************************************************************************
+名称：事件通知处理结果
+描述：事件通知的返回值，不同的返回值会影响通信组件的后续行为
+************************************************************************/
+enum EnHandleResult
+{
+	HR_OK		= 0,	// 成功
+	HR_IGNORE	= 1,	// 忽略
+	HR_ERROR	= 2,	// 错误
+};
+
+/************************************************************************
+名称：数据抓取结果
+描述：数据抓取操作的返回值
+************************************************************************/
+enum EnFetchResult
+{
+	FR_OK				= 0,	// 成功
+	FR_LENGTH_TOO_LONG	= 1,	// 抓取长度过大
+	FR_DATA_NOT_FOUND	= 2,	// 找不到 ConnID 对应的数据
+};
+
+/************************************************************************
+名称：操作结果代码
+描述：组件 Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
+************************************************************************/
+enum EnSocketError
+{
+	SE_OK						= NO_ERROR,	// 成功
+	SE_ILLEGAL_STATE			= 1,		// 当前状态不允许操作
+	SE_INVALID_PARAM			= 2,		// 非法参数
+	SE_SOCKET_CREATE			= 3,		// 创建 SOCKET 失败
+	SE_SOCKET_BIND				= 4,		// 绑定 SOCKET 失败
+	SE_SOCKET_PREPARE			= 5,		// 设置 SOCKET 失败
+	SE_SOCKET_LISTEN			= 6,		// 监听 SOCKET 失败
+	SE_CP_CREATE				= 7,		// 创建完成端口失败
+	SE_WORKER_THREAD_CREATE		= 8,		// 创建工作线程失败
+	SE_DETECT_THREAD_CREATE		= 9,		// 创建监测线程失败
+	SE_SOCKE_ATTACH_TO_CP		= 10,		// 绑定完成端口失败
+	SE_CONNECT_SERVER			= 11,		// 连接服务器失败
+	SE_NETWORK					= 12,		// 网络错误
+	SE_DATA_PROC				= 13,		// 数据处理错误
+	SE_DATA_SEND				= 14,		// 数据发送失败
 };
 
 /************************************************************************
@@ -67,18 +112,6 @@ enum EnSocketOperation
 ************************************************************************/
 class ISocketListener
 {
-public:
-	/************************************************************************
-	名称：事件通知处理结果
-	描述：事件通知的返回值，不同的返回值会影响通信组件的后续行为
-	************************************************************************/
-	enum EnHandleResult
-	{
-		HR_OK		= 0,	// 成功
-		HR_IGNORE	= 1,	// 忽略
-		HR_ERROR	= 2,	// 错误
-	};
-
 public:
 
 	/*
@@ -336,32 +369,193 @@ public:
 };
 
 /************************************************************************
-名称：通信服务端组件接口
-描述：定义通信服务端组件的所有操作方法和属性访问方法
+名称：通信代理 Socket 监听器接口
+描述：定义 通信代理 Socket 监听器的所有事件通知
 ************************************************************************/
-class IServer
+class IAgentListener : public IClientListener
 {
 public:
 
-	/************************************************************************
-	名称：操作结果代码
-	描述：Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
-	************************************************************************/
-	enum EnServerError
-	{
-		SE_OK						= 0,	// 成功
-		SE_ILLEGAL_STATE			= 1,	// 当前状态不允许操作
-		SE_INVALID_PARAM			= 2,	// 非法参数
-		SE_SOCKET_CREATE			= 3,	// 创建监听 SOCKET 失败
-		SE_SOCKET_BIND				= 4,	// 绑定监听地址失败
-		SE_SOCKET_PREPARE			= 5,	// 设置监听 SOCKET 失败
-		SE_SOCKET_LISTEN			= 6,	// 启动监听失败
-		SE_CP_CREATE				= 7,	// 创建完成端口失败
-		SE_WORKER_THREAD_CREATE		= 8,	// 创建工作线程失败
-		SE_DETECT_THREAD_CREATE		= 9,	// 创建监测线程失败
-		SE_SOCKE_ATTACH_TO_CP		= 10,	// 监听 SOCKET 绑定到完成端口失败
-	};
+	/*
+	* 名称：关闭通信组件通知
+	* 描述：通信组件关闭时，Socket 监听器将收到该通知
+	*		
+	* 参数：	
+	* 返回值：忽略返回值
+	*/
+	virtual EnHandleResult OnAgentShutdown()										= 0;
+};
 
+/************************************************************************
+名称：TCP 通信代理 Socket 监听器接口
+描述：定义 TCP 通信代理 Socket 监听器的所有事件通知
+************************************************************************/
+class ITcpAgentListener : public IAgentListener
+{
+};
+
+/************************************************************************
+名称：PUSH 模型通信代理 Socket 监听器抽象基类
+描述：定义某些事件通知的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpAgentListener : public ITcpAgentListener
+{
+public:
+	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
+	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)			{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(CONNID dwConnID)								{return HR_IGNORE;}
+	virtual EnHandleResult OnAgentShutdown()										{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：PULL 通信代理 Socket 监听器抽象基类
+描述：定义某些事件通知的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpPullAgentListener : public CTcpAgentListener
+{
+public:
+	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)						= 0;
+	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：复合 Socket 组件接口
+描述：定义复合 Socket 组件的所有操作方法和属性访问方法，复合 Socket 组件同时管理多个 Socket 连接
+************************************************************************/
+class IComplexSocket
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：关闭通信组件
+	* 描述：关闭通信组件，关闭完成后断开所有连接并释放所有资源
+	*		
+	* 参数：	
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
+	*/
+	virtual BOOL Stop	()														= 0;
+
+	/*
+	* 名称：发送数据
+	* 描述：用户通过该方法向指定连接发送数据
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	*			pBuffer		-- 发送数据缓冲区
+	*			iLength		-- 发送数据长度
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*/
+	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength)		= 0;
+
+	/*
+	* 名称：断开连接
+	* 描述：断开某个连接
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	*			bForce		-- 是否强制断开连接
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败
+	*/
+	virtual BOOL Disconnect(CONNID dwConnID, BOOL bForce = TRUE)				= 0;
+
+	/*
+	* 名称：断开超时连接
+	* 描述：断开超过指定时长的连接
+	*		
+	* 参数：		dwPeriod	-- 时长（毫秒）
+	*			bForce		-- 是否强制断开连接
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败
+	*/
+	virtual BOOL DisconnectLongConnections(DWORD dwPeriod, BOOL bForce = TRUE)	= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/*
+	* 名称：设置连接的附加数据
+	* 描述：是否为连接绑定附加数据或者绑定什么样的数据，均由应用程序只身决定
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	*			pv			-- 数据
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败（无效的连接 ID）
+	*/
+	virtual BOOL SetConnectionExtra		(CONNID dwConnID, PVOID pExtra)			= 0;
+
+	/*
+	* 名称：获取连接的附加数据
+	* 描述：是否为连接绑定附加数据或者绑定什么样的数据，均由应用程序只身决定
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	*			ppv			-- 数据指针
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败（无效的连接 ID）
+	*/
+	virtual BOOL GetConnectionExtra		(CONNID dwConnID, PVOID* ppExtra)		= 0;
+
+	/* 检查通信组件是否已启动 */
+	virtual BOOL HasStarted				()										= 0;
+	/* 查看通信组件当前状态 */
+	virtual EnServiceState GetState		()										= 0;
+	/* 获取连接数 */
+	virtual DWORD GetConnectionCount	()										= 0;
+	/* 获取某个连接时长（毫秒） */
+	virtual BOOL GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)				= 0;
+	/* 获取某个连接的远程地址信息 */
+	virtual BOOL GetRemoteAddress(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
+	/* 获取最近一次失败操作的错误代码 */
+	virtual EnSocketError GetLastError	()										= 0;
+	/* 获取最近一次失败操作的错误描述 */
+	virtual LPCTSTR		GetLastErrorDesc()										= 0;
+
+	/* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
+	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	= 0;
+	/* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
+	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		= 0;
+	/* 设置内存块缓存池大小（通常设置为 Socket 缓存池大小的 2 - 3 倍） */
+	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)		= 0;
+	/* 设置 Socket 缓存池回收阀值（通常设置为 Socket 缓存池大小的 3 倍） */
+	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)		= 0;
+	/* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
+	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		= 0;
+	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
+	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		= 0;
+	/* 设置关闭组件前等待连接关闭的最长时限（毫秒，0 则不等待） */
+	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	= 0;
+
+	/* 获取 Socket 缓存对象锁定时间 */
+	virtual DWORD GetFreeSocketObjLockTime	()	= 0;
+	/* 获取 Socket 缓存池大小 */
+	virtual DWORD GetFreeSocketObjPool		()	= 0;
+	/* 获取内存块缓存池大小 */
+	virtual DWORD GetFreeBufferObjPool		()	= 0;
+	/* 获取 Socket 缓存池回收阀值 */
+	virtual DWORD GetFreeSocketObjHold		()	= 0;
+	/* 获取内存块缓存池回收阀值 */
+	virtual DWORD GetFreeBufferObjHold		()	= 0;
+	/* 获取工作线程数量 */
+	virtual DWORD GetWorkerThreadCount		()	= 0;
+	/* 获取关闭组建前等待连接关闭的最长时限 */
+	virtual DWORD GetMaxShutdownWaitTime	()	= 0;
+
+public:
+	virtual ~IComplexSocket() {}
+};
+
+/************************************************************************
+名称：通信服务端组件接口
+描述：定义通信服务端组件的所有操作方法和属性访问方法
+************************************************************************/
+class IServer : public IComplexSocket
+{
 public:
 
 	/***********************************************************************/
@@ -378,127 +572,13 @@ public:
 	*/
 	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort)								= 0;
 
-	/*
-	* 名称：关闭通信组件
-	* 描述：关闭服务端通信组件，关闭完成后断开所有客户端连接并释放所有资源
-	*		
-	* 参数：	
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
-	*/
-	virtual BOOL Stop	()																	= 0;
-
-	/*
-	* 名称：发送数据
-	* 描述：用户通过该方法向指定客户端发送数据
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			pBuffer		-- 发送数据缓冲区
-	*			iLength		-- 发送数据长度
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败
-	*/
-	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength)					= 0;
-
-	/*
-	* 名称：断开连接
-	* 描述：断开与某个客户端的连接
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			bForce		-- 是否强制断开连接
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败
-	*/
-	virtual BOOL Disconnect(CONNID dwConnID, BOOL bForce = TRUE)							= 0;
-
-	/*
-	* 名称：断开超时连接
-	* 描述：断开超过指定时长的连接
-	*		
-	* 参数：		dwPeriod	-- 时长（毫秒）
-	*			bForce		-- 是否强制断开连接
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败
-	*/
-	virtual BOOL DisconnectLongConnections(DWORD dwPeriod, BOOL bForce = TRUE)				= 0;
-
 public:
 
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/*
-	* 名称：设置连接的附加数据
-	* 描述：是否为连接绑定附加数据或者绑定什么样的数据，均由应用程序只身决定
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			pv			-- 数据
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败（无效的连接 ID）
-	*/
-	virtual BOOL SetConnectionExtra		(CONNID dwConnID, PVOID pExtra)						= 0;
-
-	/*
-	* 名称：获取连接的附加数据
-	* 描述：是否为连接绑定附加数据或者绑定什么样的数据，均由应用程序只身决定
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			ppv			-- 数据指针
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败（无效的连接 ID）
-	*/
-	virtual BOOL GetConnectionExtra		(CONNID dwConnID, PVOID* ppExtra)					= 0;
-
-	/* 检查通信组件是否已启动 */
-	virtual BOOL HasStarted				()													= 0;
-	/* 查看通信组件当前状态 */
-	virtual EnServiceState GetState		()													= 0;
-	/* 获取最近一次失败操作的错误代码 */
-	virtual EnServerError GetLastError	()													= 0;
-	/* 获取最近一次失败操作的错误描述 */
-	virtual LPCTSTR		GetLastErrorDesc()													= 0;
-	/* 获取客户端连接数 */
-	virtual DWORD GetConnectionCount()														= 0;
-	/* 获取某个客户端连接时长（毫秒） */
-	virtual BOOL GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)							= 0;
 	/* 获取监听 Socket 的地址信息 */
 	virtual BOOL GetListenAddress(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)		= 0;
-	/* 获取某个客户端连接的地址信息 */
-	virtual BOOL GetClientAddress(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
-
-
-	/* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
-	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	= 0;
-	/* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
-	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		= 0;
-	/* 设置内存块缓存池大小（通常设置为 Socket 缓存池大小的 2 - 3 倍） */
-	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)		= 0;
-	/* 设置 Socket 缓存池回收阀值（通常设置为 Socket 缓存池大小的 3 倍） */
-	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)		= 0;
-	/* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
-	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		= 0;
-	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
-	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		= 0;
-	/* 设置关闭服务前等待连接关闭的最长时限（毫秒，0 则不等待） */
-	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	= 0;
-
-	/* 获取 Socket 缓存对象锁定时间 */
-	virtual DWORD GetFreeSocketObjLockTime	()	= 0;
-	/* 获取 Socket 缓存池大小 */
-	virtual DWORD GetFreeSocketObjPool		()	= 0;
-	/* 获取内存块缓存池大小 */
-	virtual DWORD GetFreeBufferObjPool		()	= 0;
-	/* 获取 Socket 缓存池回收阀值 */
-	virtual DWORD GetFreeSocketObjHold		()	= 0;
-	/* 获取内存块缓存池回收阀值 */
-	virtual DWORD GetFreeBufferObjHold		()	= 0;
-	/* 获取工作线程数量 */
-	virtual DWORD GetWorkerThreadCount		()	= 0;
-	/* 获取关闭服务前等待连接关闭的最长时限 */
-	virtual DWORD GetMaxShutdownWaitTime	()	= 0;
-
-public:
-	virtual ~IServer() {}
 };
 
 /************************************************************************
@@ -579,26 +659,6 @@ class IClient
 {
 public:
 
-	/************************************************************************
-	名称：操作结果代码
-	描述：Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
-	************************************************************************/
-	enum EnClientError
-	{
-		CE_OK						= 0,	// 成功
-		CE_ILLEGAL_STATE			= 1,	// 当前状态不允许操作
-		CE_INVALID_PARAM			= 2,	// 非法参数
-		CE_SOCKET_CREATE_FAIL		= 3,	// 创建 Client Socket 失败
-		CE_SOCKET_PREPARE_FAIL		= 4,	// 设置 Client Socket 失败
-		CE_CONNECT_SERVER_FAIL		= 5,	// 连接服务器失败
-		CE_WORKER_CREATE_FAIL		= 6,	// 创建工作线程失败
-		CE_DETECTOR_CREATE_FAIL		= 7,	// 创建监测线程失败
-		CE_NETWORK_ERROR			= 8,	// 网络错误
-		CE_DATA_PROC_ERROR			= 9,	// 数据处理错误
-	};
-
-public:
-
 	/***********************************************************************/
 	/***************************** 组件操作方法 *****************************/
 
@@ -608,7 +668,7 @@ public:
 	*		
 	* 参数：		pszRemoteAddress	-- 服务端地址
 	*			usPort				-- 服务端端口
-	*			bAsyncConnect		-- 是否采用异步 Connnect
+	*			bAsyncConnect		-- 是否采用异步 Connect
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
@@ -632,7 +692,7 @@ public:
 	*			pBuffer		-- 发送数据缓冲区
 	*			iLength		-- 发送数据长度
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
+	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength)						= 0;
 
@@ -646,7 +706,7 @@ public:
 	/* 查看通信组件当前状态 */
 	virtual EnServiceState	GetState		()													= 0;
 	/* 获取最近一次失败操作的错误代码 */
-	virtual EnClientError	GetLastError	()													= 0;
+	virtual EnSocketError	GetLastError	()													= 0;
 	/* 获取最近一次失败操作的错误描述 */
 	virtual LPCTSTR			GetLastErrorDesc()													= 0;
 	/* 获取该组件对象的连接 ID */
@@ -732,24 +792,90 @@ public:
 };
 
 /************************************************************************
+名称：通信代理组件接口
+描述：定义通信代理组件的所有操作方法和属性访问方法，代理组件本质是一个同时连接多个服务器的客户端组件
+************************************************************************/
+class IAgent : public IComplexSocket
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：启动通信组件
+	* 描述：启动通信代理组件，启动完成后可开始连接远程服务器
+	*		
+	* 参数：		pszBindAddress	-- 监听地址
+	*			bAsyncConnect	-- 是否采用异步 Connect
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
+	*/
+	virtual BOOL Start	(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)								= 0;
+
+	/*
+	* 名称：连接服务器
+	* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() 事件
+	*		
+	* 参数：		pszRemoteAddress	-- 服务端地址
+	*			usPort				-- 服务端端口
+	*			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*/
+	virtual BOOL Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)						= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 获取某个连接的本地地址信息 */
+	virtual BOOL	GetLocalAddress			(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
+};
+
+/************************************************************************
+名称：TCP 通信代理组件接口
+描述：定义 TCP 通信代理组件的所有操作方法和属性访问方法
+************************************************************************/
+class ITcpAgent : public IAgent
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置是否启用地址重用机制（默认：不启用） */
+	virtual void SetReuseAddress		(BOOL bReuseAddress)			= 0;
+	/* 检测是否启用地址重用机制 */
+	virtual BOOL IsReuseAddress			()								= 0;
+
+	/* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为 1024 的倍数） */
+	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
+	/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
+	/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
+
+	/* 获取通信数据缓冲区大小 */
+	virtual DWORD GetSocketBufferSize	()	= 0;
+	/* 获取心跳检查次数 */
+	virtual DWORD GetKeepAliveTime		()	= 0;
+	/* 获取心跳检查间隔 */
+	virtual DWORD GetKeepAliveInterval	()	= 0;
+};
+
+/************************************************************************
 名称：PULL 模型组件接口
 描述：定义 PULL 模型组件的所有操作方法
 ************************************************************************/
 class IPullSocket
 {
-public:
-
-	/************************************************************************
-	名称：数据抓取结果
-	描述：数据抓取操作的返回值
-	************************************************************************/
-	enum EnFetchResult
-	{
-		FR_OK				= 0,	// 成功
-		FR_LENGTH_TOO_LONG	= 1,	// 抓取长度过大
-		FR_DATA_NOT_FOUND	= 2,	// 找不到 ConnID 对应的数据
-	};
-
 public:
 
 	/*
@@ -759,8 +885,7 @@ public:
 	* 参数：		dwConnID	-- 连接 ID
 	*			pBuffer		-- 数据抓取缓冲区
 	*			iLength		-- 抓取数据长度
-	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败
+	* 返回值：	EnFetchResult
 	*/
 	virtual EnFetchResult Fetch	(CONNID dwConnID, BYTE* pData, int iLength)	= 0;
 
@@ -769,37 +894,28 @@ public:
 };
 
 /************************************************************************
-名称：PULL 模型通信服务端组件接口
-描述：继承了 IPullSocket
-************************************************************************/
-class IPullServer : public IPullSocket
-{
-
-};
-
-/************************************************************************
 名称：TCP PULL 模型通信服务端组件接口
-描述：继承了 ITcpServer 和 IPullServer
+描述：继承了 ITcpServer 和 IPullSocket
 ************************************************************************/
-class ITcpPullServer : public IPullServer, public ITcpServer
-{
-
-};
-
-/************************************************************************
-名称：PULL 模型通信客户端组件接口
-描述：继承了 IPullSocket
-************************************************************************/
-class IPullClient : public IPullSocket
+class ITcpPullServer : public IPullSocket, public ITcpServer
 {
 
 };
 
 /************************************************************************
 名称：TCP PULL 模型通信客户端组件接口
-描述：继承了 ITcpClient 和 IPullClient
+描述：继承了 ITcpClient 和 IPullSocket
 ************************************************************************/
-class ITcpPullClient : public IPullClient, public ITcpClient
+class ITcpPullClient : public IPullSocket, public ITcpClient
+{
+
+};
+
+/************************************************************************
+名称：TCP PULL 模型代理组件接口
+描述：继承了 ITcpAgent 和 IPullSocket
+************************************************************************/
+class ITcpPullAgent : public IPullSocket, public ITcpAgent
 {
 
 };

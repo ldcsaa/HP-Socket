@@ -221,7 +221,7 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
 {
 	TCHAR szAddress[40];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
@@ -229,59 +229,59 @@ ISocketListener::EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
 
 	m_Server->GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG
 	::PostOnSend(dwConnID, pData, iLength);
 #endif
 
-#if (WINVER < 0x0502)
+#if (_WIN32_WINNT <= _WIN32_WINNT_WS03)
 	::InterlockedExchangeAdd((volatile LONG*)&m_llTotalSent, iLength);
 #else
 	::InterlockedExchangeAdd64(&m_llTotalSent, iLength);
 #endif
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG
 	::PostOnReceive(dwConnID, pData, iLength);
 #endif
 
-#if (WINVER < 0x0502)
+#if (_WIN32_WINNT <= _WIN32_WINNT_WS03)
 	::InterlockedExchangeAdd((volatile LONG*)&m_llTotalReceived, iLength);
 #else
 	::InterlockedExchangeAdd64(&m_llTotalReceived, iLength);
 #endif
 
 	if(m_Server->Send(dwConnID, pData, iLength))
-		return ISocketListener::HR_OK;
+		return HR_OK;
 	else
-		return ISocketListener::HR_ERROR;
+		return HR_ERROR;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
+EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
 {
 	::PostOnClose(dwConnID);
 	Statistics();
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	::PostOnError(dwConnID, enOperation, iErrorCode);
 	Statistics();
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
+EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
 {
 	if(m_lClientCount == 0)
 	{
@@ -296,13 +296,13 @@ ISocketListener::EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soC
 	::InterlockedIncrement(&m_lClientCount);
 	::PostOnAccept2(dwConnID);
 
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
-ISocketListener::EnHandleResult CServerDlg::OnServerShutdown()
+EnHandleResult CServerDlg::OnServerShutdown()
 {
 	::PostOnShutdown();
-	return ISocketListener::HR_OK;
+	return HR_OK;
 }
 
 void CServerDlg::Statistics()

@@ -242,7 +242,7 @@ En_HP_HandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetClientAddress(m_spServer, dwConnID, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetRemoteAddress(m_spServer, dwConnID, szAddress, &iAddressLen, &usPort);
 
 	if(!m_spThis->m_strAddress.IsEmpty())
 	{
@@ -281,7 +281,7 @@ En_HP_HandleResult CServerDlg::OnReceive(CONNID dwConnID, int iLength)
 			CBufferPtr buffer(required);
 
 			En_HP_FetchResult result = ::HP_TcpPullServer_Fetch(m_spServer, dwConnID, buffer, (int)buffer.Size());
-			if(result == IPullSocket::FR_OK)
+			if(result == HP_FR_OK)
 			{
 				if(pInfo->is_header)
 				{
