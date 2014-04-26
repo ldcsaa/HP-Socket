@@ -23,7 +23,7 @@ v3.2.1 更新：
 		Start(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)
 		Stop()
 		Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)
-		Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
+		Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0)
 		Disconnect(CONNID dwConnID, BOOL bForce = TRUE)
 		Fetch(CONNID dwConnID, BYTE* pData, int iLength)	//（Pull 模型）
 
@@ -35,7 +35,7 @@ v3.2.1 更新：
 > 增加 HPSocket for Java SDK：
 -----------------
 1、提供 Java 开发包：hpsocket-3.2.1.jar（通过 JNA 实现，目前只支持 Windows 平台）
-2、运行环境：JDK 1.6+，JVM 运行在 server 模式（"java -server"，在 client 模式下某些回调函数不能正常触发）
+2、运行环境：JDK 1.6+，JVM 运行在 server 模式（"java -server"，在 client 模式下性能受影响）
 3、增加示例工程 TestEcho-4J，展示 HPSocket4J 的使用方法（包括 PULL 模型示例和性能测试示例）
 4、MBCS 和 Unicode 版本分布位于包 org.jessma.hpsocket.mbcs 和 org.jessma.hpsocket.unicode
 5、HPSocket for Java SDK 提供以下通信组件：
@@ -87,21 +87,30 @@ v3.2.1 更新：
 	/* 7：销毁通信组件 */
 	TcpAgent.destroy(agent);
 
+> 优化数据发送策略：
+-----------------
+1、IClient/IServer/IAgent 组件的 Send() 方法不直接把数据投递到完成端口
+2、在高负载情形下，数据会放入发送队列，并进行数据包合并，避免高负载下发生 10055 错误
+3、当发送大量小数据包时，自动组包机制能大大提高发送效率
+4、应用程序可以通过 GetPendingDataLength() 获取队列中未发出的数据，从而实现流量控制
+
 > 其它更新：
 -----------------
 1、IServer 的 GetClientAddress() 方法改名为 GetRemoteAddress()
-2、EnServerError / EnClientError 枚举类型合并为 EnSocketError
-3、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
-4、公共代码包 vc-common-src 更新为 v2.3.3（参考：vc-common-src v2.3.3 的 Change Log）
-5、增加 HPSocket for C# SDK（由 int 2e 提供）
-6、代码整理优化
+2、IClient 的 Send() 方法删除 “CONNID dwConnID” 参数
+3、IClient/IServer/IAgent 的 Send() 方法增加发送数据缓冲区指针偏移量参数 “int iOffset”
+4、EnServerError / EnClientError 枚举类型合并为 EnSocketError
+5、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
+6、IClient/IServer/IAgent 增加方法：BOOL GetPendingDataLength()，获取连接中未发出数据的长度
+7、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
+8、增加 HPSocket for C# SDK（由 int 2e 提供）
+9、公共代码包 vc-common-src 更新为 v2.3.4（参考：vc-common-src v2.3.4 的 Change Log）
 	
 > 升级说明：
 -----------------
 1、HP-Socket v3.2.1 在功能上兼容 HP-Socket v3.1.3 及以前版本
-2、由于代码作了一些重构，需要根据提示修改程序代码
+2、接口有变化，需要根据提示修改程序代码；注意：现有程序不能直接替换 v3.1.3 的 DLL
 3、EnServerError / EnClientError 枚举类型合并为 EnSocketError，注意一些枚举值发生了变化
-4、不需要使用 TcpAgent / TcpPullAgent 的用户可以暂不更新
 
 ==========================================================================================
 v3.1.3 更新：
