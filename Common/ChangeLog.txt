@@ -1,61 +1,447 @@
-
-Module	: vc-common-src
-Desc	: HP-Socket 和 VC-Logger 的公共库代码
-Usage	: 把需要的代码文件导入到项目中
-
 ==========================================================================================
-v2.3.4 更新：
+v3.2.1 更新：
 ==========================================================================================
 
-> 局部代码调整：
+> 增加 TcpAgent / TcpPullAgent 通信组件：
 -----------------
-1、修改 RWLock.h，增加非重入读写类 CSlimLock
-2、修改 bufferpool.h/bufferpool.cpp，增加类 TItemListEx
+1、对于代理服务器或中转服务器等应用场景，服务器自身也作为客户端向其它服务器发起大规模连接
+2、TcpClient / TcpPullClient 基于 Event Select 通信模型，每个组件对象管理一个 Socket，并开启一个线程，不适合上述应用场景
+3、TcpAgent / TcpPullAgent 基于 IOCP 通信模型，一个组件对象管理多个 Socket，适合用作代理服务器或中转服务器的客户端通信组件
+4、TcpAgent / TcpPullAgent 的使用方式依然简单，提供以下接口方法：
 
-==========================================================================================
-v2.3.3 更新：
-==========================================================================================
+	1) 通知接口方法：
+		OnPrepareConnect(CONNID dwConnID, SOCKET socket)
+		OnConnect(CONNID dwConnID)
+		OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+		OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)	//（Push 模型）
+		OnReceive(CONNID dwConnID, int iLength)						//（Pull 模型）
+		OnClose(CONNID dwConnID)
+		OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+		OnAgentShutdown()
+		
+	2) 主要操作方法：
+		Start(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)
+		Stop()
+		Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)
+		Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0)
+		Disconnect(CONNID dwConnID, BOOL bForce = TRUE)
+		Fetch(CONNID dwConnID, BYTE* pData, int iLength)	//（Pull 模型）
 
-> 局部代码调整：
+5、增加 TcpAgent / TcpPullAgent 使用示例：
+	1) Agent-PFM
+	2) Agent-Pull
+	3) Agent-4C
+
+> 增加 HPSocket for Java SDK：
 -----------------
-1、修改 bufferpool.cpp，优化 CBufferPool、TItemList
-2、修改 STLHelper.h，增加 stack、queue、deque 的基础类型 typedef 定义
-3、修改 FuncHelper.h、FuncHelper.cpp，兼容 VS 2013
+1、提供 Java 开发包：hpsocket-3.2.1.jar（通过 JNA 实现，目前只支持 Windows 平台）
+2、运行环境：JDK 1.6+，JVM 运行在 server 模式（"java -server"，在 client 模式下性能受影响）
+3、增加示例工程 TestEcho-4J，展示 HPSocket4J 的使用方法（包括 PULL 模型示例和性能测试示例）
+4、MBCS 和 Unicode 版本分布位于包 org.jessma.hpsocket.mbcs 和 org.jessma.hpsocket.unicode
+5、HPSocket for Java SDK 提供以下通信组件：
 
-> 调整 _WIN32_WINNT 默认值：
+	1) TcpServer：TCP 通信服务端组件，支持 PUSH/PULL 模型
+	2) TcpClient：TCP 通信客户端组件，支持 PUSH/PULL 模型
+	3) TcpAgent ：TCP 通信 Agent 组件，支持 PUSH/PULL 模型
+	4) UdpServer：UDP 通信服务端组件，支持 PUSH 模型
+	5) UdpClient：UDP 通信客户端组件，支持 PUSH 模型
+ 
+6、HPSocket4J 的使用方法（以 TcpAgent 为例）：
+
+	/* 0: 应用程序加入 hpsocket-3.2.1.jar 和 jna-4.1.0.jar */
+	
+	/* 1: 创建通信组件对象 */
+	TcpAgent agent = TcpAgent.create(Mode.PUSH);
+	
+	/* 2: 设置回调函数对象 */
+	// （可选）
+	agent.setCallBackOnPrepareConnect(new OnPrepareConnectImpl());
+	// （可选）
+	agent.setCallBackOnConnect(new OnConnectImpl());
+	// （必须）PUSH 模型需要设置 OnReceive 回调函数对象
+	agent.setCallBackOnReceive(new OnReceiveImpl());
+	// （必须）PULL 模型需要设置 OnPullReceive 回调函数对象
+	// agent.setCallBackOnPullReceive(new OnPullReceiveImpl());
+	// （可选）
+	agent.setCallBackOnSend(new OnSendImpl());
+	// （必须）
+	agent.setCallBackOnClose(new OnCloseImpl());
+	// （必须）
+	agent.setCallBackOnError(new OnErrorImpl());
+	// （可选）
+	agent.setCallBackOnAgentShutdown(new OnAgentShutdownImpl());
+	
+	/* 3：启动通信组件 */
+	agent.start("127.0.0.1", false);
+	
+	/* 4：连接服务器 */
+	agent.connect("localhost", (short)5555, pdwConnID);
+	
+	/* 5：处理通信数据 */
+	// 响应 OnReceive / OnPullReceive 事件接收数据
+	// 使用	agent.send(dwConnID, data, data.length) 发送数据
+	
+	/* 6：关闭通信组件 */
+	agent.stop();
+	
+	/* 7：销毁通信组件 */
+	TcpAgent.destroy(agent);
+
+> 优化数据发送策略：
 -----------------
-1、修改 GeneralHelper.h
-	1) 32 位系统 _WIN32_WINNT 默认值：_WIN32_WINNT_WINXP
-	2) 64 位系统 _WIN32_WINNT 默认值：_WIN32_WINNT_WIN7
-
-==========================================================================================
-v2.3.2 更新：
-==========================================================================================
-
-> 增加 Buffer Pool 辅助类 TItem/TItemList/TBuffer/CItemPool/CBufferPool：
------------------
-1、增加 bufferpool.h
-2、增加 bufferpool.cpp
-
-==========================================================================================
-v2.3.1 更新：
-==========================================================================================
-
-> 增加读写锁辅助类 CSWMR 和 CRWLock：
------------------
-1、增加 RWLock.h
-2、增加 RWLock.cpp
+1、IClient/IServer/IAgent 组件的 Send() 方法不直接把数据投递到完成端口
+2、在高负载情形下，数据会放入发送队列，并进行数据包合并，避免高负载下发生 10055 错误
+3、当发送大量小数据包时，自动组包机制能大大提高发送效率
+4、应用程序可以通过 GetPendingDataLength() 获取队列中未发出的数据，从而实现流量控制
 
 > 其它更新：
 -----------------
-1、删除 CMTX/CSEM/CEvent 类的‘operator HANDLE* &()’重载运算符
-2、修改 WaitFor.cpp，优化‘GetTimeGap32()’方法
+1、IServer 的 GetClientAddress() 方法改名为 GetRemoteAddress()
+2、IClient 的 Send() 方法删除 “CONNID dwConnID” 参数
+3、IClient/IServer/IAgent 的 Send() 方法增加发送数据缓冲区指针偏移量参数 “int iOffset”
+4、EnServerError / EnClientError 枚举类型合并为 EnSocketError
+5、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
+6、IClient/IServer/IAgent 增加方法：BOOL GetPendingDataLength()，获取连接中未发出数据的长度
+7、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
+8、增加 HPSocket for C# SDK（由 int 2e 提供）
+9、公共代码包 vc-common-src 更新为 v2.3.4（参考：vc-common-src v2.3.4 的 Change Log）
+	
+> 升级说明：
+-----------------
+1、HP-Socket v3.2.1 在功能上兼容 HP-Socket v3.1.3 及以前版本
+2、接口有变化，需要根据提示修改程序代码；注意：现有程序不能直接替换 v3.1.3 的 DLL
+3、EnServerError / EnClientError 枚举类型合并为 EnSocketError，注意一些枚举值发生了变化
+
+==========================================================================================
+v3.1.3 更新：
+==========================================================================================
+
+> 增加其它语言 Demo：
+-----------------
+1、C#
+2、Delphi
+3、E 语言
+
+> Bug Fix：
+-----------------
+1、修复 IP 地址判断错误 Bug：
+	1) 客户端组件连接服务器时，如果服务器 IP 地址满位（12个数字：‘AAA.BBB.CCC.DDD’）则被错误地判断为域名
+	2) 影响组件：所有 TCP/UDP 客户端组件
+	3) 影响版本：v3.1.2 及之前所有版本
+	
+2、修复域名或主机名的 IP 地址解析错误 Bug：
+	1) 客户端组件通过域名或主机名连接服务器时，可能会解析到错误的 IP 地址
+	2) 影响组件：所有 TCP/UDP 客户端组件
+	3) 影响版本：v3.1.2 及之前所有版本
+	
+> 升级说明：
+-----------------
+1、使用 HP-Socket v3.1.2 及以前版本的应用程序可以安全升级到 HP-Socket v3.1.3
+
+==========================================================================================
+v3.1.2 更新：
+==========================================================================================
+
+> 修改 Server 组件的 OnClose() / OnError() 事件的触发规则：
+-----------------
+1、以前版本的 TCP/UDP Server 组件中，当关闭一个连接时可能会同时触发一个 OnClose() 事件和若干个 OnError() 事件
+2. 由于存在上述可能性，所以应用程序需要对 OnClose() / OnError() 的处理事件代码段进行同步
+3、从 v3.1.2 开始，当多个 OnClose() / OnError() 事件同时发生时，组件只会向应用程序通知第一个事件，后续事件则忽略
+4. 因此，应用程序在处理 OnClose() / OnError() 事件时不必处理同步，减少了出错的可能和编写同步及检测代码的负担
+
+	示例代码一：
+	--------------------------------------------------------------------------------------
+	ISocketListener::EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
+	{
+		// 以前版本：有可能存在并发的 OnClose()/OnError()，要把代码放在临界区中并检测返回值
+
+		CCriSecLock locallock(m_csPkgInfo);	// <-- 临界区
+
+		PVOID pInfo = nullptr;
+
+		if(m_Server->GetConnectionExtra(dwConnID, &pInfo) && pInfo != nullptr)	// <-- 检测返回值
+		{
+			m_Server->SetConnectionExtra(dwConnID, nullptr);
+			delete pInfo;
+		}
+	}
+
+	示例代码二：
+	--------------------------------------------------------------------------------------
+	ISocketListener::EnHandleResult CServerDlg::OnClose(CONNID dwConnID)
+	{
+		// v3.1.2 版本：只会接收到一个 OnClose()/OnError() 事件，能安全地移除临界区代码和检测代码
+
+		PVOID pInfo = nullptr;
+		m_Server->GetConnectionExtra(dwConnID, &pInfo);
+		ASSERT(pInfo != nullptr);
+
+		delete pInfo;
+	}
+
+> 其它更新：
+-----------------
+1、调整 TCP Server 默认参数：
+	1) DEFAULT_SOCKET_LISTEN_QUEUE	: 300
+	2) DEFAULT_ACCEPT_SOCKET_COUNT	: 300
+	3) DEFAULT_FREE_SOCKETOBJ_POOL	: 150
+	4) DEFAULT_FREE_SOCKETOBJ_HOLD	: 450
+	5) DEFAULT_FREE_BUFFEROBJ_POOL	: 300
+	6) DEFAULT_FREE_BUFFEROBJ_HOLD	: 900
+
+2、调整 UDP Server 默认参数：
+	1) DEFAULT_FREE_SOCKETOBJ_POOL	: 150
+	2) DEFAULT_FREE_SOCKETOBJ_HOLD	: 450
+	3) DEFAULT_FREE_BUFFEROBJ_POOL	: 300
+	4) DEFAULT_FREE_BUFFEROBJ_HOLD	: 900
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v3.1.1 及以前版本的应用程序可以安全升级到 HP-Socket v3.1.2
+
+==========================================================================================
+v3.1.1 更新：
+==========================================================================================
+
+> 增加导出纯 C 函数的动态链接库 HPSocket4C.dll：
+-----------------
+1、增加代码文件 HPSocket4C.h 和 HPSocket4C.cpp，用于创建 HPSocket4C.dll
+2、导出纯 C 函数，让其它语言（如：C/C#/Delphi 等）能方便地使用 HPSocket
+3、HPSocket4C.dll 使用方法
+
+	方法一：
+	--------------------------------------------------------------------------------------
+	(0) （C/C++ 程序）包含 HPSocket4C.h 头文件
+	(1) 调用 ::Create_HP_XxxListener() 函数创建监听器对象
+	(2) 调用 ::Create_HP_Xxx(pListener) 函数创建 HPSocket 对象
+	(3) 调用 ::HP_Set_FN_Xxx_OnYyy(pListener, ...) 函数设置监听器的回调函数
+	(4) 调用相关导出函数操作 HPSocket 对象
+	(5) ...... ......
+	(6) 调用 ::Destroy_HP_Xxx(pSocket) 函数销毁 HPSocket 对象
+	(7) 调用 ::Destroy_HP_XxxListener(pListener) 函数销毁监听器对象
+
+	方法二：
+	--------------------------------------------------------------------------------------
+	(1) 应用程序把需要用到的导出函数封装到特定语言的包装类中
+	(2) 通过包装类封装后，以面向对象的方式使用 HPSocket
+
+4、HPSocket4C.dll 动态链接库发行版本
+
+	(1) x86/HPSocket4C.dll		- (32位/MBCS/Release)
+	(2) x86/HPSocket4C_D.dll	- (32位/MBCS/DeBug)
+	(3) x86/HPSocket4C_U.dll	- (32位/UNICODE/Release)
+	(4) x86/HPSocket4C_UD.dll	- (32位/UNICODE/DeBug)
+	(5) x64/HPSocket4C.dll		- (64位/MBCS/Release)
+	(6) x64/HPSocket4C_D.dll	- (64位/MBCS/DeBug)
+	(7) x64/HPSocket4C_U.dll	- (64位/UNICODE/Release)
+	(8) x64/HPSocket4C_UD.dll	- (64位/UNICODE/DeBug)
+
+> 全面启用 Buffer Pool 缓存机制：
+-----------------
+1、Common/Src 增加代码文件 bufferpool.h 和 bufferpool.cpp，实现 Buffer Pool 缓存机制
+2、通过 Buffer Pool 缓存机制提升内存使用效率，减少动态内存分配和释放操作，避免内存空洞
+3、CTcpClient 用 CItemPool 和 TItemList 实现发送缓冲区
+4、CUdpClient 用 CItemPool 和 TItemList 实现发送缓冲区
+5、CTcpPullClient 用 CItemPool 和 TItemList 实现发送缓冲区和 PULL 缓冲区
+6、CTcpPullServer 用 CBufferPool 和 TBuffer 实现 PULL 缓冲区
+
+> 其它更新：
+-----------------
+1、IServer 增加接口方法 DisconnectLongConnections() 用于断开所有超长连接
+2、IServer 删除接口方法 GetConnectionCriSec()
+3、IClient 增加方法 Get/SetFreeBufferPoolSize()、Get/SetFreeBufferPoolHold() 用于设置 Buffer Pool 缓存大小和阀值
+4、IPullServer 删除方法 Get/SetFreePullBufferPool()、Get/SetFreePullBufferHold()
+5、HPSocket.dll 和 HPSocket4C.dll 使用 /MT(d) 选项重新编译，消除对运行时库的依赖
+6、增加示例工程 TestEcho-4C，展示 HPSocket4C.dll 的使用方法
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v3.0.2 及以前版本的应用程序可以安全升级到 HP-Socket v3.1.1
+2、如果工程想通过导入 HPSocket4C.dll 的方式使用 HP-Socket，请参考 TestEcho-4C 示例工程
+
+==========================================================================================
+v3.0.2 更新：
+==========================================================================================
+
+> 把 HP-Socket 编译为动态链接库：
+-----------------
+1、应用程序可以通过导入源代码或动态链接库方式使用 HP-Socket
+2、动态链接库使用方法
+
+	方法一：
+	-----------------------------------------------------------------------
+	(0) 应用程序包含 SocketInterface.h 和 HPSocket.h 头文件
+	(1) 调用 HP_Create_Xxx() 函数创建 HPSocket 对象
+	(2) 使用完毕后调用 HP_Destroy_Xxx() 函数销毁 HPSocket 对象
+
+	方法二：
+	-----------------------------------------------------------------------
+	(0) 应用程序包含 SocketInterface.h 和 HPSocket.h 头文件
+	(1) 创建 CXxxWrapper 包装器，通过包装器智能指针使用 HPSocket 对象
+
+3、动态链接库发行版本
+
+	(1) x86/HPSocket.dll	- (32位/MBCS/Release)
+	(2) x86/HPSocket_D.dll	- (32位/MBCS/DeBug)
+	(3) x86/HPSocket_U.dll	- (32位/UNICODE/Release)
+	(4) x86/HPSocket_UD.dll	- (32位/UNICODE/DeBug)
+	(5) x64/HPSocket.dll	- (64位/MBCS/Release)
+	(6) x64/HPSocket_D.dll	- (64位/MBCS/DeBug)
+	(7) x64/HPSocket_U.dll	- (64位/UNICODE/Release)
+	(8) x64/HPSocket_UD.dll	- (64位/UNICODE/DeBug)
+
+> 其它更新：
+-----------------
+1、把组件接口以及监听器接口的声明移到 SocketInterface.h
+2、IServer 增加接口方法 GetConnectionCount()/GetConnectPeriod() 分别获取当前连接数和某个连接的时长
+3、IServer 接口方法 GetListenAddress()/GetClientAddress() 的 CString& 参数改为 LPTSTR
+4、IClient 接口方法 GetLocalAddress() 的 CString& 参数改为 LPTSTR
+5、SocketHelper.h 中所有全局函数的 CString& 参数均改为 LPTSTR
+6、示例工程 TestEcho-Pull 和 TestEcho-PFM 改为用动态链接库方式使用 HP-Socket
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v3.0.1 的应用程序可以安全升级到 HP-Socket v3.0.2
+2、由于某些接口方法的参数作了调整，因此请参考测试工程作相应修改
+3、如果工程想通过动态链接库方式使用 HP-Socket，请参考 TestEcho-Pull 或 TestEcho-PFM 示例工程
+
+==========================================================================================
+v3.0.1 更新：
+==========================================================================================
+
+> 新增 UDP 通信组件：
+-----------------
+1、新增两个 UDP 通信组件：CUdpServer 为服务端组件，CUdpClient 为客户端组件
+2、服务端组件 CUdpServer 采用 IOCP 通信模型
+3、客户端组件 CUdpClient 采用 Event Select 通信模型
+4、UDP 通信组件的接口与原 TCP 通信组件一致，简单实用
+5、UDP 通信组件内置通信线路自动监测机制
+6、新增 UDP 通信组件示例工程 TestEcho-UDP
+
+> 代码重构与优化：
+-----------------
+1、规范所有接口、类以及代码文件的命名
+2、重构和优化了大量组件代码
+3、服务端组件加入读写锁机制，有效平衡处理性能与安全性
+4、服务端组件的 Socket 对象缓存列表设置了锁定时间，提高访问的安全性
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v2.2.3 的应用程序可以安全升级到 HP-Socket v3.0.1
+2、由于重命名了大量接口、类以及代码文件，因此升级时需要作相应调整
+
+==========================================================================================
+v2.2.3 更新：
+==========================================================================================
+
+> 连接 ID 的数据类型改为‘CONNID’：
+-----------------
+1、在SocketHelper.h 中定义 CONNID 数据类型（默认：typedef ULONG_PTR CONNID）
+2、应用程序可以把 CONNID 定义为其希望的类型（如：ULONG / ULONGLONG 等）
+3、为了便于移植与维护，应用程序的任何地方都应该用‘CONNID’类型引用连接 ID
+
+> 服务端 Socket 组件支持为每个连接绑定附加数据：
+-----------------
+1、IServerSocket 和 CIocpServer 增加方法 Get/SetConnectionExtra()
+2、通过上述两个方法，应用程序可以为每个连接绑定任意附加数据并把数据获取出来
+
+> 其它更新：
+-----------------
+1、放宽 CIocpServer 的最大 IOCP 工作线程数目限制（64 改为 500）
+2、服务端 Socket 组件的 Disconnect() 方法增加一个标识参数‘bForce’，指示是否强制断开连接
+3、调整连接 ID 的生成规则，避免生成数值为 0 的连接 ID
 
 ==========================================================================================
 v2.2.2 更新：
 ==========================================================================================
 
-> 优化与 Win32 程序（非 MFC 程序）的兼容性：
+> 优化心跳检测相关功能：
 -----------------
-1、修改 GeneralHelper.h
-2、修改 FuncHelper.cpp
+1、IServerSocket 和 IClientSocket 的 Get/SetKeepAliveTimes() 方法改为 Get/SetKeepAliveTime()
+2、CIocpServer 和 CClientSocket 的默认 KeepAliveTime 属性改为 5000
+3、CIocpServer 和 CClientSocket 的默认 KeepAliveInterval 属性改为 3000
+
+==========================================================================================
+v2.2.1 更新：
+==========================================================================================
+
+> PULL 模型支持：
+-----------------
+1、ISocketListener 增加 PULL 模型数据接收通知方法 OnReceive(dwConnID, int)
+2、增加 PULL Socket 接口 IPullSocket，该接口的 Fetch(dwConnID, pBuffer, iLength) 方法用于抓取通信数据
+
+> Server：
+-----------------
+1、服务端 Socket 接口 ISocketServer 改名为 IServerSocket
+2、增加 PULL Server Socket 监听器抽象类 CPullServerSocketListener
+3、增加 PULL Server Socket 接口 IPullServerSocket
+4、增加 PULL Server Socket 实现类 CIocpPullServer
+
+> Client：
+-----------------
+1、客户端 Socket 接口 ISocketClient 改名为 IClientSocket
+2、客户端 Socket 实现类 CSocketClient 改名为 CClientSocket
+3、增加 PULL Client Socket 监听器抽象类 CPullClientSocketListener
+4、增加 PULL Client Socket 接口 IPullClientSocket
+5、增加 PULL Client Socket 实现类 CPullClientSocket
+
+> 其他更新：
+-----------------
+1、增加 PULL Socket 测试程序 TestEcho-Pull
+2、在 SocketHelper.h (.cpp) 中添加若干帮助结构体
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v2.1.1 的应用程序可以安全升级到 v2.2.1
+2、由于 ISocketServer、ISocketClient 和 CSocketClient 的名称已修改，因此，应用程序需要对引用的名称和包含的头文件名作相应修改
+
+==========================================================================================
+v2.1.1 更新：
+==========================================================================================
+
+> Server：
+-----------------
+1、IServerSocketListener 取消 OnPrepareSocket(connID, socket) 通知方法
+2、IServerSocketListener 修改 OnAccept((connID, soClient) 通知方法，增加参数‘soClient’，用于实现原 OnPrepareSocket(connID, socket) 通知方法的功能
+3、IServerSocketListener 增加 OnPrepareListen(soListen) 通知方法，用于设置监听 socket 的 SOCKET 选项
+4、ISocketServer 增加方法 GetListenAddress(strAddress, usPort)，用于获取监听 Socket 的地址信息
+5、ISocketServer 增加方法 GetClientAddress(connID, strAddress, usPort)，用于某个客户端连接的地址信息
+6、优化 Socket 缓存池和内存块缓存池管理
+7、调整一些属性访问方法的方法名
+8、修复BUG：特殊情形下可能出现死锁现象
+
+> Client：
+-----------------
+1、ISocketServer 增加方法 GetLocalAddress(strAddress, usPort)，用于获取 Client Socket 的地址信息
+2、优化数据发送方式，提升数据发送效率
+
+> 其他更新：
+-----------------
+1、优化 TestEcho 和 TestEcho-PFM 测试程序
+3、在 SocketHelper.h (.cpp) 中添加若干帮助函数
+4、为 SocketHelper.h 中定义的所有接口、类和方法加入注释
+
+==========================================================================================
+v2.0.1 更新：
+==========================================================================================
+
+> Server：
+-----------------
+1、IServerSocketListener 增加 OnPrepareSocket(connID, socket) 通知方法用于在使用 socket 前设置 SOCKET 选项或过滤客户端连接
+2、ISocketServer 增加方法 Disconnect(connID) 用于主动断开客户端连接
+3、增加 IServerSocketListener 的子类 CServerSocketListener，提供默认（空的）通知处理方法
+
+> Client：
+-----------------
+1、IClientSocketListener 增加 OnPrepareSocket(connID, socket) 通知方法用于在使用 socket 前设置 SOCKET 选项
+2、支持异步 Connect：ISocketServer 的 Start() 方法增加一个参数 （BOOL bAsyncConnect） 设置是否采用异步 Connect
+3、增加 IClientSocketListener 的子类 CClientSocketListener，提供默认（空的）通知处理方法。
+4、修复BUG：超高负载情形下出现丢包现象
+
+
+> 其他更新：
+-----------------
+1、支持 Windows x64 平台
+2、优化 TestEcho 和 TestEcho-PFM 测试程序
+3、TestEcho 客户端程序加入“异步连接”示例
+4、TestEcho 服务端程序加入“连接过滤”和“主动断开连接”示例
