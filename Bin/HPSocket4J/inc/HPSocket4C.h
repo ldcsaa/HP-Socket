@@ -345,6 +345,19 @@ HPSOCKET_API BOOL __stdcall HP_Server_Stop(HP_Server pServer);
 HPSOCKET_API BOOL __stdcall HP_Server_Send(HP_Server pServer, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength);
 
 /*
+* 名称：发送数据
+* 描述：用户通过该方法向指定客户端发送数据
+*		
+* 参数：		dwConnID	-- 连接 ID
+*			pBuffer		-- 发送数据缓冲区
+*			iLength		-- 发送数据长度
+*			iOffset		-- 发送数据缓冲区指针偏移量
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
+*/
+HPSOCKET_API BOOL __stdcall HP_Server_SendPart(HP_Server pServer, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset);
+
+/*
 * 名称：断开连接
 * 描述：断开与某个客户端的连接
 *		
@@ -399,6 +412,8 @@ HPSOCKET_API En_HP_ServiceState __stdcall HP_Server_GetState(HP_Server pServer);
 HPSOCKET_API En_HP_SocketError __stdcall HP_Server_GetLastError(HP_Server pServer);
 /* 获取最近一次失败操作的错误描述 */
 HPSOCKET_API LPCTSTR __stdcall HP_Server_GetLastErrorDesc(HP_Server pServer);
+/* 获取连接中未发出数据的长度 */
+HPSOCKET_API BOOL __stdcall HP_Server_GetPendingDataLength(HP_Server pServer, HP_CONNID dwConnID, int* piPending);
 /* 获取客户端连接数 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetConnectionCount(HP_Server pServer);
 /* 获取某个客户端连接时长（毫秒） */
@@ -509,13 +524,24 @@ HPSOCKET_API BOOL __stdcall HP_Client_Stop(HP_Client pClient);
 * 名称：发送数据
 * 描述：用户通过该方法向服务端发送数据
 *		
-* 参数：		dwConnID	-- 连接 ID（保留参数，目前该参数并未使用）
-*			pBuffer		-- 发送数据缓冲区
+* 参数：		pBuffer		-- 发送数据缓冲区
 *			iLength		-- 发送数据长度
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
 */
-HPSOCKET_API BOOL __stdcall HP_Client_Send(HP_Client pClient, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength);
+HPSOCKET_API BOOL __stdcall HP_Client_Send(HP_Client pClient, const BYTE* pBuffer, int iLength);
+
+/*
+* 名称：发送数据
+* 描述：用户通过该方法向服务端发送数据
+*		
+* 参数：		pBuffer		-- 发送数据缓冲区
+*			iLength		-- 发送数据长度
+*			iOffset		-- 发送数据缓冲区指针偏移量
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
+*/
+HPSOCKET_API BOOL __stdcall HP_Client_SendPart(HP_Client pClient, const BYTE* pBuffer, int iLength, int iOffset);
 
 /******************************************************************************/
 /***************************** Client 属性访问方法 *****************************/
@@ -532,6 +558,8 @@ HPSOCKET_API LPCTSTR __stdcall HP_Client_GetLastErrorDesc(HP_Client pClient);
 HPSOCKET_API HP_CONNID __stdcall HP_Client_GetConnectionID(HP_Client pClient);
 /* 获取 Client Socket 的地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Client_GetLocalAddress(HP_Client pClient, LPTSTR lpszAddress, int* piAddressLen, USHORT* pusPort);
+/* 获取连接中未发出数据的长度 */
+HPSOCKET_API BOOL __stdcall HP_Client_GetPendingDataLength(HP_Client pClient, int* piPending);
 /* 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ） */
 HPSOCKET_API void __stdcall HP_Client_SetFreeBufferPoolSize(HP_Client pClient, DWORD dwFreeBufferPoolSize);
 /* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
@@ -624,6 +652,19 @@ HPSOCKET_API BOOL __stdcall HP_Agent_Connect(HP_Agent pAgent, LPCTSTR pszRemoteA
 HPSOCKET_API BOOL __stdcall HP_Agent_Send(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength);
 
 /*
+* 名称：发送数据
+* 描述：用户通过该方法向指定连接发送数据
+*		
+* 参数：		dwConnID	-- 连接 ID
+*			pBuffer		-- 发送数据缓冲区
+*			iLength		-- 发送数据长度
+*			iOffset		-- 发送数据缓冲区指针偏移量
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
+*/
+HPSOCKET_API BOOL __stdcall HP_Agent_SendPart(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset);
+
+/*
 * 名称：断开连接
 * 描述：断开某个连接
 *		
@@ -686,6 +727,8 @@ HPSOCKET_API BOOL __stdcall HP_Agent_GetRemoteAddress(HP_Agent pAgent, HP_CONNID
 HPSOCKET_API En_HP_SocketError __stdcall HP_Agent_GetLastError(HP_Agent pAgent);
 /* 获取最近一次失败操作的错误描述 */
 HPSOCKET_API LPCTSTR __stdcall HP_Agent_GetLastErrorDesc(HP_Agent pAgent);
+/* 获取连接中未发出数据的长度 */
+HPSOCKET_API BOOL __stdcall HP_Agent_GetPendingDataLength(HP_Agent pAgent, HP_CONNID dwConnID, int* piPending);
 
 /* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 HPSOCKET_API void __stdcall HP_Agent_SetFreeSocketObjLockTime(HP_Agent pAgent, DWORD dwFreeSocketObjLockTime);

@@ -3,7 +3,7 @@
 #include "../../Common/Src/socket/SocketInterface.h"
 
 #define USER_INFO_MSG			(WM_USER + 100)
-#define MAX_LOG_RECORD_LENGT	1000
+#define MAX_LOG_RECORD_LENGTH	1000
 
 #define EVT_ON_SEND				_T("OnSend")
 #define EVT_ON_RECEIVE			_T("OnReceive")

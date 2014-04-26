@@ -415,6 +415,8 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 
 		if(rc > 0)
 		{
+			m_iPending -= rc;
+
 			if(FireSend(m_dwConnID, pItem->Ptr(), rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
@@ -487,7 +489,8 @@ void CTcpClient::Reset()
 	m_lsSend.Clear();
 	m_itPool.Clear();
 
-	m_enState = SS_STOPED;
+	m_iPending	= 0;
+	m_enState	= SS_STOPED;
 }
 
 void CTcpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
@@ -507,9 +510,11 @@ void CTcpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
 	}
 }
 
-BOOL CTcpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
+BOOL CTcpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 {
 	ASSERT(pBuffer && iLength > 0);
+
+	if(iOffset != 0) pBuffer += iOffset;
 
 	if(!HasStarted())
 	{
@@ -533,6 +538,8 @@ BOOL CTcpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 		}
 
 		m_lsSend.Cat(pBuffer, iLength);
+		m_iPending += iLength;
+
 		m_evBuffer.Set();
 	}
 

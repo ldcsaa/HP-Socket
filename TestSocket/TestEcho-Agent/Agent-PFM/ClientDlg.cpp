@@ -209,7 +209,7 @@ BOOL CClientDlg::CheckParams()
 	}
 
 	if(!isOK)
-		MessageBox(_T("One of settings is invalid, pls check!"), _T("Params Error"), MB_OK);
+		MessageBox(_T("One or more settings invalid, pls check!"), _T("Params Error"), MB_OK);
 
 	return isOK;
 }
@@ -310,6 +310,8 @@ void CClientDlg::OnBnClickedStart()
 
 	m_sendBuffer.Malloc(m_iDataLen, true);
 	SetAppState(ST_STARTED);
+
+	::LogMsg(_T(" *** Go Now !"));
 
 	m_dwBeginTickCount = ::TimeGetTime();
 

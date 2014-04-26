@@ -29,7 +29,8 @@
 #include <malloc.h>
 
 #include "SocketInterface.h"
-#include"../WaitFor.h"
+#include "../WaitFor.h"
+#include "../bufferpool.h"
 
 /************************************************************************
 名称：Windows Socket 组件初始化类
@@ -60,19 +61,20 @@ private:
 	int		m_iResult;
 };
 
+/* 关闭连接标识 */
 enum EnSocketCloseFlag
 {
-	SCF_NONE	= 0,
-	SCF_CLOSE	= 1,
-	SCF_ERROR	= 2
+	SCF_NONE	= 0,	// 不触发事件
+	SCF_CLOSE	= 1,	// 触发 OnClose 事件
+	SCF_ERROR	= 2		// 触发 OnError 事件
 };
 
 /* 数据缓冲区基础结构 */
 struct TBufferObjBase
 {
 	OVERLAPPED			ov;
-	WSABUF				buff;
 	EnSocketOperation	operation;
+	WSABUF				buff;
 };
 
 /* 数据缓冲区结构 */
@@ -100,6 +102,11 @@ struct TSocketObjBase
 	SOCKADDR_IN	remoteAddr;
 	PVOID		extra;
 	BOOL		valid;
+	CCriSec		crisec;
+	TItemList	sndBuff;
+
+	volatile long	pending;
+	volatile long	sndCount;
 
 	union
 	{
@@ -107,20 +114,42 @@ struct TSocketObjBase
 		DWORD	connTime;
 	};
 
+	TSocketObjBase(CItemPool& itPool)
+	: sndBuff(itPool)
+	{
+
+	}
+
 	static BOOL IsExist(TSocketObjBase* pSocketObj)
 		{return pSocketObj != nullptr;}
 
+	static BOOL IsPending(TSocketObjBase* pSocketObj)
+		{return pSocketObj != nullptr && pSocketObj->pending > 0;}
+
 	static BOOL IsValid(TSocketObjBase* pSocketObj)
-		{return IsExist(pSocketObj) && pSocketObj->valid == TRUE;}
+		{return pSocketObj != nullptr && pSocketObj->valid == TRUE;}
 
 	static void Invalid(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
+		{ASSERT(pSocketObj != nullptr); pSocketObj->valid = FALSE;}
+
+
+	static void Release(TSocketObjBase* pSocketObj)
+	{
+		ASSERT(IsExist(pSocketObj));
+
+		pSocketObj->sndBuff.Release();
+		pSocketObj->freeTime = ::TimeGetTime();
+	}
+
+	int Pending() {return pending;}
 
 	void Reset(CONNID dwConnID)
 	{
-		connID	= dwConnID;
-		valid	= TRUE;
-		extra	= nullptr;
+		connID	 = dwConnID;
+		valid	 = TRUE;
+		extra	 = nullptr;
+		pending	 = 0;
+		sndCount = 0;
 	}
 };
 
@@ -128,7 +157,12 @@ struct TSocketObjBase
 struct TSocketObj : public TSocketObjBase
 {
 	SOCKET		socket;
-	CCriSec		crisec;
+
+	TSocketObj(CItemPool& itPool)
+	: TSocketObjBase(itPool)
+	{
+
+	}
 
 	void Reset(CONNID dwConnID, SOCKET soClient)
 	{
@@ -141,6 +175,12 @@ struct TSocketObj : public TSocketObjBase
 struct TUdpSocketObj : public TSocketObjBase
 {
 	volatile DWORD	detectFails;
+
+	TUdpSocketObj(CItemPool& itPool)
+	: TSocketObjBase(itPool)
+	{
+
+	}
 
 	void Reset(CONNID dwConnID)
 	{
@@ -236,6 +276,34 @@ LPFN_TRANSMITFILE Get_TransmitFile_FuncPtr	(SOCKET sock);
 LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock);
 
 /************************************************************************
+名称：IOCP 指令投递帮助方法
+描述：简化 IOCP 指令投递
+************************************************************************/
+
+/* IOCP 命令 */
+enum EnIocpCommand
+{
+	IOCP_CMD_EXIT		= 0x00000000,	// 退出程序
+	IOCP_CMD_ACCEPT		= 0xFFFFFFF1,	// 接受连接
+	IOCP_CMD_DISCONNECT	= 0xFFFFFFF2,	// 断开连接
+	IOCP_CMD_SEND		= 0xFFFFFFF3	// 发送数据
+};
+
+/* IOCP 命令处理动作 */
+enum EnIocpAction
+{
+	IOCP_ACT_GOON		= 0,	// 继续执行
+	IOCP_ACT_CONTINUE	= 1,	// 重新执行
+	IOCP_ACT_BREAK		= 2		// 中断执行
+};
+
+BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam);
+BOOL PostIocpExit(HANDLE hIOCP);
+BOOL PostIocpAccept(HANDLE hIOCP);
+BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID);
+BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID);
+
+/************************************************************************
 名称：setsockopt() 帮助方法
 描述：简化常用的 setsockopt() 调用
 ************************************************************************/
@@ -261,15 +329,27 @@ int SSO_UDP_ConnReset		(SOCKET sock, BOOL bNewBehavior = TRUE);
 CONNID GenerateConnectionID	();
 /* 关闭 Socket */
 int ManualCloseSocket		(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE, BOOL bReuseAddress = FALSE);
-/* 投递 AccceptEx() */
+/* 投递 AccceptEx()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostAccept				(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj);
-/* 投递 ConnectEx() */
+/* 投递 AccceptEx() */
+int PostAcceptNotCheck		(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj);
+/* 投递 ConnectEx()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostConnect				(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj);
-/* 投递 WSASend() */
+/* 投递 ConnectEx() */
+int PostConnectNotCheck		(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj);
+/* 投递 WSASend()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostSend				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* 投递 WSARecv() */
+/* 投递 WSASend() */
+int PostSendNotCheck		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+/* 投递 WSARecv() ，并把 WSA_IO_PENDING 转换为 NO_ERROR*/
 int PostReceive				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* 投递 WSASendTo() */
+/* 投递 WSARecv() */
+int PostReceiveNotCheck		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+/* 投递 WSASendTo() ，并把 WSA_IO_PENDING 转换为 NO_ERROR*/
 int PostSendTo				(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* 投递 WSARecvFrom() */
+/* 投递 WSASendTo() */
+int PostSendToNotCheck		(SOCKET sock, TUdpBufferObj* pBufferObj);
+/* 投递 WSARecvFrom() ，并把 WSA_IO_PENDING 转换为 NO_ERROR*/
 int PostReceiveFrom			(SOCKET sock, TUdpBufferObj* pBufferObj);
+/* 投递 WSARecvFrom() */
+int PostReceiveFromNotCheck	(SOCKET sock, TUdpBufferObj* pBufferObj);

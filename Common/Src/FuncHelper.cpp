@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.3
+ * Version	: 2.3.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -921,6 +921,7 @@ BOOL TerminateProcessFairily(HANDLE hProcess, DWORD dwWait)
 	return FALSE;
 }
 
+#if _MSC_VER < 1800
 DWORD GetOSVersion()
 {
 	DWORD dwOSVersion = 0;
@@ -929,6 +930,7 @@ DWORD GetOSVersion()
 		dwOSVersion = (vi.dwMajorVersion << 8) + vi.dwMinorVersion;
 	return dwOSVersion;
 }
+#endif
 
 DWORD GetCpuCount()
 {

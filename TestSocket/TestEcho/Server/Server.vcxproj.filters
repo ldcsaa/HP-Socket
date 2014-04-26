@@ -90,6 +90,9 @@
     <ClInclude Include="..\..\..\Common\Src\socket\SocketInterface.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\bufferpool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -117,6 +120,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Common\Src\RWLock.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\bufferpool.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>

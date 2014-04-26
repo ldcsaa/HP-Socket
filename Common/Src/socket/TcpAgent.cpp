@@ -30,13 +30,6 @@
 #include <malloc.h>
 #include <process.h>
 
-#define IOCP_SI_EXIT		0x00000000
-#define IOCP_SI_DISCONNECT	0xFFFFFFF2
-
-#define IOCP_SI_RS_GONO		0
-#define IOCP_SI_RS_CONTINUE	1
-#define IOCP_SI_RS_BREAK	2
-
 LPCTSTR CTcpAgent::DEFAULT_BIND_ADDRESS					= _T("0.0.0.0");
 const DWORD	CTcpAgent::MAX_WORKER_THREAD_COUNT			= 500;
 const DWORD	CTcpAgent::MIN_SOCKET_BUFFER_SIZE			= 64;
@@ -80,6 +73,10 @@ BOOL CTcpAgent::Start(LPCTSTR pszBindAddress, BOOL bAsyncConnect)
 
 BOOL CTcpAgent::CheckParams()
 {
+	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
+	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+
 	if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
 		if((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)
 			if((int)m_dwFreeSocketObjLockTime >= 0 && m_dwFreeSocketObjLockTime <= MAXLONG)
@@ -211,6 +208,7 @@ void CTcpAgent::Reset()
 {
 	m_phSocket.Reset();
 	m_phBuffer.Reset();
+	m_itPool.Clear();
 
 	::ZeroMemory((void*)&m_soAddrIN, sizeof(SOCKADDR_IN));
 
@@ -286,6 +284,7 @@ void CTcpAgent::AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag, EnSo
 	if(bDone)
 	{
 		CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+		TSocketObj::Release(pSocketObj);
 
 		{
 			CReentrantWriteLock locallock(m_csClientSocket);
@@ -293,8 +292,6 @@ void CTcpAgent::AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag, EnSo
 		}
 
 		{
-			pSocketObj->freeTime = ::TimeGetTime();
-
 			CCriSecLock locallock(m_csFreeSocket);
 			m_lsFreeSocket.push_back(pSocketObj);
 		}
@@ -344,7 +341,7 @@ TSocketObj* CTcpAgent::CreateSocketObj()
 	TSocketObj* pSocketObj = (TSocketObj*)m_phSocket.Alloc(sizeof(TSocketObj), HEAP_ZERO_MEMORY);
 	ASSERT(pSocketObj);
 
-	pSocketObj->TSocketObj::TSocketObj();
+	pSocketObj->TSocketObj::TSocketObj(m_itPool);
 	
 	return pSocketObj;
 }
@@ -384,13 +381,16 @@ TBufferObj*	CTcpAgent::GetFreeBufferObj(int iLen)
 
 void CTcpAgent::AddFreeBufferObj(TBufferObj* pBufferObj)
 {
+	if(m_lsFreeBuffer.size() < m_dwFreeBufferObjHold)
 	{
 		CCriSecLock locallock(m_csFreeBuffer);
 		m_lsFreeBuffer.push_back(pBufferObj);
 	}
-
-	if(m_lsFreeBuffer.size() > m_dwFreeBufferObjHold)
+	else
+	{
+		DeleteBufferObj(pBufferObj);
 		CompressFreeBuffer(m_dwFreeBufferObjPool);
+	}
 }
 
 void CTcpAgent::ReleaseFreeBuffer()
@@ -506,6 +506,19 @@ BOOL CTcpAgent::GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra)
 	return FALSE;
 }
 
+BOOL CTcpAgent::GetPendingDataLength(CONNID dwConnID, int& iPending)
+{
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(TSocketObj::IsValid(pSocketObj))
+	{
+		iPending = pSocketObj->Pending();
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 DWORD CTcpAgent::GetConnectionCount()
 {
 	return (DWORD)m_mpClientSocket.size();
@@ -532,7 +545,7 @@ BOOL CTcpAgent::Disconnect(CONNID dwConnID, BOOL bForce)
 	if(TSocketObj::IsValid(pSocketObj))
 	{
 		if(bForce)
-			isOK = ::PostQueuedCompletionStatus(m_hCompletePort, IOCP_SI_DISCONNECT, dwConnID, nullptr);
+			isOK = ::PostIocpDisconnect(m_hCompletePort, dwConnID);
 		else
 			isOK = m_pfnDisconnectEx(pSocketObj->socket, nullptr, 0, 0);
 	}
@@ -579,7 +592,7 @@ void CTcpAgent::WaitForWorkerThreadEnd()
 	int count = (int)m_vtWorkerThreads.size();
 
 	for(int i = 0; i < count; i++)
-		::PostQueuedCompletionStatus(m_hCompletePort, IOCP_SI_EXIT, 0, nullptr);
+		::PostIocpExit(m_hCompletePort);
 
 	int remain	= count;
 	int index	= 0;
@@ -617,7 +630,7 @@ UINT WINAPI CTcpAgent::WorkerThreadProc(LPVOID pv)
 {
 	CTcpAgent* pServer	= (CTcpAgent*)pv;
 
-	while (TRUE)
+	while(TRUE)
 	{
 		DWORD dwErrorCode = NO_ERROR;
 
@@ -636,11 +649,11 @@ UINT WINAPI CTcpAgent::WorkerThreadProc(LPVOID pv)
 
 		if(pOverlapped == nullptr)
 		{
-			int indative = pServer->CheckSpecialIndative(pOverlapped, dwBytes, pSocketObj);
+			EnIocpAction action = pServer->CheckIocpCommand(pOverlapped, dwBytes, (ULONG_PTR)pSocketObj);
 
-			if(indative == IOCP_SI_RS_CONTINUE)
+			if(action == IOCP_ACT_CONTINUE)
 				continue;
-			else if(indative == IOCP_SI_RS_BREAK)
+			else if(action == IOCP_ACT_BREAK)
 				break;
 		}
 
@@ -673,24 +686,29 @@ UINT WINAPI CTcpAgent::WorkerThreadProc(LPVOID pv)
 	return 0;
 }
 
-int CTcpAgent::CheckSpecialIndative(OVERLAPPED* pOverlapped, DWORD dwBytes, TSocketObj* pSocketObj)
+EnIocpAction CTcpAgent::CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey)
 {
-	int indative = 0;
+	EnIocpAction action = IOCP_ACT_GOON;
 
 	if(pOverlapped == nullptr)
 	{
-		if(dwBytes == IOCP_SI_DISCONNECT)
+		if(dwBytes == IOCP_CMD_SEND)
 		{
-			ForceDisconnect((CONNID)pSocketObj);
-			indative = IOCP_SI_RS_CONTINUE;
+			DoSend((CONNID)ulCompKey);
+			action = IOCP_ACT_CONTINUE;
 		}
-		else if(dwBytes == IOCP_SI_EXIT && pSocketObj == nullptr)
-			indative = IOCP_SI_RS_BREAK;
+		else if(dwBytes == IOCP_CMD_DISCONNECT)
+		{
+			ForceDisconnect((CONNID)ulCompKey);
+			action = IOCP_ACT_CONTINUE;
+		}
+		else if(dwBytes == IOCP_CMD_EXIT && ulCompKey == 0)
+			action = IOCP_ACT_BREAK;
 		else
 			VERIFY(FALSE);
 	}
 
-	return indative;
+	return action;
 }
 
 void CTcpAgent::ForceDisconnect(CONNID dwConnID)
@@ -768,6 +786,12 @@ void CTcpAgent::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* 
 	}
 
 	AddFreeBufferObj(pBufferObj);
+
+	if(TSocketObj::IsValid(pSocketObj))
+	{
+		long sndCount = ::InterlockedDecrement(&pSocketObj->sndCount);
+		if(sndCount == 0) DoSend(pSocketObj);
+	}
 }
 
 void CTcpAgent::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
@@ -910,9 +934,11 @@ DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, SOCKET& soClient, LPCTSTR pszR
 	return result;
 }
 
-BOOL CTcpAgent::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
+BOOL CTcpAgent::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset)
 {
 	ASSERT(pBuffer && iLength > 0);
+
+	if(iOffset != 0) pBuffer += iOffset;
 
 	int result				= NO_ERROR;
 	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
@@ -921,44 +947,73 @@ BOOL CTcpAgent::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 		result = ERROR_OBJECT_NOT_FOUND;
 	else
 	{
-		result = DoSend(dwConnID, pSocketObj, pBuffer, iLength);
+		CCriSecLock locallock(pSocketObj->crisec);
 
-		if(result != NO_ERROR)
-			CheckError(dwConnID, SO_SEND, result);
+		if(!TSocketObj::IsValid(pSocketObj))
+			result = ERROR_OBJECT_NOT_FOUND;
+		else
+		{
+			BOOL isPending = TSocketObj::IsPending(pSocketObj);
+			pSocketObj->sndBuff.Cat(pBuffer, iLength);
+			pSocketObj->pending += iLength;
+
+			if(!isPending && !::PostIocpSend(m_hCompletePort, dwConnID))
+				result = ::GetLastError();
+		}
 	}
-		
+
 	if(result != NO_ERROR)
 		::SetLastError(result);
 
 	return (result == NO_ERROR);
 }
 
-int CTcpAgent::DoSend(CONNID dwConnID, TSocketObj* pSocketObj, const BYTE* pBuffer, int iLen)
+BOOL CTcpAgent::DoSend(CONNID dwConnID)
 {
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return DoSend(pSocketObj);
+}
+
+BOOL CTcpAgent::DoSend(TSocketObj* pSocketObj)
+{
+	BOOL isOK	= TRUE;
 	int result	= NO_ERROR;
-	int iRemain	= iLen;
 
-	CCriSecLock locallock(pSocketObj->crisec);
-
-	while(iRemain > 0)
+	if(TSocketObj::IsPending(pSocketObj))
 	{
-		int iBufferSize = min(iRemain, (int)m_dwSocketBufferSize);
-		TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
-		memcpy(pBufferObj->buff.buf, pBuffer, iBufferSize);
+		CCriSecLock locallock(pSocketObj->crisec);
 
-		result = ::PostSend(pSocketObj, pBufferObj);
+		TItemList& sndBuff = pSocketObj->sndBuff;
 
-		if(result != NO_ERROR)
+		while(sndBuff.Size() > 0)
 		{
-			AddFreeBufferObj(pBufferObj);
-			break;
-		}
+			TItemPtr itPtr(m_itPool, sndBuff.PopFront());
 
-		iRemain -= iBufferSize;
-		pBuffer += iBufferSize;
+			int iBufferSize = itPtr->Size();
+			ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwSocketBufferSize);
+
+			TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
+			memcpy(pBufferObj->buff.buf, itPtr->Ptr(), iBufferSize);
+
+			::InterlockedIncrement(&pSocketObj->sndCount);
+			result = ::PostSendNotCheck(pSocketObj, pBufferObj);
+			pSocketObj->pending -= iBufferSize;
+
+			if(result != NO_ERROR)
+			{
+				if(result != WSA_IO_PENDING)
+				{
+					AddFreeBufferObj(pBufferObj);
+					isOK = FALSE;
+				}
+
+				break;
+			}
+		}
 	}
 
-	return result;
+	if(!isOK) CheckError(pSocketObj->connID, SO_SEND, result);
+	return isOK;
 }
 
 void CTcpAgent::CheckError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)

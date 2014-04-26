@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.3
+ * Version	: 2.3.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -117,33 +117,41 @@ inline void	TItem::Reset(int first, int last)
 	if(last >= 0)	end		= head + min(last, capacity);
 }
 
-void TItemList::Cat(const BYTE* pData, int length)
+int TItemList::Cat(const BYTE* pData, int length)
 {
-	while(length > 0)
+	int remain = length;
+
+	while(remain > 0)
 	{
 		TItem* pItem = Back();
 
 		if(pItem == nullptr || pItem->IsFull())
 			pItem = PushBack(itPool.PickFreeItem());
 
-		int cat  = pItem->Cat(pData, length);
+		int cat  = pItem->Cat(pData, remain);
 
 		pData	+= cat;
-		length	-= cat;
+		remain	-= cat;
 	}
+
+	return length;
 }
 
-void TItemList::Cat(const TItem* pItem)
+int TItemList::Cat(const TItem* pItem)
 {
-	Cat(pItem->Ptr(), pItem->Size());
+	return Cat(pItem->Ptr(), pItem->Size());
 }
 
-void TItemList::Cat(const TItemList& other)
+int TItemList::Cat(const TItemList& other)
 {
 	ASSERT(this != &other);
 
+	int length = 0;
+
 	for(TItem* pItem = other.Front(); pItem != nullptr; pItem = pItem->next)
-		Cat(pItem);
+		length += Cat(pItem);
+
+	return length;
 }
 
 int TItemList::Fetch(BYTE* pData, int length)
@@ -181,30 +189,50 @@ int TItemList::Reduce(int length)
 	return length - remain;
 }
 
+void TItemList::Release()
+{
+	itPool.PutFreeItem(*this);
+}
+
 void CItemPool::PutFreeItem(TItem* pItem)
 {
 	ASSERT(pItem != nullptr);
 
+	DWORD size = m_lsFreeItem.Size();
+
+	if(size < m_dwPoolHold)
 	{
 		CCriSecLock locallock(m_csFreeItem);
 		m_lsFreeItem.PushBack(pItem);
 	}
-
-	if((DWORD)m_lsFreeItem.Size() > m_dwPoolHold)
+	else
+	{
+		TItem::Destruct(pItem);
 		CompressFreeItem(m_dwPoolSize);
+	}
 }
 
 void CItemPool::PutFreeItem(TItemList& lsItem)
 {
-	if(lsItem.Size() > 0)
+	DWORD addSize = lsItem.Size();
+
+	if(addSize > 0)
 	{
+		DWORD cacheSize = m_lsFreeItem.Size();
+		DWORD totalSize = addSize + cacheSize;
+
+		if(totalSize <= m_dwPoolHold)
 		{
 			CCriSecLock locallock(m_csFreeItem);
 			m_lsFreeItem.Shift(lsItem);
 		}
+		else
+		{
+			lsItem.Clear();
 
-		if((DWORD)m_lsFreeItem.Size() > m_dwPoolHold)
-			CompressFreeItem(m_dwPoolSize);
+			if(cacheSize >= m_dwPoolHold)
+				CompressFreeItem(m_dwPoolSize);
+		}
 	}
 }
 
@@ -337,14 +365,14 @@ void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 			if(pBuffer->IsValid())
 			{
 				pBuffer->Reset();
-				m_itPool.PutFreeItem(pBuffer->items);
-
 				bOK = TRUE;
 			}
 		}
 
 		if(bOK)
 		{
+			m_itPool.PutFreeItem(pBuffer->items);
+			
 			{
 				CCriSecLock locallock(m_csFreeBuffer);
 				m_lsFreeBuffer.PushBack(pBuffer);

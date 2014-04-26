@@ -178,6 +178,7 @@
     <None Include="res\Server.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Common\Src\bufferpool.h" />
     <ClInclude Include="..\..\..\Common\Src\bufferptr.h" />
     <ClInclude Include="..\..\..\Common\Src\CriticalSection.h" />
     <ClInclude Include="..\..\..\Common\Src\Event.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Common\Src\bufferpool.cpp" />
     <ClCompile Include="..\..\..\Common\Src\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\Common\Src\RWLock.cpp" />
     <ClCompile Include="..\..\..\Common\Src\socket\SocketHelper.cpp" />

@@ -447,10 +447,11 @@ public:
 	* 参数：		dwConnID	-- 连接 ID
 	*			pBuffer		-- 发送数据缓冲区
 	*			iLength		-- 发送数据长度
+	*			iOffset		-- 发送数据缓冲区指针偏移量
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength)		= 0;
+	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0)	= 0;
 
 	/*
 	* 名称：断开连接
@@ -499,22 +500,24 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败（无效的连接 ID）
 	*/
-	virtual BOOL GetConnectionExtra		(CONNID dwConnID, PVOID* ppExtra)		= 0;
+	virtual BOOL GetConnectionExtra			(CONNID dwConnID, PVOID* ppExtra)	= 0;
 
 	/* 检查通信组件是否已启动 */
-	virtual BOOL HasStarted				()										= 0;
+	virtual BOOL HasStarted				()									= 0;
 	/* 查看通信组件当前状态 */
-	virtual EnServiceState GetState		()										= 0;
+	virtual EnServiceState GetState		()									= 0;
 	/* 获取连接数 */
-	virtual DWORD GetConnectionCount	()										= 0;
+	virtual DWORD GetConnectionCount	()									= 0;
 	/* 获取某个连接时长（毫秒） */
-	virtual BOOL GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)				= 0;
+	virtual BOOL GetConnectPeriod	(CONNID dwConnID, DWORD& dwPeriod)		= 0;
 	/* 获取某个连接的远程地址信息 */
-	virtual BOOL GetRemoteAddress(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
+	virtual BOOL GetRemoteAddress	(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
 	/* 获取最近一次失败操作的错误代码 */
-	virtual EnSocketError GetLastError	()										= 0;
+	virtual EnSocketError GetLastError	()									= 0;
 	/* 获取最近一次失败操作的错误描述 */
-	virtual LPCTSTR		GetLastErrorDesc()										= 0;
+	virtual LPCTSTR		GetLastErrorDesc()									= 0;
+	/* 获取连接中未发出数据的长度 */
+	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending)	= 0;
 
 	/* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	= 0;
@@ -688,13 +691,13 @@ public:
 	* 名称：发送数据
 	* 描述：用户通过该方法向服务端发送数据
 	*		
-	* 参数：		dwConnID	-- 连接 ID（保留参数，目前该参数并未使用）
-	*			pBuffer		-- 发送数据缓冲区
+	* 参数：		pBuffer		-- 发送数据缓冲区
 	*			iLength		-- 发送数据长度
+	*			iOffset		-- 发送数据缓冲区指针偏移量
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength)						= 0;
+	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0)						= 0;
 
 public:
 
@@ -713,6 +716,8 @@ public:
 	virtual CONNID			GetConnectionID	()													= 0;
 	/* 获取 Client Socket 的地址信息 */
 	virtual BOOL		GetLocalAddress	(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
+	/* 获取连接中未发出数据的长度 */
+	virtual BOOL GetPendingDataLength	(int& iPending)											= 0;
 
 	/* 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ） */
 	virtual void SetFreeBufferPoolSize		(DWORD dwFreeBufferPoolSize)						= 0;
@@ -723,7 +728,6 @@ public:
 	virtual DWORD GetFreeBufferPoolSize		()													= 0;
 	/* 获取内存块缓存池回收阀值 */
 	virtual DWORD GetFreeBufferPoolHold		()													= 0;
-
 
 public:
 	virtual ~IClient() {}
@@ -811,7 +815,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)								= 0;
+	virtual BOOL Start	(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)					= 0;
 
 	/*
 	* 名称：连接服务器
@@ -823,7 +827,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)						= 0;
+	virtual BOOL Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)			= 0;
 
 public:
 
@@ -831,7 +835,7 @@ public:
 	/***************************** 属性访问方法 *****************************/
 
 	/* 获取某个连接的本地地址信息 */
-	virtual BOOL	GetLocalAddress			(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
+	virtual BOOL GetLocalAddress(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)	= 0;
 };
 
 /************************************************************************

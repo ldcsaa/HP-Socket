@@ -239,6 +239,33 @@ LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam)
+{
+	return ::PostQueuedCompletionStatus(hIOCP, enCmd, ulParam, nullptr);
+}
+
+BOOL PostIocpExit(HANDLE hIOCP)
+{
+	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_EXIT, 0, nullptr);
+}
+
+BOOL PostIocpAccept(HANDLE hIOCP)
+{
+	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_ACCEPT, 0, nullptr);
+}
+
+BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID)
+{
+	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_DISCONNECT, dwConnID, nullptr);
+}
+
+BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID)
+{
+	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_SEND, dwConnID, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int SSO_UpdateAcceptContext(SOCKET soClient, SOCKET soBind)
 {
 	return setsockopt(soClient, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (CHAR*)&soBind, sizeof(SOCKET));
@@ -366,6 +393,16 @@ int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful, BOOL bReus
 
 int PostAccept(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj)
 {
+	int result = PostAcceptNotCheck(pfnAcceptEx, soListen, soClient, pBufferObj);
+
+	if(result == WSA_IO_PENDING)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int PostAcceptNotCheck(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj)
+{
 	int result				= NO_ERROR;
 	pBufferObj->client		= soClient;
 	pBufferObj->operation	= SO_ACCEPT;
@@ -383,14 +420,22 @@ int PostAccept(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBuf
 	)
 	{
 		result = ::WSAGetLastError();
-		if(result == WSA_IO_PENDING)
-			result = NO_ERROR;
 	}
 
 	return result;
 }
 
 int PostConnect(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj)
+{
+	int result = PostConnectNotCheck(pfnConnectEx, soClient, soAddrIN, pBufferObj);
+
+	if(result == WSA_IO_PENDING)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int PostConnectNotCheck(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	pBufferObj->client		= soClient;
@@ -408,14 +453,22 @@ int PostConnect(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAdd
 	)
 	{
 		result = ::WSAGetLastError();
-		if(result == WSA_IO_PENDING)
-			result = NO_ERROR;
 	}
 
 	return result;
 }
 
 int PostSend(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
+{
+	int result = PostSendNotCheck(pSocketObj, pBufferObj);
+
+	if(result == WSA_IO_PENDING)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int PostSendNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	pBufferObj->operation	= SO_SEND;
@@ -432,14 +485,22 @@ int PostSend(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 				) == SOCKET_ERROR)
 	{
 		result = ::WSAGetLastError();
-		if(result == WSA_IO_PENDING)
-			result = NO_ERROR;
 	}
 
 	return result;
 }
 
 int PostReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
+{
+	int result = PostReceiveNotCheck(pSocketObj, pBufferObj);
+
+	if(result == WSA_IO_PENDING)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int PostReceiveNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	pBufferObj->operation	= SO_RECEIVE;
@@ -456,14 +517,22 @@ int PostReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 				) == SOCKET_ERROR)
 	{
 		result = ::WSAGetLastError();
-		if(result == WSA_IO_PENDING)
-			result = NO_ERROR;
 	}
 
 	return result;
 }
 
 int PostSendTo(SOCKET sock, TUdpBufferObj* pBufferObj)
+{
+	int result = PostSendToNotCheck(sock, pBufferObj);
+
+	if(result == WSA_IO_PENDING)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int PostSendToNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	int iAddrLen			= sizeof(SOCKADDR_IN);
@@ -483,14 +552,22 @@ int PostSendTo(SOCKET sock, TUdpBufferObj* pBufferObj)
 					) == SOCKET_ERROR)
 	{
 		result = ::WSAGetLastError();
-		if(result == WSA_IO_PENDING)
-			result = NO_ERROR;
 	}
 
 	return result;
 }
 
 int PostReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
+{
+	int result = PostReceiveFromNotCheck(sock, pBufferObj);
+
+	if(result == WSA_IO_PENDING)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	int iAddrLen			= sizeof(SOCKADDR_IN);
@@ -512,8 +589,6 @@ int PostReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
 					) == SOCKET_ERROR)
 	{
 		result = ::WSAGetLastError();
-		if(result == WSA_IO_PENDING)
-			result = NO_ERROR;
 	}
 
 	return result;

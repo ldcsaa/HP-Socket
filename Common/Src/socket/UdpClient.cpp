@@ -409,6 +409,8 @@ BOOL CUdpClient::SendData()
 			{
 				ASSERT(rc == itPtr->Size());
 
+				m_iPending -= rc;
+
 				if(FireSend(m_dwConnID, itPtr->Ptr(), rc) == HR_ERROR)
 				{
 					TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
@@ -573,6 +575,7 @@ void CUdpClient::Reset()
 	m_lsSend.Clear();
 	m_itPool.Clear();
 
+	m_iPending		= 0;
 	m_dwDetectFails	= 0;
 	m_enState		= SS_STOPED;
 }
@@ -611,9 +614,11 @@ void CUdpClient::WaitForDetectorThreadEnd(DWORD dwCurrentThreadID)
 	}
 }
 
-BOOL CUdpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
+BOOL CUdpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 {
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
+
+	if(iOffset != 0) pBuffer += iOffset;
 
 	if(!HasStarted())
 	{
@@ -640,6 +645,7 @@ BOOL CUdpClient::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 		pItem->Cat(pBuffer, iLength);
 		m_lsSend.PushBack(pItem);
 
+		m_iPending += iLength;
 		m_evBuffer.Set();
 	}
 

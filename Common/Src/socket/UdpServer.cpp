@@ -30,14 +30,6 @@
 #include <malloc.h>
 #include <process.h>
 
-#define IOCP_SI_EXIT		0x00000000
-#define IOCP_SI_ACCEPT		0xFFFFFFF1
-#define IOCP_SI_DISCONNECT	0xFFFFFFF2
-
-#define IOCP_SI_RS_GONO		0
-#define IOCP_SI_RS_CONTINUE	1
-#define IOCP_SI_RS_BREAK	2
-
 const DWORD	CUdpServer::MAX_WORKER_THREAD_COUNT			= 500;
 const DWORD	CUdpServer::DEFAULT_WORKER_THREAD_COUNT		= min((::GetCpuCount() * 2 + 2), MAX_WORKER_THREAD_COUNT);
 const DWORD CUdpServer::DEFAULT_FREE_SOCKETOBJ_LOCK_TIME= 3 * 1000;
@@ -79,6 +71,10 @@ BOOL CUdpServer::Start(LPCTSTR pszBindAddress, USHORT usPort)
 
 BOOL CUdpServer::CheckParams()
 {
+	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
+	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+
 	if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
 		if((int)m_dwFreeSocketObjLockTime >= 0 && m_dwFreeSocketObjLockTime <= MAXLONG)
 			if((int)m_dwFreeSocketObjPool >= 0)
@@ -200,7 +196,7 @@ BOOL CUdpServer::StartAccept()
 		isOK = TRUE;
 
 		for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
-			::PostQueuedCompletionStatus(m_hCompletePort, IOCP_SI_ACCEPT, 0, nullptr);
+			::PostIocpAccept(m_hCompletePort);
 	}
 	else
 		SetLastError(SE_SOCKE_ATTACH_TO_CP, __FUNCTION__, ::GetLastError());
@@ -239,6 +235,7 @@ void CUdpServer::Reset()
 {
 	m_phSocket.Reset();
 	m_phBuffer.Reset();
+	m_itPool.Clear();
 
 	m_enState	= SS_STOPED;
 }
@@ -318,6 +315,7 @@ void CUdpServer::AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag, EnS
 	if(bDone)
 	{
 		CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+		TUdpSocketObj::Release(pSocketObj);
 
 		{
 			CReentrantWriteLock locallock(m_csClientSocket);
@@ -327,8 +325,6 @@ void CUdpServer::AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag, EnS
 		}
 
 		{
-			pSocketObj->freeTime = ::TimeGetTime();
-
 			CCriSecLock locallock(m_csFreeSocket);
 			m_lsFreeSocket.push_back(pSocketObj);
 		}
@@ -380,7 +376,7 @@ TUdpSocketObj* CUdpServer::CreateSocketObj()
 	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)m_phSocket.Alloc(sizeof(TUdpSocketObj), HEAP_ZERO_MEMORY);
 	ASSERT(pSocketObj);
 
-	pSocketObj->TUdpSocketObj::TUdpSocketObj();
+	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_itPool);
 	
 	return pSocketObj;
 }
@@ -420,6 +416,34 @@ TUdpBufferObj*	CUdpServer::GetFreeBufferObj(int iLen)
 
 void CUdpServer::AddFreeBufferObj(TUdpBufferObj* pBufferObj)
 {
+	// ~ 灵异事件 ~
+	// 32 位 Release 版本：当客户端连上服务器时会导致服务器崩溃
+
+	/*
+	if(m_lsFreeBuffer.size() < m_dwFreeBufferObjHold)
+	{
+		CCriSecLock locallock(m_csFreeBuffer);
+		m_lsFreeBuffer.push_back(pBufferObj);
+	}
+	else
+	{
+		DeleteBufferObj(pBufferObj);
+		CompressFreeBuffer(m_dwFreeBufferObjPool);
+	}
+	*/
+
+#if defined(_DEBUG) || defined(_WIN64)
+	if(m_lsFreeBuffer.size() < m_dwFreeBufferObjHold)
+	{
+		CCriSecLock locallock(m_csFreeBuffer);
+		m_lsFreeBuffer.push_back(pBufferObj);
+	}
+	else
+	{
+		DeleteBufferObj(pBufferObj);
+		CompressFreeBuffer(m_dwFreeBufferObjPool);
+	}
+#else
 	{
 		CCriSecLock locallock(m_csFreeBuffer);
 		m_lsFreeBuffer.push_back(pBufferObj);
@@ -427,6 +451,7 @@ void CUdpServer::AddFreeBufferObj(TUdpBufferObj* pBufferObj)
 
 	if(m_lsFreeBuffer.size() > m_dwFreeBufferObjHold)
 		CompressFreeBuffer(m_dwFreeBufferObjPool);
+#endif
 }
 
 void CUdpServer::ReleaseFreeBuffer()
@@ -548,6 +573,19 @@ BOOL CUdpServer::GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra)
 	return FALSE;
 }
 
+BOOL CUdpServer::GetPendingDataLength(CONNID dwConnID, int& iPending)
+{
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(TUdpSocketObj::IsValid(pSocketObj))
+	{
+		iPending = pSocketObj->Pending();
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 DWORD CUdpServer::GetConnectionCount()
 {
 	return (DWORD)m_mpClientSocket.size();
@@ -572,7 +610,7 @@ BOOL CUdpServer::Disconnect(CONNID dwConnID, BOOL bForce)
 	TUdpSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
 	if(TUdpSocketObj::IsValid(pSocketObj))
-		isOK = ::PostQueuedCompletionStatus(m_hCompletePort, IOCP_SI_DISCONNECT, dwConnID, nullptr);
+		isOK = ::PostIocpDisconnect(m_hCompletePort, dwConnID);
 
 	return isOK;
 }
@@ -616,7 +654,7 @@ void CUdpServer::WaitForWorkerThreadEnd()
 	int count = (int)m_vtWorkerThreads.size();
 
 	for(int i = 0; i < count; i++)
-		::PostQueuedCompletionStatus(m_hCompletePort, IOCP_SI_EXIT, 0, nullptr);
+		::PostIocpExit(m_hCompletePort);
 
 	int remain	= count;
 	int index	= 0;
@@ -672,7 +710,7 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 {
 	CUdpServer* pServer	= (CUdpServer*)pv;
 
-	while (TRUE)
+	while(TRUE)
 	{
 		DWORD dwErrorCode = NO_ERROR;
 		DWORD dwBytes;
@@ -690,11 +728,11 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 
 		if(pOverlapped == nullptr)
 		{
-			int indative = pServer->CheckSpecialIndative(pOverlapped, dwBytes, ulCompKey);
+			EnIocpAction action = pServer->CheckIocpCommand(pOverlapped, dwBytes, ulCompKey);
 
-			if(indative == IOCP_SI_RS_CONTINUE)
+			if(action == IOCP_ACT_CONTINUE)
 				continue;
-			else if(indative == IOCP_SI_RS_BREAK)
+			else if(action == IOCP_ACT_BREAK)
 				break;
 		}
 
@@ -726,29 +764,34 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 	return 0;
 }
 
-int CUdpServer::CheckSpecialIndative(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey)
+EnIocpAction CUdpServer::CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey)
 {
-	int indative = IOCP_SI_RS_GONO;
+	EnIocpAction action = IOCP_ACT_GOON;
 
 	if(pOverlapped == nullptr)
 	{
-		if(dwBytes == IOCP_SI_ACCEPT)
+		if(dwBytes == IOCP_CMD_SEND)
+		{
+			DoSend((CONNID)ulCompKey);
+			action = IOCP_ACT_CONTINUE;
+		}
+		else if(dwBytes == IOCP_CMD_ACCEPT)
 		{
 			DoAccept();
-			indative = IOCP_SI_RS_CONTINUE;
+			action = IOCP_ACT_CONTINUE;
 		}
-		else if(dwBytes == IOCP_SI_DISCONNECT)
+		else if(dwBytes == IOCP_CMD_DISCONNECT)
 		{
 			ForceDisconnect((CONNID)ulCompKey);
-			indative = IOCP_SI_RS_CONTINUE;
+			action = IOCP_ACT_CONTINUE;
 		}
-		else if(dwBytes == IOCP_SI_EXIT && ulCompKey == 0)
-			indative = IOCP_SI_RS_BREAK;
+		else if(dwBytes == IOCP_CMD_EXIT && ulCompKey == 0)
+			action = IOCP_ACT_BREAK;
 		else
 			VERIFY(FALSE);
 	}
 
-	return indative;
+	return action;
 }
 
 void CUdpServer::ForceDisconnect(CONNID dwConnID)
@@ -810,36 +853,36 @@ void CUdpServer::HandleZeroBytes(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 		
 		if(dwConnID != 0)
 		{
+			TRACE("<S-CNNID: %Iu> recv 0 bytes (detect package)\n", dwConnID);
+
 			TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
 			if(TUdpSocketObj::IsValid(pSocketObj))
 			{
 				pSocketObj->detectFails = 0;
-				DoSend(pSocketObj, nullptr, 0);
-			}
-			
-			TRACE("<S-CNNID: %Iu> recv 0 bytes (detect package)\n", dwConnID);
+				SendDetectPackage(dwConnID, pSocketObj);
+			}			
 		}
 
 		DoReceive(pBufferObj);
 	}
 	else
-	{
-		ASSERT(dwConnID != 0);
-		TRACE("<S-CNNID: %Iu> send 0 bytes (detect package)\n", dwConnID);
-	}
+		VERIFY(FALSE);
 }
 
 CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 {
-	CONNID dwConnID = 0;
+	CONNID dwConnID = FindConnectionID(&pBufferObj->remoteAddr);
 
+	if(dwConnID == 0)
 	{
 		CCriSecLock locallock(m_csAccept);
 
 		dwConnID = FindConnectionID(&pBufferObj->remoteAddr);
 
-		if(dwConnID == 0)
+		if(dwConnID != 0)
+			return dwConnID;
+		else
 		{
 			dwConnID					= ::GenerateConnectionID();
 			TUdpSocketObj* pSocketObj	= GetFreeSocketObj(dwConnID);
@@ -847,8 +890,6 @@ CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 			memcpy(&pSocketObj->remoteAddr, &pBufferObj->remoteAddr, sizeof(SOCKADDR_IN));
 			AddClientSocketObj(dwConnID, pSocketObj);
 		}
-		else
-			return dwConnID;
 	}
 
 	if(FireAccept(dwConnID, &pBufferObj->remoteAddr) == HR_ERROR)
@@ -869,6 +910,14 @@ void CUdpServer::HandleSend(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 	}
 
 	AddFreeBufferObj(pBufferObj);
+
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(TUdpSocketObj::IsValid(pSocketObj))
+	{
+		long sndCount = ::InterlockedDecrement(&pSocketObj->sndCount);
+		if(sndCount == 0) DoSend(pSocketObj);
+	}
 }
 
 void CUdpServer::HandleReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
@@ -909,9 +958,11 @@ int CUdpServer::DoReceive(TUdpBufferObj* pBufferObj)
 	return result;
 }
 
-BOOL CUdpServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
+BOOL CUdpServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset)
 {
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
+
+	if(iOffset != 0) pBuffer += iOffset;
 
 	if(!pBuffer || iLength <= 0 || iLength > (int)m_dwMaxDatagramSize)
 	{
@@ -919,48 +970,106 @@ BOOL CUdpServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 		return FALSE;
 	}
 
-	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	int result					= NO_ERROR;
+	TUdpSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
-	if(pSocketObj == nullptr)
-	{
-		::SetLastError(ERROR_OBJECT_NOT_FOUND);
-		return FALSE;
-	}
-
-	int result = DoSend(pSocketObj, pBuffer, iLength);
-
-	if(result != NO_ERROR)
-	{
-		::SetLastError(result);
-		return FALSE;
-	}
-	
-	return TRUE;
-}
-
-int CUdpServer::DoSend(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLen)
-{
-	int result = NO_ERROR;
-
-	if(!HasStarted())
-		result = ERROR_INVALID_STATE;
+	if(!TUdpSocketObj::IsValid(pSocketObj))
+		result = ERROR_OBJECT_NOT_FOUND;
 	else
 	{
-		TUdpBufferObj* pBufferObj = GetFreeBufferObj(iLen);
+		CCriSecLock locallock(pSocketObj->crisec);
 
-		memcpy(&pBufferObj->remoteAddr, &pSocketObj->remoteAddr, sizeof(SOCKADDR_IN));
-		memcpy(pBufferObj->buff.buf, pBuffer, iLen);
-
-		result = ::PostSendTo(m_soListen, pBufferObj);
-
-		if(result != NO_ERROR)
+		if(!TUdpSocketObj::IsValid(pSocketObj))
+			result = ERROR_OBJECT_NOT_FOUND;
+		else
 		{
-			VERIFY(!HasStarted());
-			AddFreeBufferObj(pBufferObj);
+			BOOL isPending	= TUdpSocketObj::IsPending(pSocketObj);
+			TItem* pItem	= m_itPool.PickFreeItem();
+
+			pItem->Cat(pBuffer, iLength);
+			pSocketObj->sndBuff.PushBack(pItem);
+			pSocketObj->pending += iLength;
+
+			if(!isPending && !::PostIocpSend(m_hCompletePort, dwConnID))
+				result = ::GetLastError();
 		}
 	}
 
-	return result;
+	if(result != NO_ERROR)
+		::SetLastError(result);
+
+	return (result == NO_ERROR);
+}
+
+BOOL CUdpServer::DoSend(CONNID dwConnID)
+{
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return DoSend(pSocketObj);
+}
+
+BOOL CUdpServer::DoSend(TUdpSocketObj* pSocketObj)
+{
+	BOOL isOK	= TRUE;
+	int result	= NO_ERROR;
+
+	if(TUdpSocketObj::IsPending(pSocketObj))
+	{
+		CCriSecLock locallock(pSocketObj->crisec);
+
+		TItemList& sndBuff = pSocketObj->sndBuff;
+
+		while(sndBuff.Size() > 0)
+		{
+			TItemPtr itPtr(m_itPool, sndBuff.PopFront());
+
+			int iBufferSize = itPtr->Size();
+			ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwMaxDatagramSize);
+
+			TUdpBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
+
+			memcpy(&pBufferObj->remoteAddr, &pSocketObj->remoteAddr, sizeof(SOCKADDR_IN));
+			memcpy(pBufferObj->buff.buf, itPtr->Ptr(), iBufferSize);
+
+			::InterlockedIncrement(&pSocketObj->sndCount);
+			result = ::PostSendToNotCheck(m_soListen, pBufferObj);
+			pSocketObj->pending -= iBufferSize;
+
+			if(result != NO_ERROR)
+			{
+				if(result != WSA_IO_PENDING)
+				{
+					AddFreeBufferObj(pBufferObj);
+					isOK = FALSE;
+				}
+
+				break;
+			}
+		}
+	}
+	
+	return isOK;
+}
+
+BOOL CUdpServer::SendDetectPackage(CONNID dwConnID, TUdpSocketObj* pSocketObj)
+{
+	BOOL isOK = TRUE;
+
+	if(!HasStarted())
+		isOK = FALSE;
+	else
+	{
+		int rc = sendto(m_soListen, nullptr, 0, 0, (sockaddr*)&pSocketObj->remoteAddr, sizeof(SOCKADDR_IN));
+
+		if(rc == SOCKET_ERROR && ::WSAGetLastError() != WSAEWOULDBLOCK)
+			isOK = FALSE;
+
+		if(isOK)
+			TRACE("<S-CNNID: %Iu> send 0 bytes (detect package)\n", dwConnID);
+		else
+			VERIFY(!HasStarted());
+	}
+
+	return isOK;
 }
 
 UINT WINAPI CUdpServer::DetecotrThreadProc(LPVOID pv)
@@ -995,7 +1104,7 @@ void CUdpServer::DetectConnections()
 	for(TUdpSocketObjPtrMapCI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
 	{
 		if(it->second->detectFails++ >= m_dwDetectAttempts)
-			::PostQueuedCompletionStatus(m_hCompletePort, IOCP_SI_DISCONNECT, it->first, nullptr);
+			::PostIocpDisconnect(m_hCompletePort, it->first);
 	}
 
 }

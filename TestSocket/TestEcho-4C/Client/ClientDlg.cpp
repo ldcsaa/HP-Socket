@@ -170,7 +170,7 @@ void CClientDlg::OnBnClickedSend()
 
 	smart_simple_ptr<CBufferPtr> buffer = ::GeneratePkgBuffer(++SEQ, _T("ÉËÉñÐ¡¹ÖÊÞ"), 23, strContent);
 
-	if(::HP_Client_Send(m_spClient, ::HP_Client_GetConnectionID(m_spClient), buffer->Ptr(), (int)buffer->Size()))
+	if(::HP_Client_Send(m_spClient, buffer->Ptr(), (int)buffer->Size()))
 		::LogSend(::HP_Client_GetConnectionID(m_spClient), strContent);
 	else
 		::LogSendFail(::HP_Client_GetConnectionID(m_spClient), ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(HP_SE_DATA_SEND));

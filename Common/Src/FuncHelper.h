@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.3
+ * Version	: 2.3.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -158,8 +158,11 @@ void WriteLog(LPCTSTR pszLogFileName, LPCTSTR pszLog);
 	CString GetIniString(LPCTSTR lpAppName, LPCTSTR lpKeyName, LPCTSTR lpFileName, DWORD dwSize);
 #endif
 
+#if _MSC_VER < 1800
 	// 获取操作系统版本
 	DWORD	GetOSVersion();
+#endif
+
 	// 获取 CPU 数量
 	DWORD	GetCpuCount();
 

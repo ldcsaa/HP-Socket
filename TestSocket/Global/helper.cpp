@@ -327,7 +327,7 @@ void LogMsg(const CString& msg)
 
 	g_pInfoList->SetRedraw(FALSE);
 
-	if(iCount > MAX_LOG_RECORD_LENGT)
+	if(iCount > MAX_LOG_RECORD_LENGTH)
 		g_pInfoList->DeleteString(0);
 
 	g_pInfoList->AddString(msg);

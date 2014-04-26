@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.3
+ * Version	: 2.3.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -29,30 +29,51 @@
 class CSWMR
 {
 public:
-	VOID WaitToRead();			// Call this to gain shared read access
-	VOID WaitToWrite();			// Call this to gain exclusive write access
-	VOID ReadDone()  {Done();}	// Call this when done reading the resource
-	VOID WriteDone() {Done();}	// Call this when done writing the resource
+	VOID WaitToRead();
+	VOID WaitToWrite();
+	VOID ReadDone()  {Done();}
+	VOID WriteDone() {Done();}
 
 private:
-	VOID Done();				// Call this when done accessing the resource
+	VOID Done();
 
 public:
-	CSWMR();					// Constructor
-	~CSWMR();					// Destructor
+	CSWMR();
+	~CSWMR();
 
 private:
 	CSWMR(const CSWMR&);
 	CSWMR operator = (const CSWMR&);
 
 private:
-	CRITICAL_SECTION m_cs;		// Permits exclusive access to other members
-	HANDLE m_hsemReaders;		// Readers wait on this if a writer has access
-	HANDLE m_hsemWriters;		// Writers wait on this if a reader has access
-	int m_nWaitingReaders;		// Number of readers waiting for access
-	int m_nWaitingWriters;		// Number of writers waiting for access
-	int m_nActive;				// Number of threads currently with access
-								//	(0=no threads, >0=# of readers, -1=1 writer)
+	CRITICAL_SECTION m_cs;
+	HANDLE m_hsemReaders;
+	HANDLE m_hsemWriters;
+	int m_nWaitingReaders;
+	int m_nWaitingWriters;
+	int m_nActive;
+};
+
+class CSlimLock
+{
+public:
+	VOID WaitToRead()		{::AcquireSRWLockShared(&m_lock);}
+	VOID WaitToWrite()		{::AcquireSRWLockExclusive(&m_lock);}
+	VOID ReadDone()			{::ReleaseSRWLockShared(&m_lock);}
+	VOID WriteDone()		{::ReleaseSRWLockExclusive(&m_lock);}
+	BOOL TryWaitToRead()	{return ::TryAcquireSRWLockShared(&m_lock);}
+	BOOL TryWaitToWrite()	{return ::TryAcquireSRWLockExclusive(&m_lock);}
+
+public:
+	CSlimLock()		{::InitializeSRWLock(&m_lock);}
+	~CSlimLock()	{}
+
+private:
+	CSlimLock(const CSlimLock&);
+	CSlimLock operator = (const CSlimLock&);
+
+private:
+	SRWLOCK m_lock;
 };
 
 class CRWLock
@@ -113,7 +134,13 @@ private:
 	CLockObj& m_wait;
 };
 
-typedef CLocalReadLock<CSWMR>		CReadLock;
-typedef CLocalWriteLock<CSWMR>		CWriteLock;
-typedef CLocalReadLock<CRWLock>		CReentrantReadLock;
-typedef CLocalWriteLock<CRWLock>	CReentrantWriteLock;
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
+	typedef CSlimLock	CSimpleRWLock;
+#else
+	typedef CSWMR		CSimpleRWLock;
+#endif
+
+typedef CLocalReadLock<CSimpleRWLock>	CReadLock;
+typedef CLocalWriteLock<CSimpleRWLock>	CWriteLock;
+typedef CLocalReadLock<CRWLock>			CReentrantReadLock;
+typedef CLocalWriteLock<CRWLock>		CReentrantWriteLock;

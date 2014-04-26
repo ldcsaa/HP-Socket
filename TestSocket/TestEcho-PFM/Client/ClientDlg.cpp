@@ -207,7 +207,7 @@ BOOL CClientDlg::CheckParams()
 	}
 
 	if(!isOK)
-		MessageBox(_T("One of settings is invalid, pls check!"), _T("Params Error"), MB_OK);
+		MessageBox(_T("One or more settings invalid, pls check!"), _T("Params Error"), MB_OK);
 
 	return isOK;
 }
@@ -278,6 +278,8 @@ void CClientDlg::OnBnClickedStart()
 	m_sendBuffer.Malloc(m_iDataLen, true);
 	SetAppState(ST_STARTED);
 
+	::LogMsg(_T(" *** Go Now !"));
+
 	m_dwBeginTickCount = ::TimeGetTime();
 
 	BOOL bTerminated = FALSE;
@@ -286,7 +288,7 @@ void CClientDlg::OnBnClickedStart()
 		for(int j = 0; j < m_iThreadCount; j++)
 		{
 			CTcpClientWrapper* pSocket = m_vtClients[j];
-			if(!(*pSocket)->Send((*pSocket)->GetConnectionID(), m_sendBuffer, (int)m_sendBuffer.Size()))
+			if(!(*pSocket)->Send(m_sendBuffer, (int)m_sendBuffer.Size()))
 			{
 				::LogClientSendFail(i + 1, j + 1, ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(SE_DATA_SEND));
 				bTerminated = TRUE;

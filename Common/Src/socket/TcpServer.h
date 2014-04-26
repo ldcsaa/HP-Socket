@@ -88,7 +88,7 @@ public:
 public:
 	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort);
 	virtual BOOL Stop	();
-	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength);
+	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			HasStarted					()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState					()	{return m_enState;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);
@@ -96,9 +96,10 @@ public:
 	virtual BOOL			GetListenAddress			(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 	
-	virtual DWORD	GetConnectionCount	();
-	virtual BOOL	GetConnectPeriod	(CONNID dwConnID, DWORD& dwPeriod);
-	virtual EnSocketError	GetLastError()	{return m_enLastError;}
+	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
+	virtual DWORD GetConnectionCount	();
+	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod);
+	virtual EnSocketError GetLastError	()	{return m_enLastError;}
 	virtual LPCTSTR	GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
@@ -191,7 +192,7 @@ private:
 private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
-	int CheckSpecialIndative(OVERLAPPED* pOverlapped, DWORD dwBytes, TSocketObj* pSocketObj);
+	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 	void ForceDisconnect	(CONNID dwConnID);
 	void HandleIo			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
 	void HandleError		(CONNID dwConnID, TBufferObj* pBufferObj, DWORD dwErrorCode);
@@ -200,7 +201,8 @@ private:
 	void HandleReceive		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
 	BOOL DoAccept		();
-	int DoSend			(CONNID dwConnID, TSocketObj* pSocketObj, const BYTE* pBuffer, int iLen);
+	BOOL DoSend			(CONNID dwConnID);
+	BOOL DoSend			(TSocketObj* pSocketObj);
 	int DoReceive		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
 	void CheckError	(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
@@ -212,6 +214,7 @@ private:
 	LPFN_DISCONNECTEX			m_pfnDisconnectEx;
 
 private:
+	CItemPool			m_itPool;
 	CPrivateHeap		m_phSocket;
 	CPrivateHeap		m_phBuffer;
 

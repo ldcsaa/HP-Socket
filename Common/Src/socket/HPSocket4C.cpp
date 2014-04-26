@@ -81,11 +81,13 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetLastErrorDesc=_HP_Agent_GetLastErrorDesc@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetLocalAddress=_HP_Agent_GetLocalAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetMaxShutdownWaitTime=_HP_Agent_GetMaxShutdownWaitTime@4")
+	#pragma comment(linker, "/EXPORT:HP_Agent_GetPendingDataLength=_HP_Agent_GetPendingDataLength@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetRemoteAddress=_HP_Agent_GetRemoteAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetState=_HP_Agent_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetWorkerThreadCount=_HP_Agent_GetWorkerThreadCount@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_HasStarted=_HP_Agent_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Send=_HP_Agent_Send@16")
+	#pragma comment(linker, "/EXPORT:HP_Agent_SendPart=_HP_Agent_SendPart@20")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetConnectionExtra=_HP_Agent_SetConnectionExtra@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetFreeBufferObjHold=_HP_Agent_SetFreeBufferObjHold@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetFreeBufferObjPool=_HP_Agent_SetFreeBufferObjPool@8")
@@ -102,9 +104,11 @@
 	#pragma comment(linker, "/EXPORT:HP_Client_GetLastError=_HP_Client_GetLastError@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetLastErrorDesc=_HP_Client_GetLastErrorDesc@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetLocalAddress=_HP_Client_GetLocalAddress@16")
+	#pragma comment(linker, "/EXPORT:HP_Client_GetPendingDataLength=_HP_Client_GetPendingDataLength@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetState=_HP_Client_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_HasStarted=_HP_Client_HasStarted@4")
-	#pragma comment(linker, "/EXPORT:HP_Client_Send=_HP_Client_Send@16")
+	#pragma comment(linker, "/EXPORT:HP_Client_Send=_HP_Client_Send@12")
+	#pragma comment(linker, "/EXPORT:HP_Client_SendPart=_HP_Client_SendPart@16")
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolHold=_HP_Client_SetFreeBufferPoolHold@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolSize=_HP_Client_SetFreeBufferPoolSize@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_Start=_HP_Client_Start@16")
@@ -124,11 +128,13 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_GetLastErrorDesc=_HP_Server_GetLastErrorDesc@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetListenAddress=_HP_Server_GetListenAddress@16")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetMaxShutdownWaitTime=_HP_Server_GetMaxShutdownWaitTime@4")
+	#pragma comment(linker, "/EXPORT:HP_Server_GetPendingDataLength=_HP_Server_GetPendingDataLength@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetRemoteAddress=_HP_Server_GetRemoteAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetState=_HP_Server_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetWorkerThreadCount=_HP_Server_GetWorkerThreadCount@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_HasStarted=_HP_Server_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_Send=_HP_Server_Send@16")
+	#pragma comment(linker, "/EXPORT:HP_Server_SendPart=_HP_Server_SendPart@20")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetConnectionExtra=_HP_Server_SetConnectionExtra@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetFreeBufferObjHold=_HP_Server_SetFreeBufferObjHold@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetFreeBufferObjPool=_HP_Server_SetFreeBufferObjPool@8")
@@ -811,6 +817,11 @@ HPSOCKET_API BOOL __stdcall HP_Server_Send(HP_Server pServer, HP_CONNID dwConnID
 	return C_HP_Object::ToServer(pServer)->Send(dwConnID, pBuffer, iLength);
 }
 
+HPSOCKET_API BOOL __stdcall HP_Server_SendPart(HP_Server pServer, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset)
+{
+	return C_HP_Object::ToServer(pServer)->Send(dwConnID, pBuffer, iLength, iOffset);
+}
+
 HPSOCKET_API BOOL __stdcall HP_Server_Disconnect(HP_Server pServer, HP_CONNID dwConnID, BOOL bForce)
 {
 	return C_HP_Object::ToServer(pServer)->Disconnect(dwConnID, bForce);
@@ -852,6 +863,11 @@ HPSOCKET_API En_HP_SocketError __stdcall HP_Server_GetLastError(HP_Server pServe
 HPSOCKET_API LPCTSTR __stdcall HP_Server_GetLastErrorDesc(HP_Server pServer)
 {
 	return C_HP_Object::ToServer(pServer)->GetLastErrorDesc();
+}
+
+HPSOCKET_API BOOL __stdcall HP_Server_GetPendingDataLength(HP_Server pServer, HP_CONNID dwConnID, int* piPending)
+{
+	return C_HP_Object::ToServer(pServer)->GetPendingDataLength(dwConnID, *piPending);
 }
 
 HPSOCKET_API DWORD __stdcall HP_Server_GetConnectionCount(HP_Server pServer)
@@ -1043,9 +1059,14 @@ HPSOCKET_API BOOL __stdcall HP_Client_Stop(HP_Client pClient)
 	return C_HP_Object::ToClient(pClient)->Stop();
 }
 
-HPSOCKET_API BOOL __stdcall HP_Client_Send(HP_Client pClient, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength)
+HPSOCKET_API BOOL __stdcall HP_Client_Send(HP_Client pClient, const BYTE* pBuffer, int iLength)
 {
-	return C_HP_Object::ToClient(pClient)->Send(dwConnID, pBuffer, iLength);
+	return C_HP_Object::ToClient(pClient)->Send(pBuffer, iLength);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_SendPart(HP_Client pClient, const BYTE* pBuffer, int iLength, int iOffset)
+{
+	return C_HP_Object::ToClient(pClient)->Send(pBuffer, iLength, iOffset);
 }
 
 /******************************************************************************/
@@ -1079,6 +1100,11 @@ HPSOCKET_API HP_CONNID __stdcall HP_Client_GetConnectionID(HP_Client pClient)
 HPSOCKET_API BOOL __stdcall HP_Client_GetLocalAddress(HP_Client pClient, LPTSTR lpszAddress, int* piAddressLen, USHORT* pusPort)
 {
 	return C_HP_Object::ToClient(pClient)->GetLocalAddress(lpszAddress, *piAddressLen, *pusPort);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_GetPendingDataLength(HP_Client pClient, int* piPending)
+{
+	return C_HP_Object::ToClient(pClient)->GetPendingDataLength(*piPending);
 }
 
 HPSOCKET_API void __stdcall HP_Client_SetFreeBufferPoolSize(HP_Client pClient, DWORD dwFreeBufferPoolSize)
@@ -1190,6 +1216,11 @@ HPSOCKET_API BOOL __stdcall HP_Agent_Send(HP_Agent pAgent, HP_CONNID dwConnID, c
 	return C_HP_Object::ToAgent(pAgent)->Send(dwConnID, pBuffer, iLength);
 }
 
+HPSOCKET_API BOOL __stdcall HP_Agent_SendPart(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset)
+{
+	return C_HP_Object::ToAgent(pAgent)->Send(dwConnID, pBuffer, iLength, iOffset);
+}
+
 HPSOCKET_API BOOL __stdcall HP_Agent_Disconnect(HP_Agent pAgent, HP_CONNID dwConnID, BOOL bForce)
 {
 	return C_HP_Object::ToAgent(pAgent)->Disconnect(dwConnID, bForce);
@@ -1231,6 +1262,11 @@ HPSOCKET_API En_HP_SocketError __stdcall HP_Agent_GetLastError(HP_Agent pAgent)
 HPSOCKET_API LPCTSTR __stdcall HP_Agent_GetLastErrorDesc(HP_Agent pAgent)
 {
 	return C_HP_Object::ToAgent(pAgent)->GetLastErrorDesc();
+}
+
+HPSOCKET_API BOOL __stdcall HP_Agent_GetPendingDataLength(HP_Agent pAgent, HP_CONNID dwConnID, int* piPending)
+{
+	return C_HP_Object::ToAgent(pAgent)->GetPendingDataLength(dwConnID, *piPending);
 }
 
 HPSOCKET_API DWORD __stdcall HP_Agent_GetConnectionCount(HP_Agent pAgent)

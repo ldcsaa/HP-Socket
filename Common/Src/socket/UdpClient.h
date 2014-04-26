@@ -35,13 +35,14 @@ class CUdpClient : public IUdpClient
 public:
 	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPortt, BOOL bAsyncConnect = FALSE);
 	virtual BOOL Stop	();
-	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength);
-	virtual BOOL			HasStarted		()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
-	virtual EnServiceState	GetState		()	{return m_enState;}
-	virtual CONNID			GetConnectionID	()	{return m_dwConnID;};
-	virtual BOOL			GetLocalAddress	(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
-	virtual EnSocketError	GetLastError	()	{return m_enLastError;}
-	virtual LPCTSTR			GetLastErrorDesc()	{return ::GetSocketErrorDesc(m_enLastError);}
+	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
+	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
+	virtual EnServiceState	GetState			()	{return m_enState;}
+	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
+	virtual BOOL			GetLocalAddress		(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
+	virtual BOOL GetPendingDataLength			(int& iPending) {iPending = m_iPending; return HasStarted();}
+	virtual EnSocketError	GetLastError		()	{return m_enLastError;}
+	virtual LPCTSTR			GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	{m_dwMaxDatagramSize = dwMaxDatagramSize;}
@@ -137,6 +138,7 @@ public:
 	, m_hDetector			(nullptr)
 	, m_dwDetectorID		(0)
 	, m_bAsyncConnect		(FALSE)
+	, m_iPending			(0)
 	, m_enState				(SS_STOPED)
 	, m_enLastError			(SE_OK)
 	, m_dwDetectFails		(0)
@@ -187,6 +189,7 @@ private:
 	TItemList		m_lsSend;
 	CBufferPtr		m_rcBuffer;
 
+	int						m_iPending;
 	volatile EnServiceState	m_enState;
 	volatile EnSocketError	m_enLastError;
 	volatile DWORD			m_dwDetectFails;

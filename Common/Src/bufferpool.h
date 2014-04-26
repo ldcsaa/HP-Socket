@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.3
+ * Version	: 2.3.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -256,11 +256,12 @@ private:
 struct TItemList : public TSimpleList<TItem>
 {
 public:
-	void Cat	(const BYTE* pData, int length);
-	void Cat	(const TItem* pItem);
-	void Cat	(const TItemList& other);
+	int Cat		(const BYTE* pData, int length);
+	int Cat		(const TItem* pItem);
+	int Cat		(const TItemList& other);
 	int Fetch	(BYTE* pData, int length);
 	int Reduce	(int length);
+	void Release();
 
 public:
 	TItemList(CItemPool& pool) : itPool(pool)
@@ -269,6 +270,121 @@ public:
 
 private:
 	CItemPool& itPool;
+};
+
+struct TItemListEx : public TItemList
+{
+public:
+	TItem* PushFront(TItem* pItem)
+	{
+		length += pItem->Size();
+		return __super::PushFront(pItem);
+	}
+
+	TItem* PushBack(TItem* pItem)
+	{
+		length += pItem->Size();
+		return __super::PushBack(pItem);
+	}
+
+	TItem* PopFront()
+	{
+		TItem* pItem = __super::PopFront();
+
+		if(pItem != nullptr)
+			length -= pItem->Size();
+
+		return pItem;
+	}
+
+	TItem* PopBack()
+	{
+		TItem* pItem = __super::PopBack();
+
+		if(pItem != nullptr)
+			length -= pItem->Size();
+
+		return pItem;
+	}
+
+	TItemListEx& Shift(TItemListEx& other)
+	{
+		length += other.length;
+		__super::Shift(other);
+		other.length = 0;
+
+		return *this;
+	}
+
+	void Clear()
+	{
+		__super::Clear();
+		length = 0;
+	}
+
+	void Release()
+	{
+		__super::Release();
+		length = 0;
+	}
+
+public:
+	int Cat(const BYTE* pData, int length)
+	{
+		int cat = __super::Cat(pData, length);
+		this->length += cat;
+
+		return cat;
+	}
+
+	int Cat(const TItem* pItem)
+	{
+		int cat = __super::Cat(pItem->Ptr(), pItem->Size());
+		this->length += cat;
+
+		return cat;
+	}
+
+	int Cat(const TItemList& other)
+	{
+		int cat = __super::Cat(other);
+		this->length += cat;
+
+		return cat;
+	}
+
+	int Fetch(BYTE* pData, int length)
+	{
+		int fetch	= __super::Fetch(pData, length);
+		this->length -= fetch;
+
+		return fetch;
+	}
+
+	int Reduce(int length)
+	{
+		int reduce	= __super::Reduce(length);
+		this->length -= reduce;
+
+		return reduce;
+	}
+	
+	int Length() const {return length;}
+
+public:
+	TItemListEx(CItemPool& pool) : TItemList(pool), length(0)
+	{
+	}
+
+	~TItemListEx()
+	{
+		ASSERT(length >= 0);
+	}
+
+	DECLARE_NO_COPY_CLASS(TItemListEx)
+
+private:
+	int length;
 };
 
 class CItemPool

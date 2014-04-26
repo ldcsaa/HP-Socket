@@ -153,7 +153,7 @@ void CClientDlg::OnBnClickedSend()
 	LPSTR lpszContent = T2A((LPTSTR)(LPCTSTR)strContent);
 	int iLen = (int)strlen(lpszContent);
 
-	if(m_Client.Send(m_Client.GetConnectionID(), (LPBYTE)lpszContent, iLen))
+	if(m_Client.Send((LPBYTE)lpszContent, iLen))
 		::LogSend(m_Client.GetConnectionID(), strContent);
 	else
 		::LogSendFail(m_Client.GetConnectionID(), ::GetLastError(), ::GetSocketErrorDesc(SE_DATA_SEND));

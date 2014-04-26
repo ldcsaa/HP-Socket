@@ -81,7 +81,7 @@ public:
 public:
 	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort);
 	virtual BOOL Stop	();
-	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength);
+	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			HasStarted					()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState					()	{return m_enState;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);
@@ -89,10 +89,11 @@ public:
 	virtual BOOL			GetListenAddress			(LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 
-	virtual DWORD	GetConnectionCount	();
-	virtual BOOL	GetConnectPeriod	(CONNID dwConnID, DWORD& dwPeriod);
-	virtual EnSocketError	GetLastError()	{return m_enLastError;}
-	virtual LPCTSTR	GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
+	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
+	virtual DWORD GetConnectionCount	();
+	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod);
+	virtual EnSocketError GetLastError	()	{return m_enLastError;}
+	virtual LPCTSTR GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
@@ -141,6 +142,10 @@ protected:
 	virtual BOOL CheckParams();
 
 private:
+	static UINT WINAPI WorkerThreadProc(LPVOID pv);
+	static UINT WINAPI DetecotrThreadProc(LPVOID pv);
+
+private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
 	BOOL CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort);
@@ -182,10 +187,7 @@ private:
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 
 private:
-	static UINT WINAPI WorkerThreadProc(LPVOID pv);
-	static UINT WINAPI DetecotrThreadProc(LPVOID pv);
-
-	int CheckSpecialIndative(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
+	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 	void ForceDisconnect	(CONNID dwConnID);
 	void HandleIo			(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
 	void HandleError		(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD dwErrorCode);
@@ -194,16 +196,19 @@ private:
 	void HandleSend			(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 	void HandleReceive		(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 	BOOL DoAccept			();
-	int DoSend				(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLen);
+	BOOL DoSend				(CONNID dwConnID);
+	BOOL DoSend				(TUdpSocketObj* pSocketObj);
 	int DoReceive			(TUdpBufferObj* pBufferObj);
 
 	void DetectConnections	();
+	BOOL SendDetectPackage	(CONNID dwConnID, TUdpSocketObj* pSocketObj);
 	BOOL NeedDetectorThread	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
 
 private:
 	CInitSocket			m_wsSocket;
 
 private:
+	CItemPool			m_itPool;
 	CPrivateHeap		m_phSocket;
 	CPrivateHeap		m_phBuffer;
 
