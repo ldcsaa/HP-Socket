@@ -1031,8 +1031,9 @@ BOOL CUdpServer::DoSend(TUdpSocketObj* pSocketObj)
 			memcpy(pBufferObj->buff.buf, itPtr->Ptr(), iBufferSize);
 
 			::InterlockedIncrement(&pSocketObj->sndCount);
-			result = ::PostSendToNotCheck(m_soListen, pBufferObj);
 			pSocketObj->pending -= iBufferSize;
+
+			result = ::PostSendToNotCheck(m_soListen, pBufferObj);
 
 			if(result != NO_ERROR)
 			{

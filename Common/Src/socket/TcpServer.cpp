@@ -980,8 +980,9 @@ BOOL CTcpServer::DoSend(TSocketObj* pSocketObj)
 			memcpy(pBufferObj->buff.buf, itPtr->Ptr(), iBufferSize);
 
 			::InterlockedIncrement(&pSocketObj->sndCount);
-			result = ::PostSendNotCheck(pSocketObj, pBufferObj);
 			pSocketObj->pending -= iBufferSize;
+
+			result = ::PostSendNotCheck(pSocketObj, pBufferObj);
 
 			if(result != NO_ERROR)
 			{
