@@ -24,8 +24,8 @@
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
-const USHORT CServerDlg::PORT		= 5555;
+#define DEFAULT_ADDRESS	_T("0.0.0.0")
+#define DEFAULT_PORT	_T("5555")
 
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(CServerDlg::IDD, pParent), m_Server(this)
@@ -40,6 +40,8 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_INFO, m_Info);
 	DDX_Control(pDX, IDC_START, m_Start);
 	DDX_Control(pDX, IDC_STOP, m_Stop);
+	DDX_Control(pDX, IDC_PORT, m_Port);
+	DDX_Control(pDX, IDC_SEND_POLICY, m_SendPolicy);
 }
 
 BEGIN_MESSAGE_MAP(CServerDlg, CDialogEx)
@@ -68,9 +70,8 @@ BOOL CServerDlg::OnInitDialog()
 
 	CString strTitle;
 	CString strOriginTitle;
-	GetWindowText(strOriginTitle);
-	strTitle.Format(_T("%s - (%s:%d)"), strOriginTitle, ADDRESS, PORT);
-	SetWindowText(strTitle);
+	m_SendPolicy.SetCurSel(0);
+	m_Port.SetWindowText(DEFAULT_PORT);
 
 	::SetMainWnd(this);
 	::SetInfoList(&m_Info);
@@ -154,12 +155,28 @@ void CServerDlg::SetAppState(EnAppState state)
 
 	m_Start.EnableWindow(m_enState == ST_STOPED);
 	m_Stop.EnableWindow(m_enState == ST_STARTED);
+	m_Port.EnableWindow(m_enState == ST_STOPED);
+	m_SendPolicy.EnableWindow(m_enState == ST_STOPED);
 }
 
 void CServerDlg::OnBnClickedStart()
 {
-	Reset();
+	CString strPort;
+	m_Port.GetWindowText(strPort);
+	USHORT usPort = (USHORT)_ttoi(strPort);
+
+	if(usPort == 0)
+	{
+		MessageBox(_T("Listen Port invalid, pls check!"), _T("Params Error"), MB_OK);
+		m_Port.SetFocus();
+		return;
+	}
+
+	EnSendPolicy enPolicy = (EnSendPolicy)m_SendPolicy.GetCurSel();
+
 	SetAppState(ST_STARTING);
+
+	Reset();
 
 	//m_Server->SetFreeSocketObjPool(500);
 	//m_Server->SetFreeSocketObjHold(1500);
@@ -167,9 +184,11 @@ void CServerDlg::OnBnClickedStart()
 	//m_Server->SetFreeBufferObjHold(6000);
 	//m_Server->SetAcceptSocketCount(50);
 
-	if(m_Server->Start(ADDRESS, PORT))
+	m_Server->SetSendPolicy(enPolicy);
+
+	if(m_Server->Start(DEFAULT_ADDRESS, usPort))
 	{
-		::LogServerStart(ADDRESS, PORT);
+		::LogServerStart(DEFAULT_ADDRESS, usPort);
 		SetAppState(ST_STARTED);
 	}
 	else

@@ -78,9 +78,6 @@
     <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\FuncHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Common\Src\socket\UdpClient.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -91,6 +88,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Common\Src\RWLock.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\SysHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -113,9 +113,6 @@
     <ClCompile Include="..\..\..\Common\Src\socket\SocketHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\FuncHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Common\Src\socket\UdpClient.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -123,6 +120,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Common\Src\RWLock.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>

@@ -62,5 +62,5 @@ private:
 	CONNID m_dwConnID;
 
 	TPkgInfo m_pkgInfo;
-	CTcpPullAgentWrapper m_Agent;
+	CTcpPullAgentPtr m_Agent;
 };

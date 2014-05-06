@@ -50,9 +50,8 @@ private:
 	BOOL CheckParams();
 private:
 	CComboBox m_TestTimes;
-	CComboBox m_ThreadCount;
+	CComboBox m_SocketCount;
 	CComboBox m_TestInterv;
-	CComboBox m_ThreadInterv;
 	CComboBox m_DataLen;
 	CListBox m_Info;
 	CEdit m_Address;
@@ -64,8 +63,7 @@ private:
 	USHORT m_usPort;
 	int m_iTestTimes;
 	int m_iTestInterv;
-	int m_iThreadCount;
-	int m_iThreadInterv;
+	int m_iSocketCount;
 	int m_iDataLen;
 
 	volatile LONGLONG m_llTotalReceived;
@@ -77,6 +75,6 @@ private:
 	EnAppState m_enState;
 	CBufferPtr m_sendBuffer;
 
-	VectorWrapper<vector<CTcpClientWrapper*>, PtrSet_Cleaner<vector<CTcpClientWrapper*>>> m_vtClients;
+	VectorWrapper<vector<CTcpClientPtr*>, PtrSet_Cleaner<vector<CTcpClientPtr*>>> m_vtClients;
 
 };

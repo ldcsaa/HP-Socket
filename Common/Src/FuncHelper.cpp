@@ -921,24 +921,6 @@ BOOL TerminateProcessFairily(HANDLE hProcess, DWORD dwWait)
 	return FALSE;
 }
 
-#if _MSC_VER < 1800
-DWORD GetOSVersion()
-{
-	DWORD dwOSVersion = 0;
-	OSVERSIONINFO vi = {sizeof(vi)};
-	if(GetVersionEx(&vi))
-		dwOSVersion = (vi.dwMajorVersion << 8) + vi.dwMinorVersion;
-	return dwOSVersion;
-}
-#endif
-
-DWORD GetCpuCount()
-{
-	SYSTEM_INFO si = {sizeof(si)};
-	::GetSystemInfo(&si);
-	return si.dwNumberOfProcessors;
-}
-
 #ifdef _AFX
 CString SecondToTimeStr(DWORD dwSeconds, BOOL bDayOnly)
 {

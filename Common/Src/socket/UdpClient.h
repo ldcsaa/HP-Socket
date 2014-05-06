@@ -120,11 +120,11 @@ private:
 	 WINAPI DetecotrThreadProc(LPVOID pv);
 
 private:
-	static const DWORD DEFAULT_MAX_DATAGRAM_SIZE		= 1472;
-	static const DWORD DEFAULT_FREE_BUFFER_POOL_SIZE	= 10;
-	static const DWORD DEFAULT_FREE_BUFFER_POOL_HOLD	= 30;
-	static const DWORD DEFAULT_DETECT_ATTEMPTS			= 3;
-	static const DWORD DEFAULT_DETECT_INTERVAL			= 10;
+	static const DWORD DEFAULT_MAX_DATAGRAM_SIZE;
+	static const DWORD DEFAULT_FREE_BUFFER_POOL_SIZE;
+	static const DWORD DEFAULT_FREE_BUFFER_POOL_HOLD;
+	static const DWORD DEFAULT_DETECT_ATTEMPTS;
+	static const DWORD DEFAULT_DETECT_INTERVAL;
 
 public:
 	CUdpClient(IUdpClientListener* psoListener)
@@ -189,7 +189,7 @@ private:
 	TItemList		m_lsSend;
 	CBufferPtr		m_rcBuffer;
 
-	int						m_iPending;
+	volatile int			m_iPending;
 	volatile EnServiceState	m_enState;
 	volatile EnSocketError	m_enLastError;
 	volatile DWORD			m_dwDetectFails;

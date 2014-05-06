@@ -158,14 +158,6 @@ void WriteLog(LPCTSTR pszLogFileName, LPCTSTR pszLog);
 	CString GetIniString(LPCTSTR lpAppName, LPCTSTR lpKeyName, LPCTSTR lpFileName, DWORD dwSize);
 #endif
 
-#if _MSC_VER < 1800
-	// 获取操作系统版本
-	DWORD	GetOSVersion();
-#endif
-
-	// 获取 CPU 数量
-	DWORD	GetCpuCount();
-
 #ifdef _AFX
 	// 秒转换成时间字符串
 	CString SecondToTimeStr(DWORD dwSeconds, BOOL bDayOnly = FALSE);

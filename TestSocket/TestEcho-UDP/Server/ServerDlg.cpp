@@ -140,6 +140,8 @@ void CServerDlg::OnBnClickedStart()
 	//m_Server.SetDetectAttempts(0);
 	//m_Server.SetDetectInterval(0);
 
+	//m_Server.SetSendPolicy(SP_SAFE);
+
 	m_Address.GetWindowText(m_strAddress);
 	m_strAddress.Trim();
 

@@ -89,22 +89,24 @@ v3.2.1 更新：
 
 > 优化数据发送策略：
 -----------------
-1、IClient/IServer/IAgent 组件的 Send() 方法不直接把数据投递到完成端口
-2、在高负载情形下，数据会放入发送队列，并进行数据包合并，避免高负载下发生 10055 错误
-3、当发送大量小数据包时，自动组包机制能大大提高发送效率
-4、应用程序可以通过 GetPendingDataLength() 获取队列中未发出的数据，从而实现流量控制
+1、Client 组件采用 PACK 发送模式，尽量把多个发送操作的数据组合在一起发送
+2、Server 和 Agent 组件提供以下三种数据发送策略：
+	1）PACK - 打包模式（默认）	：尽量把多个发送操作的数据组合在一起发送，增加传输效率
+	2）SAFE - 安全模式			：尽量把多个发送操作的数据组合在一起发送，并控制传输速度，避免缓冲区溢出
+	3）DIRECT - 直接模式		：对每一个发送操作都直接投递，适用于负载不高但要求实时性较高的场合
 
 > 其它更新：
 -----------------
 1、IServer 的 GetClientAddress() 方法改名为 GetRemoteAddress()
 2、IClient 的 Send() 方法删除 “CONNID dwConnID” 参数
 3、IClient/IServer/IAgent 的 Send() 方法增加发送数据缓冲区指针偏移量参数 “int iOffset”
-4、EnServerError / EnClientError 枚举类型合并为 EnSocketError
-5、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
-6、IClient/IServer/IAgent 增加方法：BOOL GetPendingDataLength()，获取连接中未发出数据的长度
-7、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
-8、增加 HPSocket for C# SDK（由 int 2e 提供）
-9、公共代码包 vc-common-src 更新为 v2.3.4（参考：vc-common-src v2.3.4 的 Change Log）
+4、增加 EnSendPolicy 枚举类型，IServer/IAgent 增加发送模式设置方法 SetSendPolicy()
+5、EnServerError / EnClientError 枚举类型合并为 EnSocketError
+6、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
+7、IClient/IServer/IAgent 增加方法：BOOL GetPendingDataLength()，获取连接中未发出数据的长度
+8、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
+9、增加 HPSocket for C# SDK（由 int 2e 提供）
+10、公共代码包 vc-common-src 更新为 v2.3.4（参考：vc-common-src v2.3.4 的 Change Log）
 	
 > 升级说明：
 -----------------

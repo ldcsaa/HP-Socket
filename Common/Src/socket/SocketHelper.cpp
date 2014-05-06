@@ -472,13 +472,12 @@ int PostSendNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	pBufferObj->operation	= SO_SEND;
-	DWORD dwBytes;
 
 	if(::WSASend(
 					pSocketObj->socket,
 					&pBufferObj->buff,
 					1,
-					&dwBytes,
+					nullptr,
 					0,
 					&pBufferObj->ov,
 					nullptr
@@ -504,13 +503,13 @@ int PostReceiveNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	pBufferObj->operation	= SO_RECEIVE;
-	DWORD dwBytes, dwFlag	= 0; 
+	DWORD dwFlag			= 0; 
 
 	if(::WSARecv(
 					pSocketObj->socket,
 					&pBufferObj->buff,
 					1,
-					&dwBytes,
+					nullptr,
 					&dwFlag,
 					&pBufferObj->ov,
 					nullptr
@@ -536,14 +535,13 @@ int PostSendToNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	int iAddrLen			= sizeof(SOCKADDR_IN);
-	DWORD dwBytes			= 0;
 	pBufferObj->operation	= SO_SEND;
 
 	if(::WSASendTo	(
 						sock,
 						&pBufferObj->buff,
 						1,
-						&dwBytes,
+						nullptr,
 						0,
 						(sockaddr*)&pBufferObj->remoteAddr,
 						iAddrLen,
@@ -571,7 +569,7 @@ int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	int iAddrLen			= sizeof(SOCKADDR_IN);
-	DWORD dwBytes, dwFlag	= 0;
+	DWORD dwFlag			= 0;
 	pBufferObj->operation	= SO_RECEIVE;
 
 	::ZeroMemory(&pBufferObj->remoteAddr, iAddrLen);
@@ -580,7 +578,7 @@ int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 						sock,
 						&pBufferObj->buff,
 						1,
-						&dwBytes,
+						nullptr,
 						&dwFlag,
 						(sockaddr*)&pBufferObj->remoteAddr,
 						&iAddrLen,

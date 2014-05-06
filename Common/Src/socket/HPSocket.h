@@ -35,7 +35,7 @@ Usage:
 		方法二：
 		--------------------------------------------------------------------------------------
 		0. 应用程序包含 SocketInterface.h 和 HPSocket.h 头文件
-		1. 创建 CXxxWrapper 包装器，通过包装器智能指针使用 HPSocket 对象
+		1. 创建 CXxxPtr 智能指针，通过智能指针使用 HPSocket 对象
 
 Release:
 		1. x86/HPSocket.dll		- (32位/MBCS/Release)
@@ -114,7 +114,7 @@ struct TcpServer_Creator
 
 	static void Destroy(ITcpServer* pServer)
 	{
-		return HP_Destroy_TcpServer(pServer);
+		HP_Destroy_TcpServer(pServer);
 	}
 };
 
@@ -128,7 +128,7 @@ struct TcpClient_Creator
 
 	static void Destroy(ITcpClient* pClient)
 	{
-		return HP_Destroy_TcpClient(pClient);
+		HP_Destroy_TcpClient(pClient);
 	}
 };
 
@@ -142,7 +142,7 @@ struct TcpAgent_Creator
 
 	static void Destroy(ITcpAgent* pAgent)
 	{
-		return HP_Destroy_TcpAgent(pAgent);
+		HP_Destroy_TcpAgent(pAgent);
 	}
 };
 
@@ -156,7 +156,7 @@ struct TcpPullServer_Creator
 
 	static void Destroy(ITcpPullServer* pServer)
 	{
-		return HP_Destroy_TcpPullServer(pServer);
+		HP_Destroy_TcpPullServer(pServer);
 	}
 };
 
@@ -170,7 +170,7 @@ struct TcpPullClient_Creator
 
 	static void Destroy(ITcpPullClient* pClient)
 	{
-		return HP_Destroy_TcpPullClient(pClient);
+		HP_Destroy_TcpPullClient(pClient);
 	}
 };
 
@@ -184,7 +184,7 @@ struct TcpPullAgent_Creator
 
 	static void Destroy(ITcpPullAgent* pAgent)
 	{
-		return HP_Destroy_TcpPullAgent(pAgent);
+		HP_Destroy_TcpPullAgent(pAgent);
 	}
 };
 
@@ -198,7 +198,7 @@ struct UdpServer_Creator
 
 	static void Destroy(IUdpServer* pServer)
 	{
-		return HP_Destroy_UdpServer(pServer);
+		HP_Destroy_UdpServer(pServer);
 	}
 };
 
@@ -212,17 +212,17 @@ struct UdpClient_Creator
 
 	static void Destroy(IUdpClient* pClient)
 	{
-		return HP_Destroy_UdpClient(pClient);
+		HP_Destroy_UdpClient(pClient);
 	}
 };
 
 /**************************************************/
-/*************** HPSocket 对象包装类 ***************/
+/************** HPSocket 对象智能指针 **************/
 
-template<class T, class _Listener, class _Creator> class CHPWrapper
+template<class T, class _Listener, class _Creator> class CHPSocketPtr
 {
 public:
-	CHPWrapper(_Listener* pListener = nullptr)
+	CHPSocketPtr(_Listener* pListener = nullptr)
 	{
 		if(pListener)
 			m_pObj = _Creator::Create(pListener);
@@ -230,13 +230,13 @@ public:
 			m_pObj = nullptr;
 	}
 
-	~CHPWrapper()
+	~CHPSocketPtr()
 	{
 		Reset();
 	}
 
 public:
-	CHPWrapper&  Reset(T* pObj = nullptr)
+	CHPSocketPtr&  Reset(T* pObj = nullptr)
 	{
 		if(pObj != m_pObj)
 		{
@@ -249,7 +249,7 @@ public:
 		return *this;
 	}
 
-	CHPWrapper& Attach(T* pObj)
+	CHPSocketPtr& Attach(T* pObj)
 	{
 		return Reset(pObj);
 	}
@@ -267,29 +267,29 @@ public:
 	T* operator ->	()	const	{return m_pObj				;}
 	operator T*		()	const	{return m_pObj				;}
 
-	CHPWrapper& operator =	(T* pObj)	{return Reset(pObj)	;}
+	CHPSocketPtr& operator = (T* pObj)	{return Reset(pObj)	;}
 
 private:
-	CHPWrapper(const CHPWrapper&);
-	CHPWrapper& operator = (const CHPWrapper&);
+	CHPSocketPtr(const CHPSocketPtr&);
+	CHPSocketPtr& operator = (const CHPSocketPtr&);
 
 private:
 	T* m_pObj;
 };
 
-// ITcpServer 对象包装类
-typedef CHPWrapper<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerWrapper;
-// ITcpClient 对象包装类
-typedef CHPWrapper<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientWrapper;
-// ITcpAgent 对象包装类
-typedef CHPWrapper<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>				CTcpAgentWrapper;
-// ITcpPullServer 对象包装类
-typedef CHPWrapper<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerWrapper;
-// ITcpPullClient 对象包装类
-typedef CHPWrapper<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientWrapper;
-// ITcpPullAgent 对象包装类
-typedef CHPWrapper<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>		CTcpPullAgentWrapper;
-// IUdpServer 对象包装类
-typedef CHPWrapper<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerWrapper;
-// IUdpClient 对象包装类
-typedef CHPWrapper<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientWrapper;
+// ITcpServer 对象智能指针
+typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
+// ITcpClient 对象智能指针
+typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
+// ITcpAgent 对象智能指针
+typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
+// ITcpPullServer 对象智能指针
+typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
+// ITcpPullClient 对象智能指针
+typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
+// ITcpPullAgent 对象智能指针
+typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
+// IUdpServer 对象智能指针
+typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
+// IUdpClient 对象智能指针
+typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;

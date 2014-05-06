@@ -26,8 +26,6 @@
 
 // CClientDlg dialog
 
-#define CONTENT_1		"X"
-#define CONTENT_10		"0123456789"
 #define DEFAULT_ADDRESS	_T("127.0.0.1")
 #define DEFAULT_PORT	_T("5555")
 #define LOCAL_ADDRESS	_T("0.0.0.0")
@@ -48,9 +46,10 @@ void CClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STOP, m_Stop);
 	DDX_Control(pDX, IDC_TEST_TIMES, m_TestTimes);
 	DDX_Control(pDX, IDC_SOCK_COUNT, m_SocketCount);
+	DDX_Control(pDX, IDC_THREAD_COUNT, m_ThreadCount);
 	DDX_Control(pDX, IDC_DATA_LEN, m_DataLen);
 	DDX_Control(pDX, IDC_TEST_TIMES_INTERV, m_TestInterv);
-	DDX_Control(pDX, IDC_SOCK_COUNT_INTERV, m_SocketInterv);
+	DDX_Control(pDX, IDC_SEND_POLICY, m_SendPolicy);
 }
 
 BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
@@ -80,8 +79,9 @@ BOOL CClientDlg::OnInitDialog()
 	m_TestTimes.SetCurSel(5);
 	m_TestInterv.SetCurSel(1);
 	m_SocketCount.SetCurSel(5);
-	m_SocketInterv.SetCurSel(0);
+	m_ThreadCount.SetCurSel(0);
 	m_DataLen.SetCurSel(5);
+	m_SendPolicy.SetCurSel(0);
 	m_Address.SetWindowText(DEFAULT_ADDRESS);
 	m_Port.SetWindowText(DEFAULT_PORT);
 
@@ -164,8 +164,9 @@ void CClientDlg::SetAppState(EnAppState state)
 	m_TestTimes.EnableWindow(m_enState == ST_STOPED);
 	m_TestInterv.EnableWindow(m_enState == ST_STOPED);
 	m_SocketCount.EnableWindow(m_enState == ST_STOPED);
-	m_SocketInterv.EnableWindow(m_enState == ST_STOPED);
+	m_ThreadCount.EnableWindow(m_enState == ST_STOPED);
 	m_DataLen.EnableWindow(m_enState == ST_STOPED);
+	m_SendPolicy.EnableWindow(m_enState == ST_STOPED);
 }
 
 BOOL CClientDlg::CheckParams()
@@ -197,9 +198,9 @@ BOOL CClientDlg::CheckParams()
 		m_SocketCount.SetFocus();
 		isOK = FALSE;
 	}
-	else if(m_iSocketInterv < 0)
+	else if(m_iThreadCount < 0 || m_iThreadCount > (int)CTcpAgent::MAX_WORKER_THREAD_COUNT)
 	{
-		m_SocketInterv.SetFocus();
+		m_ThreadCount.SetFocus();
 		isOK = FALSE;
 	}
 	else if(m_iDataLen <= 0)
@@ -220,28 +221,33 @@ void CClientDlg::OnBnClickedStart()
 	CString strPort;
 	CString strTestTimes;
 	CString strTestInterv;
+	CString strSocketCount;
 	CString strThreadCount;
-	CString strThreadInterv;
 	CString strDataLen;
 
 	m_Address.GetWindowText(strAddress);
 	m_Port.GetWindowText(strPort);
 	m_TestTimes.GetWindowText(strTestTimes);
 	m_TestInterv.GetWindowText(strTestInterv);
-	m_SocketCount.GetWindowText(strThreadCount);
-	m_SocketInterv.GetWindowText(strThreadInterv);
+	m_SocketCount.GetWindowText(strSocketCount);
+	m_ThreadCount.GetWindowText(strThreadCount);
 	m_DataLen.GetWindowText(strDataLen);
 
 	m_strAddress	= strAddress.Trim();
 	m_usPort		= (USHORT)_ttoi(strPort);
 	m_iTestTimes	= _ttoi(strTestTimes);
 	m_iTestInterv	= _ttoi(strTestInterv);
-	m_iSocketCount	= _ttoi(strThreadCount);
-	m_iSocketInterv	= _ttoi(strThreadInterv);
+	m_iSocketCount	= _ttoi(strSocketCount);
+	m_iThreadCount	= _ttoi(strThreadCount);
 	m_iDataLen		= _ttoi(strDataLen);
+
+	EnSendPolicy enPolicy = (EnSendPolicy)m_SendPolicy.GetCurSel();
 
 	if(!CheckParams())
 		return;
+
+	if(m_iThreadCount == 0)
+		m_iThreadCount = CTcpAgent::DEFAULT_WORKER_THREAD_COUNT;
 
 	SetAppState(ST_STARTING);
 
@@ -254,7 +260,8 @@ void CClientDlg::OnBnClickedStart()
 
 	BOOL isOK = FALSE;
 
-	//m_Agent.SetWorkerThreadCount(min(m_iThreadCount / 2, (int)CTcpAgent::MAX_WORKER_THREAD_COUNT));
+	m_Agent.SetWorkerThreadCount(m_iThreadCount);
+	m_Agent.SetSendPolicy(enPolicy);
 
 	if(m_Agent.Start(LOCAL_ADDRESS, FALSE))
 	{
@@ -327,9 +334,6 @@ void CClientDlg::OnBnClickedStart()
 				bTerminated = TRUE;
 				break;
 			}
-
-			if(m_iSocketInterv > 0 && j + 1 < m_iSocketCount)
-				::WaitWithMessageLoop(m_iSocketInterv);
 		}
 
 		if(bTerminated)

@@ -63,9 +63,6 @@
     <ClInclude Include="..\..\..\Common\Src\Event.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\FuncHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -93,6 +90,9 @@
     <ClInclude Include="..\..\..\Common\Src\socket\SocketInterface.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\SysHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -110,9 +110,6 @@
     <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\FuncHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Common\Src\RWLock.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -123,6 +120,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Common\Src\socket\TcpAgent.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>

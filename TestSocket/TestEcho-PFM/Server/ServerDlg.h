@@ -52,6 +52,8 @@ private:
 
 private:
 	CListBox m_Info;
+	CEdit m_Port;
+	CComboBox m_SendPolicy;
 	CButton m_Start;
 	CButton m_Stop;
 	EnAppState m_enState;
@@ -61,9 +63,5 @@ private:
 	volatile LONG m_lClientCount;
 
 	CCriSec m_cs;
-	CTcpServerWrapper m_Server;
-
-private:
-	static const USHORT PORT;
-	static const LPCTSTR ADDRESS;
+	CTcpServerPtr m_Server;
 };

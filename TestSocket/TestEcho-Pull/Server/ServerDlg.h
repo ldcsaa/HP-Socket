@@ -70,5 +70,5 @@ private:
 	
 	//CCriSec m_csPkgInfo;
 
-	CTcpPullServerWrapper m_Server;
+	CTcpPullServerPtr m_Server;
 };

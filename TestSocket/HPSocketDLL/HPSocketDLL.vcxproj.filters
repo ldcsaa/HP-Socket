@@ -84,9 +84,6 @@
     <ClInclude Include="..\..\Common\Src\RWLock.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\FuncHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Src\socket\HPSocket.h">
       <Filter>Common\socket</Filter>
     </ClInclude>
@@ -101,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Src\socket\TcpPullAgent.h">
       <Filter>Common\socket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Src\SysHelper.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -140,9 +140,6 @@
     <ClCompile Include="..\..\Common\Src\RWLock.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\FuncHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Src\socket\HPSocket.cpp">
       <Filter>Common\socket</Filter>
     </ClCompile>
@@ -154,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Src\socket\TcpPullAgent.cpp">
       <Filter>Common\socket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Src\SysHelper.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

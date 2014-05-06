@@ -105,8 +105,9 @@ struct TSocketObjBase
 	CCriSec		crisec;
 	TItemList	sndBuff;
 
-	volatile long	pending;
-	volatile long	sndCount;
+	volatile BOOL smooth;
+	volatile long pending;
+	volatile long sndCount;
 
 	union
 	{
@@ -123,15 +124,17 @@ struct TSocketObjBase
 	static BOOL IsExist(TSocketObjBase* pSocketObj)
 		{return pSocketObj != nullptr;}
 
-	static BOOL IsPending(TSocketObjBase* pSocketObj)
-		{return pSocketObj != nullptr && pSocketObj->pending > 0;}
-
 	static BOOL IsValid(TSocketObjBase* pSocketObj)
-		{return pSocketObj != nullptr && pSocketObj->valid == TRUE;}
+		{return pSocketObj != nullptr && pSocketObj->valid;}
 
 	static void Invalid(TSocketObjBase* pSocketObj)
-		{ASSERT(pSocketObj != nullptr); pSocketObj->valid = FALSE;}
+		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
 
+	static BOOL IsSmooth(TSocketObjBase* pSocketObj)
+		{ASSERT(IsExist(pSocketObj)); return pSocketObj->valid && pSocketObj->smooth;}
+
+	static BOOL IsPending(TSocketObjBase* pSocketObj)
+		{ASSERT(IsExist(pSocketObj)); return pSocketObj->valid && pSocketObj->pending > 0;}
 
 	static void Release(TSocketObjBase* pSocketObj)
 	{
@@ -148,6 +151,7 @@ struct TSocketObjBase
 		connID	 = dwConnID;
 		valid	 = TRUE;
 		extra	 = nullptr;
+		smooth	 = TRUE;
 		pending	 = 0;
 		sndCount = 0;
 	}
@@ -156,7 +160,7 @@ struct TSocketObjBase
 /* 数据缓冲区结构 */
 struct TSocketObj : public TSocketObjBase
 {
-	SOCKET		socket;
+	SOCKET socket;
 
 	TSocketObj(CItemPool& itPool)
 	: TSocketObjBase(itPool)
@@ -174,7 +178,7 @@ struct TSocketObj : public TSocketObjBase
 /* UDP 数据缓冲区结构 */
 struct TUdpSocketObj : public TSocketObjBase
 {
-	volatile DWORD	detectFails;
+	volatile DWORD detectFails;
 
 	TUdpSocketObj(CItemPool& itPool)
 	: TSocketObjBase(itPool)
@@ -324,6 +328,13 @@ int SSO_UDP_ConnReset		(SOCKET sock, BOOL bNewBehavior = TRUE);
 名称：Socket 操作方法
 描述：Socket 操作包装方法
 ************************************************************************/
+
+/* 检测 IOCP 操作返回值：NO_ERROR 则返回 TRUE */
+#define IOCP_NO_ERROR(result)	(result == NO_ERROR)
+/* 检测 IOCP 操作返回值：WSA_IO_PENDING 则返回 TRUE */
+#define IOCP_PENDING(result)	(result == WSA_IO_PENDING)
+/* 检测 IOCP 操作返回值：NO_ERROR 或 WSA_IO_PENDING 则返回 TRUE */
+#define IOCP_SUCCESS(result)	(IOCP_NO_ERROR(result) || IOCP_PENDING(result))
 
 /* 生成 Connection ID */
 CONNID GenerateConnectionID	();

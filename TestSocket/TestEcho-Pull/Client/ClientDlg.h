@@ -59,5 +59,5 @@ private:
 
 	TPkgInfo m_pkgInfo;
 
-	CTcpPullClientWrapper m_Client;
+	CTcpPullClientPtr m_Client;
 };

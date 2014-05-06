@@ -102,11 +102,11 @@ private:
 	 WINAPI WorkerThreadProc(LPVOID pv);
 
 private:
-	static const DWORD DEFAULT_SOCKET_BUFFER_SIZE		= 4 * 1024;
-	static const DWORD DEFAULT_FREE_BUFFER_POOL_SIZE	= 10;
-	static const DWORD DEFAULT_FREE_BUFFER_POOL_HOLD	= 30;
-	static const DWORD DEFALUT_KEEPALIVE_TIME			= 5 * 1000;
-	static const DWORD DEFALUT_KEEPALIVE_INTERVAL		= 3 * 1000;
+	static const DWORD DEFAULT_SOCKET_BUFFER_SIZE;
+	static const DWORD DEFAULT_FREE_BUFFER_POOL_SIZE;
+	static const DWORD DEFAULT_FREE_BUFFER_POOL_HOLD;
+	static const DWORD DEFALUT_KEEPALIVE_TIME;
+	static const DWORD DEFALUT_KEEPALIVE_INTERVAL;
 
 public:
 	CTcpClient(ITcpClientListener* psoListener)
@@ -158,7 +158,7 @@ private:
 	TItemList		m_lsSend;
 	CBufferPtr		m_rcBuffer;
 
-	int						m_iPending;
+	volatile int			m_iPending;
 	volatile EnServiceState	m_enState;
 	volatile EnSocketError	m_enLastError;
 

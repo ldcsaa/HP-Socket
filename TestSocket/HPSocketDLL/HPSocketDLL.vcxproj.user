@@ -5,7 +5,11 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">
-    <LocalDebuggerCommand>D:\MyWork\Cpp\TestSocket\Bin\HPSocket\x86\Server.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>D:\MyWork\Cpp\TestSocket\TestEcho-PFM\Debug\Server.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">
+    <LocalDebuggerCommand>D:\MyWork\Cpp\TestSocket\TestEcho-PFM\Release\Server.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

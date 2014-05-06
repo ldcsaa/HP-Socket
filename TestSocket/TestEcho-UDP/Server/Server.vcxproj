@@ -182,7 +182,6 @@
     <ClInclude Include="..\..\..\Common\Src\bufferptr.h" />
     <ClInclude Include="..\..\..\Common\Src\CriticalSection.h" />
     <ClInclude Include="..\..\..\Common\Src\Event.h" />
-    <ClInclude Include="..\..\..\Common\Src\FuncHelper.h" />
     <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h" />
     <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h" />
     <ClInclude Include="..\..\..\Common\Src\RWLock.h" />
@@ -192,6 +191,7 @@
     <ClInclude Include="..\..\..\Common\Src\socket\SocketInterface.h" />
     <ClInclude Include="..\..\..\Common\Src\socket\UdpServer.h" />
     <ClInclude Include="..\..\..\Common\Src\STLHelper.h" />
+    <ClInclude Include="..\..\..\Common\Src\SysHelper.h" />
     <ClInclude Include="..\..\..\Common\Src\WaitFor.h" />
     <ClInclude Include="..\..\..\Common\Src\Win32Helper.h" />
     <ClInclude Include="..\..\Global\helper.h" />
@@ -202,10 +202,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Common\Src\bufferpool.cpp" />
-    <ClCompile Include="..\..\..\Common\Src\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\Common\Src\RWLock.cpp" />
     <ClCompile Include="..\..\..\Common\Src\socket\SocketHelper.cpp" />
     <ClCompile Include="..\..\..\Common\Src\socket\UdpServer.cpp" />
+    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp" />
     <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="Server.cpp" />

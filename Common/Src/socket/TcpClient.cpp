@@ -25,12 +25,19 @@
 #include "stdafx.h"
 #include "TcpClient.h"
 #include "../WaitFor.h"
+#include "../SysHelper.h"
 
 #ifndef _WIN32_WCE
 	#include <process.h>
 #else
 	#define _beginthreadex	::CreateThread
 #endif
+
+const DWORD CTcpClient::DEFAULT_SOCKET_BUFFER_SIZE		= ::SysGetPageSize();
+const DWORD CTcpClient::DEFAULT_FREE_BUFFER_POOL_SIZE	= 10;
+const DWORD CTcpClient::DEFAULT_FREE_BUFFER_POOL_HOLD	= 30;
+const DWORD CTcpClient::DEFALUT_KEEPALIVE_TIME			= 5 * 1000;
+const DWORD CTcpClient::DEFALUT_KEEPALIVE_INTERVAL		= 3 * 1000;
 
 BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
 {
@@ -304,8 +311,14 @@ BOOL CTcpClient::ProcessNetworkEvent()
 			FireClose(m_dwConnID);
 		else
 		{
+			EnSocketOperation enOperation = events.lNetworkEvents & FD_READ ? SO_RECEIVE :
+												(
+													events.lNetworkEvents & FD_WRITE ? SO_SEND :
+														(events.lNetworkEvents & FD_CONNECT ? SO_CONNECT : SO_UNKNOWN)
+												);
+
 			SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-			FireError(m_dwConnID, SO_UNKNOWN, iCode);
+			FireError(m_dwConnID, enOperation, iCode);
 		}
 
 		bContinue = FALSE;
@@ -411,12 +424,17 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 {
 	while(!pItem->IsEmpty())
 	{
-		int rc = send(m_soClient, (char*)pItem->Ptr(), min(pItem->Size(), (int)m_dwSocketBufferSize), 0);
+		int rc = 0;
+
+		{
+			CCriSecLock locallock(m_scSend);
+
+			rc = send(m_soClient, (char*)pItem->Ptr(), min(pItem->Size(), (int)m_dwSocketBufferSize), 0);
+			if(rc > 0) m_iPending -= rc;
+		}
 
 		if(rc > 0)
 		{
-			m_iPending -= rc;
-
 			if(FireSend(m_dwConnID, pItem->Ptr(), rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
@@ -537,10 +555,13 @@ BOOL CTcpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 			return FALSE;
 		}
 
+		ASSERT(m_iPending >= 0);
+		BOOL isPending = m_iPending > 0;
+
 		m_lsSend.Cat(pBuffer, iLength);
 		m_iPending += iLength;
 
-		m_evBuffer.Set();
+		if(!isPending) m_evBuffer.Set();
 	}
 
 	return TRUE;

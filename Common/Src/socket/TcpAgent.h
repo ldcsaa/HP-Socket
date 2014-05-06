@@ -58,6 +58,7 @@ public:
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPED)
 	, m_bAsyncConnect			(TRUE)
+	, m_enSendPolicy			(SP_PACK)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwSocketBufferSize		(DEFAULT_SOCKET_BUFFER_SIZE)
 	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
@@ -104,6 +105,7 @@ public:
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetSocketBufferSize		(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize		= dwSocketBufferSize;}
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
@@ -116,6 +118,7 @@ public:
 	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	{m_dwMaxShutdownWaitTime	= dwMaxShutdownWaitTime;}
 	virtual void SetReuseAddress			(BOOL bReuseAddress)			{m_bReuseAddress			= bReuseAddress;}
 
+	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetSocketBufferSize		()	{return m_dwSocketBufferSize;}
 	virtual DWORD GetFreeSocketObjLockTime	()	{return m_dwFreeSocketObjLockTime;}
@@ -187,21 +190,33 @@ private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
+
+	DWORD CreateClientSocket(SOCKET& soClient);
+	DWORD ConnectToServer	(CONNID dwConnID, SOCKET& soClient, LPCTSTR pszRemoteAddress, USHORT usPort);
 	void ForceDisconnect	(CONNID dwConnID);
+
 	void HandleIo			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
 	void HandleError		(CONNID dwConnID, TBufferObj* pBufferObj, DWORD dwErrorCode);
 	void HandleConnect		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	void HandleSend			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	void HandleReceive		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
-	DWORD CreateClientSocket(SOCKET& soClient);
-	DWORD ConnectToServer	(CONNID dwConnID, SOCKET& soClient, LPCTSTR pszRemoteAddress, USHORT usPort);
+	void TriggerFireSend	(CONNID dwConnID, TBufferObj* pBufferObj);
 
-	BOOL DoSend				(CONNID dwConnID);
-	BOOL DoSend				(TSocketObj* pSocketObj);
-	int DoReceive			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+	int SendPack	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendSafe	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
 
-	void CheckError			(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	int DoReceive	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+
+	int DoSend		(CONNID dwConnID);
+	int DoSend		(TSocketObj* pSocketObj);
+	int DoSendPack	(TSocketObj* pSocketObj);
+	int DoSendSafe	(TSocketObj* pSocketObj);
+	int SendItem	(TSocketObj* pSocketObj);
+
+	void CheckError	(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
 
 private:
 	CInitSocket			m_wsSocket;
@@ -234,6 +249,7 @@ private:
 	ITcpAgentListener*	m_psoListener;
 
 private:
+	EnSendPolicy m_enSendPolicy;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwSocketBufferSize;
 	DWORD m_dwFreeSocketObjLockTime;

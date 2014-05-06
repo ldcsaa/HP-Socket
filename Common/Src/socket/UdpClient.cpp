@@ -32,6 +32,12 @@
 	#define _beginthreadex	::CreateThread
 #endif
 
+const DWORD CUdpClient::DEFAULT_MAX_DATAGRAM_SIZE		= 1472;
+const DWORD CUdpClient::DEFAULT_FREE_BUFFER_POOL_SIZE	= 10;
+const DWORD CUdpClient::DEFAULT_FREE_BUFFER_POOL_HOLD	= 30;
+const DWORD CUdpClient::DEFAULT_DETECT_ATTEMPTS			= 3;
+const DWORD CUdpClient::DEFAULT_DETECT_INTERVAL			= 10;
+
 BOOL CUdpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
 {
 	if(!CheckParams() || !CheckStarting())
@@ -342,8 +348,14 @@ BOOL CUdpClient::HandleClosse(WSANETWORKEVENTS& events)
 		FireClose(m_dwConnID);
 	else
 	{
+		EnSocketOperation enOperation = events.lNetworkEvents & FD_READ ? SO_RECEIVE :
+											(
+												events.lNetworkEvents & FD_WRITE ? SO_SEND :
+													(events.lNetworkEvents & FD_CONNECT ? SO_CONNECT : SO_UNKNOWN)
+											);
+
 		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-		FireError(m_dwConnID, SO_UNKNOWN, iCode);
+		FireError(m_dwConnID, enOperation, iCode);
 	}
 
 	return FALSE;
@@ -403,13 +415,18 @@ BOOL CUdpClient::SendData()
 		{
 			ASSERT(!itPtr->IsEmpty());
 
-			int rc = send(m_soClient, (char*)itPtr->Ptr(), itPtr->Size(), 0);
+			int rc = 0;
+
+			{
+				CCriSecLock locallock(m_scSend);
+
+				rc = send(m_soClient, (char*)itPtr->Ptr(), itPtr->Size(), 0);
+				if(rc > 0) m_iPending -= rc;
+			}
 
 			if(rc > 0)
 			{
 				ASSERT(rc == itPtr->Size());
-
-				m_iPending -= rc;
 
 				if(FireSend(m_dwConnID, itPtr->Ptr(), rc) == HR_ERROR)
 				{
@@ -641,12 +658,16 @@ BOOL CUdpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 			return FALSE;
 		}
 
+		ASSERT(m_iPending >= 0);
+		BOOL isPending = m_iPending > 0;
+
 		TItem* pItem = m_itPool.PickFreeItem();
 		pItem->Cat(pBuffer, iLength);
 		m_lsSend.PushBack(pItem);
 
 		m_iPending += iLength;
-		m_evBuffer.Set();
+
+		if(!isPending) m_evBuffer.Set();
 	}
 
 	return TRUE;

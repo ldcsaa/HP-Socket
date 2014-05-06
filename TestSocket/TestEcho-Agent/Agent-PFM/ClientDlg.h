@@ -53,8 +53,9 @@ private:
 	CComboBox m_TestTimes;
 	CComboBox m_SocketCount;
 	CComboBox m_TestInterv;
-	CComboBox m_SocketInterv;
+	CComboBox m_ThreadCount;
 	CComboBox m_DataLen;
+	CComboBox m_SendPolicy;
 	CListBox m_Info;
 	CEdit m_Address;
 	CEdit m_Port;
@@ -66,7 +67,7 @@ private:
 	int m_iTestTimes;
 	int m_iTestInterv;
 	int m_iSocketCount;
-	int m_iSocketInterv;
+	int m_iThreadCount;
 	int m_iDataLen;
 
 	volatile LONGLONG m_llTotalReceived;

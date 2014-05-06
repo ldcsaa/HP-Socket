@@ -55,6 +55,7 @@ public:
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPED)
 	, m_hDetector				(nullptr)
+	, m_enSendPolicy			(SP_PACK)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
 	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
@@ -99,6 +100,7 @@ public:
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
 	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		{m_dwFreeSocketObjPool		= dwFreeSocketObjPool;}
@@ -110,6 +112,7 @@ public:
 	virtual void SetDetectInterval			(DWORD dwDetectInterval)		{m_dwDetectInterval			= dwDetectInterval;}
 	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	{m_dwMaxShutdownWaitTime	= dwMaxShutdownWaitTime;}
 
+	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetFreeSocketObjLockTime	()	{return m_dwFreeSocketObjLockTime;}
 	virtual DWORD GetFreeSocketObjPool		()	{return m_dwFreeSocketObjPool;}
@@ -188,17 +191,30 @@ private:
 
 private:
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
-	void ForceDisconnect	(CONNID dwConnID);
-	void HandleIo			(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
-	void HandleError		(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD dwErrorCode);
-	void HandleZeroBytes	(CONNID dwConnID, TUdpBufferObj* pBufferObj);
-	CONNID HandleAccept		(TUdpBufferObj* pBufferObj);
-	void HandleSend			(CONNID dwConnID, TUdpBufferObj* pBufferObj);
-	void HandleReceive		(CONNID dwConnID, TUdpBufferObj* pBufferObj);
-	BOOL DoAccept			();
-	BOOL DoSend				(CONNID dwConnID);
-	BOOL DoSend				(TUdpSocketObj* pSocketObj);
-	int DoReceive			(TUdpBufferObj* pBufferObj);
+
+	void ForceDisconnect(CONNID dwConnID);
+	void HandleIo		(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
+	void HandleError	(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD dwErrorCode);
+	void HandleZeroBytes(CONNID dwConnID, TUdpBufferObj* pBufferObj);
+	CONNID HandleAccept	(TUdpBufferObj* pBufferObj);
+	void HandleSend		(CONNID dwConnID, TUdpBufferObj* pBufferObj);
+	void HandleReceive	(CONNID dwConnID, TUdpBufferObj* pBufferObj);
+
+	void TriggerFireSend(CONNID dwConnID, TUdpBufferObj* pBufferObj);
+
+	int SendPack	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendSafe	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendDirect	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int CatAndPost	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
+
+	BOOL DoAccept	();
+	int DoReceive	(TUdpBufferObj* pBufferObj);
+
+	int DoSend		(CONNID dwConnID);
+	int DoSend		(TUdpSocketObj* pSocketObj);
+	int DoSendPack	(TUdpSocketObj* pSocketObj);
+	int DoSendSafe	(TUdpSocketObj* pSocketObj);
+	int SendItem	(TUdpSocketObj* pSocketObj);
 
 	void DetectConnections	();
 	BOOL SendDetectPackage	(CONNID dwConnID, TUdpSocketObj* pSocketObj);
@@ -237,6 +253,7 @@ private:
 	IUdpServerListener*	m_psoListener;
 
 private:
+	EnSendPolicy m_enSendPolicy;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwFreeSocketObjLockTime;
 	DWORD m_dwFreeSocketObjPool;

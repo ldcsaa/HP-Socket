@@ -84,6 +84,22 @@ enum EnFetchResult
 };
 
 /************************************************************************
+名称：数据发送策略
+描述：Server 组件和 Agent 组件的数据发送策略
+
+* 打包模式（默认）	：尽量把多个发送操作的数据组合在一起发送，增加传输效率
+* 安全模式			：尽量把多个发送操作的数据组合在一起发送，并控制传输速度，避免缓冲区溢出
+* 直接模式			：对每一个发送操作都直接投递，适用于负载不高但要求实时性较高的场合
+
+************************************************************************/
+enum EnSendPolicy
+{
+	SP_PACK				= 0,	// 打包模式（默认）
+	SP_SAFE				= 1,	// 安全模式
+	SP_DIRECT			= 2,	// 直接模式
+};
+
+/************************************************************************
 名称：操作结果代码
 描述：组件 Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
 ************************************************************************/
@@ -519,6 +535,8 @@ public:
 	/* 获取连接中未发出数据的长度 */
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending)	= 0;
 
+	/* 设置数据发送策略 */
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		= 0;
 	/* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	= 0;
 	/* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
@@ -534,6 +552,8 @@ public:
 	/* 设置关闭组件前等待连接关闭的最长时限（毫秒，0 则不等待） */
 	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	= 0;
 
+	/* 获取数据发送策略 */
+	virtual EnSendPolicy GetSendPolicy		()	= 0;
 	/* 获取 Socket 缓存对象锁定时间 */
 	virtual DWORD GetFreeSocketObjLockTime	()	= 0;
 	/* 获取 Socket 缓存池大小 */

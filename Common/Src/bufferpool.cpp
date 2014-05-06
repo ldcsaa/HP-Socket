@@ -23,26 +23,27 @@
  */
  
 /******************************************************************************
-Module:  BufferPtr.cpp
-Notices: Copyright (c) 2006 Bruce Liang
-Purpose: 用于简化堆内存的申请和释放.
+Module:  BufferPool.cpp
+Notices: Copyright (c) 2013 Bruce Liang
+Purpose: 简单内存缓冲池
 Desc:
 ******************************************************************************/
 
 #include "stdafx.h"
-#include "WaitFor.h"
 #include "bufferpool.h"
+#include "SysHelper.h"
+#include "WaitFor.h"
 
-const DWORD TItem::DEFAULT_ITEM_CAPACITY			= 4096 - sizeof(TItem);
+const DWORD TItem::DEFAULT_ITEM_CAPACITY			= ::SysGetPageSize();
 const DWORD CItemPool::DEFAULT_ITEM_CAPACITY		= TItem::DEFAULT_ITEM_CAPACITY;
 const DWORD CItemPool::DEFAULT_POOL_SIZE			= 300;
-const DWORD CItemPool::DEFAULT_POOL_HOLD			= 600;
+const DWORD CItemPool::DEFAULT_POOL_HOLD			= 900;
 const DWORD CBufferPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACITY;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
-const DWORD CBufferPool::DEFAULT_BUFFER_LOCK_TIME	= 3000;
-const DWORD CBufferPool::DEFAULT_BUFFER_POOL_SIZE	= 100;
-const DWORD CBufferPool::DEFAULT_BUFFER_POOL_HOLD	= 300;
+const DWORD CBufferPool::DEFAULT_BUFFER_LOCK_TIME	= 5000;
+const DWORD CBufferPool::DEFAULT_BUFFER_POOL_SIZE	= 150;
+const DWORD CBufferPool::DEFAULT_BUFFER_POOL_HOLD	= 450;
 
 TItem* TItem::Construct(CPrivateHeap& heap, int capacity, BYTE* pData, int length)
 {
@@ -258,7 +259,11 @@ TItem* CItemPool::PickFreeItem()
 
 inline void CItemPool::Clear()
 {
-	m_lsFreeItem.Clear();
+	{
+		CCriSecLock locallock(m_csFreeItem);
+		m_lsFreeItem.Clear();
+	}
+
 	m_heap.Reset();
 }
 
@@ -457,11 +462,19 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 
 void CBufferPool::Clear()
 {
-	for(TBufferPtrMapCI it = m_mpBuffer.begin(); it != m_mpBuffer.end(); ++it)
-		TBuffer::Destruct(it->second);
+	{
+		CReentrantWriteLock locallock(m_csBufferMap);
 
-	m_mpBuffer.clear();
-	m_lsFreeBuffer.Clear();
+		for(TBufferPtrMapCI it = m_mpBuffer.begin(); it != m_mpBuffer.end(); ++it)
+			TBuffer::Destruct(it->second);
+
+		m_mpBuffer.clear();
+	}
+
+	{
+		CCriSecLock locallock(m_csFreeBuffer);
+		m_lsFreeBuffer.Clear();
+	}
 
 	m_itPool.Clear();
 	m_heap.Reset();

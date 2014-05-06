@@ -24,11 +24,8 @@
 
 // CClientDlg dialog
 
-#define CONTENT_1		"X"
-#define CONTENT_10		"0123456789"
 #define DEFAULT_ADDRESS	_T("127.0.0.1")
 #define DEFAULT_PORT	_T("5555")
-
 
 CClientDlg::CClientDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(CClientDlg::IDD, pParent)
@@ -45,10 +42,9 @@ void CClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_START, m_Start);
 	DDX_Control(pDX, IDC_STOP, m_Stop);
 	DDX_Control(pDX, IDC_TEST_TIMES, m_TestTimes);
-	DDX_Control(pDX, IDC_THR_COUNT, m_ThreadCount);
+	DDX_Control(pDX, IDC_SOCKET_COUNT, m_SocketCount);
 	DDX_Control(pDX, IDC_DATA_LEN, m_DataLen);
 	DDX_Control(pDX, IDC_TEST_TIMES_INTERV, m_TestInterv);
-	DDX_Control(pDX, IDC_THR_COUNT_INTERV, m_ThreadInterv);
 }
 
 BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
@@ -77,8 +73,7 @@ BOOL CClientDlg::OnInitDialog()
 
 	m_TestTimes.SetCurSel(5);
 	m_TestInterv.SetCurSel(1);
-	m_ThreadCount.SetCurSel(5);
-	m_ThreadInterv.SetCurSel(0);
+	m_SocketCount.SetCurSel(5);
 	m_DataLen.SetCurSel(5);
 	m_Address.SetWindowText(DEFAULT_ADDRESS);
 	m_Port.SetWindowText(DEFAULT_PORT);
@@ -161,8 +156,7 @@ void CClientDlg::SetAppState(EnAppState state)
 	m_Port.EnableWindow(m_enState == ST_STOPED);
 	m_TestTimes.EnableWindow(m_enState == ST_STOPED);
 	m_TestInterv.EnableWindow(m_enState == ST_STOPED);
-	m_ThreadCount.EnableWindow(m_enState == ST_STOPED);
-	m_ThreadInterv.EnableWindow(m_enState == ST_STOPED);
+	m_SocketCount.EnableWindow(m_enState == ST_STOPED);
 	m_DataLen.EnableWindow(m_enState == ST_STOPED);
 }
 
@@ -190,14 +184,9 @@ BOOL CClientDlg::CheckParams()
 		m_TestInterv.SetFocus();
 		isOK = FALSE;
 	}
-	else if(m_iThreadCount <= 0)
+	else if(m_iSocketCount <= 0)
 	{
-		m_ThreadCount.SetFocus();
-		isOK = FALSE;
-	}
-	else if(m_iThreadInterv < 0)
-	{
-		m_ThreadInterv.SetFocus();
+		m_SocketCount.SetFocus();
 		isOK = FALSE;
 	}
 	else if(m_iDataLen <= 0)
@@ -218,24 +207,21 @@ void CClientDlg::OnBnClickedStart()
 	CString strPort;
 	CString strTestTimes;
 	CString strTestInterv;
-	CString strThreadCount;
-	CString strThreadInterv;
+	CString strSocketCount;
 	CString strDataLen;
 
 	m_Address.GetWindowText(strAddress);
 	m_Port.GetWindowText(strPort);
 	m_TestTimes.GetWindowText(strTestTimes);
 	m_TestInterv.GetWindowText(strTestInterv);
-	m_ThreadCount.GetWindowText(strThreadCount);
-	m_ThreadInterv.GetWindowText(strThreadInterv);
+	m_SocketCount.GetWindowText(strSocketCount);
 	m_DataLen.GetWindowText(strDataLen);
 
 	m_strAddress	= strAddress.Trim();
 	m_usPort		= (USHORT)_ttoi(strPort);
 	m_iTestTimes	= _ttoi(strTestTimes);
 	m_iTestInterv	= _ttoi(strTestInterv);
-	m_iThreadCount	= _ttoi(strThreadCount);
-	m_iThreadInterv	= _ttoi(strThreadInterv);
+	m_iSocketCount	= _ttoi(strSocketCount);
 	m_iDataLen		= _ttoi(strDataLen);
 
 	if(!CheckParams())
@@ -247,13 +233,13 @@ void CClientDlg::OnBnClickedStart()
 	m_dwTimeconsuming	= 0;
 	m_llTotalReceived	= 0;
 	m_llTotalSent		= 0;
-	m_llExpectReceived	= (LONGLONG)m_iTestTimes * (LONGLONG)m_iThreadCount * (LONGLONG)m_iDataLen;
+	m_llExpectReceived	= (LONGLONG)m_iTestTimes * (LONGLONG)m_iSocketCount * (LONGLONG)m_iDataLen;
 
 	m_vtClients.Clear();
 
-	for(int i = 0; i < m_iThreadCount; i++)
+	for(int i = 0; i < m_iSocketCount; i++)
 	{
-		smart_simple_ptr<CTcpClientWrapper> pSocket = new CTcpClientWrapper(this);
+		smart_simple_ptr<CTcpClientPtr> pSocket = new CTcpClientPtr(this);
 
 		if((*pSocket)->Start(m_strAddress, m_usPort))
 			m_vtClients->push_back(pSocket.release());
@@ -285,18 +271,15 @@ void CClientDlg::OnBnClickedStart()
 	BOOL bTerminated = FALSE;
 	for(int i = 0; i < m_iTestTimes; i++)
 	{
-		for(int j = 0; j < m_iThreadCount; j++)
+		for(int j = 0; j < m_iSocketCount; j++)
 		{
-			CTcpClientWrapper* pSocket = m_vtClients[j];
+			CTcpClientPtr* pSocket = m_vtClients[j];
 			if(!(*pSocket)->Send(m_sendBuffer, (int)m_sendBuffer.Size()))
 			{
 				::LogClientSendFail(i + 1, j + 1, ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(SE_DATA_SEND));
 				bTerminated = TRUE;
 				break;
 			}
-
-			if(m_iThreadInterv > 0 && j + 1 < m_iThreadCount)
-				::WaitWithMessageLoop(m_iThreadInterv);
 		}
 
 		if(bTerminated)
@@ -315,7 +298,7 @@ void CClientDlg::OnBnClickedStop()
 
 	for(size_t i = 0; i < m_vtClients.Size(); i++)
 	{
-		CTcpClientWrapper* pSocket = m_vtClients[i];
+		CTcpClientPtr* pSocket = m_vtClients[i];
 
 		if((*pSocket)->Stop())
 			::LogClientStopping((DWORD)i + 1);
