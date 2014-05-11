@@ -107,6 +107,8 @@ v3.2.1 更新：
 8、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
 9、增加 HPSocket for C# SDK（由 int 2e 提供）
 10、公共代码包 vc-common-src 更新为 v2.3.4（参考：vc-common-src v2.3.4 的 Change Log）
+11、修复 Bug：CTcpServer 重复启动、停止引起内存泄漏
+12、修复 Bug：CUdpServer 长时间运行容易造成程序崩溃
 	
 > 升级说明：
 -----------------
