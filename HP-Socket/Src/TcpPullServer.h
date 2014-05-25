@@ -34,9 +34,9 @@ public:
 
 protected:
 	virtual EnHandleResult FireAccept(CONNID dwConnID, SOCKET soClient);
-	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult FireClose(CONNID dwConnID);
-	virtual EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
+	virtual EnHandleResult FireClose(TSocketObj* pSocketObj);
+	virtual EnHandleResult FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult FireServerShutdown();
 
 	virtual BOOL CheckParams()

@@ -472,10 +472,11 @@ int PostSendNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	DWORD dwBytes			= 0;
+	pBufferObj->client		= pSocketObj->socket;
 	pBufferObj->operation	= SO_SEND;
 
 	if(::WSASend(
-					pSocketObj->socket,
+					pBufferObj->client,
 					&pBufferObj->buff,
 					1,
 					&dwBytes,
@@ -505,10 +506,11 @@ int PostReceiveNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 	int result				= NO_ERROR;
 	DWORD dwFlag			= 0; 
 	DWORD dwBytes			= 0; 
+	pBufferObj->client		= pSocketObj->socket;
 	pBufferObj->operation	= SO_RECEIVE;
 
 	if(::WSARecv(
-					pSocketObj->socket,
+					pBufferObj->client,
 					&pBufferObj->buff,
 					1,
 					&dwBytes,

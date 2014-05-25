@@ -66,7 +66,7 @@ BOOL CUdpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 				SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
 		}
 		else
-			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_OPERATION_ABORTED);
+			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
 	}
 	else
 		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
@@ -328,7 +328,7 @@ BOOL CUdpClient::HandleConnect(WSANETWORKEVENTS& events)
 				m_enState = SS_STARTED;
 			}
 			else
-				iCode = ERROR_OPERATION_ABORTED;
+				iCode = ERROR_CANCELLED;
 		}
 		else
 			iCode = ::WSAGetLastError();
@@ -377,8 +377,8 @@ BOOL CUdpClient::ReadData()
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
-				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_OPERATION_ABORTED);
-				FireError(m_dwConnID, SO_RECEIVE, ERROR_OPERATION_ABORTED);
+				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_CANCELLED);
+				FireError(m_dwConnID, SO_RECEIVE, ERROR_CANCELLED);
 
 				return FALSE;
 			}

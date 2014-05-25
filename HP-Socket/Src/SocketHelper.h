@@ -61,6 +61,11 @@ private:
 	int		m_iResult;
 };
 
+/* Server 组件和 Agent 组件内部使用的事件处理结果常量 */
+
+// 连接已关闭
+#define HR_CLOSED	0xFF
+
 /* 关闭连接标识 */
 enum EnSocketCloseFlag
 {
@@ -103,7 +108,8 @@ struct TSocketObjBase
 	SOCKADDR_IN	remoteAddr;
 	PVOID		extra;
 	BOOL		valid;
-	CCriSec		crisec;
+	CCriSec		csSend;
+	CCriSec		csRecv;
 	TItemList	sndBuff;
 
 	volatile BOOL smooth;

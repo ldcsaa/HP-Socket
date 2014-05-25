@@ -173,6 +173,24 @@ enum En_HP_SendPolicy
 };
 
 /************************************************************************
+名称：数据接收策略
+描述：Server 组件和 Agent 组件的数据接收策略
+
+* 串行模式（默认）	：对于单个连接，顺序触发 OnReceive 和 OnClose/OnError 事件。
+					  降低应用程序处理的复杂度，增强安全性；但同时损失一些并发性能。
+* 并行模式			：对于单个连接，同时收到 OnReceive 和 OnClose/OnError 事件时，
+					  会在不同的 IOCP 工作线程中同时触发这些事件，使并发性能得到提升，但应用程序
+					  需要考虑在 OnReceive 的事件处理代码中，某些公共变量可能被 OnClose/OnError
+					  的事件处理代码更改的情形，程序代码逻辑会变得复杂，处理不好时将会产生代码缺陷
+
+************************************************************************/
+enum En_HP_RecvPolicy
+{
+	HP_RP_SERIAL			= 0,	// 串行模式（默认）
+	HP_RP_PARALLEL			= 1,	// 并行模式
+};
+
+/************************************************************************
 名称：操作结果代码
 描述：组件 Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
 ************************************************************************/
@@ -432,6 +450,8 @@ HPSOCKET_API LPCTSTR __stdcall HP_Server_GetLastErrorDesc(HP_Server pServer);
 HPSOCKET_API BOOL __stdcall HP_Server_GetPendingDataLength(HP_Server pServer, HP_CONNID dwConnID, int* piPending);
 /* 获取客户端连接数 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetConnectionCount(HP_Server pServer);
+/* 获取所有连接的 CONNID */
+HPSOCKET_API BOOL __stdcall HP_Server_GetAllConnectionIDs(HP_Server pServer, HP_CONNID* pIDs, DWORD* pdwCount);
 /* 获取某个客户端连接时长（毫秒） */
 HPSOCKET_API BOOL __stdcall HP_Server_GetConnectPeriod(HP_Server pServer, HP_CONNID dwConnID, DWORD* pdwPeriod);
 /* 获取监听 Socket 的地址信息 */
@@ -441,6 +461,8 @@ HPSOCKET_API BOOL __stdcall HP_Server_GetRemoteAddress(HP_Server pServer, HP_CON
 
 /* 设置数据发送策略 */
 HPSOCKET_API void __stdcall HP_Server_SetSendPolicy(HP_Server pServer, En_HP_SendPolicy enSendPolicy);
+/* 设置数据接收策略 */
+HPSOCKET_API void __stdcall HP_Server_SetRecvPolicy(HP_Server pServer, En_HP_RecvPolicy enRecvPolicy);
 /* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 HPSOCKET_API void __stdcall HP_Server_SetFreeSocketObjLockTime(HP_Server pServer, DWORD dwFreeSocketObjLockTime);
 /* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
@@ -458,6 +480,8 @@ HPSOCKET_API void __stdcall HP_Server_SetMaxShutdownWaitTime(HP_Server pServer, 
 
 /* 获取数据发送策略 */
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Server_GetSendPolicy(HP_Server pServer);
+/* 获取数据接收策略 */
+HPSOCKET_API En_HP_RecvPolicy __stdcall HP_Server_GetRecvPolicy(HP_Server pServer);
 /* 获取 Socket 缓存对象锁定时间 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetFreeSocketObjLockTime(HP_Server pServer);
 /* 获取 Socket 缓存池大小 */
@@ -737,6 +761,8 @@ HPSOCKET_API BOOL __stdcall HP_Agent_HasStarted(HP_Agent pAgent);
 HPSOCKET_API En_HP_ServiceState __stdcall HP_Agent_GetState(HP_Agent pAgent);
 /* 获取连接数 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetConnectionCount(HP_Agent pAgent);
+/* 获取所有连接的 CONNID */
+HPSOCKET_API BOOL __stdcall HP_Agent_GetAllConnectionIDs(HP_Agent pAgent, HP_CONNID* pIDs, DWORD* pdwCount);
 /* 获取某个连接时长（毫秒） */
 HPSOCKET_API BOOL __stdcall HP_Agent_GetConnectPeriod(HP_Agent pAgent, HP_CONNID dwConnID, DWORD* pdwPeriod);
 /* 获取某个连接的本地地址信息 */
@@ -752,6 +778,8 @@ HPSOCKET_API BOOL __stdcall HP_Agent_GetPendingDataLength(HP_Agent pAgent, HP_CO
 
 /* 设置数据发送策略 */
 HPSOCKET_API void __stdcall HP_Agent_SetSendPolicy(HP_Agent pAgent, En_HP_SendPolicy enSendPolicy);
+/* 设置数据接收策略 */
+HPSOCKET_API void __stdcall HP_Agent_SetRecvPolicy(HP_Agent pAgent, En_HP_RecvPolicy enRecvPolicy);
 /* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 HPSOCKET_API void __stdcall HP_Agent_SetFreeSocketObjLockTime(HP_Agent pAgent, DWORD dwFreeSocketObjLockTime);
 /* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
@@ -769,6 +797,8 @@ HPSOCKET_API void __stdcall HP_Agent_SetMaxShutdownWaitTime(HP_Agent pAgent, DWO
 
 /* 获取数据发送策略 */
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Agent_GetSendPolicy(HP_Agent pAgent);
+/* 获取数据接收策略 */
+HPSOCKET_API En_HP_RecvPolicy __stdcall HP_Agent_GetRecvPolicy(HP_Agent pAgent);
 /* 获取 Socket 缓存对象锁定时间 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeSocketObjLockTime(HP_Agent pAgent);
 /* 获取 Socket 缓存池大小 */

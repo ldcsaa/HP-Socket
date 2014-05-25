@@ -62,6 +62,7 @@ public:
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPED)
 	, m_enSendPolicy			(SP_PACK)
+	, m_enRecvPolicy			(RP_SERIAL)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwAcceptSocketCount		(DEFAULT_ACCEPT_SOCKET_COUNT)
 	, m_dwSocketBufferSize		(DEFAULT_SOCKET_BUFFER_SIZE)
@@ -100,6 +101,7 @@ public:
 	
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
 	virtual DWORD GetConnectionCount	();
+	virtual BOOL GetAllConnectionIDs	(CONNID* pIDs, DWORD& dwCount);
 	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod);
 	virtual EnSocketError GetLastError	()	{return m_enLastError;}
 	virtual LPCTSTR	GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
@@ -109,6 +111,7 @@ public:
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
+	virtual void SetRecvPolicy				(EnRecvPolicy enRecvPolicy)		{m_enRecvPolicy				= enRecvPolicy;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetAcceptSocketCount		(DWORD dwAcceptSocketCount)		{m_dwAcceptSocketCount		= dwAcceptSocketCount;}
 	virtual void SetSocketBufferSize		(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize		= dwSocketBufferSize;}
@@ -123,6 +126,7 @@ public:
 	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	{m_dwMaxShutdownWaitTime	= dwMaxShutdownWaitTime;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
+	virtual EnRecvPolicy GetRecvPolicy		()	{return m_enRecvPolicy;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetAcceptSocketCount		()	{return m_dwAcceptSocketCount;}
 	virtual DWORD GetSocketBufferSize		()	{return m_dwSocketBufferSize;}
@@ -137,20 +141,17 @@ public:
 	virtual DWORD GetMaxShutdownWaitTime	()	{return m_dwMaxShutdownWaitTime;}
 
 protected:
+	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
+	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, int iLength);
+	virtual EnHandleResult FireClose(TSocketObj* pSocketObj);
+	virtual EnHandleResult FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
+
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
 		{return m_psoListener->OnPrepareListen(soListen);}
 	virtual EnHandleResult FireAccept(CONNID dwConnID, SOCKET soClient)
 		{return m_psoListener->OnAccept(dwConnID, soClient);}
 	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
-	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(dwConnID, pData, iLength);}
-	virtual EnHandleResult FireReceive(CONNID dwConnID, int iLength)
-		{return m_psoListener->OnReceive(dwConnID, iLength);}
-	virtual EnHandleResult FireClose(CONNID dwConnID)
-		{return m_psoListener->OnClose(dwConnID);}
-	virtual EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnError(dwConnID, enOperation, iErrorCode);}
 	virtual EnHandleResult FireServerShutdown()
 		{return m_psoListener->OnServerShutdown();}
 
@@ -181,11 +182,12 @@ private:
 	TBufferObj*	GetFreeBufferObj(int iLen = 0);
 	TSocketObj*	GetFreeSocketObj(CONNID dwConnID, SOCKET soClient);
 	void		AddFreeBufferObj(TBufferObj* pBufferObj);
-	void		AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
+	void		AddFreeSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	TBufferObj*	CreateBufferObj();
 	TSocketObj*	CreateSocketObj();
 	void		DeleteBufferObj(TBufferObj* pBufferObj);
 	void		DeleteSocketObj(TSocketObj* pSocketObj);
+	BOOL		InvalidSocketObj(TSocketObj* pSocketObj);
 
 	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj);
 	void		CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SD_SEND);
@@ -201,7 +203,7 @@ private:
 
 	void ForceDisconnect(CONNID dwConnID);
 	void HandleIo		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
-	void HandleError	(CONNID dwConnID, TBufferObj* pBufferObj, DWORD dwErrorCode);
+	void HandleError	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwErrorCode);
 	void HandleAccept	(SOCKET soListen, TBufferObj* pBufferObj);
 	void HandleSend		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	void HandleReceive	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
@@ -222,7 +224,7 @@ private:
 	int DoSendSafe	(TSocketObj* pSocketObj);
 	int SendItem	(TSocketObj* pSocketObj);
 
-	void CheckError	(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	void CheckError	(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 
 private:
 	CInitSocket					m_wsSocket;
@@ -257,6 +259,7 @@ private:
 
 private:
 	EnSendPolicy m_enSendPolicy;
+	EnRecvPolicy m_enRecvPolicy;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwAcceptSocketCount;
 	DWORD m_dwSocketBufferSize;

@@ -35,9 +35,9 @@ EnHandleResult CTcpPullServer::FireAccept(CONNID dwConnID, SOCKET soClient)
 	return result;
 }
 
-EnHandleResult CTcpPullServer::FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CTcpPullServer::FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
 {
-	TBuffer* pBuffer = m_bfPool[dwConnID];
+	TBuffer* pBuffer = m_bfPool[pSocketObj->connID];
 
 	if(pBuffer != nullptr && pBuffer->IsValid())
 	{
@@ -53,26 +53,26 @@ EnHandleResult CTcpPullServer::FireReceive(CONNID dwConnID, const BYTE* pData, i
 			}
 		}
 
-		if(len > 0) return __super::FireReceive(dwConnID, len);
+		if(len > 0) return __super::FireReceive(pSocketObj, len);
 	}
 
 	return HR_IGNORE;
 }
 
-EnHandleResult CTcpPullServer::FireClose(CONNID dwConnID)
+EnHandleResult CTcpPullServer::FireClose(TSocketObj* pSocketObj)
 {
-	EnHandleResult result = __super::FireClose(dwConnID);
+	EnHandleResult result = __super::FireClose(pSocketObj);
 
-	m_bfPool.PutFreeBuffer(dwConnID);
+	m_bfPool.PutFreeBuffer(pSocketObj->connID);
 
 	return result;
 }
 
-EnHandleResult CTcpPullServer::FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CTcpPullServer::FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
 {
-	EnHandleResult result = __super::FireError(dwConnID, enOperation, iErrorCode);
+	EnHandleResult result = __super::FireError(pSocketObj, enOperation, iErrorCode);
 
-	m_bfPool.PutFreeBuffer(dwConnID);
+	m_bfPool.PutFreeBuffer(pSocketObj->connID);
 
 	return result;
 }

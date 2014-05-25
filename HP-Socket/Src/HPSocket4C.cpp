@@ -69,6 +69,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_Connect=_HP_Agent_Connect@16")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Disconnect=_HP_Agent_Disconnect@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_DisconnectLongConnections=_HP_Agent_DisconnectLongConnections@12")
+	#pragma comment(linker, "/EXPORT:HP_Agent_GetAllConnectionIDs=_HP_Agent_GetAllConnectionIDs@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetConnectPeriod=_HP_Agent_GetConnectPeriod@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetConnectionCount=_HP_Agent_GetConnectionCount@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetConnectionExtra=_HP_Agent_GetConnectionExtra@12")
@@ -82,6 +83,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetLocalAddress=_HP_Agent_GetLocalAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetMaxShutdownWaitTime=_HP_Agent_GetMaxShutdownWaitTime@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetPendingDataLength=_HP_Agent_GetPendingDataLength@12")
+	#pragma comment(linker, "/EXPORT:HP_Agent_GetRecvPolicy=_HP_Agent_GetRecvPolicy@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetRemoteAddress=_HP_Agent_GetRemoteAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetState=_HP_Agent_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetSendPolicy=_HP_Agent_GetSendPolicy@4")
@@ -96,6 +98,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetFreeSocketObjLockTime=_HP_Agent_SetFreeSocketObjLockTime@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetFreeSocketObjPool=_HP_Agent_SetFreeSocketObjPool@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetMaxShutdownWaitTime=_HP_Agent_SetMaxShutdownWaitTime@8")
+	#pragma comment(linker, "/EXPORT:HP_Agent_SetRecvPolicy=_HP_Agent_SetRecvPolicy@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetSendPolicy=_HP_Agent_SetSendPolicy@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_SetWorkerThreadCount=_HP_Agent_SetWorkerThreadCount@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Start=_HP_Agent_Start@12")
@@ -118,6 +121,7 @@
 	#pragma comment(linker, "/EXPORT:HP_GetSocketErrorDesc=_HP_GetSocketErrorDesc@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_Disconnect=_HP_Server_Disconnect@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_DisconnectLongConnections=_HP_Server_DisconnectLongConnections@12")
+	#pragma comment(linker, "/EXPORT:HP_Server_GetAllConnectionIDs=_HP_Server_GetAllConnectionIDs@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetConnectPeriod=_HP_Server_GetConnectPeriod@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetConnectionCount=_HP_Server_GetConnectionCount@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetConnectionExtra=_HP_Server_GetConnectionExtra@12")
@@ -131,6 +135,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_GetListenAddress=_HP_Server_GetListenAddress@16")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetMaxShutdownWaitTime=_HP_Server_GetMaxShutdownWaitTime@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetPendingDataLength=_HP_Server_GetPendingDataLength@12")
+	#pragma comment(linker, "/EXPORT:HP_Server_GetRecvPolicy=_HP_Server_GetRecvPolicy@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetRemoteAddress=_HP_Server_GetRemoteAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetSendPolicy=_HP_Server_GetSendPolicy@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetState=_HP_Server_GetState@4")
@@ -145,6 +150,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_SetFreeSocketObjLockTime=_HP_Server_SetFreeSocketObjLockTime@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetFreeSocketObjPool=_HP_Server_SetFreeSocketObjPool@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetMaxShutdownWaitTime=_HP_Server_SetMaxShutdownWaitTime@8")
+	#pragma comment(linker, "/EXPORT:HP_Server_SetRecvPolicy=_HP_Server_SetRecvPolicy@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetSendPolicy=_HP_Server_SetSendPolicy@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetWorkerThreadCount=_HP_Server_SetWorkerThreadCount@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_Start=_HP_Server_Start@12")
@@ -879,6 +885,11 @@ HPSOCKET_API DWORD __stdcall HP_Server_GetConnectionCount(HP_Server pServer)
 	return C_HP_Object::ToServer(pServer)->GetConnectionCount();
 }
 
+HPSOCKET_API BOOL __stdcall HP_Server_GetAllConnectionIDs(HP_Server pServer, HP_CONNID* pIDs, DWORD* pdwCount)
+{
+	return C_HP_Object::ToServer(pServer)->GetAllConnectionIDs(pIDs, *pdwCount);
+}
+
 HPSOCKET_API BOOL __stdcall HP_Server_GetConnectPeriod(HP_Server pServer, HP_CONNID dwConnID, DWORD* pdwPeriod)
 {
 	return C_HP_Object::ToServer(pServer)->GetConnectPeriod(dwConnID, *pdwPeriod);
@@ -897,6 +908,11 @@ HPSOCKET_API BOOL __stdcall HP_Server_GetRemoteAddress(HP_Server pServer, HP_CON
 HPSOCKET_API void __stdcall HP_Server_SetSendPolicy(HP_Server pServer, En_HP_SendPolicy enSendPolicy)
 {
 	C_HP_Object::ToServer(pServer)->SetSendPolicy((EnSendPolicy)enSendPolicy);
+}
+
+HPSOCKET_API void __stdcall HP_Server_SetRecvPolicy(HP_Server pServer, En_HP_RecvPolicy enRecvPolicy)
+{
+	C_HP_Object::ToServer(pServer)->SetRecvPolicy((EnRecvPolicy)enRecvPolicy);
 }
 
 HPSOCKET_API void __stdcall HP_Server_SetFreeSocketObjLockTime(HP_Server pServer, DWORD dwFreeSocketObjLockTime)
@@ -937,6 +953,11 @@ HPSOCKET_API void __stdcall HP_Server_SetMaxShutdownWaitTime(HP_Server pServer, 
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Server_GetSendPolicy(HP_Server pServer)
 {
 	return (En_HP_SendPolicy)C_HP_Object::ToServer(pServer)->GetSendPolicy();
+}
+
+HPSOCKET_API En_HP_RecvPolicy __stdcall HP_Server_GetRecvPolicy(HP_Server pServer)
+{
+	return (En_HP_RecvPolicy)C_HP_Object::ToServer(pServer)->GetRecvPolicy();
 }
 
 HPSOCKET_API DWORD __stdcall HP_Server_GetFreeSocketObjLockTime(HP_Server pServer)
@@ -1288,6 +1309,11 @@ HPSOCKET_API DWORD __stdcall HP_Agent_GetConnectionCount(HP_Agent pAgent)
 	return C_HP_Object::ToAgent(pAgent)->GetConnectionCount();
 }
 
+HPSOCKET_API BOOL __stdcall HP_Agent_GetAllConnectionIDs(HP_Agent pAgent, HP_CONNID* pIDs, DWORD* pdwCount)
+{
+	return C_HP_Object::ToAgent(pAgent)->GetAllConnectionIDs(pIDs, *pdwCount);
+}
+
 HPSOCKET_API BOOL __stdcall HP_Agent_GetConnectPeriod(HP_Agent pAgent, HP_CONNID dwConnID, DWORD* pdwPeriod)
 {
 	return C_HP_Object::ToAgent(pAgent)->GetConnectPeriod(dwConnID, *pdwPeriod);
@@ -1306,6 +1332,11 @@ HPSOCKET_API BOOL __stdcall HP_Agent_GetRemoteAddress(HP_Agent pAgent, HP_CONNID
 HPSOCKET_API void __stdcall HP_Agent_SetSendPolicy(HP_Agent pAgent, En_HP_SendPolicy enSendPolicy)
 {
 	C_HP_Object::ToAgent(pAgent)->SetSendPolicy((EnSendPolicy)enSendPolicy);
+}
+
+HPSOCKET_API void __stdcall HP_Agent_SetRecvPolicy(HP_Agent pAgent, En_HP_RecvPolicy enRecvPolicy)
+{
+	C_HP_Object::ToAgent(pAgent)->SetRecvPolicy((EnRecvPolicy)enRecvPolicy);
 }
 
 HPSOCKET_API void __stdcall HP_Agent_SetFreeSocketObjLockTime(HP_Agent pAgent, DWORD dwFreeSocketObjLockTime)
@@ -1346,6 +1377,11 @@ HPSOCKET_API void __stdcall HP_Agent_SetMaxShutdownWaitTime(HP_Agent pAgent, DWO
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Agent_GetSendPolicy(HP_Agent pAgent)
 {
 	return (En_HP_SendPolicy)C_HP_Object::ToAgent(pAgent)->GetSendPolicy();
+}
+
+HPSOCKET_API En_HP_RecvPolicy __stdcall HP_Agent_GetRecvPolicy(HP_Agent pAgent)
+{
+	return (En_HP_RecvPolicy)C_HP_Object::ToAgent(pAgent)->GetRecvPolicy();
 }
 
 HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeSocketObjLockTime(HP_Agent pAgent)

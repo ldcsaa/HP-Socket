@@ -12,4 +12,8 @@
     <LocalDebuggerCommand>D:\MyWork\Cpp\TestSocket\TestEcho-PFM\Release\Server.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">
+    <LocalDebuggerCommand>D:\MyWork\Cpp\HP-Socket\Bin\HPSocket\x64\HttpProxy-Server.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>
