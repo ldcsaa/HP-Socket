@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.4
+ * Version	: 2.3.5
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -547,11 +547,11 @@ private:
 	TBuffer*		last;
 };
 
-typedef TSimpleList<TBuffer>			TBufferList;
+typedef TSimpleList<TBuffer>				TBufferList;
 
-typedef hash_map<ULONG_PTR, TBuffer*>	TBufferPtrMap;
-typedef TBufferPtrMap::iterator			TBufferPtrMapI;
-typedef TBufferPtrMap::const_iterator	TBufferPtrMapCI;
+typedef unordered_map<ULONG_PTR, TBuffer*>	TBufferPtrMap;
+typedef TBufferPtrMap::iterator				TBufferPtrMapI;
+typedef TBufferPtrMap::const_iterator		TBufferPtrMapCI;
 
 class CBufferPool
 {

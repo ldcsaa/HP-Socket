@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.4
+ * Version	: 2.3.5
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -37,10 +37,14 @@
 #include <list>
 #include <set>
 #include <map>
+#include <hash_set>
 #include <hash_map>
+#include <unordered_set>
+#include <unordered_map>
 
 using namespace std;
 using namespace stdext;
+using namespace std::tr1;
 
 typedef	wstring		CStdStringW;
 typedef string		CStdStringA;
@@ -51,91 +55,119 @@ typedef string		CStdStringA;
 	typedef CStdStringA		CStdString;
 #endif
 
-typedef list<short>					short_list;
-typedef list<int>					int_list;
-typedef list<long>					long_list;
-typedef list<__int64>				int64_list;
-typedef list<unsigned short>		ushort_list;
-typedef list<unsigned int>			uint_list;
-typedef list<unsigned long>			ulong_list;
-typedef list<unsigned __int64>		uint64_list;
-typedef list<float>					float_list;
-typedef list<double>				double_list;
-typedef stack<short>				short_stack;
-typedef stack<int>					int_stack;
-typedef stack<long>					long_stack;
-typedef stack<__int64>				int64_stack;
-typedef stack<unsigned short>		ushort_stack;
-typedef stack<unsigned int>			uint_stack;
-typedef stack<unsigned long>		ulong_stack;
-typedef stack<unsigned __int64>		uint64_stack;
-typedef stack<float>				float_stack;
-typedef stack<double>				double_stack;
-typedef queue<short>				short_queue;
-typedef queue<int>					int_queue;
-typedef queue<long>					long_queue;
-typedef queue<__int64>				int64_queue;
-typedef queue<unsigned short>		ushort_queue;
-typedef queue<unsigned int>			uint_queue;
-typedef queue<unsigned long>		ulong_queue;
-typedef queue<unsigned __int64>		uint64_queue;
-typedef queue<float>				float_queue;
-typedef queue<double>				double_queue;
-typedef deque<short>				short_deque;
-typedef deque<int>					int_deque;
-typedef deque<long>					long_deque;
-typedef deque<__int64>				int64_deque;
-typedef deque<unsigned short>		ushort_deque;
-typedef deque<unsigned int>			uint_deque;
-typedef deque<unsigned long>		ulong_deque;
-typedef deque<unsigned __int64>		uint64_deque;
-typedef deque<float>				float_deque;
-typedef deque<double>				double_deque;
-typedef vector<short>				short_vector;
-typedef vector<int>					int_vector;
-typedef vector<long>				long_vector;
-typedef vector<__int64>				int64_vector;
-typedef vector<unsigned short>		ushort_vector;
-typedef vector<unsigned int>		uint_vector;
-typedef vector<unsigned long>		ulong_vector;
-typedef vector<unsigned __int64>	uint64_vector;
-typedef vector<float>				float_vector;
-typedef vector<double>				double_vector;
-typedef set<short>					short_set;
-typedef set<int>					int_set;
-typedef set<long>					long_set;
-typedef set<__int64>				int64_set;
-typedef set<unsigned short>			ushort_set;
-typedef set<unsigned int>			uint_set;
-typedef set<unsigned long>			ulong_set;
-typedef set<unsigned __int64>		uint64_set;
-typedef set<float>					float_set;
-typedef set<double>					double_set;
+typedef list<short>						short_list;
+typedef list<int>						int_list;
+typedef list<long>						long_list;
+typedef list<__int64>					int64_list;
+typedef list<unsigned short>			ushort_list;
+typedef list<unsigned int>				uint_list;
+typedef list<unsigned long>				ulong_list;
+typedef list<unsigned __int64>			uint64_list;
+typedef list<float>						float_list;
+typedef list<double>					double_list;
+typedef stack<short>					short_stack;
+typedef stack<int>						int_stack;
+typedef stack<long>						long_stack;
+typedef stack<__int64>					int64_stack;
+typedef stack<unsigned short>			ushort_stack;
+typedef stack<unsigned int>				uint_stack;
+typedef stack<unsigned long>			ulong_stack;
+typedef stack<unsigned __int64>			uint64_stack;
+typedef stack<float>					float_stack;
+typedef stack<double>					double_stack;
+typedef queue<short>					short_queue;
+typedef queue<int>						int_queue;
+typedef queue<long>						long_queue;
+typedef queue<__int64>					int64_queue;
+typedef queue<unsigned short>			ushort_queue;
+typedef queue<unsigned int>				uint_queue;
+typedef queue<unsigned long>			ulong_queue;
+typedef queue<unsigned __int64>			uint64_queue;
+typedef queue<float>					float_queue;
+typedef queue<double>					double_queue;
+typedef deque<short>					short_deque;
+typedef deque<int>						int_deque;
+typedef deque<long>						long_deque;
+typedef deque<__int64>					int64_deque;
+typedef deque<unsigned short>			ushort_deque;
+typedef deque<unsigned int>				uint_deque;
+typedef deque<unsigned long>			ulong_deque;
+typedef deque<unsigned __int64>			uint64_deque;
+typedef deque<float>					float_deque;
+typedef deque<double>					double_deque;
+typedef vector<short>					short_vector;
+typedef vector<int>						int_vector;
+typedef vector<long>					long_vector;
+typedef vector<__int64>					int64_vector;
+typedef vector<unsigned short>			ushort_vector;
+typedef vector<unsigned int>			uint_vector;
+typedef vector<unsigned long>			ulong_vector;
+typedef vector<unsigned __int64>		uint64_vector;
+typedef vector<float>					float_vector;
+typedef vector<double>					double_vector;
+typedef set<short>						short_set;
+typedef set<int>						int_set;
+typedef set<long>						long_set;
+typedef set<__int64>					int64_set;
+typedef set<unsigned short>				ushort_set;
+typedef set<unsigned int>				uint_set;
+typedef set<unsigned long>				ulong_set;
+typedef set<unsigned __int64>			uint64_set;
+typedef set<float>						float_set;
+typedef set<double>						double_set;
+typedef hash_set<short>					short_hash_set;
+typedef hash_set<int>					int_hash_set;
+typedef hash_set<long>					long_hash_set;
+typedef hash_set<__int64>				int64_hash_set;
+typedef hash_set<unsigned short>		ushort_hash_set;
+typedef hash_set<unsigned int>			uint_hash_set;
+typedef hash_set<unsigned long>			ulong_hash_set;
+typedef hash_set<unsigned __int64>		uint64_hash_set;
+typedef hash_set<float>					float_hash_set;
+typedef hash_set<double>				double_hash_set;
+typedef unordered_set<short>			short_unordered_set;
+typedef unordered_set<int>				int_unordered_set;
+typedef unordered_set<long>				long_unordered_set;
+typedef unordered_set<__int64>			int64_unordered_set;
+typedef unordered_set<unsigned short>	ushort_unordered_set;
+typedef unordered_set<unsigned int>		uint_unordered_set;
+typedef unordered_set<unsigned long>	ulong_unordered_set;
+typedef unordered_set<unsigned __int64>	uint64_unordered_set;
+typedef unordered_set<float>			float_unordered_set;
+typedef unordered_set<double>			double_unordered_set;
 
-typedef list<INT_PTR>				int_ptr_list;
-typedef list<LONG_PTR>				long_ptr_list;
-typedef list<UINT_PTR>				uint_ptr_list;
-typedef list<ULONG_PTR>				ulong_ptr_list;
-typedef stack<INT_PTR>				int_ptr_stack;
-typedef stack<LONG_PTR>				long_ptr_stack;
-typedef stack<UINT_PTR>				uint_ptr_stack;
-typedef stack<ULONG_PTR>			ulong_ptr_stack;
-typedef queue<INT_PTR>				int_ptr_queue;
-typedef queue<LONG_PTR>				long_ptr_queue;
-typedef queue<UINT_PTR>				uint_ptr_queue;
-typedef queue<ULONG_PTR>			ulong_ptr_queue;
-typedef deque<INT_PTR>				int_ptr_deque;
-typedef deque<LONG_PTR>				long_ptr_deque;
-typedef deque<UINT_PTR>				uint_ptr_deque;
-typedef deque<ULONG_PTR>			ulong_ptr_deque;
-typedef vector<INT_PTR>				int_ptr_vector;
-typedef vector<LONG_PTR>			long_ptr_vector;
-typedef vector<UINT_PTR>			uint_ptr_vector;
-typedef vector<ULONG_PTR>			ulong_ptr_vector;
-typedef set<INT_PTR>				int_ptr_set;
-typedef set<LONG_PTR>				long_ptr_set;
-typedef set<UINT_PTR>				uint_ptr_set;
-typedef set<ULONG_PTR>				ulong_ptr_set;
+typedef list<INT_PTR>					int_ptr_list;
+typedef list<LONG_PTR>					long_ptr_list;
+typedef list<UINT_PTR>					uint_ptr_list;
+typedef list<ULONG_PTR>					ulong_ptr_list;
+typedef stack<INT_PTR>					int_ptr_stack;
+typedef stack<LONG_PTR>					long_ptr_stack;
+typedef stack<UINT_PTR>					uint_ptr_stack;
+typedef stack<ULONG_PTR>				ulong_ptr_stack;
+typedef queue<INT_PTR>					int_ptr_queue;
+typedef queue<LONG_PTR>					long_ptr_queue;
+typedef queue<UINT_PTR>					uint_ptr_queue;
+typedef queue<ULONG_PTR>				ulong_ptr_queue;
+typedef deque<INT_PTR>					int_ptr_deque;
+typedef deque<LONG_PTR>					long_ptr_deque;
+typedef deque<UINT_PTR>					uint_ptr_deque;
+typedef deque<ULONG_PTR>				ulong_ptr_deque;
+typedef vector<INT_PTR>					int_ptr_vector;
+typedef vector<LONG_PTR>				long_ptr_vector;
+typedef vector<UINT_PTR>				uint_ptr_vector;
+typedef vector<ULONG_PTR>				ulong_ptr_vector;
+typedef set<INT_PTR>					int_ptr_set;
+typedef set<LONG_PTR>					long_ptr_set;
+typedef set<UINT_PTR>					uint_ptr_set;
+typedef set<ULONG_PTR>					ulong_ptr_set;
+typedef hash_set<INT_PTR>				int_ptr_hash_set;
+typedef hash_set<LONG_PTR>				long_ptr_hash_set;
+typedef hash_set<UINT_PTR>				uint_ptr_hash_set;
+typedef hash_set<ULONG_PTR>				ulong_ptr_hash_set;
+typedef unordered_set<INT_PTR>			int_ptr_unordered_set;
+typedef unordered_set<LONG_PTR>			long_ptr_unordered_set;
+typedef unordered_set<UINT_PTR>			uint_ptr_unordered_set;
+typedef unordered_set<ULONG_PTR>		ulong_ptr_unordered_set;
 
 /*****************************************************************************/
 /******************************** 容器操作函数 *******************************/
@@ -600,57 +632,6 @@ private:
 
 	DECLARE_NO_COPY_CLASS(MapWrapper)
 };
-
-/************************************************************************/
-/*                       字符串比较 hash 函数                           */
-/************************************************************************/
-template<class T, bool uncase = true, size_t bk_size = 4, size_t min_bks = 8>
-// T -> TCHAR* / CString
-struct STR_HASH_FUNCTION
-{
-	enum
-	{
-		bucket_size	= bk_size,
-		min_buckets	= min_bks,
-	};
-
-	//HASH_MAP函数。
-	size_t operator() (const T &A) const
-	{
-		LPCTSTR key	= (LPCTSTR)A;
-		UINT nHash	= 0;
-
-		if(uncase)
-		{
-			while(*key)
-			{
-				UINT delta = (*key >= _T('A') && *key <= _T('Z')) ? 32 : 0;
-				nHash	= (nHash << 5) + nHash + delta + *key++;
-			}
-		}
-		else
-		{
-			while(*key)
-				nHash	= (nHash << 5) + nHash + *key++;
-		}
-
-		return nHash;
-	}
-
-	//比较函数。
-	bool operator() (const T &A, const T &B) const
-	{
-		if(uncase)
-			return lstrcmpi((LPCTSTR)A, (LPCTSTR)B) < 0;
-		else
-			return lstrcmp((LPCTSTR)A, (LPCTSTR)B) < 0;
-	}
-};
-
-typedef STR_HASH_FUNCTION<LPCTSTR, false>	CASE_TCHAR_HASH_FUNCTION;
-typedef STR_HASH_FUNCTION<LPCTSTR, true>	UNCASE_TCHAR_HASH_FUNCTION;
-typedef STR_HASH_FUNCTION<CString, false>	CASE_STR_HASH_FUNCTION;
-typedef STR_HASH_FUNCTION<CString, true>	UNCASE_STR_HASH_FUNCTION;
 
 /************************************************************************/
 /*                            比较仿函数                                */

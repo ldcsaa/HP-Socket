@@ -107,12 +107,14 @@ v3.2.1 更新：
 4、增加 EnSendPolicy 枚举类型，IServer/IAgent 增加发送模式设置方法 SetSendPolicy()
 5、增加 EnRecvPolicy 枚举类型，IServer/IAgent 增加接收模式设置方法 SetRecvPolicy()
 6、IServer/IAgent 增加方法：BOOL GetAllConnectionIDs()，获取所有连接的 CONNID
-7、EnServerError / EnClientError 枚举类型合并为 EnSocketError
-8、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
-9、IClient/IServer/IAgent 增加方法：BOOL GetPendingDataLength()，获取连接中未发出数据的长度
-10、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
-11、增加 HPSocket for C# SDK（由 int 2e 提供）
-12、公共代码包 vc-common-src 更新为 v2.3.4（参考：vc-common-src v2.3.4 的 Change Log）
+7、IUdpServer 增加方法：SetPostReceiveCount()，设置 Receive 预投递数量
+8、EnServerError / EnClientError 枚举类型合并为 EnSocketError
+9、EnSocketError / EnHandleResult / EnFetchResult 枚举类型从原所在类中移到外部
+10、IClient/IServer/IAgent 增加方法：BOOL GetPendingDataLength()，获取连接中未发出数据的长度
+11、HPSocket4C.dll 增加方法 SendPart()，支持指定缓冲区指针偏移量
+12、增加 HPSocket for C# SDK（由 int 2e 提供）
+13、增加 HPSocket 易语言支持库（由 Yecate 提供）
+14、公共代码包 vc-common-src 更新为 v2.3.5（参考：vc-common-src v2.3.5 的 Change Log）
 	
 > 升级说明：
 -----------------
