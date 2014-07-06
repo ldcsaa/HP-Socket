@@ -54,6 +54,8 @@ private:
 	int m_nActive;
 };
 
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
+
 class CSlimLock
 {
 public:
@@ -75,6 +77,8 @@ private:
 private:
 	SRWLOCK m_lock;
 };
+
+#endif
 
 class CRWLock
 {

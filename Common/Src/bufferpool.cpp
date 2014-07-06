@@ -75,7 +75,7 @@ inline int TItem::Cat(const BYTE* pData, int length)
 
 	if(cat > 0)
 	{
-		memmove(end, pData, cat);
+		memcpy(end, pData, cat);
 		end += cat;
 	}
 
@@ -93,7 +93,7 @@ inline int TItem::Fetch(BYTE* pData, int length)
 	ASSERT(pData != nullptr && length > 0);
 
 	int fetch = min(Size(), length);
-	memmove(pData, begin, fetch);
+	memcpy(pData, begin, fetch);
 	begin	 += fetch;
 
 	return fetch;

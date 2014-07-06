@@ -1,4 +1,29 @@
 ==========================================================================================
+v3.2.2 更新：
+==========================================================================================
+
+> 增加若干帮助方法：
+-----------------
+1、批量发送方法 SendPackets()
+	1) IClient / IServer / IAgent 增加批量发送方法 SendPackets(dwConnID, pBuffers[], iBufferCount)
+	2) 对于 TCP 组件 - 顺序发送所有数据包
+	3) 对于 UDP 组件 - 把所有数据包组合成一个数据包发送（数据包的总长度不能大于设置的 UDP 包最大长度）
+2、小文件发送方法 SendSmallFile()
+	1) ITcpClient / ITcpServer / ITcpAgent 增加小文件发送方法 SendSmallFile(dwConnID, lpszFileName, pHead, pTail)
+	2) 通过 pHead 和 pTail 参数，可以分别在文件数据的头部和尾部加入自定义数据
+	3) SendSmallFile() 只能发送 4096 KB 以内大小的文件
+3、HPSocket.dll 和 HPSocket4C.dll 增加以下导出方法
+	1) SYS_WSAGetLastError()：调用系统的 WSAGetLastError()
+	2) SYS_SetSocketOption()：调用系统的 setsockopt()
+	3) SYS_GetSocketOption()：调用系统的 getsockopt()
+	4) SYS_IoctlSocket()	：调用系统的 ioctlsocket()
+	5) SYS_WSAIoctl()		：调用系统的 WSAIoctl()
+
+> 升级说明：
+-----------------
+1、使用 HP-Socket v3.2.1 及以前版本的应用程序可以安全升级到 HP-Socket v3.2.2
+
+==========================================================================================
 v3.2.1 更新：
 ==========================================================================================
 
@@ -97,7 +122,7 @@ v3.2.1 更新：
 	3）DIRECT - 直接模式		：对每一个发送操作都直接投递，适用于负载不高但要求实时性较高的场合
 2、Server 和 Agent 组件提供以下两种数据接收策略：
 	1）SERIAL - 串行模式（默认）：顺序触发同一连接的 OnReceive 和 OnClose/OnError 事件
-	2）PARALLEL - 并行模式		：在不同的 IOCP 工作线程中同时触发同一连接的 OnReceive 和 OnClose/OnError 事件
+	2）PARALLEL - 并行模式		：在不同的通信线程中同时触发同一连接的 OnReceive 和 OnClose/OnError 事件
 
 > 其它更新：
 -----------------
