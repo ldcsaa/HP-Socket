@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -94,10 +94,10 @@ private:
 	TItem* next;
 	TItem* last;
 
+	int		capacity;
 	BYTE*	head;
 	BYTE*	begin;
 	BYTE*	end;
-	int		capacity;
 };
 
 template<class T> struct TSimpleList
@@ -248,9 +248,9 @@ private:
 	}
 
 private:
+	int	size;
 	T*	pFront;
 	T*	pBack;
-	int	size;
 };
 
 struct TItemList : public TSimpleList<TItem>
@@ -430,12 +430,12 @@ public:
 private:
 	CPrivateHeap	m_heap;
 
+	DWORD			m_dwItemCapacity;
+	DWORD			m_dwPoolSize;
+	DWORD			m_dwPoolHold;
+
 	CCriSec			m_csFreeItem;
 	TItemList		m_lsFreeItem;
-
-	DWORD m_dwItemCapacity;
-	DWORD m_dwPoolSize;
-	DWORD m_dwPoolHold;
 };
 
 struct TItemPtr
@@ -538,13 +538,13 @@ private:
 	ULONG_PTR		id;
 	int				length;
 	DWORD			freeTime;
-	CCriSec			cs;
-
-	TItemList		items;
 
 private:
 	TBuffer*		next;
 	TBuffer*		last;
+
+	CCriSec			cs;
+	TItemList		items;
 };
 
 typedef TSimpleList<TBuffer>				TBufferList;
@@ -615,17 +615,16 @@ public:
 	static const DWORD DEFAULT_BUFFER_POOL_HOLD;
 
 private:
-	CPrivateHeap	m_heap;
+	DWORD			m_dwBufferLockTime;
+	DWORD			m_dwBufferPoolSize;
+	DWORD			m_dwBufferPoolHold;
 
+	CPrivateHeap	m_heap;
 	CItemPool		m_itPool;
 
-	CCriSec			m_csFreeBuffer;
 	CRWLock			m_csBufferMap;
-
 	TBufferPtrMap	m_mpBuffer;
-	TBufferList		m_lsFreeBuffer;
 
-	DWORD m_dwBufferLockTime;
-	DWORD m_dwBufferPoolSize;
-	DWORD m_dwBufferPoolHold;
+	CCriSec			m_csFreeBuffer;
+	TBufferList		m_lsFreeBuffer;
 };

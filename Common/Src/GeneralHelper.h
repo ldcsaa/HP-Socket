@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -32,7 +32,7 @@ _WIN32_WINNT		: Windows NT 版本	（默认：_WIN32_WINNT_WINXP / _WIN32_WINNT_WIN7）
 WINVER				: Windows 版本		（默认：_WIN32_WINNT）
 _USE_MFC			: 使用 MFC
 _WINSOCK_SUPPORT	: 支持 Windows Socket
-_RIBBONS_SUPPORT	: 支持 Ribbons 界面风格
+_NO_RIBBONS_SUPPORT	: 不支持 Ribbons 界面风格
 _DETECT_MEMORY_LEAK	: DEBUG 状态下支持内存泄露检查
 
 Windows CE:
@@ -252,7 +252,7 @@ Windows 95
 		#include <afxcmn.h>			// MFC support for Windows Common Controls
 	#endif
 
-	#ifdef _RIBBONS_SUPPORT
+	#ifndef _NO_RIBBONS_SUPPORT
 		#include <afxcontrolbars.h>	// MFC support for ribbons and control bars
 	#endif
 

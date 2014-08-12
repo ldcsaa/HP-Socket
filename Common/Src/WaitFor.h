@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -57,7 +57,7 @@ ULONGLONG GetTimeGap64(ULONGLONG ullOriginal);
 返回值:		TRUE  : 收完消息
 			FALSE : bDispatchQuitMsg 参数为 FALSE 并收到 WM_QUIT 消息		
 **********************************/
-BOOL	PeekMessageLoop(BOOL bDispatchQuitMsg = TRUE);
+BOOL PeekMessageLoop(BOOL bDispatchQuitMsg = TRUE);
 
 /**********************************
 描述: 等待指定时间, 同时处理Windows消息

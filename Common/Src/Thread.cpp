@@ -1,12 +1,12 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.1
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
- * Porject	: https://code.google.com/p/ldcsaa
- * Bolg		: http://www.cnblogs.com/ldcsaa
- * WeiBo	: http://weibo.com/u/1402935851
+ * Project	: https://github.com/ldcsaa
+ * Blog		: http://www.cnblogs.com/ldcsaa
+ * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,3 +23,5 @@
  */
 
 #include "stdafx.h"
+#include "Thread.h"
+#include <process.h>

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -21,13 +21,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/******************************************************************************
-Module:  BufferPtr.h
-Notices: Copyright (c) 2006 Bruce Liang
-Purpose: 用于简化堆内存的申请和释放.
-Desc:
-******************************************************************************/
 
 #pragma once
 
@@ -174,9 +167,9 @@ private:
 	}
 
 private:
-	T*	m_pch;
-	size_t			m_size;
-	size_t			m_capacity;
+	T*		m_pch;
+	size_t	m_size;
+	size_t	m_capacity;
 };
 
 typedef CBufferPtrT<char>			CCharBufferPtr;

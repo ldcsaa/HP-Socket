@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -21,14 +21,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/******************************************************************************
-Module:  Event.h
-Notices: Copyright (c) 2006 Bruce Liang
-Purpose: 封装Win32事件内核对象, 用于在设置及读取变量时同步线程.
-Desc:
-Usage:
-******************************************************************************/
 
 #pragma once
 

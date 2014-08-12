@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -21,13 +21,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/******************************************************************************
-Module:  Singleton.h
-Notices: Copyright (c) 2006 Bruce Liang
-Purpose: 用于简化 Singleton 模式的定义.
-Desc:
-******************************************************************************/
 
 #pragma once
 

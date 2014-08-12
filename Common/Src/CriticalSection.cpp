@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.5
+ * Version	: 2.3.7
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -21,17 +21,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/****************************************************************************
-*																			*
-* CriticalSection.cpp 														*
-*																			*
-* Create by :																*
-* Kingfisher	2003-10-15													*
-* 																			*
-* Description: 																*
-* 封装Win32临界量对象和互斥量内核对象										*
-****************************************************************************/
 
 #include "stdafx.h"
 #include "CriticalSection.h"
