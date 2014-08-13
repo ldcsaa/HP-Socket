@@ -36,6 +36,9 @@
 template <class T, class _PutGuard = CCriSec, class _GetGuard = CCriSec> class CRingBuffer
 {
 public:
+	static const UINT DEFAULT_SIZE = 4096;
+
+public:
 	BOOL Put(T* pElement)
 	{
 		ASSERT(pElement != nullptr);
@@ -244,7 +247,7 @@ public:
 		return TRUE;
 	}
 
-	BOOL Create(DWORD dwExpect = DEFAULT_EXPECT)
+	BOOL Create(DWORD dwExpect = DEFAULT_SIZE)
 	{
 		ASSERT(!IsValid() && dwExpect > 0);
 
@@ -367,7 +370,7 @@ private:
 	}
 
 public:
-	CRingBuffer(BOOL bCreate = FALSE, DWORD uiExpect = DEFAULT_EXPECT)
+	CRingBuffer(BOOL bCreate = FALSE, DWORD uiExpect = DEFAULT_SIZE)
 	: m_pv(nullptr)
 	, m_bValid(FALSE)
 	, m_dwReal(0)
