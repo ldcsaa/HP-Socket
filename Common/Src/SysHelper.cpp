@@ -58,7 +58,7 @@ BOOL SysGetOSVersionInfo(LPOSVERSIONINFO pInfo, BOOL bInfoEx)
 	return ::GetVersionEx(pInfo);
 }
 
-DWORD GetOSVersion()
+DWORD SysGetOSVersion()
 {
 	OSVERSIONINFO vi;
 	DWORD dwOSVersion = 0;
