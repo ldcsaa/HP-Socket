@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,14 +30,15 @@
 class CTcpPullAgent : public IPullSocket, public CTcpAgent
 {
 public:
-	virtual EnFetchResult Fetch(CONNID dwConnID, BYTE* pData, int iLength);
+	virtual EnFetchResult Fetch	(CONNID dwConnID, BYTE* pData, int iLength);
+	virtual EnFetchResult Peek	(CONNID dwConnID, BYTE* pData, int iLength);
 
 protected:
 	virtual EnHandleResult FireConnect(CONNID dwConnID);
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult FireClose(TSocketObj* pSocketObj);
 	virtual EnHandleResult FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult FireAgentShutdown();
+	virtual EnHandleResult FireShutdown();
 
 	virtual BOOL CheckParams()
 	{

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.7
+ * Version	: 2.3.8
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -36,7 +36,7 @@
 template <class T, class _PutGuard = CCriSec, class _GetGuard = CCriSec> class CRingBuffer
 {
 public:
-	static const UINT DEFAULT_SIZE = 4096;
+	static const UINT DEFAULT_EXPECT = 4096;
 
 public:
 	BOOL Put(T* pElement)
@@ -247,7 +247,7 @@ public:
 		return TRUE;
 	}
 
-	BOOL Create(DWORD dwExpect = DEFAULT_SIZE)
+	BOOL Create(DWORD dwExpect = DEFAULT_EXPECT)
 	{
 		ASSERT(!IsValid() && dwExpect > 0);
 
@@ -370,7 +370,7 @@ private:
 	}
 
 public:
-	CRingBuffer(BOOL bCreate = FALSE, DWORD uiExpect = DEFAULT_SIZE)
+	CRingBuffer(BOOL bCreate = FALSE, DWORD uiExpect = DEFAULT_EXPECT)
 	: m_pv(nullptr)
 	, m_bValid(FALSE)
 	, m_dwReal(0)

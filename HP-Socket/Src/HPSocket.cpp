@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,6 +30,7 @@
 #include "TcpPullClient.h"
 #include "UdpServer.h"
 #include "UdpClient.h"
+#include "UdpCast.h"
 #include "TcpAgent.h"
 #include "TcpPullAgent.h"
 
@@ -41,6 +42,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullServer=_HP_Create_TcpPullServer")
 	#pragma comment(linker, "/EXPORT:HP_Create_TcpServer=_HP_Create_TcpServer")
 	#pragma comment(linker, "/EXPORT:HP_Create_UdpClient=_HP_Create_UdpClient")
+	#pragma comment(linker, "/EXPORT:HP_Create_UdpCast=_HP_Create_UdpCast")
 	#pragma comment(linker, "/EXPORT:HP_Create_UdpServer=_HP_Create_UdpServer")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpAgent=_HP_Destroy_TcpAgent")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullAgent=_HP_Destroy_TcpPullAgent")
@@ -49,6 +51,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullServer=_HP_Destroy_TcpPullServer")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpServer=_HP_Destroy_TcpServer")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpClient=_HP_Destroy_UdpClient")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpCast=_HP_Destroy_UdpCast")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpServer=_HP_Destroy_UdpServer")
 	#pragma comment(linker, "/EXPORT:HP_GetSocketErrorDesc=_HP_GetSocketErrorDesc")
 	#pragma comment(linker, "/EXPORT:SYS_GetLastError=_SYS_GetLastError")
@@ -64,14 +67,14 @@ HPSOCKET_API ITcpServer* HP_Create_TcpServer(ITcpServerListener* pListener)
 	return new CTcpServer(pListener);
 }
 
-HPSOCKET_API ITcpClient* HP_Create_TcpClient(ITcpClientListener* pListener)
-{
-	return new CTcpClient(pListener);
-}
-
 HPSOCKET_API ITcpAgent* HP_Create_TcpAgent(ITcpAgentListener* pListener)
 {
 	return new CTcpAgent(pListener);
+}
+
+HPSOCKET_API ITcpClient* HP_Create_TcpClient(ITcpClientListener* pListener)
+{
+	return new CTcpClient(pListener);
 }
 
 HPSOCKET_API ITcpPullServer* HP_Create_TcpPullServer(ITcpServerListener* pListener)
@@ -79,14 +82,14 @@ HPSOCKET_API ITcpPullServer* HP_Create_TcpPullServer(ITcpServerListener* pListen
 	return (ITcpPullServer*)(new CTcpPullServer(pListener));
 }
 
-HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener)
-{
-	return (ITcpPullClient*)(new CTcpPullClient(pListener));
-}
-
 HPSOCKET_API ITcpPullAgent* HP_Create_TcpPullAgent(ITcpAgentListener* pListener)
 {
 	return (ITcpPullAgent*)(new CTcpPullAgent(pListener));
+}
+
+HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener)
+{
+	return (ITcpPullClient*)(new CTcpPullClient(pListener));
 }
 
 HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener)
@@ -99,14 +102,14 @@ HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener)
 	return new CUdpClient(pListener);
 }
 
+HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener)
+{
+	return new CUdpCast(pListener);
+}
+
 HPSOCKET_API void HP_Destroy_TcpServer(ITcpServer* pServer)
 {
 	delete pServer;
-}
-
-HPSOCKET_API void HP_Destroy_TcpClient(ITcpClient* pClient)
-{
-	delete pClient;
 }
 
 HPSOCKET_API void HP_Destroy_TcpAgent(ITcpAgent* pAgent)
@@ -114,19 +117,24 @@ HPSOCKET_API void HP_Destroy_TcpAgent(ITcpAgent* pAgent)
 	delete pAgent;
 }
 
+HPSOCKET_API void HP_Destroy_TcpClient(ITcpClient* pClient)
+{
+	delete pClient;
+}
+
 HPSOCKET_API void HP_Destroy_TcpPullServer(ITcpPullServer* pServer)
 {
 	delete pServer;
 }
 
-HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient)
-{
-	delete pClient;
-}
-
 HPSOCKET_API void HP_Destroy_TcpPullAgent(ITcpPullAgent* pAgent)
 {
 	delete pAgent;
+}
+
+HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient)
+{
+	delete pClient;
 }
 
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer)
@@ -137,6 +145,11 @@ HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer)
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient)
 {
 	delete pClient;
+}
+
+HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast)
+{
+	delete pCast;
 }
 
 HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode)

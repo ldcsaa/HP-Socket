@@ -1,4 +1,50 @@
 ==========================================================================================
+v3.3.1 更新：
+==========================================================================================
+
+> 组件接口调整：
+-----------------
+1、IClientListener 监听器接口用 IClient* 参数取代 CONNID 参数标识 Client 组件对象
+2、增加 IPullClient 接口，用作 PULL Client 组件的基接口 
+3、IPullSocket 和 IPullClient 接口增加 Peek() 方法用于窥探缓冲区数据（不会移除缓冲区数据）
+4、增加 IComplexSocketListener 监听器接口，用作 Server/Agent 组件的监听器基接口
+5、IComplexSocketListener 提供 OnShutdown 通知方法取代 Server/Agent 组件原来的 OnServerShutdown/OnAgentShutdown
+6、IClient组件增加 Get/SetExtra() 方法用于保存自定义附加数据
+
+> 增加 UdpCast 通信组件：
+-----------------
+1、UdpClient / UdpServer 用于 C/S 模式的点对点单播通信，但在某些应用场景下，需要用到组播或广播通信
+2、UdpCast 实现了组播或广播通信，UdpCast 提供 IUdpCast 接口，该接口继承自 IClient，有以下接口方法：
+
+	1) 通知接口方法：
+		OnPrepareConnect(IClient* pClient, SOCKET socket)
+		OnConnect(IClient* pClient)
+		OnSend(IClient* pClient, const BYTE* pData, int iLength)
+		OnReceive(IClient* pClient, const BYTE* pData, int iLength)
+		OnClose(IClient* pClient)
+		OnError(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+		
+	2) 主要操作方法：
+		Start(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE /*该参数被忽略*/)
+		Stop()
+		Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)
+		Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0)
+		SendPackets(const WSABUF pBuffers[], int iCount)
+
+3、增加 UdpCast 使用示例：TestUDPCast
+
+> 升级说明：
+-----------------
+1、HP-Socket v3.3.1 在功能上兼容 HP-Socket v3.2.3 版本，但代码级别不完全兼容
+2、HP-Socket v3.2.3 升级到 HP-Socket v3.3.1 需要注意以下调整：
+
+	1) Client 组件
+		a) IClientListener 监听器接口调整，所有通知方法的参数有调整
+		b) PULL Client 用 IPullClient 作为基接口，Fetch()/Peek()方法参数有调整
+	2) Agent/Server 组件
+		a) OnShutdown 取代 OnServerShutdown/OnAgentShutdown
+
+==========================================================================================
 v3.2.3 更新：
 ==========================================================================================
 

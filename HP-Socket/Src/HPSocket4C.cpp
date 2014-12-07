@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -32,6 +32,7 @@
 #include "TcpPullAgent.h"
 #include "UdpServer.h"
 #include "UdpClient.h"
+#include "UdpCast.h"
 
 #if !defined(_WIN64)
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpAgent=_Create_HP_TcpAgent@4")
@@ -46,6 +47,8 @@
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpPullServerListener=_Create_HP_TcpPullServerListener@0")
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpServer=_Create_HP_TcpServer@4")
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpServerListener=_Create_HP_TcpServerListener@0")
+	#pragma comment(linker, "/EXPORT:Create_HP_UdpCast=_Create_HP_UdpCast@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_UdpCastListener=_Create_HP_UdpCastListener@0")
 	#pragma comment(linker, "/EXPORT:Create_HP_UdpClient=_Create_HP_UdpClient@4")
 	#pragma comment(linker, "/EXPORT:Create_HP_UdpClientListener=_Create_HP_UdpClientListener@0")
 	#pragma comment(linker, "/EXPORT:Create_HP_UdpServer=_Create_HP_UdpServer@4")
@@ -62,6 +65,8 @@
 	#pragma comment(linker, "/EXPORT:Destroy_HP_TcpPullServerListener=_Destroy_HP_TcpPullServerListener@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_TcpServer=_Destroy_HP_TcpServer@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_TcpServerListener=_Destroy_HP_TcpServerListener@4")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_UdpCast=_Destroy_HP_UdpCast@4")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_UdpCastListener=_Destroy_HP_UdpCastListener@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_UdpClient=_Destroy_HP_UdpClient@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_UdpClientListener=_Destroy_HP_UdpClientListener@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_UdpServer=_Destroy_HP_UdpServer@4")
@@ -85,8 +90,8 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetPendingDataLength=_HP_Agent_GetPendingDataLength@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetRecvPolicy=_HP_Agent_GetRecvPolicy@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetRemoteAddress=_HP_Agent_GetRemoteAddress@20")
-	#pragma comment(linker, "/EXPORT:HP_Agent_GetState=_HP_Agent_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetSendPolicy=_HP_Agent_GetSendPolicy@4")
+	#pragma comment(linker, "/EXPORT:HP_Agent_GetState=_HP_Agent_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_GetWorkerThreadCount=_HP_Agent_GetWorkerThreadCount@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_HasStarted=_HP_Agent_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Send=_HP_Agent_Send@16")
@@ -105,6 +110,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_Start=_HP_Agent_Start@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Stop=_HP_Agent_Stop@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetConnectionID=_HP_Client_GetConnectionID@4")
+	#pragma comment(linker, "/EXPORT:HP_Client_GetExtra=_HP_Client_GetExtra@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetFreeBufferPoolHold=_HP_Client_GetFreeBufferPoolHold@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetFreeBufferPoolSize=_HP_Client_GetFreeBufferPoolSize@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_GetLastError=_HP_Client_GetLastError@4")
@@ -116,6 +122,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Client_Send=_HP_Client_Send@12")
 	#pragma comment(linker, "/EXPORT:HP_Client_SendPackets=_HP_Client_SendPackets@12")
 	#pragma comment(linker, "/EXPORT:HP_Client_SendPart=_HP_Client_SendPart@16")
+	#pragma comment(linker, "/EXPORT:HP_Client_SetExtra=_HP_Client_SetExtra@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolHold=_HP_Client_SetFreeBufferPoolHold@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolSize=_HP_Client_SetFreeBufferPoolSize@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_Start=_HP_Client_Start@16")
@@ -158,7 +165,6 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_SetWorkerThreadCount=_HP_Server_SetWorkerThreadCount@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_Start=_HP_Server_Start@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_Stop=_HP_Server_Stop@4")
-	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnAgentShutdown=_HP_Set_FN_Agent_OnAgentShutdown@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnClose=_HP_Set_FN_Agent_OnClose@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnConnect=_HP_Set_FN_Agent_OnConnect@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnError=_HP_Set_FN_Agent_OnError@8")
@@ -166,6 +172,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnPullReceive=_HP_Set_FN_Agent_OnPullReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnReceive=_HP_Set_FN_Agent_OnReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnSend=_HP_Set_FN_Agent_OnSend@8")
+	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnShutdown=_HP_Set_FN_Agent_OnShutdown@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnClose=_HP_Set_FN_Client_OnClose@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnConnect=_HP_Set_FN_Client_OnConnect@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnError=_HP_Set_FN_Client_OnError@8")
@@ -180,7 +187,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnPullReceive=_HP_Set_FN_Server_OnPullReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnReceive=_HP_Set_FN_Server_OnReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnSend=_HP_Set_FN_Server_OnSend@8")
-	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnServerShutdown=_HP_Set_FN_Server_OnServerShutdown@8")
+	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnShutdown=_HP_Set_FN_Server_OnShutdown@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetKeepAliveInterval=_HP_TcpAgent_GetKeepAliveInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetKeepAliveTime=_HP_TcpAgent_GetKeepAliveTime@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetSocketBufferSize=_HP_TcpAgent_GetSocketBufferSize@4")
@@ -198,19 +205,35 @@
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetKeepAliveTime=_HP_TcpClient_SetKeepAliveTime@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetSocketBufferSize=_HP_TcpClient_SetSocketBufferSize@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpPullAgent_Fetch=_HP_TcpPullAgent_Fetch@16")
-	#pragma comment(linker, "/EXPORT:HP_TcpPullClient_Fetch=_HP_TcpPullClient_Fetch@16")
+	#pragma comment(linker, "/EXPORT:HP_TcpPullAgent_Peek=_HP_TcpPullAgent_Peek@16")
+	#pragma comment(linker, "/EXPORT:HP_TcpPullClient_Fetch=_HP_TcpPullClient_Fetch@12")
+	#pragma comment(linker, "/EXPORT:HP_TcpPullClient_Peek=_HP_TcpPullClient_Peek@12")
 	#pragma comment(linker, "/EXPORT:HP_TcpPullServer_Fetch=_HP_TcpPullServer_Fetch@16")
+	#pragma comment(linker, "/EXPORT:HP_TcpPullServer_Peek=_HP_TcpPullServer_Peek@16")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetAcceptSocketCount=_HP_TcpServer_GetAcceptSocketCount@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetKeepAliveInterval=_HP_TcpServer_GetKeepAliveInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetKeepAliveTime=_HP_TcpServer_GetKeepAliveTime@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetSocketBufferSize=_HP_TcpServer_GetSocketBufferSize@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetSocketListenQueue=_HP_TcpServer_GetSocketListenQueue@4")
+	#pragma comment(linker, "/EXPORT:HP_TcpServer_SendSmallFile=_HP_TcpServer_SendSmallFile@20")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetAcceptSocketCount=_HP_TcpServer_SetAcceptSocketCount@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetKeepAliveInterval=_HP_TcpServer_SetKeepAliveInterval@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetKeepAliveTime=_HP_TcpServer_SetKeepAliveTime@8")
-	#pragma comment(linker, "/EXPORT:HP_TcpServer_SendSmallFile=_HP_TcpServer_SendSmallFile@20")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetSocketBufferSize=_HP_TcpServer_SetSocketBufferSize@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetSocketListenQueue=_HP_TcpServer_SetSocketListenQueue@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetBindAdddress=_HP_UdpCast_GetBindAdddress@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetCastMode=_HP_UdpCast_GetCastMode@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetMaxDatagramSize=_HP_UdpCast_GetMaxDatagramSize@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetMultiCastTtl=_HP_UdpCast_GetMultiCastTtl@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetRemoteAddress=_HP_UdpCast_GetRemoteAddress@16")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_IsMultiCastLoop=_HP_UdpCast_IsMultiCastLoop@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_IsReuseAddress=_HP_UdpCast_IsReuseAddress@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetBindAdddress=_HP_UdpCast_SetBindAdddress@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetCastMode=_HP_UdpCast_SetCastMode@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetMaxDatagramSize=_HP_UdpCast_SetMaxDatagramSize@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetMultiCastLoop=_HP_UdpCast_SetMultiCastLoop@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetMultiCastTtl=_HP_UdpCast_SetMultiCastTtl@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetReuseAddress=_HP_UdpCast_SetReuseAddress@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpClient_GetDetectAttempts=_HP_UdpClient_GetDetectAttempts@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpClient_GetDetectInterval=_HP_UdpClient_GetDetectInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpClient_GetMaxDatagramSize=_HP_UdpClient_GetMaxDatagramSize@4")
@@ -226,12 +249,124 @@
 	#pragma comment(linker, "/EXPORT:HP_UdpServer_SetMaxDatagramSize=_HP_UdpServer_SetMaxDatagramSize@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpServer_SetPostReceiveCount=_HP_UdpServer_SetPostReceiveCount@8")
 	#pragma comment(linker, "/EXPORT:SYS_GetLastError=_SYS_GetLastError@0")
-	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError@0")
-	#pragma comment(linker, "/EXPORT:SYS_SetSocketOption=_SYS_SetSocketOption@20")
 	#pragma comment(linker, "/EXPORT:SYS_GetSocketOption=_SYS_GetSocketOption@20")
 	#pragma comment(linker, "/EXPORT:SYS_IoctlSocket=_SYS_IoctlSocket@12")
+	#pragma comment(linker, "/EXPORT:SYS_SetSocketOption=_SYS_SetSocketOption@20")
+	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError@0")
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl@28")
 #endif
+
+class C_HP_Object
+{
+public:
+
+	inline static IServer* ToServer(HP_Server pServer)
+	{
+		return (IServer*)((char*)pServer + ((C_HP_Object*)pServer)->offset);
+	}
+
+	inline static IAgent* ToAgent(HP_Agent pAgent)
+	{
+		return (IAgent*)((char*)pAgent + ((C_HP_Object*)pAgent)->offset);
+	}
+
+	inline static IClient* ToClient(HP_Client pClient)
+	{
+		return (IClient*)((char*)pClient + ((C_HP_Object*)pClient)->offset);
+	}
+
+	inline static IPullSocket* ToPullSocket(HP_PullSocket pPullSocket)
+	{
+		return (IPullSocket*)((char*)pPullSocket + sizeof(C_HP_Object));
+	}
+
+	inline static IPullClient* ToPullClient(HP_PullClient pPullClient)
+	{
+		return (IPullClient*)((char*)pPullClient + sizeof(C_HP_Object));
+	}
+
+	inline static HP_Server FromServer(IServer* pServer)
+	{
+		C_HP_Object* pResult = (C_HP_Object*)((char*)pServer - sizeof(C_HP_Object));
+
+		if(pResult->offset != sizeof(C_HP_Object))
+			pResult = (C_HP_Object*)((char*)pResult - sizeof(IPullSocket));
+
+		return (HP_Object)pResult;
+	}
+
+	inline static HP_Agent FromAgent(IAgent* pAgent)
+	{
+		C_HP_Object* pResult = (C_HP_Object*)((char*)pAgent - sizeof(C_HP_Object));
+
+		if(pResult->offset != sizeof(C_HP_Object))
+			pResult = (C_HP_Object*)((char*)pResult - sizeof(IPullSocket));
+
+		return (HP_Object)pResult;
+	}
+
+	inline static HP_Client FromClient(IClient* pClient)
+	{
+		C_HP_Object* pResult = (C_HP_Object*)((char*)pClient - sizeof(C_HP_Object));
+
+		if(pResult->offset != sizeof(C_HP_Object))
+			pResult = (C_HP_Object*)((char*)pResult - sizeof(IPullClient));
+
+		return (HP_Object)pResult;
+	}
+
+	inline static HP_PullSocket FromPullSocket(IPullSocket* pPullSocket)
+	{
+		return (HP_PullSocket)((char*)pPullSocket - sizeof(IPullSocket));
+	}
+
+	inline static HP_PullClient FromPullClient(IPullClient* pPullClient)
+	{
+		return (HP_PullClient)((char*)pPullClient - sizeof(IPullClient));
+	}
+
+public:
+
+	inline static ITcpServer* ToTcpServer(HP_TcpServer pServer)
+	{
+		return (ITcpServer*)ToServer(pServer);
+	}
+
+	inline static IUdpServer* ToUdpServer(HP_UdpServer pServer)
+	{
+		return (IUdpServer*)ToServer(pServer);
+	}
+
+	inline static ITcpAgent* ToTcpAgent(HP_TcpAgent pAgent)
+	{
+		return (ITcpAgent*)ToAgent(pAgent);
+	}
+
+	inline static ITcpClient* ToTcpClient(HP_TcpClient pClient)
+	{
+		return (ITcpClient*)ToClient(pClient);
+	}
+
+	inline static IUdpClient* ToUdpClient(HP_UdpClient pClient)
+	{
+		return (IUdpClient*)ToClient(pClient);
+	}
+
+	inline static IUdpCast* ToUdpCast(HP_UdpCast pCast)
+	{
+		return (IUdpCast*)ToClient(pCast);
+	}
+
+protected:
+
+	C_HP_Object(int k = 0) : offset(k + sizeof(C_HP_Object))	{}
+
+	virtual ~C_HP_Object()										{}
+
+private:
+
+	size_t offset;
+};
 
 class C_HP_ServerListener : public IServerListener
 {
@@ -239,8 +374,8 @@ public:
 	virtual EnHandleResult OnPrepareListen(UINT_PTR soListen)
 	{
 		return	(m_fnOnPrepareListen)
-				? (EnHandleResult)m_fnOnPrepareListen(soListen)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnPrepareListen(soListen)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnAccept(CONNID dwConnID, UINT_PTR soClient)
@@ -248,15 +383,15 @@ public:
 		ASSERT(m_fnOnAccept);
 
 		return	(m_fnOnAccept)
-				? (EnHandleResult)m_fnOnAccept(dwConnID, soClient)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnAccept(dwConnID, soClient)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 	{
 		return	(m_fnOnSend)
-				? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
@@ -264,8 +399,8 @@ public:
 		ASSERT(m_fnOnReceive);
 
 		return	(m_fnOnReceive)
-				? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)
@@ -273,8 +408,8 @@ public:
 		ASSERT(m_fnOnPullReceive);
 
 		return	(m_fnOnPullReceive)
-				? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnClose(CONNID dwConnID)
@@ -282,8 +417,8 @@ public:
 		ASSERT(m_fnOnClose);
 
 		return	(m_fnOnClose)
-				? (EnHandleResult)m_fnOnClose(dwConnID)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnClose(dwConnID)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
@@ -291,49 +426,49 @@ public:
 		ASSERT(m_fnOnError);
 
 		return	(m_fnOnError)
-				? (EnHandleResult)m_fnOnError(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnError(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
+			: HR_IGNORE;
 	}
 
-	virtual EnHandleResult OnServerShutdown()
+	virtual EnHandleResult OnShutdown()
 	{
-		return	(m_fnOnServerShutdown)
-				? (EnHandleResult)m_fnOnServerShutdown()
-				: HR_IGNORE;
+		return	(m_fnOnShutdown)
+			? (EnHandleResult)m_fnOnShutdown()
+			: HR_IGNORE;
 	}
 
 public:
 	C_HP_ServerListener()
-	: m_fnOnPrepareListen	(nullptr)
-	, m_fnOnAccept			(nullptr)
-	, m_fnOnSend			(nullptr)
-	, m_fnOnReceive			(nullptr)
-	, m_fnOnPullReceive		(nullptr)
-	, m_fnOnClose			(nullptr)
-	, m_fnOnError			(nullptr)
-	, m_fnOnServerShutdown	(nullptr)
+		: m_fnOnPrepareListen	(nullptr)
+		, m_fnOnAccept			(nullptr)
+		, m_fnOnSend			(nullptr)
+		, m_fnOnReceive			(nullptr)
+		, m_fnOnPullReceive		(nullptr)
+		, m_fnOnClose			(nullptr)
+		, m_fnOnError			(nullptr)
+		, m_fnOnShutdown		(nullptr)
 	{
 	}
 
 public:
-	HP_FN_OnPrepareListen	m_fnOnPrepareListen	;
-	HP_FN_OnAccept			m_fnOnAccept		;
-	HP_FN_OnSend			m_fnOnSend			;
-	HP_FN_OnReceive			m_fnOnReceive		;
-	HP_FN_OnPullReceive		m_fnOnPullReceive	;
-	HP_FN_OnClose			m_fnOnClose			;
-	HP_FN_OnError			m_fnOnError			;
-	HP_FN_OnServerShutdown	m_fnOnServerShutdown;
+	HP_FN_Server_OnPrepareListen	m_fnOnPrepareListen	;
+	HP_FN_Server_OnAccept			m_fnOnAccept		;
+	HP_FN_Server_OnSend				m_fnOnSend			;
+	HP_FN_Server_OnReceive			m_fnOnReceive		;
+	HP_FN_Server_OnPullReceive		m_fnOnPullReceive	;
+	HP_FN_Server_OnClose			m_fnOnClose			;
+	HP_FN_Server_OnError			m_fnOnError			;
+	HP_FN_Server_OnShutdown			m_fnOnShutdown		;
 };
 
-class C_HP_ClientListener : public IClientListener
+class C_HP_AgentListener : public IAgentListener
 {
 public:
 	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, UINT_PTR socket)
 	{
 		return	(m_fnOnPrepareConnect)
-				? (EnHandleResult)m_fnOnPrepareConnect(dwConnID, socket)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnPrepareConnect(dwConnID, socket)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnConnect(CONNID dwConnID)
@@ -341,15 +476,15 @@ public:
 		ASSERT(m_fnOnConnect);
 
 		return	(m_fnOnConnect)
-				? (EnHandleResult)m_fnOnConnect(dwConnID)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnConnect(dwConnID)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 	{
 		return	(m_fnOnSend)
-				? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
@@ -357,8 +492,8 @@ public:
 		ASSERT(m_fnOnReceive);
 
 		return	(m_fnOnReceive)
-				? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)
@@ -366,8 +501,8 @@ public:
 		ASSERT(m_fnOnPullReceive);
 
 		return	(m_fnOnPullReceive)
-				? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnClose(CONNID dwConnID)
@@ -375,8 +510,8 @@ public:
 		ASSERT(m_fnOnClose);
 
 		return	(m_fnOnClose)
-				? (EnHandleResult)m_fnOnClose(dwConnID)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnClose(dwConnID)
+			: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
@@ -384,107 +519,123 @@ public:
 		ASSERT(m_fnOnError);
 
 		return	(m_fnOnError)
-				? (EnHandleResult)m_fnOnError(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
-				: HR_IGNORE;
+			? (EnHandleResult)m_fnOnError(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
+			: HR_IGNORE;
 	}
 
-public:
-	C_HP_ClientListener()
-	: m_fnOnPrepareConnect	(nullptr)
-	, m_fnOnConnect			(nullptr)
-	, m_fnOnSend			(nullptr)
-	, m_fnOnReceive			(nullptr)
-	, m_fnOnPullReceive		(nullptr)
-	, m_fnOnClose			(nullptr)
-	, m_fnOnError			(nullptr)
+	virtual EnHandleResult OnShutdown()
 	{
-	}
-
-public:
-	HP_FN_OnPrepareConnect	m_fnOnPrepareConnect;
-	HP_FN_OnConnect			m_fnOnConnect		;
-	HP_FN_OnSend			m_fnOnSend			;
-	HP_FN_OnReceive			m_fnOnReceive		;
-	HP_FN_OnPullReceive		m_fnOnPullReceive	;
-	HP_FN_OnClose			m_fnOnClose			;
-	HP_FN_OnError			m_fnOnError			;
-};
-
-class C_HP_AgentListener : public C_HP_ClientListener
-{
-public:
-	virtual EnHandleResult OnAgentShutdown()
-	{
-		return	(m_fnOnAgentShutdown)
-				? (EnHandleResult)m_fnOnAgentShutdown()
-				: HR_IGNORE;
+		return	(m_fnOnShutdown)
+			? (EnHandleResult)m_fnOnShutdown()
+			: HR_IGNORE;
 	}
 
 public:
 	C_HP_AgentListener()
-	: m_fnOnAgentShutdown	(nullptr)
+		: m_fnOnPrepareConnect	(nullptr)
+		, m_fnOnConnect			(nullptr)
+		, m_fnOnSend			(nullptr)
+		, m_fnOnReceive			(nullptr)
+		, m_fnOnPullReceive		(nullptr)
+		, m_fnOnClose			(nullptr)
+		, m_fnOnError			(nullptr)
+		, m_fnOnShutdown		(nullptr)
 	{
 	}
 
 public:
-	HP_FN_OnAgentShutdown	m_fnOnAgentShutdown	;
+	HP_FN_Agent_OnPrepareConnect	m_fnOnPrepareConnect;
+	HP_FN_Agent_OnConnect			m_fnOnConnect		;
+	HP_FN_Agent_OnSend				m_fnOnSend			;
+	HP_FN_Agent_OnReceive			m_fnOnReceive		;
+	HP_FN_Agent_OnPullReceive		m_fnOnPullReceive	;
+	HP_FN_Agent_OnClose				m_fnOnClose			;
+	HP_FN_Agent_OnError				m_fnOnError			;
+	HP_FN_Agent_OnShutdown			m_fnOnShutdown		;
 };
 
-class C_HP_Object
+class C_HP_ClientListener : public IClientListener
 {
 public:
-
-	static IServer* ToServer(PVOID pServer)
+	virtual EnHandleResult OnPrepareConnect(IClient* pClient, UINT_PTR socket)
 	{
-		return dynamic_cast<IServer*>((C_HP_Object*)pServer);
+		return	(m_fnOnPrepareConnect)
+			? (EnHandleResult)m_fnOnPrepareConnect(C_HP_Object::FromClient(pClient), socket)
+			: HR_IGNORE;
 	}
 
-	static IClient* ToClient(PVOID pClient)
+	virtual EnHandleResult OnConnect(IClient* pClient)
 	{
-		return dynamic_cast<IClient*>((C_HP_Object*)pClient);
+		ASSERT(m_fnOnConnect);
+
+		return	(m_fnOnConnect)
+			? (EnHandleResult)m_fnOnConnect(C_HP_Object::FromClient(pClient))
+			: HR_IGNORE;
 	}
 
-	static IAgent* ToAgent(PVOID pAgent)
+	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)
 	{
-		return dynamic_cast<IAgent*>((C_HP_Object*)pAgent);
+		return	(m_fnOnSend)
+			? (EnHandleResult)m_fnOnSend(C_HP_Object::FromClient(pClient), pData, iLength)
+			: HR_IGNORE;
 	}
 
-	static IPullSocket* ToPullSocket(PVOID pPullSocket)
+	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)
 	{
-		return dynamic_cast<IPullSocket*>((C_HP_Object*)pPullSocket);
+		ASSERT(m_fnOnReceive);
+
+		return	(m_fnOnReceive)
+			? (EnHandleResult)m_fnOnReceive(C_HP_Object::FromClient(pClient), pData, iLength)
+			: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)
+	{
+		ASSERT(m_fnOnPullReceive);
+
+		return	(m_fnOnPullReceive)
+			? (EnHandleResult)m_fnOnPullReceive(C_HP_Object::FromClient(pClient), iLength)
+			: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnClose(IClient* pClient)
+	{
+		ASSERT(m_fnOnClose);
+
+		return	(m_fnOnClose)
+			? (EnHandleResult)m_fnOnClose(C_HP_Object::FromClient(pClient))
+			: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnError(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+	{
+		ASSERT(m_fnOnError);
+
+		return	(m_fnOnError)
+			? (EnHandleResult)m_fnOnError(C_HP_Object::FromClient(pClient), (En_HP_SocketOperation)enOperation, iErrorCode)
+			: HR_IGNORE;
 	}
 
 public:
-
-	static ITcpServer* ToTcpServer(PVOID pServer)
+	C_HP_ClientListener()
+		: m_fnOnPrepareConnect	(nullptr)
+		, m_fnOnConnect			(nullptr)
+		, m_fnOnSend			(nullptr)
+		, m_fnOnReceive			(nullptr)
+		, m_fnOnPullReceive		(nullptr)
+		, m_fnOnClose			(nullptr)
+		, m_fnOnError			(nullptr)
 	{
-		return (ITcpServer*)ToServer(pServer);
-	}
-
-	static IUdpServer* ToUdpServer(PVOID pServer)
-	{
-		return (IUdpServer*)ToServer(pServer);
-	}
-
-	static ITcpClient* ToTcpClient(PVOID pClient)
-	{
-		return (ITcpClient*)ToClient(pClient);
-	}
-
-	static IUdpClient* ToUdpClient(PVOID pClient)
-	{
-		return (IUdpClient*)ToClient(pClient);
-	}
-
-	static ITcpAgent* ToTcpAgent(PVOID pAgent)
-	{
-		return (ITcpAgent*)ToAgent(pAgent);
 	}
 
 public:
-	virtual ~C_HP_Object()
-	{
-	}
+	HP_FN_Client_OnPrepareConnect	m_fnOnPrepareConnect;
+	HP_FN_Client_OnConnect			m_fnOnConnect		;
+	HP_FN_Client_OnSend				m_fnOnSend			;
+	HP_FN_Client_OnReceive			m_fnOnReceive		;
+	HP_FN_Client_OnPullReceive		m_fnOnPullReceive	;
+	HP_FN_Client_OnClose			m_fnOnClose			;
+	HP_FN_Client_OnError			m_fnOnError			;
 };
 
 class C_HP_TcpServer : public C_HP_Object, public CTcpServer
@@ -496,31 +647,13 @@ public:
 class C_HP_TcpPullServer : public C_HP_Object, public CTcpPullServer
 {
 public:
-	C_HP_TcpPullServer(ITcpServerListener* pListener) : CTcpPullServer(pListener) {}
+	C_HP_TcpPullServer(ITcpServerListener* pListener) : C_HP_Object(sizeof(IPullSocket)), CTcpPullServer(pListener) {}
 };
 
 class C_HP_UdpServer : public C_HP_Object, public CUdpServer
 {
 public:
 	C_HP_UdpServer(IUdpServerListener* pListener) : CUdpServer(pListener) {}
-};
-
-class C_HP_TcpClient : public C_HP_Object, public CTcpClient
-{
-public:
-	C_HP_TcpClient(ITcpClientListener* pListener) : CTcpClient(pListener) {}
-};
-
-class C_HP_TcpPullClient : public C_HP_Object, public CTcpPullClient
-{
-public:
-	C_HP_TcpPullClient(ITcpClientListener* pListener) : CTcpPullClient(pListener) {}
-};
-
-class C_HP_UdpClient : public C_HP_Object, public CUdpClient
-{
-public:
-	C_HP_UdpClient(IUdpClientListener* pListener) : CUdpClient(pListener) {}
 };
 
 class C_HP_TcpAgent : public C_HP_Object, public CTcpAgent
@@ -532,7 +665,31 @@ public:
 class C_HP_TcpPullAgent : public C_HP_Object, public CTcpPullAgent
 {
 public:
-	C_HP_TcpPullAgent(ITcpAgentListener* pListener) : CTcpPullAgent(pListener) {}
+	C_HP_TcpPullAgent(ITcpAgentListener* pListener) : C_HP_Object(sizeof(IPullSocket)), CTcpPullAgent(pListener) {}
+};
+
+class C_HP_TcpClient : public C_HP_Object, public CTcpClient
+{
+public:
+	C_HP_TcpClient(ITcpClientListener* pListener) : CTcpClient(pListener) {}
+};
+
+class C_HP_TcpPullClient : public C_HP_Object, public CTcpPullClient
+{
+public:
+	C_HP_TcpPullClient(ITcpClientListener* pListener) : C_HP_Object(sizeof(IPullClient)), CTcpPullClient(pListener) {}
+};
+
+class C_HP_UdpClient : public C_HP_Object, public CUdpClient
+{
+public:
+	C_HP_UdpClient(IUdpClientListener* pListener) : CUdpClient(pListener) {}
+};
+
+class C_HP_UdpCast : public C_HP_Object, public CUdpCast
+{
+public:
+	C_HP_UdpCast(IUdpCastListener* pListener) : CUdpCast(pListener) {}
 };
 
 /****************************************************/
@@ -543,14 +700,14 @@ HPSOCKET_API HP_TcpServer __stdcall Create_HP_TcpServer(HP_TcpServerListener pLi
 	return (HP_TcpServer)(new C_HP_TcpServer((ITcpServerListener*)pListener));
 }
 
-HPSOCKET_API HP_TcpClient __stdcall Create_HP_TcpClient(HP_TcpClientListener pListener)
-{
-	return (HP_TcpClient)(new C_HP_TcpClient((ITcpClientListener*)pListener));
-}
-
 HPSOCKET_API HP_TcpAgent __stdcall Create_HP_TcpAgent(HP_TcpAgentListener pListener)
 {
 	return (HP_TcpAgent)(new C_HP_TcpAgent((ITcpAgentListener*)pListener));
+}
+
+HPSOCKET_API HP_TcpClient __stdcall Create_HP_TcpClient(HP_TcpClientListener pListener)
+{
+	return (HP_TcpClient)(new C_HP_TcpClient((ITcpClientListener*)pListener));
 }
 
 HPSOCKET_API HP_TcpPullServer __stdcall Create_HP_TcpPullServer(HP_TcpPullServerListener pListener)
@@ -558,14 +715,14 @@ HPSOCKET_API HP_TcpPullServer __stdcall Create_HP_TcpPullServer(HP_TcpPullServer
 	return (HP_TcpPullServer)(new C_HP_TcpPullServer((ITcpServerListener*)pListener));
 }
 
-HPSOCKET_API HP_TcpPullClient __stdcall Create_HP_TcpPullClient(HP_TcpPullClientListener pListener)
-{
-	return (HP_TcpPullClient)(new C_HP_TcpPullClient((ITcpClientListener*)pListener));
-}
-
 HPSOCKET_API HP_TcpPullAgent __stdcall Create_HP_TcpPullAgent(HP_TcpPullAgentListener pListener)
 {
 	return (HP_TcpPullAgent)(new C_HP_TcpPullAgent((ITcpAgentListener*)pListener));
+}
+
+HPSOCKET_API HP_TcpPullClient __stdcall Create_HP_TcpPullClient(HP_TcpPullClientListener pListener)
+{
+	return (HP_TcpPullClient)(new C_HP_TcpPullClient((ITcpClientListener*)pListener));
 }
 
 HPSOCKET_API HP_UdpServer __stdcall Create_HP_UdpServer(HP_UdpServerListener pListener)
@@ -578,14 +735,14 @@ HPSOCKET_API HP_UdpClient __stdcall Create_HP_UdpClient(HP_UdpClientListener pLi
 	return (HP_UdpClient)(new C_HP_UdpClient((IUdpClientListener*)pListener));
 }
 
+HPSOCKET_API HP_UdpCast __stdcall Create_HP_UdpCast(HP_UdpCastListener pListener)
+{
+	return (HP_UdpCast)(new C_HP_UdpCast((IUdpCastListener*)pListener));
+}
+
 HPSOCKET_API void __stdcall Destroy_HP_TcpServer(HP_TcpServer pServer)
 {
 	delete (C_HP_TcpServer*)pServer;
-}
-
-HPSOCKET_API void __stdcall Destroy_HP_TcpClient(HP_TcpClient pClient)
-{
-	delete (C_HP_TcpClient*)pClient;
 }
 
 HPSOCKET_API void __stdcall Destroy_HP_TcpAgent(HP_TcpAgent pAgent)
@@ -593,19 +750,24 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpAgent(HP_TcpAgent pAgent)
 	delete (C_HP_TcpAgent*)pAgent;
 }
 
+HPSOCKET_API void __stdcall Destroy_HP_TcpClient(HP_TcpClient pClient)
+{
+	delete (C_HP_TcpClient*)pClient;
+}
+
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullServer(HP_TcpPullServer pServer)
 {
 	delete (C_HP_TcpPullServer*)pServer;
 }
 
-HPSOCKET_API void __stdcall Destroy_HP_TcpPullClient(HP_TcpPullClient pClient)
-{
-	delete (C_HP_TcpPullClient*)pClient;
-}
-
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullAgent(HP_TcpPullAgent pAgent)
 {
 	delete (C_HP_TcpPullAgent*)pAgent;
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_TcpPullClient(HP_TcpPullClient pClient)
+{
+	delete (C_HP_TcpPullClient*)pClient;
 }
 
 HPSOCKET_API void __stdcall Destroy_HP_UdpServer(HP_UdpServer pServer)
@@ -618,14 +780,14 @@ HPSOCKET_API void __stdcall Destroy_HP_UdpClient(HP_UdpClient pClient)
 	delete (C_HP_UdpClient*)pClient;
 }
 
+HPSOCKET_API void __stdcall Destroy_HP_UdpCast(HP_UdpCast pCast)
+{
+	delete (C_HP_UdpCast*)pCast;
+}
+
 HPSOCKET_API HP_TcpServerListener __stdcall Create_HP_TcpServerListener()
 {
 	return (HP_TcpServerListener)(new C_HP_ServerListener);
-}
-
-HPSOCKET_API HP_TcpClientListener __stdcall Create_HP_TcpClientListener()
-{
-	return (HP_TcpClientListener)(new C_HP_ClientListener);
 }
 
 HPSOCKET_API HP_TcpAgentListener __stdcall Create_HP_TcpAgentListener()
@@ -633,19 +795,24 @@ HPSOCKET_API HP_TcpAgentListener __stdcall Create_HP_TcpAgentListener()
 	return (HP_TcpAgentListener)(new C_HP_AgentListener);
 }
 
+HPSOCKET_API HP_TcpClientListener __stdcall Create_HP_TcpClientListener()
+{
+	return (HP_TcpClientListener)(new C_HP_ClientListener);
+}
+
 HPSOCKET_API HP_TcpPullServerListener __stdcall Create_HP_TcpPullServerListener()
 {
 	return (HP_TcpPullServerListener)(new C_HP_ServerListener);
 }
 
-HPSOCKET_API HP_TcpPullClientListener __stdcall Create_HP_TcpPullClientListener()
-{
-	return (HP_TcpPullClientListener)(new C_HP_ClientListener);
-}
-
 HPSOCKET_API HP_TcpPullAgentListener __stdcall Create_HP_TcpPullAgentListener()
 {
 	return (HP_TcpPullAgentListener)(new C_HP_AgentListener);
+}
+
+HPSOCKET_API HP_TcpPullClientListener __stdcall Create_HP_TcpPullClientListener()
+{
+	return (HP_TcpPullClientListener)(new C_HP_ClientListener);
 }
 
 HPSOCKET_API HP_UdpServerListener __stdcall Create_HP_UdpServerListener()
@@ -658,14 +825,14 @@ HPSOCKET_API HP_UdpClientListener __stdcall Create_HP_UdpClientListener()
 	return (HP_UdpClientListener)(new C_HP_ClientListener);
 }
 
+HPSOCKET_API HP_UdpCastListener __stdcall Create_HP_UdpCastListener()
+{
+	return (HP_UdpCastListener)(new C_HP_ClientListener);
+}
+
 HPSOCKET_API void __stdcall Destroy_HP_TcpServerListener(HP_TcpServerListener pListener)
 {
 	delete (C_HP_ServerListener*)pListener;
-}
-
-HPSOCKET_API void __stdcall Destroy_HP_TcpClientListener(HP_TcpClientListener pListener)
-{
-	delete (C_HP_ClientListener*)pListener;
 }
 
 HPSOCKET_API void __stdcall Destroy_HP_TcpAgentListener(HP_TcpAgentListener pListener)
@@ -673,19 +840,24 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpAgentListener(HP_TcpAgentListener pLis
 	delete (C_HP_AgentListener*)pListener;
 }
 
+HPSOCKET_API void __stdcall Destroy_HP_TcpClientListener(HP_TcpClientListener pListener)
+{
+	delete (C_HP_ClientListener*)pListener;
+}
+
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullServerListener(HP_TcpPullServerListener pListener)
 {
 	delete (C_HP_ServerListener*)pListener;
 }
 
-HPSOCKET_API void __stdcall Destroy_HP_TcpPullClientListener(HP_TcpPullClientListener pListener)
-{
-	delete (C_HP_ClientListener*)pListener;
-}
-
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullAgentListener(HP_TcpPullAgentListener pListener)
 {
 	delete (C_HP_AgentListener*)pListener;
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_TcpPullClientListener(HP_TcpPullClientListener pListener)
+{
+	delete (C_HP_ClientListener*)pListener;
 }
 
 HPSOCKET_API void __stdcall Destroy_HP_UdpServerListener(HP_UdpServerListener pListener)
@@ -698,128 +870,133 @@ HPSOCKET_API void __stdcall Destroy_HP_UdpClientListener(HP_UdpClientListener pL
 	delete (C_HP_ClientListener*)pListener;
 }
 
+HPSOCKET_API void __stdcall Destroy_HP_UdpCastListener(HP_UdpCastListener pListener)
+{
+	delete (C_HP_ClientListener*)pListener;
+}
+
 /**********************************************************************************/
 /***************************** Server 回调函数设置方法 *****************************/
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnPrepareListen(HP_ServerListener pListener, HP_FN_OnPrepareListen fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnPrepareListen(HP_ServerListener pListener, HP_FN_Server_OnPrepareListen fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnPrepareListen = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnAccept(HP_ServerListener pListener, HP_FN_OnAccept fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnAccept(HP_ServerListener pListener, HP_FN_Server_OnAccept fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnAccept = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnSend(HP_ServerListener pListener, HP_FN_OnSend fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnSend(HP_ServerListener pListener, HP_FN_Server_OnSend fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnSend = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnReceive(HP_ServerListener pListener, HP_FN_OnReceive fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnReceive(HP_ServerListener pListener, HP_FN_Server_OnReceive fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnReceive = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnPullReceive(HP_ServerListener pListener, HP_FN_OnPullReceive fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnPullReceive(HP_ServerListener pListener, HP_FN_Server_OnPullReceive fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnPullReceive = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnClose(HP_ServerListener pListener, HP_FN_OnClose fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnClose(HP_ServerListener pListener, HP_FN_Server_OnClose fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnClose = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnError(HP_ServerListener pListener, HP_FN_OnError fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnError(HP_ServerListener pListener, HP_FN_Server_OnError fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnError = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnServerShutdown(HP_ServerListener pListener, HP_FN_OnServerShutdown fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnShutdown(HP_ServerListener pListener, HP_FN_Server_OnShutdown fn)
 {
-	((C_HP_ServerListener*)pListener)->m_fnOnServerShutdown = fn;
-}
-
-/**********************************************************************************/
-/***************************** Client 回调函数设置方法 *****************************/
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnPrepareConnect(HP_ClientListener pListener, HP_FN_OnPrepareConnect fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnPrepareConnect = fn;
-}
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnConnect(HP_ClientListener pListener, HP_FN_OnConnect fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnConnect = fn;
-}
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnSend(HP_ClientListener pListener, HP_FN_OnSend fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnSend = fn;
-}
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnReceive(HP_ClientListener pListener, HP_FN_OnReceive fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnReceive = fn;
-}
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnPullReceive(HP_ClientListener pListener, HP_FN_OnPullReceive fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnPullReceive = fn;
-}
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnClose(HP_ClientListener pListener, HP_FN_OnClose fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnClose = fn;
-}
-
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnError(HP_ClientListener pListener, HP_FN_OnError fn)
-{
-	((C_HP_ClientListener*)pListener)->m_fnOnError = fn;
+	((C_HP_ServerListener*)pListener)->m_fnOnShutdown = fn;
 }
 
 /**********************************************************************************/
 /***************************** Agent 回调函数设置方法 *****************************/
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnPrepareConnect(HP_AgentListener pListener, HP_FN_OnPrepareConnect fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnPrepareConnect(HP_AgentListener pListener, HP_FN_Agent_OnPrepareConnect fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnPrepareConnect = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnConnect(HP_AgentListener pListener, HP_FN_OnConnect fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnConnect(HP_AgentListener pListener, HP_FN_Agent_OnConnect fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnConnect = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnSend(HP_AgentListener pListener, HP_FN_OnSend fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnSend(HP_AgentListener pListener, HP_FN_Agent_OnSend fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnSend = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnReceive(HP_AgentListener pListener, HP_FN_OnReceive fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnReceive(HP_AgentListener pListener, HP_FN_Agent_OnReceive fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnReceive = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnPullReceive(HP_AgentListener pListener, HP_FN_OnPullReceive fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnPullReceive(HP_AgentListener pListener, HP_FN_Agent_OnPullReceive fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnPullReceive = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnClose(HP_AgentListener pListener, HP_FN_OnClose fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnClose(HP_AgentListener pListener, HP_FN_Agent_OnClose fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnClose = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnError(HP_AgentListener pListener, HP_FN_OnError fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnError(HP_AgentListener pListener, HP_FN_Agent_OnError fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnError = fn;
 }
 
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnAgentShutdown(HP_AgentListener pListener, HP_FN_OnAgentShutdown fn)
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnShutdown(HP_AgentListener pListener, HP_FN_Agent_OnShutdown fn)
 {
-	((C_HP_AgentListener*)pListener)->m_fnOnAgentShutdown = fn;
+	((C_HP_AgentListener*)pListener)->m_fnOnShutdown = fn;
+}
+
+/**********************************************************************************/
+/***************************** Client 回调函数设置方法 *****************************/
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnPrepareConnect(HP_ClientListener pListener, HP_FN_Client_OnPrepareConnect fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnPrepareConnect = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnConnect(HP_ClientListener pListener, HP_FN_Client_OnConnect fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnConnect = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnSend(HP_ClientListener pListener, HP_FN_Client_OnSend fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnSend = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnReceive(HP_ClientListener pListener, HP_FN_Client_OnReceive fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnReceive = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnPullReceive(HP_ClientListener pListener, HP_FN_Client_OnPullReceive fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnPullReceive = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnClose(HP_ClientListener pListener, HP_FN_Client_OnClose fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnClose = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnError(HP_ClientListener pListener, HP_FN_Client_OnError fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnError = fn;
 }
 
 /**************************************************************************/
@@ -1117,166 +1294,6 @@ HPSOCKET_API DWORD __stdcall HP_UdpServer_GetDetectInterval(HP_UdpServer pServer
 	return C_HP_Object::ToUdpServer(pServer)->GetDetectInterval();
 }
 
-/******************************************************************************/
-/***************************** Client 组件操作方法 *****************************/
-
-HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
-{
-	return C_HP_Object::ToClient(pClient)->Start(pszRemoteAddress, usPort, bAsyncConnect);
-}
-
-HPSOCKET_API BOOL __stdcall HP_Client_Stop(HP_Client pClient)
-{
-	return C_HP_Object::ToClient(pClient)->Stop();
-}
-
-HPSOCKET_API BOOL __stdcall HP_Client_Send(HP_Client pClient, const BYTE* pBuffer, int iLength)
-{
-	return C_HP_Object::ToClient(pClient)->Send(pBuffer, iLength);
-}
-
-HPSOCKET_API BOOL __stdcall HP_Client_SendPart(HP_Client pClient, const BYTE* pBuffer, int iLength, int iOffset)
-{
-	return C_HP_Object::ToClient(pClient)->Send(pBuffer, iLength, iOffset);
-}
-
-HPSOCKET_API BOOL __stdcall HP_Client_SendPackets(HP_Client pClient, const WSABUF pBuffers[], int iCount)
-{
-	return C_HP_Object::ToClient(pClient)->SendPackets(pBuffers, iCount);
-}
-
-/******************************************************************************/
-/***************************** Client 属性访问方法 *****************************/
-
-HPSOCKET_API BOOL __stdcall HP_Client_HasStarted(HP_Client pClient)
-{
-	return C_HP_Object::ToClient(pClient)->HasStarted();
-}
-
-HPSOCKET_API En_HP_ServiceState	__stdcall HP_Client_GetState(HP_Client pClient)
-{
-	return (En_HP_ServiceState)C_HP_Object::ToClient(pClient)->GetState();
-}
-
-HPSOCKET_API En_HP_SocketError	__stdcall HP_Client_GetLastError(HP_Client pClient)
-{
-	return (En_HP_SocketError)C_HP_Object::ToClient(pClient)->GetLastError();
-}
-
-HPSOCKET_API LPCTSTR __stdcall HP_Client_GetLastErrorDesc(HP_Client pClient)
-{
-	return C_HP_Object::ToClient(pClient)->GetLastErrorDesc();
-}
-
-HPSOCKET_API HP_CONNID __stdcall HP_Client_GetConnectionID(HP_Client pClient)
-{
-	return C_HP_Object::ToClient(pClient)->GetConnectionID();
-}
-
-HPSOCKET_API BOOL __stdcall HP_Client_GetLocalAddress(HP_Client pClient, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
-{
-	return C_HP_Object::ToClient(pClient)->GetLocalAddress(lpszAddress, *piAddressLen, *pusPort);
-}
-
-HPSOCKET_API BOOL __stdcall HP_Client_GetPendingDataLength(HP_Client pClient, int* piPending)
-{
-	return C_HP_Object::ToClient(pClient)->GetPendingDataLength(*piPending);
-}
-
-HPSOCKET_API void __stdcall HP_Client_SetFreeBufferPoolSize(HP_Client pClient, DWORD dwFreeBufferPoolSize)
-{
-	C_HP_Object::ToClient(pClient)->SetFreeBufferPoolSize(dwFreeBufferPoolSize);
-}
-
-HPSOCKET_API void __stdcall HP_Client_SetFreeBufferPoolHold(HP_Client pClient, DWORD dwFreeBufferPoolHold)
-{
-	C_HP_Object::ToClient(pClient)->SetFreeBufferPoolHold(dwFreeBufferPoolHold);
-}
-
-HPSOCKET_API DWORD __stdcall HP_Client_GetFreeBufferPoolSize(HP_Client pClient)
-{
-	return C_HP_Object::ToClient(pClient)->GetFreeBufferPoolSize();
-}
-
-HPSOCKET_API DWORD __stdcall HP_Client_GetFreeBufferPoolHold(HP_Client pClient)
-{
-	return C_HP_Object::ToClient(pClient)->GetFreeBufferPoolHold();
-}
-
-/**********************************************************************************/
-/******************************* TCP Client 操作方法 *******************************/
-
-HPSOCKET_API BOOL __stdcall HP_TcpClient_SendSmallFile(HP_Client pClient, LPCTSTR lpszFileName, const LPWSABUF pHead, const LPWSABUF pTail)
-{
-	return C_HP_Object::ToTcpClient(pClient)->SendSmallFile(lpszFileName, pHead, pTail);
-}
-
-/**********************************************************************************/
-/***************************** TCP Client 属性访问方法 *****************************/
-	
-HPSOCKET_API void __stdcall HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClient, DWORD dwSocketBufferSize)
-{
-	C_HP_Object::ToTcpClient(pClient)->SetSocketBufferSize(dwSocketBufferSize);
-}
-
-HPSOCKET_API void __stdcall HP_TcpClient_SetKeepAliveTime(HP_TcpClient pClient, DWORD dwKeepAliveTime)
-{
-	C_HP_Object::ToTcpClient(pClient)->SetKeepAliveTime(dwKeepAliveTime);
-}
-
-HPSOCKET_API void __stdcall HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClient, DWORD dwKeepAliveInterval)
-{
-	C_HP_Object::ToTcpClient(pClient)->SetKeepAliveInterval(dwKeepAliveInterval);
-}
-
-HPSOCKET_API DWORD __stdcall HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient)
-{
-	return C_HP_Object::ToTcpClient(pClient)->GetSocketBufferSize();
-}
-
-HPSOCKET_API DWORD __stdcall HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient)
-{
-	return C_HP_Object::ToTcpClient(pClient)->GetKeepAliveTime();
-}
-
-HPSOCKET_API DWORD __stdcall HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient)
-{
-	return C_HP_Object::ToTcpClient(pClient)->GetKeepAliveInterval();
-}
-
-/**********************************************************************************/
-/***************************** UDP Client 属性访问方法 *****************************/
-
-HPSOCKET_API void __stdcall HP_UdpClient_SetMaxDatagramSize(HP_UdpClient pClient, DWORD dwMaxDatagramSize)
-{
-	C_HP_Object::ToUdpClient(pClient)->SetMaxDatagramSize(dwMaxDatagramSize);
-}
-
-HPSOCKET_API DWORD __stdcall HP_UdpClient_GetMaxDatagramSize(HP_UdpClient pClient)
-{
-	return C_HP_Object::ToUdpClient(pClient)->GetMaxDatagramSize();
-}
-
-HPSOCKET_API void __stdcall HP_UdpClient_SetDetectAttempts(HP_UdpClient pClient, DWORD dwDetectAttempts)
-{
-	C_HP_Object::ToUdpClient(pClient)->SetDetectAttempts(dwDetectAttempts);
-}
-
-HPSOCKET_API void __stdcall HP_UdpClient_SetDetectInterval(HP_UdpClient pClient, DWORD dwDetectInterval)
-{
-	C_HP_Object::ToUdpClient(pClient)->SetDetectInterval(dwDetectInterval);
-}
-
-HPSOCKET_API DWORD __stdcall HP_UdpClient_GetDetectAttempts(HP_UdpClient pClient)
-{
-	return C_HP_Object::ToUdpClient(pClient)->GetDetectAttempts();
-}
-
-HPSOCKET_API DWORD __stdcall HP_UdpClient_GetDetectInterval(HP_UdpClient pClient)
-{
-	return C_HP_Object::ToUdpClient(pClient)->GetDetectInterval();
-}
-
 /**************************************************************************/
 /***************************** Agent 操作方法 *****************************/
 
@@ -1524,38 +1541,291 @@ HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent
 	return C_HP_Object::ToTcpAgent(pAgent)->GetKeepAliveInterval();
 }
 
+/******************************************************************************/
+/***************************** Client 组件操作方法 *****************************/
+
+HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
+{
+	return C_HP_Object::ToClient(pClient)->Start(pszRemoteAddress, usPort, bAsyncConnect);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_Stop(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->Stop();
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_Send(HP_Client pClient, const BYTE* pBuffer, int iLength)
+{
+	return C_HP_Object::ToClient(pClient)->Send(pBuffer, iLength);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_SendPart(HP_Client pClient, const BYTE* pBuffer, int iLength, int iOffset)
+{
+	return C_HP_Object::ToClient(pClient)->Send(pBuffer, iLength, iOffset);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_SendPackets(HP_Client pClient, const WSABUF pBuffers[], int iCount)
+{
+	return C_HP_Object::ToClient(pClient)->SendPackets(pBuffers, iCount);
+}
+
+/******************************************************************************/
+/***************************** Client 属性访问方法 *****************************/
+
+HPSOCKET_API void __stdcall HP_Client_SetExtra(HP_Client pClient, PVOID pExtra)
+{
+	C_HP_Object::ToClient(pClient)->SetExtra(pExtra);
+}
+
+HPSOCKET_API PVOID __stdcall HP_Client_GetExtra(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->GetExtra();
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_HasStarted(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->HasStarted();
+}
+
+HPSOCKET_API En_HP_ServiceState	__stdcall HP_Client_GetState(HP_Client pClient)
+{
+	return (En_HP_ServiceState)C_HP_Object::ToClient(pClient)->GetState();
+}
+
+HPSOCKET_API En_HP_SocketError	__stdcall HP_Client_GetLastError(HP_Client pClient)
+{
+	return (En_HP_SocketError)C_HP_Object::ToClient(pClient)->GetLastError();
+}
+
+HPSOCKET_API LPCTSTR __stdcall HP_Client_GetLastErrorDesc(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->GetLastErrorDesc();
+}
+
+HPSOCKET_API HP_CONNID __stdcall HP_Client_GetConnectionID(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->GetConnectionID();
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_GetLocalAddress(HP_Client pClient, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return C_HP_Object::ToClient(pClient)->GetLocalAddress(lpszAddress, *piAddressLen, *pusPort);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_GetPendingDataLength(HP_Client pClient, int* piPending)
+{
+	return C_HP_Object::ToClient(pClient)->GetPendingDataLength(*piPending);
+}
+
+HPSOCKET_API void __stdcall HP_Client_SetFreeBufferPoolSize(HP_Client pClient, DWORD dwFreeBufferPoolSize)
+{
+	C_HP_Object::ToClient(pClient)->SetFreeBufferPoolSize(dwFreeBufferPoolSize);
+}
+
+HPSOCKET_API void __stdcall HP_Client_SetFreeBufferPoolHold(HP_Client pClient, DWORD dwFreeBufferPoolHold)
+{
+	C_HP_Object::ToClient(pClient)->SetFreeBufferPoolHold(dwFreeBufferPoolHold);
+}
+
+HPSOCKET_API DWORD __stdcall HP_Client_GetFreeBufferPoolSize(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->GetFreeBufferPoolSize();
+}
+
+HPSOCKET_API DWORD __stdcall HP_Client_GetFreeBufferPoolHold(HP_Client pClient)
+{
+	return C_HP_Object::ToClient(pClient)->GetFreeBufferPoolHold();
+}
+
+/**********************************************************************************/
+/******************************* TCP Client 操作方法 *******************************/
+
+HPSOCKET_API BOOL __stdcall HP_TcpClient_SendSmallFile(HP_Client pClient, LPCTSTR lpszFileName, const LPWSABUF pHead, const LPWSABUF pTail)
+{
+	return C_HP_Object::ToTcpClient(pClient)->SendSmallFile(lpszFileName, pHead, pTail);
+}
+
+/**********************************************************************************/
+/***************************** TCP Client 属性访问方法 *****************************/
+
+HPSOCKET_API void __stdcall HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClient, DWORD dwSocketBufferSize)
+{
+	C_HP_Object::ToTcpClient(pClient)->SetSocketBufferSize(dwSocketBufferSize);
+}
+
+HPSOCKET_API void __stdcall HP_TcpClient_SetKeepAliveTime(HP_TcpClient pClient, DWORD dwKeepAliveTime)
+{
+	C_HP_Object::ToTcpClient(pClient)->SetKeepAliveTime(dwKeepAliveTime);
+}
+
+HPSOCKET_API void __stdcall HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClient, DWORD dwKeepAliveInterval)
+{
+	C_HP_Object::ToTcpClient(pClient)->SetKeepAliveInterval(dwKeepAliveInterval);
+}
+
+HPSOCKET_API DWORD __stdcall HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToTcpClient(pClient)->GetSocketBufferSize();
+}
+
+HPSOCKET_API DWORD __stdcall HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToTcpClient(pClient)->GetKeepAliveTime();
+}
+
+HPSOCKET_API DWORD __stdcall HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToTcpClient(pClient)->GetKeepAliveInterval();
+}
+
+/**********************************************************************************/
+/***************************** UDP Client 属性访问方法 *****************************/
+
+HPSOCKET_API void __stdcall HP_UdpClient_SetMaxDatagramSize(HP_UdpClient pClient, DWORD dwMaxDatagramSize)
+{
+	C_HP_Object::ToUdpClient(pClient)->SetMaxDatagramSize(dwMaxDatagramSize);
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpClient_GetMaxDatagramSize(HP_UdpClient pClient)
+{
+	return C_HP_Object::ToUdpClient(pClient)->GetMaxDatagramSize();
+}
+
+HPSOCKET_API void __stdcall HP_UdpClient_SetDetectAttempts(HP_UdpClient pClient, DWORD dwDetectAttempts)
+{
+	C_HP_Object::ToUdpClient(pClient)->SetDetectAttempts(dwDetectAttempts);
+}
+
+HPSOCKET_API void __stdcall HP_UdpClient_SetDetectInterval(HP_UdpClient pClient, DWORD dwDetectInterval)
+{
+	C_HP_Object::ToUdpClient(pClient)->SetDetectInterval(dwDetectInterval);
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpClient_GetDetectAttempts(HP_UdpClient pClient)
+{
+	return C_HP_Object::ToUdpClient(pClient)->GetDetectAttempts();
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpClient_GetDetectInterval(HP_UdpClient pClient)
+{
+	return C_HP_Object::ToUdpClient(pClient)->GetDetectInterval();
+}
+
+/**********************************************************************************/
+/****************************** UDP Cast 属性访问方法 ******************************/
+
+HPSOCKET_API void __stdcall HP_UdpCast_SetMaxDatagramSize(HP_UdpCast pCast, DWORD dwMaxDatagramSize)
+{
+	C_HP_Object::ToUdpCast(pCast)->SetMaxDatagramSize(dwMaxDatagramSize);
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpCast_GetMaxDatagramSize(HP_UdpCast pCast)
+{
+	return C_HP_Object::ToUdpCast(pCast)->GetMaxDatagramSize();
+}
+
+HPSOCKET_API BOOL __stdcall HP_UdpCast_GetRemoteAddress(HP_UdpCast pCast, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return C_HP_Object::ToUdpCast(pCast)->GetRemoteAddress(lpszAddress, *piAddressLen, *pusPort);
+}
+
+HPSOCKET_API void __stdcall HP_UdpCast_SetBindAdddress(HP_UdpCast pCast, LPCTSTR pszBindAddress)
+{
+	C_HP_Object::ToUdpCast(pCast)->SetBindAdddress(pszBindAddress);
+}
+
+HPSOCKET_API LPCTSTR __stdcall HP_UdpCast_GetBindAdddress(HP_UdpCast pCast)
+{
+	return C_HP_Object::ToUdpCast(pCast)->GetBindAdddress();
+}
+
+HPSOCKET_API void __stdcall HP_UdpCast_SetReuseAddress(HP_UdpCast pCast, BOOL bReuseAddress)
+{
+	C_HP_Object::ToUdpCast(pCast)->SetReuseAddress(bReuseAddress);
+}
+
+HPSOCKET_API BOOL __stdcall HP_UdpCast_IsReuseAddress(HP_UdpCast pCast)
+{
+	return C_HP_Object::ToUdpCast(pCast)->IsReuseAddress();
+}
+
+HPSOCKET_API void __stdcall HP_UdpCast_SetCastMode(HP_UdpCast pCast, En_HP_CastMode enCastMode)
+{
+	C_HP_Object::ToUdpCast(pCast)->SetCastMode((EnCastMode)enCastMode);
+}
+
+HPSOCKET_API En_HP_CastMode __stdcall HP_UdpCast_GetCastMode(HP_UdpCast pCast)
+{
+	return (En_HP_CastMode)C_HP_Object::ToUdpCast(pCast)->GetCastMode();
+}
+
+HPSOCKET_API void __stdcall HP_UdpCast_SetMultiCastTtl(HP_UdpCast pCast, int iMCTtl)
+{
+	C_HP_Object::ToUdpCast(pCast)->SetMultiCastTtl(iMCTtl);
+}
+
+HPSOCKET_API int __stdcall HP_UdpCast_GetMultiCastTtl(HP_UdpCast pCast)
+{
+	return C_HP_Object::ToUdpCast(pCast)->GetMultiCastTtl();
+}
+
+HPSOCKET_API void __stdcall HP_UdpCast_SetMultiCastLoop(HP_UdpCast pCast, BOOL bMCLoop)
+{
+	C_HP_Object::ToUdpCast(pCast)->SetMultiCastLoop(bMCLoop);
+}
+
+HPSOCKET_API BOOL __stdcall HP_UdpCast_IsMultiCastLoop(HP_UdpCast pCast)
+{
+	return C_HP_Object::ToUdpCast(pCast)->IsMultiCastLoop();
+}
+
 /***************************************************************************************/
 /***************************** TCP Pull Server 组件操作方法 *****************************/
 
-HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullServer_Fetch(HP_TcpPullServer pServer, HP_CONNID dwConnID, BYTE* pBuffer, int iLength)
+HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullServer_Fetch(HP_TcpPullServer pServer, HP_CONNID dwConnID, BYTE* pData, int iLength)
 {
-	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pServer)->Fetch(dwConnID, pBuffer, iLength);
+	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pServer)->Fetch(dwConnID, pData, iLength);
+}
+
+HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullServer_Peek(HP_TcpPullServer pServer, HP_CONNID dwConnID, BYTE* pData, int iLength)
+{
+	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pServer)->Peek(dwConnID, pData, iLength);
 }
 
 /***************************************************************************************/
 /***************************** TCP Pull Server 属性访问方法 *****************************/
 
 /***************************************************************************************/
-/***************************** TCP Pull Client 组件操作方法 *****************************/
-
-HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullClient_Fetch(HP_TcpPullClient pClient, HP_CONNID dwConnID, BYTE* pBuffer, int iLength)
-{
-	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pClient)->Fetch(dwConnID, pBuffer, iLength);
-}
-
-/***************************************************************************************/
-/***************************** TCP Pull Client 属性访问方法 *****************************/
-
-/***************************************************************************************/
 /***************************** TCP Pull Agent 组件操作方法 *****************************/
 
-HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullAgent_Fetch(HP_TcpPullAgent pAgent, HP_CONNID dwConnID, BYTE* pBuffer, int iLength)
+HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullAgent_Fetch(HP_TcpPullAgent pAgent, HP_CONNID dwConnID, BYTE* pData, int iLength)
 {
-	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pAgent)->Fetch(dwConnID, pBuffer, iLength);
+	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pAgent)->Fetch(dwConnID, pData, iLength);
+}
+
+HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullAgent_Peek(HP_TcpPullAgent pAgent, HP_CONNID dwConnID, BYTE* pData, int iLength)
+{
+	return (En_HP_FetchResult)C_HP_Object::ToPullSocket(pAgent)->Peek(dwConnID, pData, iLength);
 }
 
 /***************************************************************************************/
 /***************************** TCP Pull Agent 属性访问方法 *****************************/
+
+/***************************************************************************************/
+/***************************** TCP Pull Client 组件操作方法 *****************************/
+
+HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullClient_Fetch(HP_TcpPullClient pClient, BYTE* pData, int iLength)
+{
+	return (En_HP_FetchResult)C_HP_Object::ToPullClient(pClient)->Fetch(pData, iLength);
+}
+
+HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullClient_Peek(HP_TcpPullClient pClient, BYTE* pData, int iLength)
+{
+	return (En_HP_FetchResult)C_HP_Object::ToPullClient(pClient)->Peek(pData, iLength);
+}
+
+/***************************************************************************************/
+/***************************** TCP Pull Client 属性访问方法 *****************************/
 
 /***************************************************************************************/
 /*************************************** 其它方法 ***************************************/

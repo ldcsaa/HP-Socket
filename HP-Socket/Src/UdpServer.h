@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -40,7 +40,7 @@ public:
 	, m_soListen				(INVALID_SOCKET)
 	, m_iRemainPostReceives		(0)
 	, m_enLastError				(SE_OK)
-	, m_enState					(SS_STOPED)
+	, m_enState					(SS_STOPPED)
 	, m_hDetector				(nullptr)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enRecvPolicy			(RP_SERIAL)
@@ -59,7 +59,7 @@ public:
 		ASSERT(m_wsSocket.IsValid());
 		ASSERT(m_psoListener);
 
-		Reset();
+		Reset(FALSE);
 	}
 
 	virtual ~CUdpServer()
@@ -130,10 +130,11 @@ protected:
 		{return m_psoListener->OnAccept(dwConnID, pSockAddr);}
 	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
-	virtual EnHandleResult FireServerShutdown()
-		{return m_psoListener->OnServerShutdown();}
+	virtual EnHandleResult FireShutdown()
+		{return m_psoListener->OnShutdown();}
 
 	virtual BOOL CheckParams();
+	virtual void Reset(BOOL bAll = TRUE);
 
 private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
@@ -158,8 +159,6 @@ private:
 	void WaitForWorkerThreadEnd();
 	void WaitForDetectorThreadEnd();
 	void CloseCompletePort();
-
-	void Reset();
 
 	void			CompressFreeBuffer(size_t size);
 	void			CompressFreeSocket(size_t size, BOOL bForce = FALSE);

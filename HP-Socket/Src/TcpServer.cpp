@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -146,7 +146,7 @@ BOOL CTcpServer::CheckParams()
 
 BOOL CTcpServer::CheckStarting()
 {
-	if(m_enState == SS_STOPED)
+	if(m_enState == SS_STOPPED)
 	{
 		m_enState = SS_STARTING;
 		::_ReadWriteBarrier();
@@ -164,7 +164,7 @@ BOOL CTcpServer::CheckStoping()
 {
 	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
 	{
-		m_enState = SS_STOPING;
+		m_enState = SS_STOPPING;
 		::_ReadWriteBarrier();
 	}
 	else
@@ -281,7 +281,7 @@ BOOL CTcpServer::Stop()
 	
 	ReleaseClientSocket();
 
-	FireServerShutdown();
+	FireShutdown();
 
 	ReleaseFreeSocket();
 	ReleaseFreeBuffer();
@@ -293,17 +293,20 @@ BOOL CTcpServer::Stop()
 	return TRUE;
 }
 
-void CTcpServer::Reset()
+void CTcpServer::Reset(BOOL bAll)
 {
-	m_phSocket.Reset();
-	m_phBuffer.Reset();
-	m_itPool.Clear();
+	if(bAll)
+	{
+		m_phSocket.Reset();
+		m_phBuffer.Reset();
+		m_itPool.Clear();
+	}
 
 	m_iRemainAcceptSockets		= 0;
 	m_pfnAcceptEx				= nullptr;
 	m_pfnGetAcceptExSockaddrs	= nullptr;
 	m_pfnDisconnectEx			= nullptr;
-	m_enState					= SS_STOPED;
+	m_enState					= SS_STOPPED;
 }
 
 void CTcpServer::CloseListenSocket()

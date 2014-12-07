@@ -331,6 +331,7 @@
     <ClInclude Include="..\..\Src\TcpPullClient.h" />
     <ClInclude Include="..\..\Src\TcpPullServer.h" />
     <ClInclude Include="..\..\Src\TcpServer.h" />
+    <ClInclude Include="..\..\Src\UdpCast.h" />
     <ClInclude Include="..\..\Src\UdpClient.h" />
     <ClInclude Include="..\..\Src\UdpServer.h" />
     <ClInclude Include="resource.h" />
@@ -349,6 +350,7 @@
     <ClCompile Include="..\..\Src\TcpPullClient.cpp" />
     <ClCompile Include="..\..\Src\TcpPullServer.cpp" />
     <ClCompile Include="..\..\Src\TcpServer.cpp" />
+    <ClCompile Include="..\..\Src\UdpCast.cpp" />
     <ClCompile Include="..\..\Src\UdpClient.cpp" />
     <ClCompile Include="..\..\Src\UdpServer.cpp" />
     <ClCompile Include="dllmain.cpp">

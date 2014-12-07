@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -77,9 +77,9 @@ EnHandleResult CTcpPullServer::FireError(TSocketObj* pSocketObj, EnSocketOperati
 	return result;
 }
 
-EnHandleResult CTcpPullServer::FireServerShutdown()
+EnHandleResult CTcpPullServer::FireShutdown()
 {
-	EnHandleResult result = __super::FireServerShutdown();
+	EnHandleResult result = __super::FireShutdown();
 
 	m_bfPool.Clear();
 
@@ -102,6 +102,32 @@ EnFetchResult CTcpPullServer::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
 			if(pBuffer->Length() >= iLength)
 			{
 				pBuffer->Fetch(pData, iLength);
+				result = FR_OK;
+			}
+			else
+				result = FR_LENGTH_TOO_LONG;
+		}
+	}
+
+	return result;
+}
+
+EnFetchResult CTcpPullServer::Peek(CONNID dwConnID, BYTE* pData, int iLength)
+{
+	ASSERT(pData != nullptr && iLength > 0);
+
+	EnFetchResult result	= FR_DATA_NOT_FOUND;
+	TBuffer* pBuffer		= m_bfPool[dwConnID];
+
+	if(pBuffer != nullptr && pBuffer->IsValid())
+	{
+		CCriSecLock locallock(pBuffer->CriSec());
+
+		if(pBuffer->IsValid())
+		{
+			if(pBuffer->Length() >= iLength)
+			{
+				pBuffer->Peek(pData, iLength);
 				result = FR_OK;
 			}
 			else

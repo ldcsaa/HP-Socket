@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -63,7 +63,7 @@ extern const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE;
 /* Client 默认内存块缓存池回收阀值 */
 extern const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD;
 /* Agent 默认绑定地址 */
-extern LPCTSTR DEFAULT_AGENT_BIND_ADDRESS;
+extern LPCTSTR DEFAULT_BIND_ADDRESS;
 
 /* TCP 默认通信数据缓冲区大小 */
 extern const DWORD DEFAULT_TCP_SOCKET_BUFFER_SIZE;

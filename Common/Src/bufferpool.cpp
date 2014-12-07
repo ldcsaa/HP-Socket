@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.7
+ * Version	: 2.3.8
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -99,6 +99,16 @@ inline int TItem::Fetch(BYTE* pData, int length)
 	return fetch;
 }
 
+inline int TItem::Peek(BYTE* pData, int length)
+{
+	ASSERT(pData != nullptr && length > 0);
+
+	int peek = min(Size(), length);
+	memcpy(pData, begin, peek);
+
+	return peek;
+}
+
 inline int TItem::Reduce(int length)
 {
 	ASSERT(length > 0);
@@ -169,6 +179,23 @@ int TItemList::Fetch(BYTE* pData, int length)
 
 		if(pItem->IsEmpty())
 			itPool.PutFreeItem(PopFront());
+	}
+
+	return length - remain;
+}
+
+int TItemList::Peek(BYTE* pData, int length)
+{
+	int remain	 = length;
+	TItem* pItem = Front();
+
+	while(remain > 0 && pItem != nullptr)
+	{
+		int peek = pItem->Peek(pData, remain);
+
+		pData	+= peek;
+		remain	-= peek;
+		pItem	 = pItem->next;
 	}
 
 	return length - remain;
@@ -331,6 +358,11 @@ int TBuffer::Fetch(BYTE* pData, int len)
 	DecreaseLength(fetch);
 
 	return fetch;
+}
+
+int TBuffer::Peek(BYTE* pData, int len)
+{
+	return items.Peek(pData, len);
 }
 
 int TBuffer::Reduce(int len)

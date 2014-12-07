@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -43,7 +43,7 @@ BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 
 	if(CreateClientSocket())
 	{
-		if(FirePrepareConnect(m_dwConnID, m_soClient) != HR_ERROR)
+		if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
 		{
 			if(ConnectToServer(pszRemoteAddress, usPort))
 			{
@@ -87,7 +87,7 @@ BOOL CTcpClient::CheckStarting()
 {
 	CCriSecLock locallock(m_csCheck);
 
-	if(m_enState == SS_STOPED)
+	if(m_enState == SS_STOPPED)
 	{
 		m_enState = SS_STARTING;
 		::_ReadWriteBarrier();
@@ -107,7 +107,7 @@ BOOL CTcpClient::CheckStoping()
 
 	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
 	{
-		m_enState = SS_STOPING;
+		m_enState = SS_STOPPING;
 		::_ReadWriteBarrier();
 	}
 	else
@@ -146,11 +146,17 @@ BOOL CTcpClient::ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort)
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 
 	if(!::GetIPAddress(pszRemoteAddress, szAddress, iAddressLen))
+	{
+		::WSASetLastError(WSAEADDRNOTAVAIL);
 		return FALSE;
+	}
 
 	SOCKADDR_IN addr;
 	if(!::sockaddr_A_2_IN(AF_INET, szAddress, usPort, addr))
+	{
+		::WSASetLastError(WSAEADDRNOTAVAIL);
 		return FALSE;
+	}
 
 	BOOL isOK = FALSE;
 
@@ -168,7 +174,7 @@ BOOL CTcpClient::ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort)
 		{
 			if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 			{
-				if(FireConnect(m_dwConnID) != HR_ERROR)
+				if(FireConnect(this) != HR_ERROR)
 				{
 					m_enState	= SS_STARTED;
 					isOK		= TRUE;
@@ -249,7 +255,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 		SetLastError(SE_NETWORK, __FUNCTION__, code);
 
 		VERIFY(::WSAResetEvent(m_evSocket));
-		FireError(m_dwConnID, SO_UNKNOWN, code);
+		FireError(this, SO_UNKNOWN, code);
 
 		bContinue = FALSE;
 	}
@@ -263,7 +269,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 		else
 		{
 			SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-			FireError(m_dwConnID, SO_RECEIVE, iCode);
+			FireError(this, SO_RECEIVE, iCode);
 			bContinue = FALSE;
 		}
 	}
@@ -277,7 +283,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 		else
 		{
 			SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-			FireError(m_dwConnID, SO_SEND, iCode);
+			FireError(this, SO_SEND, iCode);
 			bContinue = FALSE;
 		}
 	}
@@ -290,7 +296,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 		{
 			if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 			{
-				if(FireConnect(m_dwConnID) != HR_ERROR)
+				if(FireConnect(this) != HR_ERROR)
 					m_enState = SS_STARTED;
 				else
 					iCode = ERROR_CANCELLED;
@@ -302,7 +308,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 		if(iCode != 0)
 		{
 			SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-			FireError(m_dwConnID, SO_CONNECT, iCode);
+			FireError(this, SO_CONNECT, iCode);
 			bContinue = FALSE;
 		}
 	}
@@ -312,7 +318,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 		int iCode = events.iErrorCode[FD_CLOSE_BIT];
 
 		if(iCode == 0)
-			FireClose(m_dwConnID);
+			FireClose(this);
 		else
 		{
 			EnSocketOperation enOperation = events.lNetworkEvents & FD_READ ? SO_RECEIVE :
@@ -322,7 +328,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 												);
 
 			SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-			FireError(m_dwConnID, enOperation, iCode);
+			FireError(this, enOperation, iCode);
 		}
 
 		bContinue = FALSE;
@@ -339,12 +345,12 @@ BOOL CTcpClient::ReadData()
 
 		if(rc > 0)
 		{
-			if(FireReceive(m_dwConnID, m_rcBuffer, rc) == HR_ERROR)
+			if(FireReceive(this, m_rcBuffer, rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
 				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_CANCELLED);
-				FireError(m_dwConnID, SO_RECEIVE, ERROR_CANCELLED);
+				FireError(this, SO_RECEIVE, ERROR_CANCELLED);
 
 				return FALSE;
 			}
@@ -358,14 +364,14 @@ BOOL CTcpClient::ReadData()
 			else
 			{
 				SetLastError(SE_NETWORK, __FUNCTION__, code);
-				FireError(m_dwConnID, SO_RECEIVE, code);
+				FireError(this, SO_RECEIVE, code);
 
 				return FALSE;
 			}
 		}
 		else if(rc == 0)
 		{
-			FireClose(m_dwConnID);
+			FireClose(this);
 			return FALSE;
 		}
 		else
@@ -439,7 +445,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 
 		if(rc > 0)
 		{
-			if(FireSend(m_dwConnID, pItem->Ptr(), rc) == HR_ERROR)
+			if(FireSend(this, pItem->Ptr(), rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
 				ASSERT(FALSE);
@@ -456,7 +462,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 			else
 			{
 				SetLastError(SE_NETWORK, __FUNCTION__, code);
-				FireError(m_dwConnID, SO_SEND, code);
+				FireError(this, SO_SEND, code);
 
 				return FALSE;
 			}
@@ -483,7 +489,7 @@ BOOL CTcpClient::Stop()
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
 	if(bNeedFireClose)
-		FireClose(m_dwConnID);
+		FireClose(this);
 
 	if(m_evSocket != nullptr)
 	{
@@ -503,16 +509,19 @@ BOOL CTcpClient::Stop()
 	return TRUE;
 }
 
-void CTcpClient::Reset()
+void CTcpClient::Reset(BOOL bAll)
 {
-	m_rcBuffer.Free();
-	m_evBuffer.Reset();
-	m_evWorker.Reset();
-	m_lsSend.Clear();
-	m_itPool.Clear();
+	if(bAll)
+	{
+		m_rcBuffer.Free();
+		m_evBuffer.Reset();
+		m_evWorker.Reset();
+		m_lsSend.Clear();
+		m_itPool.Clear();
+	}
 
 	m_iPending	= 0;
-	m_enState	= SS_STOPED;
+	m_enState	= SS_STOPPED;
 }
 
 void CTcpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)

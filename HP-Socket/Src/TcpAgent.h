@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -40,7 +40,7 @@ public:
 	, m_pfnConnectEx			(nullptr)
 	, m_pfnDisconnectEx			(nullptr)
 	, m_enLastError				(SE_OK)
-	, m_enState					(SS_STOPED)
+	, m_enState					(SS_STOPPED)
 	, m_bAsyncConnect			(TRUE)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enRecvPolicy			(RP_SERIAL)
@@ -59,7 +59,7 @@ public:
 		ASSERT(m_wsSocket.IsValid());
 		ASSERT(m_psoListener);
 
-		Reset();
+		Reset(FALSE);
 	}
 
 	virtual ~CTcpAgent()
@@ -133,10 +133,11 @@ protected:
 		{return m_psoListener->OnConnect(dwConnID);}
 	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
 		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
-	virtual EnHandleResult FireAgentShutdown()
-		{return m_psoListener->OnAgentShutdown();}
+	virtual EnHandleResult FireShutdown()
+		{return m_psoListener->OnShutdown();}
 
 	virtual BOOL CheckParams();
+	virtual void Reset(BOOL bAll = TRUE);
 
 private:
 	BOOL CheckStarting();
@@ -152,8 +153,6 @@ private:
 	void ReleaseFreeBuffer();
 	void WaitForWorkerThreadEnd();
 	void CloseCompletePort();
-
-	void Reset();
 
 	void		CompressFreeBuffer(size_t size);
 	void		CompressFreeSocket(size_t size, BOOL bForce = FALSE);

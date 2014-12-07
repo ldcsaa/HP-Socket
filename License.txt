@@ -1,7 +1,7 @@
 /*
- * Copyright: JessMA Open Source (ldcsaa@gmail.com)
+ * Copyright JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -21,12 +21,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/******************************************************************************
-Module:  PrivateHeap.cpp
-Notices: Copyright (c) 2006 Bruce Liang
-Purpose: 管理进程私有堆.
-******************************************************************************/
-
-#include "StdAfx.h"
-#include "PrivateHeap.h"

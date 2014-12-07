@@ -30,14 +30,13 @@
 #include "../../Common/Src/bufferpool.h"
 #include "../../Common/Src/CriticalSection.h"
 
-class CTcpClient : public ITcpClient
+class CUdpCast : public IUdpCast
 {
 public:
 	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
-	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount);
-	virtual BOOL SendSmallFile	(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
+	virtual BOOL			SendPackets			(const WSABUF pBuffers[], int iCount);
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
 	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
@@ -47,19 +46,31 @@ public:
 	virtual LPCTSTR			GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
-	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize	= dwSocketBufferSize;}
-	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			{m_dwKeepAliveTime		= dwKeepAliveTime;}
-	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		{m_dwKeepAliveInterval	= dwKeepAliveInterval;}
-	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize = dwFreeBufferPoolSize;}
-	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold = dwFreeBufferPoolHold;}
+	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)		{m_dwMaxDatagramSize	= dwMaxDatagramSize;}
+	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize	= dwFreeBufferPoolSize;}
+	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold	= dwFreeBufferPoolHold;}
+	virtual void SetReuseAddress		(BOOL bReuseAddress)			{m_bReuseAddress		= bReuseAddress;}
+	virtual void SetBindAdddress		(LPCTSTR pszBindAddress)		{m_strBindAddress		= pszBindAddress;}
+	virtual void SetCastMode			(EnCastMode enCastMode)			{m_enCastMode			= enCastMode;}
+	virtual void SetMultiCastTtl		(int iMCTtl)					{m_iMCTtl				= iMCTtl;}
+	virtual void SetMultiCastLoop		(BOOL bMCLoop)					{m_bMCLoop				= bMCLoop;}
 	virtual void SetExtra				(PVOID pExtra)					{m_pExtra				= pExtra;}						
 
-	virtual DWORD GetSocketBufferSize	()	{return m_dwSocketBufferSize;}
-	virtual DWORD GetKeepAliveTime		()	{return m_dwKeepAliveTime;}
-	virtual DWORD GetKeepAliveInterval	()	{return m_dwKeepAliveInterval;}
+	virtual DWORD GetMaxDatagramSize	()	{return m_dwMaxDatagramSize;}
 	virtual DWORD GetFreeBufferPoolSize	()	{return m_dwFreeBufferPoolSize;}
 	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
+	virtual BOOL  IsReuseAddress		()	{return m_bReuseAddress;}
+	virtual LPCTSTR GetBindAdddress		()	{return (LPCTSTR)m_strBindAddress;}
+	virtual EnCastMode GetCastMode		()	{return m_enCastMode;}
+	virtual int GetMultiCastTtl			()	{return m_iMCTtl;}
+	virtual BOOL IsMultiCastLoop		()	{return m_bMCLoop;}
 	virtual PVOID GetExtra				()	{return m_pExtra;}
+
+	virtual BOOL GetRemoteAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
+	{
+		ADDRESS_FAMILY usFamily;
+		return ::sockaddr_IN_2_A(m_remoteAddr, usFamily, lpszAddress, iAddressLen, usPort);
+	}
 
 protected:
 	virtual EnHandleResult FirePrepareConnect(IClient* pClient, SOCKET socket)
@@ -84,15 +95,21 @@ private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
 	BOOL CreateClientSocket();
-	BOOL ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort);
+	BOOL ConnectToGroup(LPCTSTR pszRemoteAddress, USHORT usPort);
 	BOOL CreateWorkerThread();
+	BOOL CreateDetectorThread();
 	BOOL ProcessNetworkEvent();
 	BOOL ReadData();
 	BOOL SendData();
-	BOOL DoSendData(TItem* pItem);
 	TItem* GetSendBuffer();
-	BOOL SendInternal(const WSABUF pBuffers[], int iCount, EnSocketError& enCode);
+	int SendInternal(const BYTE* pBuffer, int iLength, EnSocketError& enCode);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
+
+	BOOL HandleError();
+	BOOL HandleRead(WSANETWORKEVENTS& events);
+	BOOL HandleWrite(WSANETWORKEVENTS& events);
+	BOOL HandleConnect(WSANETWORKEVENTS& events);
+	BOOL HandleClosse(WSANETWORKEVENTS& events);
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 
@@ -105,7 +122,7 @@ private:
 	 WINAPI WorkerThreadProc(LPVOID pv);
 
 public:
-	CTcpClient(ITcpClientListener* psoListener)
+	CUdpCast(IUdpCastListener* psoListener)
 	: m_psoListener			(psoListener)
 	, m_lsSend				(m_itPool)
 	, m_soClient			(INVALID_SOCKET)
@@ -113,50 +130,60 @@ public:
 	, m_dwConnID			(0)
 	, m_hWorker				(nullptr)
 	, m_dwWorkerID			(0)
-	, m_bAsyncConnect		(FALSE)
 	, m_iPending			(0)
 	, m_enState				(SS_STOPPED)
 	, m_enLastError			(SE_OK)
 	, m_pExtra				(nullptr)
-	, m_dwSocketBufferSize	(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
+	, m_dwMaxDatagramSize	(DEFAULT_UDP_MAX_DATAGRAM_SIZE)
 	, m_dwFreeBufferPoolSize(DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE)
 	, m_dwFreeBufferPoolHold(DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD)
-	, m_dwKeepAliveTime		(DEFALUT_TCP_KEEPALIVE_TIME)
-	, m_dwKeepAliveInterval	(DEFALUT_TCP_KEEPALIVE_INTERVAL)
+	, m_bReuseAddress		(FALSE)
+	, m_iMCTtl				(1)
+	, m_bMCLoop				(FALSE)
+	, m_enCastMode			(CM_MULTICAST)
+	, m_strBindAddress		(DEFAULT_BIND_ADDRESS)
 	{
 		ASSERT(m_psoListener);
+		Reset(FALSE);
 	}
 
-	virtual ~CTcpClient()	{if(HasStarted()) Stop();}
+	virtual ~CUdpCast()	{if(HasStarted()) Stop();}
 
 private:
 	CInitSocket			m_wsSocket;
 
 private:
-	ITcpClientListener*	m_psoListener;
-	BOOL				m_bAsyncConnect;
+	IUdpCastListener*	m_psoListener;
+
 	SOCKET				m_soClient;
 	HANDLE				m_evSocket;
 	CONNID				m_dwConnID;
 
-	DWORD				m_dwSocketBufferSize;
+	BOOL				m_bReuseAddress;
+	DWORD				m_dwMaxDatagramSize;
 	DWORD				m_dwFreeBufferPoolSize;
 	DWORD				m_dwFreeBufferPoolHold;
-	DWORD				m_dwKeepAliveTime;
-	DWORD				m_dwKeepAliveInterval;
+
+	int					m_iMCTtl;
+	BOOL				m_bMCLoop;
+	EnCastMode			m_enCastMode;
+	CString				m_strBindAddress;
 
 	HANDLE				m_hWorker;
 
 #ifndef _WIN32_WCE
 	UINT				m_dwWorkerID;
 #else
-	DWORD
-#endif					m_dwWorkerID;
+	DWORD				m_dwWorkerID;
+#endif
 
 	EnServiceState		m_enState;
 	EnSocketError		m_enLastError;
 
 	PVOID				m_pExtra;
+
+	SOCKADDR_IN			m_castAddr;
+	SOCKADDR_IN			m_remoteAddr;
 
 	CBufferPtr			m_rcBuffer;
 
@@ -169,6 +196,7 @@ private:
 
 	CEvt				m_evBuffer;
 	CEvt				m_evWorker;
+	CEvt				m_evDetector;
 	CCriSec				m_csCheck;
 
 	volatile int		m_iPending;

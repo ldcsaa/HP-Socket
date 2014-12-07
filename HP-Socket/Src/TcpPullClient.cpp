@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,15 +25,15 @@
 #include "stdafx.h"
 #include "TcpPullClient.h"
 
-EnHandleResult CTcpPullClient::FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CTcpPullClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
 {
 	m_lsBuffer.Cat(pData, iLength);
 	m_iTotalLength += iLength;
 
-	return __super::FireReceive(dwConnID, m_iTotalLength);
+	return __super::FireReceive(pClient, m_iTotalLength);
 }
 
-EnFetchResult CTcpPullClient::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
+EnFetchResult CTcpPullClient::Fetch(BYTE* pData, int iLength)
 {
 	ASSERT(pData != nullptr && iLength > 0);
 
@@ -42,6 +42,19 @@ EnFetchResult CTcpPullClient::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
 		m_lsBuffer.Fetch(pData, iLength);
 		m_iTotalLength -= iLength;
 
+		return FR_OK;
+	}
+
+	return FR_LENGTH_TOO_LONG;
+}
+
+EnFetchResult CTcpPullClient::Peek(BYTE* pData, int iLength)
+{
+	ASSERT(pData != nullptr && iLength > 0);
+
+	if(m_iTotalLength >= iLength)
+	{
+		m_lsBuffer.Peek(pData, iLength);
 		return FR_OK;
 	}
 

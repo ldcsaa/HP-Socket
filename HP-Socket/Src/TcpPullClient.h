@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -27,20 +27,21 @@
 #include "TcpClient.h"
 #include "../../Common/Src/bufferpool.h"
 
-class CTcpPullClient : public IPullSocket, public CTcpClient
+class CTcpPullClient : public IPullClient, public CTcpClient
 {
 public:
-	virtual EnFetchResult Fetch(CONNID dwConnID, BYTE* pData, int iLength);
+	virtual EnFetchResult Fetch	(BYTE* pData, int iLength);
+	virtual EnFetchResult Peek	(BYTE* pData, int iLength);
 
 protected:
-	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength);
 
-	virtual void Reset()
+	virtual void Reset(BOOL bAll = TRUE)
 	{
 		m_iTotalLength = 0;
 		m_lsBuffer.Clear();
 
-		return __super::Reset();
+		return __super::Reset(bAll);
 	}
 
 public:

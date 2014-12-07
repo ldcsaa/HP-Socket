@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -67,37 +67,41 @@ Release:
 
 // 创建 ITcpServer 对象
 HPSOCKET_API ITcpServer* HP_Create_TcpServer(ITcpServerListener* pListener);
-// 创建 ITcpClient 对象
-HPSOCKET_API ITcpClient* HP_Create_TcpClient(ITcpClientListener* pListener);
 // 创建 ITcpAgent 对象
 HPSOCKET_API ITcpAgent* HP_Create_TcpAgent(ITcpAgentListener* pListener);
+// 创建 ITcpClient 对象
+HPSOCKET_API ITcpClient* HP_Create_TcpClient(ITcpClientListener* pListener);
 // 创建 ITcpPullServer 对象
 HPSOCKET_API ITcpPullServer* HP_Create_TcpPullServer(ITcpServerListener* pListener);
-// 创建 ITcpPullClient 对象
-HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener);
 // 创建 ITcpPullAgent 对象
 HPSOCKET_API ITcpPullAgent* HP_Create_TcpPullAgent(ITcpAgentListener* pListener);
+// 创建 ITcpPullClient 对象
+HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener);
 // 创建 IUdpServer 对象
 HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
 // 创建 IUdpClient 对象
 HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener);
+// 创建 IUdpCast 对象
+HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener);
 
 // 销毁 ITcpServer 对象
 HPSOCKET_API void HP_Destroy_TcpServer(ITcpServer* pServer);
-// 销毁 ITcpClient 对象
-HPSOCKET_API void HP_Destroy_TcpClient(ITcpClient* pClient);
 // 销毁 ITcpAgent 对象
 HPSOCKET_API void HP_Destroy_TcpAgent(ITcpAgent* pAgent);
+// 销毁 ITcpClient 对象
+HPSOCKET_API void HP_Destroy_TcpClient(ITcpClient* pClient);
 // 销毁 ITcpPullServer 对象
 HPSOCKET_API void HP_Destroy_TcpPullServer(ITcpPullServer* pServer);
-// 销毁 ITcpPullClient 对象
-HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient);
 // 销毁 ITcpPullAgent 对象
 HPSOCKET_API void HP_Destroy_TcpPullAgent(ITcpPullAgent* pAgent);
+// 销毁 ITcpPullClient 对象
+HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient);
 // 销毁 IUdpServer 对象
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
 // 销毁 IUdpClient 对象
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient);
+// 销毁 IUdpCast 对象
+HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast);
 
 // 获取错误描述文本
 HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode);
@@ -128,20 +132,6 @@ struct TcpServer_Creator
 	}
 };
 
-// ITcpClient 对象创建器
-struct TcpClient_Creator
-{
-	static ITcpClient* Create(ITcpClientListener* pListener)
-	{
-		return HP_Create_TcpClient(pListener);
-	}
-
-	static void Destroy(ITcpClient* pClient)
-	{
-		HP_Destroy_TcpClient(pClient);
-	}
-};
-
 // ITcpAgent 对象创建器
 struct TcpAgent_Creator
 {
@@ -153,6 +143,20 @@ struct TcpAgent_Creator
 	static void Destroy(ITcpAgent* pAgent)
 	{
 		HP_Destroy_TcpAgent(pAgent);
+	}
+};
+
+// ITcpClient 对象创建器
+struct TcpClient_Creator
+{
+	static ITcpClient* Create(ITcpClientListener* pListener)
+	{
+		return HP_Create_TcpClient(pListener);
+	}
+
+	static void Destroy(ITcpClient* pClient)
+	{
+		HP_Destroy_TcpClient(pClient);
 	}
 };
 
@@ -170,20 +174,6 @@ struct TcpPullServer_Creator
 	}
 };
 
-// ITcpPullClient 对象创建器
-struct TcpPullClient_Creator
-{
-	static ITcpPullClient* Create(ITcpClientListener* pListener)
-	{
-		return HP_Create_TcpPullClient(pListener);
-	}
-
-	static void Destroy(ITcpPullClient* pClient)
-	{
-		HP_Destroy_TcpPullClient(pClient);
-	}
-};
-
 // ITcpPullAgent 对象创建器
 struct TcpPullAgent_Creator
 {
@@ -195,6 +185,20 @@ struct TcpPullAgent_Creator
 	static void Destroy(ITcpPullAgent* pAgent)
 	{
 		HP_Destroy_TcpPullAgent(pAgent);
+	}
+};
+
+// ITcpPullClient 对象创建器
+struct TcpPullClient_Creator
+{
+	static ITcpPullClient* Create(ITcpClientListener* pListener)
+	{
+		return HP_Create_TcpPullClient(pListener);
+	}
+
+	static void Destroy(ITcpPullClient* pClient)
+	{
+		HP_Destroy_TcpPullClient(pClient);
 	}
 };
 
@@ -223,6 +227,20 @@ struct UdpClient_Creator
 	static void Destroy(IUdpClient* pClient)
 	{
 		HP_Destroy_UdpClient(pClient);
+	}
+};
+
+// IUdpClient 对象创建器
+struct UdpCast_Creator
+{
+	static IUdpCast* Create(IUdpCastListener* pListener)
+	{
+		return HP_Create_UdpCast(pListener);
+	}
+
+	static void Destroy(IUdpCast* pCast)
+	{
+		HP_Destroy_UdpCast(pCast);
 	}
 };
 
@@ -289,17 +307,19 @@ private:
 
 // ITcpServer 对象智能指针
 typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
-// ITcpClient 对象智能指针
-typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
 // ITcpAgent 对象智能指针
 typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
+// ITcpClient 对象智能指针
+typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
 // ITcpPullServer 对象智能指针
 typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
-// ITcpPullClient 对象智能指针
-typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
 // ITcpPullAgent 对象智能指针
 typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
+// ITcpPullClient 对象智能指针
+typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
 // IUdpServer 对象智能指针
 typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
 // IUdpClient 对象智能指针
 typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
+// IUdpCast 对象智能指针
+typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -50,15 +50,15 @@ const DWORD	DEFAULT_MAX_SHUTDOWN_WAIT_TIME			= 15 * 1000;
 const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	= 10;
 const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	= 30;
 const DWORD	DEFAULT_TCP_SOCKET_BUFFER_SIZE			= ::SysGetPageSize();
-const DWORD	DEFALUT_TCP_KEEPALIVE_TIME				= 10 * 1000;
+const DWORD	DEFALUT_TCP_KEEPALIVE_TIME				= 20 * 1000;
 const DWORD	DEFALUT_TCP_KEEPALIVE_INTERVAL			= 5 * 1000;
 const DWORD	DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	= SOMAXCONN;
 const DWORD	DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT	= 300;
 const DWORD	DEFAULT_UDP_MAX_DATAGRAM_SIZE			= 1472;
 const DWORD	DEFAULT_UDP_POST_RECEIVE_COUNT			= 300;
-const DWORD DEFAULT_UDP_DETECT_ATTEMPTS				= 5;
-const DWORD DEFAULT_UDP_DETECT_INTERVAL				= 12;
-LPCTSTR DEFAULT_AGENT_BIND_ADDRESS					= _T("0.0.0.0");
+const DWORD DEFAULT_UDP_DETECT_ATTEMPTS				= 3;
+const DWORD DEFAULT_UDP_DETECT_INTERVAL				= 20;
+LPCTSTR DEFAULT_BIND_ADDRESS						= _T("0.0.0.0");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -103,47 +103,56 @@ BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
 
 BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr)
 {
-	addr.s_addr		= 0;
-	hostent* host	= ::gethostbyname(CT2A(lpszHost));
+	addr.s_addr	= 0;
 
-	if(host)
+	addrinfo*	pInfo = nullptr;
+	addrinfo	hints = {0};
+
+	hints.ai_flags	= AI_ALL;
+	hints.ai_family	= AF_INET;
+
+	int rs = ::getaddrinfo((CT2A)lpszHost, nullptr, &hints, &pInfo);
+
+	if(rs == NO_ERROR)
 	{
 		IN_ADDR inAddr;
 		ULONG addrs[3]  = {0};
 		char** pptr		= nullptr;
 
-		if(host->h_addrtype == AF_INET)
+		for(addrinfo* pCur = pInfo; pCur != nullptr; pCur = pCur->ai_next)
 		{
-			for(pptr = host->h_addr_list; *pptr != nullptr; ++pptr)
+			if(pCur->ai_family == AF_INET)
 			{
-				inAddr.s_addr	= *(ULONG*)*pptr;
-				UCHAR a			= inAddr.s_net;
-				UCHAR b			= inAddr.s_host;
+				inAddr	= ((SOCKADDR_IN*)(pCur->ai_addr))->sin_addr;
+				UCHAR a	= inAddr.s_net;
+				UCHAR b	= inAddr.s_host;
 
 				if(addrs[0] == 0 && a == 127)
 				{
 					addrs[0] = inAddr.s_addr;
 					break;
 				}
-				else if	(	addrs[1] == 0							&& 
+				else if(	addrs[1] == 0							&& 
 							(
 								(a == 10)							||
 								(a == 172 && b >= 16 && b <= 31)	||
 								(a == 192 && b == 168)
+								)
 							)
-						)
 					addrs[1] = inAddr.s_addr;
 				else if(addrs[2] == 0)
 					addrs[2] = inAddr.s_addr;
 			}
+		}
 
-			for(int i = 0; i < 3; i++)
+		::freeaddrinfo(pInfo);
+
+		for(int i = 0; i < 3; i++)
+		{
+			if(addrs[i] != 0)
 			{
-				if(addrs[i] != 0)
-				{
-					addr.s_addr = addrs[i];
-					break;
-				}
+				addr.s_addr = addrs[i];
+				break;
 			}
 		}
 	}
@@ -153,15 +162,15 @@ BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr)
 
 BOOL IN_ADDR_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen)
 {
-	BOOL isOK		= TRUE;
-	char* lpszIP	= inet_ntoa(addr);
-	int iIPLen		= (int)strlen(lpszIP);
+	BOOL isOK = TRUE;
 
-	if(iIPLen > 0)
-		++iIPLen;
+	TCHAR szAddr[16];
+	wsprintf(szAddr, _T("%hu.%hu.%hu.%hu"), addr.s_net, addr.s_host, addr.s_lh, addr.s_impno);
 
-	if(iIPLen > 0 && iAddressLen >= iIPLen)
-		lstrcpy(lpszAddress, CA2T(lpszIP));
+	int iIPLen = lstrlen(szAddr) + 1;
+
+	if(iAddressLen >= iIPLen)
+		memcpy(lpszAddress, szAddr, iIPLen * sizeof(TCHAR));
 	else
 		isOK = FALSE;
 

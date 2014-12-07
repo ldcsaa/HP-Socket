@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -125,7 +125,7 @@ BOOL CUdpServer::CheckParams()
 
 BOOL CUdpServer::CheckStarting()
 {
-	if(m_enState == SS_STOPED)
+	if(m_enState == SS_STOPPED)
 	{
 		m_enState = SS_STARTING;
 		::_ReadWriteBarrier();
@@ -143,7 +143,7 @@ BOOL CUdpServer::CheckStoping()
 {
 	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
 	{
-		m_enState = SS_STOPING;
+		m_enState = SS_STOPPING;
 		::_ReadWriteBarrier();
 	}
 	else
@@ -261,7 +261,7 @@ BOOL CUdpServer::Stop()
 	
 	ReleaseClientSocket();
 
-	FireServerShutdown();
+	FireShutdown();
 
 	ReleaseFreeSocket();
 	ReleaseFreeBuffer();
@@ -273,14 +273,17 @@ BOOL CUdpServer::Stop()
 	return TRUE;
 }
 
-void CUdpServer::Reset()
+void CUdpServer::Reset(BOOL bAll)
 {
-	m_phSocket.Reset();
-	m_phBuffer.Reset();
-	m_itPool.Clear();
+	if(bAll)
+	{
+		m_phSocket.Reset();
+		m_phBuffer.Reset();
+		m_itPool.Clear();
+	}
 
 	m_iRemainPostReceives	= 0;
-	m_enState				= SS_STOPED;
+	m_enState				= SS_STOPPED;
 }
 
 void CUdpServer::CloseListenSocket()

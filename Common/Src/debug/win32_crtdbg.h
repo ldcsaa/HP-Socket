@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.7
+ * Version	: 2.3.8
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -94,10 +94,10 @@ namespace __dbg_impl
 
 			if (::_CrtMemDifference( &s3, &s1, &s2))
 			{
-				TRACE0("!! Memory stats !!\n");
-				TRACE0("----------------------------------------\n");
+				TRACE("!! Memory stats !!\n");
+				TRACE("----------------------------------------\n");
 				::_CrtMemDumpStatistics(&s3);
-				TRACE0("----------------------------------------\n");
+				TRACE("----------------------------------------\n");
 			}
 		}
 

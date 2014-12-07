@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.2.3
+ * Version	: 3.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -33,7 +33,7 @@
 class CUdpClient : public IUdpClient
 {
 public:
-	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPortt, BOOL bAsyncConnect = FALSE);
+	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			SendPackets			(const WSABUF pBuffers[], int iCount);
@@ -46,40 +46,41 @@ public:
 	virtual LPCTSTR			GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
-	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	{m_dwMaxDatagramSize = dwMaxDatagramSize;}
-	virtual void SetDetectAttempts	(DWORD dwDetectAttempts)	{m_dwDetectAttempts	 = dwDetectAttempts;}
-	virtual void SetDetectInterval	(DWORD dwDetectInterval)	{m_dwDetectInterval	 = dwDetectInterval;}
-
-	virtual DWORD GetMaxDatagramSize()							{return m_dwMaxDatagramSize;}
-	virtual DWORD GetDetectAttempts	()							{return m_dwDetectAttempts;}
-	virtual DWORD GetDetectInterval	()							{return m_dwDetectInterval;}
-
+	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)		{m_dwMaxDatagramSize	= dwMaxDatagramSize;}
+	virtual void SetDetectAttempts		(DWORD dwDetectAttempts)		{m_dwDetectAttempts		= dwDetectAttempts;}
+	virtual void SetDetectInterval		(DWORD dwDetectInterval)		{m_dwDetectInterval		= dwDetectInterval;}
 	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize = dwFreeBufferPoolSize;}
 	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold = dwFreeBufferPoolHold;}
+	virtual void SetExtra				(PVOID pExtra)					{m_pExtra				= pExtra;}						
 
+
+	virtual DWORD GetMaxDatagramSize	()	{return m_dwMaxDatagramSize;}
+	virtual DWORD GetDetectAttempts		()	{return m_dwDetectAttempts;}
+	virtual DWORD GetDetectInterval		()	{return m_dwDetectInterval;}
 	virtual DWORD GetFreeBufferPoolSize	()	{return m_dwFreeBufferPoolSize;}
 	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
+	virtual PVOID GetExtra				()	{return m_pExtra;}
 
 protected:
-	virtual EnHandleResult FirePrepareConnect(CONNID dwConnID, SOCKET socket)
-		{return m_psoListener->OnPrepareConnect(dwConnID, socket);}
-	virtual EnHandleResult FireConnect(CONNID dwConnID)
-		{return m_psoListener->OnConnect(dwConnID);}
-	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
-	virtual EnHandleResult FireReceive(CONNID dwConnID, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(dwConnID, pData, iLength);}
-	virtual EnHandleResult FireReceive(CONNID dwConnID, int iLength)
-		{return m_psoListener->OnReceive(dwConnID, iLength);}
-	virtual EnHandleResult FireClose(CONNID dwConnID)
-		{return m_psoListener->OnClose(dwConnID);}
-	virtual EnHandleResult FireError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnError(dwConnID, enOperation, iErrorCode);}
+	virtual EnHandleResult FirePrepareConnect(IClient* pClient, SOCKET socket)
+		{return m_psoListener->OnPrepareConnect(pClient, socket);}
+	virtual EnHandleResult FireConnect(IClient* pClient)
+		{return m_psoListener->OnConnect(pClient);}
+	virtual EnHandleResult FireSend(IClient* pClient, const BYTE* pData, int iLength)
+		{return m_psoListener->OnSend(pClient, pData, iLength);}
+	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength)
+		{return m_psoListener->OnReceive(pClient, pData, iLength);}
+	virtual EnHandleResult FireReceive(IClient* pClient, int iLength)
+		{return m_psoListener->OnReceive(pClient, iLength);}
+	virtual EnHandleResult FireClose(IClient* pClient)
+		{return m_psoListener->OnClose(pClient);}
+	virtual EnHandleResult FireError(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+		{return m_psoListener->OnError(pClient, enOperation, iErrorCode);}
 
-	virtual void Reset();
+	virtual BOOL CheckParams();
+	virtual void Reset(BOOL bAll = TRUE);
 
 private:
-	BOOL CheckParams();
 	BOOL CheckStarting();
 	BOOL CheckStoping();
 	BOOL CreateClientSocket();
@@ -134,9 +135,10 @@ public:
 	, m_dwDetectorID		(0)
 	, m_bAsyncConnect		(FALSE)
 	, m_iPending			(0)
-	, m_enState				(SS_STOPED)
+	, m_enState				(SS_STOPPED)
 	, m_enLastError			(SE_OK)
 	, m_dwDetectFails		(0)
+	, m_pExtra				(nullptr)
 	, m_dwMaxDatagramSize	(DEFAULT_UDP_MAX_DATAGRAM_SIZE)
 	, m_dwFreeBufferPoolSize(DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE)
 	, m_dwFreeBufferPoolHold(DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD)
@@ -149,13 +151,6 @@ public:
 	virtual ~CUdpClient()	{if(HasStarted()) Stop();}
 
 private:
-	DWORD m_dwMaxDatagramSize;
-	DWORD m_dwFreeBufferPoolSize;
-	DWORD m_dwFreeBufferPoolHold;
-	DWORD m_dwDetectAttempts;
-	DWORD m_dwDetectInterval;
-
-private:
 	CInitSocket			m_wsSocket;
 
 private:
@@ -165,6 +160,12 @@ private:
 	SOCKET				m_soClient;
 	HANDLE				m_evSocket;
 	CONNID				m_dwConnID;
+
+	DWORD				m_dwMaxDatagramSize;
+	DWORD				m_dwFreeBufferPoolSize;
+	DWORD				m_dwFreeBufferPoolHold;
+	DWORD				m_dwDetectAttempts;
+	DWORD				m_dwDetectInterval;
 
 	HANDLE				m_hWorker;
 	HANDLE				m_hDetector;
@@ -179,6 +180,8 @@ private:
 
 	EnServiceState		m_enState;
 	EnSocketError		m_enLastError;
+
+	PVOID				m_pExtra;
 
 	CBufferPtr			m_rcBuffer;
 
