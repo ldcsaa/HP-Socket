@@ -25,6 +25,7 @@
 #pragma once
 
 #include "CriticalSection.h"
+#include "Semaphore.h"
 
 class CSWMR
 {
