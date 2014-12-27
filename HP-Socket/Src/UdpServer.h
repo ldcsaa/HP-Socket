@@ -55,6 +55,7 @@ public:
 	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
 	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
 	, m_dwMaxShutdownWaitTime	(DEFAULT_MAX_SHUTDOWN_WAIT_TIME)
+	, m_bMarkSilence			(FALSE)
 	{
 		ASSERT(m_wsSocket.IsValid());
 		ASSERT(m_psoListener);
@@ -77,6 +78,7 @@ public:
 	virtual EnServiceState	GetState					()	{return m_enState;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);
 	virtual BOOL			DisconnectLongConnections	(DWORD dwPeriod, BOOL bForce = TRUE);
+	virtual BOOL			DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetListenAddress			(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 
@@ -84,6 +86,7 @@ public:
 	virtual DWORD GetConnectionCount	();
 	virtual BOOL GetAllConnectionIDs	(CONNID pIDs[], DWORD& dwCount);
 	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod);
+	virtual BOOL GetSilencePeriod		(CONNID dwConnID, DWORD& dwPeriod);
 	virtual EnSocketError GetLastError	()	{return m_enLastError;}
 	virtual LPCTSTR GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
@@ -104,6 +107,7 @@ public:
 	virtual void SetDetectAttempts			(DWORD dwDetectAttempts)		{m_dwDetectAttempts			= dwDetectAttempts;}
 	virtual void SetDetectInterval			(DWORD dwDetectInterval)		{m_dwDetectInterval			= dwDetectInterval;}
 	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	{m_dwMaxShutdownWaitTime	= dwMaxShutdownWaitTime;}
+	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
 	virtual EnRecvPolicy GetRecvPolicy		()	{return m_enRecvPolicy;}
@@ -118,6 +122,7 @@ public:
 	virtual DWORD GetDetectAttempts			()	{return m_dwDetectAttempts;}
 	virtual DWORD GetDetectInterval			()	{return m_dwDetectInterval;}
 	virtual DWORD GetMaxShutdownWaitTime	()	{return m_dwMaxShutdownWaitTime;}
+	virtual BOOL  IsMarkSilence				()	{return m_bMarkSilence;}
 
 protected:
 	virtual EnHandleResult FireReceive(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength);
@@ -228,6 +233,7 @@ private:
 	DWORD m_dwDetectAttempts;
 	DWORD m_dwDetectInterval;
 	DWORD m_dwMaxShutdownWaitTime;
+	BOOL  m_bMarkSilence;
 
 private:
 	CInitSocket				m_wsSocket;

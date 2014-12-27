@@ -9,7 +9,12 @@ v3.3.1 更新：
 3、IPullSocket 和 IPullClient 接口增加 Peek() 方法用于窥探缓冲区数据（不会移除缓冲区数据）
 4、增加 IComplexSocketListener 监听器接口，用作 Server/Agent 组件的监听器基接口
 5、IComplexSocketListener 提供 OnShutdown 通知方法取代 Server/Agent 组件原来的 OnServerShutdown/OnAgentShutdown
-6、IClient组件增加 Get/SetExtra() 方法用于保存自定义附加数据
+6、IClient 组件增加 Get/SetExtra() 方法用于保存自定义附加数据
+7、IServer 和 IAgent 组件增加“静默连接处理”相关方法：
+	1) DisconnectSilenceConnections()：断开超过指定时长的静默连接
+	2) GetSilencePeriod()：获取某个连接静默时间（毫秒）
+	3) SetMarkSilence()：设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE）
+	4) IsMarkSilence()：检测是否标记静默时间
 
 > 增加 UdpCast 通信组件：
 -----------------

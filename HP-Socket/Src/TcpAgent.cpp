@@ -387,7 +387,8 @@ void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
-	pSocketObj->connTime = ::TimeGetTime();
+	pSocketObj->connTime	= ::TimeGetTime();
+	pSocketObj->activeTime	= pSocketObj->connTime;
 
 	CReentrantWriteLock locallock(m_csClientSocket);
 	m_mpClientSocket[dwConnID] = pSocketObj;
@@ -639,7 +640,23 @@ BOOL CTcpAgent::GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)
 	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
 	if(TSocketObj::IsValid(pSocketObj))
-		dwPeriod = GetTimeGap32(pSocketObj->connTime);
+		dwPeriod = ::GetTimeGap32(pSocketObj->connTime);
+	else
+		isOK = FALSE;
+
+	return isOK;
+}
+
+BOOL CTcpAgent::GetSilencePeriod(CONNID dwConnID, DWORD& dwPeriod)
+{
+	if(!m_bMarkSilence)
+		return FALSE;
+
+	BOOL isOK				= TRUE;
+	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
+
+	if(TSocketObj::IsValid(pSocketObj))
+		dwPeriod = ::GetTimeGap32(pSocketObj->activeTime);
 	else
 		isOK = FALSE;
 
@@ -678,6 +695,31 @@ BOOL CTcpAgent::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 		}
 	}
 	
+	for(ulong_ptr_deque::const_iterator it = ls.begin(); it != ls.end(); ++it)
+		Disconnect(*it, bForce);
+
+	return ls.size() > 0;
+}
+
+BOOL CTcpAgent::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
+{
+	if(!m_bMarkSilence)
+		return FALSE;
+
+	ulong_ptr_deque ls;
+
+	{
+		CReentrantReadLock locallock(m_csClientSocket);
+
+		DWORD now = ::TimeGetTime();
+
+		for(TSocketObjPtrMapCI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
+		{
+			if(now - it->second->activeTime >= dwPeriod)
+				ls.push_back(it->first);
+		}
+	}
+
 	for(ulong_ptr_deque::const_iterator it = ls.begin(); it != ls.end(); ++it)
 		Disconnect(*it, bForce);
 
@@ -934,6 +976,7 @@ void CTcpAgent::TriggerFireSend(CONNID dwConnID, TBufferObj* pBufferObj)
 
 void CTcpAgent::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 	EnHandleResult hr = FireReceive(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len);
 
 	if(hr == HR_OK || hr == HR_IGNORE)

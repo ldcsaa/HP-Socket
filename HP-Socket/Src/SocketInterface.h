@@ -604,7 +604,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)				= 0;
+	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	= 0;
 
 	/*
 	* 名称：断开连接
@@ -615,7 +615,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败
 	*/
-	virtual BOOL Disconnect(CONNID dwConnID, BOOL bForce = TRUE)				= 0;
+	virtual BOOL Disconnect(CONNID dwConnID, BOOL bForce = TRUE)					= 0;
 
 	/*
 	* 名称：断开超时连接
@@ -626,7 +626,18 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败
 	*/
-	virtual BOOL DisconnectLongConnections(DWORD dwPeriod, BOOL bForce = TRUE)	= 0;
+	virtual BOOL DisconnectLongConnections(DWORD dwPeriod, BOOL bForce = TRUE)		= 0;
+
+	/*
+	* 名称：断开静默连接
+	* 描述：断开超过指定时长的静默连接
+	*		
+	* 参数：		dwPeriod	-- 时长（毫秒）
+	*			bForce		-- 是否强制断开连接
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败
+	*/
+	virtual BOOL DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE)	= 0;
 
 public:
 
@@ -665,12 +676,14 @@ public:
 	virtual BOOL GetAllConnectionIDs	(CONNID pIDs[], DWORD& dwCount)		= 0;
 	/* 获取某个连接时长（毫秒） */
 	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod)	= 0;
+	/* 获取某个连接静默时间（毫秒） */
+	virtual BOOL GetSilencePeriod		(CONNID dwConnID, DWORD& dwPeriod)	= 0;
 	/* 获取某个连接的远程地址信息 */
 	virtual BOOL GetRemoteAddress		(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 	/* 获取最近一次失败操作的错误代码 */
 	virtual EnSocketError GetLastError	()									= 0;
 	/* 获取最近一次失败操作的错误描述 */
-	virtual LPCTSTR		GetLastErrorDesc()									= 0;
+	virtual LPCTSTR GetLastErrorDesc	()									= 0;
 	/* 获取连接中未发出数据的长度 */
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending)	= 0;
 
@@ -692,6 +705,8 @@ public:
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		= 0;
 	/* 设置关闭组件前等待连接关闭的最长时限（毫秒，0 则不等待） */
 	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	= 0;
+	/* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
+	virtual void SetMarkSilence				(BOOL bMarkSilence)				= 0;
 
 	/* 获取数据发送策略 */
 	virtual EnSendPolicy GetSendPolicy		()	= 0;
@@ -711,6 +726,8 @@ public:
 	virtual DWORD GetWorkerThreadCount		()	= 0;
 	/* 获取关闭组建前等待连接关闭的最长时限 */
 	virtual DWORD GetMaxShutdownWaitTime	()	= 0;
+	/* 检测是否标记静默时间 */
+	virtual BOOL IsMarkSilence				()	= 0;
 
 public:
 	virtual ~IComplexSocket() {}

@@ -463,6 +463,17 @@ HPSOCKET_API BOOL __stdcall HP_Server_Disconnect(HP_Server pServer, HP_CONNID dw
 */
 HPSOCKET_API BOOL __stdcall HP_Server_DisconnectLongConnections(HP_Server pServer, DWORD dwPeriod, BOOL bForce);
 
+/*
+* 名称：断开静默连接
+* 描述：断开超过指定时长的静默连接
+*		
+* 参数：		dwPeriod	-- 时长（毫秒）
+*			bForce		-- 是否强制断开连接
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_Server_DisconnectSilenceConnections(HP_Server pServer, DWORD dwPeriod, BOOL bForce);
+
 /******************************************************************************/
 /***************************** Server 属性访问方法 *****************************/
 
@@ -504,6 +515,8 @@ HPSOCKET_API DWORD __stdcall HP_Server_GetConnectionCount(HP_Server pServer);
 HPSOCKET_API BOOL __stdcall HP_Server_GetAllConnectionIDs(HP_Server pServer, HP_CONNID pIDs[], DWORD* pdwCount);
 /* 获取某个客户端连接时长（毫秒） */
 HPSOCKET_API BOOL __stdcall HP_Server_GetConnectPeriod(HP_Server pServer, HP_CONNID dwConnID, DWORD* pdwPeriod);
+/* 获取某个连接静默时间（毫秒） */
+HPSOCKET_API BOOL __stdcall HP_Server_GetSilencePeriod(HP_Server pServer, HP_CONNID dwConnID, DWORD* pdwPeriod);
 /* 获取监听 Socket 的地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Server_GetListenAddress(HP_Server pServer, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 /* 获取某个连接的远程地址信息 */
@@ -527,6 +540,8 @@ HPSOCKET_API void __stdcall HP_Server_SetFreeBufferObjHold(HP_Server pServer, DW
 HPSOCKET_API void __stdcall HP_Server_SetWorkerThreadCount(HP_Server pServer, DWORD dwWorkerThreadCount);
 /* 设置关闭服务前等待连接关闭的最长时限（毫秒，0 则不等待） */
 HPSOCKET_API void __stdcall HP_Server_SetMaxShutdownWaitTime(HP_Server pServer, DWORD dwMaxShutdownWaitTime);
+/* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
+HPSOCKET_API void __stdcall HP_Server_SetMarkSilence(HP_Server pServer, BOOL bMarkSilence);
 
 /* 获取数据发送策略 */
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Server_GetSendPolicy(HP_Server pServer);
@@ -546,6 +561,8 @@ HPSOCKET_API DWORD __stdcall HP_Server_GetFreeBufferObjHold(HP_Server pServer);
 HPSOCKET_API DWORD __stdcall HP_Server_GetWorkerThreadCount(HP_Server pServer);
 /* 获取关闭服务前等待连接关闭的最长时限 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetMaxShutdownWaitTime(HP_Server pServer);
+/* 检测是否标记静默时间 */
+HPSOCKET_API BOOL __stdcall HP_Server_IsMarkSilence(HP_Server pServer);
 
 /**********************************************************************************/
 /******************************* TCP Server 操作方法 *******************************/
@@ -707,6 +724,17 @@ HPSOCKET_API BOOL __stdcall HP_Agent_Disconnect(HP_Agent pAgent, HP_CONNID dwCon
 */
 HPSOCKET_API BOOL __stdcall HP_Agent_DisconnectLongConnections(HP_Agent pAgent, DWORD dwPeriod, BOOL bForce);
 
+/*
+* 名称：断开静默连接
+* 描述：断开超过指定时长的静默连接
+*		
+* 参数：		dwPeriod	-- 时长（毫秒）
+*			bForce		-- 是否强制断开连接
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_Agent_DisconnectSilenceConnections(HP_Agent pAgent, DWORD dwPeriod, BOOL bForce);
+
 /******************************************************************************/
 /***************************** Agent 属性访问方法 *****************************/
 
@@ -742,6 +770,8 @@ HPSOCKET_API DWORD __stdcall HP_Agent_GetConnectionCount(HP_Agent pAgent);
 HPSOCKET_API BOOL __stdcall HP_Agent_GetAllConnectionIDs(HP_Agent pAgent, HP_CONNID pIDs[], DWORD* pdwCount);
 /* 获取某个连接时长（毫秒） */
 HPSOCKET_API BOOL __stdcall HP_Agent_GetConnectPeriod(HP_Agent pAgent, HP_CONNID dwConnID, DWORD* pdwPeriod);
+/* 获取某个连接静默时间（毫秒） */
+HPSOCKET_API BOOL __stdcall HP_Agent_GetSilencePeriod(HP_Agent pAgent, HP_CONNID dwConnID, DWORD* pdwPeriod);
 /* 获取某个连接的本地地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Agent_GetLocalAddress(HP_Agent pAgent, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 /* 获取某个连接的远程地址信息 */
@@ -771,6 +801,8 @@ HPSOCKET_API void __stdcall HP_Agent_SetFreeBufferObjHold(HP_Agent pAgent, DWORD
 HPSOCKET_API void __stdcall HP_Agent_SetWorkerThreadCount(HP_Agent pAgent, DWORD dwWorkerThreadCount);
 /* 设置关闭组件前等待连接关闭的最长时限（毫秒，0 则不等待） */
 HPSOCKET_API void __stdcall HP_Agent_SetMaxShutdownWaitTime(HP_Agent pAgent, DWORD dwMaxShutdownWaitTime);
+/* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
+HPSOCKET_API void __stdcall HP_Agent_SetMarkSilence(HP_Agent pAgent, BOOL bMarkSilence);
 
 /* 获取数据发送策略 */
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Agent_GetSendPolicy(HP_Agent pAgent);
@@ -790,6 +822,8 @@ HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeBufferObjHold(HP_Agent pAgent);
 HPSOCKET_API DWORD __stdcall HP_Agent_GetWorkerThreadCount(HP_Agent pAgent);
 /* 获取关闭组件前等待连接关闭的最长时限 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetMaxShutdownWaitTime(HP_Agent pAgent);
+/* 检测是否标记静默时间 */
+HPSOCKET_API BOOL __stdcall HP_Agent_IsMarkSilence(HP_Agent pAgent);
 
 /**********************************************************************************/
 /******************************* TCP Agent 操作方法 *******************************/

@@ -412,7 +412,8 @@ void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
-	pSocketObj->connTime = ::TimeGetTime();
+	pSocketObj->connTime	= ::TimeGetTime();
+	pSocketObj->activeTime	= pSocketObj->connTime;
 
 	CReentrantWriteLock locallock(m_csClientSocket);
 
@@ -670,7 +671,23 @@ BOOL CUdpServer::GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)
 	TUdpSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
 	if(TUdpSocketObj::IsValid(pSocketObj))
-		dwPeriod = GetTimeGap32(pSocketObj->connTime);
+		dwPeriod = ::GetTimeGap32(pSocketObj->connTime);
+	else
+		isOK = FALSE;
+
+	return isOK;
+}
+
+BOOL CUdpServer::GetSilencePeriod(CONNID dwConnID, DWORD& dwPeriod)
+{
+	if(!m_bMarkSilence)
+		return FALSE;
+
+	BOOL isOK					= TRUE;
+	TUdpSocketObj* pSocketObj	= FindSocketObj(dwConnID);
+
+	if(TUdpSocketObj::IsValid(pSocketObj))
+		dwPeriod = ::GetTimeGap32(pSocketObj->activeTime);
 	else
 		isOK = FALSE;
 
@@ -704,6 +721,31 @@ BOOL CUdpServer::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 		}
 	}
 	
+	for(ulong_ptr_deque::const_iterator it = ls.begin(); it != ls.end(); ++it)
+		Disconnect(*it, bForce);
+
+	return ls.size() > 0;
+}
+
+BOOL CUdpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
+{
+	if(!m_bMarkSilence)
+		return FALSE;
+
+	ulong_ptr_deque ls;
+
+	{
+		CReentrantReadLock locallock(m_csClientSocket);
+
+		DWORD now = ::TimeGetTime();
+
+		for(TUdpSocketObjPtrMapCI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
+		{
+			if(now - it->second->activeTime >= dwPeriod)
+				ls.push_back(it->first);
+		}
+	}
+
 	for(ulong_ptr_deque::const_iterator it = ls.begin(); it != ls.end(); ++it)
 		Disconnect(*it, bForce);
 
@@ -1059,6 +1101,7 @@ void CUdpServer::HandleReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
+			if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 			if(FireReceive(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len) == HR_ERROR)
 			{
 				TRACE("<S-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", dwConnID);

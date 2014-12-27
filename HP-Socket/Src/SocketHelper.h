@@ -168,6 +168,8 @@ struct TSocketObjBase
 		DWORD	connTime;
 	};
 
+	DWORD		activeTime;
+
 	CCriSec		csSend;
 	TItemList	sndBuff;
 
