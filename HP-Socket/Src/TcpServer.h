@@ -252,6 +252,8 @@ private:
 	CPrivateHeap		m_phSocket;
 	CItemPool			m_itPool;
 
+	CSpinGuard			m_csState;
+
 	CRWLock				m_csClientSocket;
 	TSocketObjPtrMap	m_mpClientSocket;
 

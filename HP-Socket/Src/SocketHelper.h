@@ -177,7 +177,7 @@ struct TSocketObjBase
 	volatile long pending;
 	volatile long sndCount;
 
-	CCriSec		csRecv;
+	CReentrantSpinGuard csRecv;
 
 	TSocketObjBase(CItemPool& itPool)
 	: sndBuff(itPool)

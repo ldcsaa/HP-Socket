@@ -36,7 +36,7 @@ EnHandleResult CTcpAgent::FireReceive(TSocketObj* pSocketObj, const BYTE* pData,
 	{
 		if(TSocketObj::IsValid(pSocketObj))
 		{
-			CCriSecLock locallock(pSocketObj->csRecv);
+			CReentrantSpinLock locallock(pSocketObj->csRecv);
 
 			if(TSocketObj::IsValid(pSocketObj))
 			{
@@ -56,7 +56,7 @@ EnHandleResult CTcpAgent::FireReceive(TSocketObj* pSocketObj, int iLength)
 	{
 		if(TSocketObj::IsValid(pSocketObj))
 		{
-			CCriSecLock locallock(pSocketObj->csRecv);
+			CReentrantSpinLock locallock(pSocketObj->csRecv);
 
 			if(TSocketObj::IsValid(pSocketObj))
 			{
@@ -74,7 +74,7 @@ EnHandleResult CTcpAgent::FireClose(TSocketObj* pSocketObj)
 {
 	if(m_enRecvPolicy == RP_SERIAL)
 	{
-		CCriSecLock locallock(pSocketObj->csRecv);
+		CReentrantSpinLock locallock(pSocketObj->csRecv);
 		return m_psoListener->OnClose(pSocketObj->connID);
 	}
 
@@ -85,7 +85,7 @@ EnHandleResult CTcpAgent::FireError(TSocketObj* pSocketObj, EnSocketOperation en
 {
 	if(m_enRecvPolicy == RP_SERIAL)
 	{
-		CCriSecLock locallock(pSocketObj->csRecv);
+		CReentrantSpinLock locallock(pSocketObj->csRecv);
 		return m_psoListener->OnError(pSocketObj->connID, enOperation, iErrorCode);
 	}
 
@@ -145,11 +145,10 @@ BOOL CTcpAgent::CheckParams()
 
 BOOL CTcpAgent::CheckStarting()
 {
+	CSpinLock locallock(m_csState);
+
 	if(m_enState == SS_STOPPED)
-	{
 		m_enState = SS_STARTING;
-		::_ReadWriteBarrier();
-	}
 	else
 	{
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
@@ -161,11 +160,10 @@ BOOL CTcpAgent::CheckStarting()
 
 BOOL CTcpAgent::CheckStoping()
 {
+	CSpinLock locallock(m_csState);
+
 	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
-	{
 		m_enState = SS_STOPPING;
-		::_ReadWriteBarrier();
-	}
 	else
 	{
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
@@ -356,8 +354,8 @@ BOOL CTcpAgent::InvalidSocketObj(TSocketObj* pSocketObj)
 	{
 		if(TSocketObj::IsValid(pSocketObj))
 		{
-			CCriSecLock locallock(pSocketObj->csRecv);
-			CCriSecLock locallock2(pSocketObj->csSend);
+			CReentrantSpinLock	locallock(pSocketObj->csRecv);
+			CCriSecLock			locallock2(pSocketObj->csSend);
 
 			if(TSocketObj::IsValid(pSocketObj))
 			{

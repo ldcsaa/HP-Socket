@@ -89,13 +89,10 @@ BOOL CUdpClient::CheckParams()
 
 BOOL CUdpClient::CheckStarting()
 {
-	CCriSecLock locallock(m_csCheck);
+	CSpinLock locallock(m_csState);
 
 	if(m_enState == SS_STOPPED)
-	{
 		m_enState = SS_STARTING;
-		::_ReadWriteBarrier();
-	}
 	else
 	{
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
@@ -107,13 +104,10 @@ BOOL CUdpClient::CheckStarting()
 
 BOOL CUdpClient::CheckStoping()
 {
-	CCriSecLock locallock(m_csCheck);
+	CSpinLock locallock(m_csState);
 
 	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
-	{
 		m_enState = SS_STOPPING;
-		::_ReadWriteBarrier();
-	}
 	else
 	{
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);

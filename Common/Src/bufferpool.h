@@ -198,7 +198,7 @@ public:
 
 	TSimpleList<T>& Shift(TSimpleList<T>& other)
 	{
-		if(other.size > 0)
+		if(&other != this && other.size > 0)
 		{
 			if(size > 0)
 			{
@@ -311,9 +311,13 @@ public:
 
 	TItemListEx& Shift(TItemListEx& other)
 	{
-		length += other.length;
-		__super::Shift(other);
-		other.length = 0;
+		if(&other != this && other.length > 0)
+		{
+			length += other.length;
+			other.length = 0;
+
+			__super::Shift(other);
+		}
 
 		return *this;
 	}

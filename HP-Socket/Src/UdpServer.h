@@ -252,6 +252,8 @@ private:
 	CPrivateHeap			m_phSocket;
 	CItemPool				m_itPool;
 
+	CSpinGuard				m_csState;
+
 	CCriSec					m_csAccept;
 	CEvt					m_evDetector;
 

@@ -163,13 +163,14 @@ private:
 protected:
 	CItemPool			m_itPool;
 
+	CSpinGuard			m_csState;
+
 private:
 	CCriSec				m_csSend;
 	TItemList			m_lsSend;
 
 	CEvt				m_evBuffer;
 	CEvt				m_evWorker;
-	CCriSec				m_csCheck;
 
 	volatile int		m_iPending;
 };

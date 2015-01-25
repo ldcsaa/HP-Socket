@@ -35,7 +35,7 @@ EnHandleResult CUdpServer::FireReceive(TUdpSocketObj* pSocketObj, const BYTE* pD
 	{
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
-			CCriSecLock locallock(pSocketObj->csRecv);
+			CReentrantSpinLock locallock(pSocketObj->csRecv);
 
 			if(TUdpSocketObj::IsValid(pSocketObj))
 			{
@@ -53,7 +53,7 @@ EnHandleResult CUdpServer::FireClose(TUdpSocketObj* pSocketObj)
 {
 	if(m_enRecvPolicy == RP_SERIAL)
 	{
-		CCriSecLock locallock(pSocketObj->csRecv);
+		CReentrantSpinLock locallock(pSocketObj->csRecv);
 		return m_psoListener->OnClose(pSocketObj->connID);
 	}
 
@@ -64,7 +64,7 @@ EnHandleResult CUdpServer::FireError(TUdpSocketObj* pSocketObj, EnSocketOperatio
 {
 	if(m_enRecvPolicy == RP_SERIAL)
 	{
-		CCriSecLock locallock(pSocketObj->csRecv);
+		CReentrantSpinLock locallock(pSocketObj->csRecv);
 		return m_psoListener->OnError(pSocketObj->connID, enOperation, iErrorCode);
 	}
 
@@ -125,11 +125,10 @@ BOOL CUdpServer::CheckParams()
 
 BOOL CUdpServer::CheckStarting()
 {
+	CSpinLock locallock(m_csState);
+
 	if(m_enState == SS_STOPPED)
-	{
 		m_enState = SS_STARTING;
-		::_ReadWriteBarrier();
-	}
 	else
 	{
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
@@ -141,11 +140,10 @@ BOOL CUdpServer::CheckStarting()
 
 BOOL CUdpServer::CheckStoping()
 {
+	CSpinLock locallock(m_csState);
+
 	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
-	{
 		m_enState = SS_STOPPING;
-		::_ReadWriteBarrier();
-	}
 	else
 	{
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
@@ -381,8 +379,8 @@ BOOL CUdpServer::InvalidSocketObj(TUdpSocketObj* pSocketObj)
 	{
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
-			CCriSecLock locallock(pSocketObj->csRecv);
-			CCriSecLock locallock2(pSocketObj->csSend);
+			CReentrantSpinLock	locallock(pSocketObj->csRecv);
+			CCriSecLock			locallock2(pSocketObj->csSend);
 
 			if(TUdpSocketObj::IsValid(pSocketObj))
 			{

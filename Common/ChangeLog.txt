@@ -11,6 +11,8 @@ v2.3.8 更新：
 	1) TItem 增加 Peek() 方法
 	2) TItemList 增加 Peek() 方法
 	3) TBuffer 增加 Peek() 方法
+2、修改 CriticalSection.h
+	1) 增加 CReentrantSpinLock、CReentrantSpinGuard
 
 ==========================================================================================
 v2.3.7 更新：
@@ -18,7 +20,7 @@ v2.3.7 更新：
 
 1、修改 CriticalSection.h
 	1) 增加 CSpinLock、CSpinGuard
-	2) 设置 CInterCriSec 的默认 Spin Count 为 4000
+	2) 设置 CInterCriSec 的默认 Spin Count 为 4096
 2、修改 RWLock.h
 	1) 用 CSpinLock 取代 CInterCriSec 作为 CRWLock 和 CSWMR 的同步锁
 	2) 增加 ICVCondition/CCVGuardCS/CCVGuardSRW 等类，用于实现生产者-消费者模型

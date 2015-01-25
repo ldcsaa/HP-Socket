@@ -26,6 +26,10 @@
 
 #include <intrin.h>
 
+#pragma intrinsic(_ReadBarrier)
+#pragma intrinsic(_WriteBarrier)
+#pragma intrinsic(_ReadWriteBarrier)
+
 #define DEFAULT_CRISEC_SPIN_COUNT	4096
 
 #if defined (_WIN64)
@@ -160,39 +164,37 @@ private:
 class CSpinGuard
 {
 public:
-	CSpinGuard()
-	: m_dwThreadID	(0)
-	, m_iCount		(0)
+	CSpinGuard() : m_lFlag(0)
 	{
 
 	}
 
 	~CSpinGuard()
 	{
-		ASSERT(m_dwThreadID	== 0);
-		ASSERT(m_iCount		== 0);
+		ASSERT(m_lFlag == 0);
 	}
 
 	void Lock()
 	{
-		for(UINT i = 0; !_TryLock(i == 0); i++)
+		for(UINT i = 0; !TryLock(); ++i)
 			Pause(i);
 	}
 
 	BOOL TryLock()
 	{
-		return _TryLock(TRUE);
+		if(::InterlockedCompareExchange(&m_lFlag, 1, 0) == 0)
+		{
+			::_ReadWriteBarrier();
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 	void Unlock()
 	{
-		DWORD dwCurrentThreadID = ::GetCurrentThreadId();
-
-		if(m_dwThreadID == dwCurrentThreadID)
-		{
-			if((--m_iCount) == 0)
-				m_dwThreadID = 0;
-		}
+		ASSERT(m_lFlag == 1);
+		m_lFlag = 0;
 	}
 
 	static void Pause(UINT i)
@@ -207,6 +209,57 @@ private:
 	CSpinGuard(const CSpinGuard& cs);
 	CSpinGuard operator = (const CSpinGuard& cs);
 
+private:
+	volatile LONG m_lFlag;
+};
+
+class CReentrantSpinGuard
+{
+public:
+	CReentrantSpinGuard()
+	: m_dwThreadID	(0)
+	, m_iCount		(0)
+	{
+
+	}
+
+	~CReentrantSpinGuard()
+	{
+		ASSERT(m_dwThreadID	== 0);
+		ASSERT(m_iCount		== 0);
+	}
+
+	void Lock()
+	{
+		for(UINT i = 0; !_TryLock(i == 0); ++i)
+			Pause(i);
+	}
+
+	BOOL TryLock()
+	{
+		return _TryLock(TRUE);
+	}
+
+	void Unlock()
+	{
+		ASSERT(m_dwThreadID == ::GetCurrentThreadId());
+
+		if((--m_iCount) == 0)
+			m_dwThreadID = 0;
+	}
+
+	static void Pause(UINT i)
+	{
+		if		(i < DEFAULT_PAUSE_YIELD)		YieldProcessor();
+		else if	(i < DEFAULT_PAUSE_CYCLE - 1)	SwitchToThread();
+		else if	(i < DEFAULT_PAUSE_CYCLE)		Sleep(1);
+		else									Pause(i & (DEFAULT_PAUSE_CYCLE - 1));
+	}
+
+private:
+	CReentrantSpinGuard(const CReentrantSpinGuard& cs);
+	CReentrantSpinGuard operator = (const CReentrantSpinGuard& cs);
+
 	BOOL _TryLock(BOOL bFirst)
 	{
 		DWORD dwCurrentThreadID = ::GetCurrentThreadId();
@@ -217,7 +270,7 @@ private:
 			return TRUE;
 		}
 
-		if(::InterlockedCompareExchange((volatile LONG*)&m_dwThreadID, dwCurrentThreadID, 0) == 0)
+		if(::InterlockedCompareExchange(&m_dwThreadID, dwCurrentThreadID, 0) == 0)
 		{
 			::_ReadWriteBarrier();
 			ASSERT(m_iCount == 0);
@@ -231,8 +284,8 @@ private:
 	}
 
 private:
-	volatile DWORD m_dwThreadID;
-	int m_iCount;
+	volatile DWORD	m_dwThreadID;
+	int				m_iCount;
 };
 
 class CFakeGuard
@@ -252,11 +305,12 @@ private:
 	CLockObj& m_lock;
 };
 
-typedef CInterCriSec				CCriSec;
+typedef CInterCriSec					CCriSec;
 
-typedef CLocalLock<CCriSec>			CCriSecLock;
-typedef CLocalLock<CInterCriSec>	CInterCriSecLock;
-typedef CLocalLock<CInterCriSec2>	CInterCriSecLock2;
-typedef CLocalLock<CMTX>			CMutexLock;
-typedef CLocalLock<CSpinGuard>		CSpinLock;
-typedef	CLocalLock<CFakeGuard>		CFakeLock;
+typedef CLocalLock<CCriSec>				CCriSecLock;
+typedef CLocalLock<CInterCriSec>		CInterCriSecLock;
+typedef CLocalLock<CInterCriSec2>		CInterCriSecLock2;
+typedef CLocalLock<CMTX>				CMutexLock;
+typedef CLocalLock<CSpinGuard>			CSpinLock;
+typedef CLocalLock<CReentrantSpinGuard>	CReentrantSpinLock;
+typedef	CLocalLock<CFakeGuard>			CFakeLock;
