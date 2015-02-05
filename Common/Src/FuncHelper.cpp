@@ -649,6 +649,10 @@ BOOL ShellRunExe(LPCTSTR lpszPath, LPCTSTR lpszParams, int iShow, HANDLE* phProc
 
 void WriteLog(LPCTSTR pszLogFileName, LPCTSTR pszLog)
 {
+#ifdef _UNICODE
+	USES_CONVERSION;
+#endif
+
 	HANDLE hLogFile = ::CreateFile(pszLogFileName, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if(hLogFile != INVALID_HANDLE_VALUE)
 		::SetFilePointer(hLogFile, 0, 0, FILE_END);
@@ -659,8 +663,14 @@ void WriteLog(LPCTSTR pszLogFileName, LPCTSTR pszLog)
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 	CString strLog;
-	strLog.Format(_T("%04d-%02d-%02d %02d:%02d:%02d.%03d\t%s\r\n"), st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, pszLog); 
-	::WriteFile(hLogFile, strLog, strLog.GetLength() * sizeof(TCHAR), &dwSize, nullptr);
+	strLog.Format(_T("[%02d-%02d %02d:%02d:%02d.%03d]  %s\r\n"), st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, pszLog);
+
+#ifdef _UNICODE
+	LPSTR lpszLog = T2A((LPTSTR)(LPCTSTR)strLog);
+	::WriteFile(hLogFile, lpszLog, strlen(lpszLog), &dwSize, nullptr);
+#else
+	::WriteFile(hLogFile, strLog, strLog.GetLength(), &dwSize, nullptr);
+#endif
 
 	::CloseHandle(hLogFile);
 }
@@ -875,20 +885,29 @@ BOOL CALLBACK ProcessMainWindowEnumFunc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
+HWND FindProcessMainWindow(DWORD dwProcID, LPCTSTR lpszWndClassName)
+{
+	if(dwProcID == 0)
+		dwProcID = ::GetCurrentProcessId();
+
+	ASSERT(dwProcID != 0);
+
+	TProcWnd pw;
+	pw.dwProcID			= dwProcID;
+	pw.lpszClassName	= lpszWndClassName;
+	pw.hWnd				= nullptr;
+
+	::EnumWindows(ProcessMainWindowEnumFunc, (LPARAM)&pw);
+
+	return pw.hWnd;
+}
+
 HWND FindProcessMainWindow(HANDLE hProcess, LPCTSTR lpszWndClassName)
 {
-	DWORD dwProcID = ::GetProcessId(hProcess);
+	DWORD dwProcID = (hProcess == nullptr) ? ::GetCurrentProcessId() : ::GetProcessId(hProcess);
 
 	if(dwProcID != 0)
-	{
-		TProcWnd pw;
-		pw.dwProcID			= dwProcID;
-		pw.lpszClassName	= lpszWndClassName;
-		pw.hWnd				= 0;
-
-		if(::EnumWindows(ProcessMainWindowEnumFunc, (LPARAM)&pw))
-			return pw.hWnd;
-	}
+		return FindProcessMainWindow(dwProcID, lpszWndClassName);
 
 	return nullptr;
 }

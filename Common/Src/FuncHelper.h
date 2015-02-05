@@ -142,6 +142,8 @@ typedef MapWrapper<ProcessInfos, PtrMap_Cleaner<ProcessInfos>>		ProcessInfoMap;
 BOOL FindRunningProcessesInfo(ProcessInfoMap& infoMap);
 
 // 查找进程的主窗口
+HWND FindProcessMainWindow(DWORD dwProcID, LPCTSTR lpszClassName = nullptr);
+// 查找进程的主窗口
 HWND FindProcessMainWindow(HANDLE hProcess, LPCTSTR lpszClassName = nullptr);
 
 BOOL TerminateProcessFairily(HANDLE hProcess, DWORD dwWait = INFINITE);

@@ -141,19 +141,40 @@ public:												\
 class COnlyOneApp
 {
 public:
-	BOOL IsFirstApp() {return m_bIsFirstApp;}
+	BOOL IsFirstApp	() {return m_bIsFirstApp;}
+	DWORD GetProcID	() {return m_dwProcID;}
 
 	COnlyOneApp(LPCTSTR pszAppFlag)
-	: m_bIsFirstApp(FALSE)
+	: m_dwProcID(0), m_bIsFirstApp(FALSE)
 	{
-		m_hMap = ::CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, 4, pszAppFlag);
-		if(m_hMap && ::GetLastError() != ERROR_ALREADY_EXISTS)
-			m_bIsFirstApp = TRUE;
-		else if(!m_hMap)
+		m_hMap = ::CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, sizeof(DWORD), pszAppFlag);
+
+		if(m_hMap)
 		{
-#ifdef _AFX
+			if(::GetLastError() != ERROR_ALREADY_EXISTS)
+			{
+				m_bIsFirstApp	= TRUE;
+				m_dwProcID		= ::GetCurrentProcessId();
+
+				LPVOID lpBuff	= ::MapViewOfFile(m_hMap, FILE_MAP_WRITE, 0, 0, sizeof(DWORD));
+				ASSERT(lpBuff);
+
+				memcpy(lpBuff, &m_dwProcID, sizeof(DWORD));
+				::UnmapViewOfFile(lpBuff);
+			}
+			else
+			{
+				m_bIsFirstApp	= FALSE;
+				LPVOID lpBuff	= ::MapViewOfFile(m_hMap, FILE_MAP_READ, 0, 0, sizeof(DWORD));
+				ASSERT(lpBuff);
+
+				memcpy(&m_dwProcID, lpBuff, sizeof(DWORD));
+				::UnmapViewOfFile(lpBuff);
+			}
+		}
+		else
+		{
 			ASSERT(FALSE);
-#endif
 		}
 	}
 
@@ -161,6 +182,7 @@ public:
 
 private:
 	HANDLE	m_hMap;
+	DWORD	m_dwProcID;
 	BOOL	m_bIsFirstApp;
 
 	DECLARE_NO_COPY_CLASS(COnlyOneApp)
