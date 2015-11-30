@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -27,14 +27,8 @@
 #include "GeneralHelper.h"
 #include "CriticalSection.h"
 
-// Ö§³Ö timeGetTime() º¯Êý
-#ifdef _WIN32_WCE
-	#include <Mmsystem.h>
-	#pragma comment(lib, "Mmtimer")
-#else
-	#include <MmSystem.h>
-	#pragma comment(lib, "Winmm")
-#endif
+#include <MmSystem.h>
+#pragma comment(lib, "Winmm")
 
 DWORD TimeGetTime()
 {

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -27,11 +27,7 @@
 #include "TcpClient.h"
 #include "../../Common/Src/WaitFor.h"
 
-#ifndef _WIN32_WCE
-	#include <process.h>
-#else
-	#define _beginthreadex	::CreateThread
-#endif
+#include <process.h>
 
 BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
 {
@@ -118,10 +114,8 @@ BOOL CTcpClient::CreateClientSocket()
 	m_soClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(m_soClient != INVALID_SOCKET)
 	{
-#ifndef _WIN32_WCE
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 		VERIFY(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
-#endif
 
 		m_evSocket = ::WSACreateEvent();
 		ASSERT(m_evSocket != WSA_INVALID_EVENT);
@@ -187,12 +181,7 @@ BOOL CTcpClient::CreateWorkerThread()
 	return m_hWorker != nullptr;
 }
 
-#ifndef _WIN32_WCE
-	UINT
-#else
-	DWORD
-#endif
-	WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
+UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 {
 	TRACE("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 

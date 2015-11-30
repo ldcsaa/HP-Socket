@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -106,21 +106,8 @@ private:
 
 	void SetLastError		(EnSocketError code, LPCSTR func, int ec);
 
-	static 
-#ifndef _WIN32_WCE
-	UINT
-#else
-	DWORD
-#endif
-	 WINAPI WorkerThreadProc(LPVOID pv);
-
-	static 
-#ifndef _WIN32_WCE
-	UINT
-#else
-	DWORD
-#endif
-	 WINAPI DetecotrThreadProc(LPVOID pv);
+	static UINT WINAPI WorkerThreadProc(LPVOID pv);
+	static UINT WINAPI DetecotrThreadProc(LPVOID pv);
 
 public:
 	CUdpClient(IUdpClientListener* psoListener)
@@ -169,14 +156,8 @@ private:
 
 	HANDLE				m_hWorker;
 	HANDLE				m_hDetector;
-
-#ifndef _WIN32_WCE
 	UINT				m_dwWorkerID;
 	UINT				m_dwDetectorID;
-#else
-	DWORD				m_dwWorkerID;
-#	DWORD				m_dwDetectorID;
-#endif
 
 	EnServiceState		m_enState;
 	EnSocketError		m_enLastError;

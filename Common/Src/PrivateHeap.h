@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -65,109 +65,8 @@ Examples:
 
 #pragma once
 
-class CPrivateHeap
+class CPrivateHeapImpl
 {
-public:
-
-	/*
-	enum EnCreateOptions
-	{
-		CO_DEFAULT				= 0,
-		CO_NO_SERIALIZE			= HEAP_NO_SERIALIZE,
-		CO_GENERATE_EXCEPTIONS	= HEAP_GENERATE_EXCEPTIONS,
-		CO_NOSERIALIZE_GENERATEEXCEPTIONS
-								= HEAP_NO_SERIALIZE	|
-								  HEAP_GENERATE_EXCEPTIONS
-	};
-
-	enum EnAllocOptions
-	{
-		AO_DEFAULT				= 0,
-		AO_ZERO_MEMORY			= HEAP_ZERO_MEMORY,
-		AO_NO_SERIALIZE			= HEAP_NO_SERIALIZE,
-		AO_GENERATE_EXCEPTIONS	= HEAP_GENERATE_EXCEPTIONS,
-		AO_ZEROMEMORY_NOSERIALIZE
-								= HEAP_ZERO_MEMORY	|
-								  HEAP_NO_SERIALIZE,
-		AO_ZEROMEMORY_GENERATEEXCEPTIONS
-								= HEAP_ZERO_MEMORY	|
-								  HEAP_GENERATE_EXCEPTIONS,
-		AO_NOSERIALIZE_GENERATESEXCEPTIONS
-								= HEAP_NO_SERIALIZE	|
-								  HEAP_GENERATE_EXCEPTIONS,
-		AO_ZEROMEMORY_NOSERIALIZE_GENERATESEXCEPTIONS
-								= HEAP_ZERO_MEMORY	|
-								  HEAP_NO_SERIALIZE	|
-								  HEAP_GENERATE_EXCEPTIONS
-	};
-
-	enum EnReAllocOptions
-	{
-		RAO_DEFAULT					= 0,
-		RAO_ZERO_MEMORY				= HEAP_ZERO_MEMORY,
-		RAO_NO_SERIALIZE			= HEAP_NO_SERIALIZE,
-		RAO_GENERATE_EXCEPTIONS		= HEAP_GENERATE_EXCEPTIONS,
-		RAO_REALLOC_IN_PLACE_ONLY	= HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_ZEROMEMORY_NOSERIALIZE
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_NO_SERIALIZE,
-		RAO_ZEROMEMORY_GENERATEEXCEPTIONS
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_GENERATE_EXCEPTIONS,
-		RAO_ZEROMEMORY_REALLOCINPLACEONLY
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_NOSERIALIZE_GENERATESEXCEPTIONS
-									= HEAP_NO_SERIALIZE			|
-									  HEAP_GENERATE_EXCEPTIONS,
-		RAO_NOSERIALIZE_REALLOCINPLACEONLY
-									= HEAP_NO_SERIALIZE			|
-									  HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_GENERATESEXCEPTIONS_REALLOCINPLACEONLY
-									= HEAP_GENERATE_EXCEPTIONS	|
-									  HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_ZEROMEMORY_NOSERIALIZE_GENERATESEXCEPTIONS
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_NO_SERIALIZE			|
-									  HEAP_GENERATE_EXCEPTIONS,
-		RAO_ZEROMEMORY_NOSERIALIZE_REALLOCINPLACEONLY
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_NO_SERIALIZE			|
-									  HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_ZEROMEMORY_GENERATESEXCEPTIONS_REALLOCINPLACEONLY
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_GENERATE_EXCEPTIONS	|
-									  HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_NOSERIALIZE_GENERATESEXCEPTIONS_REALLOCINPLACEONLY
-									= HEAP_NO_SERIALIZE			|
-									  HEAP_GENERATE_EXCEPTIONS	|
-									  HEAP_REALLOC_IN_PLACE_ONLY,
-		RAO_ZEROMEMORY_NOSERIALIZE_GENERATESEXCEPTIONS_REALLOCINPLACEONLY
-									= HEAP_ZERO_MEMORY			|
-									  HEAP_NO_SERIALIZE			|
-									  HEAP_GENERATE_EXCEPTIONS	|
-									  HEAP_REALLOC_IN_PLACE_ONLY
-	};
-
-	enum EnSizeOptions
-	{
-		SO_DEFAULT		= 0,
-		SO_NO_SERIALIZE	= HEAP_NO_SERIALIZE
-	};
-	
-	enum EnFreeOptions
-	{
-		FO_DEFAULT		= 0,
-		FO_NO_SERIALIZE	= HEAP_NO_SERIALIZE
-	};
-
-	enum EnCompactOptions
-	{
-		CPO_DEFAULT		= 0,
-		CPO_NO_SERIALIZE	= HEAP_NO_SERIALIZE
-	};
-	*/
-
 public:
 	PVOID Alloc(SIZE_T dwSize, DWORD dwFlags = 0)
 		{return ::HeapAlloc(m_hHeap, dwFlags, dwSize);}
@@ -195,17 +94,17 @@ public:
 	}
 
 public:
-	CPrivateHeap(DWORD dwOptions = 0, SIZE_T dwInitSize = 0, SIZE_T dwMaxSize = 0)
+	CPrivateHeapImpl(DWORD dwOptions = 0, SIZE_T dwInitSize = 0, SIZE_T dwMaxSize = 0)
 	: m_dwOptions(dwOptions), m_dwInitSize(dwInitSize), m_dwMaxSize(dwMaxSize)
 		{m_hHeap = ::HeapCreate(m_dwOptions, m_dwInitSize, m_dwMaxSize);}
 
-	~CPrivateHeap	()	{if(IsValid()) ::HeapDestroy(m_hHeap);}
+	~CPrivateHeapImpl	()	{if(IsValid()) ::HeapDestroy(m_hHeap);}
 
 	operator HANDLE	()	{return m_hHeap;}
 
 private:
-	CPrivateHeap(const CPrivateHeap&);
-	CPrivateHeap operator = (const CPrivateHeap&);
+	CPrivateHeapImpl(const CPrivateHeapImpl&);
+	CPrivateHeapImpl operator = (const CPrivateHeapImpl&);
 
 private:
 	HANDLE	m_hHeap;
@@ -213,6 +112,65 @@ private:
 	SIZE_T	m_dwInitSize;
 	SIZE_T	m_dwMaxSize;
 };
+
+class CGlobalHeapImpl
+{
+public:
+	PVOID Alloc(SIZE_T dwSize, DWORD dwFlags = 0)
+	{
+		PVOID pv = malloc(dwSize);
+		
+		if(pv && (dwFlags | HEAP_ZERO_MEMORY))
+			ZeroMemory(pv, dwSize);
+		
+		return pv;
+	}
+
+	PVOID ReAlloc(PVOID pvMemory, SIZE_T dwSize, DWORD dwFlags = 0)
+	{
+		PVOID pv = realloc(pvMemory, dwSize);
+
+		if(pv && (dwFlags | HEAP_ZERO_MEMORY))
+			ZeroMemory(pv, dwSize);
+		else if(!pv)
+			free(pvMemory);
+
+		return pv;
+	}
+
+	BOOL Free(PVOID pvMemory, DWORD dwFlags = 0)
+	{
+		if(pvMemory)
+		{
+			free(pvMemory);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	SIZE_T Compact	(DWORD dwFlags = 0)					{return -1;}
+	SIZE_T Size		(PVOID pvMemory, DWORD dwFlags = 0)	{return _msize(pvMemory);}
+
+	BOOL IsValid()	{return TRUE;}
+	BOOL Reset()	{return TRUE;}
+
+public:
+	CGlobalHeapImpl	(DWORD dwOptions = 0, SIZE_T dwInitSize = 0, SIZE_T dwMaxSize = 0) {}
+	~CGlobalHeapImpl()	{}
+
+	operator HANDLE	()	{return nullptr;}
+
+private:
+	CGlobalHeapImpl(const CGlobalHeapImpl&);
+	CGlobalHeapImpl operator = (const CGlobalHeapImpl&);
+};
+
+#ifndef _NOT_USE_PRIVATE_HEAP
+	typedef CPrivateHeapImpl	CPrivateHeap;
+#else
+	typedef CGlobalHeapImpl		CPrivateHeap;
+#endif
 
 template<class T>
 class CPrivateHeapBuffer

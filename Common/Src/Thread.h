@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,7 +25,8 @@
 #pragma once
 
 #include <process.h>
-#include "CriticalSection.h"
+#include "RWLock.h"
+#include "STLHelper.h"
 
 template<class T = void> class CThread
 {
@@ -138,11 +139,182 @@ private:
 	}
 
 private:
-	CThread(const CThread&);
-	CThread& operator = (const CThread&);
-
-private:
 	HANDLE	m_hThread;
 	T*		m_lpParam;
 	int		m_iPriority;
+
+	DECLARE_NO_COPY_CLASS(CThread)
+};
+
+template<class T, typename construct_param_type = void*> class CTlsObj
+{
+	typedef unordered_map<DWORD, T*>			TLocalMap;
+	typedef typename TLocalMap::iterator		TLocalMapI;
+	typedef typename TLocalMap::const_iterator	TLocalMapCI;
+
+public:
+	T* TryGet(DWORD dwTID = 0)
+	{
+		T* pValue = nullptr;
+		if(dwTID == 0) dwTID = ::GetCurrentThreadId();
+
+		{
+			CReadLock locallock(m_lock);
+			TLocalMapCI it = m_map.find(dwTID);
+
+			if(it != m_map.end())
+				pValue = it->second;
+		}
+
+		return pValue;
+	}
+
+	T* Get()
+	{
+		DWORD dwTID	= ::GetCurrentThreadId();
+		T* pValue	= TryGet(dwTID);
+
+		if(pValue == nullptr)
+		{
+			CWriteLock locallock(m_lock);
+			TLocalMapCI it = m_map.find(dwTID);
+
+			if(it != m_map.end())
+				pValue = it->second;
+
+			if(pValue == nullptr)
+			{
+				pValue		 = Construct();
+				m_map[dwTID] = pValue;
+			}
+		}
+
+		return pValue;
+	}
+
+	T& GetRef()
+	{
+		return *Get();
+	}
+
+	T* Get(construct_param_type construct_param)
+	{
+		DWORD dwTID	= ::GetCurrentThreadId();
+		T* pValue	= TryGet(dwTID);
+
+		if(pValue == nullptr)
+		{
+
+			CWriteLock locallock(m_lock);
+			TLocalMapCI it = m_map.find(dwTID);
+
+			if(it != m_map.end())
+				pValue = it->second;
+
+			if(pValue == nullptr)
+			{
+				pValue		 = ConstructWithParam(construct_param);
+				m_map[dwTID] = pValue;
+			}
+		}
+
+		return pValue;
+	}
+
+	T& GetRef(construct_param_type construct_param)
+	{
+		return *Get(construct_param);
+	}
+
+	T* SetAndRetriveOldValue(T* pValue)
+	{
+		DWORD dwTID  = ::GetCurrentThreadId();
+		T* pOldValue = TryGet(dwTID);
+
+		if(pValue != pOldValue)
+		{
+			CWriteLock locallock(m_lock);
+			m_map[dwTID] = pValue;
+		}
+
+		return pOldValue;
+	}
+
+	void Set(T* pValue)
+	{
+		T* pOldValue = SetAndRetriveOldValue(pValue);
+
+		if(pValue != pOldValue)
+			Delete(pOldValue);
+	}
+
+	void Remove()
+	{
+		DWORD dwTID  = ::GetCurrentThreadId();
+		T* pOldValue = TryGet(dwTID);
+
+		Delete(pOldValue);
+
+		{
+			CWriteLock locallock(m_lock);
+			m_map.erase(dwTID);
+		}
+	}
+
+	void Clear()
+	{
+		CWriteLock locallock(m_lock);
+
+		if(!IsEmpty())
+		{
+			for(TLocalMapCI it = m_map.begin(); it != m_map.end(); ++it)
+				Delete(it->second);
+
+			m_map.clear();
+		}
+	}
+
+	TLocalMap&			GetLocalMap()			{return m_map;}
+	const TLocalMap&	GetLocalMap()	const	{return m_map;}
+
+	T*					operator ->	()			{return Get();}
+	const T*			operator ->	()	const	{return Get();}
+	T&					operator *	()			{return GetRef();}
+	const T&			operator *	()	const	{return GetRef();}
+	size_t Size			()				const	{return m_map.size();}
+	bool IsEmpty		()				const	{return m_map.empty();}
+
+public:
+	CTlsObj()
+	{
+
+	}
+
+	~CTlsObj()
+	{
+		Clear();
+	}
+
+private:
+	static inline void Delete(T* pValue)
+	{
+		if(pValue != nullptr)
+			delete pValue;
+	}
+
+	static inline T* Construct()
+	{
+		return new T;
+	}
+
+	static inline T* ConstructWithParam(construct_param_type construct_param)
+	{
+		return new T(construct_param);
+	}
+
+private:
+	CSimpleRWLock	m_lock;
+	TLocalMap		m_map;
+
+	DECLARE_NO_COPY_CLASS(CTlsObj)
 };

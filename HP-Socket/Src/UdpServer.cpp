@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -317,7 +317,7 @@ void CUdpServer::ReleaseClientSocket()
 	m_mpClientSocket.clear();
 }
 
-TUdpSocketObj*	CUdpServer::GetFreeSocketObj(CONNID dwConnID)
+TUdpSocketObj* CUdpServer::GetFreeSocketObj(CONNID dwConnID)
 {
 	TUdpSocketObj* pSocketObj = nullptr;
 
@@ -446,7 +446,7 @@ void CUdpServer::CompressFreeSocket(size_t size, BOOL bForce)
 
 TUdpSocketObj* CUdpServer::CreateSocketObj()
 {
-	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)m_phSocket.Alloc(sizeof(TUdpSocketObj), HEAP_ZERO_MEMORY);
+	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)m_phSocket.Alloc(sizeof(TUdpSocketObj));
 	ASSERT(pSocketObj);
 
 	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_itPool);
@@ -522,10 +522,12 @@ void CUdpServer::CompressFreeBuffer(size_t size)
 
 TUdpBufferObj* CUdpServer::CreateBufferObj()
 {
-	TUdpBufferObj* pBufferObj	= (TUdpBufferObj*)m_phBuffer.Alloc(sizeof(TUdpBufferObj) + m_dwMaxDatagramSize, HEAP_ZERO_MEMORY);
-	pBufferObj->buff.buf		= ((char*)pBufferObj) + sizeof(TUdpBufferObj);
-
+	TUdpBufferObj* pBufferObj = (TUdpBufferObj*)m_phBuffer.Alloc(sizeof(TUdpBufferObj) + m_dwMaxDatagramSize);
 	ASSERT(pBufferObj);
+
+	::ZeroMemory(pBufferObj, sizeof(TUdpBufferObj));
+	pBufferObj->buff.buf = ((char*)pBufferObj) + sizeof(TUdpBufferObj);
+
 	return pBufferObj;
 }
 

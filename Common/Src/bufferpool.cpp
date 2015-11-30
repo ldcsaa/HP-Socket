@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -37,13 +37,13 @@ Desc:
 const DWORD TItem::DEFAULT_ITEM_CAPACITY			= ::SysGetPageSize();
 const DWORD CItemPool::DEFAULT_ITEM_CAPACITY		= TItem::DEFAULT_ITEM_CAPACITY;
 const DWORD CItemPool::DEFAULT_POOL_SIZE			= 300;
-const DWORD CItemPool::DEFAULT_POOL_HOLD			= 900;
+const DWORD CItemPool::DEFAULT_POOL_HOLD			= 1200;
 const DWORD CBufferPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACITY;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
-const DWORD CBufferPool::DEFAULT_BUFFER_LOCK_TIME	= 5000;
+const DWORD CBufferPool::DEFAULT_BUFFER_LOCK_TIME	= 10 * 1000;
 const DWORD CBufferPool::DEFAULT_BUFFER_POOL_SIZE	= 150;
-const DWORD CBufferPool::DEFAULT_BUFFER_POOL_HOLD	= 450;
+const DWORD CBufferPool::DEFAULT_BUFFER_POOL_HOLD	= 600;
 
 TItem* TItem::Construct(CPrivateHeap& heap, int capacity, BYTE* pData, int length)
 {

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -229,9 +229,9 @@ public:
 		}
 	}
 
-	T*	Front	()	const	{return pFront;}
-	T*	Back		()	const	{return pBack;}
-	int	Size		()	const	{return size;}
+	T*		Front	()	const	{return pFront;}
+	T*		Back	()	const	{return pBack;}
+	int		Size	()	const	{return size;}
 	bool	IsEmpty	()	const	{return size == 0;}
 
 public:

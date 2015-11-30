@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -130,7 +130,7 @@ enum EnSocketCloseFlag
 /* 数据缓冲区基础结构 */
 struct TBufferObjBase
 {
-	OVERLAPPED			ov;
+	WSAOVERLAPPED		ov;
 	EnSocketOperation	operation;
 	WSABUF				buff;
 };
@@ -310,6 +310,8 @@ typedef TSockAddrMap::const_iterator							TSockAddrMapCI;
 
 /* 获取错误描述文本 */
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode);
+/* 获取 IPv4 地址 */
+ULONG GetIPv4InAddr(LPCTSTR lpszAddress);
 /* 检查字符串是否符合 IP 地址格式 */
 BOOL IsIPAddress(LPCTSTR lpszAddress);
 /* 通过主机名获取 IP 地址 */

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,12 +28,7 @@
 #include "SocketHelper.h"
 
 #include <mstcpip.h>
-
-#ifndef _WIN32_WCE
-	#pragma comment(lib, "ws2_32")
-#else
-	#pragma comment(lib, "ws2")
-#endif
+#pragma comment(lib, "ws2_32")
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -43,12 +38,12 @@ const DWORD MAX_SMALL_FILE_SIZE						= 4096 * 1024;
 const DWORD	DEFAULT_WORKER_THREAD_COUNT				= min((::SysGetNumberOfProcessors() * 2 + 2), MAX_WORKER_THREAD_COUNT);
 const DWORD DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		= 10 * 1000;
 const DWORD	DEFAULT_FREE_SOCKETOBJ_POOL				= 150;
-const DWORD	DEFAULT_FREE_SOCKETOBJ_HOLD				= 450;
+const DWORD	DEFAULT_FREE_SOCKETOBJ_HOLD				= 600;
 const DWORD	DEFAULT_FREE_BUFFEROBJ_POOL				= 300;
-const DWORD	DEFAULT_FREE_BUFFEROBJ_HOLD				= 900;
+const DWORD	DEFAULT_FREE_BUFFEROBJ_HOLD				= 1200;
 const DWORD	DEFAULT_MAX_SHUTDOWN_WAIT_TIME			= 15 * 1000;
 const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	= 10;
-const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	= 30;
+const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	= 40;
 const DWORD	DEFAULT_TCP_SOCKET_BUFFER_SIZE			= ::SysGetPageSize();
 const DWORD	DEFALUT_TCP_KEEPALIVE_TIME				= 20 * 1000;
 const DWORD	DEFALUT_TCP_KEEPALIVE_INTERVAL			= 5 * 1000;
@@ -62,12 +57,25 @@ LPCTSTR DEFAULT_BIND_ADDRESS						= _T("0.0.0.0");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+ULONG GetIPv4InAddr(LPCTSTR lpszAddress)
+{
+	if (!lpszAddress || lpszAddress[0] == '\0')
+		return INADDR_NONE;
+
+#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+	IN_ADDR addr;
+	if (::InetPton(AF_INET, lpszAddress, &addr.s_addr) == 1)
+		return addr.s_addr;
+
+	return INADDR_NONE;
+#else
+	return ::inet_addr(CT2A(lpszAddress));
+#endif
+}
+
 BOOL IsIPAddress(LPCTSTR lpszAddress)
 {
-	if(!lpszAddress || lpszAddress[0] == '\0')
-		return FALSE;
-
-	return ::inet_addr(CT2A(lpszAddress)) != INADDR_NONE;
+	return GetIPv4InAddr(lpszAddress) != INADDR_NONE;
 }
 
 BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
@@ -189,9 +197,11 @@ BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR l
 
 BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, SOCKADDR_IN& addr)
 {
+	ASSERT(usFamily == AF_INET);
+
 	addr.sin_family			= usFamily;
 	addr.sin_port			= htons(usPort);
-	addr.sin_addr.s_addr	= inet_addr(CT2A(pszAddress));
+	addr.sin_addr.s_addr	= GetIPv4InAddr(pszAddress);
 
 	return addr.sin_addr.s_addr != INADDR_NONE;
 }

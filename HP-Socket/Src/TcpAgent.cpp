@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -419,7 +419,7 @@ void CTcpAgent::CompressFreeSocket(size_t size, BOOL bForce)
 
 TSocketObj* CTcpAgent::CreateSocketObj()
 {
-	TSocketObj* pSocketObj = (TSocketObj*)m_phSocket.Alloc(sizeof(TSocketObj), HEAP_ZERO_MEMORY);
+	TSocketObj* pSocketObj = (TSocketObj*)m_phSocket.Alloc(sizeof(TSocketObj));
 	ASSERT(pSocketObj);
 
 	pSocketObj->TSocketObj::TSocketObj(m_itPool);
@@ -494,10 +494,12 @@ void CTcpAgent::CompressFreeBuffer(size_t size)
 
 TBufferObj* CTcpAgent::CreateBufferObj()
 {
-	TBufferObj* pBufferObj	= (TBufferObj*)m_phBuffer.Alloc(sizeof(TBufferObj) + m_dwSocketBufferSize, HEAP_ZERO_MEMORY);
-	pBufferObj->buff.buf	= ((char*)pBufferObj) + sizeof(TBufferObj);
-
+	TBufferObj* pBufferObj = (TBufferObj*)m_phBuffer.Alloc(sizeof(TBufferObj) + m_dwSocketBufferSize);
 	ASSERT(pBufferObj);
+
+	::ZeroMemory(pBufferObj, sizeof(TBufferObj));
+	pBufferObj->buff.buf = ((char*)pBufferObj) + sizeof(TBufferObj);
+
 	return pBufferObj;
 }
 

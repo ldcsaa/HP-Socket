@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -26,11 +26,7 @@
 #include "UdpCast.h"
 #include "../../Common/Src/WaitFor.h"
 
-#ifndef _WIN32_WCE
-	#include <process.h>
-#else
-	#define _beginthreadex	::CreateThread
-#endif
+#include <process.h>
 
 BOOL CUdpCast::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
 {
@@ -121,10 +117,7 @@ BOOL CUdpCast::CreateClientSocket()
 
 	if(m_soClient != INVALID_SOCKET)
 	{
-#ifndef _WIN32_WCE
 		VERIFY(::SSO_UDP_ConnReset(m_soClient, FALSE) == NO_ERROR);
-#endif
-
 		VERIFY(::SSO_ReuseAddress(m_soClient, m_bReuseAddress) != SOCKET_ERROR);
 
 		m_evSocket = ::WSACreateEvent();
@@ -215,12 +208,7 @@ BOOL CUdpCast::CreateWorkerThread()
 	return m_hWorker != nullptr;
 }
 
-#ifndef _WIN32_WCE
-	UINT
-#else
-	DWORD
-#endif
-	WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
+UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 {
 	TRACE("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 

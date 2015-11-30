@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -96,13 +96,7 @@ private:
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 
-	static 
-#ifndef _WIN32_WCE
-	UINT
-#else
-	DWORD
-#endif
-	 WINAPI WorkerThreadProc(LPVOID pv);
+	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
 public:
 	CTcpClient(ITcpClientListener* psoListener)
@@ -146,12 +140,7 @@ private:
 	DWORD				m_dwKeepAliveInterval;
 
 	HANDLE				m_hWorker;
-
-#ifndef _WIN32_WCE
 	UINT				m_dwWorkerID;
-#else
-	DWORD
-#endif					m_dwWorkerID;
 
 	EnServiceState		m_enState;
 	EnSocketError		m_enLastError;

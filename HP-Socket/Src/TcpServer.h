@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.1
+ * Version	: 3.3.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,11 +25,11 @@
 #pragma once
 
 #include "SocketHelper.h"
-#include "../../Common/Src/PrivateHeap.h"
 #include "../../Common/Src/Event.h"
 #include "../../Common/Src/RWLock.h"
-#include "../../Common/Src/CriticalSection.h"
 #include "../../Common/Src/STLHelper.h"
+#include "../../Common/Src/PrivateHeap.h"
+#include "../../Common/Src/CriticalSection.h"
 
 class CTcpServer : public ITcpServer
 {

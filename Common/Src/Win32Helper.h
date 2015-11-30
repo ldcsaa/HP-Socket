@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -581,7 +581,6 @@ public:
 		return obj;
 	}
 
-#ifndef _WIN32_WCE
 	HBITMAP CreateBitmapIndirect(CONST BITMAP *lpbm)
 	{
 		HBITMAP obj = ::CreateBitmapIndirect(lpbm);
@@ -589,15 +588,6 @@ public:
 
 		return obj;
 	}
-#else
-	HBITMAP SHLoadDIBitMap(LPCTSTR lpszFileName)
-	{
-		HBITMAP obj = ::SHLoadDIBitmap(lpszFileName);
-		reset(obj);
-
-		return obj;
-	}
-#endif
 
 	HBITMAP CreateCompatibleBitmap(HDC hdc, int nWidth, int nHeight)
 	{
@@ -781,7 +771,6 @@ public:
 						int nEscapement,			// angle of escapement
 						int nOrientation,			// base-line orientation angle
 						int fnWeight,				// font weight
-#ifndef _WIN32_WCE
 						DWORD bItalic,				// italic attribute option
 						DWORD bUnderline,			// underline attribute option
 						DWORD cStrikeOut,			// strikeout attribute option
@@ -790,17 +779,6 @@ public:
 						DWORD nClipPrecision,		// clipping precision
 						DWORD nQuality,				// output quality
 						DWORD nPitchAndFamily,		// pitch and family
-#else
-						BYTE bItalic,				// italic attribute option
-						BYTE bUnderline,			// underline attribute option
-						BYTE cStrikeOut,			// strikeout attribute option
-						BYTE nCharSet,				// character set identifier
-						BYTE nOutPrecision,			// output precision
-						BYTE nClipPrecision,		// clipping precision
-						BYTE nQuality,				// output quality
-						BYTE nPitchAndFamily,		// pitch and family
-
-#endif
 						LPCTSTR lpszFace           // typeface name
 					)
 	{

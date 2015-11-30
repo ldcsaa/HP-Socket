@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.8
+ * Version	: 2.3.9
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -37,10 +37,20 @@
 #include <list>
 #include <set>
 #include <map>
-#include <hash_set>
-#include <hash_map>
-#include <unordered_set>
-#include <unordered_map>
+#if _MSC_VER >= 1500
+	#include <unordered_set>
+	#include <unordered_map>
+
+	#define hash_set	unordered_set
+	#define hash_map	unordered_map
+#else
+	#include <hash_set>
+	#include <hash_map>
+
+	#define unorderedhash_set	hash_set
+	#define unordered_map		hash_map
+#endif
+
 
 using namespace std;
 using namespace stdext;
