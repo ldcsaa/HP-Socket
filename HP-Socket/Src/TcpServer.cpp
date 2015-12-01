@@ -322,7 +322,7 @@ void CTcpServer::DisconnectClientSocket()
 {
 	CReentrantReadLock locallock(m_csClientSocket);
 
-	for(TSocketObjPtrMapI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
+	for(TSocketObjPtrMapI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
 		Disconnect(it->first);
 }
 
@@ -330,7 +330,7 @@ void CTcpServer::ReleaseClientSocket()
 {
 	CReentrantWriteLock locallock(m_csClientSocket);
 
-	for(TSocketObjPtrMapI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
+	for(TSocketObjPtrMapI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
 	{
 		TSocketObj* pSocketObj = it->second;
 
@@ -659,8 +659,10 @@ BOOL CTcpServer::GetAllConnectionIDs(CONNID pIDs[], DWORD& dwCount)
 
 		if(pIDs != nullptr && dwSize <= dwCount)
 		{
-			TSocketObjPtrMapCI it = m_mpClientSocket.begin();
-			for(int i = 0; it != m_mpClientSocket.end(); ++it, ++i)
+			TSocketObjPtrMapCI it	= m_mpClientSocket.begin();
+			TSocketObjPtrMapCI end	= m_mpClientSocket.end();
+
+			for(int i = 0; it != end; ++it, ++i)
 				pIDs[i] = it->first;
 
 			isOK = TRUE;
@@ -725,14 +727,14 @@ BOOL CTcpServer::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 
 		DWORD now = ::TimeGetTime();
 
-		for(TSocketObjPtrMapCI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
+		for(TSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
 		{
 			if(now - it->second->connTime >= dwPeriod)
 				ls.push_back(it->first);
 		}
 	}
 
-	for(ulong_ptr_deque::const_iterator it = ls.begin(); it != ls.end(); ++it)
+	for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
 		Disconnect(*it, bForce);
 
 	return ls.size() > 0;
@@ -750,14 +752,14 @@ BOOL CTcpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 
 		DWORD now = ::TimeGetTime();
 
-		for(TSocketObjPtrMapCI it = m_mpClientSocket.begin(); it != m_mpClientSocket.end(); ++it)
+		for(TSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
 		{
 			if(now - it->second->activeTime >= dwPeriod)
 				ls.push_back(it->first);
 		}
 	}
 
-	for(ulong_ptr_deque::const_iterator it = ls.begin(); it != ls.end(); ++it)
+	for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
 		Disconnect(*it, bForce);
 
 	return ls.size() > 0;

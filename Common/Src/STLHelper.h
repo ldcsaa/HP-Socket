@@ -208,8 +208,9 @@ template<class Set> struct Set_Cleaner
 **********************************/
 template<class PtrSet> void ClearPtrSet(PtrSet& v)
 {
-	for(PtrSet::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(PtrSet::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 		delete (*it);
 
@@ -230,8 +231,9 @@ template<class PtrSet> struct PtrSet_Cleaner
 **********************************/
 template<class PtrArraySet> void ClearPtrArraySet(PtrArraySet& v)
 {
-	for(PtrArraySet::iterator	it = v.begin(); 
-								it != v.end(); 
+	for(PtrArraySet::iterator	it	= v.begin(),
+								end	= v.end(); 
+								it != end;
 								++it)
 		delete[] (*it);
 
@@ -269,8 +271,9 @@ template<class Map> struct Map_Cleaner
 **********************************/
 template<class PtrMap> void ClearPtrMap(PtrMap& v)
 {
-	for(PtrMap::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(PtrMap::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 		delete it->second;
 
@@ -291,8 +294,9 @@ template<class PtrMap> struct PtrMap_Cleaner
 **********************************/
 template<class PtrArrayMap> void ClearPtrArrayMap(PtrArrayMap& v)
 {
-	for(PtrArrayMap::iterator	it = v.begin(); 
-								it != v.end(); 
+	for(PtrArrayMap::iterator	it	= v.begin(),
+								end	= v.end(); 
+								it != end;
 								++it)
 		delete[] it->second;
 
@@ -313,8 +317,9 @@ template<class PtrArrayMap> struct PtrArrayMap_Cleaner
 **********************************/
 template<class SetSet> void ClearSetSet(SetSet& v)
 {
-	for(SetSet::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(SetSet::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 	{
 		(*it)->clear();
@@ -338,8 +343,9 @@ template<class SetSet> struct SetSet_Cleaner
 **********************************/
 template<class PtrSetSet> void ClearPtrSetSet(PtrSetSet& v)
 {
-	for(PtrSetSet::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(PtrSetSet::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 	{
 		ClearPtrSet(**it);
@@ -363,8 +369,9 @@ template<class PtrSetSet> struct PtrSetSet_Cleaner
 **********************************/
 template<class PtrArraySetSet> void ClearPtrArraySetSet(PtrArraySetSet& v)
 {
-	for(PtrArraySetSet::iterator	it = v.begin(); 
-									it != v.end(); 
+	for(PtrArraySetSet::iterator	it	= v.begin(),
+									end	= v.end(); 
+									it != end;
 									++it)
 	{
 		ClearPtrArraySet(**it);
@@ -388,8 +395,9 @@ template<class PtrArraySetSet> struct PtrArraySetSet_Cleaner
 **********************************/
 template<class SetMap> void ClearSetMap(SetMap& v)
 {
-	for(SetMap::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(SetMap::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 	{
 		it->second->clear();
@@ -413,8 +421,9 @@ template<class SetMap> struct SetMap_Cleaner
 **********************************/
 template<class PtrSetMap> void ClearPtrSetMap(PtrSetMap& v)
 {
-	for(PtrSetMap::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(PtrSetMap::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 	{
 		ClearPtrSet(*(it->second));
@@ -438,8 +447,9 @@ template<class PtrSetMap> struct PtrSetMap_Cleaner
 **********************************/
 template<class PtrArraySetMap> void ClearPtrArraySetMap(PtrArraySetMap& v)
 {
-	for(PtrArraySetMap::iterator	it = v.begin(); 
-									it != v.end(); 
+	for(PtrArraySetMap::iterator	it	= v.begin(),
+									end	= v.end(); 
+									it != end;
 									++it)
 	{
 		ClearPtrArraySet(*(it->second));
@@ -463,8 +473,9 @@ v		: map
 **********************************/
 template<class MapMap> void ClearMapMap(MapMap& v)
 {
-	for(MapMap::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(MapMap::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 	{
 		it->second->clear();
@@ -488,8 +499,9 @@ template<class MapMap> struct MapMap_Cleaner
 **********************************/
 template<class PtrMapMap> void ClearPtrMapMap(PtrMapMap& v)
 {
-	for(PtrMapMap::iterator	it = v.begin(); 
-							it != v.end(); 
+	for(PtrMapMap::iterator	it	= v.begin(),
+							end	= v.end(); 
+							it != end;
 							++it)
 	{
 		ClearPtrMap(*(it->second));
@@ -513,8 +525,9 @@ template<class PtrMapMap> struct PtrMapMap_Cleaner
 **********************************/
 template<class PtrArrayMapMap> void ClearPtrArrayMapMap(PtrArrayMapMap& v)
 {
-	for(PtrArrayMapMap::iterator	it = v.begin(); 
-									it != v.end(); 
+	for(PtrArrayMapMap::iterator	it	= v.begin(),
+									end	= v.end(); 
+									it != end;
 									++it)
 	{
 		ClearPtrArrayMap(*(it->second));

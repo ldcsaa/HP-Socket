@@ -497,7 +497,7 @@ void CBufferPool::Clear()
 	{
 		CReentrantWriteLock locallock(m_csBufferMap);
 
-		for(TBufferPtrMapCI it = m_mpBuffer.begin(); it != m_mpBuffer.end(); ++it)
+		for(TBufferPtrMapCI it = m_mpBuffer.begin(), end = m_mpBuffer.end(); it != end; ++it)
 			TBuffer::Destruct(it->second);
 
 		m_mpBuffer.clear();
