@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,13 +24,14 @@
  
 #include "stdafx.h"
 #include "TcpPullAgent.h"
+#include "MiscHelper.h"
 
-EnHandleResult CTcpPullAgent::FireConnect(CONNID dwConnID)
+EnHandleResult CTcpPullAgent::FireConnect(TSocketObj* pSocketObj)
 {
-	EnHandleResult result = __super::FireConnect(dwConnID);
+	EnHandleResult result = __super::FireConnect(pSocketObj);
 
 	if(result != HR_ERROR)
-		m_bfPool.PutCacheBuffer(dwConnID);
+		m_bfPool.PutCacheBuffer(pSocketObj->connID);
 
 	return result;
 }
@@ -38,39 +39,16 @@ EnHandleResult CTcpPullAgent::FireConnect(CONNID dwConnID)
 EnHandleResult CTcpPullAgent::FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
 {
 	TBuffer* pBuffer = m_bfPool[pSocketObj->connID];
+	ASSERT(pBuffer && pBuffer->IsValid());
 
-	if(pBuffer != nullptr && pBuffer->IsValid())
-	{
-		int len = 0;
+	pBuffer->Cat(pData, iLength);
 
-		{
-			CCriSecLock locallock(pBuffer->CriSec());
-
-			if(pBuffer->IsValid())
-			{
-				pBuffer->Cat(pData, iLength);
-				len = pBuffer->Length();
-			}
-		}
-
-		if(len > 0) return __super::FireReceive(pSocketObj, len);
-	}
-
-	return HR_IGNORE;
+	return __super::FireReceive(pSocketObj, pBuffer->Length());
 }
 
-EnHandleResult CTcpPullAgent::FireClose(TSocketObj* pSocketObj)
+EnHandleResult CTcpPullAgent::FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
 {
-	EnHandleResult result = __super::FireClose(pSocketObj);
-
-	m_bfPool.PutFreeBuffer(pSocketObj->connID);
-
-	return result;
-}
-
-EnHandleResult CTcpPullAgent::FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-{
-	EnHandleResult result = __super::FireError(pSocketObj, enOperation, iErrorCode);
+	EnHandleResult result = __super::FireClose(pSocketObj, enOperation, iErrorCode);
 
 	m_bfPool.PutFreeBuffer(pSocketObj->connID);
 
@@ -83,57 +61,17 @@ EnHandleResult CTcpPullAgent::FireShutdown()
 
 	m_bfPool.Clear();
 
-	return HR_OK;
+	return result;
 }
 
 EnFetchResult CTcpPullAgent::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
 {
-	ASSERT(pData != nullptr && iLength > 0);
-
-	EnFetchResult result	= FR_DATA_NOT_FOUND;
-	TBuffer* pBuffer		= m_bfPool[dwConnID];
-
-	if(pBuffer != nullptr && pBuffer->IsValid())
-	{
-		CCriSecLock locallock(pBuffer->CriSec());
-
-		if(pBuffer->IsValid())
-		{
-			if(pBuffer->Length() >= iLength)
-			{
-				pBuffer->Fetch(pData, iLength);
-				result = FR_OK;
-			}
-			else
-				result = FR_LENGTH_TOO_LONG;
-		}
-	}
-
-	return result;
+	TBuffer* pBuffer = m_bfPool[dwConnID];
+	return ::FetchBuffer(pBuffer, pData, iLength);
 }
 
 EnFetchResult CTcpPullAgent::Peek(CONNID dwConnID, BYTE* pData, int iLength)
 {
-	ASSERT(pData != nullptr && iLength > 0);
-
-	EnFetchResult result	= FR_DATA_NOT_FOUND;
-	TBuffer* pBuffer		= m_bfPool[dwConnID];
-
-	if(pBuffer != nullptr && pBuffer->IsValid())
-	{
-		CCriSecLock locallock(pBuffer->CriSec());
-
-		if(pBuffer->IsValid())
-		{
-			if(pBuffer->Length() >= iLength)
-			{
-				pBuffer->Peek(pData, iLength);
-				result = FR_OK;
-			}
-			else
-				result = FR_LENGTH_TOO_LONG;
-		}
-	}
-
-	return result;
+	TBuffer* pBuffer = m_bfPool[dwConnID];
+	return ::PeekBuffer(pBuffer, pData, iLength);
 }

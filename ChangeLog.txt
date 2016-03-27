@@ -1,4 +1,26 @@
 ==========================================================================================
+v3.4.1 更新：
+==========================================================================================
+
+> 增加 Tcp Pack 系列通信组件：
+-----------------
+1、Tcp Pack 系列组件保证每个 OnReceive 事件都向应用程序提供一个完整数据包
+2、Tcp Pack 系列组件是 PUSH/PULL 模式的结合体，应用程序不必处理分包（如：PUSH）与数据抓取（如：PULL）
+3、Tcp Pack 系列组件提供 Get/SetMaxPackSize() 和 Get/SetPackHeaderFlag() 方法，用来设置最大包长和包头标识
+2、CTcpPackServer 实现 ITcpServer 接口，CTcpPackAgent 实现 ITcpAgent 接口，CTcpPackClient 实现 ITcpClient 接口
+
+> 组件接口调整：
+-----------------
+1、OnClose/OnError 合并为一个通信事件： OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+2、枚举类型 EnSocketOperation 增加一个枚举值： SO_CLOSE = 5，标识关闭 Socket 操作
+3、IServer 和 IAgent 接口删除接口方法： Get/SetRecvPolicy()
+4、IServer 和 IAgent 接口删除接口方法： Get/SetMaxShutdownWaitTime()
+
+> 升级说明：
+-----------------
+1、HP-Socket v3.3.2 及之前版本升级到 HP-Socket v3.4.1 版本，需要修改 OnClose/OnError 事件的处理代码
+
+==========================================================================================
 v3.3.2 更新：
 ==========================================================================================
 

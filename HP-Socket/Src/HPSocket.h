@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -77,6 +77,12 @@ HPSOCKET_API ITcpPullServer* HP_Create_TcpPullServer(ITcpServerListener* pListen
 HPSOCKET_API ITcpPullAgent* HP_Create_TcpPullAgent(ITcpAgentListener* pListener);
 // 创建 ITcpPullClient 对象
 HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener);
+// 创建 ITcpPackServer 对象
+HPSOCKET_API ITcpPackServer* HP_Create_TcpPackServer(ITcpServerListener* pListener);
+// 创建 ITcpPackAgent 对象
+HPSOCKET_API ITcpPackAgent* HP_Create_TcpPackAgent(ITcpAgentListener* pListener);
+// 创建 ITcpPackClient 对象
+HPSOCKET_API ITcpPackClient* HP_Create_TcpPackClient(ITcpClientListener* pListener);
 // 创建 IUdpServer 对象
 HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
 // 创建 IUdpClient 对象
@@ -96,6 +102,12 @@ HPSOCKET_API void HP_Destroy_TcpPullServer(ITcpPullServer* pServer);
 HPSOCKET_API void HP_Destroy_TcpPullAgent(ITcpPullAgent* pAgent);
 // 销毁 ITcpPullClient 对象
 HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient);
+// 销毁 ITcpPackServer 对象
+HPSOCKET_API void HP_Destroy_TcpPackServer(ITcpPackServer* pServer);
+// 销毁 ITcpPackAgent 对象
+HPSOCKET_API void HP_Destroy_TcpPackAgent(ITcpPackAgent* pAgent);
+// 销毁 ITcpPackClient 对象
+HPSOCKET_API void HP_Destroy_TcpPackClient(ITcpPackClient* pClient);
 // 销毁 IUdpServer 对象
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
 // 销毁 IUdpClient 对象
@@ -199,6 +211,48 @@ struct TcpPullClient_Creator
 	static void Destroy(ITcpPullClient* pClient)
 	{
 		HP_Destroy_TcpPullClient(pClient);
+	}
+};
+
+// ITcpPackServer 对象创建器
+struct TcpPackServer_Creator
+{
+	static ITcpPackServer* Create(ITcpServerListener* pListener)
+	{
+		return HP_Create_TcpPackServer(pListener);
+	}
+
+	static void Destroy(ITcpPackServer* pServer)
+	{
+		HP_Destroy_TcpPackServer(pServer);
+	}
+};
+
+// ITcpPackAgent 对象创建器
+struct TcpPackAgent_Creator
+{
+	static ITcpPackAgent* Create(ITcpAgentListener* pListener)
+	{
+		return HP_Create_TcpPackAgent(pListener);
+	}
+
+	static void Destroy(ITcpPackAgent* pAgent)
+	{
+		HP_Destroy_TcpPackAgent(pAgent);
+	}
+};
+
+// ITcpPackClient 对象创建器
+struct TcpPackClient_Creator
+{
+	static ITcpPackClient* Create(ITcpClientListener* pListener)
+	{
+		return HP_Create_TcpPackClient(pListener);
+	}
+
+	static void Destroy(ITcpPackClient* pClient)
+	{
+		HP_Destroy_TcpPackClient(pClient);
 	}
 };
 
@@ -317,6 +371,12 @@ typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	
 typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
 // ITcpPullClient 对象智能指针
 typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
+// ITcpPackServer 对象智能指针
+typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, TcpPackServer_Creator>	CTcpPackServerPtr;
+// ITcpPackAgent 对象智能指针
+typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, TcpPackAgent_Creator>	CTcpPackAgentPtr;
+// ITcpPackClient 对象智能指针
+typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, TcpPackClient_Creator>	CTcpPackClientPtr;
 // IUdpServer 对象智能指针
 typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
 // IUdpClient 对象智能指针

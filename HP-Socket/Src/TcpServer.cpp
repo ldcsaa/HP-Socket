@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,66 +30,48 @@
 #include <malloc.h>
 #include <process.h>
 
-EnHandleResult CTcpServer::FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+EnHandleResult CTcpServer::TriggerFireAccept(TSocketObj* pSocketObj)
 {
-	if(m_enRecvPolicy == RP_SERIAL)
-	{
-		if(TSocketObj::IsValid(pSocketObj))
-		{
-			CReentrantSpinLock locallock(pSocketObj->csRecv);
-
-			if(TSocketObj::IsValid(pSocketObj))
-			{
-				return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);
-			}
-		}
-
-		return (EnHandleResult)HR_CLOSED;
-	}
-
-	return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);
+	CReentrantSpinLock locallock(pSocketObj->csRecv);
+	return FireAccept(pSocketObj);
 }
 
-EnHandleResult CTcpServer::FireReceive(TSocketObj* pSocketObj, int iLength)
+EnHandleResult CTcpServer::TriggerFireReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
-	if(m_enRecvPolicy == RP_SERIAL)
-	{
-		if(TSocketObj::IsValid(pSocketObj))
-		{
-			CReentrantSpinLock locallock(pSocketObj->csRecv);
+	EnHandleResult rs = (EnHandleResult)HR_CLOSED;
 
-			if(TSocketObj::IsValid(pSocketObj))
-			{
-				return m_psoListener->OnReceive(pSocketObj->connID, iLength);
-			}
-		}
-
-		return (EnHandleResult)HR_CLOSED;
-	}
-
-	return m_psoListener->OnReceive(pSocketObj->connID, iLength);
-}
-
-EnHandleResult CTcpServer::FireClose(TSocketObj* pSocketObj)
-{
-	if(m_enRecvPolicy == RP_SERIAL)
+	if(TSocketObj::IsValid(pSocketObj))
 	{
 		CReentrantSpinLock locallock(pSocketObj->csRecv);
-		return m_psoListener->OnClose(pSocketObj->connID);
+
+		if(TSocketObj::IsValid(pSocketObj))
+		{
+			rs = FireReceive(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len);
+		}
 	}
 
-	return m_psoListener->OnClose(pSocketObj->connID);
+	return rs;
 }
 
-EnHandleResult CTcpServer::FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CTcpServer::TriggerFireSend(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
-	if(m_enRecvPolicy == RP_SERIAL)
+	EnHandleResult rs = FireSend(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len);
+
+	if(rs == HR_ERROR)
 	{
-		CReentrantSpinLock locallock(pSocketObj->csRecv);
-		return m_psoListener->OnError(pSocketObj->connID, enOperation, iErrorCode);
+		TRACE("<S-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", pSocketObj->connID);
+		ASSERT(FALSE);
 	}
 
-	return m_psoListener->OnError(pSocketObj->connID, enOperation, iErrorCode);
+	AddFreeBufferObj(pBufferObj);
+
+	return rs;
+}
+
+EnHandleResult CTcpServer::TriggerFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+{
+	CReentrantSpinLock locallock(pSocketObj->csRecv);
+	return FireClose(pSocketObj, enOperation, iErrorCode);
 }
 
 void CTcpServer::SetLastError(EnSocketError code, LPCSTR func, int ec)
@@ -125,20 +107,18 @@ BOOL CTcpServer::CheckParams()
 	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 
 	if(m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)
-		if(m_enRecvPolicy >= RP_SERIAL && m_enRecvPolicy <= RP_PARALLEL)
-			if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
-				if((int)m_dwAcceptSocketCount > 0)
-					if((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)
-						if((int)m_dwSocketListenQueue > 0)
-							if((int)m_dwFreeSocketObjLockTime >= 0 && m_dwFreeSocketObjLockTime <= MAXLONG)
-								if((int)m_dwFreeSocketObjPool >= 0)
-									if((int)m_dwFreeBufferObjPool >= 0)
-										if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
-											if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
-												if((int)m_dwKeepAliveTime >= 0)
-													if((int)m_dwKeepAliveInterval >= 0)
-														if((int)m_dwMaxShutdownWaitTime >= 0)
-															return TRUE;
+		if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
+			if((int)m_dwAcceptSocketCount > 0)
+				if((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)
+					if((int)m_dwSocketListenQueue > 0)
+						if((int)m_dwFreeSocketObjLockTime >= 0 && m_dwFreeSocketObjLockTime <= MAXLONG)
+							if((int)m_dwFreeSocketObjPool >= 0)
+								if((int)m_dwFreeBufferObjPool >= 0)
+									if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
+										if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
+											if((int)m_dwKeepAliveTime >= 1000)
+												if((int)m_dwKeepAliveInterval >= 1000)
+													return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -183,6 +163,9 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort)
 	{
 		SOCKADDR_IN addr;
 		::sockaddr_A_2_IN(AF_INET, pszBindAddress, usPort, addr);
+
+		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
+		::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval);
 
 		if(::bind(m_soListen, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN)) != SOCKET_ERROR)
 		{
@@ -392,31 +375,15 @@ BOOL CTcpServer::InvalidSocketObj(TSocketObj* pSocketObj)
 {
 	BOOL bDone = FALSE;
 
-	if(m_enRecvPolicy == RP_SERIAL)
+	if(TSocketObj::IsValid(pSocketObj))
 	{
+		CReentrantSpinLock	locallock(pSocketObj->csRecv);
+		CCriSecLock			locallock2(pSocketObj->csSend);
+
 		if(TSocketObj::IsValid(pSocketObj))
 		{
-			CReentrantSpinLock	locallock(pSocketObj->csRecv);
-			CCriSecLock			locallock2(pSocketObj->csSend);
-
-			if(TSocketObj::IsValid(pSocketObj))
-			{
-				TSocketObj::Invalid(pSocketObj);
-				bDone = TRUE;
-			}
-		}
-	}
-	else
-	{
-		if(TSocketObj::IsValid(pSocketObj))
-		{
-			CCriSecLock locallock(pSocketObj->csSend);
-
-			if(TSocketObj::IsValid(pSocketObj))
-			{
-				TSocketObj::Invalid(pSocketObj);
-				bDone = TRUE;
-			}
+			TSocketObj::Invalid(pSocketObj);
+			bDone = TRUE;
 		}
 	}
 
@@ -555,11 +522,13 @@ TSocketObj* CTcpServer::FindSocketObj(CONNID dwConnID)
 {
 	TSocketObj* pSocketObj = nullptr;
 
-	CReentrantReadLock locallock(m_csClientSocket);
+	{
+		CReentrantReadLock locallock(m_csClientSocket);
 
-	TSocketObjPtrMapCI it = m_mpClientSocket.find(dwConnID);
-	if(it != m_mpClientSocket.end())
-		pSocketObj = it->second;
+		TSocketObjPtrMapCI it = m_mpClientSocket.find(dwConnID);
+		if(it != m_mpClientSocket.end())
+			pSocketObj = it->second;
+	}
 
 	return pSocketObj;
 }
@@ -569,9 +538,9 @@ void CTcpServer::CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag 
 	ASSERT(TSocketObj::IsExist(pSocketObj));
 
 	if(enFlag == SCF_CLOSE)
-		FireClose(pSocketObj);
+		TriggerFireClose(pSocketObj, SO_CLOSE, SE_OK);
 	else if(enFlag == SCF_ERROR)
-		FireError(pSocketObj, enOperation, iErrorCode);
+		TriggerFireClose(pSocketObj, enOperation, iErrorCode);
 
 	SOCKET socket = pSocketObj->socket;
 	pSocketObj->socket = INVALID_SOCKET;
@@ -604,7 +573,11 @@ BOOL CTcpServer::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAd
 BOOL CTcpServer::SetConnectionExtra(CONNID dwConnID, PVOID pExtra)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return SetConnectionExtra(pSocketObj, pExtra);
+}
 
+BOOL CTcpServer::SetConnectionExtra(TSocketObj* pSocketObj, PVOID pExtra)
+{
 	if(TSocketObj::IsExist(pSocketObj))
 	{
 		pSocketObj->extra = pExtra;
@@ -616,13 +589,53 @@ BOOL CTcpServer::SetConnectionExtra(CONNID dwConnID, PVOID pExtra)
 
 BOOL CTcpServer::GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra)
 {
-	ASSERT(ppExtra != nullptr);
-
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return GetConnectionExtra(pSocketObj, ppExtra);
+}
+
+BOOL CTcpServer::GetConnectionExtra(TSocketObj* pSocketObj, PVOID* ppExtra)
+{
+	ASSERT(ppExtra != nullptr);
 
 	if(TSocketObj::IsExist(pSocketObj))
 	{
 		*ppExtra = pSocketObj->extra;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTcpServer::SetConnectionReserved(CONNID dwConnID, PVOID pReserved)
+{
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return SetConnectionReserved(pSocketObj, pReserved);
+}
+
+BOOL CTcpServer::SetConnectionReserved(TSocketObj* pSocketObj, PVOID pReserved)
+{
+	if(TSocketObj::IsExist(pSocketObj))
+	{
+		pSocketObj->reserved = pReserved;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTcpServer::GetConnectionReserved(CONNID dwConnID, PVOID* ppReserved)
+{
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return GetConnectionReserved(pSocketObj, ppReserved);
+}
+
+BOOL CTcpServer::GetConnectionReserved(TSocketObj* pSocketObj, PVOID* ppReserved)
+{
+	ASSERT(ppReserved != nullptr);
+
+	if(TSocketObj::IsExist(pSocketObj))
+	{
+		*ppReserved = pSocketObj->reserved;
 		return TRUE;
 	}
 
@@ -1025,10 +1038,7 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 
 	::SSO_UpdateAcceptContext(socket, soListen);
 
-	BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-	::SSO_KeepAliveVals(socket, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval);
-
-	if(FireAccept(dwConnID, socket) != HR_ERROR)
+	if(TriggerFireAccept(pSocketObj) != HR_ERROR)
 	{
 		::CreateIoCompletionPort((HANDLE)socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0);
 		DoReceive(dwConnID, pSocketObj, pBufferObj);
@@ -1048,7 +1058,7 @@ void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 		{
 			long sndCount = ::InterlockedDecrement(&pSocketObj->sndCount);
 
-			TriggerFireSend(dwConnID, pBufferObj);
+			TriggerFireSend(pSocketObj, pBufferObj);
 			if(sndCount == 0) DoSendPack(pSocketObj);
 		}
 
@@ -1065,14 +1075,14 @@ void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 					pSocketObj->smooth = TRUE;
 			}
 
-			TriggerFireSend(dwConnID, pBufferObj);
+			TriggerFireSend(pSocketObj, pBufferObj);
 			if(sndCount == 0) DoSendSafe(pSocketObj);
 		}
 
 		break;
 	case SP_DIRECT:
 		{
-			TriggerFireSend(dwConnID, pBufferObj);
+			TriggerFireSend(pSocketObj, pBufferObj);
 		}
 
 		break;
@@ -1081,32 +1091,19 @@ void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 	}
 }
 
-void CTcpServer::TriggerFireSend(CONNID dwConnID, TBufferObj* pBufferObj)
-{
-	if(FireSend(dwConnID, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len) == HR_ERROR)
-	{
-		TRACE("<S-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", dwConnID);
-		ASSERT(FALSE);
-	}
-
-	AddFreeBufferObj(pBufferObj);
-}
-
 void CTcpServer::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
-	EnHandleResult hr = FireReceive(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len);
+	EnHandleResult hr = TriggerFireReceive(pSocketObj, pBufferObj);
 
 	if(hr == HR_OK || hr == HR_IGNORE)
 		DoReceive(dwConnID, pSocketObj, pBufferObj);
 	else if(hr == HR_CLOSED)
 	{
-		ASSERT(m_enRecvPolicy == RP_SERIAL);
 		AddFreeBufferObj(pBufferObj);
 	}
 	else
 	{
-		TRACE("<S-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", dwConnID);
 		AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_RECEIVE, ERROR_CANCELLED);
 		AddFreeBufferObj(pBufferObj);
 	}

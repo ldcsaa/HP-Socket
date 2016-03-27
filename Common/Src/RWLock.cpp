@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.9
+ * Version	: 2.3.10
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -119,8 +119,133 @@ VOID CSWMR::Done()
 
 //////////////////////////////// CRWLock Functions //////////////////////////////////
 
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
 
-CRWLock::CRWLock()
+CSlimRWLock::CSlimRWLock()
+	: m_nActive			(0)
+	, m_nReadCount		(0)
+	, m_dwWriterTID		(0)
+{
+
+}
+
+CSlimRWLock::~CSlimRWLock()
+{
+	ASSERT(m_nActive	 == 0);
+	ASSERT(m_nReadCount	 == 0);
+	ASSERT(m_dwWriterTID == 0);
+}
+
+VOID CSlimRWLock::WaitToRead()
+{
+	BOOL bWait = FALSE;
+
+	{
+		CSpinLock locallock(m_cs);
+
+		if(m_nActive > 0)
+			++m_nActive;
+		else if(m_nActive == 0)
+		{
+			if(m_smLock.TryWaitToRead())
+			{
+				++m_nReadCount;
+				++m_nActive;
+			}
+			else
+				bWait = TRUE;
+		}
+		else if(!IsOwner())
+			bWait = TRUE;
+	}
+
+	if(bWait)
+	{
+		m_smLock.WaitToRead();
+
+		CSpinLock locallock(m_cs);
+		{
+			++m_nReadCount;
+			++m_nActive;
+		}
+	}
+}
+
+VOID CSlimRWLock::WaitToWrite()
+{
+	BOOL bWait = FALSE;
+
+	{
+		CSpinLock locallock(m_cs);
+
+		if(m_nActive > 0)
+			bWait = TRUE;
+		else if(m_nActive == 0)
+		{
+			if(m_smLock.TryWaitToWrite())
+			{
+				SetOwner();
+				--m_nActive;
+			}
+			else
+				bWait = TRUE;
+		}
+		else
+		{
+			if(IsOwner())
+				--m_nActive;
+			else
+				bWait = TRUE;
+		}
+	}
+
+	if(bWait)
+	{
+		m_smLock.WaitToWrite();
+
+		SetOwner();
+		--m_nActive;
+	}
+}
+
+VOID CSlimRWLock::ReadDone()
+{
+	ASSERT(m_nActive != 0);
+
+	if(m_nActive > 0)
+	{
+		ASSERT(m_nReadCount > 0);
+
+		CSpinLock locallock(m_cs);
+
+		if(--m_nActive == 0)
+		{
+			for(; m_nReadCount > 0; --m_nReadCount)
+				m_smLock.ReadDone();
+		}
+	}
+	else
+		ASSERT(IsOwner());
+}
+
+VOID CSlimRWLock::WriteDone()
+{
+	ASSERT(m_nActive < 0);
+
+	CSpinLock locallock(m_cs);
+
+	if(++m_nActive == 0)
+	{
+		DetachOwner();
+		m_smLock.WriteDone();
+	}
+	else
+		ASSERT(IsOwner());
+}
+
+#endif
+
+CSEMRWLock::CSEMRWLock()
 : m_smRead			(MAXLONG)
 , m_smWrite			(1)
 , m_nWaitingReaders	(0)
@@ -131,13 +256,13 @@ CRWLock::CRWLock()
 
 }
 
-CRWLock::~CRWLock()
+CSEMRWLock::~CSEMRWLock()
 {
 	ASSERT(m_nActive	 == 0);
 	ASSERT(m_dwWriterTID == 0);
 }
 
-VOID CRWLock::WaitToRead()
+VOID CSEMRWLock::WaitToRead()
 {
 	BOOL bWait = FALSE;
 
@@ -172,7 +297,7 @@ VOID CRWLock::WaitToRead()
 	}
 }
 
-VOID CRWLock::WaitToWrite()
+VOID CSEMRWLock::WaitToWrite()
 {
 	BOOL bWait = FALSE;
 
@@ -208,38 +333,36 @@ VOID CRWLock::WaitToWrite()
 	}
 }
 
-VOID CRWLock::ReadDone()
+VOID CSEMRWLock::ReadDone()
 {
 	CSEM* pSem	 = nullptr;
 	LONG  lCount = 0;
 
+	ASSERT(m_nActive != 0);
+
+	if(m_nActive > 0)
 	{
 		CSpinLock locallock(m_cs);
 
-		ASSERT(m_nActive != 0);
-
-		if(m_nActive > 0)
-		{
-			if(--m_nActive == 0)
-				Done(&pSem, lCount);
-		}
-		else
-			ASSERT(IsOwner());
+		if(--m_nActive == 0)
+			Done(&pSem, lCount);
 	}
+	else
+		ASSERT(IsOwner());
 
 	if(pSem != nullptr)
 		pSem->Release(lCount);
 }
 
-VOID CRWLock::WriteDone()
+VOID CSEMRWLock::WriteDone()
 {
 	CSEM* pSem	 = nullptr;
 	LONG  lCount = 0;
 
 	{
-		CSpinLock locallock(m_cs);
-
 		ASSERT(m_nActive < 0);
+
+		CSpinLock locallock(m_cs);
 
 		if(++m_nActive == 0)
 		{
@@ -254,7 +377,7 @@ VOID CRWLock::WriteDone()
 		pSem->Release(lCount);
 }
 
-VOID CRWLock::Done(CSEM** ppSem, LONG& lCount)
+VOID CSEMRWLock::Done(CSEM** ppSem, LONG& lCount)
 {
 	ASSERT(m_nActive	 == 0);
 	ASSERT(m_dwWriterTID == 0);

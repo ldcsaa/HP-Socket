@@ -105,6 +105,18 @@
     <ClInclude Include="..\..\Src\UdpCast.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPackAgent.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPackClient.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPackServer.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\MiscHelper.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -159,6 +171,18 @@
       <Filter>HPSocket</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\UdpCast.cpp">
+      <Filter>HPSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPackAgent.cpp">
+      <Filter>HPSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPackClient.cpp">
+      <Filter>HPSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPackServer.cpp">
+      <Filter>HPSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\MiscHelper.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
   </ItemGroup>

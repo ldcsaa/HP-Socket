@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.9
+ * Version	: 2.3.10
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -382,7 +382,7 @@ void CBufferPool::PutFreeBuffer(ULONG_PTR dwID)
 	if(pBuffer != nullptr)
 	{
 		{
-			CReentrantWriteLock locallock(m_csBufferMap);
+			CWriteLock locallock(m_csBufferMap);
 			m_mpBuffer.erase(dwID);
 		}
 
@@ -441,12 +441,18 @@ void CBufferPool::CompressFreeBuffer(int size)
 	}
 }
 
-void CBufferPool::PutCacheBuffer(ULONG_PTR dwID)
+TBuffer* CBufferPool::PutCacheBuffer(ULONG_PTR dwID)
 {
 	ASSERT(dwID != 0);
 
-	CReentrantWriteLock locallock(m_csBufferMap);
-	m_mpBuffer[dwID] = PickFreeBuffer(dwID);
+	TBuffer* pBuffer = PickFreeBuffer(dwID);
+
+	{
+		CWriteLock locallock(m_csBufferMap);
+		m_mpBuffer[dwID] = pBuffer;
+	}
+
+	return pBuffer;
 }
 
 TBuffer* CBufferPool::PickFreeBuffer(ULONG_PTR dwID)
@@ -483,7 +489,7 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 
 	TBuffer* pBuffer = nullptr;
 
-	CReentrantReadLock locallock(m_csBufferMap);
+	CReadLock locallock(m_csBufferMap);
 
 	TBufferPtrMapCI it = m_mpBuffer.find(dwID);
 	if(it != m_mpBuffer.end())
@@ -495,7 +501,7 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 void CBufferPool::Clear()
 {
 	{
-		CReentrantWriteLock locallock(m_csBufferMap);
+		CWriteLock locallock(m_csBufferMap);
 
 		for(TBufferPtrMapCI it = m_mpBuffer.begin(), end = m_mpBuffer.end(); it != end; ++it)
 			TBuffer::Destruct(it->second);

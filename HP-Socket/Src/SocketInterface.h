@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -50,7 +50,7 @@ enum EnServiceState
 
 /************************************************************************
 名称：Socket 操作类型
-描述：应用程序的 OnErrror() 事件中通过该参数标识是哪种操作导致的错误
+描述：应用程序的 OnClose() 事件中通过该参数标识是哪种操作导致的错误
 ************************************************************************/
 enum EnSocketOperation
 {
@@ -59,6 +59,7 @@ enum EnSocketOperation
 	SO_CONNECT	= 2,	// Connect
 	SO_SEND		= 3,	// Send
 	SO_RECEIVE	= 4,	// Receive
+	SO_CLOSE	= 5,	// Close
 };
 
 /************************************************************************
@@ -97,24 +98,6 @@ enum EnSendPolicy
 	SP_PACK				= 0,	// 打包模式（默认）
 	SP_SAFE				= 1,	// 安全模式
 	SP_DIRECT			= 2,	// 直接模式
-};
-
-/************************************************************************
-名称：数据接收策略
-描述：Server 组件和 Agent 组件的数据接收策略
-
-* 串行模式（默认）	：对于单个连接，顺序触发 OnReceive 和 OnClose/OnError 事件。
-					  降低应用程序处理的复杂度，增强安全性；但同时损失一些并发性能。
-* 并行模式			：对于单个连接，同时收到 OnReceive 和 OnClose/OnError 事件时，
-					  会在不同的 通信线程中同时触发这些事件，使并发性能得到提升，但应用程序
-					  需要考虑在 OnReceive 的事件处理代码中，某些公共变量可能被 OnClose/OnError
-					  的事件处理代码更改或释放的情形，程序代码逻辑会变得复杂，处理不好时将会产生代码缺陷
-
-************************************************************************/
-enum EnRecvPolicy
-{
-	RP_SERIAL			= 0,	// 串行模式（默认）
-	RP_PARALLEL			= 1,	// 并行模式
 };
 
 /************************************************************************
@@ -178,7 +161,7 @@ public:
 	*			pData		-- 已接收数据缓冲区
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnError() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
 
@@ -189,18 +172,9 @@ public:
 	* 参数：		dwConnID	-- 连接 ID
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnError() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)									= 0;
-
-	/*
-	* 名称：已关闭连接通知
-	* 描述：正常关闭连接后，Socket 监听器将收到该通知
-	*		
-	* 参数：		dwConnID -- 连接 ID
-	* 返回值：	忽略返回值
-	*/
-	virtual EnHandleResult OnClose(CONNID dwConnID)													= 0;
 
 	/*
 	* 名称：通信错误通知
@@ -211,7 +185,7 @@ public:
 	*			iErrorCode	-- 错误代码
 	* 返回值：	忽略返回值
 	*/
-	virtual EnHandleResult OnError(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)	= 0;
+	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)	= 0;
 
 	/*
 	* 名称：关闭通信组件通知
@@ -407,7 +381,7 @@ public:
 	* 描述：通信客户端组件启动时，在客户端 Socket 创建完成并开始执行连接前，Socket 监听
 	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
 	*		
-	* 参数：		dwConnID	-- 连接 ID
+	* 参数：		pClient		-- 连接对象
 	*			socket		-- 客户端 Socket
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
 	*			HR_ERROR			-- 终止启动通信客户端组件
@@ -418,7 +392,7 @@ public:
 	* 名称：连接完成通知
 	* 描述：与服务端成功建立连接时，Socket 监听器将收到该通知
 	*		
-	* 参数：		dwConnID	-- 连接 ID
+	* 参数：		pClient		-- 连接对象
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
 	*			HR_ERROR			-- 同步连接：终止启动通信客户端组件
 	*								   异步连接：关闭连接
@@ -429,7 +403,7 @@ public:
 	* 名称：已发送数据通知
 	* 描述：成功发送数据后，Socket 监听器将收到该通知
 	*		
-	* 参数：		dwConnID	-- 连接 ID
+	* 参数：		pClient		-- 连接对象
 	*			pData		-- 已发送数据缓冲区
 	*			iLength		-- 已发送数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
@@ -441,11 +415,11 @@ public:
 	* 名称：数据到达通知（PUSH 模型）
 	* 描述：对于 PUSH 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
 	*		
-	* 参数：		dwConnID	-- 连接 ID
+	* 参数：		pClient		-- 连接对象
 	*			pData		-- 已接收数据缓冲区
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnError() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)				= 0;
 
@@ -453,32 +427,23 @@ public:
 	* 名称：数据到达通知（PULL 模型）
 	* 描述：对于 PULL 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
 	*		
-	* 参数：		dwConnID	-- 连接 ID
+	* 参数：		pClient		-- 连接对象
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnError() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)									= 0;
-
-	/*
-	* 名称：已关闭连接通知
-	* 描述：正常关闭连接后，Socket 监听器将收到该通知
-	*		
-	* 参数：		dwConnID -- 连接 ID
-	* 返回值：	忽略返回值
-	*/
-	virtual EnHandleResult OnClose(IClient* pClient)												= 0;
 
 	/*
 	* 名称：通信错误通知
 	* 描述：通信发生错误后，Socket 监听器将收到该通知，并关闭连接
 	*		
-	* 参数：		dwConnID	-- 连接 ID
+	* 参数：		pClient		-- 连接对象
 	*			enOperation	-- Socket 操作类型
 	*			iErrorCode	-- 错误代码
 	* 返回值：	忽略返回值
 	*/
-	virtual EnHandleResult OnError(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)	= 0;
+	virtual EnHandleResult OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)	= 0;
 
 public:
 	virtual ~IClientListener() {}
@@ -689,8 +654,6 @@ public:
 
 	/* 设置数据发送策略 */
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		= 0;
-	/* 设置数据接收策略 */
-	virtual void SetRecvPolicy				(EnRecvPolicy enRecvPolicy)		= 0;
 	/* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	= 0;
 	/* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
@@ -703,15 +666,11 @@ public:
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		= 0;
 	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		= 0;
-	/* 设置关闭组件前等待连接关闭的最长时限（毫秒，0 则不等待） */
-	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	= 0;
 	/* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				= 0;
 
 	/* 获取数据发送策略 */
 	virtual EnSendPolicy GetSendPolicy		()	= 0;
-	/* 获取数据发送策略 */
-	virtual EnRecvPolicy GetRecvPolicy		()	= 0;
 	/* 获取 Socket 缓存对象锁定时间 */
 	virtual DWORD GetFreeSocketObjLockTime	()	= 0;
 	/* 获取 Socket 缓存池大小 */
@@ -724,8 +683,6 @@ public:
 	virtual DWORD GetFreeBufferObjHold		()	= 0;
 	/* 获取工作线程数量 */
 	virtual DWORD GetWorkerThreadCount		()	= 0;
-	/* 获取关闭组建前等待连接关闭的最长时限 */
-	virtual DWORD GetMaxShutdownWaitTime	()	= 0;
 	/* 检测是否标记静默时间 */
 	virtual BOOL IsMarkSilence				()	= 0;
 
@@ -799,9 +756,9 @@ public:
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
 	/* 设置监听 Socket 的等候队列大小（根据并发连接数量调整设置） */
 	virtual void SetSocketListenQueue	(DWORD dwSocketListenQueue)		= 0;
-	/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
-	/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
 
 	/* 获取 Accept 预投递数量 */
@@ -810,9 +767,9 @@ public:
 	virtual DWORD GetSocketBufferSize	()	= 0;
 	/* 获取监听 Socket 的等候队列大小 */
 	virtual DWORD GetSocketListenQueue	()	= 0;
-	/* 获取心跳检查次数 */
+	/* 获取正常心跳包间隔 */
 	virtual DWORD GetKeepAliveTime		()	= 0;
-	/* 获取心跳检查间隔 */
+	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
 };
 
@@ -931,16 +888,16 @@ public:
 
 	/* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为 1024 的倍数） */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
-	/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
-	/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
 
 	/* 获取通信数据缓冲区大小 */
 	virtual DWORD GetSocketBufferSize	()	= 0;
-	/* 获取心跳检查次数 */
+	/* 获取正常心跳包间隔 */
 	virtual DWORD GetKeepAliveTime		()	= 0;
-	/* 获取心跳检查间隔 */
+	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
 };
 
@@ -1072,16 +1029,16 @@ public:
 	
 	/* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为：(N * 1024) - sizeof(TBufferObj)） */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)	= 0;
-	/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)		= 0;
-	/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)	= 0;
 
 	/* 获取通信数据缓冲区大小 */
 	virtual DWORD GetSocketBufferSize	()	= 0;
-	/* 获取心跳检查次数 */
+	/* 获取正常心跳包间隔 */
 	virtual DWORD GetKeepAliveTime		()	= 0;
-	/* 获取心跳检查间隔 */
+	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
 };
 
@@ -1289,5 +1246,115 @@ public:
 	inline static ITcpClient* ToClient(IPullClient* pPullClient)
 	{
 		return (ITcpClient*)((char*)pPullClient + sizeof(IPullClient));
+	}
+};
+
+/************************************************************************
+名称：Server/Agent PACK 模型组件接口
+描述：定义 Server/Agent 组件的 PACK 模型组件的所有操作方法
+************************************************************************/
+class IPackSocket
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)			= 0;
+	/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)		= 0;
+
+	/* 获取数据包最大长度 */
+	virtual DWORD GetMaxPackSize	()								= 0;
+	/* 获取包头标识 */
+	virtual USHORT GetPackHeaderFlag()								= 0;
+
+public:
+	virtual ~IPackSocket() {}
+};
+
+/************************************************************************
+名称：Client PACK 模型组件接口
+描述：定义 Client 组件的 PACK 模型组件的所有操作方法
+************************************************************************/
+class IPackClient
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)			= 0;
+	/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)		= 0;
+
+	/* 获取数据包最大长度 */
+	virtual DWORD GetMaxPackSize	()								= 0;
+	/* 获取包头标识 */
+	virtual USHORT GetPackHeaderFlag()								= 0;
+
+public:
+	virtual ~IPackClient() {}
+};
+
+/************************************************************************
+名称：TCP Server PACK 模型组件接口
+描述：继承了 ITcpServer 和 IPackSocket
+************************************************************************/
+class ITcpPackServer : public IPackSocket, public ITcpServer
+{
+public:
+	/* IServer* 转换为 IPackSocket* */
+	inline static IPackSocket* ToPack(IServer* pServer)
+	{
+		return (IPackSocket*)((char*)pServer - sizeof(IPackSocket));
+	}
+
+	/* IPackSocket* 转换为 ITcpServer* */
+	inline static ITcpServer* ToServer(IPackSocket* pPackSocket)
+	{
+		return (ITcpServer*)((char*)pPackSocket + sizeof(IPackSocket));
+	}
+};
+
+/************************************************************************
+名称：TCP Agent PACK 模型组件接口
+描述：继承了 ITcpAgent 和 IPackSocket
+************************************************************************/
+class ITcpPackAgent : public IPackSocket, public ITcpAgent
+{
+public:
+	/* IAgent* 转换为 IPackSocket* */
+	inline static IPackSocket* ToPack(IAgent* pAgent)
+	{
+		return (IPackSocket*)((char*)pAgent - sizeof(IPackSocket));
+	}
+
+	/* IPackSocket* 转换为 ITcpAgent* */
+	inline static ITcpAgent* ToAgent(IPackSocket* pPackSocket)
+	{
+		return (ITcpAgent*)((char*)pPackSocket + sizeof(IPackSocket));
+	}
+};
+
+/************************************************************************
+名称：TCP Client PACK 模型组件接口
+描述：继承了 ITcpClient 和 IPackClient
+************************************************************************/
+class ITcpPackClient : public IPackClient, public ITcpClient
+{
+public:
+	/* IClient* 转换为 IPackClient* */
+	inline static IPackClient* ToPack(IClient* pClient)
+	{
+		return (IPackClient*)((char*)pClient - sizeof(IPackClient));
+	}
+
+	/* IPackClient* 转换为 ITcpClient* */
+	inline static ITcpClient* ToClient(IPackClient* pPackClient)
+	{
+		return (ITcpClient*)((char*)pPackClient + sizeof(IPackClient));
 	}
 };

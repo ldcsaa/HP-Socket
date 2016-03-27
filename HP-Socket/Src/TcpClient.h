@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -72,13 +72,16 @@ protected:
 		{return m_psoListener->OnReceive(pClient, pData, iLength);}
 	virtual EnHandleResult FireReceive(IClient* pClient, int iLength)
 		{return m_psoListener->OnReceive(pClient, iLength);}
-	virtual EnHandleResult FireClose(IClient* pClient)
-		{return m_psoListener->OnClose(pClient);}
-	virtual EnHandleResult FireError(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnError(pClient, enOperation, iErrorCode);}
+	virtual EnHandleResult FireClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+		{return m_psoListener->OnClose(pClient, enOperation, iErrorCode);}
 
+	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void Reset(BOOL bAll = TRUE);
+
+protected:
+	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
+	PVOID GetReserved	()					{return m_pReserved;}
 
 private:
 	BOOL CheckStarting();
@@ -94,7 +97,11 @@ private:
 	BOOL SendInternal(const WSABUF pBuffers[], int iCount, EnSocketError& enCode);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
 
-	void SetLastError(EnSocketError code, LPCSTR func, int ec);
+	BOOL HandleError	(WSANETWORKEVENTS& events);
+	BOOL HandleRead		(WSANETWORKEVENTS& events);
+	BOOL HandleWrite	(WSANETWORKEVENTS& events);
+	BOOL HandleConnect	(WSANETWORKEVENTS& events);
+	BOOL HandleClose	(WSANETWORKEVENTS& events);
 
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
@@ -112,6 +119,7 @@ public:
 	, m_enState				(SS_STOPPED)
 	, m_enLastError			(SE_OK)
 	, m_pExtra				(nullptr)
+	, m_pReserved			(nullptr)
 	, m_dwSocketBufferSize	(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
 	, m_dwFreeBufferPoolSize(DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE)
 	, m_dwFreeBufferPoolHold(DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD)
@@ -146,6 +154,7 @@ private:
 	EnSocketError		m_enLastError;
 
 	PVOID				m_pExtra;
+	PVOID				m_pReserved;
 
 	CBufferPtr			m_rcBuffer;
 

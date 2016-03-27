@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,34 +25,44 @@
 #include "stdafx.h"
 #include "HPSocket.h"
 #include "TcpServer.h"
+#include "TcpAgent.h"
 #include "TcpClient.h"
 #include "TcpPullServer.h"
 #include "TcpPullClient.h"
+#include "TcpPullAgent.h"
+#include "TcpPackServer.h"
+#include "TcpPackClient.h"
+#include "TcpPackAgent.h"
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
-#include "TcpAgent.h"
-#include "TcpPullAgent.h"
 
+/*
 #if !defined(_WIN64)
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpAgent=_HP_Create_TcpAgent")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullAgent=_HP_Create_TcpPullAgent")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpClient=_HP_Create_TcpClient")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullClient=_HP_Create_TcpPullClient")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullServer=_HP_Create_TcpPullServer")
 	#pragma comment(linker, "/EXPORT:HP_Create_TcpServer=_HP_Create_TcpServer")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpAgent=_HP_Create_TcpAgent")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpClient=_HP_Create_TcpClient")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullServer=_HP_Create_TcpPullServer")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullAgent=_HP_Create_TcpPullAgent")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullClient=_HP_Create_TcpPullClient")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpPackServer=_HP_Create_TcpPackServer")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpPackAgent=_HP_Create_TcpPackAgent")
+	#pragma comment(linker, "/EXPORT:HP_Create_TcpPackClient=_HP_Create_TcpPackClient")
+	#pragma comment(linker, "/EXPORT:HP_Create_UdpServer=_HP_Create_UdpServer")
 	#pragma comment(linker, "/EXPORT:HP_Create_UdpClient=_HP_Create_UdpClient")
 	#pragma comment(linker, "/EXPORT:HP_Create_UdpCast=_HP_Create_UdpCast")
-	#pragma comment(linker, "/EXPORT:HP_Create_UdpServer=_HP_Create_UdpServer")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpAgent=_HP_Destroy_TcpAgent")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullAgent=_HP_Destroy_TcpPullAgent")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpClient=_HP_Destroy_TcpClient")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullClient=_HP_Destroy_TcpPullClient")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullServer=_HP_Destroy_TcpPullServer")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpServer=_HP_Destroy_TcpServer")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpAgent=_HP_Destroy_TcpAgent")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpClient=_HP_Destroy_TcpClient")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullServer=_HP_Destroy_TcpPullServer")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullAgent=_HP_Destroy_TcpPullAgent")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullClient=_HP_Destroy_TcpPullClient")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPackServer=_HP_Destroy_TcpPackServer")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPackAgent=_HP_Destroy_TcpPackAgent")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPackClient=_HP_Destroy_TcpPackClient")
+	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpServer=_HP_Destroy_UdpServer")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpClient=_HP_Destroy_UdpClient")
 	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpCast=_HP_Destroy_UdpCast")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpServer=_HP_Destroy_UdpServer")
 	#pragma comment(linker, "/EXPORT:HP_GetSocketErrorDesc=_HP_GetSocketErrorDesc")
 	#pragma comment(linker, "/EXPORT:SYS_GetLastError=_SYS_GetLastError")
 	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError")
@@ -61,6 +71,7 @@
 	#pragma comment(linker, "/EXPORT:SYS_IoctlSocket=_SYS_IoctlSocket")
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl")
 #endif
+*/
 
 HPSOCKET_API ITcpServer* HP_Create_TcpServer(ITcpServerListener* pListener)
 {
@@ -90,6 +101,21 @@ HPSOCKET_API ITcpPullAgent* HP_Create_TcpPullAgent(ITcpAgentListener* pListener)
 HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener)
 {
 	return (ITcpPullClient*)(new CTcpPullClient(pListener));
+}
+
+HPSOCKET_API ITcpPackServer* HP_Create_TcpPackServer(ITcpServerListener* pListener)
+{
+	return (ITcpPackServer*)(new CTcpPackServer(pListener));
+}
+
+HPSOCKET_API ITcpPackAgent* HP_Create_TcpPackAgent(ITcpAgentListener* pListener)
+{
+	return (ITcpPackAgent*)(new CTcpPackAgent(pListener));
+}
+
+HPSOCKET_API ITcpPackClient* HP_Create_TcpPackClient(ITcpClientListener* pListener)
+{
+	return (ITcpPackClient*)(new CTcpPackClient(pListener));
 }
 
 HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener)
@@ -133,6 +159,21 @@ HPSOCKET_API void HP_Destroy_TcpPullAgent(ITcpPullAgent* pAgent)
 }
 
 HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient)
+{
+	delete pClient;
+}
+
+HPSOCKET_API void HP_Destroy_TcpPackServer(ITcpPackServer* pServer)
+{
+	delete pServer;
+}
+
+HPSOCKET_API void HP_Destroy_TcpPackAgent(ITcpPackAgent* pAgent)
+{
+	delete pAgent;
+}
+
+HPSOCKET_API void HP_Destroy_TcpPackClient(ITcpPackClient* pClient)
 {
 	delete pClient;
 }

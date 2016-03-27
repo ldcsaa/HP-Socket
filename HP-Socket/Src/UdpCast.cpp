@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -260,7 +260,7 @@ BOOL CUdpCast::ProcessNetworkEvent()
 	int rc = ::WSAEnumNetworkEvents(m_soClient, m_evSocket, &events);
 
 	if(rc == SOCKET_ERROR)
-		bContinue = HandleError();
+		bContinue = HandleError(events);
 
 	if(bContinue && events.lNetworkEvents & FD_READ)
 		bContinue = HandleRead(events);
@@ -269,18 +269,27 @@ BOOL CUdpCast::ProcessNetworkEvent()
 		bContinue = HandleWrite(events);
 
 	if(bContinue && events.lNetworkEvents & FD_CLOSE)
-		bContinue = HandleClosse(events);
+		bContinue = HandleClose(events);
 
 	return bContinue;
 }
 
-BOOL CUdpCast::HandleError()
+BOOL CUdpCast::HandleError(WSANETWORKEVENTS& events)
 {
 	int iCode = ::WSAGetLastError();
 	SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 
+	EnSocketOperation enOperation = SO_UNKNOWN;
+
+	if(events.lNetworkEvents & FD_CLOSE)
+		enOperation = SO_CLOSE;
+	else if(events.lNetworkEvents & FD_READ)
+		enOperation = SO_RECEIVE;
+	else if(events.lNetworkEvents & FD_WRITE)
+		enOperation = SO_SEND;
+
 	VERIFY(::WSAResetEvent(m_evSocket));
-	FireError(this, SO_UNKNOWN, iCode);
+	FireClose(this, enOperation, iCode);
 
 	return FALSE;
 }
@@ -295,7 +304,7 @@ BOOL CUdpCast::HandleRead(WSANETWORKEVENTS& events)
 	else
 	{
 		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-		FireError(this, SO_RECEIVE, iCode);
+		FireClose(this, SO_RECEIVE, iCode);
 		bContinue = FALSE;
 	}
 
@@ -312,29 +321,23 @@ BOOL CUdpCast::HandleWrite(WSANETWORKEVENTS& events)
 	else
 	{
 		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-		FireError(this, SO_SEND, iCode);
+		FireClose(this, SO_SEND, iCode);
 		bContinue = FALSE;
 	}
 
 	return bContinue;
 }
 
-BOOL CUdpCast::HandleClosse(WSANETWORKEVENTS& events)
+BOOL CUdpCast::HandleClose(WSANETWORKEVENTS& events)
 {
 	int iCode = events.iErrorCode[FD_CLOSE_BIT];
 
 	if(iCode == 0)
-		FireClose(this);
+		FireClose(this, SO_CLOSE, SE_OK);
 	else
 	{
-		EnSocketOperation enOperation = events.lNetworkEvents & FD_READ ? SO_RECEIVE :
-											(
-												events.lNetworkEvents & FD_WRITE ? SO_SEND :
-													(events.lNetworkEvents & FD_CONNECT ? SO_CONNECT : SO_UNKNOWN)
-											);
-
 		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-		FireError(this, enOperation, iCode);
+		FireClose(this, SO_CLOSE, iCode);
 	}
 
 	return FALSE;
@@ -354,7 +357,7 @@ BOOL CUdpCast::ReadData()
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
 				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_CANCELLED);
-				FireError(this, SO_RECEIVE, ERROR_CANCELLED);
+				FireClose(this, SO_RECEIVE, ERROR_CANCELLED);
 
 				return FALSE;
 			}
@@ -368,7 +371,7 @@ BOOL CUdpCast::ReadData()
 			else
 			{
 				SetLastError(SE_NETWORK, __FUNCTION__, code);
-				FireError(this, SO_RECEIVE, code);
+				FireClose(this, SO_RECEIVE, code);
 
 				return FALSE;
 			}
@@ -422,7 +425,7 @@ BOOL CUdpCast::SendData()
 				else
 				{
 					SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-					FireError(this, SO_SEND, iCode);
+					FireClose(this, SO_SEND, iCode);
 
 					return FALSE;
 				}
@@ -468,7 +471,7 @@ BOOL CUdpCast::Stop()
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
 	if(bNeedFireClose)
-		FireClose(this);
+		FireClose(this, SO_CLOSE, SE_OK);
 
 	if(m_evSocket != nullptr)
 	{

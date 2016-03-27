@@ -24,45 +24,53 @@
  
 #pragma once
 
-#include "TcpAgent.h"
+#include "TcpServer.h"
+#include "MiscHelper.h"
 #include "../../Common/Src/bufferpool.h"
 
-class CTcpPullAgent : public IPullSocket, public CTcpAgent
+class CTcpPackServer : public IPackSocket, public CTcpServer
 {
 public:
-	virtual EnFetchResult Fetch	(CONNID dwConnID, BYTE* pData, int iLength);
-	virtual EnFetchResult Peek	(CONNID dwConnID, BYTE* pData, int iLength);
+	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 
 protected:
-	virtual EnHandleResult FireConnect(TSocketObj* pSocketObj);
+	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj);
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult FireShutdown();
 
-	virtual BOOL CheckParams()
-	{
-		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
-		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
-		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
-		m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
-		m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
-		m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
-
-		return __super::CheckParams();
-	}
+	virtual BOOL CheckParams();
 
 public:
-	CTcpPullAgent(ITcpAgentListener* psoListener) : CTcpAgent(psoListener)
+	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)		{m_dwMaxPackSize = dwMaxPackSize;}
+	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)	{m_usHeaderFlag  = usPackHeaderFlag;}
+	virtual DWORD GetMaxPackSize	()	{return m_dwMaxPackSize;}
+	virtual USHORT GetPackHeaderFlag()	{return m_usHeaderFlag;}
+
+private:
+	EnHandleResult FireSuperReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return __super::FireReceive(pSocketObj, pData, iLength);}
+
+	friend EnHandleResult ParsePack<>	(CTcpPackServer* pThis, TBufferPackInfo* pInfo, TBuffer* pBuffer, TSocketObj* pSocket,
+										DWORD dwMaxPackSize, USHORT usPackHeaderFlag, const BYTE* pData, int iLength);
+
+public:
+	CTcpPackServer(ITcpServerListener* psoListener) : CTcpServer(psoListener)
+	, m_dwMaxPackSize	(TCP_PACK_DEFAULT_MAX_SIZE)
+	, m_usHeaderFlag	(TCP_PACK_DEFAULT_HEADER_FLAG)
 	{
 
 	}
 
-	virtual ~CTcpPullAgent()
+	virtual ~CTcpPackServer()
 	{
 		if(HasStarted())
 			Stop();
 	}
 
 private:
+	DWORD	m_dwMaxPackSize;
+	USHORT	m_usHeaderFlag;
+
 	CBufferPool m_bfPool;
 };

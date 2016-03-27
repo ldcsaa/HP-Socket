@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -45,7 +45,6 @@ public:
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
 	, m_enSendPolicy			(SP_PACK)
-	, m_enRecvPolicy			(RP_SERIAL)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwSocketListenQueue		(DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE)
 	, m_dwAcceptSocketCount		(DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT)
@@ -57,7 +56,6 @@ public:
 	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
 	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
 	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
-	, m_dwMaxShutdownWaitTime	(DEFAULT_MAX_SHUTDOWN_WAIT_TIME)
 	, m_bMarkSilence			(FALSE)
 	{
 		ASSERT(m_wsSocket.IsValid());
@@ -99,7 +97,6 @@ public:
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
-	virtual void SetRecvPolicy				(EnRecvPolicy enRecvPolicy)		{m_enRecvPolicy				= enRecvPolicy;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetSocketListenQueue		(DWORD dwSocketListenQueue)		{m_dwSocketListenQueue		= dwSocketListenQueue;}
 	virtual void SetAcceptSocketCount		(DWORD dwAcceptSocketCount)		{m_dwAcceptSocketCount		= dwAcceptSocketCount;}
@@ -111,11 +108,9 @@ public:
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		{m_dwFreeBufferObjHold		= dwFreeBufferObjHold;}
 	virtual void SetKeepAliveTime			(DWORD dwKeepAliveTime)			{m_dwKeepAliveTime			= dwKeepAliveTime;}
 	virtual void SetKeepAliveInterval		(DWORD dwKeepAliveInterval)		{m_dwKeepAliveInterval		= dwKeepAliveInterval;}
-	virtual void SetMaxShutdownWaitTime		(DWORD dwMaxShutdownWaitTime)	{m_dwMaxShutdownWaitTime	= dwMaxShutdownWaitTime;}
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
-	virtual EnRecvPolicy GetRecvPolicy		()	{return m_enRecvPolicy;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetSocketListenQueue		()	{return m_dwSocketListenQueue;}
 	virtual DWORD GetAcceptSocketCount		()	{return m_dwAcceptSocketCount;}
@@ -127,26 +122,41 @@ public:
 	virtual DWORD GetFreeBufferObjHold		()	{return m_dwFreeBufferObjHold;}
 	virtual DWORD GetKeepAliveTime			()	{return m_dwKeepAliveTime;}
 	virtual DWORD GetKeepAliveInterval		()	{return m_dwKeepAliveInterval;}
-	virtual DWORD GetMaxShutdownWaitTime	()	{return m_dwMaxShutdownWaitTime;}
 	virtual BOOL  IsMarkSilence				()	{return m_bMarkSilence;}
 
 protected:
-	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
-	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, int iLength);
-	virtual EnHandleResult FireClose(TSocketObj* pSocketObj);
-	virtual EnHandleResult FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
 		{return m_psoListener->OnPrepareListen(soListen);}
-	virtual EnHandleResult FireAccept(CONNID dwConnID, SOCKET soClient)
-		{return m_psoListener->OnAccept(dwConnID, soClient);}
-	virtual EnHandleResult FireSend(CONNID dwConnID, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(dwConnID, pData, iLength);}
+	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj)
+		{return m_psoListener->OnAccept(pSocketObj->connID, pSocketObj->socket);}
+	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);}
+	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, int iLength)
+		{return m_psoListener->OnReceive(pSocketObj->connID, iLength);}
+	virtual EnHandleResult FireSend(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return m_psoListener->OnSend(pSocketObj->connID, pData, iLength);}
+	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+		{return m_psoListener->OnClose(pSocketObj->connID, enOperation, iErrorCode);}
 	virtual EnHandleResult FireShutdown()
 		{return m_psoListener->OnShutdown();}
 
+	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void Reset(BOOL bAll = TRUE);
+
+private:
+	EnHandleResult TriggerFireAccept(TSocketObj* pSocketObj);
+	EnHandleResult TriggerFireReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+	EnHandleResult TriggerFireSend(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+	EnHandleResult TriggerFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
+
+protected:
+	BOOL SetConnectionExtra(TSocketObj* pSocketObj, PVOID pExtra);
+	BOOL GetConnectionExtra(TSocketObj* pSocketObj, PVOID* ppExtra);
+	BOOL SetConnectionReserved(CONNID dwConnID, PVOID pReserved);
+	BOOL GetConnectionReserved(CONNID dwConnID, PVOID* ppReserved);
+	BOOL SetConnectionReserved(TSocketObj* pSocketObj, PVOID pReserved);
+	BOOL GetConnectionReserved(TSocketObj* pSocketObj, PVOID* ppReserved);
 
 private:
 	BOOL CheckStarting();
@@ -183,9 +193,6 @@ private:
 	TSocketObj* FindSocketObj(CONNID dwConnID);
 
 private:
-	void SetLastError(EnSocketError code, LPCSTR func, int ec);
-
-private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
@@ -196,8 +203,6 @@ private:
 	void HandleAccept	(SOCKET soListen, TBufferObj* pBufferObj);
 	void HandleSend		(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	void HandleReceive	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-
-	void TriggerFireSend(CONNID dwConnID, TBufferObj* pBufferObj);
 
 	int SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	int SendPack	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
@@ -218,7 +223,6 @@ private:
 
 private:
 	EnSendPolicy m_enSendPolicy;
-	EnRecvPolicy m_enRecvPolicy;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwSocketListenQueue;
 	DWORD m_dwAcceptSocketCount;
@@ -230,7 +234,6 @@ private:
 	DWORD m_dwFreeBufferObjHold;
 	DWORD m_dwKeepAliveTime;
 	DWORD m_dwKeepAliveInterval;
-	DWORD m_dwMaxShutdownWaitTime;
 	BOOL  m_bMarkSilence;
 
 private:

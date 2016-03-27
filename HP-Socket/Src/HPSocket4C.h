@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -93,6 +93,11 @@ typedef HP_Object	HP_PullClient;
 typedef HP_Object	HP_TcpPullServer;
 typedef HP_Object	HP_TcpPullAgent;
 typedef HP_Object	HP_TcpPullClient;
+typedef HP_Object	HP_PackSocket;
+typedef HP_Object	HP_PackClient;
+typedef HP_Object	HP_TcpPackServer;
+typedef HP_Object	HP_TcpPackAgent;
+typedef HP_Object	HP_TcpPackClient;
 typedef HP_Object	HP_UdpServer;
 typedef HP_Object	HP_UdpClient;
 typedef HP_Object	HP_UdpCast;
@@ -140,6 +145,7 @@ enum En_HP_SocketOperation
 	HP_SO_CONNECT	= 2,	// Connect
 	HP_SO_SEND		= 3,	// Send
 	HP_SO_RECEIVE	= 4,	// Receive
+	HP_SO_CLOSE		= 5,	// Close
 };
 
 /************************************************************************
@@ -178,24 +184,6 @@ enum En_HP_SendPolicy
 	HP_SP_PACK				= 0,	// 打包模式（默认）
 	HP_SP_SAFE				= 1,	// 安全模式
 	HP_SP_DIRECT			= 2,	// 直接模式
-};
-
-/************************************************************************
-名称：数据接收策略
-描述：Server 组件和 Agent 组件的数据接收策略
-
-* 串行模式（默认）	：对于单个连接，顺序触发 OnReceive 和 OnClose/OnError 事件。
-					  降低应用程序处理的复杂度，增强安全性；但同时损失一些并发性能。
-* 并行模式			：对于单个连接，同时收到 OnReceive 和 OnClose/OnError 事件时，
-					  会在不同的 通信线程中同时触发这些事件，使并发性能得到提升，但应用程序
-					  需要考虑在 OnReceive 的事件处理代码中，某些公共变量可能被 OnClose/OnError
-					  的事件处理代码更改或释放的情形，程序代码逻辑会变得复杂，处理不好时将会产生代码缺陷
-
-************************************************************************/
-enum En_HP_RecvPolicy
-{
-	HP_RP_SERIAL			= 0,	// 串行模式（默认）
-	HP_RP_PARALLEL			= 1,	// 并行模式
 };
 
 /************************************************************************
@@ -241,8 +229,7 @@ typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnAccept)			(HP_CONNID dwCon
 typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnSend)				(HP_CONNID dwConnID, const BYTE* pData, int iLength);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnReceive)			(HP_CONNID dwConnID, const BYTE* pData, int iLength);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnPullReceive)		(HP_CONNID dwConnID, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnClose)			(HP_CONNID dwConnID);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnError)			(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnClose)			(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnShutdown)			();
 
 /* Agent 回调函数 */
@@ -251,8 +238,7 @@ typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnConnect)			(HP_CONNID dwCon
 typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnSend)				(HP_CONNID dwConnID, const BYTE* pData, int iLength);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnReceive)			(HP_CONNID dwConnID, const BYTE* pData, int iLength);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnPullReceive)		(HP_CONNID dwConnID, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnClose)				(HP_CONNID dwConnID);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnError)				(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnClose)				(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnShutdown)			();
 
 /* Client 回调函数 */
@@ -261,8 +247,7 @@ typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnConnect)			(HP_Client pCli
 typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnSend)				(HP_Client pClient, const BYTE* pData, int iLength);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnReceive)			(HP_Client pClient, const BYTE* pData, int iLength);
 typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnPullReceive)		(HP_Client pClient, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnClose)			(HP_Client pClient);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnError)			(HP_Client pClient, En_HP_SocketOperation enOperation, int iErrorCode);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnClose)			(HP_Client pClient, En_HP_SocketOperation enOperation, int iErrorCode);
 
 /****************************************************/
 /************** HPSocket4C.dll 导出函数 **************/
@@ -279,6 +264,12 @@ HPSOCKET_API HP_TcpPullServer __stdcall Create_HP_TcpPullServer(HP_TcpPullServer
 HPSOCKET_API HP_TcpPullAgent __stdcall Create_HP_TcpPullAgent(HP_TcpPullAgentListener pListener);
 // 创建 HP_TcpPullClient 对象
 HPSOCKET_API HP_TcpPullClient __stdcall Create_HP_TcpPullClient(HP_TcpPullClientListener pListener);
+// 创建 HP_TcpPackServer 对象
+HPSOCKET_API HP_TcpPackServer __stdcall Create_HP_TcpPackServer(HP_TcpServerListener pListener);
+// 创建 HP_TcpPackAgent 对象
+HPSOCKET_API HP_TcpPackAgent __stdcall Create_HP_TcpPackAgent(HP_TcpAgentListener pListener);
+// 创建 HP_TcpPackClient 对象
+HPSOCKET_API HP_TcpPackClient __stdcall Create_HP_TcpPackClient(HP_TcpClientListener pListener);
 // 创建 HP_UdpServer 对象
 HPSOCKET_API HP_UdpServer __stdcall Create_HP_UdpServer(HP_UdpServerListener pListener);
 // 创建 HP_UdpClient 对象
@@ -298,6 +289,12 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpPullServer(HP_TcpPullServer pServer);
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullAgent(HP_TcpPullAgent pAgent);
 // 销毁 HP_TcpPullClient 对象
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullClient(HP_TcpPullClient pClient);
+// 销毁 HP_TcpPackServer 对象
+HPSOCKET_API void __stdcall Destroy_HP_TcpPackServer(HP_TcpPackServer pServer);
+// 销毁 HP_TcpPackAgent 对象
+HPSOCKET_API void __stdcall Destroy_HP_TcpPackAgent(HP_TcpPackAgent pAgent);
+// 销毁 HP_TcpPackClient 对象
+HPSOCKET_API void __stdcall Destroy_HP_TcpPackClient(HP_TcpPackClient pClient);
 // 销毁 HP_UdpServer 对象
 HPSOCKET_API void __stdcall Destroy_HP_UdpServer(HP_UdpServer pServer);
 // 销毁 HP_UdpClient 对象
@@ -352,7 +349,6 @@ HPSOCKET_API void __stdcall HP_Set_FN_Server_OnSend(HP_ServerListener pListener	
 HPSOCKET_API void __stdcall HP_Set_FN_Server_OnReceive(HP_ServerListener pListener			, HP_FN_Server_OnReceive fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Server_OnPullReceive(HP_ServerListener pListener		, HP_FN_Server_OnPullReceive fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Server_OnClose(HP_ServerListener pListener			, HP_FN_Server_OnClose fn);
-HPSOCKET_API void __stdcall HP_Set_FN_Server_OnError(HP_ServerListener pListener			, HP_FN_Server_OnError fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Server_OnShutdown(HP_ServerListener pListener			, HP_FN_Server_OnShutdown fn);
 
 /**********************************************************************************/
@@ -364,7 +360,6 @@ HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnSend(HP_AgentListener pListener			
 HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnReceive(HP_AgentListener pListener			, HP_FN_Agent_OnReceive fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnPullReceive(HP_AgentListener pListener		, HP_FN_Agent_OnPullReceive fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnClose(HP_AgentListener pListener				, HP_FN_Agent_OnClose fn);
-HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnError(HP_AgentListener pListener				, HP_FN_Agent_OnError fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnShutdown(HP_AgentListener pListener			, HP_FN_Agent_OnShutdown fn);
 
 /**********************************************************************************/
@@ -376,7 +371,6 @@ HPSOCKET_API void __stdcall HP_Set_FN_Client_OnSend(HP_ClientListener pListener	
 HPSOCKET_API void __stdcall HP_Set_FN_Client_OnReceive(HP_ClientListener pListener			, HP_FN_Client_OnReceive fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Client_OnPullReceive(HP_ClientListener pListener		, HP_FN_Client_OnPullReceive fn);
 HPSOCKET_API void __stdcall HP_Set_FN_Client_OnClose(HP_ClientListener pListener			, HP_FN_Client_OnClose fn);
-HPSOCKET_API void __stdcall HP_Set_FN_Client_OnError(HP_ClientListener pListener			, HP_FN_Client_OnError fn);
 
 /**************************************************************************/
 /***************************** Server 操作方法 *****************************/
@@ -524,8 +518,6 @@ HPSOCKET_API BOOL __stdcall HP_Server_GetRemoteAddress(HP_Server pServer, HP_CON
 
 /* 设置数据发送策略 */
 HPSOCKET_API void __stdcall HP_Server_SetSendPolicy(HP_Server pServer, En_HP_SendPolicy enSendPolicy);
-/* 设置数据接收策略 */
-HPSOCKET_API void __stdcall HP_Server_SetRecvPolicy(HP_Server pServer, En_HP_RecvPolicy enRecvPolicy);
 /* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 HPSOCKET_API void __stdcall HP_Server_SetFreeSocketObjLockTime(HP_Server pServer, DWORD dwFreeSocketObjLockTime);
 /* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
@@ -538,15 +530,11 @@ HPSOCKET_API void __stdcall HP_Server_SetFreeSocketObjHold(HP_Server pServer, DW
 HPSOCKET_API void __stdcall HP_Server_SetFreeBufferObjHold(HP_Server pServer, DWORD dwFreeBufferObjHold);
 /* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 HPSOCKET_API void __stdcall HP_Server_SetWorkerThreadCount(HP_Server pServer, DWORD dwWorkerThreadCount);
-/* 设置关闭服务前等待连接关闭的最长时限（毫秒，0 则不等待） */
-HPSOCKET_API void __stdcall HP_Server_SetMaxShutdownWaitTime(HP_Server pServer, DWORD dwMaxShutdownWaitTime);
 /* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
 HPSOCKET_API void __stdcall HP_Server_SetMarkSilence(HP_Server pServer, BOOL bMarkSilence);
 
 /* 获取数据发送策略 */
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Server_GetSendPolicy(HP_Server pServer);
-/* 获取数据接收策略 */
-HPSOCKET_API En_HP_RecvPolicy __stdcall HP_Server_GetRecvPolicy(HP_Server pServer);
 /* 获取 Socket 缓存对象锁定时间 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetFreeSocketObjLockTime(HP_Server pServer);
 /* 获取 Socket 缓存池大小 */
@@ -559,8 +547,6 @@ HPSOCKET_API DWORD __stdcall HP_Server_GetFreeSocketObjHold(HP_Server pServer);
 HPSOCKET_API DWORD __stdcall HP_Server_GetFreeBufferObjHold(HP_Server pServer);
 /* 获取工作线程数量 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetWorkerThreadCount(HP_Server pServer);
-/* 获取关闭服务前等待连接关闭的最长时限 */
-HPSOCKET_API DWORD __stdcall HP_Server_GetMaxShutdownWaitTime(HP_Server pServer);
 /* 检测是否标记静默时间 */
 HPSOCKET_API BOOL __stdcall HP_Server_IsMarkSilence(HP_Server pServer);
 
@@ -589,9 +575,9 @@ HPSOCKET_API void __stdcall HP_TcpServer_SetSocketListenQueue(HP_TcpServer pServ
 HPSOCKET_API void __stdcall HP_TcpServer_SetAcceptSocketCount(HP_TcpServer pServer, DWORD dwAcceptSocketCount);
 /* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为 1024 的倍数） */
 HPSOCKET_API void __stdcall HP_TcpServer_SetSocketBufferSize(HP_TcpServer pServer, DWORD dwSocketBufferSize);
-/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
 HPSOCKET_API void __stdcall HP_TcpServer_SetKeepAliveTime(HP_TcpServer pServer, DWORD dwKeepAliveTime);
-/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 HPSOCKET_API void __stdcall HP_TcpServer_SetKeepAliveInterval(HP_TcpServer pServer, DWORD dwKeepAliveInterval);
 
 /* 获取 Accept 预投递数量 */
@@ -600,9 +586,9 @@ HPSOCKET_API DWORD __stdcall HP_TcpServer_GetAcceptSocketCount(HP_TcpServer pSer
 HPSOCKET_API DWORD __stdcall HP_TcpServer_GetSocketBufferSize(HP_TcpServer pServer);
 /* 获取监听 Socket 的等候队列大小 */
 HPSOCKET_API DWORD __stdcall HP_TcpServer_GetSocketListenQueue(HP_TcpServer pServer);
-/* 获取心跳检查次数 */
+/* 获取正常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpServer_GetKeepAliveTime(HP_TcpServer pServer);
-/* 获取心跳检查间隔 */
+/* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpServer_GetKeepAliveInterval(HP_TcpServer pServer);
 
 /**********************************************************************************/
@@ -785,8 +771,6 @@ HPSOCKET_API BOOL __stdcall HP_Agent_GetPendingDataLength(HP_Agent pAgent, HP_CO
 
 /* 设置数据发送策略 */
 HPSOCKET_API void __stdcall HP_Agent_SetSendPolicy(HP_Agent pAgent, En_HP_SendPolicy enSendPolicy);
-/* 设置数据接收策略 */
-HPSOCKET_API void __stdcall HP_Agent_SetRecvPolicy(HP_Agent pAgent, En_HP_RecvPolicy enRecvPolicy);
 /* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 HPSOCKET_API void __stdcall HP_Agent_SetFreeSocketObjLockTime(HP_Agent pAgent, DWORD dwFreeSocketObjLockTime);
 /* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
@@ -799,15 +783,11 @@ HPSOCKET_API void __stdcall HP_Agent_SetFreeSocketObjHold(HP_Agent pAgent, DWORD
 HPSOCKET_API void __stdcall HP_Agent_SetFreeBufferObjHold(HP_Agent pAgent, DWORD dwFreeBufferObjHold);
 /* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 HPSOCKET_API void __stdcall HP_Agent_SetWorkerThreadCount(HP_Agent pAgent, DWORD dwWorkerThreadCount);
-/* 设置关闭组件前等待连接关闭的最长时限（毫秒，0 则不等待） */
-HPSOCKET_API void __stdcall HP_Agent_SetMaxShutdownWaitTime(HP_Agent pAgent, DWORD dwMaxShutdownWaitTime);
 /* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
 HPSOCKET_API void __stdcall HP_Agent_SetMarkSilence(HP_Agent pAgent, BOOL bMarkSilence);
 
 /* 获取数据发送策略 */
 HPSOCKET_API En_HP_SendPolicy __stdcall HP_Agent_GetSendPolicy(HP_Agent pAgent);
-/* 获取数据接收策略 */
-HPSOCKET_API En_HP_RecvPolicy __stdcall HP_Agent_GetRecvPolicy(HP_Agent pAgent);
 /* 获取 Socket 缓存对象锁定时间 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeSocketObjLockTime(HP_Agent pAgent);
 /* 获取 Socket 缓存池大小 */
@@ -820,8 +800,6 @@ HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeSocketObjHold(HP_Agent pAgent);
 HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeBufferObjHold(HP_Agent pAgent);
 /* 获取工作线程数量 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetWorkerThreadCount(HP_Agent pAgent);
-/* 获取关闭组件前等待连接关闭的最长时限 */
-HPSOCKET_API DWORD __stdcall HP_Agent_GetMaxShutdownWaitTime(HP_Agent pAgent);
 /* 检测是否标记静默时间 */
 HPSOCKET_API BOOL __stdcall HP_Agent_IsMarkSilence(HP_Agent pAgent);
 
@@ -851,16 +829,16 @@ HPSOCKET_API BOOL __stdcall HP_TcpAgent_IsReuseAddress(HP_TcpAgent pAgent);
 
 /* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为 1024 的倍数） */
 HPSOCKET_API void __stdcall HP_TcpAgent_SetSocketBufferSize(HP_TcpAgent pAgent, DWORD dwSocketBufferSize);
-/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
 HPSOCKET_API void __stdcall HP_TcpAgent_SetKeepAliveTime(HP_TcpAgent pAgent, DWORD dwKeepAliveTime);
-/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 HPSOCKET_API void __stdcall HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent, DWORD dwKeepAliveInterval);
 
 /* 获取通信数据缓冲区大小 */
 HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent);
-/* 获取心跳检查次数 */
+/* 获取正常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent);
-/* 获取心跳检查间隔 */
+/* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent);
 
 /******************************************************************************/
@@ -975,16 +953,16 @@ HPSOCKET_API BOOL __stdcall HP_TcpClient_SendSmallFile(HP_Client pClient, LPCTST
 
 /* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为：(N * 1024) - sizeof(TBufferObj)） */
 HPSOCKET_API void __stdcall HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClient, DWORD dwSocketBufferSize);
-/* 设置心跳包间隔（毫秒，0 则不发送心跳包） */
+/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
 HPSOCKET_API void __stdcall HP_TcpClient_SetKeepAliveTime(HP_TcpClient pClient, DWORD dwKeepAliveTime);
-/* 设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 HPSOCKET_API void __stdcall HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClient, DWORD dwKeepAliveInterval);
 
 /* 获取通信数据缓冲区大小 */
 HPSOCKET_API DWORD __stdcall HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient);
-/* 获取心跳检查次数 */
+/* 获取正常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient);
-/* 获取心跳检查间隔 */
+/* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient);
 
 /**********************************************************************************/
@@ -1117,6 +1095,54 @@ HPSOCKET_API En_HP_FetchResult __stdcall HP_TcpPullClient_Peek(HP_TcpPullClient 
 
 /***************************************************************************************/
 /***************************** TCP Pull Client 属性访问方法 *****************************/
+
+/***************************************************************************************/
+/***************************** TCP Pack Server 组件操作方法 *****************************/
+
+/***************************************************************************************/
+/***************************** TCP Pack Server 属性访问方法 *****************************/
+
+/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+HPSOCKET_API void __stdcall HP_TcpPackServer_SetMaxPackSize(HP_TcpPackServer pServer, DWORD dwMaxPackSize);
+/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+HPSOCKET_API void __stdcall HP_TcpPackServer_SetPackHeaderFlag(HP_TcpPackServer pServer, USHORT usPackHeaderFlag);
+
+/* 获取数据包最大长度 */
+HPSOCKET_API DWORD __stdcall HP_TcpPackServer_GetMaxPackSize(HP_TcpPackServer pServer);
+/* 获取包头标识 */
+HPSOCKET_API USHORT __stdcall HP_TcpPackServer_GetPackHeaderFlag(HP_TcpPackServer pServer);
+
+/***************************************************************************************/
+/***************************** TCP Pack Agent 组件操作方法 *****************************/
+
+/***************************************************************************************/
+/***************************** TCP Pack Agent 属性访问方法 *****************************/
+
+/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+HPSOCKET_API void __stdcall HP_TcpPackAgent_SetMaxPackSize(HP_TcpPackAgent pAgent, DWORD dwMaxPackSize);
+/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+HPSOCKET_API void __stdcall HP_TcpPackAgent_SetPackHeaderFlag(HP_TcpPackAgent pAgent, USHORT usPackHeaderFlag);
+
+/* 获取数据包最大长度 */
+HPSOCKET_API DWORD __stdcall HP_TcpPackAgent_GetMaxPackSize(HP_TcpPackAgent pAgent);
+/* 获取包头标识 */
+HPSOCKET_API USHORT __stdcall HP_TcpPackAgent_GetPackHeaderFlag(HP_TcpPackAgent pAgent);
+
+/***************************************************************************************/
+/***************************** TCP Pack Client 组件操作方法 *****************************/
+
+/***************************************************************************************/
+/***************************** TCP Pack Client 属性访问方法 *****************************/
+
+/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+HPSOCKET_API void __stdcall HP_TcpPackClient_SetMaxPackSize(HP_TcpPackClient pClient, DWORD dwMaxPackSize);
+/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+HPSOCKET_API void __stdcall HP_TcpPackClient_SetPackHeaderFlag(HP_TcpPackClient pClient, USHORT usPackHeaderFlag);
+
+/* 获取数据包最大长度 */
+HPSOCKET_API DWORD __stdcall HP_TcpPackClient_GetMaxPackSize(HP_TcpPackClient pClient);
+/* 获取包头标识 */
+HPSOCKET_API USHORT __stdcall HP_TcpPackClient_GetPackHeaderFlag(HP_TcpPackClient pClient);
 
 /***************************************************************************************/
 /*************************************** 其它方法 ***************************************/

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -56,8 +56,6 @@ extern const DWORD DEFAULT_FREE_SOCKETOBJ_HOLD;
 extern const DWORD DEFAULT_FREE_BUFFEROBJ_POOL;
 /* Server/Agent 默认内存块缓存池回收阀值 */
 extern const DWORD DEFAULT_FREE_BUFFEROBJ_HOLD;
-/* Server/Agent 默认关闭最大等待时限 */
-extern const DWORD DEFAULT_MAX_SHUTDOWN_WAIT_TIME;
 /* Client 默认内存块缓存池大小 */
 extern const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE;
 /* Client 默认内存块缓存池回收阀值 */
@@ -84,6 +82,17 @@ extern const DWORD DEFAULT_UDP_POST_RECEIVE_COUNT;
 extern const DWORD DEFAULT_UDP_DETECT_ATTEMPTS;
 /* UDP 默认监测包发送间隔 */
 extern const DWORD DEFAULT_UDP_DETECT_INTERVAL;
+
+/* TCP Pack 包长度掩码 */
+extern const DWORD TCP_PACK_LENGTH_MASK;
+/* TCP Pack 包最大长度硬限制 */
+extern const DWORD TCP_PACK_MAX_SIZE_LIMIT;
+/* TCP Pack 包默认最大长度 */
+extern const DWORD TCP_PACK_DEFAULT_MAX_SIZE;
+/* TCP Pack 包头标识值硬限制 */
+extern const USHORT TCP_PACK_HEADER_FLAG_LIMIT;
+/* TCP Pack 包头默认标识值 */
+extern const USHORT TCP_PACK_DEFAULT_HEADER_FLAG;
 
 /************************************************************************
 名称：Windows Socket 组件初始化类
@@ -123,8 +132,8 @@ private:
 enum EnSocketCloseFlag
 {
 	SCF_NONE	= 0,	// 不触发事件
-	SCF_CLOSE	= 1,	// 触发 OnClose 事件
-	SCF_ERROR	= 2		// 触发 OnError 事件
+	SCF_CLOSE	= 1,	// 触发 正常关闭 OnClose 事件
+	SCF_ERROR	= 2		// 触发 异常关闭 OnClose 事件
 };
 
 /* 数据缓冲区基础结构 */
@@ -160,6 +169,7 @@ struct TSocketObjBase
 	CONNID		connID;
 	SOCKADDR_IN	remoteAddr;
 	PVOID		extra;
+	PVOID		reserved;
 	BOOL		valid;
 
 	union
@@ -214,10 +224,11 @@ struct TSocketObjBase
 	{
 		connID	 = dwConnID;
 		valid	 = TRUE;
-		extra	 = nullptr;
 		smooth	 = TRUE;
 		pending	 = 0;
 		sndCount = 0;
+		extra	 = nullptr;
+		reserved = nullptr;
 	}
 };
 

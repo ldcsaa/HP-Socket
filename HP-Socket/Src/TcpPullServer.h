@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -34,10 +34,9 @@ public:
 	virtual EnFetchResult Peek	(CONNID dwConnID, BYTE* pData, int iLength);
 
 protected:
-	virtual EnHandleResult FireAccept(CONNID dwConnID, SOCKET soClient);
+	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj);
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
-	virtual EnHandleResult FireClose(TSocketObj* pSocketObj);
-	virtual EnHandleResult FireError(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult FireShutdown();
 
 	virtual BOOL CheckParams()

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.9
+ * Version	: 2.3.10
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -564,7 +564,7 @@ class CBufferPool
 {
 public:
 	void		PutFreeBuffer	(ULONG_PTR dwID);
-	void		PutCacheBuffer	(ULONG_PTR dwID);
+	TBuffer*	PutCacheBuffer	(ULONG_PTR dwID);
 	TBuffer*	PickFreeBuffer	(ULONG_PTR dwID);
 	TBuffer*	FindCacheBuffer	(ULONG_PTR dwID);
 
@@ -629,7 +629,7 @@ private:
 	CPrivateHeap	m_heap;
 	CItemPool		m_itPool;
 
-	CRWLock			m_csBufferMap;
+	CSimpleRWLock	m_csBufferMap;
 	TBufferPtrMap	m_mpBuffer;
 
 	CCriSec			m_csFreeBuffer;

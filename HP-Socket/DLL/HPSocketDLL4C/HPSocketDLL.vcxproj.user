@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">
-    <LocalDebuggerCommand>..\Bin\HPSocket4C\x86\Client.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>E:\MyWork\Cpp\HP-Socket\Bin\HPSocket4C\x86\TestEcho-Pack-Server.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

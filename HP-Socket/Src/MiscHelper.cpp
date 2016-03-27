@@ -23,29 +23,31 @@
  */
  
 #include "stdafx.h"
-#include "TcpPullClient.h"
 #include "MiscHelper.h"
 
-EnHandleResult CTcpPullClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
+BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& buffers, DWORD dwMaxPackSize, USHORT usPackHeaderFlag, DWORD& header)
 {
-	m_lsBuffer.Cat(pData, iLength);
+	ASSERT(pBuffers && iCount > 0);
 
-	return __super::FireReceive(pClient, m_lsBuffer.Length());
-}
+	DWORD iLength = 0;
 
-EnFetchResult CTcpPullClient::Fetch(BYTE* pData, int iLength)
-{
-	return ::FetchBuffer(&m_lsBuffer, pData, iLength);;
-}
+	for(int i = 0; i < iCount; i++)
+	{
+		const WSABUF& buf	= pBuffers[i];
+		buffers[i + 1]		= buf;
+		iLength			   += buf.len;
+	}
 
-EnFetchResult CTcpPullClient::Peek(BYTE* pData, int iLength)
-{
-	return ::PeekBuffer(&m_lsBuffer, pData, iLength);
-}
+	if(iLength == 0 || iLength > dwMaxPackSize)
+	{
+		::SetLastError(ERROR_BAD_LENGTH);
+		return FALSE;
+	}
 
-void CTcpPullClient::Reset(BOOL bAll)
-{
-	m_lsBuffer.Clear();
+	header = (usPackHeaderFlag << 19) | iLength;
 
-	return __super::Reset(bAll);
+	buffers[0].len = sizeof(header);
+	buffers[0].buf = (char*)&header;
+
+	return TRUE;
 }

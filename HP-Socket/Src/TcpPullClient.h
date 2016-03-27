@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.3.2
+ * Version	: 3.4.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -36,19 +36,11 @@ public:
 protected:
 	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength);
 
-	virtual void Reset(BOOL bAll = TRUE)
-	{
-		m_iTotalLength = 0;
-		m_lsBuffer.Clear();
-
-		return __super::Reset(bAll);
-	}
+	virtual void Reset(BOOL bAll = TRUE);
 
 public:
-	CTcpPullClient(ITcpClientListener* psoListener)
-	: CTcpClient	(psoListener)
-	, m_lsBuffer	(m_itPool)
-	, m_iTotalLength(0)
+	CTcpPullClient(ITcpClientListener* psoListener) : CTcpClient(psoListener)
+	, m_lsBuffer(m_itPool)
 	{
 
 	}
@@ -56,6 +48,5 @@ public:
 	virtual ~CTcpPullClient()	{if(HasStarted()) Stop();}
 
 private:
-	int			m_iTotalLength;
-	TItemList	m_lsBuffer;
+	TItemListEx	m_lsBuffer;
 };

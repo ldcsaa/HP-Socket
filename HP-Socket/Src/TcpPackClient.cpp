@@ -23,29 +23,39 @@
  */
  
 #include "stdafx.h"
-#include "TcpPullClient.h"
-#include "MiscHelper.h"
+#include "TcpPackClient.h"
 
-EnHandleResult CTcpPullClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
+BOOL CTcpPackClient::CheckParams()
 {
-	m_lsBuffer.Cat(pData, iLength);
+	if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
+		if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
+			return __super::CheckParams();;
 
-	return __super::FireReceive(pClient, m_lsBuffer.Length());
+	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
+	return FALSE;
 }
 
-EnFetchResult CTcpPullClient::Fetch(BYTE* pData, int iLength)
+BOOL CTcpPackClient::SendPackets(const WSABUF pBuffers[], int iCount)
 {
-	return ::FetchBuffer(&m_lsBuffer, pData, iLength);;
+	int iNewCount = iCount + 1;
+	unique_ptr<WSABUF[]> buffers(new WSABUF[iNewCount]);
+
+	DWORD header;
+	if(!::AddPackHeader(pBuffers, iCount, buffers, m_dwMaxPackSize, m_usHeaderFlag, header))
+		return FALSE;
+
+	return __super::SendPackets(buffers.get(), iNewCount);
 }
 
-EnFetchResult CTcpPullClient::Peek(BYTE* pData, int iLength)
+EnHandleResult CTcpPackClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
 {
-	return ::PeekBuffer(&m_lsBuffer, pData, iLength);
+	return ParsePack(this, &m_pkInfo, &m_lsBuffer, pClient, m_dwMaxPackSize, m_usHeaderFlag, pData, iLength);
 }
 
-void CTcpPullClient::Reset(BOOL bAll)
+void CTcpPackClient::Reset(BOOL bAll)
 {
 	m_lsBuffer.Clear();
+	m_pkInfo.Reset();
 
 	return __super::Reset(bAll);
 }

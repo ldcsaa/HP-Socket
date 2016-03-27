@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.9
+ * Version	: 2.3.10
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -82,9 +82,39 @@ private:
 	SRWLOCK m_lock;
 };
 
+class CSlimRWLock
+{
+public:
+	VOID WaitToRead();
+	VOID WaitToWrite();
+	VOID ReadDone();
+	VOID WriteDone();
+
+private:
+	BOOL IsOwner()		{return m_dwWriterTID == ::GetCurrentThreadId();}
+	VOID SetOwner()		{m_dwWriterTID = ::GetCurrentThreadId();}
+	VOID DetachOwner()	{m_dwWriterTID = 0;}
+
+public:
+	CSlimRWLock();
+	~CSlimRWLock();
+
+private:
+	CSlimRWLock(const CSlimRWLock&);
+	CSlimRWLock operator = (const CSlimRWLock&);
+
+private:
+	int m_nActive;
+	int m_nReadCount;
+	DWORD m_dwWriterTID;
+
+	CSpinGuard	m_cs;
+	CSlimLock	m_smLock;
+};
+
 #endif
 
-class CRWLock
+class CSEMRWLock
 {
 public:
 	VOID WaitToRead();
@@ -99,12 +129,12 @@ private:
 	VOID DetachOwner()	{m_dwWriterTID = 0;}
 
 public:
-	CRWLock();
-	~CRWLock();
+	CSEMRWLock();
+	~CSEMRWLock();
 
 private:
-	CRWLock(const CRWLock&);
-	CRWLock operator = (const CRWLock&);
+	CSEMRWLock(const CSEMRWLock&);
+	CSEMRWLock operator = (const CSEMRWLock&);
 
 private:
 	int m_nWaitingReaders;
@@ -149,6 +179,8 @@ private:
 
 typedef CLocalReadLock<CSimpleRWLock>	CReadLock;
 typedef CLocalWriteLock<CSimpleRWLock>	CWriteLock;
+
+typedef CSEMRWLock						CRWLock;
 typedef CLocalReadLock<CRWLock>			CReentrantReadLock;
 typedef CLocalWriteLock<CRWLock>		CReentrantWriteLock;
 
