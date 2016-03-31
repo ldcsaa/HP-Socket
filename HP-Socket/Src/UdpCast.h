@@ -88,6 +88,7 @@ protected:
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
 
 protected:

@@ -7,7 +7,7 @@ v3.4.1 更新：
 1、Tcp Pack 系列组件保证每个 OnReceive 事件都向应用程序提供一个完整数据包
 2、Tcp Pack 系列组件是 PUSH/PULL 模式的结合体，应用程序不必处理分包（如：PUSH）与数据抓取（如：PULL）
 3、Tcp Pack 系列组件提供 Get/SetMaxPackSize() 和 Get/SetPackHeaderFlag() 方法，用来设置最大包长和包头标识
-2、CTcpPackServer 实现 ITcpServer 接口，CTcpPackAgent 实现 ITcpAgent 接口，CTcpPackClient 实现 ITcpClient 接口
+4、CTcpPackServer 实现 ITcpServer 接口，CTcpPackAgent 实现 ITcpAgent 接口，CTcpPackClient 实现 ITcpClient 接口
 
 > 组件接口调整：
 -----------------

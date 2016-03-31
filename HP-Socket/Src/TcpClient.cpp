@@ -34,6 +34,8 @@ BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
+	PrepareStart();
+
 	BOOL isOK		= FALSE;
 	m_bAsyncConnect	= bAsyncConnect;
 
@@ -64,19 +66,22 @@ BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 
 BOOL CTcpClient::CheckParams()
 {
-	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
-	m_itPool.SetPoolSize((int)m_dwFreeBufferPoolSize);
-	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
-
 	if((int)m_dwSocketBufferSize > 0)
 		if((int)m_dwFreeBufferPoolSize >= 0)
 			if((int)m_dwFreeBufferPoolHold >= 0)
-				if((int)m_dwKeepAliveTime >= 1000)
-					if((int)m_dwKeepAliveInterval >= 1000)
+				if((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)
+					if((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)
 						return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
+}
+
+void CTcpClient::PrepareStart()
+{
+	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
+	m_itPool.SetPoolSize((int)m_dwFreeBufferPoolSize);
+	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
 }
 
 BOOL CTcpClient::CheckStarting()

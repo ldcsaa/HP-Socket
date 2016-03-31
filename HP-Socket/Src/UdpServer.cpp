@@ -85,6 +85,8 @@ BOOL CUdpServer::Start(LPCTSTR pszBindAddress, USHORT usPort)
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
+	PrepareStart();
+
 	if(CreateListenSocket(pszBindAddress, usPort))
 		if(CreateCompletePort())
 			if(CreateWorkerThreads())
@@ -102,25 +104,31 @@ BOOL CUdpServer::Start(LPCTSTR pszBindAddress, USHORT usPort)
 
 BOOL CUdpServer::CheckParams()
 {
-	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
-	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
-	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
-
 	if(m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)
 		if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
-			if((int)m_dwFreeSocketObjLockTime >= 0 && m_dwFreeSocketObjLockTime <= MAXLONG)
+			if((int)m_dwFreeSocketObjLockTime >= 0)
 				if((int)m_dwFreeSocketObjPool >= 0)
 					if((int)m_dwFreeBufferObjPool >= 0)
 						if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
 							if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
-								if((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXWORD)
+								if((int)m_dwMaxDatagramSize > 0)
 									if((int)m_dwPostReceiveCount > 0)
-										if((int)m_dwDetectAttempts >= 0 && m_dwDetectAttempts <= MAXLONG)
-											if((int)m_dwDetectInterval >= 0&& m_dwDetectInterval <= MAXLONG)
+										if((int)m_dwDetectAttempts >= 0)
+											if((int)m_dwDetectInterval >= 0)
 												return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
+}
+
+void CUdpServer::PrepareStart()
+{
+	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
+	m_lsFreeBuffer.Reset(m_dwFreeBufferObjHold);
+
+	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
+	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 }
 
 BOOL CUdpServer::CheckStarting()
@@ -319,20 +327,17 @@ void CUdpServer::ReleaseClientSocket()
 
 TUdpSocketObj* CUdpServer::GetFreeSocketObj(CONNID dwConnID)
 {
+	DWORD dwIndex;
 	TUdpSocketObj* pSocketObj = nullptr;
 
-	if(m_lsFreeSocket.size() > 0)
+	if(m_lsFreeSocket.TryLock(&pSocketObj, dwIndex))
 	{
-		CCriSecLock locallock(m_csFreeSocket);
-
-		if(m_lsFreeSocket.size() > 0)
+		if(::GetTimeGap32(pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
+			m_lsFreeSocket.ReleaseLock(nullptr, dwIndex);
+		else
 		{
-			pSocketObj = m_lsFreeSocket.front();
-
-			if(::GetTimeGap32(pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
-				m_lsFreeSocket.pop_front();
-			else
-				pSocketObj = nullptr;
+			m_lsFreeSocket.ReleaseLock(pSocketObj, dwIndex);
+			pSocketObj = nullptr;
 		}
 	}
 
@@ -349,25 +354,42 @@ void CUdpServer::AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag, EnS
 
 void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
 {
-	if(InvalidSocketObj(pSocketObj))
+	if(!InvalidSocketObj(pSocketObj))
+		return;
+
+	CloseClientUdpSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+	TUdpSocketObj::Release(pSocketObj);
+
 	{
-		CloseClientUdpSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
-		TUdpSocketObj::Release(pSocketObj);
+		CReentrantWriteLock locallock(m_csClientSocket);
 
+		m_mpClientAddr.erase(&pSocketObj->remoteAddr);
+		m_mpClientSocket.erase(pSocketObj->connID);
+	}
+
+	if(!m_lsFreeSocket.TryPut(pSocketObj))
+	{
+		m_lsGCSocket.PushBack(pSocketObj);
+
+		if(m_lsGCSocket.Size() > m_dwFreeSocketObjPool)
+			ReleaseGCSocketObj();
+	}
+}
+
+void CUdpServer::ReleaseGCSocketObj(BOOL bForce)
+{
+	TUdpSocketObj* pSocketObj	= nullptr;
+	DWORD now					= ::TimeGetTime();
+
+	while(m_lsGCSocket.PopFront(&pSocketObj))
+	{
+		if(bForce || (now - pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
+			DeleteSocketObj(pSocketObj);
+		else
 		{
-			CReentrantWriteLock locallock(m_csClientSocket);
-
-			m_mpClientAddr.erase(&pSocketObj->remoteAddr);
-			m_mpClientSocket.erase(pSocketObj->connID);
+			m_lsGCSocket.PushBack(pSocketObj);
+			break;
 		}
-
-		{
-			CCriSecLock locallock(m_csFreeSocket);
-			m_lsFreeSocket.push_back(pSocketObj);
-		}
-
-		if(m_lsFreeSocket.size() > m_dwFreeSocketObjHold)
-			CompressFreeSocket(m_dwFreeSocketObjPool);
 	}
 }
 
@@ -405,27 +427,16 @@ void CUdpServer::AddClienTUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketOb
 
 void CUdpServer::ReleaseFreeSocket()
 {
-	CompressFreeSocket(0, TRUE);
-}
+	TUdpSocketObj* pSocketObj = nullptr;
 
-void CUdpServer::CompressFreeSocket(size_t size, BOOL bForce)
-{
-	CCriSecLock locallock(m_csFreeSocket);
+	while(m_lsFreeSocket.TryGet(&pSocketObj))
+		DeleteSocketObj(pSocketObj);
 
-	DWORD now = ::TimeGetTime();
+	VERIFY(m_lsFreeSocket.IsEmpty());
+	m_lsFreeSocket.Reset();
 
-	while(m_lsFreeSocket.size() > size)
-	{
-		TUdpSocketObj* pSocketObj = m_lsFreeSocket.front();
-
-		if(bForce || (now - pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
-		{
-			m_lsFreeSocket.pop_front();
-			DeleteSocketObj(pSocketObj);
-		}
-		else
-			break;
-	}
+	ReleaseGCSocketObj(TRUE);
+	VERIFY(m_lsGCSocket.IsEmpty());
 }
 
 TUdpSocketObj* CUdpServer::CreateSocketObj()
@@ -452,18 +463,8 @@ TUdpBufferObj* CUdpServer::GetFreeBufferObj(int iLen)
 
 	TUdpBufferObj* pBufferObj = nullptr;
 
-	if(m_lsFreeBuffer.size() > 0)
-	{
-		CCriSecLock locallock(m_csFreeBuffer);
-
-		if(m_lsFreeBuffer.size() > 0)
-		{
-			pBufferObj = m_lsFreeBuffer.front();
-			m_lsFreeBuffer.pop_front();
-		}
-	}
-
-	if(!pBufferObj) pBufferObj = CreateBufferObj();
+	if(!m_lsFreeBuffer.TryGet(&pBufferObj))
+		pBufferObj = CreateBufferObj();
 
 	if(iLen < 0) iLen	 = m_dwMaxDatagramSize;
 	pBufferObj->addrLen	 = sizeof(SOCKADDR_IN);
@@ -474,34 +475,19 @@ TUdpBufferObj* CUdpServer::GetFreeBufferObj(int iLen)
 
 void CUdpServer::AddFreeBufferObj(TUdpBufferObj* pBufferObj)
 {
-	if(m_lsFreeBuffer.size() < m_dwFreeBufferObjHold)
-	{
-		CCriSecLock locallock(m_csFreeBuffer);
-		m_lsFreeBuffer.push_back(pBufferObj);
-	}
-	else
-	{
+	if(!m_lsFreeBuffer.TryPut(pBufferObj))
 		DeleteBufferObj(pBufferObj);
-		CompressFreeBuffer(m_dwFreeBufferObjPool);
-	}
 }
 
 void CUdpServer::ReleaseFreeBuffer()
 {
-	CompressFreeBuffer(0);
-}
+	TUdpBufferObj* pBufferObj = nullptr;
 
-void CUdpServer::CompressFreeBuffer(size_t size)
-{
-	CCriSecLock locallock(m_csFreeBuffer);
-
-	while(m_lsFreeBuffer.size() > size)
-	{
-		TUdpBufferObj* pBufferObj = m_lsFreeBuffer.front();
-
-		m_lsFreeBuffer.pop_front();
+	while(m_lsFreeBuffer.TryGet(&pBufferObj))
 		DeleteBufferObj(pBufferObj);
-	}
+
+	VERIFY(m_lsFreeBuffer.IsEmpty());
+	m_lsFreeBuffer.Reset();
 }
 
 TUdpBufferObj* CUdpServer::CreateBufferObj()

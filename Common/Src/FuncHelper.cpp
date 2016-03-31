@@ -667,7 +667,7 @@ void WriteLog(LPCTSTR pszLogFileName, LPCTSTR pszLog)
 
 #ifdef _UNICODE
 	LPSTR lpszLog = T2A((LPTSTR)(LPCTSTR)strLog);
-	::WriteFile(hLogFile, lpszLog, strlen(lpszLog), &dwSize, nullptr);
+	::WriteFile(hLogFile, lpszLog, (DWORD)::strlen(lpszLog), &dwSize, nullptr);
 #else
 	::WriteFile(hLogFile, strLog, strLog.GetLength(), &dwSize, nullptr);
 #endif

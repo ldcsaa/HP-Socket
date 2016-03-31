@@ -34,8 +34,8 @@ Desc:
 #include "RWLock.h"
 #include "Singleton.h"
 #include "STLHelper.h"
+#include "RingBuffer.h"
 #include "PrivateHeap.h"
-#include "CriticalSection.h"
 
 struct TItem
 {
@@ -400,10 +400,8 @@ public:
 	void PutFreeItem	(TItemList& lsItem);
 	TItem* PickFreeItem	();
 
+	inline void Prepare();
 	inline void Clear();
-
-private:
-	void CompressFreeItem(int size);
 
 public:
 	void SetItemCapacity(DWORD dwItemCapacity)	{m_dwItemCapacity	= dwItemCapacity;}
@@ -420,7 +418,6 @@ public:
 	: m_dwPoolSize(dwPoolSize)
 	, m_dwPoolHold(dwPoolHold)
 	, m_dwItemCapacity(dwItemCapacity)
-	, m_lsFreeItem(*this)
 	{
 	}
 
@@ -434,14 +431,13 @@ public:
 	static const DWORD DEFAULT_POOL_HOLD;
 
 private:
-	CPrivateHeap	m_heap;
+	CPrivateHeap		m_heap;
 
-	DWORD			m_dwItemCapacity;
-	DWORD			m_dwPoolSize;
-	DWORD			m_dwPoolHold;
+	DWORD				m_dwItemCapacity;
+	DWORD				m_dwPoolSize;
+	DWORD				m_dwPoolHold;
 
-	CCriSec			m_csFreeItem;
-	TItemList		m_lsFreeItem;
+	CRingPool<TItem>	m_lsFreeItem;
 };
 
 struct TItemPtr
@@ -554,7 +550,8 @@ private:
 	TItemList		items;
 };
 
-typedef TSimpleList<TBuffer>				TBufferList;
+typedef CRingPool<TBuffer>					TBufferList;
+typedef CCASQueue<TBuffer>					TBufferQueue;
 
 typedef unordered_map<ULONG_PTR, TBuffer*>	TBufferPtrMap;
 typedef TBufferPtrMap::iterator				TBufferPtrMapI;
@@ -568,11 +565,12 @@ public:
 	TBuffer*	PickFreeBuffer	(ULONG_PTR dwID);
 	TBuffer*	FindCacheBuffer	(ULONG_PTR dwID);
 
+	void		Prepare			();
 	void		Clear			();
 
 private:
 	void PutFreeBuffer		(TBuffer* pBuffer);
-	void CompressFreeBuffer	(int size);
+	void ReleaseGCBuffer	(BOOL bForce = FALSE);
 
 public:
 	void SetItemCapacity	(DWORD dwItemCapacity)		{m_itPool.SetItemCapacity(dwItemCapacity);}
@@ -632,6 +630,6 @@ private:
 	CSimpleRWLock	m_csBufferMap;
 	TBufferPtrMap	m_mpBuffer;
 
-	CCriSec			m_csFreeBuffer;
 	TBufferList		m_lsFreeBuffer;
+	TBufferQueue	m_lsGCBuffer;
 };

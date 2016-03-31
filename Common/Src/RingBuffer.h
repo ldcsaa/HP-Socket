@@ -412,11 +412,359 @@ private:
 	char				pack3[PACK_SIZE_OF(_GetGuard)];
 };
 
-#if !defined (_WIN64)
-	#pragma pack(pop)
-#endif
-
 typedef CRingBuffer<void, CCriSec, CCriSec>				CCSRingBuffer;
 typedef CRingBuffer<void, CInterCriSec, CInterCriSec>	CICSRingBuffer;
 typedef CRingBuffer<void, CSpinGuard, CSpinGuard>		CSGRingBuffer;
 typedef CRingBuffer<void, CFakeGuard, CFakeGuard>		CFKRingBuffer;
+
+template <class T> class CRingPool
+{
+private:
+	typedef T*			TPTR;
+	typedef volatile T*	VTPTR;
+
+	static TPTR const E_EMPTY;
+	static TPTR const E_LOCKED;
+	static TPTR const E_RELEASED;
+	static TPTR const E_OCCUPIED;
+	static TPTR const E_MAX_STATUS;
+public:
+
+	BOOL TryPut(TPTR pElement)
+	{
+		ASSERT(pElement != nullptr);
+
+		BOOL isOK = FALSE;
+
+		while(true)
+		{
+			BOOL bOccupy = FALSE;
+			DWORD seqPut = m_seqPut;
+
+			if(!HasPutSpace(seqPut))
+				break;
+
+			DWORD dwIndex = seqPut % m_dwSize;
+			VTPTR& pValue = *(m_pv + dwIndex);
+
+			if(pValue == E_RELEASED)
+			{
+				if(::InterlockedCompareExchangePointer((volatile PVOID*)&pValue, E_OCCUPIED, E_RELEASED) == E_RELEASED)
+					bOccupy = TRUE;
+				else
+					continue;
+			}
+
+			if(pValue == E_EMPTY || bOccupy)
+			{
+				if(::InterlockedCompareExchange(&m_seqPut, seqPut + 1, seqPut) == seqPut)
+				{
+					pValue	= pElement;
+					isOK	= TRUE;
+
+					break;
+				}
+			}
+			else if(pValue == E_LOCKED)
+				break;
+		}
+
+		return isOK;
+	}
+
+	BOOL TryGet(TPTR* ppElement)
+	{
+		ASSERT(ppElement != nullptr);
+
+		BOOL isOK = FALSE;
+
+		while(true)
+		{
+			DWORD seqGet = m_seqGet;
+
+			if(!HasGetSpace(seqGet))
+				break;
+
+			DWORD dwIndex = seqGet % m_dwSize;
+			VTPTR& pValue = *(m_pv + dwIndex);
+
+			if(pValue == E_LOCKED)
+				break;
+			else if(pValue != E_EMPTY && pValue != E_RELEASED && pValue != E_OCCUPIED)
+			{
+				if(::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet) == seqGet)
+				{
+					ASSERT(pValue > E_MAX_STATUS);
+
+					*(ppElement)	= (TPTR)pValue;
+					pValue			= E_EMPTY;
+					isOK			= TRUE;
+
+					break;
+				}
+			}
+		}
+
+		return isOK;
+	}
+
+	BOOL TryLock(TPTR* ppElement, DWORD& dwIndex)
+	{
+		ASSERT(ppElement != nullptr);
+
+		BOOL isOK = FALSE;
+
+		while(true)
+		{
+			DWORD seqGet = m_seqGet;
+
+			if(!HasGetSpace(seqGet))
+				break;
+
+			dwIndex			= seqGet % m_dwSize;
+			VTPTR& pValue	= *(m_pv + dwIndex);
+
+			if(pValue == E_LOCKED)
+				break;
+			else if(pValue != E_EMPTY && pValue != E_RELEASED && pValue != E_OCCUPIED)
+			{
+				if(::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet) == seqGet)
+				{
+					ASSERT(pValue > E_MAX_STATUS);
+
+					*(ppElement)	= (TPTR)pValue;
+					pValue			= E_LOCKED;
+					isOK			= TRUE;
+
+					break;
+				}
+			}
+		}
+
+		return isOK;
+	}
+
+	void ReleaseLock(TPTR pElement, DWORD dwIndex)
+	{
+		ASSERT(dwIndex < m_dwSize);
+		ASSERT(pElement == nullptr || (UINT_PTR)pElement > (UINT_PTR)E_MAX_STATUS);
+
+		VTPTR& pValue = *(m_pv + dwIndex);
+		VERIFY(pValue == E_LOCKED);
+
+		if(pElement != nullptr)
+		{
+			for(DWORD i = 0; ; i++)
+			{
+				if(TryPut(pElement))
+					break;
+
+				DWORD dwPutIndex = m_seqPut % m_dwSize;
+
+				if(dwIndex == dwPutIndex)
+				{
+					pValue = pElement;
+					::InterlockedIncrement(&m_seqPut);
+
+					return;
+				}
+
+				CSpinGuard::Pause(i);
+			}
+		}
+
+		pValue = E_RELEASED;
+	}
+
+public:
+
+	void Reset(DWORD dwSize = 0)
+	{
+		if(IsValid())
+			Destroy();
+		if(dwSize > 0)
+			Create(dwSize);
+	}
+
+	DWORD Size()		{return m_dwSize;}
+	DWORD Elements()	{return m_seqPut - m_seqGet;}
+	BOOL IsFull()		{return Elements() == Size();}
+	BOOL IsEmpty()		{return Elements() == 0;}
+	BOOL IsValid()		{return m_pv != nullptr;}
+
+private:
+
+	BOOL HasPutSpace(DWORD seqPut)
+	{
+		return (seqPut - m_seqGet < m_dwSize);
+	}
+
+	BOOL HasGetSpace(DWORD seqGet)
+	{
+		return (m_seqPut - seqGet > 0);
+	}
+
+	void Create(DWORD dwSize)
+	{
+		ASSERT(!IsValid() && dwSize > 0);
+
+		m_seqPut = 0;
+		m_seqGet = 0;
+		m_dwSize = dwSize;
+		m_pv	 = (VTPTR*)malloc(m_dwSize * sizeof(TPTR));
+
+		::memset(m_pv, (int)E_EMPTY, m_dwSize * sizeof(TPTR));
+	}
+
+	void Destroy()
+	{
+		ASSERT(IsValid());
+
+		free((void*)m_pv);
+		m_pv = nullptr;
+		m_dwSize = 0;
+		m_seqPut = 0;
+		m_seqGet = 0;
+	}
+
+
+public:
+	CRingPool(DWORD dwSize = 0)
+		: m_pv(nullptr)
+		, m_dwSize(0)
+		, m_seqPut(0)
+		, m_seqGet(0)
+	{
+		Reset(dwSize);
+	}
+
+	~CRingPool()
+	{
+		Reset(0);
+	}
+
+private:
+	CRingPool(const CRingPool&);
+	CRingPool operator = (const CRingPool&);
+
+private:
+	DWORD				m_dwSize;
+	VTPTR*				m_pv;
+	char				pack1[PACK_SIZE_OF(VTPTR*)];
+	volatile DWORD		m_seqPut;
+	char				pack4[PACK_SIZE_OF(DWORD)];
+	volatile DWORD		m_seqGet;
+	char				pack5[PACK_SIZE_OF(DWORD)];
+};
+
+template <class T> T* const CRingPool<T>::E_EMPTY		= (T*)0x00;
+template <class T> T* const CRingPool<T>::E_LOCKED		= (T*)0x01;
+template <class T> T* const CRingPool<T>::E_RELEASED	= (T*)0x02;
+template <class T> T* const CRingPool<T>::E_OCCUPIED	= (T*)0x03;
+template <class T> T* const CRingPool<T>::E_MAX_STATUS	= (T*)0x0F;
+
+template <class T> class CCASQueue
+{
+private:
+	struct Node;
+	typedef Node*			NPTR;
+	typedef volatile Node*	VNPTR;
+	typedef volatile ULONG	VLONG;
+
+	struct Node
+	{
+		T* pValue;
+		VNPTR pNext;
+
+		Node(T* val, NPTR next = nullptr)
+			: pValue(val), pNext(next)
+		{
+
+		}
+	};
+
+public:
+
+	void PushBack(T* pVal)
+	{
+		ASSERT(pVal != nullptr);
+
+		VNPTR pTail	= nullptr;
+		NPTR pNode	= new Node(pVal);
+
+		while(true)
+		{
+			pTail = m_pTail;
+
+			if(::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail->pNext, pNode, nullptr) == nullptr)
+				break;
+		}
+
+		::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail, pNode, (PVOID)pTail);
+		::InterlockedIncrement(&m_lSize);
+	}
+
+	BOOL PopFront(T** ppVal)
+	{
+		ASSERT(ppVal != nullptr);
+
+		BOOL isOK	= FALSE;
+		VNPTR pNext	= nullptr;
+
+		while(true) 
+		{
+			pNext = m_pHead->pNext;
+
+			if(pNext == nullptr)
+				break;
+
+			if(::InterlockedCompareExchangePointer((volatile PVOID*)&m_pHead->pNext, (PVOID)pNext->pNext, (PVOID)pNext) == pNext)
+			{
+				*ppVal	= pNext->pValue;
+				isOK	= TRUE;
+
+				::InterlockedDecrement(&m_lSize);
+				delete pNext;
+
+				break;
+			}
+		}
+
+		return isOK;
+	}
+
+public:
+
+	ULONG Size()	{return m_lSize;}
+	BOOL IsEmpty()	{return m_lSize == 0;}
+
+public:
+
+	CCASQueue() : m_lSize(0)
+	{
+		NPTR pHead = new Node(nullptr);
+		m_pHead = m_pTail = pHead;
+	}
+
+	~CCASQueue()
+	{
+		ASSERT(m_pHead != nullptr);
+
+		while(m_pHead != nullptr)
+		{
+			VNPTR pNode = m_pHead->pNext;
+
+			delete m_pHead;
+			m_pHead = pNode;
+		}
+	}
+
+private:
+	VLONG m_lSize;
+	VNPTR m_pHead;
+	VNPTR m_pTail;
+};
+
+#if !defined (_WIN64)
+	#pragma pack(pop)
+#endif

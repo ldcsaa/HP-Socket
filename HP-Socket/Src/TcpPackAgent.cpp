@@ -28,19 +28,22 @@
 
 BOOL CTcpPackAgent::CheckParams()
 {
-	m_bfPool.SetItemCapacity	(GetSocketBufferSize());
-	m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
-	m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
-	m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
-	m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
-	m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
-
 	if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
 		if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
 			return __super::CheckParams();;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
+}
+
+void CTcpPackAgent::PrepareStart()
+{
+	m_bfPool.SetItemCapacity	(GetSocketBufferSize());
+	m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
+	m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
+	m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
+	m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
+	m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
 }
 
 BOOL CTcpPackAgent::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)

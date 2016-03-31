@@ -33,6 +33,8 @@ BOOL CUdpCast::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
+	PrepareStart();
+
 	BOOL isOK = FALSE;
 
 	if(CreateClientSocket())
@@ -64,10 +66,6 @@ BOOL CUdpCast::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect
 
 BOOL CUdpCast::CheckParams()
 {
-	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
-	m_itPool.SetPoolSize((int)m_dwFreeBufferPoolSize);
-	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
-
 	if((int)m_dwMaxDatagramSize > 0)
 		if((int)m_dwFreeBufferPoolSize >= 0)
 			if((int)m_dwFreeBufferPoolHold >= 0)
@@ -79,6 +77,13 @@ BOOL CUdpCast::CheckParams()
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
+}
+
+void CUdpCast::PrepareStart()
+{
+	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
+	m_itPool.SetPoolSize((int)m_dwFreeBufferPoolSize);
+	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
 }
 
 BOOL CUdpCast::CheckStarting()

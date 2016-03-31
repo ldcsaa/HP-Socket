@@ -40,6 +40,7 @@ protected:
 	virtual EnHandleResult FireShutdown();
 
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 
 public:
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)		{m_dwMaxPackSize = dwMaxPackSize;}

@@ -226,80 +226,48 @@ void CItemPool::PutFreeItem(TItem* pItem)
 {
 	ASSERT(pItem != nullptr);
 
-	DWORD size = m_lsFreeItem.Size();
-
-	if(size < m_dwPoolHold)
-	{
-		CCriSecLock locallock(m_csFreeItem);
-		m_lsFreeItem.PushBack(pItem);
-	}
-	else
-	{
+	if(!m_lsFreeItem.TryPut(pItem))
 		TItem::Destruct(pItem);
-		CompressFreeItem(m_dwPoolSize);
-	}
 }
 
 void CItemPool::PutFreeItem(TItemList& lsItem)
 {
-	DWORD addSize = lsItem.Size();
+	if(lsItem.IsEmpty())
+		return;
 
-	if(addSize > 0)
-	{
-		DWORD cacheSize = m_lsFreeItem.Size();
-		DWORD totalSize = addSize + cacheSize;
-
-		if(totalSize <= m_dwPoolHold)
-		{
-			CCriSecLock locallock(m_csFreeItem);
-			m_lsFreeItem.Shift(lsItem);
-		}
-		else
-		{
-			lsItem.Clear();
-
-			if(cacheSize >= m_dwPoolHold)
-				CompressFreeItem(m_dwPoolSize);
-		}
-	}
+	TItem* pItem;
+	while((pItem = lsItem.PopFront()) != nullptr)
+		PutFreeItem(pItem);
 }
 
 TItem* CItemPool::PickFreeItem()
 {
 	TItem* pItem = nullptr;
 
-	if(m_lsFreeItem.Size() > 0)
-	{
-		CCriSecLock locallock(m_csFreeItem);
-
-		if(m_lsFreeItem.Size() > 0)
-			pItem = m_lsFreeItem.PopFront();
-	}
-
-	if(pItem == nullptr)
-		pItem = TItem::Construct(m_heap, m_dwItemCapacity);
-	else
+	if(m_lsFreeItem.TryGet(&pItem))
 		pItem->Reset();
+	else
+		pItem = TItem::Construct(m_heap, m_dwItemCapacity);
 
 	return pItem;
 }
 
-inline void CItemPool::Clear()
+inline void CItemPool::Prepare()
 {
-	{
-		CCriSecLock locallock(m_csFreeItem);
-		m_lsFreeItem.Clear();
-	}
-
-	m_heap.Reset();
+	m_lsFreeItem.Reset(m_dwPoolHold);
 }
 
-void CItemPool::CompressFreeItem(int size)
+inline void CItemPool::Clear()
 {
-	CCriSecLock locallock(m_csFreeItem);
+	TItem* pItem = nullptr;
 
-	while(m_lsFreeItem.Size() > size)
-		TItem::Destruct(m_lsFreeItem.PopFront());
+	while(m_lsFreeItem.TryGet(&pItem))
+		TItem::Destruct(pItem);
+
+	VERIFY(m_lsFreeItem.IsEmpty());
+	m_lsFreeItem.Reset();
+
+	m_heap.Reset();
 }
 
 TBuffer* TBuffer::Construct(CBufferPool& pool, ULONG_PTR dwID)
@@ -392,52 +360,49 @@ void CBufferPool::PutFreeBuffer(ULONG_PTR dwID)
 
 void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 {
-	if(pBuffer->IsValid())
+	if(!pBuffer->IsValid())
+		return;
+
+	BOOL bOK = FALSE;
+
 	{
-		BOOL bOK = FALSE;
+		CCriSecLock locallock(pBuffer->cs);
 
+		if(pBuffer->IsValid())
 		{
-			CCriSecLock locallock(pBuffer->cs);
-
-			if(pBuffer->IsValid())
-			{
-				pBuffer->Reset();
-				bOK = TRUE;
-			}
+			pBuffer->Reset();
+			bOK = TRUE;
 		}
+	}
 
-		if(bOK)
+	if(bOK)
+	{
+		m_itPool.PutFreeItem(pBuffer->items);
+
+		if(!m_lsFreeBuffer.TryPut(pBuffer))
 		{
-			m_itPool.PutFreeItem(pBuffer->items);
-			
-			{
-				CCriSecLock locallock(m_csFreeBuffer);
-				m_lsFreeBuffer.PushBack(pBuffer);
-			}
+			m_lsGCBuffer.PushBack(pBuffer);
 
-			if((DWORD)m_lsFreeBuffer.Size() > m_dwBufferPoolHold)
-				CompressFreeBuffer(m_dwBufferPoolSize);
+			if(m_lsGCBuffer.Size() > m_dwBufferPoolSize)
+				ReleaseGCBuffer();
 		}
 	}
 }
 
-void CBufferPool::CompressFreeBuffer(int size)
+void CBufferPool::ReleaseGCBuffer(BOOL bForce)
 {
-	CCriSecLock locallock(m_csFreeBuffer);
+	TBuffer* pBuffer = nullptr;
+	DWORD now		 = ::TimeGetTime();
 
-	DWORD now = ::TimeGetTime();
-
-	while(m_lsFreeBuffer.Size() > size)
+	while(m_lsGCBuffer.PopFront(&pBuffer))
 	{
-		TBuffer* pBuffer = m_lsFreeBuffer.Front();
-
-		if(now - pBuffer->freeTime >= m_dwBufferLockTime)
-		{
-			m_lsFreeBuffer.PopFront();
+		if(bForce || (now - pBuffer->freeTime) >= m_dwBufferLockTime)
 			TBuffer::Destruct(pBuffer);
-		}
 		else
+		{
+			m_lsGCBuffer.PushBack(pBuffer);
 			break;
+		}
 	}
 }
 
@@ -459,20 +424,17 @@ TBuffer* CBufferPool::PickFreeBuffer(ULONG_PTR dwID)
 {
 	ASSERT( dwID != 0);
 
+	DWORD dwIndex;
 	TBuffer* pBuffer = nullptr;
 
-	if(m_lsFreeBuffer.Size() > 0)
+	if(m_lsFreeBuffer.TryLock(&pBuffer, dwIndex))
 	{
-		CCriSecLock locallock(m_csFreeBuffer);
-
-		if(m_lsFreeBuffer.Size() > 0)
+		if(::GetTimeGap32(pBuffer->freeTime) >= m_dwBufferLockTime)
+			m_lsFreeBuffer.ReleaseLock(nullptr, dwIndex);
+		else
 		{
-			pBuffer = m_lsFreeBuffer.Front();
-
-			if(::GetTimeGap32(pBuffer->freeTime) >= m_dwBufferLockTime)
-				m_lsFreeBuffer.PopFront();
-			else
-				pBuffer = nullptr;
+			m_lsFreeBuffer.ReleaseLock(pBuffer, dwIndex);
+			pBuffer = nullptr;
 		}
 	}
 
@@ -498,6 +460,12 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 	return pBuffer;
 }
 
+void CBufferPool::Prepare()
+{
+	m_itPool.Prepare();
+	m_lsFreeBuffer.Reset(m_dwBufferPoolHold);
+}
+
 void CBufferPool::Clear()
 {
 	{
@@ -509,10 +477,16 @@ void CBufferPool::Clear()
 		m_mpBuffer.clear();
 	}
 
-	{
-		CCriSecLock locallock(m_csFreeBuffer);
-		m_lsFreeBuffer.Clear();
-	}
+	TBuffer* pBuffer = nullptr;
+
+	while(m_lsFreeBuffer.TryGet(&pBuffer))
+		TBuffer::Destruct(pBuffer);
+
+	VERIFY(m_lsFreeBuffer.IsEmpty());
+	m_lsFreeBuffer.Reset();
+
+	ReleaseGCBuffer(TRUE);
+	VERIFY(m_lsGCBuffer.IsEmpty());
 
 	m_itPool.Clear();
 	m_heap.Reset();

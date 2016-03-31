@@ -28,8 +28,8 @@
 #include "../../Common/Src/Event.h"
 #include "../../Common/Src/RWLock.h"
 #include "../../Common/Src/STLHelper.h"
+#include "../../Common/Src/RingBuffer.h"
 #include "../../Common/Src/PrivateHeap.h"
-#include "../../Common/Src/CriticalSection.h"
 
 class CUdpServer : public IUdpServer
 {
@@ -136,6 +136,7 @@ protected:
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
 
 private:
@@ -176,8 +177,6 @@ private:
 	void WaitForDetectorThreadEnd();
 	void CloseCompletePort();
 
-	void			CompressFreeBuffer(size_t size);
-	void			CompressFreeSocket(size_t size, BOOL bForce = FALSE);
 	TUdpBufferObj*	GetFreeBufferObj(int iLen = -1);
 	TUdpSocketObj*	GetFreeSocketObj(CONNID dwConnID);
 	void			AddFreeBufferObj(TUdpBufferObj* pBufferObj);
@@ -188,6 +187,7 @@ private:
 	void			DeleteBufferObj(TUdpBufferObj* pBufferObj);
 	void			DeleteSocketObj(TUdpSocketObj* pSocketObj);
 	BOOL			InvalidSocketObj(TUdpSocketObj* pSocketObj);
+	void			ReleaseGCSocketObj(BOOL bForce = FALSE);
 
 	void			AddClienTUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
 	void			CloseClientUdpSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
@@ -265,11 +265,9 @@ private:
 	TUdpSocketObjPtrMap		m_mpClientSocket;
 	TSockAddrMap			m_mpClientAddr;
 
-	CCriSec					m_csFreeBuffer;
 	TUdpBufferObjPtrList	m_lsFreeBuffer;
-
-	CCriSec					m_csFreeSocket;
 	TUdpSocketObjPtrList	m_lsFreeSocket;
+	TUdpSocketObjPtrQueue	m_lsGCSocket;
 
 	volatile long			m_iRemainPostReceives;
 };

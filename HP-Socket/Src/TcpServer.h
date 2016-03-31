@@ -28,8 +28,8 @@
 #include "../../Common/Src/Event.h"
 #include "../../Common/Src/RWLock.h"
 #include "../../Common/Src/STLHelper.h"
+#include "../../Common/Src/RingBuffer.h"
 #include "../../Common/Src/PrivateHeap.h"
-#include "../../Common/Src/CriticalSection.h"
 
 class CTcpServer : public ITcpServer
 {
@@ -142,6 +142,7 @@ protected:
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
 
 private:
@@ -176,8 +177,6 @@ private:
 	void WaitForWorkerThreadEnd();
 	void CloseCompletePort();
 
-	void		CompressFreeBuffer(size_t size);
-	void		CompressFreeSocket(size_t size, BOOL bForce = FALSE);
 	TBufferObj*	GetFreeBufferObj(int iLen = 0);
 	TSocketObj*	GetFreeSocketObj(CONNID dwConnID, SOCKET soClient);
 	void		AddFreeBufferObj(TBufferObj* pBufferObj);
@@ -187,6 +186,7 @@ private:
 	void		DeleteBufferObj(TBufferObj* pBufferObj);
 	void		DeleteSocketObj(TSocketObj* pSocketObj);
 	BOOL		InvalidSocketObj(TSocketObj* pSocketObj);
+	void		ReleaseGCSocketObj(BOOL bForce = FALSE);
 
 	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj);
 	void		CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SD_SEND);
@@ -260,11 +260,9 @@ private:
 	CRWLock				m_csClientSocket;
 	TSocketObjPtrMap	m_mpClientSocket;
 
-	CCriSec				m_csFreeBuffer;
 	TBufferObjPtrList	m_lsFreeBuffer;
-
-	CCriSec				m_csFreeSocket;
 	TSocketObjPtrList	m_lsFreeSocket;
+	TSocketObjPtrQueue	m_lsGCSocket;
 
 	volatile long		m_iRemainAcceptSockets;
 };

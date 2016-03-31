@@ -86,6 +86,8 @@ BOOL CTcpAgent::Start(LPCTSTR pszBindAddress, BOOL bAsyncConnect)
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
+	PrepareStart();
+
 	if(ParseBindAddress(pszBindAddress, bAsyncConnect))
 		if(CreateCompletePort())
 			if(CreateWorkerThreads())
@@ -103,24 +105,30 @@ BOOL CTcpAgent::Start(LPCTSTR pszBindAddress, BOOL bAsyncConnect)
 
 BOOL CTcpAgent::CheckParams()
 {
-	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
-	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
-	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
-
 	if(m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)
 		if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
 			if((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)
-				if((int)m_dwFreeSocketObjLockTime >= 0 && m_dwFreeSocketObjLockTime <= MAXLONG)
+				if((int)m_dwFreeSocketObjLockTime >= 0)
 					if((int)m_dwFreeSocketObjPool >= 0)
 						if((int)m_dwFreeBufferObjPool >= 0)
 							if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
 								if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
-									if((int)m_dwKeepAliveTime >= 1000)
-										if((int)m_dwKeepAliveInterval >= 1000)
+									if((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)
+										if((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)
 											return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
+}
+
+void CTcpAgent::PrepareStart()
+{
+	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
+	m_lsFreeBuffer.Reset(m_dwFreeBufferObjHold);
+
+	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
+	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 }
 
 BOOL CTcpAgent::CheckStarting()
@@ -281,20 +289,17 @@ void CTcpAgent::ReleaseClientSocket()
 
 TSocketObj*	CTcpAgent::GetFreeSocketObj(CONNID dwConnID, SOCKET soClient)
 {
+	DWORD dwIndex;
 	TSocketObj* pSocketObj = nullptr;
 
-	if(m_lsFreeSocket.size() > 0)
+	if(m_lsFreeSocket.TryLock(&pSocketObj, dwIndex))
 	{
-		CCriSecLock locallock(m_csFreeSocket);
-
-		if(m_lsFreeSocket.size() > 0)
+		if(::GetTimeGap32(pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
+			m_lsFreeSocket.ReleaseLock(nullptr, dwIndex);
+		else
 		{
-			pSocketObj = m_lsFreeSocket.front();
-
-			if(::GetTimeGap32(pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
-				m_lsFreeSocket.pop_front();
-			else
-				pSocketObj = nullptr;
+			m_lsFreeSocket.ReleaseLock(pSocketObj, dwIndex);
+			pSocketObj = nullptr;
 		}
 	}
 
@@ -306,23 +311,40 @@ TSocketObj*	CTcpAgent::GetFreeSocketObj(CONNID dwConnID, SOCKET soClient)
 
 void CTcpAgent::AddFreeSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
 {
-	if(InvalidSocketObj(pSocketObj))
+	if(!InvalidSocketObj(pSocketObj))
+		return;
+
+	CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+	TSocketObj::Release(pSocketObj);
+
 	{
-		CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
-		TSocketObj::Release(pSocketObj);
+		CReentrantWriteLock locallock(m_csClientSocket);
+		m_mpClientSocket.erase(pSocketObj->connID);
+	}
 
+	if(!m_lsFreeSocket.TryPut(pSocketObj))
+	{
+		m_lsGCSocket.PushBack(pSocketObj);
+
+		if(m_lsGCSocket.Size() > m_dwFreeSocketObjPool)
+			ReleaseGCSocketObj();
+	}
+}
+
+void CTcpAgent::ReleaseGCSocketObj(BOOL bForce)
+{
+	TSocketObj* pSocketObj	= nullptr;
+	DWORD now				= ::TimeGetTime();
+
+	while(m_lsGCSocket.PopFront(&pSocketObj))
+	{
+		if(bForce || (now - pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
+			DeleteSocketObj(pSocketObj);
+		else
 		{
-			CReentrantWriteLock locallock(m_csClientSocket);
-			m_mpClientSocket.erase(pSocketObj->connID);
+			m_lsGCSocket.PushBack(pSocketObj);
+			break;
 		}
-
-		{
-			CCriSecLock locallock(m_csFreeSocket);
-			m_lsFreeSocket.push_back(pSocketObj);
-		}
-
-		if(m_lsFreeSocket.size() > m_dwFreeSocketObjHold)
-			CompressFreeSocket(m_dwFreeSocketObjPool);
 	}
 }
 
@@ -358,27 +380,16 @@ void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj)
 
 void CTcpAgent::ReleaseFreeSocket()
 {
-	CompressFreeSocket(0, TRUE);
-}
+	TSocketObj* pSocketObj = nullptr;
 
-void CTcpAgent::CompressFreeSocket(size_t size, BOOL bForce)
-{
-	CCriSecLock locallock(m_csFreeSocket);
+	while(m_lsFreeSocket.TryGet(&pSocketObj))
+		DeleteSocketObj(pSocketObj);
 
-	DWORD now = ::TimeGetTime();
+	VERIFY(m_lsFreeSocket.IsEmpty());
+	m_lsFreeSocket.Reset();
 
-	while(m_lsFreeSocket.size() > size)
-	{
-		TSocketObj* pSocketObj = m_lsFreeSocket.front();
-
-		if(bForce || (now - pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
-		{
-			m_lsFreeSocket.pop_front();
-			DeleteSocketObj(pSocketObj);
-		}
-		else
-			break;
-	}
+	ReleaseGCSocketObj(TRUE);
+	VERIFY(m_lsGCSocket.IsEmpty());
 }
 
 TSocketObj* CTcpAgent::CreateSocketObj()
@@ -405,18 +416,8 @@ TBufferObj* CTcpAgent::GetFreeBufferObj(int iLen)
 
 	TBufferObj* pBufferObj = nullptr;
 
-	if(m_lsFreeBuffer.size() > 0)
-	{
-		CCriSecLock locallock(m_csFreeBuffer);
-
-		if(m_lsFreeBuffer.size() > 0)
-		{
-			pBufferObj = m_lsFreeBuffer.front();
-			m_lsFreeBuffer.pop_front();
-		}
-	}
-
-	if(!pBufferObj) pBufferObj = CreateBufferObj();
+	if(!m_lsFreeBuffer.TryGet(&pBufferObj))
+		pBufferObj = CreateBufferObj();
 
 	if(iLen <= 0) iLen	 = m_dwSocketBufferSize;
 	pBufferObj->buff.len = iLen;
@@ -426,34 +427,19 @@ TBufferObj* CTcpAgent::GetFreeBufferObj(int iLen)
 
 void CTcpAgent::AddFreeBufferObj(TBufferObj* pBufferObj)
 {
-	if(m_lsFreeBuffer.size() < m_dwFreeBufferObjHold)
-	{
-		CCriSecLock locallock(m_csFreeBuffer);
-		m_lsFreeBuffer.push_back(pBufferObj);
-	}
-	else
-	{
+	if(!m_lsFreeBuffer.TryPut(pBufferObj))
 		DeleteBufferObj(pBufferObj);
-		CompressFreeBuffer(m_dwFreeBufferObjPool);
-	}
 }
 
 void CTcpAgent::ReleaseFreeBuffer()
 {
-	CompressFreeBuffer(0);
-}
+	TBufferObj* pBufferObj = nullptr;
 
-void CTcpAgent::CompressFreeBuffer(size_t size)
-{
-	CCriSecLock locallock(m_csFreeBuffer);
-
-	while(m_lsFreeBuffer.size() > size)
-	{
-		TBufferObj* pBufferObj = m_lsFreeBuffer.front();
-
-		m_lsFreeBuffer.pop_front();
+	while(m_lsFreeBuffer.TryGet(&pBufferObj))
 		DeleteBufferObj(pBufferObj);
-	}
+
+	VERIFY(m_lsFreeBuffer.IsEmpty());
+	m_lsFreeBuffer.Reset();
 }
 
 TBufferObj* CTcpAgent::CreateBufferObj()

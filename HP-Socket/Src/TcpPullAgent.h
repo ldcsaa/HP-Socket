@@ -39,16 +39,16 @@ protected:
 	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult FireShutdown();
 
-	virtual BOOL CheckParams()
+	virtual void PrepareStart()
 	{
+		__super::PrepareStart();
+
 		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
 		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
 		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
 		m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
 		m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
 		m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
-
-		return __super::CheckParams();
 	}
 
 public:

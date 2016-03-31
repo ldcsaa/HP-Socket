@@ -315,6 +315,7 @@
     <ClInclude Include="..\..\..\Common\Src\Event.h" />
     <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h" />
     <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h" />
+    <ClInclude Include="..\..\..\Common\Src\RingBuffer.h" />
     <ClInclude Include="..\..\..\Common\Src\RWLock.h" />
     <ClInclude Include="..\..\..\Common\Src\Semaphore.h" />
     <ClInclude Include="..\..\..\Common\Src\Singleton.h" />

@@ -31,6 +31,7 @@
 #include "SocketInterface.h"
 #include "../../Common/Src/WaitFor.h"
 #include "../../Common/Src/bufferpool.h"
+#include "../../Common//Src/RingBuffer.h"
 
 /************************************************************************
 名称：全局常量
@@ -158,10 +159,10 @@ struct TUdpBufferObj : public TBufferObjBase
 };
 
 /* 数据缓冲区结构链表 */
-typedef deque<TBufferObj*>		TBufferObjPtrList;
+typedef CRingPool<TBufferObj>		TBufferObjPtrList;
 
 /* Udp 数据缓冲区结构链表 */
-typedef deque<TUdpBufferObj*>	TUdpBufferObjPtrList;
+typedef CRingPool<TUdpBufferObj>	TUdpBufferObjPtrList;
 
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
@@ -269,7 +270,9 @@ struct TUdpSocketObj : public TSocketObjBase
 };
 
 /* 数据缓冲区结构链表 */
-typedef deque<TSocketObj*>						TSocketObjPtrList;
+typedef CRingPool<TSocketObj>					TSocketObjPtrList;
+/* 数据缓冲区垃圾回收结构链表 */
+typedef CCASQueue<TSocketObj>					TSocketObjPtrQueue;
 /* 数据缓冲区结构哈希表 */
 typedef unordered_map<CONNID, TSocketObj*>		TSocketObjPtrMap;
 /* 数据缓冲区结构哈希表迭代器 */
@@ -278,7 +281,9 @@ typedef TSocketObjPtrMap::iterator				TSocketObjPtrMapI;
 typedef TSocketObjPtrMap::const_iterator		TSocketObjPtrMapCI;
 
 /* UDP 数据缓冲区结构链表 */
-typedef deque<TUdpSocketObj*>					TUdpSocketObjPtrList;
+typedef CRingPool<TUdpSocketObj>				TUdpSocketObjPtrList;
+/* 数据缓冲区垃圾回收结构链表 */
+typedef CCASQueue<TUdpSocketObj>				TUdpSocketObjPtrQueue;
 /* UDP 数据缓冲区结构哈希表 */
 typedef unordered_map<CONNID, TUdpSocketObj*>	TUdpSocketObjPtrMap;
 /* UDP 数据缓冲区结构哈希表迭代器 */
