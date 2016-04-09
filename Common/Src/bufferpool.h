@@ -550,26 +550,26 @@ private:
 	TItemList		items;
 };
 
-typedef CRingPool<TBuffer>					TBufferList;
-typedef CCASQueue<TBuffer>					TBufferQueue;
-
-typedef unordered_map<ULONG_PTR, TBuffer*>	TBufferPtrMap;
-typedef TBufferPtrMap::iterator				TBufferPtrMapI;
-typedef TBufferPtrMap::const_iterator		TBufferPtrMapCI;
-
 class CBufferPool
 {
+	typedef CRingPool<TBuffer>					TBufferList;
+	typedef CCASQueue<TBuffer>					TBufferQueue;
+
+	typedef unordered_map<ULONG_PTR, TBuffer*>	TBufferPtrMap;
+	typedef TBufferPtrMap::iterator				TBufferPtrMapI;
+	typedef TBufferPtrMap::const_iterator		TBufferPtrMapCI;
+
 public:
 	void		PutFreeBuffer	(ULONG_PTR dwID);
 	TBuffer*	PutCacheBuffer	(ULONG_PTR dwID);
-	TBuffer*	PickFreeBuffer	(ULONG_PTR dwID);
 	TBuffer*	FindCacheBuffer	(ULONG_PTR dwID);
+	TBuffer*	PickFreeBuffer	(ULONG_PTR dwID);
+	void		PutFreeBuffer	(TBuffer* pBuffer);
 
 	void		Prepare			();
 	void		Clear			();
 
 private:
-	void PutFreeBuffer		(TBuffer* pBuffer);
 	void ReleaseGCBuffer	(BOOL bForce = FALSE);
 
 public:
