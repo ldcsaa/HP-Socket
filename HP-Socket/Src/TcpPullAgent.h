@@ -49,6 +49,8 @@ protected:
 		m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
 		m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
 		m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
+
+		m_bfPool.Prepare();
 	}
 
 public:

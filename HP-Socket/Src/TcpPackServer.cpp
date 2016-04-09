@@ -46,6 +46,8 @@ void CTcpPackServer::PrepareStart()
 	m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
 	m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
 	m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
+
+	m_bfPool.Prepare();
 }
 
 BOOL CTcpPackServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)

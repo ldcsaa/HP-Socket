@@ -129,6 +129,8 @@ void CUdpServer::PrepareStart()
 	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
 	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
 	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+
+	m_itPool.Prepare();
 }
 
 BOOL CUdpServer::CheckStarting()

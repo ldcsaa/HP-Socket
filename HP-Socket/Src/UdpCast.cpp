@@ -84,6 +84,8 @@ void CUdpCast::PrepareStart()
 	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
 	m_itPool.SetPoolSize((int)m_dwFreeBufferPoolSize);
 	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
+
+	m_itPool.Prepare();
 }
 
 BOOL CUdpCast::CheckStarting()

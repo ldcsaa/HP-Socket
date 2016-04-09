@@ -129,6 +129,8 @@ void CTcpAgent::PrepareStart()
 	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
 	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
 	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+
+	m_itPool.Prepare();
 }
 
 BOOL CTcpAgent::CheckStarting()
