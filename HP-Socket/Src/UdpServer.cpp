@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -453,7 +453,7 @@ void CUdpServer::DeleteSocketObj(TUdpSocketObj* pSocketObj)
 {
 	ASSERT(pSocketObj);
 
-	pSocketObj->TUdpSocketObj::~TUdpSocketObj();;
+	pSocketObj->TUdpSocketObj::~TUdpSocketObj();
 	m_phSocket.Free(pSocketObj);
 }
 
@@ -1363,7 +1363,7 @@ int CUdpServer::SendItem(TUdpSocketObj* pSocketObj)
 		if(result != NO_ERROR)
 		{
 			if(result != WSA_IO_PENDING)
-				AddFreeBufferObj(pBufferObj);;
+				AddFreeBufferObj(pBufferObj);
 
 			break;
 		}

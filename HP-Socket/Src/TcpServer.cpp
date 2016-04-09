@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -1324,7 +1324,7 @@ int CTcpServer::SendItem(TSocketObj* pSocketObj)
 		if(result != NO_ERROR)
 		{
 			if(result != WSA_IO_PENDING)
-				AddFreeBufferObj(pBufferObj);;
+				AddFreeBufferObj(pBufferObj);
 
 			break;
 		}

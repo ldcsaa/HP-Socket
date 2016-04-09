@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -419,7 +419,7 @@ BOOL CTcpClient::SendData()
 					CCriSecLock locallock(m_csSend);
 					m_lsSend.PushFront(itPtr.Detach());
 					
-					break;;
+					break;
 				}
 			}
 			else

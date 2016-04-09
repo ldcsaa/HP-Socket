@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -31,14 +31,18 @@ EnHandleResult CTcpPullServer::FireAccept(TSocketObj* pSocketObj)
 	EnHandleResult result = __super::FireAccept(pSocketObj);
 
 	if(result != HR_ERROR)
-		m_bfPool.PutCacheBuffer(pSocketObj->connID);
+	{
+		TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
+		VERIFY(SetConnectionReserved(pSocketObj, pBuffer));
+	}
 
 	return result;
 }
 
 EnHandleResult CTcpPullServer::FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
 {
-	TBuffer* pBuffer = m_bfPool[pSocketObj->connID];
+	TBuffer* pBuffer = nullptr;
+	GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
 	ASSERT(pBuffer && pBuffer->IsValid());
 
 	pBuffer->Cat(pData, iLength);

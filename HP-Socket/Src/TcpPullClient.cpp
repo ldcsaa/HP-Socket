@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -35,7 +35,7 @@ EnHandleResult CTcpPullClient::FireReceive(IClient* pClient, const BYTE* pData, 
 
 EnFetchResult CTcpPullClient::Fetch(BYTE* pData, int iLength)
 {
-	return ::FetchBuffer(&m_lsBuffer, pData, iLength);;
+	return ::FetchBuffer(&m_lsBuffer, pData, iLength);
 }
 
 EnFetchResult CTcpPullClient::Peek(BYTE* pData, int iLength)

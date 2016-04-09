@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -412,8 +412,8 @@ public:
 	virtual EnHandleResult OnPrepareListen(UINT_PTR soListen)
 	{
 		return	(m_fnOnPrepareListen)
-			? (EnHandleResult)m_fnOnPrepareListen(soListen)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnPrepareListen(soListen)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnAccept(CONNID dwConnID, UINT_PTR soClient)
@@ -421,15 +421,15 @@ public:
 		ASSERT(m_fnOnAccept);
 
 		return	(m_fnOnAccept)
-			? (EnHandleResult)m_fnOnAccept(dwConnID, soClient)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnAccept(dwConnID, soClient)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 	{
 		return	(m_fnOnSend)
-			? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
@@ -437,8 +437,8 @@ public:
 		ASSERT(m_fnOnReceive);
 
 		return	(m_fnOnReceive)
-			? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)
@@ -446,8 +446,8 @@ public:
 		ASSERT(m_fnOnPullReceive);
 
 		return	(m_fnOnPullReceive)
-			? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
@@ -455,15 +455,15 @@ public:
 		ASSERT(m_fnOnClose);
 
 		return	(m_fnOnClose)
-			? (EnHandleResult)m_fnOnClose(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnClose(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnShutdown()
 	{
 		return	(m_fnOnShutdown)
-			? (EnHandleResult)m_fnOnShutdown()
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnShutdown()
+				: HR_IGNORE;
 	}
 
 public:
@@ -494,8 +494,8 @@ public:
 	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, UINT_PTR socket)
 	{
 		return	(m_fnOnPrepareConnect)
-			? (EnHandleResult)m_fnOnPrepareConnect(dwConnID, socket)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnPrepareConnect(dwConnID, socket)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnConnect(CONNID dwConnID)
@@ -503,15 +503,15 @@ public:
 		ASSERT(m_fnOnConnect);
 
 		return	(m_fnOnConnect)
-			? (EnHandleResult)m_fnOnConnect(dwConnID)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnConnect(dwConnID)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 	{
 		return	(m_fnOnSend)
-			? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
@@ -519,8 +519,8 @@ public:
 		ASSERT(m_fnOnReceive);
 
 		return	(m_fnOnReceive)
-			? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)
@@ -528,8 +528,8 @@ public:
 		ASSERT(m_fnOnPullReceive);
 
 		return	(m_fnOnPullReceive)
-			? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
@@ -537,15 +537,15 @@ public:
 		ASSERT(m_fnOnClose);
 
 		return	(m_fnOnClose)
-			? (EnHandleResult)m_fnOnClose(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnClose(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnShutdown()
 	{
 		return	(m_fnOnShutdown)
-			? (EnHandleResult)m_fnOnShutdown()
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnShutdown()
+				: HR_IGNORE;
 	}
 
 public:
@@ -576,8 +576,8 @@ public:
 	virtual EnHandleResult OnPrepareConnect(IClient* pClient, UINT_PTR socket)
 	{
 		return	(m_fnOnPrepareConnect)
-			? (EnHandleResult)m_fnOnPrepareConnect(C_HP_Object::FromClient(pClient), socket)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnPrepareConnect(C_HP_Object::FromClient(pClient), socket)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnConnect(IClient* pClient)
@@ -585,15 +585,15 @@ public:
 		ASSERT(m_fnOnConnect);
 
 		return	(m_fnOnConnect)
-			? (EnHandleResult)m_fnOnConnect(C_HP_Object::FromClient(pClient))
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnConnect(C_HP_Object::FromClient(pClient))
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)
 	{
 		return	(m_fnOnSend)
-			? (EnHandleResult)m_fnOnSend(C_HP_Object::FromClient(pClient), pData, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnSend(C_HP_Object::FromClient(pClient), pData, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)
@@ -601,8 +601,8 @@ public:
 		ASSERT(m_fnOnReceive);
 
 		return	(m_fnOnReceive)
-			? (EnHandleResult)m_fnOnReceive(C_HP_Object::FromClient(pClient), pData, iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnReceive(C_HP_Object::FromClient(pClient), pData, iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)
@@ -610,8 +610,8 @@ public:
 		ASSERT(m_fnOnPullReceive);
 
 		return	(m_fnOnPullReceive)
-			? (EnHandleResult)m_fnOnPullReceive(C_HP_Object::FromClient(pClient), iLength)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnPullReceive(C_HP_Object::FromClient(pClient), iLength)
+				: HR_IGNORE;
 	}
 
 	virtual EnHandleResult OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
@@ -619,8 +619,8 @@ public:
 		ASSERT(m_fnOnClose);
 
 		return	(m_fnOnClose)
-			? (EnHandleResult)m_fnOnClose(C_HP_Object::FromClient(pClient), (En_HP_SocketOperation)enOperation, iErrorCode)
-			: HR_IGNORE;
+				? (EnHandleResult)m_fnOnClose(C_HP_Object::FromClient(pClient), (En_HP_SocketOperation)enOperation, iErrorCode)
+				: HR_IGNORE;
 	}
 
 public:

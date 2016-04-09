@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.1
+ * Version	: 3.4.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,7 +30,7 @@ BOOL CTcpPackAgent::CheckParams()
 {
 	if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
 		if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
-			return __super::CheckParams();;
+			return __super::CheckParams();
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -38,6 +38,8 @@ BOOL CTcpPackAgent::CheckParams()
 
 void CTcpPackAgent::PrepareStart()
 {
+	__super::PrepareStart();
+
 	m_bfPool.SetItemCapacity	(GetSocketBufferSize());
 	m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
 	m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
@@ -64,7 +66,7 @@ EnHandleResult CTcpPackAgent::FireConnect(TSocketObj* pSocketObj)
 
 	if(result != HR_ERROR)
 	{
-		TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
+		TBuffer* pBuffer = m_bfPool.PickFreeBuffer(pSocketObj->connID);
 		VERIFY(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
 	}
 
@@ -91,8 +93,8 @@ EnHandleResult CTcpPackAgent::FireClose(TSocketObj* pSocketObj, EnSocketOperatio
 	GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
 	ASSERT(pInfo);
 
+	m_bfPool.PutFreeBuffer(pInfo->pBuffer);
 	TBufferPackInfo::Destruct(pInfo);
-	m_bfPool.PutFreeBuffer(pSocketObj->connID);
 
 	return result;
 }
