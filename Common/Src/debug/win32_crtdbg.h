@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.10
+ * Version	: 2.3.11
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -42,43 +42,6 @@
 
 namespace __dbg_impl
 {
-	/*
-	class CCriticalSection
-	{
-	public:
-		CCriticalSection()	{ ::InitializeCriticalSection( &m_cs ); }
-		~CCriticalSection()	{ ::DeleteCriticalSection( &m_cs ); }
-
-		void Enter()		{ ::EnterCriticalSection( &m_cs ); }
-		void Leave()		{ ::LeaveCriticalSection( &m_cs ); }
-
-	private:
-		CRITICAL_SECTION m_cs;
-	};
-
-	class CDumbCS
-	{
-	public:
-		void Enter() { }
-		void Leave() { }
-	};
-
-	class CGuard
-	{
-	public:
-#ifdef _MT
-		typedef CCriticalSection lock_type;
-#else
-		typedef CDumbCS lock_type;
-#endif
-		lock_type lock;
-
-	public:
-		CGuard()	{ lock.Enter(); }
-		~CGuard()	{ lock.Leave(); }
-	};
-	*/
-
 	class CDebugEnv
 	{
 	public:

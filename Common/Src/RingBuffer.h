@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.10
+ * Version	: 2.3.11
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -723,9 +723,12 @@ public:
 				*ppVal	= pNext->pValue;
 				isOK	= TRUE;
 
+				if(m_pTail == pNext)
+					::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail, (PVOID)m_pHead, (PVOID)pNext);
+				
 				::InterlockedDecrement(&m_lSize);
-				delete pNext;
 
+				delete pNext;
 				break;
 			}
 		}
@@ -749,6 +752,7 @@ public:
 	~CCASQueue()
 	{
 		ASSERT(m_pHead != nullptr);
+		ASSERT(m_pHead->pNext == nullptr);
 
 		while(m_pHead != nullptr)
 		{
