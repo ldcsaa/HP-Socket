@@ -1025,12 +1025,10 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 	AddClientSocketObj(dwConnID, pSocketObj);
 
 	::SSO_UpdateAcceptContext(socket, soListen);
+	::CreateIoCompletionPort((HANDLE)socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0);
 
 	if(TriggerFireAccept(pSocketObj) != HR_ERROR)
-	{
-		::CreateIoCompletionPort((HANDLE)socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0);
 		DoReceive(dwConnID, pSocketObj, pBufferObj);
-	}
 	else
 	{
 		AddFreeSocketObj(pSocketObj, SCF_NONE);

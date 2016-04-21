@@ -242,14 +242,14 @@ BOOL CTcpClient::ProcessNetworkEvent()
 	if(rc == SOCKET_ERROR)
 		bContinue = HandleError(events);
 
+	if(m_bAsyncConnect && bContinue && events.lNetworkEvents & FD_CONNECT)
+		bContinue = HandleConnect(events);
+
 	if(bContinue && events.lNetworkEvents & FD_READ)
 		bContinue = HandleRead(events);
 
 	if(bContinue && events.lNetworkEvents & FD_WRITE)
 		bContinue = HandleWrite(events);
-
-	if(m_bAsyncConnect && bContinue && events.lNetworkEvents & FD_CONNECT)
-		bContinue = HandleConnect(events);
 
 	if(bContinue && events.lNetworkEvents & FD_CLOSE)
 		bContinue = HandleClose(events);
@@ -259,10 +259,8 @@ BOOL CTcpClient::ProcessNetworkEvent()
 
 BOOL CTcpClient::HandleError(WSANETWORKEVENTS& events)
 {
-	int iCode = ::WSAGetLastError();
-	SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-
-	EnSocketOperation enOperation = SO_UNKNOWN;
+	int iCode						= ::WSAGetLastError();
+	EnSocketOperation enOperation	= SO_UNKNOWN;
 
 	if(events.lNetworkEvents & FD_CONNECT)
 		enOperation = SO_CONNECT;
@@ -288,7 +286,6 @@ BOOL CTcpClient::HandleRead(WSANETWORKEVENTS& events)
 		bContinue = ReadData();
 	else
 	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireClose(this, SO_RECEIVE, iCode);
 		bContinue = FALSE;
 	}
@@ -305,7 +302,6 @@ BOOL CTcpClient::HandleWrite(WSANETWORKEVENTS& events)
 		bContinue = SendData();
 	else
 	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireClose(this, SO_SEND, iCode);
 		bContinue = FALSE;
 	}
@@ -333,8 +329,9 @@ BOOL CTcpClient::HandleConnect(WSANETWORKEVENTS& events)
 
 	if(iCode != 0)
 	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-		FireClose(this, SO_CONNECT, iCode);
+		if(iCode != ERROR_CANCELLED)
+			FireClose(this, SO_CONNECT, iCode);
+
 		bContinue = FALSE;
 	}
 
@@ -348,10 +345,7 @@ BOOL CTcpClient::HandleClose(WSANETWORKEVENTS& events)
 	if(iCode == 0)
 		FireClose(this, SO_CLOSE, SE_OK);
 	else
-	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireClose(this, SO_CLOSE, iCode);
-	}
 
 	return FALSE;
 }
@@ -368,9 +362,7 @@ BOOL CTcpClient::ReadData()
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
-				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_CANCELLED);
 				FireClose(this, SO_RECEIVE, ERROR_CANCELLED);
-
 				return FALSE;
 			}
 		}
@@ -382,9 +374,7 @@ BOOL CTcpClient::ReadData()
 				break;
 			else
 			{
-				SetLastError(SE_NETWORK, __FUNCTION__, code);
 				FireClose(this, SO_RECEIVE, code);
-
 				return FALSE;
 			}
 		}
@@ -480,9 +470,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 				break;
 			else
 			{
-				SetLastError(SE_NETWORK, __FUNCTION__, code);
 				FireClose(this, SO_SEND, code);
-
 				return FALSE;
 			}
 		}
@@ -607,7 +595,7 @@ BOOL CTcpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 	}
 
 	if(result != NO_ERROR)
-		SetLastError(enCode, __FUNCTION__, result);
+		::SetLastError(result);
 
 	return (result == NO_ERROR);
 }
@@ -679,7 +667,7 @@ BOOL CTcpClient::SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead, const
 		}
 	}
 
-	SetLastError(SE_INVALID_PARAM, __FUNCTION__, hr & 0x0000FFFF);
+	::SetLastError(hr & 0x0000FFFF);
 
 	return FALSE;
 }

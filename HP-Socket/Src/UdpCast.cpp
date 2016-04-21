@@ -283,10 +283,8 @@ BOOL CUdpCast::ProcessNetworkEvent()
 
 BOOL CUdpCast::HandleError(WSANETWORKEVENTS& events)
 {
-	int iCode = ::WSAGetLastError();
-	SetLastError(SE_NETWORK, __FUNCTION__, iCode);
-
-	EnSocketOperation enOperation = SO_UNKNOWN;
+	int iCode						= ::WSAGetLastError();
+	EnSocketOperation enOperation	= SO_UNKNOWN;
 
 	if(events.lNetworkEvents & FD_CLOSE)
 		enOperation = SO_CLOSE;
@@ -310,7 +308,6 @@ BOOL CUdpCast::HandleRead(WSANETWORKEVENTS& events)
 		bContinue = ReadData();
 	else
 	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireClose(this, SO_RECEIVE, iCode);
 		bContinue = FALSE;
 	}
@@ -327,7 +324,6 @@ BOOL CUdpCast::HandleWrite(WSANETWORKEVENTS& events)
 		bContinue = SendData();
 	else
 	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireClose(this, SO_SEND, iCode);
 		bContinue = FALSE;
 	}
@@ -342,10 +338,7 @@ BOOL CUdpCast::HandleClose(WSANETWORKEVENTS& events)
 	if(iCode == 0)
 		FireClose(this, SO_CLOSE, SE_OK);
 	else
-	{
-		SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 		FireClose(this, SO_CLOSE, iCode);
-	}
 
 	return FALSE;
 }
@@ -363,9 +356,7 @@ BOOL CUdpCast::ReadData()
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
-				SetLastError(SE_DATA_PROC, __FUNCTION__, ERROR_CANCELLED);
 				FireClose(this, SO_RECEIVE, ERROR_CANCELLED);
-
 				return FALSE;
 			}
 		}
@@ -377,9 +368,7 @@ BOOL CUdpCast::ReadData()
 				break;
 			else
 			{
-				SetLastError(SE_NETWORK, __FUNCTION__, code);
 				FireClose(this, SO_RECEIVE, code);
-
 				return FALSE;
 			}
 		}
@@ -431,9 +420,7 @@ BOOL CUdpCast::SendData()
 				}
 				else
 				{
-					SetLastError(SE_NETWORK, __FUNCTION__, iCode);
 					FireClose(this, SO_SEND, iCode);
-
 					return FALSE;
 				}
 			}
@@ -553,7 +540,7 @@ BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 	}
 
 	if(result != NO_ERROR)
-		SetLastError(enCode, __FUNCTION__, result);
+		::SetLastError(result);
 
 	return (result == NO_ERROR);
 }
@@ -605,7 +592,7 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 	}
 
 	if(result != NO_ERROR)
-		SetLastError(enCode, __FUNCTION__, result);
+		::SetLastError(result);
 
 	return (result == NO_ERROR);
 }
