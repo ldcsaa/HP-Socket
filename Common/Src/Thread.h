@@ -28,12 +28,10 @@
 #include "RWLock.h"
 #include "STLHelper.h"
 
-template<class T = void> class CThread
+template<class T> class CThread
 {
 public:
-	virtual UINT Run(T* lpParam)  = 0;
-
-	BOOL Start(T* lpParam = nullptr, int iPriority = THREAD_PRIORITY_NORMAL, UINT uiStackSize = 0, LPSECURITY_ATTRIBUTES lpThreadAttributes = nullptr)
+	BOOL Start(T* pRunner, int iPriority = THREAD_PRIORITY_NORMAL, UINT uiStackSize = 0, LPSECURITY_ATTRIBUTES lpThreadAttributes = nullptr)
 	{
 		BOOL isOK = TRUE;
 
@@ -41,12 +39,26 @@ public:
 		{
 			Release();
 
-			m_lpParam	= lpParam;
-			m_iPriority	= iPriority;
-			m_hThread	= (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)this, 0, nullptr);
-			isOK		= (m_hThread != nullptr);
-		
-			if(!isOK)	::SetLastError(_doserrno);
+			if(iPriority == THREAD_PRIORITY_NORMAL)
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)pRunner, 0, &m_uiThreadID);
+			else
+			{
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)pRunner, CREATE_SUSPENDED, &m_uiThreadID);
+
+				if(IsValid())
+				{
+					::SetThreadPriority(m_hThread, iPriority);
+					::ResumeThread(m_hThread);
+				}
+			}
+
+			if(IsValid())
+				m_pRunner = pRunner;
+			else
+			{
+				::SetLastError(_doserrno);
+				isOK = FALSE;
+			}
 		}
 		else
 		{
@@ -64,6 +76,9 @@ public:
 
 	BOOL IsRunning()
 	{
+		if(!IsValid())
+			return FALSE;
+
 		DWORD dwExitCode;
 
 		if(GetExitCode(&dwExitCode))
@@ -74,36 +89,21 @@ public:
 
 	VOID Release()
 	{
-		if(m_hThread != nullptr)
+		if(IsValid())
 		{
 			::CloseHandle(m_hThread);
-			m_hThread = nullptr;
+			Reset();
 		}
 	}
 
 	HANDLE Detatch()
 	{
-		HANDLE h	= m_hThread;
-		m_hThread	= nullptr;
+		HANDLE h = m_hThread;
+
+		Reset();
 
 		return h;
 	}
-
-	CThread& Attatch(HANDLE hThread)
-	{
-		if(hThread != m_hThread)
-		{
-			Release();
-
-			m_hThread = hThread;
-		}
-
-		return *this;
-	}
-
-#if _WIN32_WINNT >= _WIN32_WINNT_WS03
-	DWORD GetID			()						{return ::GetThreadId(m_hThread);}
-#endif
 
 	BOOL Terminate		(DWORD dwExitCode)		{return ::TerminateThread(m_hThread, dwExitCode);}
 	BOOL GetExitCode	(LPDWORD lpExitCode)	{return ::GetExitCodeThread(m_hThread, lpExitCode);}
@@ -111,15 +111,16 @@ public:
 	DWORD Resume		()						{return ::ResumeThread(m_hThread);}
 
 	BOOL IsValid		()	{return m_hThread != nullptr;}
-	HANDLE& GetHandle	() 	{return m_hThread;}
-	operator HANDLE		()	{return m_hThread;}
+	T* GetRunner		()	{return m_pRunner;}
+	DWORD GetThreadID	()	{return m_uiThreadID;}
+
+	HANDLE& GetThreadHandle			() 			{return m_hThread;}
+	const HANDLE& GetThreadHandle	() const	{return m_hThread;}
 
 public:
 	CThread()
-	: m_hThread(nullptr)
-	, m_lpParam(nullptr)
-	, m_iPriority(THREAD_PRIORITY_NORMAL)
 	{
+		Reset();
 	}
 	
 	virtual ~CThread()
@@ -130,18 +131,20 @@ public:
 private:
 	static UINT WINAPI ThreadProc(LPVOID pv)
 	{
-		CThread* pThis = (CThread*)pv;
+		return ((T*)pv)->Run();
+	}
 
-		if(pThis->m_iPriority != THREAD_PRIORITY_NORMAL)
-			::SetThreadPriority(GetCurrentThread(), pThis->m_iPriority);
-
-		return pThis->Run(pThis->m_lpParam);
+	void Reset()
+	{
+		m_uiThreadID = 0;
+		m_hThread	 = nullptr;
+		m_pRunner	 = nullptr;
 	}
 
 private:
+	UINT	m_uiThreadID;
 	HANDLE	m_hThread;
-	T*		m_lpParam;
-	int		m_iPriority;
+	T*		m_pRunner;
 
 	DECLARE_NO_COPY_CLASS(CThread)
 };
