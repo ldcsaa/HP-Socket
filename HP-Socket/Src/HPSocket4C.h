@@ -63,10 +63,14 @@ Release:
 /**************************************************/
 /********* imports / exports HPSocket.dll *********/
 
-#ifdef HPSOCKET_EXPORTS
-	#define HPSOCKET_API extern "C" __declspec(dllexport)
+#ifdef HPSOCKET_STATIC_LIB
+	#define HPSOCKET_API EXTERN_C
 #else
-	#define HPSOCKET_API extern "C" __declspec(dllimport)
+	#ifdef HPSOCKET_EXPORTS
+		#define HPSOCKET_API EXTERN_C __declspec(dllexport)
+	#else
+		#define HPSOCKET_API EXTERN_C __declspec(dllimport)
+	#endif
 #endif
 
 /************************************************************************
@@ -99,6 +103,7 @@ typedef HP_Object	HP_TcpPackServer;
 typedef HP_Object	HP_TcpPackAgent;
 typedef HP_Object	HP_TcpPackClient;
 typedef HP_Object	HP_UdpServer;
+typedef HP_Object	HP_UdpAgent;
 typedef HP_Object	HP_UdpClient;
 typedef HP_Object	HP_UdpCast;
 
@@ -115,6 +120,7 @@ typedef HP_Object	HP_TcpPullServerListener;
 typedef HP_Object	HP_TcpPullAgentListener;
 typedef HP_Object	HP_TcpPullClientListener;
 typedef HP_Object	HP_UdpServerListener;
+typedef HP_Object	HP_UdpAgentListener;
 typedef HP_Object	HP_UdpClientListener;
 typedef HP_Object	HP_UdpCastListener;
 
@@ -272,6 +278,8 @@ HPSOCKET_API HP_TcpPackAgent __stdcall Create_HP_TcpPackAgent(HP_TcpAgentListene
 HPSOCKET_API HP_TcpPackClient __stdcall Create_HP_TcpPackClient(HP_TcpClientListener pListener);
 // 创建 HP_UdpServer 对象
 HPSOCKET_API HP_UdpServer __stdcall Create_HP_UdpServer(HP_UdpServerListener pListener);
+// 创建 HP_UdpAgent 对象
+HPSOCKET_API HP_UdpAgent __stdcall Create_HP_UdpAgent(HP_UdpAgentListener pListener);
 // 创建 HP_UdpClient 对象
 HPSOCKET_API HP_UdpClient __stdcall Create_HP_UdpClient(HP_UdpClientListener pListener);
 // 创建 HP_UdpCast 对象
@@ -297,6 +305,8 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpPackAgent(HP_TcpPackAgent pAgent);
 HPSOCKET_API void __stdcall Destroy_HP_TcpPackClient(HP_TcpPackClient pClient);
 // 销毁 HP_UdpServer 对象
 HPSOCKET_API void __stdcall Destroy_HP_UdpServer(HP_UdpServer pServer);
+// 销毁 HP_UdpAgent 对象
+HPSOCKET_API void __stdcall Destroy_HP_UdpAgent(HP_UdpAgent pAgent);
 // 销毁 HP_UdpClient 对象
 HPSOCKET_API void __stdcall Destroy_HP_UdpClient(HP_UdpClient pClient);
 // 销毁 HP_UdpCast 对象
@@ -316,6 +326,8 @@ HPSOCKET_API HP_TcpPullAgentListener __stdcall Create_HP_TcpPullAgentListener();
 HPSOCKET_API HP_TcpPullClientListener __stdcall Create_HP_TcpPullClientListener();
 // 创建 HP_UdpServerListener 对象
 HPSOCKET_API HP_UdpServerListener __stdcall Create_HP_UdpServerListener();
+// 创建 HP_UdpAgentListener 对象
+HPSOCKET_API HP_TcpAgentListener __stdcall Create_HP_UdpAgentListener();
 // 创建 HP_UdpClientListener 对象
 HPSOCKET_API HP_UdpClientListener __stdcall Create_HP_UdpClientListener();
 // 创建 HP_UdpCastListener 对象
@@ -335,6 +347,8 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpPullAgentListener(HP_TcpPullAgentListe
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullClientListener(HP_TcpPullClientListener pListener);
 // 销毁 HP_UdpServerListener 对象
 HPSOCKET_API void __stdcall Destroy_HP_UdpServerListener(HP_UdpServerListener pListener);
+// 销毁 HP_UdpAgentListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_UdpAgentListener(HP_UdpAgentListener pListener);
 // 销毁 HP_UdpClientListener 对象
 HPSOCKET_API void __stdcall Destroy_HP_UdpClientListener(HP_UdpClientListener pListener);
 // 销毁 HP_UdpCastListener 对象

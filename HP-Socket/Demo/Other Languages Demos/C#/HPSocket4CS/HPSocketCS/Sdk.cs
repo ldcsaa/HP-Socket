@@ -330,6 +330,14 @@ namespace HPSocketCS.SDK
         public static extern IntPtr Create_HP_UdpServer(IntPtr pListener);
 
         /// <summary>
+        /// 创建 UdpAgent 对象
+        /// </summary>
+        /// <param name="pListener"></param>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern IntPtr Create_HP_UdpAgent(IntPtr pListener);
+
+        /// <summary>
         /// 创建 UdpClient 对象
         /// </summary>
         /// <param name="pListener"></param>
@@ -417,6 +425,14 @@ namespace HPSocketCS.SDK
         public static extern void Destroy_HP_UdpServer(IntPtr pServer);
 
         /// <summary>
+        /// 销毁 UdpAgent 对象
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern void Destroy_HP_UdpAgent(IntPtr pAgent);
+
+        /// <summary>
         /// 销毁 UdpClient 对象
         /// </summary>
         /// <param name="pClient"></param>
@@ -473,6 +489,13 @@ namespace HPSocketCS.SDK
         /// <returns></returns>
         [DllImport(SOCKET_DLL_PATH)]
         public static extern IntPtr Create_HP_UdpServerListener();
+
+        /// <summary>
+        /// 创建 UdpAgentListener 对象
+        /// </summary>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern IntPtr Create_HP_UdpAgentListener();
 
         /// <summary>
         /// 创建 UdpClientListener 对象
@@ -538,6 +561,14 @@ namespace HPSocketCS.SDK
         /// <returns></returns>
         [DllImport(SOCKET_DLL_PATH)]
         public static extern void Destroy_HP_UdpServerListener(IntPtr pListener);
+
+        /// <summary>
+        /// 销毁 UdpAgentListener 对象
+        /// </summary>
+        /// <param name="pListener"></param>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern void Destroy_HP_UdpAgentListener(IntPtr pListener);
 
         /// <summary>
         /// 销毁 UdpClientListener 对象
@@ -1337,7 +1368,7 @@ namespace HPSocketCS.SDK
         ///  名称：发送小文件
         ///  描述：向指定连接发送 4096 KB 以下的小文件
         /// </summary>
-        /// <param name="pServer"></param>
+        /// <param name="pClient"></param>
         /// <param name="lpszFileName">文件路径</param>
         /// <param name="pHead">头部附加数据</param>
         /// <param name="pTail">尾部附加数据</param>
@@ -1570,28 +1601,12 @@ namespace HPSocketCS.SDK
         /// <summary>
         /// 断开超过指定时长的静默连接
         /// </summary>
-        /// <param name="pServer"></param>
+        /// <param name="pAgent"></param>
         /// <param name="dwPeriod">时长（毫秒）</param>
         /// <param name="bForce">是否强制断开连接</param>
         /// <returns></returns>
         [DllImport(SOCKET_DLL_PATH)]
         public static extern bool HP_Agent_DisconnectSilenceConnections(IntPtr pAgent, uint dwPeriod, bool bForce);
-
-        /******************************************************************************/
-        /***************************** Agent 操作方法 *****************************/
-
-        /// <summary>
-        ///  名称：发送小文件
-        ///  描述：向指定连接发送 4096 KB 以下的小文件
-        /// </summary>
-        /// <param name="pServer"></param>
-        /// <param name="connId">连接 ID</param>
-        /// <param name="lpszFileName">文件路径</param>
-        /// <param name="pHead">头部附加数据</param>
-        /// <param name="pTail">尾部附加数据</param>
-        /// <returns>TRUE.成功 FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码</returns>
-        [DllImport(SOCKET_DLL_PATH, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool HP_TcpAgent_SendSmallFile(IntPtr pAgent, IntPtr connId, string lpszFileName, ref WSABUF pHead, ref WSABUF pTail);
 
         /******************************************************************************/
         /***************************** Agent 属性访问方法 *****************************/
@@ -1681,7 +1696,7 @@ namespace HPSocketCS.SDK
         /// <summary>
         /// 获取某个连接静默时间（毫秒）
         /// </summary>
-        /// <param name="pServer"></param>
+        /// <param name="pAgent"></param>
         /// <param name="connId"></param>
         /// <param name="pdwPeriod"></param>
         /// <returns></returns>
@@ -1788,7 +1803,7 @@ namespace HPSocketCS.SDK
         /// <summary>
         /// 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE）
         /// </summary>
-        /// <param name="pServer"></param>
+        /// <param name="pAgent"></param>
         /// <param name="bMarkSilence"></param>
         [DllImport(SOCKET_DLL_PATH)]
         public static extern void HP_Agent_SetMarkSilence(IntPtr pAgent, bool bMarkSilence);
@@ -1844,10 +1859,26 @@ namespace HPSocketCS.SDK
         /// <summary>
         /// 检测是否标记静默时间
         /// </summary>
-        /// <param name="pServer"></param>
+        /// <param name="pAgent"></param>
         /// <returns></returns>
         [DllImport(SOCKET_DLL_PATH)]
         public static extern bool HP_Agent_IsMarkSilence(IntPtr pAgent);
+
+        /******************************************************************************/
+        /***************************** Agent 操作方法 *****************************/
+
+        /// <summary>
+        ///  名称：发送小文件
+        ///  描述：向指定连接发送 4096 KB 以下的小文件
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <param name="connId">连接 ID</param>
+        /// <param name="lpszFileName">文件路径</param>
+        /// <param name="pHead">头部附加数据</param>
+        /// <param name="pTail">尾部附加数据</param>
+        /// <returns>TRUE.成功 FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码</returns>
+        [DllImport(SOCKET_DLL_PATH, CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool HP_TcpAgent_SendSmallFile(IntPtr pAgent, IntPtr connId, string lpszFileName, ref WSABUF pHead, ref WSABUF pTail);
 
         /**********************************************************************************/
         /***************************** TCP Agent 属性访问方法 *****************************/

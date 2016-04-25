@@ -54,10 +54,14 @@ Release:
 /**************************************************/
 /********* imports / exports HPSocket.dll *********/
 
-#ifdef HPSOCKET_EXPORTS
-	#define HPSOCKET_API EXTERN_C __declspec(dllexport)
+#ifdef HPSOCKET_STATIC_LIB
+	#define HPSOCKET_API EXTERN_C
 #else
-	#define HPSOCKET_API EXTERN_C __declspec(dllimport)
+	#ifdef HPSOCKET_EXPORTS
+		#define HPSOCKET_API EXTERN_C __declspec(dllexport)
+	#else
+		#define HPSOCKET_API EXTERN_C __declspec(dllimport)
+	#endif
 #endif
 
 #include "SocketInterface.h"
