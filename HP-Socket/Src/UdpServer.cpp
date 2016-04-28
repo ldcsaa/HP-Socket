@@ -999,7 +999,7 @@ void CUdpServer::HandleZeroBytes(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 			{
 				pSocketObj->detectFails = 0;
 				SendDetectPackage(dwConnID, pSocketObj);
-			}			
+			}
 		}
 
 		DoReceive(pBufferObj);

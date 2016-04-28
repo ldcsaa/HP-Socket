@@ -1865,7 +1865,7 @@ namespace HPSocketCS.SDK
         public static extern bool HP_Agent_IsMarkSilence(IntPtr pAgent);
 
         /******************************************************************************/
-        /***************************** Agent 操作方法 *****************************/
+        /***************************** TCP Agent 操作方法 *****************************/
 
         /// <summary>
         ///  名称：发送小文件
@@ -1946,6 +1946,57 @@ namespace HPSocketCS.SDK
         /// <returns></returns>
         [DllImport(SOCKET_DLL_PATH)]
         public static extern uint HP_TcpAgent_GetKeepAliveInterval(IntPtr pAgent);
+
+        /**********************************************************************************/
+        /***************************** UDP Agent 属性访问方法 *****************************/
+
+        /// <summary>
+        /// 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节）
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <param name="dwMaxDatagramSize"></param>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern void HP_UdpAgent_SetMaxDatagramSize(IntPtr pAgent, uint dwMaxDatagramSize);
+
+        /// <summary>
+        /// 设置监测包尝试次数（0 则不发送监测跳包，如果超过最大尝试次数则认为已断线）
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <param name="dwDetectAttempts"></param>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern void HP_UdpAgent_SetDetectAttempts(IntPtr pAgent, uint dwDetectAttempts);
+
+        /// <summary>
+        /// 设置监测包发送间隔（秒，0 不发送监测包）
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <param name="dwDetectInterval"></param>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern void HP_UdpAgent_SetDetectInterval(IntPtr pAgent, uint dwDetectInterval);
+
+        /// <summary>
+        /// 获取数据报文最大长度
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern uint HP_UdpAgent_GetMaxDatagramSize(IntPtr pAgent);
+
+        /// <summary>
+        /// 获取心跳检查次数
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern uint HP_UdpAgent_GetDetectAttempts(IntPtr pAgent);
+
+        /// <summary>
+        /// 获取心跳检查间隔
+        /// </summary>
+        /// <param name="pAgent"></param>
+        /// <returns></returns>
+        [DllImport(SOCKET_DLL_PATH)]
+        public static extern uint HP_UdpAgent_GetDetectInterval(IntPtr pAgent);
 
         /***************************************************************************************/
         /***************************** TCP Pull Server 组件操作方法 *****************************/

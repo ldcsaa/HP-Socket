@@ -855,6 +855,22 @@ HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent);
 /* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent);
 
+/**********************************************************************************/
+/***************************** UDP Agent 属性访问方法 *****************************/
+
+/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+HPSOCKET_API void __stdcall HP_UdpAgent_SetMaxDatagramSize(HP_UdpAgent pAgent, DWORD dwMaxDatagramSize);
+/* 设置监测包尝试次数（0 则不发送监测跳包，如果超过最大尝试次数则认为已断线） */
+HPSOCKET_API void __stdcall HP_UdpAgent_SetDetectAttempts(HP_UdpAgent pAgent, DWORD dwDetectAttempts);
+/* 设置监测包发送间隔（秒，0 不发送监测包） */
+HPSOCKET_API void __stdcall HP_UdpAgent_SetDetectInterval(HP_UdpAgent pAgent, DWORD dwDetectInterval);
+/* 获取数据报文最大长度 */
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetMaxDatagramSize(HP_UdpAgent pAgent);
+/* 获取心跳检查次数 */
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetDetectAttempts(HP_UdpAgent pAgent);
+/* 获取心跳检查间隔 */
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetDetectInterval(HP_UdpAgent pAgent);
+
 /******************************************************************************/
 /***************************** Client 组件操作方法 *****************************/
 

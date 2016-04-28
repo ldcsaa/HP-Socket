@@ -44,14 +44,14 @@ public:
 	, m_bAsyncConnect			(TRUE)
 	, m_enSendPolicy			(SP_PACK)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
-	, m_dwSocketBufferSize		(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
 	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
 	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
 	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
 	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
 	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
-	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
-	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
+	, m_dwMaxDatagramSize		(DEFAULT_UDP_MAX_DATAGRAM_SIZE)
+	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
+	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
 	, m_bReuseAddress			(FALSE)
 	, m_bMarkSilence			(FALSE)
 	{
@@ -90,44 +90,32 @@ public:
 	virtual LPCTSTR GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
-	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)		{m_dwMaxDatagramSize	= dwMaxDatagramSize;}
-	virtual void SetDetectAttempts		(DWORD dwDetectAttempts)		{m_dwDetectAttempts		= dwDetectAttempts;}
-	virtual void SetDetectInterval		(DWORD dwDetectInterval)		{m_dwDetectInterval		= dwDetectInterval;}
-	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize = dwFreeBufferPoolSize;}
-	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold = dwFreeBufferPoolHold;}
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
-
-
-	virtual DWORD GetMaxDatagramSize	()	{return m_dwMaxDatagramSize;}
-	virtual DWORD GetDetectAttempts		()	{return m_dwDetectAttempts;}
-	virtual DWORD GetDetectInterval		()	{return m_dwDetectInterval;}
-	virtual DWORD GetFreeBufferPoolSize	()	{return m_dwFreeBufferPoolSize;}
-	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
-	virtual void SetSocketBufferSize		(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize		= dwSocketBufferSize;}
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
 	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		{m_dwFreeSocketObjPool		= dwFreeSocketObjPool;}
 	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)		{m_dwFreeBufferObjPool		= dwFreeBufferObjPool;}
 	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)		{m_dwFreeSocketObjHold		= dwFreeSocketObjHold;}
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		{m_dwFreeBufferObjHold		= dwFreeBufferObjHold;}
-	virtual void SetKeepAliveTime			(DWORD dwKeepAliveTime)			{m_dwKeepAliveTime			= dwKeepAliveTime;}
-	virtual void SetKeepAliveInterval		(DWORD dwKeepAliveInterval)		{m_dwKeepAliveInterval		= dwKeepAliveInterval;}
+	virtual void SetMaxDatagramSize			(DWORD dwMaxDatagramSize)		{m_dwMaxDatagramSize		= dwMaxDatagramSize;}
+	virtual void SetDetectAttempts			(DWORD dwDetectAttempts)		{m_dwDetectAttempts			= dwDetectAttempts;}
+	virtual void SetDetectInterval			(DWORD dwDetectInterval)		{m_dwDetectInterval			= dwDetectInterval;}
 	virtual void SetReuseAddress			(BOOL bReuseAddress)			{m_bReuseAddress			= bReuseAddress;}
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
-	virtual DWORD GetSocketBufferSize		()	{return m_dwSocketBufferSize;}
 	virtual DWORD GetFreeSocketObjLockTime	()	{return m_dwFreeSocketObjLockTime;}
 	virtual DWORD GetFreeSocketObjPool		()	{return m_dwFreeSocketObjPool;}
 	virtual DWORD GetFreeBufferObjPool		()	{return m_dwFreeBufferObjPool;}
 	virtual DWORD GetFreeSocketObjHold		()	{return m_dwFreeSocketObjHold;}
 	virtual DWORD GetFreeBufferObjHold		()	{return m_dwFreeBufferObjHold;}
-	virtual DWORD GetKeepAliveTime			()	{return m_dwKeepAliveTime;}
-	virtual DWORD GetKeepAliveInterval		()	{return m_dwKeepAliveInterval;}
+	virtual DWORD GetMaxDatagramSize		()	{return m_dwMaxDatagramSize;}
+	virtual DWORD GetDetectAttempts			()	{return m_dwDetectAttempts;}
+	virtual DWORD GetDetectInterval			()	{return m_dwDetectInterval;}
 	virtual BOOL  IsReuseAddress			()	{return m_bReuseAddress;}
 	virtual BOOL  IsMarkSilence				()	{return m_bMarkSilence;}
 
@@ -230,24 +218,19 @@ private:
 
 private:
 
+
+	EnSendPolicy		m_enSendPolicy;
+	DWORD				m_dwWorkerThreadCount;
+	DWORD				m_dwFreeSocketObjLockTime;
+	DWORD				m_dwFreeSocketObjPool;
+	DWORD				m_dwFreeBufferObjPool;
+	DWORD				m_dwFreeSocketObjHold;
+	DWORD				m_dwFreeBufferObjHold;
 	DWORD				m_dwMaxDatagramSize;
-	DWORD				m_dwFreeBufferPoolSize;
-	DWORD				m_dwFreeBufferPoolHold;
 	DWORD				m_dwDetectAttempts;
 	DWORD				m_dwDetectInterval;
-
-	EnSendPolicy m_enSendPolicy;
-	DWORD m_dwWorkerThreadCount;
-	DWORD m_dwSocketBufferSize;
-	DWORD m_dwFreeSocketObjLockTime;
-	DWORD m_dwFreeSocketObjPool;
-	DWORD m_dwFreeBufferObjPool;
-	DWORD m_dwFreeSocketObjHold;
-	DWORD m_dwFreeBufferObjHold;
-	DWORD m_dwKeepAliveTime;
-	DWORD m_dwKeepAliveInterval;
-	BOOL  m_bReuseAddress;
-	BOOL  m_bMarkSilence;
+	BOOL				m_bReuseAddress;
+	BOOL				m_bMarkSilence;
 
 private:
 	CInitSocket			m_wsSocket;

@@ -671,36 +671,6 @@ namespace HPSocketCS
         }
 
         /// <summary>
-        /// 读取或设置心跳包间隔（毫秒，0 则不发送心跳包））
-        /// </summary>
-//         public uint KeepAliveTime
-//         {
-//             get
-//             {
-//                 return HPSocketSdk.HP_UdpAgent_GetKeepAliveTime(pAgent);
-//             }
-//             set
-//             {
-//                 HPSocketSdk.HP_UdpAgent_SetKeepAliveTime(pAgent, value);
-//             }
-//         }
-
-        /// <summary>
-        /// 读取或设置心跳确认包检测间隔（毫秒，0 不发送心跳包，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线）
-        /// </summary>
-//         public uint KeepAliveInterval
-//         {
-//             get
-//             {
-//                 return HPSocketSdk.HP_UdpAgent_GetKeepAliveInterval(pAgent);
-//             }
-//             set
-//             {
-//                 HPSocketSdk.HP_UdpAgent_SetKeepAliveInterval(pAgent, value);
-//             }
-//         }
-
-        /// <summary>
         /// 读取或设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE）
         /// </summary>
         public bool IsMarkSilence
@@ -727,6 +697,51 @@ namespace HPSocketCS
             set
             {
                 HPSocketSdk.HP_Agent_SetSendPolicy(pAgent, value);
+            }
+        }
+
+        /// <summary>
+        /// 读取或设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节）
+        /// </summary>
+        public uint MaxDatagramSize
+        {
+            get
+            {
+                return HPSocketSdk.HP_UdpAgent_GetMaxDatagramSize(pAgent);
+            }
+            set
+            {
+                HPSocketSdk.HP_UdpAgent_SetMaxDatagramSize(pAgent, value);
+            }
+        }
+
+        /// <summary>
+        /// 读取或设置监测包尝试次数（0 则不发送监测跳包，如果超过最大尝试次数则认为已断线）
+        /// </summary>
+        public uint DetectAttempts
+        {
+            get
+            {
+                return HPSocketSdk.HP_UdpAgent_GetDetectAttempts(pAgent);
+            }
+            set
+            {
+                HPSocketSdk.HP_UdpAgent_SetDetectAttempts(pAgent, value);
+            }
+        }
+
+        /// <summary>
+        /// 读取或设置设置监测包发送间隔（秒，0 不发送监测包）
+        /// </summary>
+        public uint DetectInterval
+        {
+            get
+            {
+                return HPSocketSdk.HP_UdpAgent_GetDetectInterval(pAgent);
+            }
+            set
+            {
+                HPSocketSdk.HP_UdpAgent_SetDetectInterval(pAgent, value);
             }
         }
 

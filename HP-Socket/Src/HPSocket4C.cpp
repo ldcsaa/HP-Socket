@@ -381,6 +381,11 @@ public:
 		return (ITcpAgent*)ToAgent(pAgent);
 	}
 
+	inline static IUdpAgent* ToUdpAgent(HP_UdpAgent pAgent)
+	{
+		return (IUdpAgent*)ToAgent(pAgent);
+	}
+
 	inline static ITcpClient* ToTcpClient(HP_TcpClient pClient)
 	{
 		return (ITcpClient*)ToClient(pClient);
@@ -1605,6 +1610,39 @@ HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent)
 HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent)
 {
 	return C_HP_Object::ToTcpAgent(pAgent)->GetKeepAliveInterval();
+}
+
+/**********************************************************************************/
+/***************************** UDP Agent 属性访问方法 *****************************/
+
+HPSOCKET_API void __stdcall HP_UdpAgent_SetMaxDatagramSize(HP_UdpAgent pAgent, DWORD dwMaxDatagramSize)
+{
+	C_HP_Object::ToUdpAgent(pAgent)->SetMaxDatagramSize(dwMaxDatagramSize);
+}
+
+HPSOCKET_API void __stdcall HP_UdpAgent_SetDetectAttempts(HP_UdpAgent pAgent, DWORD dwDetectAttempts)
+{
+	C_HP_Object::ToUdpAgent(pAgent)->SetDetectAttempts(dwDetectAttempts);
+}
+
+HPSOCKET_API void __stdcall HP_UdpAgent_SetDetectInterval(HP_UdpAgent pAgent, DWORD dwDetectInterval)
+{
+	C_HP_Object::ToUdpAgent(pAgent)->SetDetectInterval(dwDetectInterval);
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetMaxDatagramSize(HP_UdpAgent pAgent)
+{
+	return C_HP_Object::ToUdpAgent(pAgent)->GetMaxDatagramSize();
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetDetectAttempts(HP_UdpAgent pAgent)
+{
+	return C_HP_Object::ToUdpAgent(pAgent)->GetDetectAttempts();
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetDetectInterval(HP_UdpAgent pAgent)
+{
+	return C_HP_Object::ToUdpAgent(pAgent)->GetDetectInterval();
 }
 
 /******************************************************************************/

@@ -107,14 +107,14 @@ BOOL CUdpAgent::CheckParams()
 {
 	if(m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)
 		if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
-			if((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)
-				if((int)m_dwFreeSocketObjLockTime >= 0)
-					if((int)m_dwFreeSocketObjPool >= 0)
-						if((int)m_dwFreeBufferObjPool >= 0)
-							if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
-								if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
-									if((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)
-										if((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)
+			if((int)m_dwFreeSocketObjLockTime >= 0)
+				if((int)m_dwFreeSocketObjPool >= 0)
+					if((int)m_dwFreeBufferObjPool >= 0)
+						if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
+							if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
+								if((int)m_dwMaxDatagramSize > 0)
+									if((int)m_dwDetectAttempts >= 0)
+										if((int)m_dwDetectInterval >= 0)
 											return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -126,7 +126,7 @@ void CUdpAgent::PrepareStart()
 	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
 	m_lsFreeBuffer.Reset(m_dwFreeBufferObjHold);
 
-	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
+	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
 	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
 	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 
@@ -414,14 +414,14 @@ void CUdpAgent::DeleteSocketObj(TSocketObj* pSocketObj)
 
 TBufferObj* CUdpAgent::GetFreeBufferObj(int iLen)
 {
-	ASSERT(iLen >= 0 && iLen <= (int)m_dwSocketBufferSize);
+	ASSERT(iLen >= 0 && iLen <= (int)m_dwMaxDatagramSize);
 
 	TBufferObj* pBufferObj = nullptr;
 
 	if(!m_lsFreeBuffer.TryGet(&pBufferObj))
 		pBufferObj = CreateBufferObj();
 
-	if(iLen <= 0) iLen	 = m_dwSocketBufferSize;
+	if(iLen <= 0) iLen	 = m_dwMaxDatagramSize;
 	pBufferObj->buff.len = iLen;
 
 	return pBufferObj;
@@ -446,7 +446,7 @@ void CUdpAgent::ReleaseFreeBuffer()
 
 TBufferObj* CUdpAgent::CreateBufferObj()
 {
-	TBufferObj* pBufferObj = (TBufferObj*)m_phBuffer.Alloc(sizeof(TBufferObj) + m_dwSocketBufferSize);
+	TBufferObj* pBufferObj = (TBufferObj*)m_phBuffer.Alloc(sizeof(TBufferObj) + m_dwMaxDatagramSize);
 	ASSERT(pBufferObj);
 
 	::ZeroMemory(pBufferObj, sizeof(TBufferObj));
@@ -981,7 +981,7 @@ void CUdpAgent::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferOb
 
 int CUdpAgent::DoReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
-	pBufferObj->buff.len = m_dwSocketBufferSize;
+	pBufferObj->buff.len = m_dwMaxDatagramSize;
 	int result =::PostReceive(pSocketObj, pBufferObj);
 
 	if(result != NO_ERROR)
@@ -1039,9 +1039,6 @@ DWORD CUdpAgent::CreateClientSocket(SOCKET& soClient)
 	if(soClient != INVALID_SOCKET)
 	{
 		VERIFY(::SSO_ReuseAddress(soClient, m_bReuseAddress) != SOCKET_ERROR);
-
-		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-		::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval);
 
 		if(m_bAsyncConnect && ::bind(soClient, (SOCKADDR*)&m_soAddrIN, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
 			result = ::WSAGetLastError();
@@ -1229,7 +1226,7 @@ int CUdpAgent::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLeng
 
 	while(iRemain > 0)
 	{
-		int iBufferSize = min(iRemain, (int)m_dwSocketBufferSize);
+		int iBufferSize = min(iRemain, (int)m_dwMaxDatagramSize);
 		TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
 		memcpy(pBufferObj->buff.buf, pBuffer, iBufferSize);
 
@@ -1335,7 +1332,7 @@ int CUdpAgent::SendItem(TSocketObj* pSocketObj)
 		TItemPtr itPtr(m_itPool, pSocketObj->sndBuff.PopFront());
 
 		int iBufferSize = itPtr->Size();
-		ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwSocketBufferSize);
+		ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwMaxDatagramSize);
 
 		pSocketObj->pending   -= iBufferSize;
 		TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
