@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.11
+ * Version	: 2.3.12
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -35,9 +35,6 @@ Desc:
 #include "WaitFor.h"
 
 const DWORD TItem::DEFAULT_ITEM_CAPACITY			= ::SysGetPageSize();
-const DWORD CItemPool::DEFAULT_ITEM_CAPACITY		= TItem::DEFAULT_ITEM_CAPACITY;
-const DWORD CItemPool::DEFAULT_POOL_SIZE			= 300;
-const DWORD CItemPool::DEFAULT_POOL_HOLD			= 1200;
 const DWORD CBufferPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACITY;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
@@ -220,54 +217,6 @@ int TItemList::Reduce(int length)
 void TItemList::Release()
 {
 	itPool.PutFreeItem(*this);
-}
-
-void CItemPool::PutFreeItem(TItem* pItem)
-{
-	ASSERT(pItem != nullptr);
-
-	if(!m_lsFreeItem.TryPut(pItem))
-		TItem::Destruct(pItem);
-}
-
-void CItemPool::PutFreeItem(TItemList& lsItem)
-{
-	if(lsItem.IsEmpty())
-		return;
-
-	TItem* pItem;
-	while((pItem = lsItem.PopFront()) != nullptr)
-		PutFreeItem(pItem);
-}
-
-TItem* CItemPool::PickFreeItem()
-{
-	TItem* pItem = nullptr;
-
-	if(m_lsFreeItem.TryGet(&pItem))
-		pItem->Reset();
-	else
-		pItem = TItem::Construct(m_heap, m_dwItemCapacity);
-
-	return pItem;
-}
-
-inline void CItemPool::Prepare()
-{
-	m_lsFreeItem.Reset(m_dwPoolHold);
-}
-
-inline void CItemPool::Clear()
-{
-	TItem* pItem = nullptr;
-
-	while(m_lsFreeItem.TryGet(&pItem))
-		TItem::Destruct(pItem);
-
-	VERIFY(m_lsFreeItem.IsEmpty());
-	m_lsFreeItem.Reset();
-
-	m_heap.Reset();
 }
 
 TBuffer* TBuffer::Construct(CBufferPool& pool, ULONG_PTR dwID)

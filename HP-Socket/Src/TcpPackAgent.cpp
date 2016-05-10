@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.3
+ * Version	: 3.4.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -93,10 +93,12 @@ EnHandleResult CTcpPackAgent::FireClose(TSocketObj* pSocketObj, EnSocketOperatio
 
 	TBufferPackInfo* pInfo = nullptr;
 	GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
-	ASSERT(pInfo);
 
-	m_bfPool.PutFreeBuffer(pInfo->pBuffer);
-	TBufferPackInfo::Destruct(pInfo);
+	if(pInfo != nullptr)
+	{
+		m_bfPool.PutFreeBuffer(pInfo->pBuffer);
+		TBufferPackInfo::Destruct(pInfo);
+	}
 
 	return result;
 }

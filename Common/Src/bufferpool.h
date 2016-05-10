@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.11
+ * Version	: 2.3.12
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -39,10 +39,10 @@ Desc:
 
 struct TItem
 {
-	template<typename T> 
-	friend struct	TSimpleList;
+	template<typename T> friend struct	TSimpleList;
+	template<typename T> friend class	CNodePoolT;
+
 	friend struct	TItemList;
-	friend class	CItemPool;
 	friend struct	TBuffer;
 
 public:
@@ -254,6 +254,100 @@ private:
 	T*	pBack;
 };
 
+template<class T> class CNodePoolT
+{
+public:
+	void PutFreeItem(T* pItem)
+	{
+		ASSERT(pItem != nullptr);
+
+		if(!m_lsFreeItem.TryPut(pItem))
+			T::Destruct(pItem);
+	}
+
+	void PutFreeItem(TSimpleList<T>& lsItem)
+	{
+		if(lsItem.IsEmpty())
+			return;
+
+		T* pItem;
+		while((pItem = lsItem.PopFront()) != nullptr)
+			PutFreeItem(pItem);
+	}
+
+	T* PickFreeItem()
+	{
+		T* pItem = nullptr;
+
+		if(m_lsFreeItem.TryGet(&pItem))
+			pItem->Reset();
+		else
+			pItem = T::Construct(m_heap, m_dwItemCapacity);
+
+		return pItem;
+	}
+
+	inline void Prepare()
+	{
+		m_lsFreeItem.Reset(m_dwPoolHold);
+	}
+
+	inline void Clear()
+	{
+		T* pItem = nullptr;
+
+		while(m_lsFreeItem.TryGet(&pItem))
+			T::Destruct(pItem);
+
+		VERIFY(m_lsFreeItem.IsEmpty());
+		m_lsFreeItem.Reset();
+
+		m_heap.Reset();
+	}
+
+public:
+	void SetItemCapacity(DWORD dwItemCapacity)	{m_dwItemCapacity	= dwItemCapacity;}
+	void SetPoolSize	(DWORD dwPoolSize)		{m_dwPoolSize		= dwPoolSize;}
+	void SetPoolHold	(DWORD dwPoolHold)		{m_dwPoolHold		= dwPoolHold;}
+	DWORD GetItemCapacity	()					{return m_dwItemCapacity;}
+	DWORD GetPoolSize		()					{return m_dwPoolSize;}
+	DWORD GetPoolHold		()					{return m_dwPoolHold;}
+
+public:
+	CNodePoolT(	DWORD dwPoolSize	 = DEFAULT_POOL_SIZE,
+				DWORD dwPoolHold	 = DEFAULT_POOL_HOLD,
+				DWORD dwItemCapacity = DEFAULT_ITEM_CAPACITY)
+				: m_dwPoolSize(dwPoolSize)
+				, m_dwPoolHold(dwPoolHold)
+				, m_dwItemCapacity(dwItemCapacity)
+	{
+	}
+
+	~CNodePoolT()	{Clear();}
+
+	DECLARE_NO_COPY_CLASS(CNodePoolT)
+
+public:
+	static const DWORD DEFAULT_ITEM_CAPACITY;
+	static const DWORD DEFAULT_POOL_SIZE;
+	static const DWORD DEFAULT_POOL_HOLD;
+
+private:
+	CPrivateHeap	m_heap;
+
+	DWORD			m_dwItemCapacity;
+	DWORD			m_dwPoolSize;
+	DWORD			m_dwPoolHold;
+
+	CRingPool<T>	m_lsFreeItem;
+};
+
+template<class T> const DWORD CNodePoolT<T>::DEFAULT_ITEM_CAPACITY	= TItem::DEFAULT_ITEM_CAPACITY;
+template<class T> const DWORD CNodePoolT<T>::DEFAULT_POOL_SIZE		= 300;
+template<class T> const DWORD CNodePoolT<T>::DEFAULT_POOL_HOLD		= 1200;
+
+typedef CNodePoolT<TItem>	CItemPool;
+
 struct TItemList : public TSimpleList<TItem>
 {
 public:
@@ -391,53 +485,6 @@ public:
 
 private:
 	int length;
-};
-
-class CItemPool
-{
-public:
-	void PutFreeItem	(TItem* pItem);
-	void PutFreeItem	(TItemList& lsItem);
-	TItem* PickFreeItem	();
-
-	inline void Prepare();
-	inline void Clear();
-
-public:
-	void SetItemCapacity(DWORD dwItemCapacity)	{m_dwItemCapacity	= dwItemCapacity;}
-	void SetPoolSize	(DWORD dwPoolSize)		{m_dwPoolSize		= dwPoolSize;}
-	void SetPoolHold	(DWORD dwPoolHold)		{m_dwPoolHold		= dwPoolHold;}
-	DWORD GetItemCapacity	()					{return m_dwItemCapacity;}
-	DWORD GetPoolSize		()					{return m_dwPoolSize;}
-	DWORD GetPoolHold		()					{return m_dwPoolHold;}
-
-public:
-	CItemPool(	DWORD dwPoolSize	 = DEFAULT_POOL_SIZE,
-				DWORD dwPoolHold	 = DEFAULT_POOL_HOLD,
-				DWORD dwItemCapacity = DEFAULT_ITEM_CAPACITY)
-	: m_dwPoolSize(dwPoolSize)
-	, m_dwPoolHold(dwPoolHold)
-	, m_dwItemCapacity(dwItemCapacity)
-	{
-	}
-
-	~CItemPool()	{Clear();}
-
-	DECLARE_NO_COPY_CLASS(CItemPool)
-
-public:
-	static const DWORD DEFAULT_ITEM_CAPACITY;
-	static const DWORD DEFAULT_POOL_SIZE;
-	static const DWORD DEFAULT_POOL_HOLD;
-
-private:
-	CPrivateHeap		m_heap;
-
-	DWORD				m_dwItemCapacity;
-	DWORD				m_dwPoolSize;
-	DWORD				m_dwPoolHold;
-
-	CRingPool<TItem>	m_lsFreeItem;
 };
 
 struct TItemPtr
@@ -592,15 +639,14 @@ public:
 	TBuffer* operator []	(ULONG_PTR dwID)			{return FindCacheBuffer(dwID);}
 
 public:
-	CBufferPool(DWORD dwPoolSize	 = DEFAULT_BUFFER_POOL_SIZE,
-				DWORD dwPoolHold	 = DEFAULT_BUFFER_POOL_HOLD,
-				DWORD dwLockTime	 = DEFAULT_BUFFER_LOCK_TIME,
-				DWORD dwItemCapacity = DEFAULT_ITEM_CAPACITY)
+	CBufferPool(DWORD dwPoolSize = DEFAULT_BUFFER_POOL_SIZE,
+				DWORD dwPoolHold = DEFAULT_BUFFER_POOL_HOLD,
+				DWORD dwLockTime = DEFAULT_BUFFER_LOCK_TIME)
 	: m_dwBufferPoolSize(dwPoolSize)
 	, m_dwBufferPoolHold(dwPoolHold)
 	, m_dwBufferLockTime(dwLockTime)
 	{
-		m_itPool.SetItemCapacity(dwItemCapacity);
+
 	}
 
 	~CBufferPool()	{Clear();}

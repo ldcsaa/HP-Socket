@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.11
+ * Version	: 2.3.12
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -696,11 +696,13 @@ public:
 		{
 			pTail = m_pTail;
 
-			if(::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail->pNext, pNode, nullptr) == nullptr)
+			if(::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail, (PVOID)pNode, (PVOID)pTail) == pTail)
+			{
+				pTail->pNext = pNode;
 				break;
+			}
 		}
 
-		::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail, pNode, (PVOID)pTail);
 		::InterlockedIncrement(&m_lSize);
 	}
 
@@ -709,26 +711,35 @@ public:
 		ASSERT(ppVal != nullptr);
 
 		BOOL isOK	= FALSE;
-		VNPTR pNext	= nullptr;
+		VNPTR pHead = nullptr;
+		VNPTR pNext = nullptr;
+		T* pVal		= nullptr;
 
 		while(true) 
 		{
-			pNext = m_pHead->pNext;
+			while(::InterlockedCompareExchange(&m_lLock, 1, 0) != 0)
+				CSpinGuard::Pause(0);
+
+			pHead = m_pHead;
+			pNext = pHead->pNext;
 
 			if(pNext == nullptr)
-				break;
-
-			if(::InterlockedCompareExchangePointer((volatile PVOID*)&m_pHead->pNext, (PVOID)pNext->pNext, (PVOID)pNext) == pNext)
 			{
-				*ppVal	= pNext->pValue;
+				m_lLock = 0;
+				break;
+			}
+
+			pVal	= pNext->pValue;
+			m_lLock	= 0;
+
+			if(::InterlockedCompareExchangePointer((volatile PVOID*)&m_pHead, (PVOID)pNext, (PVOID)pHead) == pHead)
+			{
+				*ppVal	= pVal;
 				isOK	= TRUE;
 
-				if(m_pTail == pNext)
-					::InterlockedCompareExchangePointer((volatile PVOID*)&m_pTail, (PVOID)m_pHead, (PVOID)pNext);
-				
 				::InterlockedDecrement(&m_lSize);
 
-				delete pNext;
+				delete pHead;
 				break;
 			}
 		}
@@ -743,7 +754,7 @@ public:
 
 public:
 
-	CCASQueue() : m_lSize(0)
+	CCASQueue() : m_lLock(0), m_lSize(0)
 	{
 		NPTR pHead = new Node(nullptr);
 		m_pHead = m_pTail = pHead;
@@ -751,6 +762,8 @@ public:
 
 	~CCASQueue()
 	{
+		ASSERT(m_lLock == 0);
+		ASSERT(m_lSize == 0);
 		ASSERT(m_pHead != nullptr);
 		ASSERT(m_pHead->pNext == nullptr);
 
@@ -764,6 +777,7 @@ public:
 	}
 
 private:
+	VLONG m_lLock;
 	VLONG m_lSize;
 	VNPTR m_pHead;
 	VNPTR m_pTail;
