@@ -120,6 +120,9 @@
     <ClInclude Include="..\..\..\Common\Src\RingBuffer.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\UdpAgent.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -186,6 +189,9 @@
       <Filter>HPSocket</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\MiscHelper.cpp">
+      <Filter>HPSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\UdpAgent.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
   </ItemGroup>

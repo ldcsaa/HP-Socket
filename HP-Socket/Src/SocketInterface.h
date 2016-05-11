@@ -366,6 +366,29 @@ public:
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
 };
 
+/************************************************************************
+名称：UDP 通信代理 Socket 监听器接口
+描述：定义 UDP 通信代理 Socket 监听器的所有事件
+************************************************************************/
+class IUdpAgentListener : public IAgentListener
+{
+};
+
+/************************************************************************
+名称：PUSH 模型通信代理 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CUdpAgentListener : public IUdpAgentListener
+{
+public:
+	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)						{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)				{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnShutdown()													{return HR_IGNORE;}
+};
+
+
 class IClient;
 
 /************************************************************************
@@ -490,7 +513,7 @@ class IUdpClientListener : public IClientListener
 };
 
 /************************************************************************
-名称：UDP 户端 Socket 监听器抽象基类
+名称：UDP 客户端 Socket 监听器抽象基类
 描述：定义某些事件的默认处理方法（忽略事件）
 ************************************************************************/
 class CUdpClientListener : public IUdpClientListener
@@ -899,6 +922,37 @@ public:
 	virtual DWORD GetKeepAliveTime		()	= 0;
 	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
+};
+
+/************************************************************************
+名称：UDP 通信代理组件接口
+描述：定义 UDP 通信代理组件的所有操作方法和属性访问方法
+************************************************************************/
+class IUdpAgent : public IAgent
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	= 0;
+	/* 获取数据报文最大长度 */
+	virtual DWORD GetMaxDatagramSize()							= 0;
+
+	/* 设置监测包尝试次数（0 则不发送监测跳包，如果超过最大尝试次数则认为已断线） */
+	virtual void SetDetectAttempts	(DWORD dwDetectAttempts)	= 0;
+	/* 设置监测包发送间隔（秒，0 不发送监测包） */
+	virtual void SetDetectInterval	(DWORD dwDetectInterval)	= 0;
+	/* 获取心跳检查次数 */
+	virtual DWORD GetDetectAttempts	()							= 0;
+	/* 获取心跳检查间隔 */
+	virtual DWORD GetDetectInterval	()							= 0;
 };
 
 /************************************************************************

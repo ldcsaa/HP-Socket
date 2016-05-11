@@ -80,6 +80,9 @@
     <Compile Include="TcpPullServer.cs" />
     <Compile Include="TcpPackAgent.cs" />
     <Compile Include="TcpPackClient.cs" />
+    <Compile Include="UdpAgent.cs" />
+    <Compile Include="UdpClient.cs" />
+    <Compile Include="UdpServer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

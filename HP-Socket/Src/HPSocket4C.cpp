@@ -27,6 +27,7 @@
 #include "TcpServer.h"
 #include "TcpClient.h"
 #include "TcpAgent.h"
+#include "UdpAgent.h"
 #include "TcpPullServer.h"
 #include "TcpPullClient.h"
 #include "TcpPullAgent.h"
@@ -380,6 +381,11 @@ public:
 		return (ITcpAgent*)ToAgent(pAgent);
 	}
 
+	inline static IUdpAgent* ToUdpAgent(HP_UdpAgent pAgent)
+	{
+		return (IUdpAgent*)ToAgent(pAgent);
+	}
+
 	inline static ITcpClient* ToTcpClient(HP_TcpClient pClient)
 	{
 		return (ITcpClient*)ToClient(pClient);
@@ -685,6 +691,12 @@ public:
 	C_HP_TcpPackAgent(ITcpAgentListener* pListener) : C_HP_Object(sizeof(IPackSocket)), CTcpPackAgent(pListener) {}
 };
 
+class C_HP_UdpAgent : public C_HP_Object, public CUdpAgent
+{
+public:
+	C_HP_UdpAgent(IUdpAgentListener* pListener) : CUdpAgent(pListener) {}
+};
+
 class C_HP_TcpClient : public C_HP_Object, public CTcpClient
 {
 public:
@@ -768,6 +780,11 @@ HPSOCKET_API HP_UdpServer __stdcall Create_HP_UdpServer(HP_UdpServerListener pLi
 	return (HP_UdpServer)(new C_HP_UdpServer((IUdpServerListener*)pListener));
 }
 
+HPSOCKET_API HP_UdpAgent __stdcall Create_HP_UdpAgent(HP_UdpAgentListener pListener)
+{
+	return (HP_UdpAgent)(new C_HP_UdpAgent((IUdpAgentListener*)pListener));
+}
+
 HPSOCKET_API HP_UdpClient __stdcall Create_HP_UdpClient(HP_UdpClientListener pListener)
 {
 	return (HP_UdpClient)(new C_HP_UdpClient((IUdpClientListener*)pListener));
@@ -828,6 +845,11 @@ HPSOCKET_API void __stdcall Destroy_HP_UdpServer(HP_UdpServer pServer)
 	delete (C_HP_UdpServer*)pServer;
 }
 
+HPSOCKET_API void __stdcall Destroy_HP_UdpAgent(HP_UdpAgent pAgent)
+{
+	delete (C_HP_UdpAgent*)pAgent;
+}
+
 HPSOCKET_API void __stdcall Destroy_HP_UdpClient(HP_UdpClient pClient)
 {
 	delete (C_HP_UdpClient*)pClient;
@@ -873,6 +895,12 @@ HPSOCKET_API HP_UdpServerListener __stdcall Create_HP_UdpServerListener()
 	return (HP_UdpServerListener)(new C_HP_ServerListener);
 }
 
+HPSOCKET_API HP_UdpAgentListener __stdcall Create_HP_UdpAgentListener()
+{
+	return (HP_UdpAgentListener)(new C_HP_AgentListener);
+}
+
+
 HPSOCKET_API HP_UdpClientListener __stdcall Create_HP_UdpClientListener()
 {
 	return (HP_UdpClientListener)(new C_HP_ClientListener);
@@ -916,6 +944,11 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpPullClientListener(HP_TcpPullClientLis
 HPSOCKET_API void __stdcall Destroy_HP_UdpServerListener(HP_UdpServerListener pListener)
 {
 	delete (C_HP_ServerListener*)pListener;
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_UdpAgentListener(HP_UdpAgentListener pListener)
+{
+	delete (C_HP_AgentListener*)pListener;
 }
 
 HPSOCKET_API void __stdcall Destroy_HP_UdpClientListener(HP_UdpClientListener pListener)
@@ -1577,6 +1610,39 @@ HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent)
 HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent)
 {
 	return C_HP_Object::ToTcpAgent(pAgent)->GetKeepAliveInterval();
+}
+
+/**********************************************************************************/
+/***************************** UDP Agent 属性访问方法 *****************************/
+
+HPSOCKET_API void __stdcall HP_UdpAgent_SetMaxDatagramSize(HP_UdpAgent pAgent, DWORD dwMaxDatagramSize)
+{
+	C_HP_Object::ToUdpAgent(pAgent)->SetMaxDatagramSize(dwMaxDatagramSize);
+}
+
+HPSOCKET_API void __stdcall HP_UdpAgent_SetDetectAttempts(HP_UdpAgent pAgent, DWORD dwDetectAttempts)
+{
+	C_HP_Object::ToUdpAgent(pAgent)->SetDetectAttempts(dwDetectAttempts);
+}
+
+HPSOCKET_API void __stdcall HP_UdpAgent_SetDetectInterval(HP_UdpAgent pAgent, DWORD dwDetectInterval)
+{
+	C_HP_Object::ToUdpAgent(pAgent)->SetDetectInterval(dwDetectInterval);
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetMaxDatagramSize(HP_UdpAgent pAgent)
+{
+	return C_HP_Object::ToUdpAgent(pAgent)->GetMaxDatagramSize();
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetDetectAttempts(HP_UdpAgent pAgent)
+{
+	return C_HP_Object::ToUdpAgent(pAgent)->GetDetectAttempts();
+}
+
+HPSOCKET_API DWORD __stdcall HP_UdpAgent_GetDetectInterval(HP_UdpAgent pAgent)
+{
+	return C_HP_Object::ToUdpAgent(pAgent)->GetDetectInterval();
 }
 
 /******************************************************************************/
