@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.12
+ * Version	: 2.3.13
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -297,20 +297,20 @@ void CBufferPool::PutFreeBuffer(ULONG_PTR dwID)
 	TBuffer* pBuffer = FindCacheBuffer(dwID);
 
 	if(pBuffer != nullptr)
-	{
-		{
-			CWriteLock locallock(m_csBufferMap);
-			m_mpBuffer.erase(dwID);
-		}
-
 		PutFreeBuffer(pBuffer);
-	}
 }
 
 void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 {
+	ASSERT(pBuffer != nullptr);
+
 	if(!pBuffer->IsValid())
 		return;
+
+	{
+		CWriteLock locallock(m_csBufferMap);
+		m_mpBuffer.erase(pBuffer->ID());
+	}
 
 	BOOL bOK = FALSE;
 

@@ -1,14 +1,44 @@
 ==========================================================================================
-v3.4.4 更新：
+v3.5.1 更新：
 ==========================================================================================
 
-> Bug 修复：
+> 增加 SSL 系列通信组件：
 -----------------
-1、修复 TCP Pack Agent “异步连接失败导致程序崩溃” Bug
+1、新增 SSL PUSH 组件：CSSLServer、CSSLAgent、CSSLClient
+2、新增 SSL PULL 组件：CSSLPullServer、CSSLPullAgent、CSSLPullClient
+3、新增 SSL PACK 组件：CSSLPackServer、CSSLPackAgent、CSSLPackClient
+4、SSL Server 实现 ITcpServer 接口，SSL Agent 实现 ITcpAgent 接口，SSL Client 实现 ITcpClient 接口
+5、启动 SSL 通信组件前需要调用 HP_SSL_Initialize() 函数初始化 SSL 全局环境参数
+6、通信结束后调用 HP_SSL_Cleanup() 函数清理 SSL 全局运行环境
+7、新增 SSL 相关示例 Demo：
+	1) TestEcho-SSL			（源代码）
+	2) TestEcho-SSL-Pack	（DLL / 4C DLL）
+	3) TestEcho-SSL-4C		（4C LIB）
+	4) TestEcho-SSL-PFM		（LIB）
+
+> 组件接口调整：
+-----------------
+1、ITcpServerListener 接口增加 SSL 握手成功事件：OnHandShake(CONNID dwConnID)
+2、ITcpAgentListener 接口增加 SSL 握手成功事件：OnHandShake(CONNID dwConnID)
+3、ITcpClientListener 接口增加 SSL 握手成功事件：OnHandShake(IClient* pClient)
+4、枚举类型 EnSocketError 增加‘SSL 环境未就绪’错误代码 SE_SSL_ENV_NOT_READY 
+5、增加枚举类型：EnSSLSessionMode（SSL 工作模式），EnSSLVerifyMode（SSL 验证模式）
+6、HPSocket-SSL DLL 主要头文件：SocketInterface-SSL.h，HPSocket-SSL.h
+7、HPSocket4C-SSL DLL 主要头文件：HPSocket4C-SSL.h
+8、Tcp Pack 系列组件可设置的最大包长调整为 4194303/0x3FFFFF 字节
+9、Tcp Pack 系列组件的有效包头标识取值范围调整为 0 ~ 1023/0x3FF
+
+> 增加静态库工程：
+-----------------
+1、新增项目工程 HPSocketLIB 和 HPSocketLIB4C 用于编译 HPSocket 和 HPSocket4C 静态库
+2、静态库与动态库的使用方式一致（请参考示例 Demo：TestEcho-SSL-4C 和 TestEcho-SSL-PFM）
+3、使用 HPSocket 或 HPSocket4C 静态库时，需要在工程属性中定义预处理宏 -> HPSOCKET_STATIC_LIB
+4、静态库目标文件不包含在发布包中（因为太大），如果需要请自行编译
 
 > 升级说明：
 -----------------
-1、HP-Socket v3.4.4 完全兼容 HP-Socket v3.4.3 版本，可以直接替换升级
+1、HP-Socket v3.5.1 的非 SSL 版本不能二进制兼容 HP-Socket v3.4.x 版本，升级需重新编译应用程序
+2、TCP 组件接口增加了 OnHandShake() 事件，使用 C++ 接口的应用程序需要处理该事件，对于非 SSL 组件则可提供一个空实现
 
 ==========================================================================================
 v3.4.3 更新：
