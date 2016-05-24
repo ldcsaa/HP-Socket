@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -226,6 +226,8 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 		else
 			ASSERT(FALSE);
 	}
+
+	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
 
 	TRACE("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
@@ -561,12 +563,11 @@ BOOL CTcpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 	return SendPackets(&buffer, 1);
 }
 
-BOOL CTcpClient::SendPackets(const WSABUF pBuffers[], int iCount)
+BOOL CTcpClient::DoSendPackets(const WSABUF pBuffers[], int iCount)
 {
-	int result			 = NO_ERROR;
-	EnSocketError enCode = SE_OK;
-
 	ASSERT(pBuffers && iCount > 0);
+
+	int result = NO_ERROR;
 
 	if(pBuffers && iCount > 0)
 	{
@@ -575,24 +576,15 @@ BOOL CTcpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 			CCriSecLock locallock(m_csSend);
 
 			if(HasStarted())
-				result = SendInternal(pBuffers, iCount, enCode);
+				result = SendInternal(pBuffers, iCount);
 			else
-			{
 				result = ERROR_INVALID_STATE;
-				enCode = SE_ILLEGAL_STATE;
-			}
 		}
 		else
-		{
 			result = ERROR_INVALID_STATE;
-			enCode = SE_ILLEGAL_STATE;
-		}
 	}
 	else
-	{
 		result = ERROR_INVALID_PARAMETER;
-		enCode = SE_INVALID_PARAM;
-	}
 
 	if(result != NO_ERROR)
 		::SetLastError(result);
@@ -600,7 +592,7 @@ BOOL CTcpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 	return (result == NO_ERROR);
 }
 
-BOOL CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount, EnSocketError& enCode)
+BOOL CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount)
 {
 	int result = NO_ERROR;
 
@@ -642,7 +634,9 @@ BOOL CTcpClient::SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead, const
 
 		if(SUCCEEDED(hr))
 		{
-			if(ullLen > 0 && ullLen <= MAX_SMALL_FILE_SIZE)
+			ULONGLONG ullTotal = ullLen + (pHead ? pHead->len : 0) + (pTail ? pTail->len : 0);
+
+			if(ullLen > 0 && ullTotal <= MAX_SMALL_FILE_SIZE)
 			{
 				CAtlFileMapping<> fmap;
 				hr = fmap.MapFile(file);

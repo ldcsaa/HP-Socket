@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -125,13 +125,12 @@ BOOL CTcpServer::CheckParams()
 void CTcpServer::PrepareStart()
 {
 	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
-	m_lsFreeBuffer.Reset(m_dwFreeBufferObjHold);
 
-	m_itPool.SetItemCapacity((int)m_dwSocketBufferSize);
-	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
-	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+	m_bfPool.SetItemCapacity((int)m_dwSocketBufferSize);
+	m_bfPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_bfPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 
-	m_itPool.Prepare();
+	m_bfPool.Prepare();
 }
 
 BOOL CTcpServer::CheckStarting()
@@ -289,8 +288,6 @@ void CTcpServer::Reset(BOOL bAll)
 	if(bAll)
 	{
 		m_phSocket.Reset();
-		m_phBuffer.Reset();
-		m_itPool.Clear();
 	}
 
 	m_iRemainAcceptSockets		= 0;
@@ -444,7 +441,7 @@ TSocketObj* CTcpServer::CreateSocketObj()
 	TSocketObj* pSocketObj = (TSocketObj*)m_phSocket.Alloc(sizeof(TSocketObj));
 	ASSERT(pSocketObj);
 
-	pSocketObj->TSocketObj::TSocketObj(m_itPool);
+	pSocketObj->TSocketObj::TSocketObj(m_bfPool);
 	
 	return pSocketObj;
 }
@@ -459,51 +456,23 @@ void CTcpServer::DeleteSocketObj(TSocketObj* pSocketObj)
 
 TBufferObj* CTcpServer::GetFreeBufferObj(int iLen)
 {
-	ASSERT(iLen >= 0 && iLen <= (int)m_dwSocketBufferSize);
+	ASSERT(iLen >= -1 && iLen <= (int)m_dwSocketBufferSize);
 
-	TBufferObj* pBufferObj = nullptr;
-
-	if(!m_lsFreeBuffer.TryGet(&pBufferObj))
-		pBufferObj = CreateBufferObj();
-
-	if(iLen <= 0) iLen	 = m_dwSocketBufferSize;
-	pBufferObj->buff.len = iLen;
+	TBufferObj* pBufferObj	= m_bfPool.PickFreeItem();
+	if(iLen < 0) iLen		= m_dwSocketBufferSize;
+	pBufferObj->buff.len	= iLen;
 
 	return pBufferObj;
 }
 
 void CTcpServer::AddFreeBufferObj(TBufferObj* pBufferObj)
 {
-	if(!m_lsFreeBuffer.TryPut(pBufferObj))
-		DeleteBufferObj(pBufferObj);
+	m_bfPool.PutFreeItem(pBufferObj);
 }
 
 void CTcpServer::ReleaseFreeBuffer()
 {
-	TBufferObj* pBufferObj = nullptr;
-
-	while(m_lsFreeBuffer.TryGet(&pBufferObj))
-		DeleteBufferObj(pBufferObj);
-
-	VERIFY(m_lsFreeBuffer.IsEmpty());
-	m_lsFreeBuffer.Reset();
-}
-
-TBufferObj* CTcpServer::CreateBufferObj()
-{
-	TBufferObj* pBufferObj = (TBufferObj*)m_phBuffer.Alloc(sizeof(TBufferObj) + m_dwSocketBufferSize);
-	ASSERT(pBufferObj);
-
-	::ZeroMemory(pBufferObj, sizeof(TBufferObj));
-	pBufferObj->buff.buf = ((char*)pBufferObj) + sizeof(TBufferObj);
-
-	return pBufferObj;
-}
-
-void CTcpServer::DeleteBufferObj(TBufferObj* pBufferObj)
-{
-	ASSERT(pBufferObj);
-	m_phBuffer.Free(pBufferObj);
+	m_bfPool.Clear();
 }
 
 TSocketObj* CTcpServer::FindSocketObj(CONNID dwConnID)
@@ -630,6 +599,42 @@ BOOL CTcpServer::GetConnectionReserved(TSocketObj* pSocketObj, PVOID* ppReserved
 	return FALSE;
 }
 
+BOOL CTcpServer::SetConnectionReserved2(CONNID dwConnID, PVOID pReserved2)
+{
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return SetConnectionReserved2(pSocketObj, pReserved2);
+}
+
+BOOL CTcpServer::SetConnectionReserved2(TSocketObj* pSocketObj, PVOID pReserved2)
+{
+	if(TSocketObj::IsExist(pSocketObj))
+	{
+		pSocketObj->reserved2 = pReserved2;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTcpServer::GetConnectionReserved2(CONNID dwConnID, PVOID* ppReserved2)
+{
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return GetConnectionReserved2(pSocketObj, ppReserved2);
+}
+
+BOOL CTcpServer::GetConnectionReserved2(TSocketObj* pSocketObj, PVOID* ppReserved2)
+{
+	ASSERT(ppReserved2 != nullptr);
+
+	if(TSocketObj::IsExist(pSocketObj))
+	{
+		*ppReserved2 = pSocketObj->reserved2;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CTcpServer::GetPendingDataLength(CONNID dwConnID, int& iPending)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
@@ -735,15 +740,20 @@ BOOL CTcpServer::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 		}
 	}
 
-	for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
-		Disconnect(*it, bForce);
+	if(!ls.empty())
+	{
+		for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
+			Disconnect(*it, bForce);
+	}
 
-	return ls.size() > 0;
+	return TRUE;
 }
 
 BOOL CTcpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 {
 	if(!m_bMarkSilence)
+		return FALSE;
+	if(dwPeriod > MAX_SILENCE_CONNECTION_PERIOD)
 		return FALSE;
 
 	ulong_ptr_deque ls;
@@ -755,15 +765,18 @@ BOOL CTcpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 
 		for(TSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
 		{
-			if(now - it->second->activeTime >= dwPeriod)
+			if((int)(now - it->second->activeTime) >= (int)dwPeriod)
 				ls.push_back(it->first);
 		}
 	}
 
-	for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
-		Disconnect(*it, bForce);
+	if(!ls.empty())
+	{
+		for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
+			Disconnect(*it, bForce);
+	}
 
-	return ls.size() > 0;
+	return TRUE;
 }
 
 void CTcpServer::WaitForAcceptSocketClose()
@@ -918,6 +931,8 @@ UINT WINAPI CTcpServer::WorkerThreadProc(LPVOID pv)
 
 		pServer->HandleIo(dwConnID, pSocketObj, pBufferObj, dwBytes, dwErrorCode);
 	}
+
+	pServer->OnWorkerThreadEnd(::GetCurrentThreadId());
 
 	return 0;
 }
@@ -1122,26 +1137,33 @@ BOOL CTcpServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOf
 	return SendPackets(dwConnID, &buffer, 1);
 }
 
-BOOL CTcpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)
+BOOL CTcpServer::DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)
 {
-	int result				= NO_ERROR;
-	TSocketObj* pSocketObj	= nullptr;
-
 	ASSERT(pBuffers && iCount > 0);
+
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(!TSocketObj::IsValid(pSocketObj))
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
+	}
+
+	return DoSendPackets(pSocketObj, pBuffers, iCount);
+}
+
+BOOL CTcpServer::DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount)
+{
+	ASSERT(pSocketObj && pBuffers && iCount > 0);
+
+	int result = NO_ERROR;
 
 	if(pBuffers && iCount > 0)
 	{
-		pSocketObj = FindSocketObj(dwConnID);
+		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(TSocketObj::IsValid(pSocketObj))
-		{
-			CCriSecLock locallock(pSocketObj->csSend);
-
-			if(TSocketObj::IsValid(pSocketObj))
-				result = SendInternal(pSocketObj, pBuffers, iCount);
-			else
-				result = ERROR_OBJECT_NOT_FOUND;
-		}
+			result = SendInternal(pSocketObj, pBuffers, iCount);
 		else
 			result = ERROR_OBJECT_NOT_FOUND;
 	}
@@ -1310,14 +1332,12 @@ int CTcpServer::SendItem(TSocketObj* pSocketObj)
 	{
 		::InterlockedIncrement(&pSocketObj->sndCount);
 
-		TItemPtr itPtr(m_itPool, pSocketObj->sndBuff.PopFront());
+		TBufferObj* pBufferObj	= pSocketObj->sndBuff.PopFront();
+		int iBufferSize			= pBufferObj->buff.len;
 
-		int iBufferSize = itPtr->Size();
 		ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwSocketBufferSize);
 
-		pSocketObj->pending   -= iBufferSize;
-		TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
-		memcpy(pBufferObj->buff.buf, itPtr->Ptr(), iBufferSize);
+		pSocketObj->pending	   -= iBufferSize;
 
 		result = ::PostSendNotCheck(pSocketObj, pBufferObj);
 
@@ -1347,7 +1367,9 @@ BOOL CTcpServer::SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWS
 
 		if(SUCCEEDED(hr))
 		{
-			if(ullLen > 0 && ullLen <= MAX_SMALL_FILE_SIZE)
+			ULONGLONG ullTotal = ullLen + (pHead ? pHead->len : 0) + (pTail ? pTail->len : 0);
+
+			if(ullLen > 0 && ullTotal <= MAX_SMALL_FILE_SIZE)
 			{
 				CAtlFileMapping<> fmap;
 				hr = fmap.MapFile(file);

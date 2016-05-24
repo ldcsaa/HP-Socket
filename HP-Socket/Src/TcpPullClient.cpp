@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,28 +24,3 @@
  
 #include "stdafx.h"
 #include "TcpPullClient.h"
-#include "MiscHelper.h"
-
-EnHandleResult CTcpPullClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
-{
-	m_lsBuffer.Cat(pData, iLength);
-
-	return __super::FireReceive(pClient, m_lsBuffer.Length());
-}
-
-EnFetchResult CTcpPullClient::Fetch(BYTE* pData, int iLength)
-{
-	return ::FetchBuffer(&m_lsBuffer, pData, iLength);
-}
-
-EnFetchResult CTcpPullClient::Peek(BYTE* pData, int iLength)
-{
-	return ::PeekBuffer(&m_lsBuffer, pData, iLength);
-}
-
-void CTcpPullClient::Reset(BOOL bAll)
-{
-	m_lsBuffer.Clear();
-
-	return __super::Reset(bAll);
-}

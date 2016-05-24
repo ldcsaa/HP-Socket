@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -31,7 +31,7 @@
 #include "SocketInterface.h"
 #include "../../Common/Src/WaitFor.h"
 #include "../../Common/Src/bufferpool.h"
-#include "../../Common//Src/RingBuffer.h"
+#include "../../Common/Src/RingBuffer.h"
 
 /************************************************************************
 名称：全局常量
@@ -44,6 +44,7 @@ extern const DWORD MAX_WORKER_THREAD_COUNT;
 extern const DWORD MIN_SOCKET_BUFFER_SIZE;
 /* 小文件最大字节数 */
 extern const DWORD MAX_SMALL_FILE_SIZE;
+extern const DWORD MAX_SILENCE_CONNECTION_PERIOD;
 
 /* IOCP 默认工作线程数 */
 extern const DWORD DEFAULT_WORKER_THREAD_COUNT;
@@ -84,6 +85,8 @@ extern const DWORD DEFAULT_UDP_DETECT_ATTEMPTS;
 /* UDP 默认监测包发送间隔 */
 extern const DWORD DEFAULT_UDP_DETECT_INTERVAL;
 
+/* TCP Pack 包长度位数 */
+extern const DWORD TCP_PACK_LENGTH_BITS;
 /* TCP Pack 包长度掩码 */
 extern const DWORD TCP_PACK_LENGTH_MASK;
 /* TCP Pack 包最大长度硬限制 */
@@ -138,25 +141,135 @@ enum EnSocketCloseFlag
 };
 
 /* 数据缓冲区基础结构 */
-struct TBufferObjBase
+template<class T> struct TBufferObjBase
 {
 	WSAOVERLAPPED		ov;
 	EnSocketOperation	operation;
 	WSABUF				buff;
+
+	int					capacity;
+	CPrivateHeap&		heap;
+
+	T* next;
+	T* last;
+
+	static T* Construct(CPrivateHeap& heap, DWORD dwCapacity)
+	{
+		T* pBufferObj = (T*)heap.Alloc(sizeof(T) + dwCapacity);
+		ASSERT(pBufferObj);
+
+		ZeroMemory(pBufferObj, sizeof(T));
+		
+		pBufferObj->TBufferObjBase::TBufferObjBase(heap, dwCapacity);
+		pBufferObj->buff.buf = ((char*)pBufferObj) + sizeof(T);
+
+		return pBufferObj;
+	}
+
+	static void Destruct(T* pBufferObj)
+	{
+		ASSERT(pBufferObj);
+		pBufferObj->heap.Free(pBufferObj);
+	}
+
+	TBufferObjBase(CPrivateHeap& hp, DWORD dwCapacity)
+	: heap(hp)
+	, capacity((int)dwCapacity)
+	{
+		ASSERT(capacity > 0);
+	}
+
+	int Cat(const BYTE* pData, int length)
+	{
+		ASSERT(pData != nullptr && length > 0);
+
+		int cat = min(Remain(), length);
+
+		if(cat > 0)
+		{
+			memcpy(buff.buf + buff.len, pData, cat);
+			buff.len += cat;
+		}
+
+		return cat;
+	}
+
+	void Reset()	{buff.len = 0;}
+	int Remain()	{return capacity - buff.len;}
+	BOOL IsFull()	{return buff.len == capacity;}
 };
 
 /* 数据缓冲区结构 */
-struct TBufferObj : public TBufferObjBase
+struct TBufferObj : public TBufferObjBase<TBufferObj>
 {
 	SOCKET client;
 };
 
 /* UDP 数据缓冲区结构 */
-struct TUdpBufferObj : public TBufferObjBase
+struct TUdpBufferObj : public TBufferObjBase<TUdpBufferObj>
 {
 	SOCKADDR_IN	remoteAddr;
 	int			addrLen;
 };
+
+/* 数据缓冲区链表模板 */
+template<class T> struct TBufferObjListT : public TSimpleList<T>
+{
+public:
+	int Cat(const BYTE* pData, int length)
+	{
+		ASSERT(pData != nullptr && length > 0);
+
+		int remain = length;
+
+		while(remain > 0)
+		{
+			T* pItem = Back();
+
+			if(pItem == nullptr || pItem->IsFull())
+				pItem = PushBack(bfPool.PickFreeItem());
+
+			int cat  = pItem->Cat(pData, remain);
+
+			pData	+= cat;
+			remain	-= cat;
+		}
+
+		return length;
+	}
+
+	T* PushTail(const BYTE* pData, int length)
+	{
+		ASSERT(pData != nullptr && length > 0 && length <= (int)bfPool.GetItemCapacity());
+
+		T* pItem = PushBack(bfPool.PickFreeItem());
+		pItem->Cat(pData, length);
+
+		return pItem;
+	}
+
+	void Release()
+	{
+		bfPool.PutFreeItem(*this);
+	}
+
+public:
+	TBufferObjListT(CNodePoolT<T>& pool) : bfPool(pool)
+	{
+	}
+
+private:
+	CNodePoolT<T>& bfPool;
+};
+
+/* 数据缓冲区对象池 */
+typedef CNodePoolT<TBufferObj>			CBufferObjPool;
+/* UDP 数据缓冲区对象池 */
+typedef CNodePoolT<TUdpBufferObj>		CUdpBufferObjPool;
+/* 数据缓冲区链表模板 */
+typedef TBufferObjListT<TBufferObj>		TBufferObjList;
+/* UDP 数据缓冲区链表模板 */
+typedef TBufferObjListT<TUdpBufferObj>	TUdpBufferObjList;
 
 /* 数据缓冲区结构链表 */
 typedef CRingPool<TBufferObj>		TBufferObjPtrList;
@@ -171,6 +284,7 @@ struct TSocketObjBase
 	SOCKADDR_IN	remoteAddr;
 	PVOID		extra;
 	PVOID		reserved;
+	PVOID		reserved2;
 	BOOL		valid;
 
 	union
@@ -182,19 +296,12 @@ struct TSocketObjBase
 	DWORD		activeTime;
 
 	CCriSec		csSend;
-	TItemList	sndBuff;
 
 	volatile BOOL smooth;
 	volatile long pending;
 	volatile long sndCount;
 
 	CReentrantSpinGuard csRecv;
-
-	TSocketObjBase(CItemPool& itPool)
-	: sndBuff(itPool)
-	{
-
-	}
 
 	static BOOL IsExist(TSocketObjBase* pSocketObj)
 		{return pSocketObj != nullptr;}
@@ -215,7 +322,6 @@ struct TSocketObjBase
 	{
 		ASSERT(IsExist(pSocketObj));
 
-		pSocketObj->sndBuff.Release();
 		pSocketObj->freeTime = ::TimeGetTime();
 	}
 
@@ -230,18 +336,26 @@ struct TSocketObjBase
 		sndCount = 0;
 		extra	 = nullptr;
 		reserved = nullptr;
+		reserved2= nullptr;
 	}
 };
 
 /* 数据缓冲区结构 */
 struct TSocketObj : public TSocketObjBase
 {
-	SOCKET socket;
-
-	TSocketObj(CItemPool& itPool)
-	: TSocketObjBase(itPool)
+	SOCKET			socket;
+	TBufferObjList	sndBuff;
+	
+	TSocketObj(CBufferObjPool& bfPool)
+	: sndBuff(bfPool)
 	{
 
+	}
+
+	static void Release(TSocketObj* pSocketObj)
+	{
+		__super::Release(pSocketObj);
+		pSocketObj->sndBuff.Release();
 	}
 
 	void Reset(CONNID dwConnID, SOCKET soClient)
@@ -254,12 +368,19 @@ struct TSocketObj : public TSocketObjBase
 /* UDP 数据缓冲区结构 */
 struct TUdpSocketObj : public TSocketObjBase
 {
-	volatile DWORD detectFails;
+	TUdpBufferObjList	sndBuff;
+	volatile DWORD		detectFails;
 
-	TUdpSocketObj(CItemPool& itPool)
-	: TSocketObjBase(itPool)
+	TUdpSocketObj(CUdpBufferObjPool& bfPool)
+	: sndBuff(bfPool)
 	{
 
+	}
+
+	static void Release(TUdpSocketObj* pSocketObj)
+	{
+		__super::Release(pSocketObj);
+		pSocketObj->sndBuff.Release();
 	}
 
 	void Reset(CONNID dwConnID)
@@ -314,11 +435,11 @@ struct sockaddr_func
 
 /* 地址-连接 ID 哈希表 */
 typedef unordered_map<SOCKADDR_IN*, CONNID, sockaddr_func::hash, sockaddr_func::equal_to>
-																TSockAddrMap;
+										TSockAddrMap;
 /* 地址-连接 ID 哈希表迭代器 */
-typedef TSockAddrMap::iterator									TSockAddrMapI;
+typedef TSockAddrMap::iterator			TSockAddrMapI;
 /* 地址-连接 ID 哈希表 const 迭代器 */
-typedef TSockAddrMap::const_iterator							TSockAddrMapCI;
+typedef TSockAddrMap::const_iterator	TSockAddrMapCI;
 
 /*****************************************************************************************************/
 /******************************************** 公共帮助方法 ********************************************/

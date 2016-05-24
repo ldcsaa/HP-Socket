@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -23,7 +23,7 @@
  */
  
 #include "stdafx.h"
-#include "HPSocket4C.h"
+#include "SocketObject4C.h"
 #include "TcpServer.h"
 #include "TcpClient.h"
 #include "TcpAgent.h"
@@ -37,7 +37,7 @@
 #include "UdpClient.h"
 #include "UdpCast.h"
 
-#if !defined(_WIN64)
+#if !defined(_WIN64) && !defined(HPSOCKET_STATIC_LIB)
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpAgent=_Create_HP_TcpAgent@4")
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpAgentListener=_Create_HP_TcpAgentListener@0")
 	#pragma comment(linker, "/EXPORT:Create_HP_TcpClient=_Create_HP_TcpClient@4")
@@ -174,6 +174,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_Start=_HP_Server_Start@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_Stop=_HP_Server_Stop@4")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnConnect=_HP_Set_FN_Agent_OnConnect@8")
+	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnHandShake=_HP_Set_FN_Agent_OnHandShake@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnClose=_HP_Set_FN_Agent_OnClose@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnPrepareConnect=_HP_Set_FN_Agent_OnPrepareConnect@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnPullReceive=_HP_Set_FN_Agent_OnPullReceive@8")
@@ -181,12 +182,14 @@
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnSend=_HP_Set_FN_Agent_OnSend@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Agent_OnShutdown=_HP_Set_FN_Agent_OnShutdown@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnConnect=_HP_Set_FN_Client_OnConnect@8")
+	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnHandShake=_HP_Set_FN_Client_OnHandShake@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnClose=_HP_Set_FN_Client_OnClose@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnPrepareConnect=_HP_Set_FN_Client_OnPrepareConnect@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnPullReceive=_HP_Set_FN_Client_OnPullReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnReceive=_HP_Set_FN_Client_OnReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Client_OnSend=_HP_Set_FN_Client_OnSend@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnAccept=_HP_Set_FN_Server_OnAccept@8")
+	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnHandShake=_HP_Set_FN_Server_OnHandShake@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnClose=_HP_Set_FN_Server_OnClose@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnPrepareListen=_HP_Set_FN_Server_OnPrepareListen@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnPullReceive=_HP_Set_FN_Server_OnPullReceive@8")
@@ -274,375 +277,6 @@
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl@28")
 #endif
 
-class C_HP_Object
-{
-public:
-
-	inline static IServer* ToServer(HP_Server pServer)
-	{
-		return (IServer*)((char*)pServer + ((C_HP_Object*)pServer)->offset);
-	}
-
-	inline static IAgent* ToAgent(HP_Agent pAgent)
-	{
-		return (IAgent*)((char*)pAgent + ((C_HP_Object*)pAgent)->offset);
-	}
-
-	inline static IClient* ToClient(HP_Client pClient)
-	{
-		return (IClient*)((char*)pClient + ((C_HP_Object*)pClient)->offset);
-	}
-
-	inline static IPullSocket* ToPullSocket(HP_PullSocket pPullSocket)
-	{
-		return (IPullSocket*)((char*)pPullSocket + sizeof(C_HP_Object));
-	}
-
-	inline static IPullClient* ToPullClient(HP_PullClient pPullClient)
-	{
-		return (IPullClient*)((char*)pPullClient + sizeof(C_HP_Object));
-	}
-
-	inline static IPackSocket* ToPackSocket(HP_PackSocket pPackSocket)
-	{
-		return (IPackSocket*)((char*)pPackSocket + sizeof(C_HP_Object));
-	}
-
-	inline static IPackClient* ToPackClient(HP_PackClient pPackClient)
-	{
-		return (IPackClient*)((char*)pPackClient + sizeof(C_HP_Object));
-	}
-
-	inline static HP_Server FromServer(IServer* pServer)
-	{
-		C_HP_Object* pResult = (C_HP_Object*)((char*)pServer - sizeof(C_HP_Object));
-
-		if(pResult->offset != sizeof(C_HP_Object))
-			pResult = (C_HP_Object*)((char*)pResult - sizeof(HP_Object));
-
-		return (HP_Object)pResult;
-	}
-
-	inline static HP_Agent FromAgent(IAgent* pAgent)
-	{
-		C_HP_Object* pResult = (C_HP_Object*)((char*)pAgent - sizeof(C_HP_Object));
-
-		if(pResult->offset != sizeof(C_HP_Object))
-			pResult = (C_HP_Object*)((char*)pResult - sizeof(HP_Object));
-
-		return (HP_Object)pResult;
-	}
-
-	inline static HP_Client FromClient(IClient* pClient)
-	{
-		C_HP_Object* pResult = (C_HP_Object*)((char*)pClient - sizeof(C_HP_Object));
-
-		if(pResult->offset != sizeof(C_HP_Object))
-			pResult = (C_HP_Object*)((char*)pResult - sizeof(HP_Object));
-
-		return (HP_Object)pResult;
-	}
-
-	inline static HP_PullSocket FromPullSocket(IPullSocket* pPullSocket)
-	{
-		return (HP_PullSocket)((char*)pPullSocket - sizeof(IPullSocket));
-	}
-
-	inline static HP_PullClient FromPullClient(IPullClient* pPullClient)
-	{
-		return (HP_PullClient)((char*)pPullClient - sizeof(IPullClient));
-	}
-
-	inline static HP_PackSocket FromPackSocket(IPackSocket* pPackSocket)
-	{
-		return (HP_PackSocket)((char*)pPackSocket - sizeof(IPackSocket));
-	}
-
-	inline static HP_PackClient FromPackClient(IPackClient* pPackClient)
-	{
-		return (HP_PackClient)((char*)pPackClient - sizeof(IPackClient));
-	}
-
-public:
-
-	inline static ITcpServer* ToTcpServer(HP_TcpServer pServer)
-	{
-		return (ITcpServer*)ToServer(pServer);
-	}
-
-	inline static IUdpServer* ToUdpServer(HP_UdpServer pServer)
-	{
-		return (IUdpServer*)ToServer(pServer);
-	}
-
-	inline static ITcpAgent* ToTcpAgent(HP_TcpAgent pAgent)
-	{
-		return (ITcpAgent*)ToAgent(pAgent);
-	}
-
-	inline static ITcpClient* ToTcpClient(HP_TcpClient pClient)
-	{
-		return (ITcpClient*)ToClient(pClient);
-	}
-
-	inline static IUdpClient* ToUdpClient(HP_UdpClient pClient)
-	{
-		return (IUdpClient*)ToClient(pClient);
-	}
-
-	inline static IUdpCast* ToUdpCast(HP_UdpCast pCast)
-	{
-		return (IUdpCast*)ToClient(pCast);
-	}
-
-protected:
-
-	C_HP_Object(int k = 0) : offset(k + sizeof(C_HP_Object))	{}
-
-	virtual ~C_HP_Object()										{}
-
-private:
-
-	size_t offset;
-};
-
-class C_HP_ServerListener : public IServerListener
-{
-public:
-	virtual EnHandleResult OnPrepareListen(UINT_PTR soListen)
-	{
-		return	(m_fnOnPrepareListen)
-				? (EnHandleResult)m_fnOnPrepareListen(soListen)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnAccept(CONNID dwConnID, UINT_PTR soClient)
-	{
-		ASSERT(m_fnOnAccept);
-
-		return	(m_fnOnAccept)
-				? (EnHandleResult)m_fnOnAccept(dwConnID, soClient)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
-	{
-		return	(m_fnOnSend)
-				? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
-	{
-		ASSERT(m_fnOnReceive);
-
-		return	(m_fnOnReceive)
-				? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)
-	{
-		ASSERT(m_fnOnPullReceive);
-
-		return	(m_fnOnPullReceive)
-				? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
-	{
-		ASSERT(m_fnOnClose);
-
-		return	(m_fnOnClose)
-				? (EnHandleResult)m_fnOnClose(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnShutdown()
-	{
-		return	(m_fnOnShutdown)
-				? (EnHandleResult)m_fnOnShutdown()
-				: HR_IGNORE;
-	}
-
-public:
-	C_HP_ServerListener()
-		: m_fnOnPrepareListen	(nullptr)
-		, m_fnOnAccept			(nullptr)
-		, m_fnOnSend			(nullptr)
-		, m_fnOnReceive			(nullptr)
-		, m_fnOnPullReceive		(nullptr)
-		, m_fnOnClose			(nullptr)
-		, m_fnOnShutdown		(nullptr)
-	{
-	}
-
-public:
-	HP_FN_Server_OnPrepareListen	m_fnOnPrepareListen	;
-	HP_FN_Server_OnAccept			m_fnOnAccept		;
-	HP_FN_Server_OnSend				m_fnOnSend			;
-	HP_FN_Server_OnReceive			m_fnOnReceive		;
-	HP_FN_Server_OnPullReceive		m_fnOnPullReceive	;
-	HP_FN_Server_OnClose			m_fnOnClose			;
-	HP_FN_Server_OnShutdown			m_fnOnShutdown		;
-};
-
-class C_HP_AgentListener : public IAgentListener
-{
-public:
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, UINT_PTR socket)
-	{
-		return	(m_fnOnPrepareConnect)
-				? (EnHandleResult)m_fnOnPrepareConnect(dwConnID, socket)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnConnect(CONNID dwConnID)
-	{
-		ASSERT(m_fnOnConnect);
-
-		return	(m_fnOnConnect)
-				? (EnHandleResult)m_fnOnConnect(dwConnID)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
-	{
-		return	(m_fnOnSend)
-				? (EnHandleResult)m_fnOnSend(dwConnID, pData, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
-	{
-		ASSERT(m_fnOnReceive);
-
-		return	(m_fnOnReceive)
-				? (EnHandleResult)m_fnOnReceive(dwConnID, pData, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)
-	{
-		ASSERT(m_fnOnPullReceive);
-
-		return	(m_fnOnPullReceive)
-				? (EnHandleResult)m_fnOnPullReceive(dwConnID, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
-	{
-		ASSERT(m_fnOnClose);
-
-		return	(m_fnOnClose)
-				? (EnHandleResult)m_fnOnClose(dwConnID, (En_HP_SocketOperation)enOperation, iErrorCode)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnShutdown()
-	{
-		return	(m_fnOnShutdown)
-				? (EnHandleResult)m_fnOnShutdown()
-				: HR_IGNORE;
-	}
-
-public:
-	C_HP_AgentListener()
-		: m_fnOnPrepareConnect	(nullptr)
-		, m_fnOnConnect			(nullptr)
-		, m_fnOnSend			(nullptr)
-		, m_fnOnReceive			(nullptr)
-		, m_fnOnPullReceive		(nullptr)
-		, m_fnOnClose			(nullptr)
-		, m_fnOnShutdown		(nullptr)
-	{
-	}
-
-public:
-	HP_FN_Agent_OnPrepareConnect	m_fnOnPrepareConnect;
-	HP_FN_Agent_OnConnect			m_fnOnConnect		;
-	HP_FN_Agent_OnSend				m_fnOnSend			;
-	HP_FN_Agent_OnReceive			m_fnOnReceive		;
-	HP_FN_Agent_OnPullReceive		m_fnOnPullReceive	;
-	HP_FN_Agent_OnClose				m_fnOnClose			;
-	HP_FN_Agent_OnShutdown			m_fnOnShutdown		;
-};
-
-class C_HP_ClientListener : public IClientListener
-{
-public:
-	virtual EnHandleResult OnPrepareConnect(IClient* pClient, UINT_PTR socket)
-	{
-		return	(m_fnOnPrepareConnect)
-				? (EnHandleResult)m_fnOnPrepareConnect(C_HP_Object::FromClient(pClient), socket)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnConnect(IClient* pClient)
-	{
-		ASSERT(m_fnOnConnect);
-
-		return	(m_fnOnConnect)
-				? (EnHandleResult)m_fnOnConnect(C_HP_Object::FromClient(pClient))
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)
-	{
-		return	(m_fnOnSend)
-				? (EnHandleResult)m_fnOnSend(C_HP_Object::FromClient(pClient), pData, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)
-	{
-		ASSERT(m_fnOnReceive);
-
-		return	(m_fnOnReceive)
-				? (EnHandleResult)m_fnOnReceive(C_HP_Object::FromClient(pClient), pData, iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)
-	{
-		ASSERT(m_fnOnPullReceive);
-
-		return	(m_fnOnPullReceive)
-				? (EnHandleResult)m_fnOnPullReceive(C_HP_Object::FromClient(pClient), iLength)
-				: HR_IGNORE;
-	}
-
-	virtual EnHandleResult OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
-	{
-		ASSERT(m_fnOnClose);
-
-		return	(m_fnOnClose)
-				? (EnHandleResult)m_fnOnClose(C_HP_Object::FromClient(pClient), (En_HP_SocketOperation)enOperation, iErrorCode)
-				: HR_IGNORE;
-	}
-
-public:
-	C_HP_ClientListener()
-		: m_fnOnPrepareConnect	(nullptr)
-		, m_fnOnConnect			(nullptr)
-		, m_fnOnSend			(nullptr)
-		, m_fnOnReceive			(nullptr)
-		, m_fnOnPullReceive		(nullptr)
-		, m_fnOnClose			(nullptr)
-	{
-	}
-
-public:
-	HP_FN_Client_OnPrepareConnect	m_fnOnPrepareConnect;
-	HP_FN_Client_OnConnect			m_fnOnConnect		;
-	HP_FN_Client_OnSend				m_fnOnSend			;
-	HP_FN_Client_OnReceive			m_fnOnReceive		;
-	HP_FN_Client_OnPullReceive		m_fnOnPullReceive	;
-	HP_FN_Client_OnClose			m_fnOnClose			;
-};
-
 class C_HP_TcpServer : public C_HP_Object, public CTcpServer
 {
 public:
@@ -716,7 +350,7 @@ public:
 };
 
 /****************************************************/
-/************** HPSocket4C.dll 导出函数 **************/
+/**************** HPSocket4C 导出函数 ****************/
 
 HPSOCKET_API HP_TcpServer __stdcall Create_HP_TcpServer(HP_TcpServerListener pListener)
 {
@@ -941,6 +575,11 @@ HPSOCKET_API void __stdcall HP_Set_FN_Server_OnAccept(HP_ServerListener pListene
 	((C_HP_ServerListener*)pListener)->m_fnOnAccept = fn;
 }
 
+HPSOCKET_API void __stdcall HP_Set_FN_Server_OnHandShake(HP_ServerListener pListener, HP_FN_Server_OnHandShake fn)
+{
+	((C_HP_ServerListener*)pListener)->m_fnOnHandShake = fn;
+}
+
 HPSOCKET_API void __stdcall HP_Set_FN_Server_OnSend(HP_ServerListener pListener, HP_FN_Server_OnSend fn)
 {
 	((C_HP_ServerListener*)pListener)->m_fnOnSend = fn;
@@ -979,6 +618,11 @@ HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnConnect(HP_AgentListener pListener
 	((C_HP_AgentListener*)pListener)->m_fnOnConnect = fn;
 }
 
+HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnHandShake(HP_AgentListener pListener, HP_FN_Agent_OnHandShake fn)
+{
+	((C_HP_AgentListener*)pListener)->m_fnOnHandShake = fn;
+}
+
 HPSOCKET_API void __stdcall HP_Set_FN_Agent_OnSend(HP_AgentListener pListener, HP_FN_Agent_OnSend fn)
 {
 	((C_HP_AgentListener*)pListener)->m_fnOnSend = fn;
@@ -1015,6 +659,11 @@ HPSOCKET_API void __stdcall HP_Set_FN_Client_OnPrepareConnect(HP_ClientListener 
 HPSOCKET_API void __stdcall HP_Set_FN_Client_OnConnect(HP_ClientListener pListener, HP_FN_Client_OnConnect fn)
 {
 	((C_HP_ClientListener*)pListener)->m_fnOnConnect = fn;
+}
+
+HPSOCKET_API void __stdcall HP_Set_FN_Client_OnHandShake(HP_ClientListener pListener, HP_FN_Client_OnHandShake fn)
+{
+	((C_HP_ClientListener*)pListener)->m_fnOnHandShake = fn;
 }
 
 HPSOCKET_API void __stdcall HP_Set_FN_Client_OnSend(HP_ClientListener pListener, HP_FN_Client_OnSend fn)

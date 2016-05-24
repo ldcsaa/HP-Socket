@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -91,6 +91,8 @@ protected:
 	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
 
+	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+
 protected:
 	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
 	PVOID GetReserved	()					{return m_pReserved;}
@@ -106,7 +108,7 @@ private:
 	BOOL ReadData();
 	BOOL SendData();
 	TItem* GetSendBuffer();
-	int SendInternal(const BYTE* pBuffer, int iLength, EnSocketError& enCode);
+	int SendInternal(const BYTE* pBuffer, int iLength);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
 
 	BOOL HandleError(WSANETWORKEVENTS& events);
@@ -183,9 +185,9 @@ private:
 protected:
 	CItemPool			m_itPool;
 
+private:
 	CSpinGuard			m_csState;
 
-private:
 	CCriSec				m_csSend;
 	TItemList			m_lsSend;
 

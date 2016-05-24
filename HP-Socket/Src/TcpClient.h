@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -36,8 +36,8 @@ public:
 	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
-	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount);
 	virtual BOOL SendSmallFile	(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
+	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount)	{return DoSendPackets(pBuffers, iCount);}
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
 	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
@@ -63,22 +63,43 @@ public:
 
 protected:
 	virtual EnHandleResult FirePrepareConnect(IClient* pClient, SOCKET socket)
-		{return m_psoListener->OnPrepareConnect(pClient, socket);}
+		{return DoFirePrepareConnect(pClient, socket);}
 	virtual EnHandleResult FireConnect(IClient* pClient)
-		{return m_psoListener->OnConnect(pClient);}
+		{return DoFireConnect(pClient);}
+	virtual EnHandleResult FireHandShake(IClient* pClient)
+		{return DoFireHandShake(pClient);}
 	virtual EnHandleResult FireSend(IClient* pClient, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pClient, pData, iLength);}
+		{return DoFireSend(pClient, pData, iLength);}
 	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pClient, pData, iLength);}
+		{return DoFireReceive(pClient, pData, iLength);}
 	virtual EnHandleResult FireReceive(IClient* pClient, int iLength)
-		{return m_psoListener->OnReceive(pClient, iLength);}
+		{return DoFireReceive(pClient, iLength);}
 	virtual EnHandleResult FireClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+		{return DoFireClose(pClient, enOperation, iErrorCode);}
+
+	virtual EnHandleResult DoFirePrepareConnect(IClient* pClient, SOCKET socket)
+		{return m_psoListener->OnPrepareConnect(pClient, socket);}
+	virtual EnHandleResult DoFireConnect(IClient* pClient)
+		{return m_psoListener->OnConnect(pClient);}
+	virtual EnHandleResult DoFireHandShake(IClient* pClient)
+		{return m_psoListener->OnHandShake(pClient);}
+	virtual EnHandleResult DoFireSend(IClient* pClient, const BYTE* pData, int iLength)
+		{return m_psoListener->OnSend(pClient, pData, iLength);}
+	virtual EnHandleResult DoFireReceive(IClient* pClient, const BYTE* pData, int iLength)
+		{return m_psoListener->OnReceive(pClient, pData, iLength);}
+	virtual EnHandleResult DoFireReceive(IClient* pClient, int iLength)
+		{return m_psoListener->OnReceive(pClient, iLength);}
+	virtual EnHandleResult DoFireClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
 		{return m_psoListener->OnClose(pClient, enOperation, iErrorCode);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
+
+	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+
+	BOOL DoSendPackets(const WSABUF pBuffers[], int iCount);
 
 protected:
 	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
@@ -95,7 +116,7 @@ private:
 	BOOL SendData();
 	BOOL DoSendData(TItem* pItem);
 	TItem* GetSendBuffer();
-	BOOL SendInternal(const WSABUF pBuffers[], int iCount, EnSocketError& enCode);
+	BOOL SendInternal(const WSABUF pBuffers[], int iCount);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
 
 	BOOL HandleError	(WSANETWORKEVENTS& events);
@@ -162,9 +183,9 @@ private:
 protected:
 	CItemPool			m_itPool;
 
+private:
 	CSpinGuard			m_csState;
 
-private:
 	CCriSec				m_csSend;
 	TItemList			m_lsSend;
 

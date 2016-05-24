@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -38,7 +38,7 @@
 #include "UdpCast.h"
 
 /*
-#if !defined(_WIN64)
+#if !defined(_WIN64) && !defined(HPSOCKET_STATIC_LIB)
 	#pragma comment(linker, "/EXPORT:HP_Create_TcpServer=_HP_Create_TcpServer")
 	#pragma comment(linker, "/EXPORT:HP_Create_TcpAgent=_HP_Create_TcpAgent")
 	#pragma comment(linker, "/EXPORT:HP_Create_TcpClient=_HP_Create_TcpClient")

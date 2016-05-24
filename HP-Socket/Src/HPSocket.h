@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -23,7 +23,7 @@
  */
 
 /******************************************************************************
-Module:  HPSocket DLL
+Module:  HPSocket
 
 Usage:
 		方法一：
@@ -38,32 +38,48 @@ Usage:
 		1. 创建 CXxxPtr 智能指针，通过智能指针使用 HPSocket 对象
 
 Release:
-		1. x86/HPSocket.dll		- (32位/MBCS/Release)
-		2. x86/HPSocket_D.dll	- (32位/MBCS/DeBug)
-		3. x86/HPSocket_U.dll	- (32位/UNICODE/Release)
-		4. x86/HPSocket_UD.dll	- (32位/UNICODE/DeBug)
-		5. x64/HPSocket.dll		- (64位/MBCS/Release)
-		6. x64/HPSocket_D.dll	- (64位/MBCS/DeBug)
-		7. x64/HPSocket_U.dll	- (64位/UNICODE/Release)
-		8. x64/HPSocket_UD.dll	- (64位/UNICODE/DeBug)
+		<-- 动态链接库 -->
+		1. x86/HPSocket.dll				- (32位/MBCS/Release)
+		2. x86/HPSocket_D.dll			- (32位/MBCS/DeBug)
+		3. x86/HPSocket_U.dll			- (32位/UNICODE/Release)
+		4. x86/HPSocket_UD.dll			- (32位/UNICODE/DeBug)
+		5. x64/HPSocket.dll				- (64位/MBCS/Release)
+		6. x64/HPSocket_D.dll			- (64位/MBCS/DeBug)
+		7. x64/HPSocket_U.dll			- (64位/UNICODE/Release)
+		8. x64/HPSocket_UD.dll			- (64位/UNICODE/DeBug)
+
+		<-- 静态链接库 -->
+		!!注意!!：使用 HPSocket 静态库时，需要在工程属性中定义预处理宏 -> HPSOCKET_STATIC_LIB
+		1. x86/static/HPSocket.lib		- (32位/MBCS/Release)
+		2. x86/static/HPSocket_D.lib	- (32位/MBCS/DeBug)
+		3. x86/static/HPSocket_U.lib	- (32位/UNICODE/Release)
+		4. x86/static/HPSocket_UD.lib	- (32位/UNICODE/DeBug)
+		5. x64/static/HPSocket.lib		- (64位/MBCS/Release)
+		6. x64/static/HPSocket_D.lib	- (64位/MBCS/DeBug)
+		7. x64/static/HPSocket_U.lib	- (64位/UNICODE/Release)
+		8. x64/static/HPSocket_UD.lib	- (64位/UNICODE/DeBug)
 
 ******************************************************************************/
 
 #pragma once
 
 /**************************************************/
-/********* imports / exports HPSocket.dll *********/
+/*********** imports / exports HPSocket ***********/
 
-#ifdef HPSOCKET_EXPORTS
-	#define HPSOCKET_API EXTERN_C __declspec(dllexport)
+#ifdef HPSOCKET_STATIC_LIB
+	#define HPSOCKET_API EXTERN_C
 #else
-	#define HPSOCKET_API EXTERN_C __declspec(dllimport)
+	#ifdef HPSOCKET_EXPORTS
+		#define HPSOCKET_API EXTERN_C __declspec(dllexport)
+	#else
+		#define HPSOCKET_API EXTERN_C __declspec(dllimport)
+	#endif
 #endif
 
 #include "SocketInterface.h"
 
 /**************************************************/
-/************** HPSocket.dll 导出函数 **************/
+/**************** HPSocket 导出函数 ****************/
 
 // 创建 ITcpServer 对象
 HPSOCKET_API ITcpServer* HP_Create_TcpServer(ITcpServerListener* pListener);
@@ -318,7 +334,7 @@ public:
 	}
 
 public:
-	CHPSocketPtr&  Reset(T* pObj = nullptr)
+	CHPSocketPtr& Reset(T* pObj = nullptr)
 	{
 		if(pObj != m_pObj)
 		{

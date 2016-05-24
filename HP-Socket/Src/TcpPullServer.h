@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,19 +25,71 @@
 #pragma once
 
 #include "TcpServer.h"
+#include "MiscHelper.h"
 #include "../../Common/Src/bufferpool.h"
 
-class CTcpPullServer : public IPullSocket, public CTcpServer
+template<class T> class CTcpPullServerT : public IPullSocket, public T
 {
 public:
-	virtual EnFetchResult Fetch	(CONNID dwConnID, BYTE* pData, int iLength);
-	virtual EnFetchResult Peek	(CONNID dwConnID, BYTE* pData, int iLength);
+	virtual EnFetchResult Fetch(CONNID dwConnID, BYTE* pData, int iLength)
+	{
+		TBuffer* pBuffer = m_bfPool[dwConnID];
+		return ::FetchBuffer(pBuffer, pData, iLength);
+	}
+
+	virtual EnFetchResult Peek(CONNID dwConnID, BYTE* pData, int iLength)
+	{
+		TBuffer* pBuffer = m_bfPool[dwConnID];
+		return ::PeekBuffer(pBuffer, pData, iLength);
+	}
 
 protected:
-	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj);
-	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
-	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult FireShutdown();
+	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj)
+	{
+		EnHandleResult result = __super::DoFireAccept(pSocketObj);
+
+		if(result != HR_ERROR)
+		{
+			TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
+			VERIFY(SetConnectionReserved(pSocketObj, pBuffer));
+		}
+
+		return result;
+	}
+
+	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+	{
+		TBuffer* pBuffer = nullptr;
+		GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
+		ASSERT(pBuffer && pBuffer->IsValid());
+
+		pBuffer->Cat(pData, iLength);
+
+		return __super::DoFireReceive(pSocketObj, pBuffer->Length());
+	}
+
+	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+	{
+		EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
+
+		TBuffer* pBuffer = nullptr;
+		GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
+		ASSERT(pBuffer);
+
+		if(pBuffer != nullptr)
+			m_bfPool.PutFreeBuffer(pBuffer);
+
+		return result;
+	}
+
+	virtual EnHandleResult DoFireShutdown()
+	{
+		EnHandleResult result = __super::DoFireShutdown();
+
+		m_bfPool.Clear();
+
+		return result;
+	}
 
 	virtual void PrepareStart()
 	{
@@ -54,12 +106,13 @@ protected:
 	}
 
 public:
-	CTcpPullServer(ITcpServerListener* psoListener) : CTcpServer(psoListener)
+	CTcpPullServerT(ITcpServerListener* psoListener)
+	: T(psoListener)
 	{
 
 	}
 
-	virtual ~CTcpPullServer()
+	virtual ~CTcpPullServerT()
 	{
 		if(HasStarted())
 			Stop();
@@ -68,3 +121,12 @@ public:
 private:
 	CBufferPool m_bfPool;
 };
+
+typedef CTcpPullServerT<CTcpServer> CTcpPullServer;
+
+#ifdef _SSL_SUPPORT
+
+#include "SSLServer.h"
+typedef CTcpPullServerT<CSSLServer> CSSLPullServer;
+
+#endif

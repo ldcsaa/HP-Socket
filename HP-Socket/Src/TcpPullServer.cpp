@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,58 +24,3 @@
  
 #include "stdafx.h"
 #include "TcpPullServer.h"
-#include "MiscHelper.h"
-
-EnHandleResult CTcpPullServer::FireAccept(TSocketObj* pSocketObj)
-{
-	EnHandleResult result = __super::FireAccept(pSocketObj);
-
-	if(result != HR_ERROR)
-	{
-		TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
-		VERIFY(SetConnectionReserved(pSocketObj, pBuffer));
-	}
-
-	return result;
-}
-
-EnHandleResult CTcpPullServer::FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-{
-	TBuffer* pBuffer = nullptr;
-	GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
-	ASSERT(pBuffer && pBuffer->IsValid());
-
-	pBuffer->Cat(pData, iLength);
-
-	return __super::FireReceive(pSocketObj, pBuffer->Length());
-}
-
-EnHandleResult CTcpPullServer::FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-{
-	EnHandleResult result = __super::FireClose(pSocketObj, enOperation, iErrorCode);
-
-	m_bfPool.PutFreeBuffer(pSocketObj->connID);
-
-	return result;
-}
-
-EnHandleResult CTcpPullServer::FireShutdown()
-{
-	EnHandleResult result = __super::FireShutdown();
-
-	m_bfPool.Clear();
-
-	return result;
-}
-
-EnFetchResult CTcpPullServer::Fetch(CONNID dwConnID, BYTE* pData, int iLength)
-{
-	TBuffer* pBuffer = m_bfPool[dwConnID];
-	return ::FetchBuffer(pBuffer, pData, iLength);
-}
-
-EnFetchResult CTcpPullServer::Peek(CONNID dwConnID, BYTE* pData, int iLength)
-{
-	TBuffer* pBuffer = m_bfPool[dwConnID];
-	return ::PeekBuffer(pBuffer, pData, iLength);
-}

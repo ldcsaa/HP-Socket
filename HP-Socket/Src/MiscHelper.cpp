@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -44,7 +44,7 @@ BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& bu
 		return FALSE;
 	}
 
-	header = (usPackHeaderFlag << 19) | iLength;
+	header = (usPackHeaderFlag << TCP_PACK_LENGTH_BITS) | iLength;
 
 	buffers[0].len = sizeof(header);
 	buffers[0].buf = (char*)&header;
