@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -124,13 +124,12 @@ BOOL CUdpServer::CheckParams()
 void CUdpServer::PrepareStart()
 {
 	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
-	m_lsFreeBuffer.Reset(m_dwFreeBufferObjHold);
 
-	m_itPool.SetItemCapacity((int)m_dwMaxDatagramSize);
-	m_itPool.SetPoolSize((int)m_dwFreeBufferObjPool);
-	m_itPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+	m_bfPool.SetItemCapacity((int)m_dwMaxDatagramSize);
+	m_bfPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_bfPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 
-	m_itPool.Prepare();
+	m_bfPool.Prepare();
 }
 
 BOOL CUdpServer::CheckStarting()
@@ -286,8 +285,6 @@ void CUdpServer::Reset(BOOL bAll)
 	if(bAll)
 	{
 		m_phSocket.Reset();
-		m_phBuffer.Reset();
-		m_itPool.Clear();
 	}
 
 	m_iRemainPostReceives	= 0;
@@ -446,7 +443,7 @@ TUdpSocketObj* CUdpServer::CreateSocketObj()
 	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)m_phSocket.Alloc(sizeof(TUdpSocketObj));
 	ASSERT(pSocketObj);
 
-	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_itPool);
+	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_bfPool);
 	
 	return pSocketObj;
 }
@@ -463,50 +460,22 @@ TUdpBufferObj* CUdpServer::GetFreeBufferObj(int iLen)
 {
 	ASSERT(iLen >= -1 && iLen <= (int)m_dwMaxDatagramSize);
 
-	TUdpBufferObj* pBufferObj = nullptr;
-
-	if(!m_lsFreeBuffer.TryGet(&pBufferObj))
-		pBufferObj = CreateBufferObj();
-
-	if(iLen < 0) iLen	 = m_dwMaxDatagramSize;
-	pBufferObj->addrLen	 = sizeof(SOCKADDR_IN);
-	pBufferObj->buff.len = iLen;
+	TUdpBufferObj* pBufferObj	= m_bfPool.PickFreeItem();;
+	if(iLen < 0) iLen			= m_dwMaxDatagramSize;
+	pBufferObj->addrLen			= sizeof(SOCKADDR_IN);
+	pBufferObj->buff.len		= iLen;
 
 	return pBufferObj;
 }
 
 void CUdpServer::AddFreeBufferObj(TUdpBufferObj* pBufferObj)
 {
-	if(!m_lsFreeBuffer.TryPut(pBufferObj))
-		DeleteBufferObj(pBufferObj);
+	m_bfPool.PutFreeItem(pBufferObj);
 }
 
 void CUdpServer::ReleaseFreeBuffer()
 {
-	TUdpBufferObj* pBufferObj = nullptr;
-
-	while(m_lsFreeBuffer.TryGet(&pBufferObj))
-		DeleteBufferObj(pBufferObj);
-
-	VERIFY(m_lsFreeBuffer.IsEmpty());
-	m_lsFreeBuffer.Reset();
-}
-
-TUdpBufferObj* CUdpServer::CreateBufferObj()
-{
-	TUdpBufferObj* pBufferObj = (TUdpBufferObj*)m_phBuffer.Alloc(sizeof(TUdpBufferObj) + m_dwMaxDatagramSize);
-	ASSERT(pBufferObj);
-
-	::ZeroMemory(pBufferObj, sizeof(TUdpBufferObj));
-	pBufferObj->buff.buf = ((char*)pBufferObj) + sizeof(TUdpBufferObj);
-
-	return pBufferObj;
-}
-
-void CUdpServer::DeleteBufferObj(TUdpBufferObj* pBufferObj)
-{
-	ASSERT(pBufferObj);
-	m_phBuffer.Free(pBufferObj);
+	m_bfPool.Clear();
 }
 
 TUdpSocketObj* CUdpServer::FindSocketObj(CONNID dwConnID)
@@ -641,6 +610,42 @@ BOOL CUdpServer::GetConnectionReserved(TUdpSocketObj* pSocketObj, PVOID* ppReser
 	return FALSE;
 }
 
+BOOL CUdpServer::SetConnectionReserved2(CONNID dwConnID, PVOID pReserved2)
+{
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return SetConnectionReserved2(pSocketObj, pReserved2);
+}
+
+BOOL CUdpServer::SetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID pReserved2)
+{
+	if(TUdpSocketObj::IsExist(pSocketObj))
+	{
+		pSocketObj->reserved2 = pReserved2;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CUdpServer::GetConnectionReserved2(CONNID dwConnID, PVOID* ppReserved2)
+{
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+	return GetConnectionReserved2(pSocketObj, ppReserved2);
+}
+
+BOOL CUdpServer::GetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID* ppReserved2)
+{
+	ASSERT(ppReserved2 != nullptr);
+
+	if(TUdpSocketObj::IsExist(pSocketObj))
+	{
+		*ppReserved2 = pSocketObj->reserved2;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CUdpServer::GetPendingDataLength(CONNID dwConnID, int& iPending)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
@@ -741,15 +746,20 @@ BOOL CUdpServer::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 		}
 	}
 	
-	for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
-		Disconnect(*it, bForce);
+	if(!ls.empty())
+	{
+		for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
+			Disconnect(*it, bForce);
+	}
 
-	return ls.size() > 0;
+	return TRUE;
 }
 
 BOOL CUdpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 {
 	if(!m_bMarkSilence)
+		return FALSE;
+	if(dwPeriod > MAX_SILENCE_CONNECTION_PERIOD)
 		return FALSE;
 
 	ulong_ptr_deque ls;
@@ -761,15 +771,18 @@ BOOL CUdpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 
 		for(TUdpSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
 		{
-			if(now - it->second->activeTime >= dwPeriod)
+			if((int)(now - it->second->activeTime) >= (int)dwPeriod)
 				ls.push_back(it->first);
 		}
 	}
 
-	for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
-		Disconnect(*it, bForce);
+	if(!ls.empty())
+	{
+		for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
+			Disconnect(*it, bForce);
+	}
 
-	return ls.size() > 0;
+	return TRUE;
 }
 
 void CUdpServer::WaitForPostReceiveRelease()
@@ -911,6 +924,8 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 
 		pServer->HandleIo(dwConnID, pBufferObj, dwBytes, dwErrorCode);
 	}
+
+	pServer->OnWorkerThreadEnd(::GetCurrentThreadId());
 
 	return 0;
 }
@@ -1170,7 +1185,7 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 		int iLength = 0;
 		int iMaxLen = (int)m_dwMaxDatagramSize;
 
-		TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
+		TUdpBufferObj* pBufferObj = m_bfPool.PickFreeItem();
 
 		for(int i = 0; i < iCount; i++)
 		{
@@ -1184,16 +1199,18 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 				iLength += iBufLen;
 
 				if(iLength <= iMaxLen)
-					itPtr->Cat(pBuffer, iBufLen);
+					pBufferObj->Cat(pBuffer, iBufLen);
 				else
 					break;
 			}
 		}
 
 		if(iLength > 0 && iLength <= iMaxLen)
-			result = SendInternal(dwConnID, itPtr->Ptr(), iLength);
+			result = SendInternal(dwConnID, (const BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len);
 		else
 			result = ERROR_INCORRECT_SIZE;
+
+		m_bfPool.PutFreeItem(pBufferObj);
 	}
 	else
 		result = ERROR_INVALID_PARAMETER;
@@ -1264,11 +1281,9 @@ int CUdpServer::SendDirect(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int i
 
 int CUdpServer::CatAndPost(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend)
 {
-	int result	 = NO_ERROR;
-	TItem* pItem = m_itPool.PickFreeItem();
+	int result = NO_ERROR;
 
-	pItem->Cat(pBuffer, iLength);
-	pSocketObj->sndBuff.PushBack(pItem);
+	pSocketObj->sndBuff.PushTail(pBuffer, iLength);
 	pSocketObj->pending += iLength;
 
 	if(isPostSend && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
@@ -1349,16 +1364,14 @@ int CUdpServer::SendItem(TUdpSocketObj* pSocketObj)
 	{
 		::InterlockedIncrement(&pSocketObj->sndCount);
 
-		TItemPtr itPtr(m_itPool, pSocketObj->sndBuff.PopFront());
+		TUdpBufferObj* pBufferObj	= pSocketObj->sndBuff.PopFront();
+		int iBufferSize				= pBufferObj->buff.len;
 
-		int iBufferSize = itPtr->Size();
 		ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwMaxDatagramSize);
 
-		pSocketObj->pending		 -= iBufferSize;
-		TUdpBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
+		pSocketObj->pending		   -= iBufferSize;
 
 		memcpy(&pBufferObj->remoteAddr, &pSocketObj->remoteAddr, sizeof(SOCKADDR_IN));
-		memcpy(pBufferObj->buff.buf, itPtr->Ptr(), iBufferSize);
 
 		int result = ::PostSendToNotCheck(m_soListen, pBufferObj);
 

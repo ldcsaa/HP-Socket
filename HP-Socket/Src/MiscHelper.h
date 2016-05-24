@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -114,7 +114,7 @@ template<class T, class B, class S> EnHandleResult ParsePack(T* pThis, TPackInfo
 
 			if(usPackHeaderFlag != 0)
 			{
-				USHORT flag = (USHORT)(header >> 19);
+				USHORT flag = (USHORT)(header >> TCP_PACK_LENGTH_BITS);
 
 				if(flag != usPackHeaderFlag)
 				{
@@ -135,7 +135,7 @@ template<class T, class B, class S> EnHandleResult ParsePack(T* pThis, TPackInfo
 		}
 		else
 		{
-			rs = pThis->FireSuperReceive(pSocket, (const BYTE*)buffer, (int)buffer.Size());
+			rs = pThis->DoFireSuperReceive(pSocket, (const BYTE*)buffer, (int)buffer.Size());
 
 			if(rs == HR_ERROR)
 				return rs;
@@ -149,4 +149,3 @@ template<class T, class B, class S> EnHandleResult ParsePack(T* pThis, TPackInfo
 
 	return rs;
 }
-

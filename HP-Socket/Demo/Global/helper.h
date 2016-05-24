@@ -13,6 +13,7 @@
 #define EVT_ON_PREPARE_LISTEN	_T("OnPrepareListen")
 #define EVT_ON_ACCEPT			_T("OnAccept")
 #define EVT_ON_CONNECT			_T("OnConnect")
+#define EVT_ON_HAND_SHAKE		_T("OnHandShake")
 #define EVT_ON_SHUTDOWN			_T("OnShutdown")
 #define EVT_ON_END_TEST			_T("END TEST")
 
@@ -82,6 +83,7 @@ void LogDetect(CONNID dwConnID);
 void LogDetectFail(CONNID dwConnID);
 void LogOnConnect(CONNID dwConnID, const CString& strAddress, USHORT usPort);
 void LogOnConnect2(CONNID dwConnID);
+void LogOnHandShake2(CONNID dwConnID);
 void LogMsg(const CString& msg);
 void PostOnSend(CONNID dwConnID, const BYTE* pData, int iLength);
 void PostOnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
@@ -90,12 +92,34 @@ void PostOnClose(CONNID dwConnID);
 void PostOnError(CONNID dwConnID, int enOperation, int iErrorCode);
 void PostOnAccept(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, BOOL bPass);
 void PostOnAccept2(CONNID dwConnID);
+void PostOnHandShake(CONNID dwConnID);
 void PostOnPrepareListen(LPCTSTR lpszAddress, USHORT usPort);
 void PostOnPrepareConnect(CONNID dwConnID);
 void PostOnConnect(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort);
 void PostOnConnect2(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort);
+void PostOnConnect3(CONNID dwConnID);
 void PostOnShutdown();
 void PostServerStatics(const LONGLONG& llTotalSent, const LONGLONG& llTotalReceived);
 void PostTimeConsuming(DWORD dwTickCount);
 void PostInfoMsg(info_msg* msg);
 void LogInfoMsg(info_msg* pInfoMsg);
+
+#ifdef _SSL_SUPPORT
+
+#include "../../Src/SocketInterface-SSL.h"
+
+extern int g_c_iVerifyMode;
+extern BOOL g_c_bNeedClientVerification;
+extern LPCTSTR g_c_lpszCAPemCertFileOrPath;
+extern LPCTSTR g_c_lpszPemCertFile;
+extern LPCTSTR g_c_lpszPemKeyFile;
+extern LPCTSTR g_c_lpszKeyPasswod;
+
+extern int g_s_iVerifyMode;
+extern BOOL g_s_bNeedClientVerification;
+extern LPCTSTR g_s_lpszCAPemCertFileOrPath;
+extern LPCTSTR g_s_lpszPemCertFile;
+extern LPCTSTR g_s_lpszPemKeyFile;
+extern LPCTSTR g_s_lpszKeyPasswod;
+
+#endif

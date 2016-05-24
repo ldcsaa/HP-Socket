@@ -161,7 +161,7 @@ void CServerDlg::OnBnClickedStart()
 	SetAppState(ST_STARTING);
 	
 	::HP_TcpPackServer_SetMaxPackSize(m_spThis->m_pServer, 0xFFF);
-	::HP_TcpPackServer_SetPackHeaderFlag(m_spThis->m_pServer, 0x16C9);
+	::HP_TcpPackServer_SetPackHeaderFlag(m_spThis->m_pServer, 0x169);
 
 	if(::HP_Server_Start(m_spThis->m_pServer, ADDRESS, PORT))
 	{

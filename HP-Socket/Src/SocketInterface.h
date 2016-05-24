@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -121,6 +121,9 @@ enum EnSocketError
 	SE_NETWORK					= 12,		// 网络错误
 	SE_DATA_PROC				= 13,		// 数据处理错误
 	SE_DATA_SEND				= 14,		// 数据发送失败
+
+	/***** SSL Socket 扩展操作结果代码 *****/
+	SE_SSL_ENV_NOT_READY		= 101,		// SSL 环境未就绪
 };
 
 /************************************************************************
@@ -161,7 +164,7 @@ public:
 	*			pData		-- 已接收数据缓冲区
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
 
@@ -172,7 +175,7 @@ public:
 	* 参数：		dwConnID	-- 连接 ID
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)									= 0;
 
@@ -239,6 +242,17 @@ public:
 	*			HR_ERROR			-- 拒绝连接
 	*/
 	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient)	= 0;
+
+	/*
+	* 名称：握手完成通知（仅用于 SSL 连接）
+	* 描述：SSL 连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
+	*		数据收发操作
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnHandShake(CONNID dwConnID)					= 0;
 };
 
 /************************************************************************
@@ -252,6 +266,7 @@ public:
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
 	virtual EnHandleResult OnPrepareListen(SOCKET soListen)							{return HR_IGNORE;}
 	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient)				{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(CONNID dwConnID)								{return HR_IGNORE;}
 	virtual EnHandleResult OnShutdown()												{return HR_IGNORE;}
 };
 
@@ -339,6 +354,18 @@ public:
 ************************************************************************/
 class ITcpAgentListener : public IAgentListener
 {
+public:
+	
+	/*
+	* 名称：握手完成通知（仅用于 SSL 连接）
+	* 描述：SSL 连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
+	*		数据收发操作
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnHandShake(CONNID dwConnID)							= 0;
 };
 
 /************************************************************************
@@ -352,6 +379,7 @@ public:
 	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
 	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)				{return HR_IGNORE;}
 	virtual EnHandleResult OnConnect(CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(CONNID dwConnID)									{return HR_IGNORE;}
 	virtual EnHandleResult OnShutdown()													{return HR_IGNORE;}
 };
 
@@ -419,7 +447,7 @@ public:
 	*			pData		-- 已接收数据缓冲区
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)				= 0;
 
@@ -430,7 +458,7 @@ public:
 	* 参数：		pClient		-- 连接对象
 	*			iLength		-- 已接收数据长度
 	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件时间并关闭连接
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
 	*/
 	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)									= 0;
 
@@ -455,6 +483,19 @@ public:
 ************************************************************************/
 class ITcpClientListener : public IClientListener
 {
+public:
+	public:
+	
+	/*
+	* 名称：握手完成通知（仅用于 SSL 连接）
+	* 描述：SSL 连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
+	*		数据收发操作
+	*		
+	* 参数：		dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnHandShake(IClient* pClient)								= 0;
 };
 
 /************************************************************************
@@ -468,6 +509,7 @@ public:
 	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)		{return HR_IGNORE;}
 	virtual EnHandleResult OnPrepareConnect(IClient* pClient, SOCKET socket)			{return HR_IGNORE;}
 	virtual EnHandleResult OnConnect(IClient* pClient)									{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(IClient* pClient)								{return HR_IGNORE;}
 };
 
 /************************************************************************
@@ -666,7 +708,7 @@ public:
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		= 0;
 	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		= 0;
-	/* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：FALSE） */
+	/* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：TRUE） */
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				= 0;
 
 	/* 获取数据发送策略 */
@@ -1260,9 +1302,9 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+	/* 设置数据包最大长度（有效数据包最大长度不能超过 4194303/0x3FFFFF 字节，默认：262144/0x40000） */
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)			= 0;
-	/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+	/* 设置包头标识（有效包头标识取值范围 0 ~ 1023/0x3FF，当包头标识为 0 时不校验包头，默认：0） */
 	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)		= 0;
 
 	/* 获取数据包最大长度 */
@@ -1285,9 +1327,9 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据包最大长度（有效数据包最大长度不能超过 524287/0x7FFFF 字节，默认：262144/0x40000） */
+	/* 设置数据包最大长度（有效数据包最大长度不能超过 4194303/0x3FFFFF 字节，默认：262144/0x40000） */
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)			= 0;
-	/* 设置包头标识（有效包头标识取值范围 0 ~ 8191/0x1FFF，当包头标识为 0 时不校验包头，默认：0） */
+	/* 设置包头标识（有效包头标识取值范围 0 ~ 1023/0x3FF，当包头标识为 0 时不校验包头，默认：0） */
 	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)		= 0;
 
 	/* 获取数据包最大长度 */

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,42 +28,119 @@
 #include "MiscHelper.h"
 #include "../../Common/Src/bufferpool.h"
 
-class CTcpPackAgent : public IPackSocket, public CTcpAgent
+template<class T> class CTcpPackAgentT : public IPackSocket, public T
 {
 public:
-	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
+	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)
+	{
+		int iNewCount = iCount + 1;
+		unique_ptr<WSABUF[]> buffers(new WSABUF[iNewCount]);
+
+		DWORD header;
+		if(!::AddPackHeader(pBuffers, iCount, buffers, m_dwMaxPackSize, m_usHeaderFlag, header))
+			return FALSE;
+
+		return __super::SendPackets(dwConnID, buffers.get(), iNewCount);
+	}
 
 protected:
-	virtual EnHandleResult FireConnect(TSocketObj* pSocketObj);
-	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
-	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult FireShutdown();
+	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj)
+	{
+		EnHandleResult result = __super::DoFireConnect(pSocketObj);
 
-	virtual BOOL CheckParams();
-	virtual void PrepareStart();
+		if(result != HR_ERROR)
+		{
+			TBuffer* pBuffer = m_bfPool.PickFreeBuffer(pSocketObj->connID);
+			VERIFY(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
+		}
+
+		return result;
+	}
+
+	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+	{
+		TBufferPackInfo* pInfo = nullptr;
+		GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
+		ASSERT(pInfo);
+
+		TBuffer* pBuffer = (TBuffer*)pInfo->pBuffer;
+		ASSERT(pBuffer && pBuffer->IsValid());
+
+		return ParsePack(this, pInfo, pBuffer, pSocketObj, m_dwMaxPackSize, m_usHeaderFlag, pData, iLength);
+	}
+
+	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+	{
+		EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
+
+		TBufferPackInfo* pInfo = nullptr;
+		GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
+
+		if(pInfo != nullptr)
+		{
+			m_bfPool.PutFreeBuffer(pInfo->pBuffer);
+			TBufferPackInfo::Destruct(pInfo);
+		}
+
+		return result;
+	}
+
+	virtual EnHandleResult DoFireShutdown()
+	{
+		EnHandleResult result = __super::DoFireShutdown();
+
+		m_bfPool.Clear();
+
+		return HR_OK;
+	}
+
+	virtual BOOL CheckParams()
+	{
+		if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
+			if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
+				return __super::CheckParams();
+
+		SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+
+	virtual void PrepareStart()
+	{
+		__super::PrepareStart();
+
+		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
+		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
+		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
+		m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
+		m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
+		m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
+
+		m_bfPool.Prepare();
+	}
 
 public:
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)		{m_dwMaxPackSize = dwMaxPackSize;}
 	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)	{m_usHeaderFlag  = usPackHeaderFlag;}
-	virtual DWORD GetMaxPackSize	()	{return m_dwMaxPackSize;}
-	virtual USHORT GetPackHeaderFlag()	{return m_usHeaderFlag;}
+	virtual DWORD GetMaxPackSize	()							{return m_dwMaxPackSize;}
+	virtual USHORT GetPackHeaderFlag()							{return m_usHeaderFlag;}
 
 private:
-	EnHandleResult FireSuperReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return __super::FireReceive(pSocketObj, pData, iLength);}
+	EnHandleResult DoFireSuperReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return __super::DoFireReceive(pSocketObj, pData, iLength);}
 
-	friend EnHandleResult ParsePack<>	(CTcpPackAgent* pThis, TBufferPackInfo* pInfo, TBuffer* pBuffer, TSocketObj* pSocket,
+	friend EnHandleResult ParsePack<>	(CTcpPackAgentT* pThis, TBufferPackInfo* pInfo, TBuffer* pBuffer, TSocketObj* pSocket,
 										DWORD dwMaxPackSize, USHORT usPackHeaderFlag, const BYTE* pData, int iLength);
 
 public:
-	CTcpPackAgent(ITcpAgentListener* psoListener) : CTcpAgent(psoListener)
+	CTcpPackAgentT(ITcpAgentListener* psoListener)
+	: T(psoListener)
 	, m_dwMaxPackSize	(TCP_PACK_DEFAULT_MAX_SIZE)
 	, m_usHeaderFlag	(TCP_PACK_DEFAULT_HEADER_FLAG)
 	{
 
 	}
 
-	virtual ~CTcpPackAgent()
+	virtual ~CTcpPackAgentT()
 	{
 		if(HasStarted())
 			Stop();
@@ -75,3 +152,12 @@ private:
 
 	CBufferPool m_bfPool;
 };
+
+typedef CTcpPackAgentT<CTcpAgent> CTcpPackAgent;
+
+#ifdef _SSL_SUPPORT
+
+#include "SSLAgent.h"
+typedef CTcpPackAgentT<CSSLAgent> CSSLPackAgent;
+
+#endif

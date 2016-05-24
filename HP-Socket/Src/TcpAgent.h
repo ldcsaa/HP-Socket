@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -53,7 +53,7 @@ public:
 	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
 	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
 	, m_bReuseAddress			(FALSE)
-	, m_bMarkSilence			(FALSE)
+	, m_bMarkSilence			(TRUE)
 	{
 		ASSERT(m_wsSocket.IsValid());
 		ASSERT(m_psoListener);
@@ -72,8 +72,8 @@ public:
 	virtual BOOL Stop	();
 	virtual BOOL Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr);
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
-	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
+	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	{return DoSendPackets(dwConnID, pBuffers, iCount);}
 	virtual BOOL			HasStarted					()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState					()	{return m_enState;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);
@@ -122,24 +122,49 @@ public:
 
 protected:
 	virtual EnHandleResult FirePrepareConnect(CONNID dwConnID, SOCKET socket)
-		{return m_psoListener->OnPrepareConnect(dwConnID, socket);}
+		{return DoFirePrepareConnect(dwConnID, socket);}
 	virtual EnHandleResult FireConnect(TSocketObj* pSocketObj)
-		{return m_psoListener->OnConnect(pSocketObj->connID);}
+		{return DoFireConnect(pSocketObj);}
+	virtual EnHandleResult FireHandShake(TSocketObj* pSocketObj)
+		{return DoFireHandShake(pSocketObj);}
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);}
+		{return DoFireReceive(pSocketObj, pData, iLength);}
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, iLength);}
+		{return DoFireReceive(pSocketObj, iLength);}
 	virtual EnHandleResult FireSend(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pSocketObj->connID, pData, iLength);}
+		{return DoFireSend(pSocketObj, pData, iLength);}
 	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnClose(pSocketObj->connID, enOperation, iErrorCode);}
+		{return DoFireClose(pSocketObj, enOperation, iErrorCode);}
 	virtual EnHandleResult FireShutdown()
+		{return DoFireShutdown();}
+
+	virtual EnHandleResult DoFirePrepareConnect(CONNID dwConnID, SOCKET socket)
+		{return m_psoListener->OnPrepareConnect(dwConnID, socket);}
+	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj)
+		{return m_psoListener->OnConnect(pSocketObj->connID);}
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
+		{return m_psoListener->OnHandShake(pSocketObj->connID);}
+	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);}
+	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, int iLength)
+		{return m_psoListener->OnReceive(pSocketObj->connID, iLength);}
+	virtual EnHandleResult DoFireSend(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return m_psoListener->OnSend(pSocketObj->connID, pData, iLength);}
+	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+		{return m_psoListener->OnClose(pSocketObj->connID, enOperation, iErrorCode);}
+	virtual EnHandleResult DoFireShutdown()
 		{return m_psoListener->OnShutdown();}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
+
+	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+
+	BOOL DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
+	BOOL DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
+	TSocketObj* FindSocketObj(CONNID dwConnID);
 
 private:
 	EnHandleResult TriggerFireConnect(TSocketObj* pSocketObj);
@@ -154,6 +179,10 @@ protected:
 	BOOL GetConnectionReserved(CONNID dwConnID, PVOID* ppReserved);
 	BOOL SetConnectionReserved(TSocketObj* pSocketObj, PVOID pReserved);
 	BOOL GetConnectionReserved(TSocketObj* pSocketObj, PVOID* ppReserved);
+	BOOL SetConnectionReserved2(CONNID dwConnID, PVOID pReserved2);
+	BOOL GetConnectionReserved2(CONNID dwConnID, PVOID* ppReserved2);
+	BOOL SetConnectionReserved2(TSocketObj* pSocketObj, PVOID pReserved2);
+	BOOL GetConnectionReserved2(TSocketObj* pSocketObj, PVOID* ppReserved2);
 
 private:
 	BOOL CheckStarting();
@@ -170,20 +199,17 @@ private:
 	void WaitForWorkerThreadEnd();
 	void CloseCompletePort();
 
-	TBufferObj*	GetFreeBufferObj(int iLen = 0);
+	TBufferObj*	GetFreeBufferObj(int iLen = -1);
 	TSocketObj*	GetFreeSocketObj(CONNID dwConnID, SOCKET soClient);
 	void		AddFreeBufferObj(TBufferObj* pBufferObj);
 	void		AddFreeSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
-	TBufferObj*	CreateBufferObj();
 	TSocketObj*	CreateSocketObj();
-	void		DeleteBufferObj(TBufferObj* pBufferObj);
 	void		DeleteSocketObj(TSocketObj* pSocketObj);
 	BOOL		InvalidSocketObj(TSocketObj* pSocketObj);
 	void		ReleaseGCSocketObj(BOOL bForce = FALSE);
 
 	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj);
 	void		CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SD_SEND);
-	TSocketObj* FindSocketObj(CONNID dwConnID);
 
 private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
@@ -245,16 +271,14 @@ private:
 	SOCKADDR_IN			m_soAddrIN;
 	vector<HANDLE>		m_vtWorkerThreads;
 
-	CPrivateHeap		m_phBuffer;
 	CPrivateHeap		m_phSocket;
-	CItemPool			m_itPool;
+	CBufferObjPool		m_bfPool;
 
 	CSpinGuard			m_csState;
 
 	CRWLock				m_csClientSocket;
 	TSocketObjPtrMap	m_mpClientSocket;
 
-	TBufferObjPtrList	m_lsFreeBuffer;
 	TSocketObjPtrList	m_lsFreeSocket;
 	TSocketObjPtrQueue	m_lsGCSocket;
 };

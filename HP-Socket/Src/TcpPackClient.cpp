@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,38 +24,3 @@
  
 #include "stdafx.h"
 #include "TcpPackClient.h"
-
-BOOL CTcpPackClient::CheckParams()
-{
-	if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
-		if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
-			return __super::CheckParams();
-
-	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
-	return FALSE;
-}
-
-BOOL CTcpPackClient::SendPackets(const WSABUF pBuffers[], int iCount)
-{
-	int iNewCount = iCount + 1;
-	unique_ptr<WSABUF[]> buffers(new WSABUF[iNewCount]);
-
-	DWORD header;
-	if(!::AddPackHeader(pBuffers, iCount, buffers, m_dwMaxPackSize, m_usHeaderFlag, header))
-		return FALSE;
-
-	return __super::SendPackets(buffers.get(), iNewCount);
-}
-
-EnHandleResult CTcpPackClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
-{
-	return ParsePack(this, &m_pkInfo, &m_lsBuffer, pClient, m_dwMaxPackSize, m_usHeaderFlag, pData, iLength);
-}
-
-void CTcpPackClient::Reset(BOOL bAll)
-{
-	m_lsBuffer.Clear();
-	m_pkInfo.Reset();
-
-	return __super::Reset(bAll);
-}

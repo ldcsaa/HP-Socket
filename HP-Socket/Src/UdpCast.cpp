@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -86,6 +86,7 @@ void CUdpCast::PrepareStart()
 	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
 
 	m_itPool.Prepare();
+
 }
 
 BOOL CUdpCast::CheckStarting()
@@ -253,6 +254,8 @@ UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 		else
 			ASSERT(FALSE);
 	}
+
+	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
 
 	TRACE("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
@@ -523,21 +526,17 @@ void CUdpCast::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
 
 BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 {
-	int result			 = NO_ERROR;
-	EnSocketError enCode = SE_OK;
+	int result = NO_ERROR;
 
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
 
 	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
 	{
 		if(iOffset != 0) pBuffer += iOffset;
-		result = SendInternal(pBuffer, iLength, enCode);
+		result = SendInternal(pBuffer, iLength);
 	}
 	else
-	{
 		result = ERROR_INVALID_PARAMETER;
-		enCode = SE_INVALID_PARAM;
-	}
 
 	if(result != NO_ERROR)
 		::SetLastError(result);
@@ -547,8 +546,7 @@ BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 
 BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 {
-	int result			 = NO_ERROR;
-	EnSocketError enCode = SE_OK;
+	int result = NO_ERROR;
 
 	ASSERT(pBuffers && iCount > 0);
 
@@ -578,18 +576,12 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 		}
 
 		if(iLength > 0 && iLength <= iMaxLen)
-			result = SendInternal(itPtr->Ptr(), iLength, enCode);
+			result = SendInternal(itPtr->Ptr(), iLength);
 		else
-		{
 			result = ERROR_INCORRECT_SIZE;
-			enCode = SE_INVALID_PARAM;
-		}
 	}
 	else
-	{
 		result = ERROR_INVALID_PARAMETER;
-		enCode = SE_INVALID_PARAM;
-	}
 
 	if(result != NO_ERROR)
 		::SetLastError(result);
@@ -597,7 +589,7 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 	return (result == NO_ERROR);
 }
 
-int CUdpCast::SendInternal(const BYTE* pBuffer, int iLength, EnSocketError& enCode)
+int CUdpCast::SendInternal(const BYTE* pBuffer, int iLength)
 {
 	int result = NO_ERROR;
 
@@ -620,16 +612,10 @@ int CUdpCast::SendInternal(const BYTE* pBuffer, int iLength, EnSocketError& enCo
 			if(!isPending) m_evBuffer.Set();
 		}
 		else
-		{
 			result = ERROR_INVALID_STATE;
-			enCode = SE_ILLEGAL_STATE;
-		}
 	}
 	else
-	{
 		result = ERROR_INVALID_STATE;
-		enCode = SE_ILLEGAL_STATE;
-	}
 
 	return result;
 }

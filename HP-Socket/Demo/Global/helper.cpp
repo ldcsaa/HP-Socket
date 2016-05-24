@@ -164,6 +164,13 @@ void LogOnConnect2(CONNID dwConnID)
 	LogMsg(msg);
 }
 
+void LogOnHandShake2(CONNID dwConnID)
+{
+	CString msg;
+	msg.Format(_T("  > [ %Iu, %s ]"), dwConnID, EVT_ON_HAND_SHAKE);
+	LogMsg(msg);
+}
+
 void PostOnSend(CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	/*
@@ -240,6 +247,13 @@ void PostOnAccept2(CONNID dwConnID)
 	PostInfoMsg(msg);
 }
 
+void PostOnHandShake(CONNID dwConnID)
+{
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_HAND_SHAKE, 0, nullptr);
+
+	PostInfoMsg(msg);
+}
+
 void PostOnPrepareListen(LPCTSTR lpszAddress, USHORT usPort)
 {
 	LPTSTR lpszContent = new TCHAR[100];
@@ -273,6 +287,13 @@ void PostOnConnect2(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort)
 	wsprintf(lpszContent, _T("remote address: %s:%d"), lpszAddress, usPort);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_CONNECT, content_len, lpszContent);
+
+	PostInfoMsg(msg);
+}
+
+void PostOnConnect3(CONNID dwConnID)
+{
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_CONNECT, 0, nullptr);
 
 	PostInfoMsg(msg);
 }
@@ -403,3 +424,80 @@ CBufferPtr* GeneratePkgBuffer(const TPkgHeader& header, const TPkgBody& body)
 
 	return pBuffer;
 }
+
+#ifdef _SSL_SUPPORT
+
+#include "../../../Common/Src/FuncHelper.h"
+
+CString g_c_strCAPemCertFileOrPath;
+CString g_c_strPemCertFile;
+CString g_c_strPemKeyFile;
+
+CString g_s_strCAPemCertFileOrPath;
+CString g_s_strPemCertFile;
+CString g_s_strPemKeyFile;
+
+int g_c_iVerifyMode					= SSL_VM_PEER;
+LPCTSTR g_c_lpszCAPemCertFileOrPath	= _T("ssl-cert\\ca.crt");
+LPCTSTR g_c_lpszPemCertFile			= _T("ssl-cert\\client.cer");
+LPCTSTR g_c_lpszPemKeyFile			= _T("ssl-cert\\client.key");
+LPCTSTR g_c_lpszKeyPasswod			= _T("123456");
+
+int g_s_iVerifyMode					= SSL_VM_PEER | SSL_VM_FAIL_IF_NO_PEER_CERT;
+LPCTSTR g_s_lpszCAPemCertFileOrPath	= _T("ssl-cert\\ca.crt");
+LPCTSTR g_s_lpszPemCertFile			= _T("ssl-cert\\server.cer");
+LPCTSTR g_s_lpszPemKeyFile			= _T("ssl-cert\\server.key");
+LPCTSTR g_s_lpszKeyPasswod			= _T("123456");
+
+BOOL InitSSLParams();
+BOOL g_SSLParams = InitSSLParams();
+
+BOOL InitSSLParams()
+{
+	::SetCurrentPathToModulePath();
+
+	CString strPath;
+	::GetCurrentDirectory(MAX_PATH, strPath.GetBuffer(MAX_PATH));
+	strPath.ReleaseBuffer();
+	strPath += PATH_SEPARATOR_CHAR;
+
+	if(g_c_lpszPemCertFile)
+	{
+		g_c_strPemCertFile	= strPath + g_c_lpszPemCertFile;
+		g_c_lpszPemCertFile	= g_c_strPemCertFile;
+	}
+
+	if(g_c_lpszPemKeyFile)
+	{
+		g_c_strPemKeyFile	= strPath + g_c_lpszPemKeyFile;
+		g_c_lpszPemKeyFile	= g_c_strPemKeyFile;
+	}
+
+	if(g_c_lpszCAPemCertFileOrPath)
+	{
+		g_c_strCAPemCertFileOrPath	= strPath + g_c_lpszCAPemCertFileOrPath;
+		g_c_lpszCAPemCertFileOrPath	= g_c_strCAPemCertFileOrPath;
+	}
+
+	if(g_s_lpszPemCertFile)
+	{
+		g_s_strPemCertFile	= strPath + g_s_lpszPemCertFile;
+		g_s_lpszPemCertFile	= g_s_strPemCertFile;
+	}
+
+	if(g_s_lpszPemKeyFile)
+	{
+		g_s_strPemKeyFile	= strPath + g_s_lpszPemKeyFile;
+		g_s_lpszPemKeyFile	= g_s_strPemKeyFile;
+	}
+
+	if(g_s_lpszCAPemCertFileOrPath)
+	{
+		g_s_strCAPemCertFileOrPath	= strPath + g_s_lpszCAPemCertFileOrPath;
+		g_s_lpszCAPemCertFileOrPath	= g_s_strCAPemCertFileOrPath;
+	}
+
+	return TRUE;
+}
+
+#endif

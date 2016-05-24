@@ -180,7 +180,7 @@ void CClientDlg::OnBnClickedStart()
 	::LogClientStarting(strAddress, usPort);
 	
 	m_Client->SetMaxPackSize(0x01FFF);
-	m_Client->SetPackHeaderFlag(0x16C9);
+	m_Client->SetPackHeaderFlag(0x169);
 
 	if(m_Client->Start(strAddress, usPort, m_bAsyncConn))
 	{

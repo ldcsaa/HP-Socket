@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -53,7 +53,7 @@ public:
 	, m_dwPostReceiveCount		(DEFAULT_UDP_POST_RECEIVE_COUNT)
 	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
 	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
-	, m_bMarkSilence			(FALSE)
+	, m_bMarkSilence			(TRUE)
 	{
 		ASSERT(m_wsSocket.IsValid());
 		ASSERT(m_psoListener);
@@ -139,6 +139,8 @@ protected:
 	virtual void PrepareStart();
 	virtual void Reset(BOOL bAll = TRUE);
 
+	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+
 private:
 	EnHandleResult TriggerFireAccept(TUdpSocketObj* pSocketObj);
 	EnHandleResult TriggerFireReceive(TUdpSocketObj* pSocketObj, TUdpBufferObj* pBufferObj);
@@ -152,6 +154,10 @@ protected:
 	BOOL GetConnectionReserved(CONNID dwConnID, PVOID* ppReserved);
 	BOOL SetConnectionReserved(TUdpSocketObj* pSocketObj, PVOID pReserved);
 	BOOL GetConnectionReserved(TUdpSocketObj* pSocketObj, PVOID* ppReserved);
+	BOOL SetConnectionReserved2(CONNID dwConnID, PVOID pReserved2);
+	BOOL GetConnectionReserved2(CONNID dwConnID, PVOID* ppReserved2);
+	BOOL SetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID pReserved2);
+	BOOL GetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID* ppReserved2);
 
 private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
@@ -182,9 +188,7 @@ private:
 	void			AddFreeBufferObj(TUdpBufferObj* pBufferObj);
 	void			AddFreeSocketObj(CONNID dwConnID, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	void			AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
-	TUdpBufferObj*	CreateBufferObj();
 	TUdpSocketObj*	CreateSocketObj();
-	void			DeleteBufferObj(TUdpBufferObj* pBufferObj);
 	void			DeleteSocketObj(TUdpSocketObj* pSocketObj);
 	BOOL			InvalidSocketObj(TUdpSocketObj* pSocketObj);
 	void			ReleaseGCSocketObj(BOOL bForce = FALSE);
@@ -252,9 +256,8 @@ private:
 	HANDLE					m_hDetector;
 	vector<HANDLE>			m_vtWorkerThreads;
 
-	CPrivateHeap			m_phBuffer;
 	CPrivateHeap			m_phSocket;
-	CItemPool				m_itPool;
+	CUdpBufferObjPool		m_bfPool;
 
 	CSpinGuard				m_csState;
 
@@ -265,7 +268,6 @@ private:
 	TUdpSocketObjPtrMap		m_mpClientSocket;
 	TSockAddrMap			m_mpClientAddr;
 
-	TUdpBufferObjPtrList	m_lsFreeBuffer;
 	TUdpSocketObjPtrList	m_lsFreeSocket;
 	TUdpSocketObjPtrQueue	m_lsGCSocket;
 

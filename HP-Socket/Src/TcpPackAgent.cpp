@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,90 +24,3 @@
  
 #include "stdafx.h"
 #include "TcpPackAgent.h"
-#include "MiscHelper.h"
-
-BOOL CTcpPackAgent::CheckParams()
-{
-	if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
-		if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
-			return __super::CheckParams();
-
-	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
-	return FALSE;
-}
-
-void CTcpPackAgent::PrepareStart()
-{
-	__super::PrepareStart();
-
-	m_bfPool.SetItemCapacity	(GetSocketBufferSize());
-	m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
-	m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
-	m_bfPool.SetBufferLockTime	(GetFreeSocketObjLockTime());
-	m_bfPool.SetBufferPoolSize	(GetFreeSocketObjPool());
-	m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
-
-	m_bfPool.Prepare();
-}
-
-BOOL CTcpPackAgent::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)
-{
-	int iNewCount = iCount + 1;
-	unique_ptr<WSABUF[]> buffers(new WSABUF[iNewCount]);
-
-	DWORD header;
-	if(!::AddPackHeader(pBuffers, iCount, buffers, m_dwMaxPackSize, m_usHeaderFlag, header))
-		return FALSE;
-
-	return __super::SendPackets(dwConnID, buffers.get(), iNewCount);
-}
-
-EnHandleResult CTcpPackAgent::FireConnect(TSocketObj* pSocketObj)
-{
-	EnHandleResult result = __super::FireConnect(pSocketObj);
-
-	if(result != HR_ERROR)
-	{
-		TBuffer* pBuffer = m_bfPool.PickFreeBuffer(pSocketObj->connID);
-		VERIFY(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
-	}
-
-	return result;
-}
-
-EnHandleResult CTcpPackAgent::FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-{
-	TBufferPackInfo* pInfo = nullptr;
-	GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
-	ASSERT(pInfo);
-
-	TBuffer* pBuffer = (TBuffer*)pInfo->pBuffer;
-	ASSERT(pBuffer && pBuffer->IsValid());
-
-	return ParsePack(this, pInfo, pBuffer, pSocketObj, m_dwMaxPackSize, m_usHeaderFlag, pData, iLength);
-}
-
-EnHandleResult CTcpPackAgent::FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-{
-	EnHandleResult result = __super::FireClose(pSocketObj, enOperation, iErrorCode);
-
-	TBufferPackInfo* pInfo = nullptr;
-	GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
-
-	if(pInfo != nullptr)
-	{
-		m_bfPool.PutFreeBuffer(pInfo->pBuffer);
-		TBufferPackInfo::Destruct(pInfo);
-	}
-
-	return result;
-}
-
-EnHandleResult CTcpPackAgent::FireShutdown()
-{
-	EnHandleResult result = __super::FireShutdown();
-
-	m_bfPool.Clear();
-
-	return HR_OK;
-}

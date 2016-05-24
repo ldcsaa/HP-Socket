@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.4.4
+ * Version	: 3.5.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,28 +25,56 @@
 #pragma once
 
 #include "TcpClient.h"
+#include "MiscHelper.h"
 #include "../../Common/Src/bufferpool.h"
 
-class CTcpPullClient : public IPullClient, public CTcpClient
+template<class T> class CTcpPullClientT : public IPullClient, public T
 {
 public:
-	virtual EnFetchResult Fetch	(BYTE* pData, int iLength);
-	virtual EnFetchResult Peek	(BYTE* pData, int iLength);
+	virtual EnFetchResult Fetch(BYTE* pData, int iLength)
+	{
+		return ::FetchBuffer(&m_lsBuffer, pData, iLength);
+	}
+
+	virtual EnFetchResult Peek(BYTE* pData, int iLength)
+	{
+		return ::PeekBuffer(&m_lsBuffer, pData, iLength);
+	}
 
 protected:
-	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength);
+	virtual EnHandleResult DoFireReceive(IClient* pClient, const BYTE* pData, int iLength)
+	{
+		m_lsBuffer.Cat(pData, iLength);
 
-	virtual void Reset(BOOL bAll = TRUE);
+		return __super::DoFireReceive(pClient, m_lsBuffer.Length());
+	}
+
+	virtual void Reset(BOOL bAll = TRUE)
+	{
+		m_lsBuffer.Clear();
+
+		return __super::Reset(bAll);
+	}
 
 public:
-	CTcpPullClient(ITcpClientListener* psoListener) : CTcpClient(psoListener)
+	CTcpPullClientT(ITcpClientListener* psoListener)
+	: T(psoListener)
 	, m_lsBuffer(m_itPool)
 	{
 
 	}
 
-	virtual ~CTcpPullClient()	{if(HasStarted()) Stop();}
+	virtual ~CTcpPullClientT()	{if(HasStarted()) Stop();}
 
 private:
 	TItemListEx	m_lsBuffer;
 };
+
+typedef CTcpPullClientT<CTcpClient> CTcpPullClient;
+
+#ifdef _SSL_SUPPORT
+
+#include "SSLClient.h"
+typedef CTcpPullClientT<CSSLClient> CSSLPullClient;
+
+#endif
