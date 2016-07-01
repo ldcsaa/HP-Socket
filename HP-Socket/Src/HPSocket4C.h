@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -404,12 +404,12 @@ HPSOCKET_API void __stdcall HP_Set_FN_Client_OnClose(HP_ClientListener pListener
 * 名称：启动通信组件
 * 描述：启动服务端通信组件，启动完成后可开始接收客户端连接并收发数据
 *		
-* 参数：		pszBindAddress	-- 监听地址
+* 参数：		lpszBindAddress	-- 监听地址
 *			usPort			-- 监听端口
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 HP_Server_GetLastError() 获取错误代码
 */
-HPSOCKET_API BOOL __stdcall HP_Server_Start(HP_Server pServer, LPCTSTR pszBindAddress, USHORT usPort);
+HPSOCKET_API BOOL __stdcall HP_Server_Start(HP_Server pServer, LPCTSTR lpszBindAddress, USHORT usPort);
 
 /*
 * 名称：关闭通信组件
@@ -538,6 +538,8 @@ HPSOCKET_API BOOL __stdcall HP_Server_GetConnectPeriod(HP_Server pServer, HP_CON
 HPSOCKET_API BOOL __stdcall HP_Server_GetSilencePeriod(HP_Server pServer, HP_CONNID dwConnID, DWORD* pdwPeriod);
 /* 获取监听 Socket 的地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Server_GetListenAddress(HP_Server pServer, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
+/* 获取某个连接的本地地址信息 */
+HPSOCKET_API BOOL __stdcall HP_Server_GetLocalAddress(HP_Server pServer, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 /* 获取某个连接的远程地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Server_GetRemoteAddress(HP_Server pServer, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 
@@ -645,12 +647,12 @@ HPSOCKET_API DWORD __stdcall HP_UdpServer_GetDetectInterval(HP_UdpServer pServer
 * 名称：启动通信组件
 * 描述：启动通信代理组件，启动完成后可开始连接远程服务器
 *		
-* 参数：		pszBindAddress	-- 监听地址
+* 参数：		lpszBindAddress	-- 绑定地址（默认：nullptr，绑定 0.0.0.0）
 *			bAsyncConnect	-- 是否采用异步 Connect
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 HP_Agent_GetLastError() 获取错误代码
 */
-HPSOCKET_API BOOL __stdcall HP_Agent_Start(HP_Agent pAgent, LPCTSTR pszBindAddress, BOOL bAsyncConnect);
+HPSOCKET_API BOOL __stdcall HP_Agent_Start(HP_Agent pAgent, LPCTSTR lpszBindAddress, BOOL bAsyncConnect);
 
 /*
 * 名称：关闭通信组件
@@ -666,13 +668,13 @@ HPSOCKET_API BOOL __stdcall HP_Agent_Stop(HP_Agent pAgent);
 * 名称：连接服务器
 * 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() 事件
 *		
-* 参数：		pszRemoteAddress	-- 服务端地址
+* 参数：		lpszRemoteAddress	-- 服务端地址
 *			usPort				-- 服务端端口
 *			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
 */
-HPSOCKET_API BOOL __stdcall HP_Agent_Connect(HP_Agent pAgent, LPCTSTR pszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID);
+HPSOCKET_API BOOL __stdcall HP_Agent_Connect(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID);
 
 /*
 * 名称：发送数据
@@ -873,13 +875,26 @@ HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent
 * 名称：启动通信组件
 * 描述：启动客户端通信组件并连接服务端，启动完成后可开始收发数据
 *		
-* 参数：		pszRemoteAddress	-- 服务端地址
+* 参数：		lpszRemoteAddress	-- 服务端地址
 *			usPort				-- 服务端端口
 *			bAsyncConnect		-- 是否采用异步 Connect
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 HP_Client_GetLastError() 获取错误代码
 */
-HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect);
+HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect);
+
+/*
+* 名称：启动通信组件（并指定绑定地址）
+* 描述：启动客户端通信组件并连接服务端，启动完成后可开始收发数据
+*		
+* 参数：		lpszRemoteAddress	-- 服务端地址
+*			usPort				-- 服务端端口
+*			bAsyncConnect		-- 是否采用异步 Connect
+*			lpszBindAddress		-- 绑定地址（默认：nullptr，TcpClient/UdpClient -> 不执行绑定操作，UdpCast 绑定 -> 0.0.0.0）
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过 HP_Client_GetLastError() 获取错误代码
+*/
+HPSOCKET_API BOOL __stdcall HP_Client_StartWithBindAddress(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress);
 
 /*
 * 名称：关闭通信组件
@@ -1016,10 +1031,6 @@ HPSOCKET_API void __stdcall HP_UdpCast_SetMaxDatagramSize(HP_UdpCast pCast, DWOR
 HPSOCKET_API DWORD __stdcall HP_UdpCast_GetMaxDatagramSize(HP_UdpCast pCast);
 /* 获取当前数据报的远程地址信息（通常在 OnReceive 事件中调用） */
 HPSOCKET_API BOOL __stdcall HP_UdpCast_GetRemoteAddress(HP_UdpCast pCast, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
-/* 设置绑定地址 */
-HPSOCKET_API void __stdcall HP_UdpCast_SetBindAdddress(HP_UdpCast pCast, LPCTSTR pszBindAddress);
-/* 获取绑定地址 */
-HPSOCKET_API LPCTSTR __stdcall HP_UdpCast_GetBindAdddress(HP_UdpCast pCast);
 /* 设置是否启用地址重用机制（默认：不启用） */
 HPSOCKET_API void __stdcall HP_UdpCast_SetReuseAddress(HP_UdpCast pCast, BOOL bReuseAddress);
 /* 检测是否启用地址重用机制 */
@@ -1186,3 +1197,7 @@ HPSOCKET_API int __stdcall SYS_GetSocketOption(SOCKET sock, int level, int name,
 HPSOCKET_API int __stdcall SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
 // 调用系统的 ::WSAIoctl()
 HPSOCKET_API int __stdcall SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
+// 获取 SOCKET 本地地址信息
+HPSOCKET_API BOOL __stdcall SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
+// 获取 SOCKET 远程地址信息
+HPSOCKET_API BOOL __stdcall SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);

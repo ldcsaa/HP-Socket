@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,33 +28,39 @@
 
 #include <process.h>
 
-BOOL CUdpCast::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
+BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
 	PrepareStart();
 
-	BOOL isOK = FALSE;
+	BOOL isOK		= FALSE;
+	in_addr sinAddr	= {0};
 
 	if(CreateClientSocket())
 	{
-		if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
+		if(BindClientSocket(lpszBindAddress, usPort, sinAddr))
 		{
-			if(ConnectToGroup(pszRemoteAddress, usPort))
+			if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
 			{
-				if(CreateWorkerThread())
+				if(ConnectToGroup(lpszRemoteAddress, usPort, sinAddr))
 				{
-						isOK = TRUE;
+					if(CreateWorkerThread())
+					{
+							isOK = TRUE;
+					}
+					else
+						SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
 				}
 				else
-					SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
+					SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
 			}
 			else
-				SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
-		}
+				SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
+			}
 		else
-			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
+			SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
 	}
 	else
 		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
@@ -72,8 +78,7 @@ BOOL CUdpCast::CheckParams()
 				if(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)
 					if(m_iMCTtl >= 0 && m_iMCTtl <= 255)
 						if(m_bMCLoop >= 0 && m_bMCLoop <= 1)
-							if(::IsIPAddress(m_strBindAddress))
-								return TRUE;
+							return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -131,22 +136,41 @@ BOOL CUdpCast::CreateClientSocket()
 		m_evSocket = ::WSACreateEvent();
 		ASSERT(m_evSocket != WSA_INVALID_EVENT);
 
-		m_dwConnID = ::GenerateConnectionID();
-
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CUdpCast::ConnectToGroup(LPCTSTR pszRemoteAddress, USHORT usPort)
+BOOL CUdpCast::BindClientSocket(LPCTSTR lpszBindAddress, USHORT usPort, in_addr& sinAddr)
+{
+	if(!lpszBindAddress)
+		lpszBindAddress = DEFAULT_BIND_ADDRESS;
+
+	SOCKADDR_IN bindAddr;
+	if(!::sockaddr_A_2_IN(AF_INET, lpszBindAddress, usPort, bindAddr))
+	{
+		::WSASetLastError(WSAEADDRNOTAVAIL);
+		return FALSE;
+	}
+
+	if(::bind(m_soClient, (struct sockaddr*)&bindAddr, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
+		return FALSE;
+
+	sinAddr		= bindAddr.sin_addr;
+	m_dwConnID	= ::GenerateConnectionID();
+
+	return TRUE;
+}
+
+BOOL CUdpCast::ConnectToGroup(LPCTSTR lpszRemoteAddress, USHORT usPort, in_addr sinAddr)
 {
 	if(m_enCastMode == CM_MULTICAST)
 	{
 		TCHAR szAddress[40];
 		int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 
-		if(!::GetIPAddress(pszRemoteAddress, szAddress, iAddressLen))
+		if(!::GetIPAddress(lpszRemoteAddress, szAddress, iAddressLen))
 		{
 			::WSASetLastError(WSAEADDRNOTAVAIL);
 			return FALSE;
@@ -171,28 +195,16 @@ BOOL CUdpCast::ConnectToGroup(LPCTSTR pszRemoteAddress, USHORT usPort)
 		VERIFY(::SSO_SetSocketOption(m_soClient, SOL_SOCKET, SO_BROADCAST, &bSet, sizeof(BOOL)) != SOCKET_ERROR);
 	}
 
-	SOCKADDR_IN bindAddr;
-	if(!::sockaddr_A_2_IN(AF_INET, m_strBindAddress, usPort, bindAddr))
+	if(m_enCastMode == CM_MULTICAST)
 	{
-		::WSASetLastError(WSAEADDRNOTAVAIL);
-		return FALSE;
-	}
+		ip_mreq mcast;
+		::ZeroMemory(&mcast, sizeof(ip_mreq));
 
-	if(::bind(m_soClient, (struct sockaddr*)&bindAddr, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
-		return FALSE;
-	else
-	{
-		if(m_enCastMode == CM_MULTICAST)
-		{
-			ip_mreq mcast;
-			::ZeroMemory(&mcast, sizeof(ip_mreq));
+		mcast.imr_multiaddr = m_castAddr.sin_addr;
+		mcast.imr_interface = sinAddr;
 
-			mcast.imr_multiaddr = m_castAddr.sin_addr;
-			mcast.imr_interface = bindAddr.sin_addr;
-
-			if(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(ip_mreq)) == SOCKET_ERROR)
-				return FALSE;
-		}
+		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(ip_mreq)) == SOCKET_ERROR)
+			return FALSE;
 	}
 
 	BOOL isOK = FALSE;

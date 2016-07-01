@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -81,14 +81,14 @@ void CTcpAgent::SetLastError(EnSocketError code, LPCSTR func, int ec)
 	TRACE("%s --> Error: %d, EC: %d\n", func, code, ec);
 }
 
-BOOL CTcpAgent::Start(LPCTSTR pszBindAddress, BOOL bAsyncConnect)
+BOOL CTcpAgent::Start(LPCTSTR lpszBindAddress, BOOL bAsyncConnect)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
 	PrepareStart();
 
-	if(ParseBindAddress(pszBindAddress, bAsyncConnect))
+	if(ParseBindAddress(lpszBindAddress))
 		if(CreateCompletePort())
 			if(CreateWorkerThreads())
 			{
@@ -162,19 +162,19 @@ BOOL CTcpAgent::CheckStoping()
 	return TRUE;
 }
 
-BOOL CTcpAgent::ParseBindAddress(LPCTSTR pszBindAddress, BOOL bAsyncConnect)
+BOOL CTcpAgent::ParseBindAddress(LPCTSTR lpszBindAddress)
 {
 	BOOL isOK	= FALSE;
 	SOCKET sock	= socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if(sock != INVALID_SOCKET)
 	{
-		if(!pszBindAddress)
-			pszBindAddress = DEFAULT_BIND_ADDRESS;
+		if(!lpszBindAddress)
+			lpszBindAddress = DEFAULT_BIND_ADDRESS;
 
-		::sockaddr_A_2_IN(AF_INET, pszBindAddress, 0, m_soAddrIN);
+		::sockaddr_A_2_IN(AF_INET, lpszBindAddress, 0, m_soAddrIN);
 
-		if(!bAsyncConnect || ::bind(sock, (SOCKADDR*)&m_soAddrIN, sizeof(SOCKADDR_IN)) != SOCKET_ERROR)
+		if(::bind(sock, (SOCKADDR*)&m_soAddrIN, sizeof(SOCKADDR_IN)) != SOCKET_ERROR)
 		{
 			m_pfnConnectEx		= ::Get_ConnectEx_FuncPtr(sock);
 			m_pfnDisconnectEx	= ::Get_DisconnectEx_FuncPtr(sock);
@@ -1008,9 +1008,9 @@ int CTcpAgent::DoReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pB
 	return result;
 }
 
-BOOL CTcpAgent::Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID)
+BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID)
 {
-	ASSERT(pszRemoteAddress && usPort != 0);
+	ASSERT(lpszRemoteAddress && usPort != 0);
 
 	if(pdwConnID) *pdwConnID = 0;
 
@@ -1029,7 +1029,7 @@ BOOL CTcpAgent::Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConn
 			if(pdwConnID)	*pdwConnID = dwConnID;
 
 			if(FirePrepareConnect(dwConnID, soClient) != HR_ERROR)
-				result = ConnectToServer(dwConnID, soClient, pszRemoteAddress, usPort);
+				result = ConnectToServer(dwConnID, soClient, lpszRemoteAddress, usPort);
 			else
 				result = ERROR_CANCELLED;
 		}
@@ -1058,7 +1058,7 @@ DWORD CTcpAgent::CreateClientSocket(SOCKET& soClient)
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 		::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval);
 
-		if(m_bAsyncConnect && ::bind(soClient, (SOCKADDR*)&m_soAddrIN, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
+		if(::bind(soClient, (SOCKADDR*)&m_soAddrIN, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
 			result = ::WSAGetLastError();
 	}
 	else
@@ -1067,12 +1067,12 @@ DWORD CTcpAgent::CreateClientSocket(SOCKET& soClient)
 	return result;
 }
 
-DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, SOCKET& soClient, LPCTSTR pszRemoteAddress, USHORT usPort)
+DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, SOCKET& soClient, LPCTSTR lpszRemoteAddress, USHORT usPort)
 {
 	TCHAR szAddress[40];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 
-	if(!::GetIPAddress(pszRemoteAddress, szAddress, iAddressLen))
+	if(!::GetIPAddress(lpszRemoteAddress, szAddress, iAddressLen))
 		return WSAEADDRNOTAVAIL;
 
 	SOCKADDR_IN addr;

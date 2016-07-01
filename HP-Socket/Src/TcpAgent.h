@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -68,9 +68,9 @@ public:
 	}
 
 public:
-	virtual BOOL Start	(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
+	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
 	virtual BOOL Stop	();
-	virtual BOOL Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr);
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr);
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	{return DoSendPackets(dwConnID, pBuffers, iCount);}
@@ -187,7 +187,7 @@ protected:
 private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
-	BOOL ParseBindAddress(LPCTSTR pszBindAddress, BOOL bAsyncConnect);
+	BOOL ParseBindAddress(LPCTSTR lpszBindAddress);
 	BOOL CreateCompletePort();
 	BOOL CreateWorkerThreads();
 
@@ -217,7 +217,7 @@ private:
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 
 	DWORD CreateClientSocket(SOCKET& soClient);
-	DWORD ConnectToServer	(CONNID dwConnID, SOCKET& soClient, LPCTSTR pszRemoteAddress, USHORT usPort);
+	DWORD ConnectToServer	(CONNID dwConnID, SOCKET& soClient, LPCTSTR lpszRemoteAddress, USHORT usPort);
 	void ForceDisconnect	(CONNID dwConnID);
 
 	void HandleIo			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);

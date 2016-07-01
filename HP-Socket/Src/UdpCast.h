@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -33,7 +33,7 @@
 class CUdpCast : public IUdpCast
 {
 public:
-	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE);
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			SendPackets			(const WSABUF pBuffers[], int iCount);
@@ -50,7 +50,6 @@ public:
 	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize	= dwFreeBufferPoolSize;}
 	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold	= dwFreeBufferPoolHold;}
 	virtual void SetReuseAddress		(BOOL bReuseAddress)			{m_bReuseAddress		= bReuseAddress;}
-	virtual void SetBindAdddress		(LPCTSTR pszBindAddress)		{m_strBindAddress		= pszBindAddress;}
 	virtual void SetCastMode			(EnCastMode enCastMode)			{m_enCastMode			= enCastMode;}
 	virtual void SetMultiCastTtl		(int iMCTtl)					{m_iMCTtl				= iMCTtl;}
 	virtual void SetMultiCastLoop		(BOOL bMCLoop)					{m_bMCLoop				= bMCLoop;}
@@ -60,7 +59,6 @@ public:
 	virtual DWORD GetFreeBufferPoolSize	()	{return m_dwFreeBufferPoolSize;}
 	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
 	virtual BOOL  IsReuseAddress		()	{return m_bReuseAddress;}
-	virtual LPCTSTR GetBindAdddress		()	{return (LPCTSTR)m_strBindAddress;}
 	virtual EnCastMode GetCastMode		()	{return m_enCastMode;}
 	virtual int GetMultiCastTtl			()	{return m_iMCTtl;}
 	virtual BOOL IsMultiCastLoop		()	{return m_bMCLoop;}
@@ -101,7 +99,8 @@ private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
 	BOOL CreateClientSocket();
-	BOOL ConnectToGroup(LPCTSTR pszRemoteAddress, USHORT usPort);
+	BOOL BindClientSocket(LPCTSTR lpszBindAddress, USHORT usPort, in_addr& sinAddr);
+	BOOL ConnectToGroup(LPCTSTR lpszRemoteAddress, USHORT usPort, in_addr sinAddr);
 	BOOL CreateWorkerThread();
 	BOOL CreateDetectorThread();
 	BOOL ProcessNetworkEvent();
@@ -140,7 +139,6 @@ public:
 	, m_iMCTtl				(1)
 	, m_bMCLoop				(FALSE)
 	, m_enCastMode			(CM_MULTICAST)
-	, m_strBindAddress		(DEFAULT_BIND_ADDRESS)
 	{
 		ASSERT(m_psoListener);
 		Reset(FALSE);
@@ -166,7 +164,6 @@ private:
 	int					m_iMCTtl;
 	BOOL				m_bMCLoop;
 	EnCastMode			m_enCastMode;
-	CString				m_strBindAddress;
 
 	HANDLE				m_hWorker;
 	UINT				m_dwWorkerID;

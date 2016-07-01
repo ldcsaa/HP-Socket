@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -70,6 +70,8 @@
 	#pragma comment(linker, "/EXPORT:SYS_GetSocketOption=_SYS_GetSocketOption")
 	#pragma comment(linker, "/EXPORT:SYS_IoctlSocket=_SYS_IoctlSocket")
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl")
+	#pragma comment(linker, "/EXPORT:SYS_GetSocketLocalAddress=_SYS_GetSocketLocalAddress")
+	#pragma comment(linker, "/EXPORT:SYS_GetSocketRemoteAddress=_SYS_GetSocketRemoteAddress")
 #endif
 */
 
@@ -226,4 +228,14 @@ HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg)
 HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned)
 {
 	return ::SSO_WSAIoctl(sock, dwIoControlCode, lpvInBuffer, cbInBuffer, lpvOutBuffer, cbOutBuffer, lpcbBytesReturned);
+}
+
+HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return ::GetSocketLocalAddress(socket, lpszAddress, *piAddressLen, *pusPort);
+}
+
+HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return ::GetSocketRemoteAddress(socket, lpszAddress, *piAddressLen, *pusPort);
 }

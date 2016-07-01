@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -460,7 +460,7 @@ BOOL IN_ADDR_2_IP(const IN_ADDR& addr, __out LPTSTR lpszAddress, __inout int& iA
 /* 把 SOCKADDR_IN 结构转换为地址数据 */
 BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, __out ADDRESS_FAMILY& usFamily, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 /* 把地址数据转换为 SOCKADDR_IN 结构 */
-BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, __out SOCKADDR_IN& addr);
+BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR lpszAddress, USHORT usPort, __out SOCKADDR_IN& addr);
 /* 获取 Socket 的本地或远程地址信息 */
 BOOL GetSocketAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort, BOOL bLocal = TRUE);
 /* 获取 Socket 的本地地址信息 */

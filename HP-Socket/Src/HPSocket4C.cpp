@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -135,6 +135,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolHold=_HP_Client_SetFreeBufferPoolHold@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolSize=_HP_Client_SetFreeBufferPoolSize@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_Start=_HP_Client_Start@16")
+	#pragma comment(linker, "/EXPORT:HP_Client_StartWithBindAddress=_HP_Client_StartWithBindAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Client_Stop=_HP_Client_Stop@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_Disconnect=_HP_Server_Disconnect@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_DisconnectLongConnections=_HP_Server_DisconnectLongConnections@12")
@@ -154,6 +155,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_GetListenAddress=_HP_Server_GetListenAddress@16")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsMarkSilence=_HP_Server_IsMarkSilence@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetPendingDataLength=_HP_Server_GetPendingDataLength@12")
+	#pragma comment(linker, "/EXPORT:HP_Server_GetLocalAddress=_HP_Server_GetLocalAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetRemoteAddress=_HP_Server_GetRemoteAddress@20")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetSendPolicy=_HP_Server_GetSendPolicy@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_GetState=_HP_Server_GetState@4")
@@ -241,14 +243,12 @@
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetKeepAliveTime=_HP_TcpServer_SetKeepAliveTime@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetSocketBufferSize=_HP_TcpServer_SetSocketBufferSize@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetSocketListenQueue=_HP_TcpServer_SetSocketListenQueue@8")
-	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetBindAdddress=_HP_UdpCast_GetBindAdddress@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetCastMode=_HP_UdpCast_GetCastMode@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetMaxDatagramSize=_HP_UdpCast_GetMaxDatagramSize@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetMultiCastTtl=_HP_UdpCast_GetMultiCastTtl@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_GetRemoteAddress=_HP_UdpCast_GetRemoteAddress@16")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_IsMultiCastLoop=_HP_UdpCast_IsMultiCastLoop@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_IsReuseAddress=_HP_UdpCast_IsReuseAddress@4")
-	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetBindAdddress=_HP_UdpCast_SetBindAdddress@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetCastMode=_HP_UdpCast_SetCastMode@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetMaxDatagramSize=_HP_UdpCast_SetMaxDatagramSize@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpCast_SetMultiCastLoop=_HP_UdpCast_SetMultiCastLoop@8")
@@ -275,6 +275,8 @@
 	#pragma comment(linker, "/EXPORT:SYS_SetSocketOption=_SYS_SetSocketOption@20")
 	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError@0")
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl@28")
+	#pragma comment(linker, "/EXPORT:SYS_GetSocketLocalAddress=_SYS_GetSocketLocalAddress@16")
+	#pragma comment(linker, "/EXPORT:SYS_GetSocketRemoteAddress=_SYS_GetSocketRemoteAddress@16")
 #endif
 
 class C_HP_TcpServer : public C_HP_Object, public CTcpServer
@@ -689,9 +691,9 @@ HPSOCKET_API void __stdcall HP_Set_FN_Client_OnClose(HP_ClientListener pListener
 /**************************************************************************/
 /***************************** Server 操作方法 *****************************/
 
-HPSOCKET_API BOOL __stdcall HP_Server_Start(HP_Server pServer, LPCTSTR pszBindAddress, USHORT usPort)
+HPSOCKET_API BOOL __stdcall HP_Server_Start(HP_Server pServer, LPCTSTR lpszBindAddress, USHORT usPort)
 {
-	return C_HP_Object::ToServer(pServer)->Start(pszBindAddress, usPort);
+	return C_HP_Object::ToServer(pServer)->Start(lpszBindAddress, usPort);
 }
 
 HPSOCKET_API BOOL __stdcall HP_Server_Stop(HP_Server pServer)
@@ -790,6 +792,11 @@ HPSOCKET_API BOOL __stdcall HP_Server_GetSilencePeriod(HP_Server pServer, HP_CON
 HPSOCKET_API BOOL __stdcall HP_Server_GetListenAddress(HP_Server pServer, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
 {
 	return C_HP_Object::ToServer(pServer)->GetListenAddress(lpszAddress, *piAddressLen, *pusPort);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Server_GetLocalAddress(HP_Server pServer, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return C_HP_Object::ToServer(pServer)->GetLocalAddress(dwConnID, lpszAddress, *piAddressLen, *pusPort);
 }
 
 HPSOCKET_API BOOL __stdcall HP_Server_GetRemoteAddress(HP_Server pServer, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
@@ -984,9 +991,9 @@ HPSOCKET_API DWORD __stdcall HP_UdpServer_GetDetectInterval(HP_UdpServer pServer
 /**************************************************************************/
 /***************************** Agent 操作方法 *****************************/
 
-HPSOCKET_API BOOL __stdcall HP_Agent_Start(HP_Agent pAgent, LPCTSTR pszBindAddress, BOOL bAsyncConnect)
+HPSOCKET_API BOOL __stdcall HP_Agent_Start(HP_Agent pAgent, LPCTSTR lpszBindAddress, BOOL bAsyncConnect)
 {
-	return C_HP_Object::ToAgent(pAgent)->Start(pszBindAddress, bAsyncConnect);
+	return C_HP_Object::ToAgent(pAgent)->Start(lpszBindAddress, bAsyncConnect);
 }
 
 HPSOCKET_API BOOL __stdcall HP_Agent_Stop(HP_Agent pAgent)
@@ -994,9 +1001,9 @@ HPSOCKET_API BOOL __stdcall HP_Agent_Stop(HP_Agent pAgent)
 	return C_HP_Object::ToAgent(pAgent)->Stop();
 }
 
-HPSOCKET_API BOOL __stdcall HP_Agent_Connect(HP_Agent pAgent, LPCTSTR pszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID)
+HPSOCKET_API BOOL __stdcall HP_Agent_Connect(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID)
 {
-	return C_HP_Object::ToAgent(pAgent)->Connect(pszRemoteAddress, usPort, pdwConnID);
+	return C_HP_Object::ToAgent(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID);
 }
 
 HPSOCKET_API BOOL __stdcall HP_Agent_Send(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength)
@@ -1231,9 +1238,14 @@ HPSOCKET_API DWORD __stdcall HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent
 /******************************************************************************/
 /***************************** Client 组件操作方法 *****************************/
 
-HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
+HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
 {
-	return C_HP_Object::ToClient(pClient)->Start(pszRemoteAddress, usPort, bAsyncConnect);
+	return C_HP_Object::ToClient(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect);
+}
+
+HPSOCKET_API BOOL __stdcall HP_Client_StartWithBindAddress(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+{
+	return C_HP_Object::ToClient(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress);
 }
 
 HPSOCKET_API BOOL __stdcall HP_Client_Stop(HP_Client pClient)
@@ -1414,16 +1426,6 @@ HPSOCKET_API DWORD __stdcall HP_UdpCast_GetMaxDatagramSize(HP_UdpCast pCast)
 HPSOCKET_API BOOL __stdcall HP_UdpCast_GetRemoteAddress(HP_UdpCast pCast, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
 {
 	return C_HP_Object::ToUdpCast(pCast)->GetRemoteAddress(lpszAddress, *piAddressLen, *pusPort);
-}
-
-HPSOCKET_API void __stdcall HP_UdpCast_SetBindAdddress(HP_UdpCast pCast, LPCTSTR pszBindAddress)
-{
-	C_HP_Object::ToUdpCast(pCast)->SetBindAdddress(pszBindAddress);
-}
-
-HPSOCKET_API LPCTSTR __stdcall HP_UdpCast_GetBindAdddress(HP_UdpCast pCast)
-{
-	return C_HP_Object::ToUdpCast(pCast)->GetBindAdddress();
 }
 
 HPSOCKET_API void __stdcall HP_UdpCast_SetReuseAddress(HP_UdpCast pCast, BOOL bReuseAddress)
@@ -1628,4 +1630,14 @@ HPSOCKET_API int __stdcall SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg)
 HPSOCKET_API int __stdcall SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned)
 {
 	return ::SSO_WSAIoctl(sock, dwIoControlCode, lpvInBuffer, cbInBuffer, lpvOutBuffer, cbOutBuffer, lpcbBytesReturned);
+}
+
+HPSOCKET_API BOOL __stdcall SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return ::GetSocketLocalAddress(socket, lpszAddress, *piAddressLen, *pusPort);
+}
+
+HPSOCKET_API BOOL __stdcall SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+{
+	return ::GetSocketRemoteAddress(socket, lpszAddress, *piAddressLen, *pusPort);
 }

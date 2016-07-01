@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -33,7 +33,7 @@
 class CUdpClient : public IUdpClient
 {
 public:
-	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE);
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			SendPackets			(const WSABUF pBuffers[], int iCount);
@@ -90,7 +90,8 @@ private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
 	BOOL CreateClientSocket();
-	BOOL ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort);
+	BOOL BindClientSocket(LPCTSTR lpszBindAddress);
+	BOOL ConnectToServer(LPCTSTR lpszRemoteAddress, USHORT usPort);
 	BOOL CreateWorkerThread();
 	BOOL CreateDetectorThread();
 	BOOL ProcessNetworkEvent();

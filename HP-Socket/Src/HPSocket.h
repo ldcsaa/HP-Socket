@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -145,6 +145,10 @@ HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID va
 HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
 // 调用系统的 ::WSAIoctl()
 HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
+// 获取 SOCKET 本地地址信息
+HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
+// 获取 SOCKET 远程地址信息
+HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 
 // ITcpServer 对象创建器
 struct TcpServer_Creator

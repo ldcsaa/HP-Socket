@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -78,6 +78,7 @@ public:
 	virtual BOOL			DisconnectLongConnections	(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetListenAddress			(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
@@ -193,7 +194,7 @@ private:
 	BOOL			InvalidSocketObj(TUdpSocketObj* pSocketObj);
 	void			ReleaseGCSocketObj(BOOL bForce = FALSE);
 
-	void			AddClienTUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
+	void			AddClientUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
 	void			CloseClientUdpSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
 

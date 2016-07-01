@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -202,13 +202,13 @@ BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR l
 	return IN_ADDR_2_IP(addr.sin_addr, lpszAddress, iAddressLen);
 }
 
-BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, SOCKADDR_IN& addr)
+BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR lpszAddress, USHORT usPort, SOCKADDR_IN& addr)
 {
 	ASSERT(usFamily == AF_INET);
 
 	addr.sin_family			= usFamily;
 	addr.sin_port			= htons(usPort);
-	addr.sin_addr.s_addr	= GetIPv4InAddr(pszAddress);
+	addr.sin_addr.s_addr	= GetIPv4InAddr(lpszAddress);
 
 	return addr.sin_addr.s_addr != INADDR_NONE;
 }

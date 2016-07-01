@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -71,7 +71,7 @@ public:
 	}
 
 public:
-	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort);
+	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
@@ -82,6 +82,7 @@ public:
 	virtual BOOL			DisconnectLongConnections	(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetListenAddress			(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
@@ -191,7 +192,7 @@ protected:
 private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
-	BOOL CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort);
+	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort);
 	BOOL CreateCompletePort();
 	BOOL CreateWorkerThreads();
 	BOOL StartAccept();

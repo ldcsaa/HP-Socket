@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -81,14 +81,14 @@ void CTcpServer::SetLastError(EnSocketError code, LPCSTR func, int ec)
 	TRACE("%s --> Error: %d, EC: %d\n", func, code, ec);
 }
 
-BOOL CTcpServer::Start(LPCTSTR pszBindAddress, USHORT usPort)
+BOOL CTcpServer::Start(LPCTSTR lpszBindAddress, USHORT usPort)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
 	PrepareStart();
 
-	if(CreateListenSocket(pszBindAddress, usPort))
+	if(CreateListenSocket(lpszBindAddress, usPort))
 		if(CreateCompletePort())
 			if(CreateWorkerThreads())
 				if(StartAccept())
@@ -163,7 +163,7 @@ BOOL CTcpServer::CheckStoping()
 	return TRUE;
 }
 
-BOOL CTcpServer::CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort)
+BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 {
 	BOOL isOK = FALSE;
 
@@ -171,7 +171,7 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort)
 	if(m_soListen != INVALID_SOCKET)
 	{
 		SOCKADDR_IN addr;
-		::sockaddr_A_2_IN(AF_INET, pszBindAddress, usPort, addr);
+		::sockaddr_A_2_IN(AF_INET, lpszBindAddress, usPort, addr);
 
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 		::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval);
@@ -510,6 +510,18 @@ BOOL CTcpServer::GetListenAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT&
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
 	return ::GetSocketLocalAddress(m_soListen, lpszAddress, iAddressLen, usPort);
+}
+
+BOOL CTcpServer::GetLocalAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
+{
+	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
+
+	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(TSocketObj::IsValid(pSocketObj))
+		return ::GetSocketLocalAddress(pSocketObj->socket, lpszAddress, iAddressLen, usPort);
+
+	return FALSE;
 }
 
 BOOL CTcpServer::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)

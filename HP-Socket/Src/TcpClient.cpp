@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -29,7 +29,7 @@
 
 #include <process.h>
 
-BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
+BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
@@ -41,20 +41,25 @@ BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConne
 
 	if(CreateClientSocket())
 	{
-		if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
+		if(BindClientSocket(lpszBindAddress))
 		{
-			if(ConnectToServer(pszRemoteAddress, usPort))
+			if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
 			{
-				if(CreateWorkerThread())
-					isOK = TRUE;
+				if(ConnectToServer(lpszRemoteAddress, usPort))
+				{
+					if(CreateWorkerThread())
+						isOK = TRUE;
+					else
+						SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
+				}
 				else
-					SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
+					SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
 			}
 			else
-				SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
+				SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
 		}
 		else
-			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
+			SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
 	}
 	else
 		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
@@ -119,6 +124,7 @@ BOOL CTcpClient::CheckStoping()
 BOOL CTcpClient::CreateClientSocket()
 {
 	m_soClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
 	if(m_soClient != INVALID_SOCKET)
 	{
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
@@ -127,20 +133,38 @@ BOOL CTcpClient::CreateClientSocket()
 		m_evSocket = ::WSACreateEvent();
 		ASSERT(m_evSocket != WSA_INVALID_EVENT);
 
-		m_dwConnID = ::GenerateConnectionID();
-
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTcpClient::ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort)
+BOOL CTcpClient::BindClientSocket(LPCTSTR lpszBindAddress)
+{
+	if(lpszBindAddress)
+	{
+		SOCKADDR_IN bindAddr;
+		if(!::sockaddr_A_2_IN(AF_INET, lpszBindAddress, 0, bindAddr))
+		{
+			::WSASetLastError(WSAEADDRNOTAVAIL);
+			return FALSE;
+		}
+
+		if(::bind(m_soClient, (struct sockaddr*)&bindAddr, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
+			return FALSE;
+	}
+
+	m_dwConnID = ::GenerateConnectionID();
+
+	return TRUE;
+}
+
+BOOL CTcpClient::ConnectToServer(LPCTSTR lpszRemoteAddress, USHORT usPort)
 {
 	TCHAR szAddress[40];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 
-	if(!::GetIPAddress(pszRemoteAddress, szAddress, iAddressLen))
+	if(!::GetIPAddress(lpszRemoteAddress, szAddress, iAddressLen))
 	{
 		::WSASetLastError(WSAEADDRNOTAVAIL);
 		return FALSE;

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -685,6 +685,8 @@ public:
 	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod)	= 0;
 	/* 获取某个连接静默时间（毫秒） */
 	virtual BOOL GetSilencePeriod		(CONNID dwConnID, DWORD& dwPeriod)	= 0;
+	/* 获取某个连接的本地地址信息 */
+	virtual BOOL GetLocalAddress		(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 	/* 获取某个连接的远程地址信息 */
 	virtual BOOL GetRemoteAddress		(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 	/* 获取最近一次失败操作的错误代码 */
@@ -747,12 +749,12 @@ public:
 	* 名称：启动通信组件
 	* 描述：启动服务端通信组件，启动完成后可开始接收客户端连接并收发数据
 	*		
-	* 参数：		pszBindAddress	-- 监听地址
+	* 参数：		lpszBindAddress	-- 监听地址
 	*			usPort			-- 监听端口
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort)								= 0;
+	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort)							= 0;
 
 public:
 
@@ -866,32 +868,30 @@ public:
 	* 名称：启动通信组件
 	* 描述：启动通信代理组件，启动完成后可开始连接远程服务器
 	*		
-	* 参数：		pszBindAddress	-- 监听地址
+	* 参数：		lpszBindAddress	-- 绑定地址（默认：nullptr，绑定 0.0.0.0）
 	*			bAsyncConnect	-- 是否采用异步 Connect
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR pszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)						= 0;
+	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)						= 0;
 
 	/*
 	* 名称：连接服务器
 	* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() 事件
 	*		
-	* 参数：		pszRemoteAddress	-- 服务端地址
+	* 参数：		lpszRemoteAddress	-- 服务端地址
 	*			usPort				-- 服务端端口
 	*			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL Connect(LPCTSTR pszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)				= 0;
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)				= 0;
 
 public:
 
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 获取某个连接的本地地址信息 */
-	virtual BOOL GetLocalAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 };
 
 /************************************************************************
@@ -958,13 +958,14 @@ public:
 	* 名称：启动通信组件
 	* 描述：启动客户端通信组件并连接服务端，启动完成后可开始收发数据
 	*		
-	* 参数：		pszRemoteAddress	-- 服务端地址
+	* 参数：		lpszRemoteAddress	-- 服务端地址
 	*			usPort				-- 服务端端口
 	*			bAsyncConnect		-- 是否采用异步 Connect
+	*			lpszBindAddress		-- 绑定地址（默认：nullptr，TcpClient/UdpClient -> 不执行绑定操作，UdpCast 绑定 -> 0.0.0.0）
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE)	= 0;
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr)	= 0;
 
 	/*
 	* 名称：关闭通信组件
@@ -1130,11 +1131,6 @@ public:
 
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
-
-	/* 设置绑定地址 */
-	virtual void SetBindAdddress	(LPCTSTR pszBindAddress)		= 0;
-	/* 获取绑定地址 */
-	virtual LPCTSTR GetBindAdddress	()								= 0;
 
 	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)		= 0;

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 3.5.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -411,7 +411,7 @@ BOOL CUdpServer::InvalidSocketObj(TUdpSocketObj* pSocketObj)
 	return bDone;
 }
 
-void CUdpServer::AddClienTUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj)
+void CUdpServer::AddClientUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
@@ -521,6 +521,18 @@ BOOL CUdpServer::GetListenAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT&
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
 	return ::GetSocketLocalAddress(m_soListen, lpszAddress, iAddressLen, usPort);
+}
+
+BOOL CUdpServer::GetLocalAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
+{
+	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
+
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(TUdpSocketObj::IsValid(pSocketObj))
+		return ::GetSocketLocalAddress(m_soListen, lpszAddress, iAddressLen, usPort);
+
+	return FALSE;
 }
 
 BOOL CUdpServer::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
@@ -1041,7 +1053,7 @@ CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 			pSocketObj	= GetFreeSocketObj(dwConnID);
 
 			memcpy(&pSocketObj->remoteAddr, &pBufferObj->remoteAddr, sizeof(SOCKADDR_IN));
-			AddClienTUdpSocketObj(dwConnID, pSocketObj);
+			AddClientUdpSocketObj(dwConnID, pSocketObj);
 		}
 	}
 
