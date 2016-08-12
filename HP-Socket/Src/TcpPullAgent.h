@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -112,8 +112,7 @@ public:
 
 	virtual ~CTcpPullAgentT()
 	{
-		if(HasStarted())
-			Stop();
+		Stop();
 	}
 
 private:

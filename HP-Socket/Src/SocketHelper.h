@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -440,6 +440,27 @@ typedef unordered_map<SOCKADDR_IN*, CONNID, sockaddr_func::hash, sockaddr_func::
 typedef TSockAddrMap::iterator			TSockAddrMapI;
 /* 地址-连接 ID 哈希表 const 迭代器 */
 typedef TSockAddrMap::const_iterator	TSockAddrMapCI;
+
+/* IClient 组件关闭上下文 */
+struct TClientCloseContext
+{
+	BOOL bFireOnClose;
+	EnSocketOperation enOperation;
+	int iErrorCode;
+
+	TClientCloseContext(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK)
+	{
+		Reset(bFire, enOp, iCode);
+	}
+
+	void Reset(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK)
+	{
+		bFireOnClose = bFire;
+		enOperation	 = enOp;
+		iErrorCode	 = iCode;
+	}
+
+};
 
 /*****************************************************************************************************/
 /******************************************** 公共帮助方法 ********************************************/

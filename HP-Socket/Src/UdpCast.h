@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -87,7 +87,7 @@ protected:
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
 
@@ -97,7 +97,7 @@ protected:
 
 private:
 	BOOL CheckStarting();
-	BOOL CheckStoping();
+	BOOL CheckStoping(DWORD dwCurrentThreadID);
 	BOOL CreateClientSocket();
 	BOOL BindClientSocket(LPCTSTR lpszBindAddress, USHORT usPort, in_addr& sinAddr);
 	BOOL ConnectToGroup(LPCTSTR lpszRemoteAddress, USHORT usPort, in_addr sinAddr);
@@ -140,17 +140,24 @@ public:
 	, m_bMCLoop				(FALSE)
 	, m_enCastMode			(CM_MULTICAST)
 	{
+		ASSERT(m_wsSocket.IsValid());
 		ASSERT(m_psoListener);
-		Reset(FALSE);
+
+		::ZeroMemory(&m_castAddr, sizeof(SOCKADDR_IN));
+		::ZeroMemory(&m_remoteAddr, sizeof(SOCKADDR_IN));
 	}
 
-	virtual ~CUdpCast()	{if(HasStarted()) Stop();}
+	virtual ~CUdpCast()
+	{
+		Stop();
+	}
 
 private:
 	CInitSocket			m_wsSocket;
 
 private:
 	IUdpCastListener*	m_psoListener;
+	TClientCloseContext m_ccContext;
 
 	SOCKET				m_soClient;
 	HANDLE				m_evSocket;
@@ -168,7 +175,7 @@ private:
 	HANDLE				m_hWorker;
 	UINT				m_dwWorkerID;
 
-	EnServiceState		m_enState;
+	volatile EnServiceState	m_enState;
 	EnSocketError		m_enLastError;
 
 	PVOID				m_pExtra;

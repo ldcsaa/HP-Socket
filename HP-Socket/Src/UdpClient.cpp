@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -34,6 +34,7 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 		return FALSE;
 
 	PrepareStart();
+	m_ccContext.Reset();
 
 	BOOL isOK		= FALSE;
 	m_bAsyncConnect	= bAsyncConnect;
@@ -68,7 +69,11 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 	else
 		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
 
-	if(!isOK) Stop();
+	if(!isOK)
+	{
+		m_ccContext.Reset(FALSE);
+		Stop();
+	}
 
 	return isOK;
 }
@@ -110,19 +115,30 @@ BOOL CUdpClient::CheckStarting()
 	return TRUE;
 }
 
-BOOL CUdpClient::CheckStoping()
+BOOL CUdpClient::CheckStoping(DWORD dwCurrentThreadID)
 {
+	if(m_enState == SS_STOPPED)
+		return FALSE;
+
 	CSpinLock locallock(m_csState);
 
-	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
-		m_enState = SS_STOPPING;
-	else
+	if(HasStarted())
 	{
+		m_enState = SS_STOPPING;
+		return TRUE;
+	}
+	else if(m_enState == SS_STOPPING)
+	{
+		if(dwCurrentThreadID != m_dwWorkerID && dwCurrentThreadID != m_dwDetectorID)
+		{
+			while(m_enState != SS_STOPPED)
+				::Sleep(30);
+		}
+
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
-		return FALSE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CUdpClient::CreateClientSocket()
@@ -218,6 +234,7 @@ UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 {
 	TRACE("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 
+	BOOL bCallStop		= TRUE;
 	CUdpClient* pClient	= (CUdpClient*)pv;
 	HANDLE hEvents[]	= {pClient->m_evSocket, pClient->m_evBuffer, pClient->m_evWorker};
 
@@ -230,30 +247,26 @@ UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 		if(retval == WSA_WAIT_EVENT_0)
 		{
 			if(!pClient->ProcessNetworkEvent())
-			{
-				if(pClient->HasStarted())
-					pClient->Stop();
-
 				break;
-			}
 		}
 		else if(retval == WSA_WAIT_EVENT_0 + 1)
 		{
 			if(!pClient->SendData())
-			{
-				if(pClient->HasStarted())
-					pClient->Stop();
-
 				break;
-			}
 		}
 		else if(retval == WSA_WAIT_EVENT_0 + 2)
+		{
+			bCallStop = FALSE;
 			break;
+		}
 		else
 			ASSERT(FALSE);
 	}
 
 	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
+
+	if(bCallStop && pClient->HasStarted())
+		pClient->Stop();
 
 	TRACE("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
@@ -300,7 +313,7 @@ BOOL CUdpClient::HandleError(WSANETWORKEVENTS& events)
 		enOperation = SO_SEND;
 
 	VERIFY(::WSAResetEvent(m_evSocket));
-	FireClose(this, enOperation, iCode);
+	m_ccContext.Reset(TRUE, enOperation, iCode);
 
 	return FALSE;
 }
@@ -314,7 +327,7 @@ BOOL CUdpClient::HandleRead(WSANETWORKEVENTS& events)
 		bContinue = ReadData();
 	else
 	{
-		FireClose(this, SO_RECEIVE, iCode);
+		m_ccContext.Reset(TRUE, SO_RECEIVE, iCode);
 		bContinue = FALSE;
 	}
 
@@ -330,7 +343,7 @@ BOOL CUdpClient::HandleWrite(WSANETWORKEVENTS& events)
 		bContinue = SendData();
 	else
 	{
-		FireClose(this, SO_SEND, iCode);
+		m_ccContext.Reset(TRUE, SO_SEND, iCode);
 		bContinue = FALSE;
 	}
 
@@ -362,7 +375,9 @@ BOOL CUdpClient::HandleConnect(WSANETWORKEVENTS& events)
 	if(iCode != 0)
 	{
 		if(iCode != ERROR_CANCELLED)
-			FireClose(this, SO_CONNECT, iCode);
+			m_ccContext.Reset(TRUE, SO_CONNECT, iCode);
+		else
+			m_ccContext.Reset(FALSE);
 
 		bContinue = FALSE;
 	}
@@ -375,9 +390,9 @@ BOOL CUdpClient::HandleClose(WSANETWORKEVENTS& events)
 	int iCode = events.iErrorCode[FD_CLOSE_BIT];
 
 	if(iCode == 0)
-		FireClose(this, SO_CLOSE, SE_OK);
+		m_ccContext.Reset(TRUE, SO_CLOSE, SE_OK);
 	else
-		FireClose(this, SO_CLOSE, iCode);
+		m_ccContext.Reset(TRUE, SO_CLOSE, iCode);
 
 	return FALSE;
 }
@@ -394,7 +409,7 @@ BOOL CUdpClient::ReadData()
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
-				FireClose(this, SO_RECEIVE, ERROR_CANCELLED);
+				m_ccContext.Reset(TRUE, SO_RECEIVE, ERROR_CANCELLED);
 				return FALSE;
 			}
 		}
@@ -406,7 +421,7 @@ BOOL CUdpClient::ReadData()
 				break;
 			else
 			{
-				FireClose(this, SO_RECEIVE, code);
+				m_ccContext.Reset(TRUE, SO_RECEIVE, code);
 				return FALSE;
 			}
 		}
@@ -463,7 +478,7 @@ BOOL CUdpClient::SendData()
 				}
 				else
 				{
-					FireClose(this, SO_SEND, iCode);
+					m_ccContext.Reset(TRUE, SO_SEND, iCode);
 					return FALSE;
 				}
 			}
@@ -530,8 +545,14 @@ UINT WINAPI CUdpClient::DetecotrThreadProc(LPVOID pv)
 
 	ASSERT(pClient->NeedDetectorThread());
 
-	while(pClient->HasStarted() && retval == WAIT_TIMEOUT)
+	while(pClient->HasStarted())
 	{
+		retval = ::WaitForSingleObject(pClient->m_evDetector, pClient->m_dwDetectInterval * 1000L);
+		ASSERT(retval == WAIT_TIMEOUT || retval == WAIT_OBJECT_0);
+
+		if(retval == WAIT_OBJECT_0)
+			break;
+
 		int iCode = NO_ERROR;
 
 		if(pClient->m_dwDetectFails++ < pClient->m_dwDetectAttempts)
@@ -541,13 +562,10 @@ UINT WINAPI CUdpClient::DetecotrThreadProc(LPVOID pv)
 
 		if(iCode != NO_ERROR)
 		{
-			pClient->FireClose(pClient, SO_CONNECT, WSAECONNRESET);
+			pClient->m_ccContext.Reset(TRUE, SO_CLOSE, WSAECONNRESET);
 			pClient->Stop();
 			break;
 		}
-
-		retval = ::WaitForSingleObject(pClient->m_evDetector, pClient->m_dwDetectInterval * 1000L);
-		ASSERT(retval == WAIT_TIMEOUT || retval == WAIT_OBJECT_0);
 	}
 
 	TRACE("---------------> Client Detecotr Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
@@ -557,23 +575,16 @@ UINT WINAPI CUdpClient::DetecotrThreadProc(LPVOID pv)
 
 BOOL CUdpClient::Stop()
 {
-	BOOL bNeedFireClose			= FALSE;
-	EnServiceState enCurState	= m_enState;
-	DWORD dwCurrentThreadID		= ::GetCurrentThreadId();
+	DWORD dwCurrentThreadID = ::GetCurrentThreadId();
 
-	if(!CheckStoping())
+	if(!CheckStoping(dwCurrentThreadID))
 		return FALSE;
-
-	if(	enCurState == SS_STARTED			&&
-		dwCurrentThreadID != m_dwWorkerID	&&
-		dwCurrentThreadID != m_dwDetectorID	)
-		bNeedFireClose = TRUE;
 
 	WaitForDetectorThreadEnd(dwCurrentThreadID);
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
-	if(bNeedFireClose)
-		FireClose(this, SO_CLOSE, SE_OK);
+	if(m_ccContext.bFireOnClose)
+		FireClose(this, m_ccContext.enOperation, m_ccContext.iErrorCode);
 
 	if(m_evSocket != nullptr)
 	{
@@ -593,17 +604,14 @@ BOOL CUdpClient::Stop()
 	return TRUE;
 }
 
-void CUdpClient::Reset(BOOL bAll)
+void CUdpClient::Reset()
 {
-	if(bAll)
-	{
-		m_rcBuffer.Free();
-		m_evBuffer.Reset();
-		m_evWorker.Reset();
-		m_evDetector.Reset();
-		m_lsSend.Clear();
-		m_itPool.Clear();
-	}
+	m_rcBuffer.Free();
+	m_evBuffer.Reset();
+	m_evWorker.Reset();
+	m_evDetector.Reset();
+	m_lsSend.Clear();
+	m_itPool.Clear();
 
 	m_iPending		= 0;
 	m_dwDetectFails	= 0;

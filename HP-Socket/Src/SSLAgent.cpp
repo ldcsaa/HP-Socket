@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -51,11 +51,11 @@ void CSSLAgent::PrepareStart()
 	m_sslPool.Prepare();
 }
 
-void CSSLAgent::Reset(BOOL bAll)
+void CSSLAgent::Reset()
 {
 	g_SSL.RemoveThreadLocalState();
 
-	__super::Reset(bAll);
+	__super::Reset();
 }
 
 void CSSLAgent::OnWorkerThreadEnd(DWORD dwThreadID)

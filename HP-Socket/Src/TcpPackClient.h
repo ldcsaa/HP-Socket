@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -58,12 +58,12 @@ protected:
 		return FALSE;
 	}
 
-	virtual void Reset(BOOL bAll = TRUE)
+	virtual void Reset()
 	{
 		m_lsBuffer.Clear();
 		m_pkInfo.Reset();
 
-		return __super::Reset(bAll);
+		return __super::Reset();
 	}
 
 public:
@@ -90,7 +90,10 @@ public:
 
 	}
 
-	virtual ~CTcpPackClientT()	{if(HasStarted()) Stop();}
+	virtual ~CTcpPackClientT()
+	{
+		Stop();
+	}
 
 private:
 	DWORD	m_dwMaxPackSize;

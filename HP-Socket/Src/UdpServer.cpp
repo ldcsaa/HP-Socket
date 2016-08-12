@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -149,17 +149,25 @@ BOOL CUdpServer::CheckStarting()
 
 BOOL CUdpServer::CheckStoping()
 {
+	if(m_enState == SS_STOPPED)
+		return FALSE;
+
 	CSpinLock locallock(m_csState);
 
-	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
-		m_enState = SS_STOPPING;
-	else
+	if(HasStarted())
 	{
+		m_enState = SS_STOPPING;
+		return TRUE;
+	}
+	else if(m_enState == SS_STOPPING)
+	{
+		while(m_enState != SS_STOPPED)
+			::Sleep(30);
+
 		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
-		return FALSE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CUdpServer::CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort)
@@ -280,12 +288,9 @@ BOOL CUdpServer::Stop()
 	return TRUE;
 }
 
-void CUdpServer::Reset(BOOL bAll)
+void CUdpServer::Reset()
 {
-	if(bAll)
-	{
-		m_phSocket.Reset();
-	}
+	m_phSocket.Reset();
 
 	m_iRemainPostReceives	= 0;
 	m_enState				= SS_STOPPED;

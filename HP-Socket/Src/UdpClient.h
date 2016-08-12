@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.2
+ * Version	: 3.5.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -78,7 +78,7 @@ protected:
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
 
@@ -88,7 +88,7 @@ protected:
 
 private:
 	BOOL CheckStarting();
-	BOOL CheckStoping();
+	BOOL CheckStoping(DWORD dwCurrentThreadID);
 	BOOL CreateClientSocket();
 	BOOL BindClientSocket(LPCTSTR lpszBindAddress);
 	BOOL ConnectToServer(LPCTSTR lpszRemoteAddress, USHORT usPort);
@@ -141,13 +141,17 @@ public:
 		ASSERT(m_psoListener);
 	}
 
-	virtual ~CUdpClient()	{if(HasStarted()) Stop();}
+	virtual ~CUdpClient()
+	{
+		Stop();
+	}
 
 private:
 	CInitSocket			m_wsSocket;
 
 private:
 	IUdpClientListener*	m_psoListener;
+	TClientCloseContext m_ccContext;
 
 	BOOL				m_bAsyncConnect;
 	SOCKET				m_soClient;
@@ -165,7 +169,7 @@ private:
 	UINT				m_dwWorkerID;
 	UINT				m_dwDetectorID;
 
-	EnServiceState		m_enState;
+	volatile EnServiceState	m_enState;
 	EnSocketError		m_enLastError;
 
 	PVOID				m_pExtra;
