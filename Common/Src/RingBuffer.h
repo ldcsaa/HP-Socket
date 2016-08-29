@@ -434,10 +434,13 @@ public:
 
 public:
 
-	static index_type& INDEX_INC(index_type& dwIndex)	{if(adjust_index) ++dwIndex; return dwIndex;}
-	static index_type& INDEX_DEC(index_type& dwIndex)	{if(adjust_index) --dwIndex; return dwIndex;}
+	static index_type&	INDEX_INC		(index_type& dwIndex)	{if(adjust_index) ++dwIndex; return dwIndex;}
+	static index_type&	INDEX_DEC		(index_type& dwIndex)	{if(adjust_index) --dwIndex; return dwIndex;}
+	static BOOL			IsValidElement	(TPTR pElement)			{return pElement > E_MAX_STATUS;}
 
-	static BOOL IsValidElement(TPTR pElement)			{return pElement > E_MAX_STATUS;}
+private:
+
+	VTPTR& INDEX_VAL(index_type dwIndex) {return *(m_pv + dwIndex);}
 
 public:
 
@@ -454,7 +457,7 @@ public:
 
 			DWORD dwCurSeq	= m_dwCurSeq;
 			dwIndex			= m_dwCurSeq % m_dwSize;
-			VTPTR& pValue	= *(m_pv + dwIndex);
+			VTPTR& pValue	= INDEX_VAL(dwIndex);
 
 			if(pValue == E_EMPTY)
 			{
@@ -495,7 +498,7 @@ public:
 			return FALSE;
 		}
 
-		*ppElement = (TPTR)(*(m_pv + dwIndex));
+		*ppElement = (TPTR)INDEX_VAL(dwIndex);
 		return IsValidElement(*ppElement);
 	}
 
@@ -537,7 +540,9 @@ public:
 
 		INDEX_DEC(dwIndex);
 
-		*(m_pv + dwIndex) = pElement;
+		BOOL bSetValueFirst = (f1 + f2 >= 0);
+
+		if(bSetValueFirst) INDEX_VAL(dwIndex) = pElement;
 
 		if(f1 != 0)
 			::InterlockedExchangeAdd(&m_dwCount, f1);
@@ -550,6 +555,8 @@ public:
 			else
 				m_elements.erase(dwIndex);
 		}
+
+		if(!bSetValueFirst) INDEX_VAL(dwIndex) = pElement;
 
 		return TRUE;
 	}
@@ -564,7 +571,7 @@ public:
 		return Put(E_LOCKED, dwIndex);
 	}
 
-	BOOL ReleaseLock(DWORD dwIndex, TPTR pElement)
+	BOOL ReleaseLock(index_type dwIndex, TPTR pElement)
 	{
 		ASSERT(pElement == nullptr || IsValidElement(pElement));
 
@@ -600,7 +607,7 @@ public:
 		ElementSet* pElements = nullptr;
 		ElementSet elements;
 
-		if(!bCopy)
+		if(bCopy)
 			pElements = &CopyElements(elements);
 		else
 			pElements = &m_elements;
@@ -631,7 +638,7 @@ public:
 		ElementSet* pElements = nullptr;
 		ElementSet elements;
 
-		if(!bCopy)
+		if(bCopy)
 			pElements = &CopyElements(elements);
 		else
 			pElements = &m_elements;
@@ -668,10 +675,12 @@ public:
 
 	const ElementSet & ElementItems() {return m_elements;}
 
-	DWORD Size()		{return m_dwSize;}
-	DWORD Elements()	{return (DWORD)m_elements.size();}
-	BOOL IsValid()		{return m_pv != nullptr;}
-	BOOL HasSpace()		{return m_dwCount < m_dwSize;}
+	DWORD Size		()	{return m_dwSize;}
+	DWORD Elements	()	{return (DWORD)m_elements.size();}
+	DWORD Spaces	()	{return m_dwSize - m_dwCount;}
+	BOOL HasSpace	()	{return m_dwCount < m_dwSize;}
+	BOOL IsEmpty	()	{return m_dwCount == 0;}
+	BOOL IsValid	()	{return m_pv != nullptr;}
 
 private:
 
@@ -749,6 +758,10 @@ private:
 	static TPTR const E_OCCUPIED;
 	static TPTR const E_MAX_STATUS;
 
+private:
+
+	VTPTR& INDEX_VAL(DWORD dwIndex) {return *(m_pv + dwIndex);}
+
 public:
 
 	BOOL TryPut(TPTR pElement)
@@ -766,7 +779,7 @@ public:
 				break;
 
 			DWORD dwIndex = seqPut % m_dwSize;
-			VTPTR& pValue = *(m_pv + dwIndex);
+			VTPTR& pValue = INDEX_VAL(dwIndex);
 
 			if(pValue == E_RELEASED)
 			{
@@ -807,7 +820,7 @@ public:
 				break;
 
 			DWORD dwIndex = seqGet % m_dwSize;
-			VTPTR& pValue = *(m_pv + dwIndex);
+			VTPTR& pValue = INDEX_VAL(dwIndex);
 
 			if(pValue == E_LOCKED)
 				break;
@@ -843,7 +856,7 @@ public:
 				break;
 
 			dwIndex			= seqGet % m_dwSize;
-			VTPTR& pValue	= *(m_pv + dwIndex);
+			VTPTR& pValue	= INDEX_VAL(dwIndex);
 
 			if(pValue == E_LOCKED)
 				break;
@@ -870,7 +883,7 @@ public:
 		ASSERT(dwIndex < m_dwSize);
 		ASSERT(pElement == nullptr || pElement > E_MAX_STATUS);
 
-		VTPTR& pValue = *(m_pv + dwIndex);
+		VTPTR& pValue = INDEX_VAL(dwIndex);
 		VERIFY(pValue == E_LOCKED);
 
 		if(pElement != nullptr)
