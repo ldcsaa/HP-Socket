@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.3
+ * Version	: 3.5.4
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -554,6 +554,8 @@ BOOL CTcpClient::Stop()
 
 void CTcpClient::Reset()
 {
+	CCriSecLock locallock(m_csSend);
+
 	m_rcBuffer.Free();
 	m_evBuffer.Reset();
 	m_evWorker.Reset();
