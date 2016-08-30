@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.14
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -47,8 +47,8 @@
 	#include <hash_set>
 	#include <hash_map>
 
-	#define unorderedhash_set	hash_set
-	#define unordered_map		hash_map
+	#define unordered_set	hash_set
+	#define unordered_map	hash_map
 #endif
 
 
