@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.14
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -31,7 +31,6 @@ Desc:
 
 #pragma once
 
-#include "RWLock.h"
 #include "Singleton.h"
 #include "STLHelper.h"
 #include "RingBuffer.h"
@@ -599,12 +598,10 @@ private:
 
 class CBufferPool
 {
-	typedef CRingPool<TBuffer>					TBufferList;
-	typedef CCASQueue<TBuffer>					TBufferQueue;
+	typedef CRingPool<TBuffer>						TBufferList;
+	typedef CCASQueue<TBuffer>						TBufferQueue;
 
-	typedef unordered_map<ULONG_PTR, TBuffer*>	TBufferPtrMap;
-	typedef TBufferPtrMap::iterator				TBufferPtrMapI;
-	typedef TBufferPtrMap::const_iterator		TBufferPtrMapCI;
+	typedef CRingCache<TBuffer, ULONG_PTR, true>	TBufferCache;
 
 public:
 	void		PutFreeBuffer	(ULONG_PTR dwID);
@@ -624,6 +621,7 @@ public:
 	void SetItemPoolSize	(DWORD dwItemPoolSize)		{m_itPool.SetPoolSize(dwItemPoolSize);}
 	void SetItemPoolHold	(DWORD dwItemPoolHold)		{m_itPool.SetPoolHold(dwItemPoolHold);}
 
+	void SetMaxCacheSize	(DWORD dwMaxCacheSize)		{m_dwMaxCacheSize	= dwMaxCacheSize;}
 	void SetBufferLockTime	(DWORD dwBufferLockTime)	{m_dwBufferLockTime	= dwBufferLockTime;}
 	void SetBufferPoolSize	(DWORD dwBufferPoolSize)	{m_dwBufferPoolSize	= dwBufferPoolSize;}
 	void SetBufferPoolHold	(DWORD dwBufferPoolHold)	{m_dwBufferPoolHold	= dwBufferPoolHold;}
@@ -632,6 +630,7 @@ public:
 	DWORD GetItemPoolSize	()							{return m_itPool.GetPoolSize();}
 	DWORD GetItemPoolHold	()							{return m_itPool.GetPoolHold();}
 
+	DWORD GetMaxCacheSize	()							{return m_dwMaxCacheSize;}
 	DWORD GetBufferLockTime	()							{return m_dwBufferLockTime;}
 	DWORD GetBufferPoolSize	()							{return m_dwBufferPoolSize;}
 	DWORD GetBufferPoolHold	()							{return m_dwBufferPoolHold;}
@@ -639,12 +638,14 @@ public:
 	TBuffer* operator []	(ULONG_PTR dwID)			{return FindCacheBuffer(dwID);}
 
 public:
-	CBufferPool(DWORD dwPoolSize = DEFAULT_BUFFER_POOL_SIZE,
-				DWORD dwPoolHold = DEFAULT_BUFFER_POOL_HOLD,
-				DWORD dwLockTime = DEFAULT_BUFFER_LOCK_TIME)
+	CBufferPool(DWORD dwPoolSize	 = DEFAULT_BUFFER_POOL_SIZE,
+				DWORD dwPoolHold	 = DEFAULT_BUFFER_POOL_HOLD,
+				DWORD dwLockTime	 = DEFAULT_BUFFER_LOCK_TIME,
+				DWORD dwMaxCacheSize = DEFAULT_MAX_CACHE_SIZE)
 	: m_dwBufferPoolSize(dwPoolSize)
 	, m_dwBufferPoolHold(dwPoolHold)
 	, m_dwBufferLockTime(dwLockTime)
+	, m_dwMaxCacheSize(dwMaxCacheSize)
 	{
 
 	}
@@ -658,6 +659,7 @@ public:
 	CItemPool&		GetItemPool()		{return m_itPool;}
 
 public:
+	static const DWORD DEFAULT_MAX_CACHE_SIZE;
 	static const DWORD DEFAULT_ITEM_CAPACITY;
 	static const DWORD DEFAULT_ITEM_POOL_SIZE;
 	static const DWORD DEFAULT_ITEM_POOL_HOLD;
@@ -666,6 +668,7 @@ public:
 	static const DWORD DEFAULT_BUFFER_POOL_HOLD;
 
 private:
+	DWORD			m_dwMaxCacheSize;
 	DWORD			m_dwBufferLockTime;
 	DWORD			m_dwBufferPoolSize;
 	DWORD			m_dwBufferPoolHold;
@@ -673,8 +676,7 @@ private:
 	CPrivateHeap	m_heap;
 	CItemPool		m_itPool;
 
-	CSimpleRWLock	m_csBufferMap;
-	TBufferPtrMap	m_mpBuffer;
+	TBufferCache	m_bfCache;
 
 	TBufferList		m_lsFreeBuffer;
 	TBufferQueue	m_lsGCBuffer;

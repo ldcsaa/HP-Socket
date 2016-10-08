@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.14
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -33,10 +33,12 @@
 #define DEFAULT_CRISEC_SPIN_COUNT	4096
 
 #if defined (_WIN64)
-	#define DEFAULT_PAUSE_YIELD		32
+	#define DEFAULT_PAUSE_RETRY		16
+	#define DEFAULT_PAUSE_YIELD		128
 	#define DEFAULT_PAUSE_CYCLE		8192
 #else
-	#define DEFAULT_PAUSE_YIELD		8
+	#define DEFAULT_PAUSE_RETRY		4
+	#define DEFAULT_PAUSE_YIELD		32
 	#define DEFAULT_PAUSE_CYCLE		4096
 #endif
 
@@ -44,6 +46,15 @@
 	#pragma intrinsic(_mm_pause)
 	#define YieldProcessor _mm_pause
 #endif
+
+static inline void YieldThread(UINT i = DEFAULT_PAUSE_RETRY)
+{
+	if		(i < DEFAULT_PAUSE_RETRY)		;
+	else if	(i < DEFAULT_PAUSE_YIELD)		YieldProcessor();
+	else if	(i < DEFAULT_PAUSE_CYCLE - 1)	SwitchToThread();
+	else if	(i < DEFAULT_PAUSE_CYCLE)		Sleep(1);
+	else									YieldThread(i & (DEFAULT_PAUSE_CYCLE - 1));
+}
 
 class CInterCriSec
 {
@@ -177,7 +188,7 @@ public:
 	void Lock()
 	{
 		for(UINT i = 0; !TryLock(); ++i)
-			Pause(i);
+			YieldThread(i);
 	}
 
 	BOOL TryLock()
@@ -195,14 +206,6 @@ public:
 	{
 		ASSERT(m_lFlag == 1);
 		m_lFlag = 0;
-	}
-
-	static void Pause(UINT i)
-	{
-		if		(i < DEFAULT_PAUSE_YIELD)		YieldProcessor();
-		else if	(i < DEFAULT_PAUSE_CYCLE - 1)	SwitchToThread();
-		else if	(i < DEFAULT_PAUSE_CYCLE)		Sleep(1);
-		else									Pause(i & (DEFAULT_PAUSE_CYCLE - 1));
 	}
 
 private:
@@ -232,7 +235,7 @@ public:
 	void Lock()
 	{
 		for(UINT i = 0; !_TryLock(i == 0); ++i)
-			Pause(i);
+			YieldThread(i);
 	}
 
 	BOOL TryLock()
@@ -246,14 +249,6 @@ public:
 
 		if((--m_iCount) == 0)
 			m_dwThreadID = 0;
-	}
-
-	static void Pause(UINT i)
-	{
-		if		(i < DEFAULT_PAUSE_YIELD)		YieldProcessor();
-		else if	(i < DEFAULT_PAUSE_CYCLE - 1)	SwitchToThread();
-		else if	(i < DEFAULT_PAUSE_CYCLE)		Sleep(1);
-		else									Pause(i & (DEFAULT_PAUSE_CYCLE - 1));
 	}
 
 private:
