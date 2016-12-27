@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -33,43 +33,44 @@
 描述：声明 HTTP 组件的公共全局常量
 ************************************************************************/
 
-#define HTTP_DEFAULT_PORT			80
-#define HTTPS_DEFAULT_PORT			443
+#define HTTP_DEFAULT_PORT				80
+#define HTTPS_DEFAULT_PORT				443
 
-#define HTTP_SCHEMA					"http://"
-#define HTTPS_SCHEMA				"https://"
+#define HTTP_SCHEMA						"http://"
+#define HTTPS_SCHEMA					"https://"
 
-#define CRLF						"\r\n"
-#define NV_SEPARATOR_CHAR			'='
-#define PORT_SEPARATOR_CHAR			':'
-#define PATH_SEPARATOR_CHAR			'/'
-#define PATH_SEPARATOR				"/"
-#define HEADER_SEPARATOR			": "
-#define COOKIE_TOKENIZE				"; "
-#define STR_HTTP_1_0				"HTTP/1.0"
-#define STR_HTTP_1_1				"HTTP/1.1"
-#define HOST_HEADER					"Host"
-#define COOKIE_HEADER				"Cookie"
-#define SET_COOKIE_HEADER			"Set-Cookie"
-#define CONTENT_TYPE_HEADER			"Content-Type"
-#define CONTENT_LENGTH_HEADER		"Content-Length"
-#define CONTENT_ENCODING_HEADER		"Content-Encoding"
-#define TRANSFER_ENCODING_HEADER	"Transfer-Encoding"
-#define UPGRADE_HEADER				"Upgrade"
-#define WEB_SOCKET_HEADER_VALUE		"WebSocket"
+#define HTTP_CRLF						"\r\n"
+#define HTTP_NV_SEPARATOR_CHAR			'='
+#define HTTP_PORT_SEPARATOR_CHAR		':'
+#define HTTP_PATH_SEPARATOR_CHAR		'/'
+#define HTTP_PATH_SEPARATOR				"/"
+#define HTTP_HEADER_SEPARATOR			": "
+#define HTTP_COOKIE_TOKENIZE				"; "
+#define HTTP_1_0_STR					"HTTP/1.0"
+#define HTTP_1_1_STR					"HTTP/1.1"
 
-#define HTTP_METHOD_POST			"POST"
-#define HTTP_METHOD_PUT				"PUT"
-#define HTTP_METHOD_PATCH			"PATCH"
-#define HTTP_METHOD_GET				"GET"
-#define HTTP_METHOD_DELETE			"DELETE"
-#define HTTP_METHOD_HEAD			"HEAD"
-#define HTTP_METHOD_TRACE			"TRACE"
-#define HTTP_METHOD_OPTIONS			"OPTIONS"
-#define HTTP_METHOD_CONNECT			"CONNECT"
+#define HTTP_HEADER_HOST				"Host"
+#define HTTP_HEADER_COOKIE				"Cookie"
+#define HTTP_HEADER_SET_COOKIE			"Set-Cookie"
+#define HTTP_HEADER_CONTENT_TYPE		"Content-Type"
+#define HTTP_HEADER_CONTENT_LENGTH		"Content-Length"
+#define HTTP_HEADER_CONTENT_ENCODING	"Content-Encoding"
+#define HTTP_HEADER_TRANSFER_ENCODING	"Transfer-Encoding"
+#define HTTP_HEADER_UPGRADE				"Upgrade"
+#define HTTP_HEADER_VALUE_WEB_SOCKET	"WebSocket"
 
-#define MIN_WS_HEADER_LEN			2
-#define MAX_WS_HEADER_LEN			14
+#define HTTP_METHOD_POST				"POST"
+#define HTTP_METHOD_PUT					"PUT"
+#define HTTP_METHOD_PATCH				"PATCH"
+#define HTTP_METHOD_GET					"GET"
+#define HTTP_METHOD_DELETE				"DELETE"
+#define HTTP_METHOD_HEAD				"HEAD"
+#define HTTP_METHOD_TRACE				"TRACE"
+#define HTTP_METHOD_OPTIONS				"OPTIONS"
+#define HTTP_METHOD_CONNECT				"CONNECT"
+
+#define HTTP_MIN_WS_HEADER_LEN			2
+#define HTTP_MAX_WS_HEADER_LEN			14
 
 extern const DWORD MIN_HTTP_RELEASE_CHECK_INTERVAL;
 extern const DWORD MIN_HTTP_RELEASE_DELAY;
@@ -79,6 +80,8 @@ extern const EnHttpVersion DEFAULT_HTTP_VERSION;
 
 extern const DWORD DEFAULT_HTTP_SYNC_CONNECT_TIMEOUT;
 extern const DWORD DEFAULT_HTTP_SYNC_REQUEST_TIMEOUT;
+
+// ------------------------------------------------------------------------------------------------------------- //
 
 enum EnHttpSyncRequestProgress
 {
@@ -104,6 +107,60 @@ struct TDyingConnection
 	static void Destruct(TDyingConnection* pObj)				{if(pObj) delete pObj;}
 
 };
+
+struct str_hash_func
+{
+	struct hash
+	{
+		size_t operator() (const char* p) const
+		{
+			return hash_value(p);
+		}
+	};
+
+	struct equal_to
+	{
+		bool operator () (const char* p1, const char* p2) const
+		{
+			return strcmp(p1, p2) == 0;
+		}
+	};
+
+};
+
+
+struct cstringa_hash_func
+{
+	struct hash
+	{
+		size_t operator() (const CStringA& str) const
+		{
+			size_t s = hash_value((LPCSTR)str);
+			return s;
+		}
+	};
+
+	struct equal_to
+	{
+		bool operator () (const CStringA& strA, const CStringA& strB) const
+		{
+			return strA == strB;
+		}
+	};
+
+};
+
+typedef unordered_multimap<CStringA, CStringA,
+		cstringa_hash_func::hash, cstringa_hash_func::equal_to>	THeaderMap;
+typedef THeaderMap::const_iterator								THeaderMapCI;
+typedef THeaderMap::iterator									THeaderMapI;
+
+typedef unordered_map<CStringA, CStringA,
+		cstringa_hash_func::hash, cstringa_hash_func::equal_to>	TCookieMap;
+typedef TCookieMap::const_iterator								TCookieMapCI;
+typedef TCookieMap::iterator									TCookieMapI;
+
+// ------------------------------------------------------------------------------------------------------------- //
 
 struct TBaseWSHeader
 {
@@ -206,7 +263,7 @@ public:
 					int iLen			= bh.len();
 					int iExtLen			= iLen < 126 ? 0 : (iLen == 126 ? 2 : 8);
 					int iMaskLen		= bh.mask() ? 4 : 0;
-					int iRealHeaderLen	= MIN_WS_HEADER_LEN + iExtLen + iMaskLen;
+					int iRealHeaderLen	= HTTP_MIN_WS_HEADER_LEN + iExtLen + iMaskLen;
 
 					if(m_iHeaderLen < iRealHeaderLen)
 					{
@@ -215,9 +272,9 @@ public:
 					}
 					else
 					{
-						m_ullBodyLen	= iExtLen == 0 ? iLen : (iExtLen == 2 ? bh.extlen() : NToH64(*(ULONGLONG*)(m_szHeader + MIN_WS_HEADER_LEN)));
+						m_ullBodyLen	= iExtLen == 0 ? iLen : (iExtLen == 2 ? bh.extlen() : NToH64(*(ULONGLONG*)(m_szHeader + HTTP_MIN_WS_HEADER_LEN)));
 						m_ullBodyRemain	= m_ullBodyLen;
-						m_lpszMask		= iMaskLen > 0 ? m_szHeader + MIN_WS_HEADER_LEN + iExtLen : nullptr;
+						m_lpszMask		= iMaskLen > 0 ? m_szHeader + HTTP_MIN_WS_HEADER_LEN + iExtLen : nullptr;
 
 						hr = m_pHttpObj->on_ws_message_header(bh.fin(), bh.rsv(), bh.code(), m_lpszMask, m_ullBodyLen);
 
@@ -290,7 +347,7 @@ public:
 		if(&src == this)
 			return FALSE;
 
-		memcpy(m_szHeader, src.m_szHeader, MAX_WS_HEADER_LEN);
+		memcpy(m_szHeader, src.m_szHeader, HTTP_MAX_WS_HEADER_LEN);
 
 		if(src.m_lpszMask)
 			m_lpszMask = m_szHeader + (src.m_lpszMask - src.m_szHeader);
@@ -323,8 +380,8 @@ private:
 	{
 		m_bHeader		= TRUE;
 		m_lpszMask		= nullptr;
-		m_iHeaderLen	= MIN_WS_HEADER_LEN;
-		m_iHeaderRemain	= MIN_WS_HEADER_LEN;
+		m_iHeaderLen	= HTTP_MIN_WS_HEADER_LEN;
+		m_iHeaderRemain	= HTTP_MIN_WS_HEADER_LEN;
 		m_ullBodyLen	= 0;
 		m_ullBodyRemain	= 0;
 	}
@@ -332,7 +389,7 @@ private:
 private:
 	T* m_pHttpObj;
 
-	BYTE m_szHeader[MAX_WS_HEADER_LEN];
+	BYTE m_szHeader[HTTP_MAX_WS_HEADER_LEN];
 	const BYTE* m_lpszMask;
 
 	BOOL m_bHeader;
@@ -342,58 +399,9 @@ private:
 	ULONGLONG m_ullBodyRemain;
 };
 
-struct str_hash_func
-{
-	struct hash
-	{
-		size_t operator() (const char* p) const
-		{
-			return hash_value(p);
-		}
-	};
+// ------------------------------------------------------------------------------------------------------------- //
 
-	struct equal_to
-	{
-		bool operator () (const char* p1, const char* p2) const
-		{
-			return strcmp(p1, p2) == 0;
-		}
-	};
-
-};
-
-struct cstringa_hash_func
-{
-	struct hash
-	{
-		size_t operator() (const CStringA& str) const
-		{
-			size_t s = hash_value((LPCSTR)str);
-			return s;
-		}
-	};
-
-	struct equal_to
-	{
-		bool operator () (const CStringA& strA, const CStringA& strB) const
-		{
-			return strA == strB;
-		}
-	};
-
-};
-
-typedef unordered_multimap<CStringA, CStringA,
-		cstringa_hash_func::hash, cstringa_hash_func::equal_to>	THeaderMap;
-typedef THeaderMap::const_iterator								THeaderMapCI;
-typedef THeaderMap::iterator									THeaderMapI;
-
-typedef unordered_map<CStringA, CStringA,
-		cstringa_hash_func::hash, cstringa_hash_func::equal_to>	TCookieMap;
-typedef TCookieMap::const_iterator								TCookieMapCI;
-typedef TCookieMap::iterator									TCookieMapI;
-
-/* Http 缓冲区结构 */
+/* Http 上下文结构 */
 template<class T, class S> struct THttpObjT
 {
 public:
@@ -496,7 +504,7 @@ public:
 		if(p->state != s_header_almost_done && p->state != s_header_field_start)
 			return hpr;
 
-		if(pSelf->m_bRequest && pSelf->m_strCurHeader == COOKIE_HEADER)
+		if(pSelf->m_bRequest && pSelf->m_strCurHeader == HTTP_HEADER_COOKIE)
 			hpr = pSelf->ParseCookie();
 		else
 		{
@@ -599,7 +607,7 @@ private:
 		else
 		{
 			LPCSTR lpszValue;
-			if(GetHeader(UPGRADE_HEADER, &lpszValue) && _stricmp(WEB_SOCKET_HEADER_VALUE, lpszValue) == 0)
+			if(GetHeader(HTTP_HEADER_UPGRADE, &lpszValue) && _stricmp(HTTP_HEADER_VALUE_WEB_SOCKET, lpszValue) == 0)
 				m_enUpgrade = HUT_WEB_SOCKET;
 			else
 				m_enUpgrade = HUT_UNKNOWN;
@@ -637,11 +645,11 @@ private:
 
 		do 
 		{
-			CStringA tk = m_strBuffer.Tokenize(COOKIE_TOKENIZE, i);
+			CStringA tk = m_strBuffer.Tokenize(HTTP_COOKIE_TOKENIZE, i);
 
 			if(i != -1)
 			{
-				int j = tk.Find(NV_SEPARATOR_CHAR);
+				int j = tk.Find(HTTP_NV_SEPARATOR_CHAR);
 
 				if(j <= 0)
 				{
@@ -658,6 +666,9 @@ private:
 	}
 
 public:
+	DWORD GetFreeTime() const		{return m_dwFreeTime;}
+	void SetFree()					{m_dwFreeTime = ::TimeGetTime();}
+
 	BOOL IsUpgrade()				{return m_parser.upgrade;}
 	BOOL IsKeepAlive()				{return ::http_should_keep_alive(&m_parser);}
 	USHORT GetVersion()				{return MAKEWORD(m_parser.http_major, m_parser.http_minor);}
@@ -678,7 +689,7 @@ public:
 	LPCSTR GetContentType()
 	{
 		LPCSTR lpszValue = nullptr;
-		GetHeader(CONTENT_TYPE_HEADER, &lpszValue);
+		GetHeader(HTTP_HEADER_CONTENT_TYPE, &lpszValue);
 
 		return lpszValue;
 	}
@@ -686,7 +697,7 @@ public:
 	LPCSTR GetContentEncoding()
 	{
 		LPCSTR lpszValue = nullptr;
-		GetHeader(CONTENT_ENCODING_HEADER, &lpszValue);
+		GetHeader(HTTP_HEADER_CONTENT_ENCODING, &lpszValue);
 
 		return lpszValue;
 	}
@@ -694,7 +705,7 @@ public:
 	LPCSTR GetTransferEncoding()
 	{
 		LPCSTR lpszValue = nullptr;
-		GetHeader(TRANSFER_ENCODING_HEADER, &lpszValue);
+		GetHeader(HTTP_HEADER_TRANSFER_ENCODING, &lpszValue);
 
 		return lpszValue;
 	}
@@ -702,7 +713,7 @@ public:
 	LPCSTR GetHost()
 	{
 		LPCSTR lpszValue = nullptr;
-		GetHeader(HOST_HEADER, &lpszValue);
+		GetHeader(HTTP_HEADER_HOST, &lpszValue);
 
 		return lpszValue;
 	}
@@ -886,6 +897,7 @@ public:
 	, m_pSocket			(pSocket)
 	, m_bRequest		(bRequest)
 	, m_bReleased		(FALSE)
+	, m_dwFreeTime		(0)
 	, m_usUrlFieldSet	(0)
 	, m_pstrUrlFileds	(nullptr)
 	, m_enUpgrade		(HUT_NONE)
@@ -916,6 +928,18 @@ public:
 		ResetParser();
 		ResetHeaderState();
 		ReleaseWSContext();
+
+		m_bReleased  = FALSE;
+		m_enUpgrade  = HUT_NONE;
+		m_dwFreeTime = 0;
+	}
+
+	void Renew(T* pContext, S* pSocket)
+	{
+		m_pContext	= pContext;
+		m_pSocket	= pSocket;
+
+		Reset();
 	}
 
 	BOOL CopyData(const THttpObjT& src)
@@ -1032,7 +1056,8 @@ private:
 	USHORT		m_usUrlFieldSet;
 	CStringA*	m_pstrUrlFileds;
 
-	EnHttpUpgradeType m_enUpgrade;
+	EnHttpUpgradeType	m_enUpgrade;
+	DWORD				m_dwFreeTime;
 
 	TWSContext<THttpObjT<T, S>>* m_pwsContext;
 
@@ -1053,14 +1078,143 @@ template<class T, class S> http_parser_settings THttpObjT<T, S>::sm_settings =
 	on_chunk_complete
 };
 
+// ------------------------------------------------------------------------------------------------------------- //
+
+template<BOOL is_request, class T, class S> class CHttpObjPoolT
+{
+	typedef THttpObjT<T, S>		THttpObj;
+	typedef CRingPool<THttpObj>	TSSLHttpObjList;
+	typedef CCASQueue<THttpObj>	TSSLHttpObjQueue;
+
+public:
+	THttpObj* PickFreeHttpObj(T* pContext, S* pSocket)
+	{
+		DWORD dwIndex;
+		THttpObj* pHttpObj = nullptr;
+
+		if(m_lsFreeHttpObj.TryLock(&pHttpObj, dwIndex))
+		{
+			if(::GetTimeGap32(pHttpObj->GetFreeTime()) >= m_dwHttpObjLockTime)
+				m_lsFreeHttpObj.ReleaseLock(nullptr, dwIndex);
+			else
+			{
+				m_lsFreeHttpObj.ReleaseLock(pHttpObj, dwIndex);
+				pHttpObj = nullptr;
+			}
+		}
+
+		if(pHttpObj)
+			pHttpObj->Renew(pContext, pSocket);
+		else
+		{
+			pHttpObj = THttpObj::Construct(is_request, pContext, pSocket);
+			ASSERT(pHttpObj);
+		}
+		
+		return pHttpObj;
+	}
+
+	void PutFreeHttpObj(THttpObj* pHttpObj)
+	{
+		pHttpObj->SetFree();
+
+		if(!m_lsFreeHttpObj.TryPut(pHttpObj))
+		{
+			m_lsGCHttpObj.PushBack(pHttpObj);
+
+			if(m_lsGCHttpObj.Size() > m_dwHttpObjPoolSize)
+				ReleaseGCHttpObj();
+		}
+	}
+
+	void Prepare()
+	{
+		m_lsFreeHttpObj.Reset(m_dwHttpObjPoolHold);
+	}
+
+	void Clear()
+	{
+		THttpObj* pHttpObj = nullptr;
+
+		while(m_lsFreeHttpObj.TryGet(&pHttpObj))
+			delete pHttpObj;
+
+		VERIFY(m_lsFreeHttpObj.IsEmpty());
+		m_lsFreeHttpObj.Reset();
+
+		ReleaseGCHttpObj(TRUE);
+		VERIFY(m_lsGCHttpObj.IsEmpty());
+	}
+
+private:
+	void ReleaseGCHttpObj(BOOL bForce = FALSE)
+	{
+		THttpObj* pHttpObj	= nullptr;
+		DWORD now			= ::TimeGetTime();
+
+		while(m_lsGCHttpObj.PopFront(&pHttpObj))
+		{
+			if(bForce || (int)(now - pHttpObj->GetFreeTime()) >= (int)m_dwHttpObjLockTime)
+				delete pHttpObj;
+			else
+			{
+				m_lsGCHttpObj.PushBack(pHttpObj);
+				break;
+			}
+		}
+	}
+
+public:
+	void SetHttpObjLockTime	(DWORD dwHttpObjLockTime)	{m_dwHttpObjLockTime = dwHttpObjLockTime;}
+	void SetHttpObjPoolSize	(DWORD dwHttpObjPoolSize)	{m_dwHttpObjPoolSize = dwHttpObjPoolSize;}
+	void SetHttpObjPoolHold	(DWORD dwHttpObjPoolHold)	{m_dwHttpObjPoolHold = dwHttpObjPoolHold;}
+
+	DWORD GetHttpObjLockTime()	{return m_dwHttpObjLockTime;}
+	DWORD GetHttpObjPoolSize()	{return m_dwHttpObjPoolSize;}
+	DWORD GetHttpObjPoolHold()	{return m_dwHttpObjPoolHold;}
+
+public:
+	CHttpObjPoolT(	DWORD dwPoolSize = DEFAULT_HTTPOBJ_POOL_SIZE,
+					DWORD dwPoolHold = DEFAULT_HTTPOBJ_POOL_HOLD,
+					DWORD dwLockTime = DEFAULT_HTTPOBJ_LOCK_TIME)
+	: m_dwHttpObjPoolSize(dwPoolSize)
+	, m_dwHttpObjPoolHold(dwPoolHold)
+	, m_dwHttpObjLockTime(dwLockTime)
+	{
+
+	}
+
+	~CHttpObjPoolT()	{Clear();}
+
+	DECLARE_NO_COPY_CLASS(CHttpObjPoolT)
+
+public:
+	static const DWORD DEFAULT_HTTPOBJ_LOCK_TIME;
+	static const DWORD DEFAULT_HTTPOBJ_POOL_SIZE;
+	static const DWORD DEFAULT_HTTPOBJ_POOL_HOLD;
+
+private:
+	DWORD				m_dwHttpObjLockTime;
+	DWORD				m_dwHttpObjPoolSize;
+	DWORD				m_dwHttpObjPoolHold;
+
+	TSSLHttpObjList		m_lsFreeHttpObj;
+	TSSLHttpObjQueue	m_lsGCHttpObj;
+};
+
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_LOCK_TIME	= 10 * 1000;
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_SIZE	= 150;
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_HOLD	= 600;
+
+// ------------------------------------------------------------------------------------------------------------- //
 
 extern CStringA& GetHttpVersionStr(EnHttpVersion enVersion, CStringA& strResult);
 extern LPCSTR GetHttpDefaultStatusCodeDesc(EnHttpStatusCode enCode);
 extern void MakeRequestLine(LPCSTR lpszMethod, LPCSTR lpszPath, EnHttpVersion enVersion, CStringA& strValue);
 extern void MakeStatusLine(EnHttpVersion enVersion, USHORT usStatusCode, LPCSTR lpszDesc, CStringA& strValue);
-extern void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, TCookieMap* pCookies, int iBodyLength, BOOL bRequest, LPCSTR lpszDefaultHost, USHORT usPort, CStringA& strValue);
+extern void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, const TCookieMap* pCookies, int iBodyLength, BOOL bRequest, LPCSTR lpszDefaultHost, USHORT usPort, CStringA& strValue);
 extern void MakeHttpPacket(const CStringA& strHeader, const BYTE* pBody, int iLength, WSABUF szBuffer[2]);
-extern BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[MAX_WS_HEADER_LEN], WSABUF szBuffer[2]);
+extern BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[HTTP_MAX_WS_HEADER_LEN], WSABUF szBuffer[2]);
 extern BOOL ParseUrl(const CStringA& strUrl, BOOL& bHttps, CStringA& strHost, USHORT& usPort, CStringA& strPath);
 
 // CP_XXX -> UNICODE

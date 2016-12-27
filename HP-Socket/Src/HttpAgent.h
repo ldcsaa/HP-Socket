@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,8 +30,9 @@
 template<class T, USHORT default_port> class CHttpAgentT : public IComplexHttpRequester, public T
 {
 protected:
-	typedef THttpObjT<CHttpAgentT, TSocketObj>	THttpObj;
-	friend struct								THttpObj;
+	typedef CHttpObjPoolT<FALSE, CHttpAgentT, TSocketObj>	CHttpObjPool;
+	typedef THttpObjT<CHttpAgentT, TSocketObj>				THttpObj;
+	friend struct											THttpObj;
 
 public:
 	virtual BOOL SendRequest(CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0);
@@ -89,6 +90,7 @@ public:
 
 private:
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj);
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
@@ -148,6 +150,7 @@ private:
 	IHttpAgentListener*	m_pListener;
 	EnHttpVersion		m_enLocalVersion;
 
+	CHttpObjPool		m_objPool;
 };
 
 // ------------------------------------------------------------------------------------------------------------- //

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.16
+ * Version	: 2.3.17
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -36,6 +36,14 @@
 #else
 	#pragma comment(lib, "Toolhelp")
 #endif
+
+#define PATH_SEPARATOR				_T("\\")
+#define PATH_SEPARATOR_CHAR			_T('\\')
+#define FILE_EXTEND_SEPARATOR		_T(".")
+#define FILE_EXTEND_SEPARATOR_CHAR	_T('.')
+#define DISK_SYMBLE					_T(":")
+#define DISK_SYMBLE_CHAR			_T(':')
+#define EXE_FILE_EXTEND_NAME		_T(".exe")
 
 BYTE DoubleCharToByte(LPCTSTR psValue)
 { 

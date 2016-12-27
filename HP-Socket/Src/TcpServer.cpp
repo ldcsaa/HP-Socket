@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -473,7 +473,7 @@ TSocketObj* CTcpServer::FindSocketObj(CONNID dwConnID)
 {
 	TSocketObj* pSocketObj = nullptr;
 
-	if(!m_bfActiveSockets.Get(dwConnID, &pSocketObj))
+	if(m_bfActiveSockets.Get(dwConnID, &pSocketObj) != TSocketObjPtrPool::GR_VALID)
 		pSocketObj = nullptr;
 
 	return pSocketObj;

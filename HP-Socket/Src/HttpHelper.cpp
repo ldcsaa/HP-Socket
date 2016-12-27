@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -125,9 +125,9 @@ LPCSTR GetHttpDefaultStatusCodeDesc(EnHttpStatusCode enCode)
 static inline CStringA& AppendHeader(LPCSTR lpszName, LPCSTR lpszValue, CStringA& strValue)
 {
 	strValue.Append(lpszName);
-	strValue.Append(HEADER_SEPARATOR);
+	strValue.Append(HTTP_HEADER_SEPARATOR);
 	strValue.Append(lpszValue);
-	strValue.Append(CRLF);
+	strValue.Append(HTTP_CRLF);
 
 	return strValue;
 }
@@ -140,18 +140,18 @@ void MakeRequestLine(LPCSTR lpszMethod, LPCSTR lpszPath, EnHttpVersion enVersion
 	strMethod.MakeUpper();
 
 	if(!lpszPath || lpszPath[0] == 0)
-		lpszPath = PATH_SEPARATOR;
+		lpszPath = HTTP_PATH_SEPARATOR;
 
-	strValue.Format("%s %s HTTP/%d.%d%s", strMethod, lpszPath, LOBYTE(enVersion), HIBYTE(enVersion), CRLF);
+	strValue.Format("%s %s HTTP/%d.%d%s", strMethod, lpszPath, LOBYTE(enVersion), HIBYTE(enVersion), HTTP_CRLF);
 }
 
 void MakeStatusLine(EnHttpVersion enVersion, USHORT usStatusCode, LPCSTR lpszDesc, CStringA& strValue)
 {
 	if(!lpszDesc) lpszDesc = ::GetHttpDefaultStatusCodeDesc((EnHttpStatusCode)usStatusCode);
-	strValue.Format("HTTP/%d.%d %d %s%s", LOBYTE(enVersion), HIBYTE(enVersion), usStatusCode, lpszDesc, CRLF);
+	strValue.Format("HTTP/%d.%d %d %s%s", LOBYTE(enVersion), HIBYTE(enVersion), usStatusCode, lpszDesc, HTTP_CRLF);
 }
 
-void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, TCookieMap* pCookies, int iBodyLength, BOOL bRequest, LPCSTR lpszDefaultHost, USHORT usPort, CStringA& strValue)
+void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, const TCookieMap* pCookies, int iBodyLength, BOOL bRequest, LPCSTR lpszDefaultHost, USHORT usPort, CStringA& strValue)
 {
 	unordered_set<LPCSTR, str_hash_func::hash, str_hash_func::equal_to> szHeaderNames;
 
@@ -175,23 +175,23 @@ void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, TCookieMap* pC
 
 	if(	(!bRequest || iBodyLength > 0)										&&
 		(szHeaderNames.empty()												||	
-		(szHeaderNames.find(CONTENT_LENGTH_HEADER) == szHeaderNames.end()	&&
-		szHeaderNames.find(TRANSFER_ENCODING_HEADER) == szHeaderNames.end())))
+		(szHeaderNames.find(HTTP_HEADER_CONTENT_LENGTH) == szHeaderNames.end()	&&
+		szHeaderNames.find(HTTP_HEADER_TRANSFER_ENCODING) == szHeaderNames.end())))
 	{
 		char szBodyLength[16];
 		_itoa(iBodyLength, szBodyLength, 10);
 
-		AppendHeader(CONTENT_LENGTH_HEADER, szBodyLength, strValue);
+		AppendHeader(HTTP_HEADER_CONTENT_LENGTH, szBodyLength, strValue);
 	}
 
 	if(	bRequest && lpszDefaultHost && lpszDefaultHost[0] != 0		&&
 		(szHeaderNames.empty()										||	
-		(szHeaderNames.find(HOST_HEADER) == szHeaderNames.end())	))
+		(szHeaderNames.find(HTTP_HEADER_HOST) == szHeaderNames.end())	))
 	{
 		CStringA strHost(lpszDefaultHost);
 		if(usPort != 0) strHost.AppendFormat(":%u", usPort);
 
-		AppendHeader(HOST_HEADER, strHost, strValue);
+		AppendHeader(HTTP_HEADER_HOST, strHost, strValue);
 	}
 
 	szHeaderNames.clear();
@@ -202,26 +202,26 @@ void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, TCookieMap* pC
 
 		if(dwSize > 0)
 		{
-			strValue.Append(COOKIE_HEADER);
-			strValue.Append(HEADER_SEPARATOR);
+			strValue.Append(HTTP_HEADER_COOKIE);
+			strValue.Append(HTTP_HEADER_SEPARATOR);
 
 			DWORD dwIndex = 0;
 
 			for(TCookieMapCI it = pCookies->begin(), end = pCookies->end(); it != end; ++it, ++dwIndex)
 			{
 				strValue.Append(it->first);
-				strValue.AppendChar(NV_SEPARATOR_CHAR);
+				strValue.AppendChar(HTTP_NV_SEPARATOR_CHAR);
 				strValue.Append(it->second);
 
 				if(dwIndex < dwSize - 1)
-					strValue.Append(COOKIE_TOKENIZE);
+					strValue.Append(HTTP_COOKIE_TOKENIZE);
 			}
 
-			strValue.Append(CRLF);
+			strValue.Append(HTTP_CRLF);
 		}
 	}
 
-	strValue.Append(CRLF);
+	strValue.Append(HTTP_CRLF);
 }
 
 void MakeHttpPacket(const CStringA& strHeader, const BYTE* pBody, int iLength, WSABUF szBuffer[2])
@@ -234,7 +234,7 @@ void MakeHttpPacket(const CStringA& strHeader, const BYTE* pBody, int iLength, W
 	szBuffer[1].len = iLength;
 }
 
-BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[MAX_WS_HEADER_LEN], WSABUF szBuffer[2])
+BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[HTTP_MAX_WS_HEADER_LEN], WSABUF szBuffer[2])
 {
 	ULONGLONG ullLength = (ULONGLONG)iLength;
 
@@ -251,7 +251,7 @@ BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE l
 
 	TBaseWSHeader bh(szHeader, TRUE);
 
-	int iHeaderLen = MIN_WS_HEADER_LEN;
+	int iHeaderLen = HTTP_MIN_WS_HEADER_LEN;
 
 	bh.set_fin(bFinal);
 	bh.set_rsv(iReserved);
@@ -270,7 +270,7 @@ BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE l
 	else
 	{
 		bh.set_len(127);
-		*(ULONGLONG*)(szHeader + MIN_WS_HEADER_LEN) = ::HToN64(ullBodyLen);
+		*(ULONGLONG*)(szHeader + HTTP_MIN_WS_HEADER_LEN) = ::HToN64(ullBodyLen);
 
 		iHeaderLen += 8;
 	}
@@ -315,7 +315,7 @@ BOOL ParseUrl(const CStringA& strUrl, BOOL& bHttps, CStringA& strHost, USHORT& u
 			return FALSE;
 	}
 
-	int i = strUrl.Find(PATH_SEPARATOR_CHAR, iSchemaLength);
+	int i = strUrl.Find(HTTP_PATH_SEPARATOR_CHAR, iSchemaLength);
 
 	if(i > 0)
 	{
@@ -325,13 +325,13 @@ BOOL ParseUrl(const CStringA& strUrl, BOOL& bHttps, CStringA& strHost, USHORT& u
 	else
 	{
 		strHost = strUrl.Mid(iSchemaLength);
-		strPath = PATH_SEPARATOR;
+		strPath = HTTP_PATH_SEPARATOR;
 	}
 
 	if(strHost.IsEmpty() || !::isalnum(strHost.GetAt(0)))
 		return FALSE;
 
-	i = strHost.Find(PORT_SEPARATOR_CHAR);
+	i = strHost.Find(HTTP_PORT_SEPARATOR_CHAR);
 
 	if(i > 0)
 	{

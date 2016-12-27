@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -84,7 +84,7 @@ template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_
 template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
 {
 	WSABUF szBuffer[2];
-	BYTE szHeader[MAX_WS_HEADER_LEN];
+	BYTE szHeader[HTTP_MAX_WS_HEADER_LEN];
 
 	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen, szHeader, szBuffer))
 		return FALSE;

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -42,8 +42,8 @@
 
 #define HP_VERSION_MAJOR	4
 #define HP_VERSION_MINOR	1
-#define HP_VERSION_REVISE	1
-#define HP_VERSION_BUILD	6
+#define HP_VERSION_REVISE	2
+#define HP_VERSION_BUILD	3
 
 /* IOCP 最大工作线程数 */
 extern const DWORD MAX_WORKER_THREAD_COUNT;
@@ -405,18 +405,18 @@ struct TUdpSocketObj : public TSocketObjBase
 };
 
 /* 有效 TSocketObj 缓存 */
-typedef CRingCache<TSocketObj, CONNID, true>	TSocketObjPtrPool;
+typedef CRingCache2<TSocketObj, CONNID, true>		TSocketObjPtrPool;
 /* 失效 TSocketObj 缓存 */
-typedef CRingPool<TSocketObj>					TSocketObjPtrList;
+typedef CRingPool<TSocketObj>						TSocketObjPtrList;
 /* 失效 TSocketObj 垃圾回收结构链表 */
-typedef CCASQueue<TSocketObj>					TSocketObjPtrQueue;
+typedef CCASQueue<TSocketObj>						TSocketObjPtrQueue;
 
 /* 有效 TUdpSocketObj 缓存 */
-typedef CRingCache<TUdpSocketObj, CONNID, true>	TUdpSocketObjPtrPool;
+typedef CRingCache2<TUdpSocketObj, CONNID, true>	TUdpSocketObjPtrPool;
 /* 失效 TUdpSocketObj 缓存 */
-typedef CRingPool<TUdpSocketObj>				TUdpSocketObjPtrList;
+typedef CRingPool<TUdpSocketObj>					TUdpSocketObjPtrList;
 /* 失效 TUdpSocketObj 垃圾回收结构链表 */
-typedef CCASQueue<TUdpSocketObj>				TUdpSocketObjPtrQueue;
+typedef CCASQueue<TUdpSocketObj>					TUdpSocketObjPtrQueue;
 
 /* SOCKADDR_IN 比较器 */
 struct sockaddr_func

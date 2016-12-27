@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -36,14 +36,24 @@ template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::CheckP
 	return __super::CheckParams();
 }
 
+template<class T, USHORT default_port> void CHttpAgentT<T, default_port>::PrepareStart()
+{
+	__super::PrepareStart();
+
+	m_objPool.SetHttpObjLockTime(GetFreeSocketObjLockTime());
+	m_objPool.SetHttpObjPoolSize(GetFreeSocketObjPool());
+	m_objPool.SetHttpObjPoolHold(GetFreeSocketObjHold());
+
+	m_objPool.Prepare();
+}
+
 template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendRequest(CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)
 {
 	THttpObj* pHttpObj = FindHttpObj(dwConnID);
-	ASSERT(pHttpObj != nullptr);
 
 	if(pHttpObj == nullptr)
 	{
-		::SetLastError(ERROR_INVALID_STATE);
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
 		return FALSE;
 	}
 	
@@ -91,7 +101,7 @@ template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendLo
 template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
 {
 	WSABUF szBuffer[2];
-	BYTE szHeader[MAX_WS_HEADER_LEN];
+	BYTE szHeader[HTTP_MAX_WS_HEADER_LEN];
 
 	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen, szHeader, szBuffer))
 		return FALSE;
@@ -104,7 +114,10 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 	EnHandleResult result = __super::DoFireConnect(pSocketObj);
 
 	if(result != HR_ERROR)
-		VERIFY(SetConnectionReserved(pSocketObj, THttpObj::Construct(FALSE, this, pSocketObj)));
+	{
+		THttpObj* pHttpObj = m_objPool.PickFreeHttpObj(this, pSocketObj);
+		VERIFY(SetConnectionReserved(pSocketObj, pHttpObj));
+	}
 
 	return result;
 }
@@ -124,7 +137,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 	THttpObj* pHttpObj = FindHttpObj(pSocketObj);
 
 	if(pHttpObj != nullptr)
-		THttpObj::Destruct(pHttpObj);
+		m_objPool.PutFreeHttpObj(pHttpObj);
 
 	return result;
 }
@@ -132,6 +145,8 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_port>::DoFireShutdown()
 {
 	EnHandleResult result = __super::DoFireShutdown();
+
+	m_objPool.Clear();
 
 	return result;
 }

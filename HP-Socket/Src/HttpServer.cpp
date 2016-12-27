@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -44,6 +44,17 @@ template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::Check
 	}
 
 	return __super::CheckParams();
+}
+
+template<class T, USHORT default_port> void CHttpServerT<T, default_port>::PrepareStart()
+{
+	__super::PrepareStart();
+
+	m_objPool.SetHttpObjLockTime(GetFreeSocketObjLockTime());
+	m_objPool.SetHttpObjPoolSize(GetFreeSocketObjPool());
+	m_objPool.SetHttpObjPoolHold(GetFreeSocketObjHold());
+
+	m_objPool.Prepare();
 }
 
 template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::SendResponse(CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc, const THeader lpHeaders[], int iHeaderCount, const BYTE* pData, int iLength)
@@ -90,7 +101,7 @@ template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::Relea
 template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
 {
 	WSABUF szBuffer[2];
-	BYTE szHeader[MAX_WS_HEADER_LEN];
+	BYTE szHeader[HTTP_MAX_WS_HEADER_LEN];
 
 	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen, szHeader, szBuffer))
 		return FALSE;
@@ -156,7 +167,10 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	EnHandleResult result = __super::DoFireAccept(pSocketObj);
 
 	if(result != HR_ERROR)
-		VERIFY(SetConnectionReserved(pSocketObj, THttpObj::Construct(TRUE, this, pSocketObj)));
+	{
+		THttpObj* pHttpObj = m_objPool.PickFreeHttpObj(this, pSocketObj);
+		VERIFY(SetConnectionReserved(pSocketObj, pHttpObj));
+	}
 
 	return result;
 }
@@ -177,9 +191,10 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
 
 	THttpObj* pHttpObj = FindHttpObj(pSocketObj);
+	ASSERT(pHttpObj);
 
 	if(pHttpObj != nullptr)
-		THttpObj::Destruct(pHttpObj);
+		m_objPool.PutFreeHttpObj(pHttpObj);
 
 	return result;
 }
@@ -188,6 +203,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 {
 	EnHandleResult result = __super::DoFireShutdown();
 
+	m_objPool.Clear();
 	WaitForCleanerThreadEnd();
 
 	return result;

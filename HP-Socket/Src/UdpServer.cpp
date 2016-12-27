@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -485,7 +485,7 @@ TUdpSocketObj* CUdpServer::FindSocketObj(CONNID dwConnID)
 {
 	TUdpSocketObj* pSocketObj = nullptr;
 
-	if(!m_bfActiveSockets.Get(dwConnID, &pSocketObj))
+	if(m_bfActiveSockets.Get(dwConnID, &pSocketObj) != TUdpSocketObjPtrPool::GR_VALID)
 		pSocketObj = nullptr;
 
 	return pSocketObj;

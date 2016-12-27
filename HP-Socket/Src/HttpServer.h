@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.1
+ * Version	: 4.1.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -31,11 +31,12 @@
 template<class T, USHORT default_port> class CHttpServerT : public IComplexHttpResponder, public T
 {
 protected:
-	typedef CThread<CHttpServerT>				CCleanThread;
-	friend class								CCleanThread;
+	typedef CThread<CHttpServerT>							CCleanThread;
+	friend class											CCleanThread;
 
-	typedef THttpObjT<CHttpServerT, TSocketObj>	THttpObj;
-	friend struct								THttpObj;
+	typedef CHttpObjPoolT<TRUE, CHttpServerT, TSocketObj>	CHttpObjPool;
+	typedef THttpObjT<CHttpServerT, TSocketObj>				THttpObj;
+	friend struct											THttpObj;
 
 public:
 
@@ -83,6 +84,7 @@ public:
 
 protected:
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj);
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
@@ -156,6 +158,8 @@ private:
 	DWORD						m_dwReleaseDelay;
 
 	CCASQueue<TDyingConnection>	m_lsDyingQueue;
+
+	CHttpObjPool				m_objPool;
 };
 
 // ------------------------------------------------------------------------------------------------------------- //
