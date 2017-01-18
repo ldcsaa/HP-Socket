@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.2
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -356,22 +356,27 @@ BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam)
 
 BOOL PostIocpExit(HANDLE hIOCP)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_EXIT, 0, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_EXIT, 0);
 }
 
 BOOL PostIocpAccept(HANDLE hIOCP)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_ACCEPT, 0, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_ACCEPT, 0);
 }
 
 BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_DISCONNECT, dwConnID, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_DISCONNECT, dwConnID);
 }
 
 BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_SEND, dwConnID, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_SEND, dwConnID);
+}
+
+BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode)
+{
+	return PostIocpCommand(hIOCP, (EnIocpCommand)iErrorCode, dwConnID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

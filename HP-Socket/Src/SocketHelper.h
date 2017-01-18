@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.2
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -42,8 +42,8 @@
 
 #define HP_VERSION_MAJOR	4
 #define HP_VERSION_MINOR	1
-#define HP_VERSION_REVISE	2
-#define HP_VERSION_BUILD	3
+#define HP_VERSION_REVISE	3
+#define HP_VERSION_BUILD	1
 
 /* IOCP 最大工作线程数 */
 extern const DWORD MAX_WORKER_THREAD_COUNT;
@@ -546,6 +546,7 @@ BOOL PostIocpExit(HANDLE hIOCP);
 BOOL PostIocpAccept(HANDLE hIOCP);
 BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID);
 BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID);
+BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode);
 
 /************************************************************************
 名称：setsockopt() 帮助方法

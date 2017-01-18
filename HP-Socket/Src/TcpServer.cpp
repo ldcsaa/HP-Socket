@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.1.2
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -899,17 +899,16 @@ EnIocpAction CTcpServer::CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes
 	ASSERT(pOverlapped == nullptr);
 
 	EnIocpAction action = IOCP_ACT_CONTINUE;
+	CONNID dwConnID		= (CONNID)ulCompKey;
 
-	if(dwBytes == IOCP_CMD_SEND)
-		DoSend((CONNID)ulCompKey);
-	else if(dwBytes == IOCP_CMD_ACCEPT)
-		DoAccept();
-	else if(dwBytes == IOCP_CMD_DISCONNECT)
-		ForceDisconnect((CONNID)ulCompKey);
-	else if(dwBytes == IOCP_CMD_EXIT && ulCompKey == 0)
-		action = IOCP_ACT_BREAK;
-	else
-		VERIFY(FALSE);
+	switch(dwBytes)
+	{
+	case IOCP_CMD_SEND		: DoSend(dwConnID)			; break;
+	case IOCP_CMD_ACCEPT	: DoAccept()				; break;
+	case IOCP_CMD_DISCONNECT: ForceDisconnect(dwConnID)	; break;
+	case IOCP_CMD_EXIT		: action = IOCP_ACT_BREAK	; break;
+	default					: CheckError(FindSocketObj(dwConnID), SO_CLOSE, (int)dwBytes);
+	}
 
 	return action;
 }
@@ -1139,7 +1138,7 @@ BOOL CTcpServer::DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], 
 	if(result != NO_ERROR)
 	{
 		if(m_enSendPolicy == SP_DIRECT && TSocketObj::IsValid(pSocketObj))
-			CheckError(pSocketObj, SO_SEND, result);
+			::PostIocpClose(m_hCompletePort, pSocketObj->connID, result);
 
 		::SetLastError(result);
 	}
