@@ -13,3 +13,4 @@
 *.a
 /HP-Socket/Project/HPSocket.VC.VC.opendb
 /HP-Socket/Project/HPSocket.VC.db
+/HP-Socket/Bin/HPSocket4C/x86/obj/noHTTP/HPSocketDLL4C.tlog
