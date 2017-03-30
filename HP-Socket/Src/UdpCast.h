@@ -33,7 +33,7 @@
 class CUdpCast : public IUdpCast
 {
 public:
-	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr);
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usBindPort = 0);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			SendPackets			(const WSABUF pBuffers[], int iCount);

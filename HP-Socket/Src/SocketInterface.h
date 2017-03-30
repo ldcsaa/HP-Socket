@@ -439,7 +439,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr)	= 0;
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usBindPort = 0)	= 0;
 
 	/*
 	* 名称：关闭通信组件

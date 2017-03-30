@@ -28,7 +28,7 @@
 
 #include <process.h>
 
-BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usBindPort)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;

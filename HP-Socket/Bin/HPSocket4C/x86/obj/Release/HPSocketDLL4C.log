@@ -1,0 +1,48 @@
+﻿  stdafx.cpp
+  bufferpool.cpp
+  RWLock.cpp
+  SysHelper.cpp
+  WaitFor.cpp
+  HPSocket4C.cpp
+  HttpAgent.cpp
+  HttpClient.cpp
+  HttpHelper.cpp
+  HttpServer.cpp
+  MiscHelper.cpp
+  SocketHelper.cpp
+  TcpAgent.cpp
+  TcpClient.cpp
+  TcpPackAgent.cpp
+  TcpPackClient.cpp
+  TcpPackServer.cpp
+  TcpPullAgent.cpp
+  TcpPullClient.cpp
+  TcpPullServer.cpp
+  TcpServer.cpp
+  正在编译...
+  UdpCast.cpp
+  UdpClient.cpp
+  UdpServer.cpp
+  http_parser.c
+  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+  gzwrite.c
+  infback.c
+  inffast.c
+  inflate.c
+  inftrees.c
+  trees.c
+  uncompr.c
+  zutil.c
+  dllmain.cpp
+    正在创建库 ..\..\Bin\HPSocket4C\x86\HPSocket4C.lib 和对象 ..\..\Bin\HPSocket4C\x86\HPSocket4C.exp
+  正在生成代码
+  All 4346 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  HPSocketDLL4C.vcxproj -> D:\Source\HP-Socket\HP-Socket\Project\HPSocketDLL4C\..\..\Bin\HPSocket4C\x86\HPSocket4C.dll
+  HPSocketDLL4C.vcxproj -> ..\..\Bin\HPSocket4C\x86\HPSocket4C.pdb (Full PDB)

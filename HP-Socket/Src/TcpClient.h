@@ -33,7 +33,7 @@
 class CTcpClient : public ITcpClient
 {
 public:
-	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr);
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usBindPort = 0);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
@@ -121,7 +121,7 @@ private:
 	BOOL CheckStarting();
 	BOOL CheckStoping(DWORD dwCurrentThreadID);
 	BOOL CreateClientSocket();
-	BOOL BindClientSocket(LPCTSTR lpszBindAddress);
+	BOOL BindClientSocket(LPCTSTR lpszBindAddress, USHORT usBindPort);
 	BOOL ConnectToServer(LPCTSTR lpszRemoteAddress, USHORT usPort);
 	BOOL CreateWorkerThread();
 	BOOL ProcessNetworkEvent();

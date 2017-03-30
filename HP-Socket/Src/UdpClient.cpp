@@ -28,7 +28,7 @@
 
 #include <process.h>
 
-BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usBindPort)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
@@ -41,7 +41,7 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 	if(CreateClientSocket())
 	{
-		if(BindClientSocket(lpszBindAddress))
+		if(BindClientSocket(lpszBindAddress, usBindPort))
 		{
 			if(FirePrepareConnect(m_soClient) != HR_ERROR)
 			{
@@ -158,7 +158,7 @@ BOOL CUdpClient::CreateClientSocket()
 	return FALSE;
 }
 
-BOOL CUdpClient::BindClientSocket(LPCTSTR lpszBindAddress)
+BOOL CUdpClient::BindClientSocket(LPCTSTR lpszBindAddress, USHORT usBindPort)
 {
 	if(lpszBindAddress)
 	{

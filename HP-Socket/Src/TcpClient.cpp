@@ -28,7 +28,7 @@
 
 #include <process.h>
 
-BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usBindPort)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
@@ -41,7 +41,7 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 	if(CreateClientSocket())
 	{
-		if(BindClientSocket(lpszBindAddress))
+		if(BindClientSocket(lpszBindAddress, usBindPort))
 		{
 			if(FirePrepareConnect(m_soClient) != HR_ERROR)
 			{
@@ -154,12 +154,12 @@ BOOL CTcpClient::CreateClientSocket()
 	return FALSE;
 }
 
-BOOL CTcpClient::BindClientSocket(LPCTSTR lpszBindAddress)
+BOOL CTcpClient::BindClientSocket(LPCTSTR lpszBindAddress, USHORT usBindPort)
 {
 	if(lpszBindAddress)
 	{
 		SOCKADDR_IN bindAddr;
-		if(!::sockaddr_A_2_IN(AF_INET, lpszBindAddress, 0, bindAddr))
+		if(!::sockaddr_A_2_IN(AF_INET, lpszBindAddress, usBindPort, bindAddr))
 		{
 			::WSASetLastError(WSAEADDRNOTAVAIL);
 			return FALSE;

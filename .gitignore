@@ -11,3 +11,5 @@
 *.lai
 *.la
 *.a
+/HP-Socket/Project/HPSocket.VC.VC.opendb
+/HP-Socket/Project/HPSocket.VC.db

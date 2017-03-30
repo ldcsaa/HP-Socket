@@ -1,0 +1,22 @@
+﻿  HPSocket4C.cpp
+  http_parser.c
+  zutil.c
+  uncompr.c
+  trees.c
+  inftrees.c
+  inflate.c
+  inffast.c
+  infback.c
+  gzwrite.c
+  gzread.c
+  gzlib.c
+  gzclose.c
+  deflate.c
+  crc32.c
+  compress.c
+  adler32.c
+  正在生成代码...
+  dllmain.cpp
+    正在创建库 ..\..\Bin\HPSocket4C\x86\HPSocket4C_D.lib 和对象 ..\..\Bin\HPSocket4C\x86\HPSocket4C_D.exp
+  HPSocketDLL4C.vcxproj -> D:\Source\HP-Socket\HP-Socket\Project\HPSocketDLL4C\..\..\Bin\HPSocket4C\x86\HPSocket4C_D.dll
+  HPSocketDLL4C.vcxproj -> ..\..\Bin\HPSocket4C\x86\HPSocket4C_D.pdb (Full PDB)

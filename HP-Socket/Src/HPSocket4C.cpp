@@ -164,7 +164,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolHold=_HP_Client_SetFreeBufferPoolHold@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolSize=_HP_Client_SetFreeBufferPoolSize@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_Start=_HP_Client_Start@16")
-	#pragma comment(linker, "/EXPORT:HP_Client_StartWithBindAddress=_HP_Client_StartWithBindAddress@20")
+	#pragma comment(linker, "/EXPORT:HP_Client_StartWithBindAddress=_HP_Client_StartWithBindAddress@24")
 	#pragma comment(linker, "/EXPORT:HP_Client_Stop=_HP_Client_Stop@4")
 	#pragma comment(linker, "/EXPORT:HP_GetHPSocketVersion=_HP_GetHPSocketVersion@0")
 	#pragma comment(linker, "/EXPORT:HP_GetSocketErrorDesc=_HP_GetSocketErrorDesc@4")
@@ -1477,9 +1477,9 @@ HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR lpszRemot
 	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect);
 }
 
-HPSOCKET_API BOOL __stdcall HP_Client_StartWithBindAddress(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+HPSOCKET_API BOOL __stdcall HP_Client_StartWithBindAddress(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usBindPort)
 {
-	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress);
+	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress, usBindPort);
 }
 
 HPSOCKET_API BOOL __stdcall HP_Client_Stop(HP_Client pClient)

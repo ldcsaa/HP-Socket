@@ -827,7 +827,7 @@ HPSOCKET_API BOOL __stdcall HP_Client_Start(HP_Client pClient, LPCTSTR lpszRemot
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 HP_Client_GetLastError() 获取错误代码
 */
-HPSOCKET_API BOOL __stdcall HP_Client_StartWithBindAddress(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress);
+HPSOCKET_API BOOL __stdcall HP_Client_StartWithBindAddress(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usBindPort);
 
 /*
 * 名称：关闭通信组件
