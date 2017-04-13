@@ -1,3 +1,56 @@
+
+# ======================================== #
+HP-Socket v4.2.1 API 更新列表：
+# ======================================== #
+--------------------
+1、TCP:
+--------------------
+HP_Server_IsSecure		(增加)
+HP_Agent_IsSecure		(增加)
+HP_Client_IsSecure		(增加)
+
+--------------------
+2、HTTP Sync Client:
+--------------------
+Create_HP_HttpSyncClient		(修改：增加可选参数 pListener，如果 pListener 非空则可以监听 HttpSyncClient 的通信事件)
+Create_HP_HttpsSyncClient		(修改：增加可选参数 pListener，如果 pListener 非空则可以监听 HttpSyncClient 的通信事件)
+
+--------------------
+3、HTTP Client:
+--------------------
+HP_HttpClient_SetUseCookie		(增加)
+HP_HttpClient_IsUseCookie		(增加)
+HP_HttpClient_AddCookie			(删除)
+HP_HttpClient_DeleteCookie		(删除)
+HP_HttpClient_DeleteAllCookies	(删除)
+
+--------------------
+4、HTTP Agent:
+--------------------
+HP_HttpAgent_SetUseCookie		(增加)
+HP_HttpAgent_IsUseCookie		(增加)
+HP_HttpAgent_AddCookie			(删除)
+HP_HttpAgent_DeleteCookie		(删除)
+HP_HttpAgent_DeleteAllCookies	(删除)
+
+--------------------
+5、Cookie Management:
+--------------------
+HP_HttpCookie_MGR_LoadFromFile				(增加)
+HP_HttpCookie_MGR_SaveToFile				(增加)
+HP_HttpCookie_MGR_ClearCookies				(增加)
+HP_HttpCookie_MGR_RemoveExpiredCookies		(增加)
+HP_HttpCookie_MGR_SetCookie					(增加)
+HP_HttpCookie_MGR_DeleteCookie				(增加)
+HP_HttpCookie_MGR_SetEnableThirdPartyCookie	(增加)
+HP_HttpCookie_MGR_IsEnableThirdPartyCookie	(增加)
+HP_HttpCookie_HLP_ParseExpires				(增加)
+HP_HttpCookie_HLP_MakeExpiresStr			(增加)
+HP_HttpCookie_HLP_ToString					(增加)
+HP_HttpCookie_HLP_CurrentUTCTime			(增加)
+HP_HttpCookie_HLP_MaxAgeToExpires			(增加)
+HP_HttpCookie_HLP_ExpiresToMaxAge			(增加)
+
 # ======================================== #
 HP-Socket v4.1.1 API 更新列表：
 # ======================================== #
