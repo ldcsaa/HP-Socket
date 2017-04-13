@@ -1,4 +1,123 @@
 ==========================================================================================
+v4.1.3 更新：
+==========================================================================================
+
+> 代码调整：
+-----------------
+1、修正 ITcpServer 和 ITcpAgent 组件的 Onclose 事件在 SP_DIRECT 发送模式下的触发规则
+2、IClient 组件优化，提高稳定性
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.3 完全兼容 HP-Socket v4.1.2 版本，可以直接替换升级
+
+==========================================================================================
+v4.1.2 更新：
+==========================================================================================
+
+> 代码调整：
+-----------------
+1、采用新环形缓冲区算法提高异步操作安全性
+2、采用延时释放策略提高 HTTP 异步操作安全性
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.2 完全兼容 HP-Socket v4.1.1 版本，可以直接替换升级
+
+==========================================================================================
+v4.1.1 更新：
+==========================================================================================
+
+> WebSocket 支持：
+-----------------
+1、所有 HTTP 组件增加 WebSocket 方法：
+	1) SendWSMessage(): 发送 WebSocket 数据包
+	2） GetWSMessageState(): 获取当前 WebSocket 状态
+2、所有 HTTP 组件监听器增加 WebSocket 事件：
+	1) OnWSMessageHeader(): WebSocket 数据包头通知
+	2) OnWSMessageBody(): WebSocket 数据包体通知
+	3) OnWSMessageComplete(): WebSocket 数据包完成通知
+3、示例 Demo TestEcho-Http 和 TestEcho-Http-4C 支持 WebSocket
+
+> 增加 HTTP Sync Client 通信组件：
+-----------------
+1、HTTP Sync Client 实现同步 HTTP 通信，不需要事件监听器
+2、HTTP Sync Client 组件类： CHttpSyncClient、CHttpsSyncClient
+3、HTTP Sync Client 实现接口： ITcpClient / IHttpSyncRequester
+4、示例 Demo TestEcho-Http 和 TestEcho-Http-4C 提供 HTTP Sync Client 示例
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.1 完全兼容 HP-Socket v4.0.1 版本，可以直接替换升级
+
+==========================================================================================
+v4.0.1 更新：
+==========================================================================================
+
+> 增加 HTTP 系列通信组件：
+-----------------
+1、新增 HTTP Server 组件：
+	1) 组件类： CHttpServer、CHttpsServer
+	2) 实现接口： ITcpServer / IComplexHttpResponder
+	3) 监听器接口： IHttpServerListener
+2、新增 HTTP Agent 组件：
+	1) 组件类： CHttpAgent、CHttpsAgent
+	2) 实现接口： ITcpAgent / IComplexHttpRequester
+	3) 监听器接口： IHttpAgentListener
+3、新增 HTTP Client 组件：
+	1) 组件类： CHttpClient、CHttpsClient
+	2) 实现接口： ITcpClient / IHttpRequester
+	3) 监听器接口： IHttpClientListener
+4、新增 HTTP 示例 Demo：
+	1) TestEcho-Http		（源代码）
+	2) TestEcho-Http-4C		（4C LIB / 4C DLL）
+5、Http 监听器：
+	1) 监听器事件：
+		OnMessageBegin()	: 【可选】开始解析
+		OnRequestLine()		: 【可选】请求行解析完成（仅用于 HTTP 服务端）
+		OnStatusLine()		: 【可选】状态行解析完成（仅用于 HTTP 客户端）
+		OnHeader()			: 【可选】请求头通知
+		OnHeadersComplete()	: 【必须】请求头完成通知
+		OnBody()			: 【必须】请求体报文通知
+		OnChunkHeader()		: 【可选】Chunked 报文头通知
+		OnChunkComplete()	: 【可选】Chunked 报文结束通知
+		OnMessageComplete()	: 【必须】完成解析通知
+		OnUpgrade()			: 【可选】升级协议通知
+		OnParseError()		: 【必须】解析错误通知
+	2) 监听器事件返回值（EnHttpParseResult）：
+		HPR_OK				: 继续解析
+		HPR_SKIP_BODY		: 跳过当前请求 BODY（仅用于 OnHeadersComplete 事件）
+		HPR_UPGRADE			: 升级协议（仅用于 OnHeadersComplete 事件）
+		HPR_ERROR			: 终止解析，断开连接
+
+> 组件接口调整：
+-----------------
+1、IServer 和 IAgent 组件的所有监听器回调方法增加‘事件源’参数，如：OnShutdown() -> OnShutdown(T* pSender)
+2、IClient 组件的所有监听器回调方法增加‘连接ID’参数，如：OnHandShake(IClient* pClient) -> OnHandShake(T* pSender, CONNID dwConnID)
+3、IServer 和 IAgent 接口增加接口方法： Get/SetMaxConnectionCount() 用于设置最大连接数，最大连接数默认：10000
+4、OnHandShake() 事件触发规则调整：非 SSL 组件在 OnConnect() 事件后也触发 OnHandShake() 事件，使 SSL 组件和 SSL 组件处理流程一致
+5、HPSocket4C 增加 PACK 组件监听器的创建、销毁方法，新版本必须使用下列方法创建、销毁 PACK 组件监听器：
+	1) Create_HP_TcpPackServerListener / Destroy_HP_TcpPackServerListener
+	2) Create_HP_TcpPackAgentListener / Destroy_HP_TcpPackAgentListener
+	3) Create_HP_TcpPackClientListener / Destroy_HP_TcpPackClientListener
+6、SSL 组件支持 SNI：
+	1) SSL 初始化方法 HP_SSL_Initialize()，增加 SNI 回调函数指针参数
+	2) 新增方法 HP_SSL_AddServerContext()，用于 加载 SNI 主机证书
+	
+
+> 其他更新：
+-----------------
+1、IServer 和 IAgent 组件采用 Ring Pool 取代 R/W Lock + Map 维护活动连接，提升读写和并发性能
+2、更新所有 Demo 示例代码
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.0.1 与 HP-Socket v3.5.4 接口不兼容
+2、IServer、IAgent 和 IClient 的所有监听器回调方法参数都有变化
+3、注意：HPSocket4C 用新方法创建和销毁 PACK 组件监听器
+4、注意：IServer 和 IAgent 应用程序需要根据实际使用场景设置最大连接数
+
+==========================================================================================
 v3.5.4 更新：
 ==========================================================================================
 

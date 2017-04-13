@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -42,23 +42,23 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireReceive(IClient* pClient, const BYTE* pData, int iLength)
+	virtual EnHandleResult DoFireReceive(ITcpClient* pSender, const BYTE* pData, int iLength)
 	{
 		m_lsBuffer.Cat(pData, iLength);
 
-		return __super::DoFireReceive(pClient, m_lsBuffer.Length());
+		return __super::DoFireReceive(pSender, m_lsBuffer.Length());
 	}
 
 	virtual void Reset()
 	{
 		m_lsBuffer.Clear();
 
-		return __super::Reset();
+		__super::Reset();
 	}
 
 public:
-	CTcpPullClientT(ITcpClientListener* psoListener)
-	: T(psoListener)
+	CTcpPullClientT(ITcpClientListener* pListener)
+	: T			(pListener)
 	, m_lsBuffer(m_itPool)
 	{
 

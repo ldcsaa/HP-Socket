@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,7 +30,7 @@ Desc: 导出纯 C 函数，让其它语言（如：C / C# / Delphi 等）能方便地使用 HPSocket
 Usage:
 		方法一：
 		--------------------------------------------------------------------------------------
-		0. （C/C++ 程序）包含 HPSocket4C.h 头文件
+		0. （C/C++ 程序）包含 HPTypeDef.h / HPSocket4C.h 头文件
 		1. 调用 ::Create_HP_XxxListener() 函数创建监听器对象
 		2. 调用 ::Create_HP_Xxx(pListener) 函数创建 HPSocket 对象
 		3. 调用 ::HP_Set_FN_Xxx_OnYyy(pListener, ...) 函数设置监听器的回调函数
@@ -72,6 +72,8 @@ Release:
 
 #include <winsock2.h>
 
+#include "HPTypeDef.h"
+
 /**************************************************/
 /********** imports / exports HPSocket4C **********/
 
@@ -84,12 +86,6 @@ Release:
 		#define HPSOCKET_API EXTERN_C __declspec(dllimport)
 	#endif
 #endif
-
-/************************************************************************
-名称：连接 ID 数据类型
-描述：定义连接 ID 的数据类型
-************************************************************************/
-typedef ULONG_PTR	HP_CONNID;
 
 /************************************************************************
 名称：定义 Socket 对象指针类型别名
@@ -130,149 +126,64 @@ typedef HP_Object	HP_PullClientListener;
 typedef HP_Object	HP_TcpPullServerListener;
 typedef HP_Object	HP_TcpPullAgentListener;
 typedef HP_Object	HP_TcpPullClientListener;
+typedef HP_Object	HP_PackSocketListener;
+typedef HP_Object	HP_PackClientListener;
+typedef HP_Object	HP_TcpPackServerListener;
+typedef HP_Object	HP_TcpPackAgentListener;
+typedef HP_Object	HP_TcpPackClientListener;
 typedef HP_Object	HP_UdpServerListener;
 typedef HP_Object	HP_UdpClientListener;
 typedef HP_Object	HP_UdpCastListener;
 
-/*****************************************************************************************************/
-/******************************************** 公共类、接口 ********************************************/
-/*****************************************************************************************************/
+typedef HP_Object	HP_Http;
+typedef HP_Object	HP_HttpServer;
+typedef HP_Object	HP_HttpAgent;
+typedef HP_Object	HP_HttpClient;
+typedef HP_Object	HP_HttpSyncClient;
 
-/************************************************************************
-名称：通信组件服务状态
-描述：应用程序可以通过通信组件的 GetState() 方法获取组件当前服务状态
-************************************************************************/
-enum En_HP_ServiceState
-{
-	HP_SS_STARTING	= 0,	// 正在启动
-	HP_SS_STARTED	= 1,	// 已经启动
-	HP_SS_STOPPING	= 2,	// 正在停止
-	HP_SS_STOPPED	= 3,	// 已经停止
-};
+typedef HP_Object	HP_HttpServerListener;
+typedef HP_Object	HP_HttpAgentListener;
+typedef HP_Object	HP_HttpClientListener;
 
-/************************************************************************
-名称：Socket 操作类型
-描述：应用程序的 OnErrror() 事件中通过该参数标识是哪种操作导致的错误
-************************************************************************/
-enum En_HP_SocketOperation
-{
-	HP_SO_UNKNOWN	= 0,	// Unknown
-	HP_SO_ACCEPT	= 1,	// Acccept
-	HP_SO_CONNECT	= 2,	// Connect
-	HP_SO_SEND		= 3,	// Send
-	HP_SO_RECEIVE	= 4,	// Receive
-	HP_SO_CLOSE		= 5,	// Close
-};
-
-/************************************************************************
-名称：事件通知处理结果
-描述：事件通知的返回值，不同的返回值会影响通信组件的后续行为
-************************************************************************/
-enum En_HP_HandleResult
-{
-	HP_HR_OK		= 0,	// 成功
-	HP_HR_IGNORE	= 1,	// 忽略
-	HP_HR_ERROR		= 2,	// 错误
-};
-
-/************************************************************************
-名称：数据抓取结果
-描述：数据抓取操作的返回值
-************************************************************************/
-enum En_HP_FetchResult
-{
-	HP_FR_OK				= 0,	// 成功
-	HP_FR_LENGTH_TOO_LONG	= 1,	// 抓取长度过大
-	HP_FR_DATA_NOT_FOUND	= 2,	// 找不到 ConnID 对应的数据
-};
-
-/************************************************************************
-名称：数据发送策略
-描述：Server 组件和 Agent 组件的数据发送策略
-
-* 打包模式（默认）	：尽量把多个发送操作的数据组合在一起发送，增加传输效率
-* 安全模式			：尽量把多个发送操作的数据组合在一起发送，并控制传输速度，避免缓冲区溢出
-* 直接模式			：对每一个发送操作都直接投递，适用于负载不高但要求实时性较高的场合
-
-************************************************************************/
-enum En_HP_SendPolicy
-{
-	HP_SP_PACK				= 0,	// 打包模式（默认）
-	HP_SP_SAFE				= 1,	// 安全模式
-	HP_SP_DIRECT			= 2,	// 直接模式
-};
-
-/************************************************************************
-名称：操作结果代码
-描述：组件 Start() / Stop() 方法执行失败时，可通过 HP_Xxx_GetLastError() 获取错误代码
-************************************************************************/
-enum En_HP_SocketError
-{
-	HP_SE_OK					= NO_ERROR,	// 成功
-	HP_SE_ILLEGAL_STATE			= 1,		// 当前状态不允许操作
-	HP_SE_INVALID_PARAM			= 2,		// 非法参数
-	HP_SE_SOCKET_CREATE			= 3,		// 创建 SOCKET 失败
-	HP_SE_SOCKET_BIND			= 4,		// 绑定 SOCKET 失败
-	HP_SE_SOCKET_PREPARE		= 5,		// 设置 SOCKET 失败
-	HP_SE_SOCKET_LISTEN			= 6,		// 监听 SOCKET 失败
-	HP_SE_CP_CREATE				= 7,		// 创建完成端口失败
-	HP_SE_WORKER_THREAD_CREATE	= 8,		// 创建工作线程失败
-	HP_SE_DETECT_THREAD_CREATE	= 9,		// 创建监测线程失败
-	HP_SE_SOCKE_ATTACH_TO_CP	= 10,		// 绑定完成端口失败
-	HP_SE_CONNECT_SERVER		= 11,		// 连接服务器失败
-	HP_SE_NETWORK				= 12,		// 网络错误
-	HP_SE_DATA_PROC				= 13,		// 数据处理错误
-	HP_SE_DATA_SEND				= 14,		// 数据发送失败
-
-	/***** SSL Socket 扩展操作结果代码 *****/
-	HP_SE_SSL_ENV_NOT_READY		= 101,		// SSL 环境未就绪
-};
-
-/************************************************************************
-名称：播送模式
-描述：UDP 组件的播送模式（组播或广播）
-************************************************************************/
-enum En_HP_CastMode
-{
-	HP_CM_MULTICAST	= 0,	// 组播
-	HP_CM_BROADCAST	= 1,	// 广播
-};
+/*****************************************************************************************************************************************************/
+/****************************************************************** TCP/UDP Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
 
 /****************************************************/
-/**************** HPSocket4C 回调函数 ****************/
+/***************** TCP/UDP 回调函数 ******************/
 
 /* Server 回调函数 */
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnPrepareListen)	(UINT_PTR soListen);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnPrepareListen)	(HP_Server pSender, UINT_PTR soListen);
 // 如果为 TCP 连接，pClient为 SOCKET 句柄；如果为 UDP 连接，pClient为 SOCKADDR_IN 指针；
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnAccept)			(HP_CONNID dwConnID, UINT_PTR pClient);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnHandShake)		(HP_CONNID dwConnID);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnSend)				(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnReceive)			(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnPullReceive)		(HP_CONNID dwConnID, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnClose)			(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnShutdown)			();
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnAccept)			(HP_Server pSender, HP_CONNID dwConnID, UINT_PTR pClient);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnHandShake)		(HP_Server pSender, HP_CONNID dwConnID);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnSend)				(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnReceive)			(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnPullReceive)		(HP_Server pSender, HP_CONNID dwConnID, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnClose)			(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Server_OnShutdown)			(HP_Server pSender);
 
 /* Agent 回调函数 */
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnPrepareConnect)	(HP_CONNID dwConnID, UINT_PTR socket);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnConnect)			(HP_CONNID dwConnID);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnHandShake)			(HP_CONNID dwConnID);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnSend)				(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnReceive)			(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnPullReceive)		(HP_CONNID dwConnID, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnClose)				(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnShutdown)			();
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnPrepareConnect)	(HP_Agent pSender, HP_CONNID dwConnID, UINT_PTR socket);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnConnect)			(HP_Agent pSender, HP_CONNID dwConnID);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnHandShake)			(HP_Agent pSender, HP_CONNID dwConnID);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnSend)				(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnReceive)			(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnPullReceive)		(HP_Agent pSender, HP_CONNID dwConnID, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnClose)				(HP_Agent pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Agent_OnShutdown)			(HP_Agent pSender);
 
 /* Client 回调函数 */
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnPrepareConnect)	(HP_Client pClient, UINT_PTR socket);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnConnect)			(HP_Client pClient);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnHandShake)		(HP_Client pClient);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnSend)				(HP_Client pClient, const BYTE* pData, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnReceive)			(HP_Client pClient, const BYTE* pData, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnPullReceive)		(HP_Client pClient, int iLength);
-typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnClose)			(HP_Client pClient, En_HP_SocketOperation enOperation, int iErrorCode);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnPrepareConnect)	(HP_Client pSender, HP_CONNID dwConnID, UINT_PTR socket);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnConnect)			(HP_Client pSender, HP_CONNID dwConnID);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnHandShake)		(HP_Client pSender, HP_CONNID dwConnID);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnSend)				(HP_Client pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnReceive)			(HP_Client pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnPullReceive)		(HP_Client pSender, HP_CONNID dwConnID, int iLength);
+typedef En_HP_HandleResult (__stdcall *HP_FN_Client_OnClose)			(HP_Client pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
 
 /****************************************************/
-/**************** HPSocket4C 导出函数 ****************/
+/*************** TCP/UDP 对象创建函数 ****************/
 
 // 创建 HP_TcpServer 对象
 HPSOCKET_API HP_TcpServer __stdcall Create_HP_TcpServer(HP_TcpServerListener pListener);
@@ -336,6 +247,12 @@ HPSOCKET_API HP_TcpPullServerListener __stdcall Create_HP_TcpPullServerListener(
 HPSOCKET_API HP_TcpPullAgentListener __stdcall Create_HP_TcpPullAgentListener();
 // 创建 HP_TcpPullClientListener 对象
 HPSOCKET_API HP_TcpPullClientListener __stdcall Create_HP_TcpPullClientListener();
+// 创建 HP_TcpPackServerListener 对象
+HPSOCKET_API HP_TcpPackServerListener __stdcall Create_HP_TcpPackServerListener();
+// 创建 HP_TcpPackAgentListener 对象
+HPSOCKET_API HP_TcpPackAgentListener __stdcall Create_HP_TcpPackAgentListener();
+// 创建 HP_TcpPackClientListener 对象
+HPSOCKET_API HP_TcpPackClientListener __stdcall Create_HP_TcpPackClientListener();
 // 创建 HP_UdpServerListener 对象
 HPSOCKET_API HP_UdpServerListener __stdcall Create_HP_UdpServerListener();
 // 创建 HP_UdpClientListener 对象
@@ -355,6 +272,12 @@ HPSOCKET_API void __stdcall Destroy_HP_TcpPullServerListener(HP_TcpPullServerLis
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullAgentListener(HP_TcpPullAgentListener pListener);
 // 销毁 HP_TcpPullClientListener 对象
 HPSOCKET_API void __stdcall Destroy_HP_TcpPullClientListener(HP_TcpPullClientListener pListener);
+// 销毁 HP_TcpPackServerListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_TcpPackServerListener(HP_TcpPackServerListener pListener);
+// 销毁 HP_TcpPackAgentListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_TcpPackAgentListener(HP_TcpPackAgentListener pListener);
+// 销毁 HP_TcpPackClientListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_TcpPackClientListener(HP_TcpPackClientListener pListener);
 // 销毁 HP_UdpServerListener 对象
 HPSOCKET_API void __stdcall Destroy_HP_UdpServerListener(HP_UdpServerListener pListener);
 // 销毁 HP_UdpClientListener 对象
@@ -530,7 +453,7 @@ HPSOCKET_API LPCTSTR __stdcall HP_Server_GetLastErrorDesc(HP_Server pServer);
 HPSOCKET_API BOOL __stdcall HP_Server_GetPendingDataLength(HP_Server pServer, HP_CONNID dwConnID, int* piPending);
 /* 获取客户端连接数 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetConnectionCount(HP_Server pServer);
-/* 获取所有连接的 CONNID */
+/* 获取所有连接的 HP_CONNID */
 HPSOCKET_API BOOL __stdcall HP_Server_GetAllConnectionIDs(HP_Server pServer, HP_CONNID pIDs[], DWORD* pdwCount);
 /* 获取某个客户端连接时长（毫秒） */
 HPSOCKET_API BOOL __stdcall HP_Server_GetConnectPeriod(HP_Server pServer, HP_CONNID dwConnID, DWORD* pdwPeriod);
@@ -555,6 +478,8 @@ HPSOCKET_API void __stdcall HP_Server_SetFreeBufferObjPool(HP_Server pServer, DW
 HPSOCKET_API void __stdcall HP_Server_SetFreeSocketObjHold(HP_Server pServer, DWORD dwFreeSocketObjHold);
 /* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
 HPSOCKET_API void __stdcall HP_Server_SetFreeBufferObjHold(HP_Server pServer, DWORD dwFreeBufferObjHold);
+/* 设置最大连接数（组件会根据设置值预分配内存，因此需要根据实际情况设置，不宜过大）*/
+HPSOCKET_API void __stdcall HP_Server_SetMaxConnectionCount(HP_Server pServer, DWORD dwMaxConnectionCount);
 /* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 HPSOCKET_API void __stdcall HP_Server_SetWorkerThreadCount(HP_Server pServer, DWORD dwWorkerThreadCount);
 /* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：TRUE） */
@@ -572,6 +497,8 @@ HPSOCKET_API DWORD __stdcall HP_Server_GetFreeBufferObjPool(HP_Server pServer);
 HPSOCKET_API DWORD __stdcall HP_Server_GetFreeSocketObjHold(HP_Server pServer);
 /* 获取内存块缓存池回收阀值 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetFreeBufferObjHold(HP_Server pServer);
+/* 获取最大连接数 */
+HPSOCKET_API DWORD __stdcall HP_Server_GetMaxConnectionCount(HP_Server pServer);
 /* 获取工作线程数量 */
 HPSOCKET_API DWORD __stdcall HP_Server_GetWorkerThreadCount(HP_Server pServer);
 /* 检测是否标记静默时间 */
@@ -666,7 +593,7 @@ HPSOCKET_API BOOL __stdcall HP_Agent_Stop(HP_Agent pAgent);
 
 /*
 * 名称：连接服务器
-* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() 事件
+* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
 *		
 * 参数：		lpszRemoteAddress	-- 服务端地址
 *			usPort				-- 服务端端口
@@ -779,7 +706,7 @@ HPSOCKET_API BOOL __stdcall HP_Agent_HasStarted(HP_Agent pAgent);
 HPSOCKET_API En_HP_ServiceState __stdcall HP_Agent_GetState(HP_Agent pAgent);
 /* 获取连接数 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetConnectionCount(HP_Agent pAgent);
-/* 获取所有连接的 CONNID */
+/* 获取所有连接的 HP_CONNID */
 HPSOCKET_API BOOL __stdcall HP_Agent_GetAllConnectionIDs(HP_Agent pAgent, HP_CONNID pIDs[], DWORD* pdwCount);
 /* 获取某个连接时长（毫秒） */
 HPSOCKET_API BOOL __stdcall HP_Agent_GetConnectPeriod(HP_Agent pAgent, HP_CONNID dwConnID, DWORD* pdwPeriod);
@@ -789,6 +716,8 @@ HPSOCKET_API BOOL __stdcall HP_Agent_GetSilencePeriod(HP_Agent pAgent, HP_CONNID
 HPSOCKET_API BOOL __stdcall HP_Agent_GetLocalAddress(HP_Agent pAgent, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 /* 获取某个连接的远程地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Agent_GetRemoteAddress(HP_Agent pAgent, HP_CONNID dwConnID, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
+/* 获取某个连接的远程主机信息 */
+HPSOCKET_API BOOL __stdcall HP_Agent_GetRemoteHost(HP_Agent pAgent, HP_CONNID dwConnID, TCHAR lpszHost[], int* piHostLen, USHORT* pusPort);
 /* 获取最近一次失败操作的错误代码 */
 HPSOCKET_API En_HP_SocketError __stdcall HP_Agent_GetLastError(HP_Agent pAgent);
 /* 获取最近一次失败操作的错误描述 */
@@ -808,6 +737,8 @@ HPSOCKET_API void __stdcall HP_Agent_SetFreeBufferObjPool(HP_Agent pAgent, DWORD
 HPSOCKET_API void __stdcall HP_Agent_SetFreeSocketObjHold(HP_Agent pAgent, DWORD dwFreeSocketObjHold);
 /* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
 HPSOCKET_API void __stdcall HP_Agent_SetFreeBufferObjHold(HP_Agent pAgent, DWORD dwFreeBufferObjHold);
+/* 设置最大连接数（组件会根据设置值预分配内存，因此需要根据实际情况设置，不宜过大）*/
+HPSOCKET_API void __stdcall HP_Agent_SetMaxConnectionCount(HP_Agent pAgent, DWORD dwMaxConnectionCount);
 /* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 HPSOCKET_API void __stdcall HP_Agent_SetWorkerThreadCount(HP_Agent pAgent, DWORD dwWorkerThreadCount);
 /* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：TRUE） */
@@ -825,6 +756,8 @@ HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeBufferObjPool(HP_Agent pAgent);
 HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeSocketObjHold(HP_Agent pAgent);
 /* 获取内存块缓存池回收阀值 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetFreeBufferObjHold(HP_Agent pAgent);
+/* 获取最大连接数 */
+HPSOCKET_API DWORD __stdcall HP_Agent_GetMaxConnectionCount(HP_Agent pAgent);
 /* 获取工作线程数量 */
 HPSOCKET_API DWORD __stdcall HP_Agent_GetWorkerThreadCount(HP_Agent pAgent);
 /* 检测是否标记静默时间 */
@@ -962,6 +895,8 @@ HPSOCKET_API LPCTSTR __stdcall HP_Client_GetLastErrorDesc(HP_Client pClient);
 HPSOCKET_API HP_CONNID __stdcall HP_Client_GetConnectionID(HP_Client pClient);
 /* 获取 Client Socket 的地址信息 */
 HPSOCKET_API BOOL __stdcall HP_Client_GetLocalAddress(HP_Client pClient, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
+/* 获取连接的远程主机信息 */
+HPSOCKET_API BOOL __stdcall HP_Client_GetRemoteHost(HP_Client pClient, TCHAR lpszHost[], int* piHostLen, USHORT* pusPort);
 /* 获取连接中未发出数据的长度 */
 HPSOCKET_API BOOL __stdcall HP_Client_GetPendingDataLength(HP_Client pClient, int* piPending);
 /* 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ） */
@@ -1180,14 +1115,644 @@ HPSOCKET_API DWORD __stdcall HP_TcpPackClient_GetMaxPackSize(HP_TcpPackClient pC
 /* 获取包头标识 */
 HPSOCKET_API USHORT __stdcall HP_TcpPackClient_GetPackHeaderFlag(HP_TcpPackClient pClient);
 
-/***************************************************************************************/
-/*************************************** 其它方法 ***************************************/
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTP Exports *******************************************************************/
+/*****************************************************************************************************************************************************/
+
+/****************************************************/
+/******************* HTTP 回调函数 *******************/
+
+/* HTTP 回调函数 */
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnMessageBegin)	(HP_Http pSender, HP_CONNID dwConnID);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnRequestLine)		(HP_Http pSender, HP_CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnStatusLine)		(HP_Http pSender, HP_CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnHeader)			(HP_Http pSender, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnHeadersComplete)	(HP_Http pSender, HP_CONNID dwConnID);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnBody)			(HP_Http pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnChunkHeader)		(HP_Http pSender, HP_CONNID dwConnID, int iLength);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnChunkComplete)	(HP_Http pSender, HP_CONNID dwConnID);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnMessageComplete)	(HP_Http pSender, HP_CONNID dwConnID);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnUpgrade)			(HP_Http pSender, HP_CONNID dwConnID, En_HP_HttpUpgradeType enUpgradeType);
+typedef En_HP_HttpParseResult (__stdcall *HP_FN_Http_OnParseError)		(HP_Http pSender, HP_CONNID dwConnID, int iErrorCode, LPCSTR lpszErrorDesc);
+
+typedef En_HP_HandleResult	 (__stdcall *HP_FN_Http_OnWSMessageHeader)	(HP_Http pSender, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen);
+typedef En_HP_HandleResult	 (__stdcall *HP_FN_Http_OnWSMessageBody)	(HP_Http pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+typedef En_HP_HandleResult	 (__stdcall *HP_FN_Http_OnWSMessageComplete)(HP_Http pSender, HP_CONNID dwConnID);
+
+/* HTTP Server 回调函数 */
+typedef HP_FN_Http_OnMessageBegin			HP_FN_HttpServer_OnMessageBegin;
+typedef HP_FN_Http_OnRequestLine			HP_FN_HttpServer_OnRequestLine;
+typedef HP_FN_Http_OnHeader					HP_FN_HttpServer_OnHeader;
+typedef HP_FN_Http_OnHeadersComplete		HP_FN_HttpServer_OnHeadersComplete;
+typedef HP_FN_Http_OnBody					HP_FN_HttpServer_OnBody;
+typedef HP_FN_Http_OnChunkHeader			HP_FN_HttpServer_OnChunkHeader;
+typedef HP_FN_Http_OnChunkComplete			HP_FN_HttpServer_OnChunkComplete;
+typedef HP_FN_Http_OnMessageComplete		HP_FN_HttpServer_OnMessageComplete;
+typedef HP_FN_Http_OnUpgrade				HP_FN_HttpServer_OnUpgrade;
+typedef HP_FN_Http_OnParseError				HP_FN_HttpServer_OnParseError;
+
+typedef HP_FN_Http_OnWSMessageHeader		HP_FN_HttpServer_OnWSMessageHeader;
+typedef HP_FN_Http_OnWSMessageBody			HP_FN_HttpServer_OnWSMessageBody;
+typedef HP_FN_Http_OnWSMessageComplete		HP_FN_HttpServer_OnWSMessageComplete;
+
+typedef HP_FN_Server_OnPrepareListen		HP_FN_HttpServer_OnPrepareListen;
+typedef HP_FN_Server_OnAccept				HP_FN_HttpServer_OnAccept;
+typedef HP_FN_Server_OnHandShake			HP_FN_HttpServer_OnHandShake;
+typedef HP_FN_Server_OnReceive				HP_FN_HttpServer_OnReceive;
+typedef HP_FN_Server_OnSend					HP_FN_HttpServer_OnSend;
+typedef HP_FN_Server_OnClose				HP_FN_HttpServer_OnClose;
+typedef HP_FN_Server_OnShutdown				HP_FN_HttpServer_OnShutdown;
+
+/* HTTP Agent 回调函数 */
+typedef HP_FN_Http_OnMessageBegin			HP_FN_HttpAgent_OnMessageBegin;
+typedef HP_FN_Http_OnStatusLine				HP_FN_HttpAgent_OnStatusLine;
+typedef HP_FN_Http_OnHeader					HP_FN_HttpAgent_OnHeader;
+typedef HP_FN_Http_OnHeadersComplete		HP_FN_HttpAgent_OnHeadersComplete;
+typedef HP_FN_Http_OnBody					HP_FN_HttpAgent_OnBody;
+typedef HP_FN_Http_OnChunkHeader			HP_FN_HttpAgent_OnChunkHeader;
+typedef HP_FN_Http_OnChunkComplete			HP_FN_HttpAgent_OnChunkComplete;
+typedef HP_FN_Http_OnMessageComplete		HP_FN_HttpAgent_OnMessageComplete;
+typedef HP_FN_Http_OnUpgrade				HP_FN_HttpAgent_OnUpgrade;
+typedef HP_FN_Http_OnParseError				HP_FN_HttpAgent_OnParseError;
+
+typedef HP_FN_Http_OnWSMessageHeader		HP_FN_HttpAgent_OnWSMessageHeader;
+typedef HP_FN_Http_OnWSMessageBody			HP_FN_HttpAgent_OnWSMessageBody;
+typedef HP_FN_Http_OnWSMessageComplete		HP_FN_HttpAgent_OnWSMessageComplete;
+
+typedef HP_FN_Agent_OnPrepareConnect		HP_FN_HttpAgent_OnPrepareConnect;
+typedef HP_FN_Agent_OnConnect				HP_FN_HttpAgent_OnConnect;
+typedef HP_FN_Agent_OnHandShake				HP_FN_HttpAgent_OnHandShake;
+typedef HP_FN_Agent_OnReceive				HP_FN_HttpAgent_OnReceive;
+typedef HP_FN_Agent_OnSend					HP_FN_HttpAgent_OnSend;
+typedef HP_FN_Agent_OnClose					HP_FN_HttpAgent_OnClose;
+typedef HP_FN_Agent_OnShutdown				HP_FN_HttpAgent_OnShutdown;
+
+/* HTTP Client 回调函数 */
+typedef HP_FN_Http_OnMessageBegin			HP_FN_HttpClient_OnMessageBegin;
+typedef HP_FN_Http_OnStatusLine				HP_FN_HttpClient_OnStatusLine;
+typedef HP_FN_Http_OnHeader					HP_FN_HttpClient_OnHeader;
+typedef HP_FN_Http_OnHeadersComplete		HP_FN_HttpClient_OnHeadersComplete;
+typedef HP_FN_Http_OnBody					HP_FN_HttpClient_OnBody;
+typedef HP_FN_Http_OnChunkHeader			HP_FN_HttpClient_OnChunkHeader;
+typedef HP_FN_Http_OnChunkComplete			HP_FN_HttpClient_OnChunkComplete;
+typedef HP_FN_Http_OnMessageComplete		HP_FN_HttpClient_OnMessageComplete;
+typedef HP_FN_Http_OnUpgrade				HP_FN_HttpClient_OnUpgrade;
+typedef HP_FN_Http_OnParseError				HP_FN_HttpClient_OnParseError;
+
+typedef HP_FN_Http_OnWSMessageHeader		HP_FN_HttpClient_OnWSMessageHeader;
+typedef HP_FN_Http_OnWSMessageBody			HP_FN_HttpClient_OnWSMessageBody;
+typedef HP_FN_Http_OnWSMessageComplete		HP_FN_HttpClient_OnWSMessageComplete;
+
+typedef HP_FN_Client_OnPrepareConnect		HP_FN_HttpClient_OnPrepareConnect;
+typedef HP_FN_Client_OnConnect				HP_FN_HttpClient_OnConnect;
+typedef HP_FN_Client_OnHandShake			HP_FN_HttpClient_OnHandShake;
+typedef HP_FN_Client_OnReceive				HP_FN_HttpClient_OnReceive;
+typedef HP_FN_Client_OnSend					HP_FN_HttpClient_OnSend;
+typedef HP_FN_Client_OnClose				HP_FN_HttpClient_OnClose;
+
+/****************************************************/
+/***************** HTTP 对象创建函数 *****************/
+
+// 创建 HP_HttpServer 对象
+HPSOCKET_API HP_HttpServer __stdcall Create_HP_HttpServer(HP_HttpServerListener pListener);
+// 创建 HP_HttpAgent 对象
+HPSOCKET_API HP_HttpAgent __stdcall Create_HP_HttpAgent(HP_HttpAgentListener pListener);
+// 创建 HP_HttpClient 对象
+HPSOCKET_API HP_HttpClient __stdcall Create_HP_HttpClient(HP_HttpClientListener pListener);
+// 创建 HP_HttpSyncClient 对象
+HPSOCKET_API HP_HttpSyncClient __stdcall Create_HP_HttpSyncClient();
+
+// 销毁 HP_HttpServer 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpServer(HP_HttpServer pServer);
+// 销毁 HP_HttpAgent 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpAgent(HP_HttpAgent pAgent);
+// 销毁 HP_HttpClient 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpClient(HP_HttpClient pClient);
+// 销毁 HP_HttpSyncClient 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpSyncClient(HP_HttpSyncClient pClient);
+
+// 创建 HP_HttpServerListener 对象
+HPSOCKET_API HP_HttpServerListener __stdcall Create_HP_HttpServerListener();
+// 创建 HP_HttpAgentListener 对象
+HPSOCKET_API HP_HttpAgentListener __stdcall Create_HP_HttpAgentListener();
+// 创建 HP_HttpClientListener 对象
+HPSOCKET_API HP_HttpClientListener __stdcall Create_HP_HttpClientListener();
+
+// 销毁 HP_HttpServerListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpServerListener(HP_HttpServerListener pListener);
+// 销毁 HP_HttpAgentListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpAgentListener(HP_HttpAgentListener pListener);
+// 销毁 HP_HttpClientListener 对象
+HPSOCKET_API void __stdcall Destroy_HP_HttpClientListener(HP_HttpClientListener pListener);
+
+/**********************************************************************************/
+/*************************** HTTP Server 回调函数设置方法 **************************/
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnMessageBegin(HP_HttpServerListener pListener		, HP_FN_HttpServer_OnMessageBegin fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnRequestLine(HP_HttpServerListener pListener		, HP_FN_HttpServer_OnRequestLine fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnHeader(HP_HttpServerListener pListener			, HP_FN_HttpServer_OnHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnHeadersComplete(HP_HttpServerListener pListener	, HP_FN_HttpServer_OnHeadersComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnBody(HP_HttpServerListener pListener				, HP_FN_HttpServer_OnBody fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnChunkHeader(HP_HttpServerListener pListener		, HP_FN_HttpServer_OnChunkHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnChunkComplete(HP_HttpServerListener pListener	, HP_FN_HttpServer_OnChunkComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnMessageComplete(HP_HttpServerListener pListener	, HP_FN_HttpServer_OnMessageComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnUpgrade(HP_HttpServerListener pListener			, HP_FN_HttpServer_OnUpgrade fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnParseError(HP_HttpServerListener pListener		, HP_FN_HttpServer_OnParseError fn);
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnWSMessageHeader(HP_HttpServerListener pListener	, HP_FN_HttpServer_OnWSMessageHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnWSMessageBody(HP_HttpServerListener pListener	, HP_FN_HttpServer_OnWSMessageBody fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnWSMessageComplete(HP_HttpServerListener pListener, HP_FN_HttpServer_OnWSMessageComplete fn);
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnPrepareListen(HP_HttpServerListener pListener	, HP_FN_HttpServer_OnPrepareListen fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnAccept(HP_HttpServerListener pListener			, HP_FN_HttpServer_OnAccept fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnHandShake(HP_HttpServerListener pListener		, HP_FN_HttpServer_OnHandShake fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnReceive(HP_HttpServerListener pListener			, HP_FN_HttpServer_OnReceive fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnSend(HP_HttpServerListener pListener				, HP_FN_HttpServer_OnSend fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnClose(HP_HttpServerListener pListener			, HP_FN_HttpServer_OnClose fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpServer_OnShutdown(HP_HttpServerListener pListener			, HP_FN_HttpServer_OnShutdown fn);
+
+/**********************************************************************************/
+/**************************** HTTP Agent 回调函数设置方法 **************************/
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnMessageBegin(HP_HttpAgentListener pListener		, HP_FN_HttpAgent_OnMessageBegin fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnStatusLine(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnStatusLine fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnHeader(HP_HttpAgentListener pListener				, HP_FN_HttpAgent_OnHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnHeadersComplete(HP_HttpAgentListener pListener	, HP_FN_HttpAgent_OnHeadersComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnBody(HP_HttpAgentListener pListener				, HP_FN_HttpAgent_OnBody fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnChunkHeader(HP_HttpAgentListener pListener		, HP_FN_HttpAgent_OnChunkHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnChunkComplete(HP_HttpAgentListener pListener		, HP_FN_HttpAgent_OnChunkComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnMessageComplete(HP_HttpAgentListener pListener	, HP_FN_HttpAgent_OnMessageComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnUpgrade(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnUpgrade fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnParseError(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnParseError fn);
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnWSMessageHeader(HP_HttpAgentListener pListener	, HP_FN_HttpAgent_OnWSMessageHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnWSMessageBody(HP_HttpAgentListener pListener		, HP_FN_HttpAgent_OnWSMessageBody fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnWSMessageComplete(HP_HttpAgentListener pListener	, HP_FN_HttpAgent_OnWSMessageComplete fn);
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnPrepareConnect(HP_HttpAgentListener pListener		, HP_FN_HttpAgent_OnPrepareConnect fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnConnect(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnConnect fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnHandShake(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnHandShake fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnReceive(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnReceive fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnSend(HP_HttpAgentListener pListener				, HP_FN_HttpAgent_OnSend fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnClose(HP_HttpAgentListener pListener				, HP_FN_HttpAgent_OnClose fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpAgent_OnShutdown(HP_HttpAgentListener pListener			, HP_FN_HttpAgent_OnShutdown fn);
+
+/**********************************************************************************/
+/*************************** HTTP Client 回调函数设置方法 **************************/
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnMessageBegin(HP_HttpClientListener pListener		, HP_FN_HttpClient_OnMessageBegin fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnStatusLine(HP_HttpClientListener pListener		, HP_FN_HttpClient_OnStatusLine fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnHeader(HP_HttpClientListener pListener			, HP_FN_HttpClient_OnHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnHeadersComplete(HP_HttpClientListener pListener	, HP_FN_HttpClient_OnHeadersComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnBody(HP_HttpClientListener pListener				, HP_FN_HttpClient_OnBody fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnChunkHeader(HP_HttpClientListener pListener		, HP_FN_HttpClient_OnChunkHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnChunkComplete(HP_HttpClientListener pListener	, HP_FN_HttpClient_OnChunkComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnMessageComplete(HP_HttpClientListener pListener	, HP_FN_HttpClient_OnMessageComplete fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnUpgrade(HP_HttpClientListener pListener			, HP_FN_HttpClient_OnUpgrade fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnParseError(HP_HttpClientListener pListener		, HP_FN_HttpClient_OnParseError fn);
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnWSMessageHeader(HP_HttpClientListener pListener	, HP_FN_HttpClient_OnWSMessageHeader fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnWSMessageBody(HP_HttpClientListener pListener	, HP_FN_HttpClient_OnWSMessageBody fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnWSMessageComplete(HP_HttpClientListener pListener, HP_FN_HttpClient_OnWSMessageComplete fn);
+
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnPrepareConnect(HP_HttpClientListener pListener	, HP_FN_HttpClient_OnPrepareConnect fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnConnect(HP_HttpClientListener pListener			, HP_FN_HttpClient_OnConnect fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnHandShake(HP_HttpClientListener pListener		, HP_FN_HttpClient_OnHandShake fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnReceive(HP_HttpClientListener pListener			, HP_FN_HttpClient_OnReceive fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnSend(HP_HttpClientListener pListener				, HP_FN_HttpClient_OnSend fn);
+HPSOCKET_API void __stdcall HP_Set_FN_HttpClient_OnClose(HP_HttpClientListener pListener			, HP_FN_HttpClient_OnClose fn);
+
+/**************************************************************************/
+/*************************** HTTP Server 操作方法 **************************/
+
+/*
+* 名称：回复请求
+* 描述：向客户端回复 HTTP 请求
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			usStatusCode	-- HTTP 状态码
+*			lpszDesc		-- HTTP 状态描述
+*			lpHeaders		-- 回复请求头
+*			iHeaderCount	-- 回复请求头数量
+*			pData			-- 回复请求体
+*			iLength			-- 回复请求体长度
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpServer_SendResponse(HP_HttpServer pServer, HP_CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pData, int iLength);
+
+/*
+* 名称：发送本地文件
+* 描述：向指定连接发送 4096 KB 以下的小文件
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			lpszFileName	-- 文件路径
+*			usStatusCode	-- HTTP 状态码
+*			lpszDesc		-- HTTP 状态描述
+*			lpHeaders		-- 回复请求头
+*			iHeaderCount	-- 回复请求头数量
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpServer_SendLocalFile(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR lpszFileName, USHORT usStatusCode, LPCSTR lpszDesc, const HP_THeader lpHeaders[], int iHeaderCount);
+
+/*
+* 名称：发送 WebSocket 消息
+* 描述：向对端端发送 WebSocket 消息
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			bFinal			-- 是否结束帧
+*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+*			iOperationCode	-- 操作码：0x0 - 0xF
+*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+*			pData			-- 消息体数据缓冲区
+*			iLength			-- 消息体数据长度
+*			ullBodyLen		-- 消息总长度
+* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+* 								ullBodyLen < iLength -> 错误参数，发送失败
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpServer_SendWSMessage(HP_HttpServer pServer, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen);
+
+/*
+* 名称：释放连接
+* 描述：把连接放入释放队列，等待某个时间（通过 SetReleaseDelay() 设置）关闭连接
+*		
+* 参数：		dwConnID		-- 连接 ID
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpServer_Release(HP_HttpServer pServer, HP_CONNID dwConnID);
+
+/******************************************************************************/
+/*************************** HTTP Server 属性访问方法 **************************/
+
+/* 设置连接释放延时（默认：3000 毫秒） */
+HPSOCKET_API void __stdcall HP_HttpServer_SetReleaseDelay(HP_HttpServer pServer, DWORD dwReleaseDelay);
+/* 获取连接释放延时 */
+HPSOCKET_API DWORD __stdcall HP_HttpServer_GetReleaseDelay(HP_HttpServer pServer);
+/* 获取请求行 URL 域掩码（URL 域参考：EnHttpUrlField） */
+HPSOCKET_API USHORT __stdcall HP_HttpServer_GetUrlFieldSet(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取某个 URL 域值 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpServer_GetUrlField(HP_HttpServer pServer, HP_CONNID dwConnID, En_HP_HttpUrlField enField);
+/* 获取请求方法 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpServer_GetMethod(HP_HttpServer pServer, HP_CONNID dwConnID);
+
+/* 设置本地协议版本 */
+HPSOCKET_API void __stdcall HP_HttpServer_SetLocalVersion(HP_HttpServer pServer, En_HP_HttpVersion usVersion);
+/* 获取本地协议版本 */
+HPSOCKET_API En_HP_HttpVersion __stdcall HP_HttpServer_GetLocalVersion(HP_HttpServer pServer);
+
+/* 检查是否升级协议 */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_IsUpgrade(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 检查是否有 Keep-Alive 标识 */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_IsKeepAlive(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取协议版本 */
+HPSOCKET_API USHORT __stdcall HP_HttpServer_GetVersion(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取主机 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpServer_GetHost(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取内容长度 */
+HPSOCKET_API ULONGLONG __stdcall HP_HttpServer_GetContentLength(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取内容类型 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpServer_GetContentType(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取内容编码 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpServer_GetContentEncoding(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取传输编码 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpServer_GetTransferEncoding(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取协议升级类型 */
+HPSOCKET_API En_HP_HttpUpgradeType __stdcall HP_HttpServer_GetUpgradeType(HP_HttpServer pServer, HP_CONNID dwConnID);
+/* 获取解析错误代码 */
+HPSOCKET_API USHORT __stdcall HP_HttpServer_GetParseErrorCode(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR* lpszErrorDesc);
+
+/* 获取某个请求头（单值） */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetHeader(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue);
+/* 获取某个请求头（多值） */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetHeaders(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue[], DWORD* pdwCount);
+/* 获取所有请求头 */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetAllHeaders(HP_HttpServer pServer, HP_CONNID dwConnID, HP_THeader lpHeaders[], DWORD* pdwCount);
+/* 获取所有请求头名称 */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetAllHeaderNames(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR lpszName[], DWORD* pdwCount);
+
+/* 获取 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetCookie(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue);
+/* 获取所有 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetAllCookies(HP_HttpServer pServer, HP_CONNID dwConnID, HP_TCookie lpCookies[], DWORD* pdwCount);
+
+/* 获取当前 WebSocket 消息状态，传入 nullptr 则不获取相应字段 */
+HPSOCKET_API BOOL __stdcall HP_HttpServer_GetWSMessageState(HP_HttpServer pServer, HP_CONNID dwConnID, BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain);
+
+/**************************************************************************/
+/*************************** HTTP Agent 操作方法 ***************************/
+
+/*
+* 名称：发送请求
+* 描述：向服务端发送 HTTP 请求
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			lpszMethod		-- 请求方法
+*			lpszPath		-- 请求路径
+*			lpHeaders		-- 请求头
+*			iHeaderCount	-- 请求头数量
+*			pBody			-- 请求体
+*			iLength			-- 请求体长度
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendRequest(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pData, int iLength);
+
+/*
+* 名称：发送本地文件
+* 描述：向指定连接发送 4096 KB 以下的小文件
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			lpszFileName	-- 文件路径
+*			lpszMethod		-- 请求方法
+*			lpszPath		-- 请求路径
+*			lpHeaders		-- 请求头
+*			iHeaderCount	-- 请求头数量
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendLocalFile(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+
+/* 发送 POST 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendPost(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+/* 发送 PUT 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendPut(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+/* 发送 PATCH 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendPatch(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+/* 发送 GET 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendGet(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 DELETE 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendDelete(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 HEAD 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendHead(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 TRACE 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendTrace(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 OPTIONS 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendOptions(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 CONNECT 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendConnect(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszHost, const HP_THeader lpHeaders[], int iHeaderCount);
+
+/*
+* 名称：发送 WebSocket 消息
+* 描述：向对端端发送 WebSocket 消息
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			bFinal			-- 是否结束帧
+*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+*			iOperationCode	-- 操作码：0x0 - 0xF
+*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+*			pData			-- 消息体数据缓冲区
+*			iLength			-- 消息体数据长度
+*			ullBodyLen		-- 消息总长度
+* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+* 								ullBodyLen < iLength -> 错误参数，发送失败
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_SendWSMessage(HP_HttpAgent pAgent, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen);
+
+/******************************************************************************/
+/*************************** HTTP Agent 属性访问方法 ***************************/
+
+/* 获取 HTTP 状态码 */
+HPSOCKET_API USHORT __stdcall HP_HttpAgent_GetStatusCode(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+
+/* 设置本地协议版本 */
+HPSOCKET_API void __stdcall HP_HttpAgent_SetLocalVersion(HP_HttpAgent pAgent, En_HP_HttpVersion usVersion);
+/* 获取本地协议版本 */
+HPSOCKET_API En_HP_HttpVersion __stdcall HP_HttpAgent_GetLocalVersion(HP_HttpAgent pAgent);
+
+/* 检查是否升级协议 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_IsUpgrade(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 检查是否有 Keep-Alive 标识 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_IsKeepAlive(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取协议版本 */
+HPSOCKET_API USHORT __stdcall HP_HttpAgent_GetVersion(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取内容长度 */
+HPSOCKET_API ULONGLONG __stdcall HP_HttpAgent_GetContentLength(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取内容类型 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpAgent_GetContentType(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取内容编码 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpAgent_GetContentEncoding(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取传输编码 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpAgent_GetTransferEncoding(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取协议升级类型 */
+HPSOCKET_API En_HP_HttpUpgradeType __stdcall HP_HttpAgent_GetUpgradeType(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+/* 获取解析错误代码 */
+HPSOCKET_API USHORT __stdcall HP_HttpAgent_GetParseErrorCode(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR* lpszErrorDesc);
+
+/* 获取某个请求头（单值） */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetHeader(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue);
+/* 获取某个请求头（多值） */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetHeaders(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue[], DWORD* pdwCount);
+/* 获取所有请求头 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetAllHeaders(HP_HttpAgent pAgent, HP_CONNID dwConnID, HP_THeader lpHeaders[], DWORD* pdwCount);
+/* 获取所有请求头名称 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetAllHeaderNames(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszName[], DWORD* pdwCount);
+
+/* 获取 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetCookie(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue);
+/* 获取所有 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetAllCookies(HP_HttpAgent pAgent, HP_CONNID dwConnID, HP_TCookie lpCookies[], DWORD* pdwCount);
+/* 添加 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_AddCookie(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue, BOOL bRelpace);
+/* 删除 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_DeleteCookie(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszName);
+/* 删除所有 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_DeleteAllCookies(HP_HttpAgent pAgent, HP_CONNID dwConnID);
+
+/* 获取当前 WebSocket 消息状态，传入 nullptr 则不获取相应字段 */
+HPSOCKET_API BOOL __stdcall HP_HttpAgent_GetWSMessageState(HP_HttpAgent pAgent, HP_CONNID dwConnID, BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain);
+
+/**************************************************************************/
+/*************************** HTTP Client 操作方法 **************************/
+
+/*
+* 名称：发送请求
+* 描述：向服务端发送 HTTP 请求
+*		
+* 参数：		lpszMethod		-- 请求方法
+*			lpszPath		-- 请求路径
+*			lpHeaders		-- 请求头
+*			iHeaderCount	-- 请求头数量
+*			pBody			-- 请求体
+*			iLength			-- 请求体长度
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendRequest(HP_HttpClient pClient, LPCSTR lpszMethod, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+
+/*
+* 名称：发送本地文件
+* 描述：向指定连接发送 4096 KB 以下的小文件
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			lpszFileName	-- 文件路径
+*			lpszMethod		-- 请求方法
+*			lpszPath		-- 请求路径
+*			lpHeaders		-- 请求头
+*			iHeaderCount	-- 请求头数量
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendLocalFile(HP_HttpClient pClient, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+
+/* 发送 POST 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendPost(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+/* 发送 PUT 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendPut(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+/* 发送 PATCH 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendPatch(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
+/* 发送 GET 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendGet(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 DELETE 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendDelete(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 HEAD 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendHead(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 TRACE 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendTrace(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 OPTIONS 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendOptions(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
+/* 发送 CONNECT 请求 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendConnect(HP_HttpClient pClient, LPCSTR lpszHost, const HP_THeader lpHeaders[], int iHeaderCount);
+
+/*
+* 名称：发送 WebSocket 消息
+* 描述：向对端端发送 WebSocket 消息
+*		
+* 参数：		bFinal			-- 是否结束帧
+*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+*			iOperationCode	-- 操作码：0x0 - 0xF
+*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+*			pData			-- 消息体数据缓冲区
+*			iLength			-- 消息体数据长度
+*			ullBodyLen		-- 消息总长度
+* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+* 								ullBodyLen < iLength -> 错误参数，发送失败
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpClient_SendWSMessage(HP_HttpClient pClient, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen);
+
+/******************************************************************************/
+/*************************** HTTP Client 属性访问方法 **************************/
+
+/* 获取 HTTP 状态码 */
+HPSOCKET_API USHORT __stdcall HP_HttpClient_GetStatusCode(HP_HttpClient pClient);
+
+/* 设置本地协议版本 */
+HPSOCKET_API void __stdcall HP_HttpClient_SetLocalVersion(HP_HttpClient pClient, En_HP_HttpVersion usVersion);
+/* 获取本地协议版本 */
+HPSOCKET_API En_HP_HttpVersion __stdcall HP_HttpClient_GetLocalVersion(HP_HttpClient pClient);
+
+/* 检查是否升级协议 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_IsUpgrade(HP_HttpClient pClient);
+/* 检查是否有 Keep-Alive 标识 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_IsKeepAlive(HP_HttpClient pClient);
+/* 获取协议版本 */
+HPSOCKET_API USHORT __stdcall HP_HttpClient_GetVersion(HP_HttpClient pClient);
+/* 获取内容长度 */
+HPSOCKET_API ULONGLONG __stdcall HP_HttpClient_GetContentLength(HP_HttpClient pClient);
+/* 获取内容类型 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpClient_GetContentType(HP_HttpClient pClient);
+/* 获取内容编码 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpClient_GetContentEncoding(HP_HttpClient pClient);
+/* 获取传输编码 */
+HPSOCKET_API LPCSTR __stdcall HP_HttpClient_GetTransferEncoding(HP_HttpClient pClient);
+/* 获取协议升级类型 */
+HPSOCKET_API En_HP_HttpUpgradeType __stdcall HP_HttpClient_GetUpgradeType(HP_HttpClient pClient);
+/* 获取解析错误代码 */
+HPSOCKET_API USHORT __stdcall HP_HttpClient_GetParseErrorCode(HP_HttpClient pClient, LPCSTR* lpszErrorDesc);
+
+/* 获取某个请求头（单值） */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetHeader(HP_HttpClient pClient, LPCSTR lpszName, LPCSTR* lpszValue);
+/* 获取某个请求头（多值） */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetHeaders(HP_HttpClient pClient, LPCSTR lpszName, LPCSTR lpszValue[], DWORD* pdwCount);
+/* 获取所有请求头 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetAllHeaders(HP_HttpClient pClient, HP_THeader lpHeaders[], DWORD* pdwCount);
+/* 获取所有请求头名称 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetAllHeaderNames(HP_HttpClient pClient, LPCSTR lpszName[], DWORD* pdwCount);
+
+/* 获取 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetCookie(HP_HttpClient pClient, LPCSTR lpszName, LPCSTR* lpszValue);
+/* 获取所有 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetAllCookies(HP_HttpClient pClient, HP_TCookie lpCookies[], DWORD* pdwCount);
+/* 添加 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_AddCookie(HP_HttpClient pClient, LPCSTR lpszName, LPCSTR lpszValue, BOOL bRelpace);
+/* 删除 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_DeleteCookie(HP_HttpClient pClient, LPCSTR lpszName);
+/* 删除所有 Cookie */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_DeleteAllCookies(HP_HttpClient pClient);
+
+/* 获取当前 WebSocket 消息状态，传入 nullptr 则不获取相应字段 */
+HPSOCKET_API BOOL __stdcall HP_HttpClient_GetWSMessageState(HP_HttpClient pClient, BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain);
+
+/**************************************************************************/
+/************************ HTTP Sync Client 操作方法 ************************/
+
+/*
+* 名称：发送 URL 请求
+* 描述：向服务端发送 HTTP URL 请求
+*		
+* 参数：		lpszMethod		-- 请求方法
+*			lpszUrl			-- 请求 URL
+*			lpHeaders		-- 请求头
+*			iHeaderCount	-- 请求头数量
+*			pBody			-- 请求体
+*			iLength			-- 请求体长度
+*			bForceReconnect	-- 强制重新连接（默认：FALSE，当请求 URL 的主机和端口与现有连接一致时，重用现有连接）
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpSyncClient_OpenUrl(HP_HttpSyncClient pClient, LPCSTR lpszMethod, LPCSTR lpszUrl, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength, BOOL bForceReconnect);
+
+/*
+* 名称：清除请求结果
+* 描述：清除上一次请求的响应头和响应体等结果信息（该方法会在每次发送请求前自动调用）
+*
+* 参数：		
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __stdcall HP_HttpSyncClient_CleanupRequestResult(HP_HttpSyncClient pClient);
+
+/******************************************************************************/
+/************************ HTTP Sync Client 属性访问方法 ************************/
+
+/* 设置连接超时（毫秒，0：系统默认超时，默认：5000） */
+HPSOCKET_API void __stdcall HP_HttpSyncClient_SetConnectTimeout(HP_HttpSyncClient pClient, DWORD dwConnectTimeout);
+/* 设置请求超时（毫秒，0：无限等待，默认：10000） */
+HPSOCKET_API void __stdcall HP_HttpSyncClient_SetRequestTimeout(HP_HttpSyncClient pClient, DWORD dwRequestTimeout);
+
+/* 获取连接超时 */
+HPSOCKET_API DWORD __stdcall HP_HttpSyncClient_GetConnectTimeout(HP_HttpSyncClient pClient);
+/* 获取请求超时 */
+HPSOCKET_API DWORD __stdcall HP_HttpSyncClient_GetRequestTimeout(HP_HttpSyncClient pClient);
+
+/* 获取响应体 */
+HPSOCKET_API BOOL __stdcall HP_HttpSyncClient_GetResponseBody(HP_HttpSyncClient pClient, LPCBYTE* lpszBody, int* piLength);
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
+HPSOCKET_API DWORD __stdcall HP_GetHPSocketVersion();
 
 /* 获取错误描述文本 */
 HPSOCKET_API LPCTSTR __stdcall HP_GetSocketErrorDesc(En_HP_SocketError enCode);
-/* 调用系统的 ::GetLastError() 方法获取系统错误代码 */
+/* 调用系统的 GetLastError() 方法获取系统错误代码 */
 HPSOCKET_API DWORD __stdcall SYS_GetLastError();
-// 调用系统的 ::WSAGetLastError() 方法获取通信错误代码
+// 调用系统的 WSAGetLastError() 方法获取系统错误代码
 HPSOCKET_API int __stdcall SYS_WSAGetLastError();
 // 调用系统的 setsockopt()
 HPSOCKET_API int __stdcall SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID val, int len);
@@ -1195,9 +1760,90 @@ HPSOCKET_API int __stdcall SYS_SetSocketOption(SOCKET sock, int level, int name,
 HPSOCKET_API int __stdcall SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
 // 调用系统的 ioctlsocket()
 HPSOCKET_API int __stdcall SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
-// 调用系统的 ::WSAIoctl()
+// 调用系统的 WSAIoctl()
 HPSOCKET_API int __stdcall SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
+
+// 设置 socket 选项：IPPROTO_TCP -> TCP_NODELAY
+HPSOCKET_API int __stdcall SYS_SSO_NoDelay(SOCKET sock, BOOL bNoDelay);
+// 设置 socket 选项：SOL_SOCKET -> SO_DONTLINGER
+HPSOCKET_API int __stdcall SYS_SSO_DontLinger(SOCKET sock, BOOL bDont);
+// 设置 socket 选项：SOL_SOCKET -> SO_LINGER
+HPSOCKET_API int __stdcall SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger);
+// 设置 socket 选项：SOL_SOCKET -> SO_RCVBUF
+HPSOCKET_API int __stdcall SYS_SSO_RecvBuffSize(SOCKET sock, int size);
+// 设置 socket 选项：SOL_SOCKET -> SO_SNDBUF
+HPSOCKET_API int __stdcall SYS_SSO_SendBuffSize(SOCKET sock, int size);
+// 设置 socket 选项：SOL_SOCKET -> SO_REUSEADDR
+HPSOCKET_API int __stdcall SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse);
+
 // 获取 SOCKET 本地地址信息
 HPSOCKET_API BOOL __stdcall SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 // 获取 SOCKET 远程地址信息
 HPSOCKET_API BOOL __stdcall SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
+
+/* IPv4 字符串地址转换为整数 */
+HPSOCKET_API ULONG __stdcall SYS_GetIPv4InAddr(LPCTSTR lpszAddress);
+/* 检查字符串是否符合 IP 地址格式 */
+HPSOCKET_API BOOL __stdcall SYS_IsIPAddress(LPCTSTR lpszAddress);
+/* 通过主机名获取 IP 地址 */
+HPSOCKET_API BOOL __stdcall SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int* piIPLenth);
+/* 通过主机名获取最优的 IP 地址 */
+HPSOCKET_API BOOL __stdcall SYS_GetOptimalIPByHostName(LPCTSTR lpszHost, ULONG* pulAddr);
+
+/* 64 位网络字节序转主机字节序 */
+HPSOCKET_API ULONGLONG __stdcall SYS_NToH64(ULONGLONG value);
+/* 64 位主机字节序转网络字节序 */
+HPSOCKET_API ULONGLONG __stdcall SYS_HToN64(ULONGLONG value);
+
+// CP_XXX -> UNICODE
+HPSOCKET_API BOOL __stdcall SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int* piDestLength);
+// UNICODE -> CP_XXX
+HPSOCKET_API BOOL __stdcall SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int* piDestLength);
+// GBK -> UNICODE
+HPSOCKET_API BOOL __stdcall SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int* piDestLength);
+// UNICODE -> GBK
+HPSOCKET_API BOOL __stdcall SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int* piDestLength);
+// UTF8 -> UNICODE
+HPSOCKET_API BOOL __stdcall SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int* piDestLength);
+// UNICODE -> UTF8
+HPSOCKET_API BOOL __stdcall SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int* piDestLength);
+// GBK -> UTF8
+HPSOCKET_API BOOL __stdcall SYS_GbkToUtf8(const char szSrc[], char szDest[], int* piDestLength);
+// UTF8 -> GBK
+HPSOCKET_API BOOL __stdcall SYS_Utf8ToGbk(const char szSrc[], char szDest[], int* piDestLength);
+
+// 普通压缩
+HPSOCKET_API int __stdcall SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+// 高级压缩（默认值：iLevel -> -1，iMethod -> 8，iWindowBits -> 15，iMemLevel -> 8，iStrategy -> 0）
+HPSOCKET_API int __stdcall SYS_CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen, int iLevel, int iMethod, int iWindowBits, int iMemLevel, int iStrategy);
+// 普通解压
+HPSOCKET_API int __stdcall SYS_Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+// 高级解压（默认值：iWindowBits -> 15）
+HPSOCKET_API int __stdcall SYS_UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen, int iWindowBits);
+// 推测压缩结果长度
+HPSOCKET_API DWORD __stdcall SYS_GuessCompressBound(DWORD dwSrcLen, BOOL bGZip);
+
+// Gzip 压缩
+HPSOCKET_API int __stdcall SYS_GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+// Gzip 解压
+HPSOCKET_API int __stdcall SYS_GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+// 推测 Gzip 解压结果长度（如果返回 0 或不合理值则说明输入内容并非有效的 Gzip 格式）
+HPSOCKET_API DWORD __stdcall SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+
+// 计算 Base64 编码后长度
+HPSOCKET_API DWORD __stdcall SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
+// 计算 Base64 解码后长度
+HPSOCKET_API DWORD __stdcall SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int __stdcall SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int __stdcall SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+
+// 计算 URL 编码后长度
+HPSOCKET_API DWORD __stdcall SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// 计算 URL 解码后长度
+HPSOCKET_API DWORD __stdcall SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int __stdcall SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);
+// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int __stdcall SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen);

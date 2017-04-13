@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -35,7 +35,8 @@
 const DWORD	MAX_WORKER_THREAD_COUNT					= 500;
 const DWORD	MIN_SOCKET_BUFFER_SIZE					= 64;
 const DWORD MAX_SMALL_FILE_SIZE						= 0x3FFFFF;
-const DWORD MAX_SILENCE_CONNECTION_PERIOD			= MAXLONG / 2;
+const DWORD MAX_CONNECTION_PERIOD					= MAXLONG / 2;
+const DWORD	DEFAULT_MAX_CONNECTION_COUNT			= 10000;
 const DWORD	DEFAULT_WORKER_THREAD_COUNT				= min((::SysGetNumberOfProcessors() * 2 + 2), MAX_WORKER_THREAD_COUNT);
 const DWORD DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		= 10 * 1000;
 const DWORD	DEFAULT_FREE_SOCKETOBJ_POOL				= 150;
@@ -66,7 +67,7 @@ const USHORT TCP_PACK_DEFAULT_HEADER_FLAG			= 0x000000;
 
 ULONG GetIPv4InAddr(LPCTSTR lpszAddress)
 {
-	if (!lpszAddress || lpszAddress[0] == '\0')
+	if (!lpszAddress || lpszAddress[0] == 0)
 		return INADDR_NONE;
 
 #if _WIN32_WINNT >= _WIN32_WINNT_VISTA
@@ -239,6 +240,16 @@ BOOL GetSocketRemoteAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen,
 	return GetSocketAddress(socket, lpszAddress, iAddressLen, usPort, FALSE);
 }
 
+ULONGLONG NToH64(ULONGLONG value)
+{
+	return (((ULONGLONG)ntohl((u_long)((value << 32) >> 32))) << 32) | ntohl((u_long)(value >> 32));
+}
+
+ULONGLONG HToN64(ULONGLONG value)
+{
+	return (((ULONGLONG)htonl((u_long)((value << 32) >> 32))) << 32) | htonl((u_long)(value >> 32));
+}
+
 PVOID GetExtensionFuncPtr(SOCKET sock, GUID guid)
 {
 	DWORD dwBytes;
@@ -289,6 +300,53 @@ LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock)
 	return (LPFN_DISCONNECTEX)GetExtensionFuncPtr(sock, guid);
 }
 
+HRESULT ReadSmallFile(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, DWORD dwMaxFileSize)
+{
+	ASSERT(lpszFileName != nullptr);
+
+	HRESULT hr = file.Create(lpszFileName, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
+
+	if(SUCCEEDED(hr))
+	{
+		ULONGLONG ullLen;
+		hr = file.GetSize(ullLen);
+
+		if(SUCCEEDED(hr))
+		{
+			if(ullLen > 0 && ullLen <= dwMaxFileSize)
+				hr = fmap.MapFile(file);
+			else if(ullLen == 0)
+				hr = HRESULT_FROM_WIN32(ERROR_FILE_INVALID);
+			else
+				hr = HRESULT_FROM_WIN32(ERROR_FILE_TOO_LARGE);
+		}
+	}
+
+	return hr;
+}
+
+HRESULT MakeSmallFilePackage(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, WSABUF szBuf[3], const LPWSABUF pHead, const LPWSABUF pTail)
+{
+	DWORD dwMaxFileSize = MAX_SMALL_FILE_SIZE - (pHead ? pHead->len : 0) - (pTail ? pTail->len : 0);
+	ASSERT(dwMaxFileSize <= MAX_SMALL_FILE_SIZE);
+
+	HRESULT hr = ReadSmallFile(lpszFileName, file, fmap, dwMaxFileSize);
+
+	if(SUCCEEDED(hr))
+	{
+		szBuf[1].len = (ULONG)fmap.GetMappingSize();
+		szBuf[1].buf = fmap;
+
+		if(pHead) memcpy(&szBuf[0], pHead, sizeof(WSABUF));
+		else	  memset(&szBuf[0], 0, sizeof(WSABUF));
+
+		if(pTail) memcpy(&szBuf[2], pTail, sizeof(WSABUF));
+		else	  memset(&szBuf[2], 0, sizeof(WSABUF));
+	}
+
+	return hr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam)
@@ -298,22 +356,27 @@ BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam)
 
 BOOL PostIocpExit(HANDLE hIOCP)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_EXIT, 0, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_EXIT, 0);
 }
 
 BOOL PostIocpAccept(HANDLE hIOCP)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_ACCEPT, 0, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_ACCEPT, 0);
 }
 
 BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_DISCONNECT, dwConnID, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_DISCONNECT, dwConnID);
 }
 
 BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_SEND, dwConnID, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_SEND, dwConnID);
+}
+
+BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode)
+{
+	return PostIocpCommand(hIOCP, (EnIocpCommand)iErrorCode, dwConnID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -690,10 +753,17 @@ LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
 	case SE_CONNECT_SERVER:			return _T("Connect to Server Fail");
 	case SE_NETWORK:				return _T("Network Error");
 	case SE_DATA_PROC:				return _T("Process Data Error");
-	case SE_DATA_SEND:				return _T("Send Data Error");
+	case SE_DATA_SEND:				return _T("Send Data Fail");
 
 	case SE_SSL_ENV_NOT_READY:		return _T("SSL environment not ready");
 
 	default: ASSERT(FALSE);			return _T("UNKNOWN ERROR");
 	}
+}
+
+DWORD GetHPSocketVersion()
+{
+	static DWORD s_dwVersion = (HP_VERSION_MAJOR << 24) | (HP_VERSION_MINOR << 16) | (HP_VERSION_REVISE << 8) | HP_VERSION_BUILD;
+
+	return s_dwVersion;
 }

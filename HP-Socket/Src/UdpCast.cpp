@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -43,7 +43,7 @@ BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnec
 	{
 		if(BindClientSocket(lpszBindAddress, usPort, sinAddr))
 		{
-			if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
+			if(FirePrepareConnect(m_soClient) != HR_ERROR)
 			{
 				if(ConnectToGroup(lpszRemoteAddress, usPort, sinAddr))
 				{
@@ -77,13 +77,13 @@ BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnec
 
 BOOL CUdpCast::CheckParams()
 {
-	if((int)m_dwMaxDatagramSize > 0)
-		if((int)m_dwFreeBufferPoolSize >= 0)
-			if((int)m_dwFreeBufferPoolHold >= 0)
-				if(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)
-					if(m_iMCTtl >= 0 && m_iMCTtl <= 255)
-						if(m_bMCLoop >= 0 && m_bMCLoop <= 1)
-							return TRUE;
+	if	(((int)m_dwMaxDatagramSize > 0)									&&
+		((int)m_dwFreeBufferPoolSize >= 0)								&&
+		((int)m_dwFreeBufferPoolHold >= 0)								&&
+		(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)	&&
+		(m_iMCTtl >= 0 && m_iMCTtl <= 255)								&&
+		(m_bMCLoop >= 0 && m_bMCLoop <= 1)								)
+		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -223,11 +223,13 @@ BOOL CUdpCast::ConnectToGroup(LPCTSTR lpszRemoteAddress, USHORT usPort, in_addr 
 			return FALSE;
 	}
 
+	SetRemoteHost(lpszRemoteAddress, usPort);
+
 	BOOL isOK = FALSE;
 
 	if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 	{
-		if(FireConnect(this) != HR_ERROR)
+		if(FireConnect() != HR_ERROR)
 		{
 			m_enState	= SS_STARTED;
 			isOK		= TRUE;
@@ -273,8 +275,13 @@ UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 			bCallStop = FALSE;
 			break;
 		}
+		else if(retval == WSA_WAIT_FAILED)
+		{
+			pClient->m_ccContext.Reset(TRUE, SO_UNKNOWN, ::WSAGetLastError());
+			break;
+		}
 		else
-			ASSERT(FALSE);
+			VERIFY(FALSE);
 	}
 
 	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
@@ -380,7 +387,7 @@ BOOL CUdpCast::ReadData()
 
 		if(rc >= 0)
 		{
-			if(FireReceive(this, m_rcBuffer, rc) == HR_ERROR)
+			if(FireReceive(m_rcBuffer, rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
@@ -430,7 +437,7 @@ BOOL CUdpCast::SendData()
 			{
 				ASSERT(rc == itPtr->Size());
 
-				if(FireSend(this, itPtr->Ptr(), rc) == HR_ERROR)
+				if(FireSend(itPtr->Ptr(), rc) == HR_ERROR)
 				{
 					TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
 					ASSERT(FALSE);
@@ -487,7 +494,7 @@ BOOL CUdpCast::Stop()
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
 	if(m_ccContext.bFireOnClose)
-		FireClose(this, m_ccContext.enOperation, m_ccContext.iErrorCode);
+		FireClose(m_ccContext.enOperation, m_ccContext.iErrorCode);
 
 	if(m_evSocket != nullptr)
 	{
@@ -521,8 +528,11 @@ void CUdpCast::Reset()
 	::ZeroMemory(&m_castAddr, sizeof(SOCKADDR_IN));
 	::ZeroMemory(&m_remoteAddr, sizeof(SOCKADDR_IN));
 
-	m_iPending		= 0;
-	m_enState		= SS_STOPPED;
+	m_strHost.Empty();
+
+	m_usPort	= 0;
+	m_iPending	= 0;
+	m_enState	= SS_STOPPED;
 }
 
 void CUdpCast::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
@@ -651,4 +661,43 @@ BOOL CUdpCast::GetLocalAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& us
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
 	return ::GetSocketLocalAddress(m_soClient, lpszAddress, iAddressLen, usPort);
+}
+
+void CUdpCast::SetRemoteHost(LPCTSTR lpszHost, USHORT usPort)
+{
+	m_strHost = lpszHost;
+	m_usPort  = usPort;
+}
+
+BOOL CUdpCast::GetRemoteHost(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
+{
+	BOOL isOK = FALSE;
+
+	if(m_strHost.IsEmpty())
+		return isOK;
+
+	int iLen = m_strHost.GetLength() + 1;
+
+	if(iHostLen >= iLen)
+	{
+		memcpy(lpszHost, CA2CT(m_strHost), iLen * sizeof(TCHAR));
+		usPort = m_usPort;
+
+		isOK = TRUE;
+	}
+
+	iHostLen = iLen;
+
+	return isOK;
+}
+
+
+BOOL CUdpCast::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
+{
+	*lpszHost = m_strHost;
+
+	if(pusPort != nullptr)
+		*pusPort = m_usPort;
+
+	return !m_strHost.IsEmpty();
 }

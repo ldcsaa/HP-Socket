@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HPSocketDLL4C", "HPSocketDLL.vcxproj", "{79A7B2E5-6F5A-4DE3-B954-5EBA1858793F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HPSocketDLL4C", "HPSocketDLL4C.vcxproj", "{79A7B2E5-6F5A-4DE3-B954-5EBA1858793F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,7 +25,6 @@
 #pragma once
 
 #include "TcpClient.h"
-#include "SocketInterface-SSL.h"
 #include "SSLHelper.h"
 
 class CSSLClient : public CTcpClient
@@ -34,23 +33,26 @@ public:
 	virtual BOOL SendPackets(const WSABUF pBuffers[], int iCount);
 
 protected:
-	virtual EnHandleResult FireConnect(IClient* pClient);
-	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength);
+	virtual EnHandleResult FireConnect();
+	virtual EnHandleResult FireReceive(const BYTE* pData, int iLength);
 
 	virtual BOOL CheckParams();
+	virtual void PrepareStart();
 	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID);
 
 private:
-	friend EnHandleResult ProcessHandShake<>(CSSLClient* pThis, CSSLSession* pSession);
-	friend EnHandleResult ProcessReceive<>(CSSLClient* pThis, CSSLSession* pSession, const BYTE* pData, int iLength);
-	friend BOOL ProcessSend<>(CSSLClient* pThis, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
+
+	friend EnHandleResult ProcessHandShake<>(CSSLClient* pThis, CSSLClient* pSocketObj, CSSLSession* pSession);
+	friend EnHandleResult ProcessReceive<>(CSSLClient* pThis, CSSLClient* pSocketObj, CSSLSession* pSession, const BYTE* pData, int iLength);
+	friend BOOL ProcessSend<>(CSSLClient* pThis, CSSLClient* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
 
 public:
-	CSSLClient(ITcpClientListener* psoListener)
-	: CTcpClient(psoListener)
-	, m_sslSession(m_itPool)
+	CSSLClient(ITcpClientListener* pListener)
+	: CTcpClient(pListener)
+	, m_sslSession		(m_itPool)
+	, m_dwMainThreadID	(0)
 	{
 
 	}
@@ -62,4 +64,5 @@ public:
 
 private:
 	CSSLSession m_sslSession;
+	DWORD		m_dwMainThreadID;
 };

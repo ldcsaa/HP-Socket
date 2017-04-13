@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,7 +25,6 @@
 #pragma once
 
 #include "TcpAgent.h"
-#include "SocketInterface-SSL.h"
 #include "SSLHelper.h"
 
 class CSSLAgent : public CTcpAgent
@@ -51,8 +50,8 @@ private:
 	friend BOOL ProcessSend<>(CSSLAgent* pThis, TSocketObj* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
 
 public:
-	CSSLAgent(ITcpAgentListener* psoListener)
-	: CTcpAgent(psoListener)
+	CSSLAgent(ITcpAgentListener* pListener)
+	: CTcpAgent(pListener)
 	{
 
 	}

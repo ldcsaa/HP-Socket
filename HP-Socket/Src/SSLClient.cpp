@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -37,9 +37,22 @@ BOOL CSSLClient::CheckParams()
 	return __super::CheckParams();
 }
 
+void CSSLClient::PrepareStart()
+{
+	m_dwMainThreadID = ::GetCurrentThreadId();
+
+	__super::PrepareStart();
+}
+
 void CSSLClient::Reset()
 {
 	m_sslSession.Reset();
+
+	if(m_dwMainThreadID != 0)
+	{
+		g_SSL.RemoveThreadLocalState(m_dwMainThreadID);
+		m_dwMainThreadID = 0;
+	}
 
 	__super::Reset();
 }
@@ -55,23 +68,23 @@ BOOL CSSLClient::SendPackets(const WSABUF pBuffers[], int iCount)
 {
 	ASSERT(pBuffers && iCount > 0);
 
-	return ::ProcessSend(this, &m_sslSession, pBuffers, iCount);
+	return ::ProcessSend(this, this, &m_sslSession, pBuffers, iCount);
 }
 
-EnHandleResult CSSLClient::FireConnect(IClient* pClient)
+EnHandleResult CSSLClient::FireConnect()
 {
-	EnHandleResult result = DoFireConnect(pClient);
+	EnHandleResult result = DoFireConnect(this);
 
 	if(result != HR_ERROR)
 	{
-		m_sslSession.Renew();
-		VERIFY(::ProcessHandShake(this, &m_sslSession) == HR_OK);
+		m_sslSession.Renew(m_strHost);
+		VERIFY(::ProcessHandShake(this, this, &m_sslSession) == HR_OK);
 	}
 
 	return result;
 }
 
-EnHandleResult CSSLClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CSSLClient::FireReceive(const BYTE* pData, int iLength)
 {
-	return ::ProcessReceive(this, &m_sslSession, pData, iLength);
+	return ::ProcessReceive(this, this, &m_sslSession, pData, iLength);
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -25,7 +25,6 @@
 #pragma once
 
 #include "TcpServer.h"
-#include "SocketInterface-SSL.h"
 #include "SSLHelper.h"
 
 class CSSLServer : public CTcpServer
@@ -51,8 +50,8 @@ private:
 	friend BOOL ProcessSend<>(CSSLServer* pThis, TSocketObj* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
 
 public:
-	CSSLServer(ITcpServerListener* psoListener)
-	: CTcpServer(psoListener)
+	CSSLServer(ITcpServerListener* pListener)
+	: CTcpServer(pListener)
 	{
 
 	}

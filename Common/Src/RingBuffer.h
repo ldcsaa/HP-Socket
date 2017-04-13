@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.14
+ * Version	: 2.3.17
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -235,16 +235,12 @@ public:
 	{
 		ASSERT(pElement != nullptr);
 
-		{
-			//CLocalLock<_GetGuard> locallock(m_csGet);
+		ULONGLONG seqGet = m_seqGet;
 
-			ULONGLONG seqGet = m_seqGet;
+		if(!IsValid() || !HasGetSpace(seqGet))
+			return FALSE;
 
-			if(!IsValid() || !HasGetSpace(seqGet))
-				return FALSE;
-
-			DoPeek(pElement, seqGet);
-		}
+		DoPeek(pElement, seqGet);
 
 		return TRUE;
 	}
@@ -419,14 +415,20 @@ typedef CRingBuffer<void, CInterCriSec, CInterCriSec>	CICSRingBuffer;
 typedef CRingBuffer<void, CSpinGuard, CSpinGuard>		CSGRingBuffer;
 typedef CRingBuffer<void, CFakeGuard, CFakeGuard>		CFKRingBuffer;
 
+// ------------------------------------------------------------------------------------------------------------- //
+
 template <class T, class index_type = DWORD, bool adjust_index = false> class CRingCache
 {
 public:
 
-	typedef T*							TPTR;
-	typedef volatile T*					VTPTR;
+	enum EnGetResult {GR_FAIL = -1, GR_INVALID = 0, GR_VALID = 1};
 
-	typedef unordered_set<index_type>	IndexSet;
+	typedef T*									TPTR;
+	typedef volatile T*							VTPTR;
+
+	typedef unordered_set<index_type>			IndexSet;
+	typedef typename IndexSet::const_iterator	IndexSetCI;
+	typedef typename IndexSet::iterator			IndexSetI;
 
 	static TPTR const E_EMPTY;
 	static TPTR const E_LOCKED;
@@ -434,8 +436,8 @@ public:
 
 public:
 
-	static index_type&	INDEX_INC(index_type& dwIndex)	{if(adjust_index) ++dwIndex; return dwIndex;}
-	static index_type&	INDEX_DEC(index_type& dwIndex)	{if(adjust_index) --dwIndex; return dwIndex;}
+	static index_type& INDEX_INC(index_type& dwIndex)	{if(adjust_index) ++dwIndex; return dwIndex;}
+	static index_type& INDEX_DEC(index_type& dwIndex)	{if(adjust_index) --dwIndex; return dwIndex;}
 
 private:
 
@@ -454,9 +456,9 @@ public:
 			if(!HasSpace())
 				break;
 
-			DWORD dwCurSeq	= m_dwCurSeq;
-			dwIndex			= m_dwCurSeq % m_dwSize;
-			VTPTR& pValue	= INDEX_VAL(dwIndex);
+			DWORD dwCurSeq			= m_dwCurSeq;
+			index_type dwCurIndex	= dwCurSeq % m_dwSize;
+			VTPTR& pValue			= INDEX_VAL(dwCurIndex);
 
 			if(pValue == E_EMPTY)
 			{
@@ -465,10 +467,12 @@ public:
 					::InterlockedIncrement(&m_dwCount);
 					::InterlockedCompareExchange(&m_dwCurSeq, dwCurSeq + 1, dwCurSeq);
 
+					dwIndex = INDEX_INC(dwCurIndex);
+					isOK	= TRUE;
+
 					if(pElement != E_LOCKED)
 						EmplaceIndex(dwIndex);
 
-					isOK = TRUE;
 					break;
 				}
 			}
@@ -476,33 +480,31 @@ public:
 			::InterlockedCompareExchange(&m_dwCurSeq, dwCurSeq + 1, dwCurSeq);
 		}
 
-		if(isOK) INDEX_INC(dwIndex);
-
 		return isOK;
 	}
 
-	BOOL Get(index_type dwIndex, TPTR* ppElement)
+	EnGetResult Get(index_type dwIndex, TPTR* ppElement)
 	{
-		INDEX_DEC(dwIndex);
-
-		ASSERT(dwIndex < m_dwSize);
+		ASSERT(dwIndex <= m_dwSize);
 		ASSERT(ppElement != nullptr);
 
-		if((dwIndex >= m_dwSize))
+		if(INDEX_DEC(dwIndex) >= m_dwSize)
 		{
 			*ppElement = nullptr;
-			return FALSE;
+			return GR_FAIL;
 		}
 
 		*ppElement = (TPTR)INDEX_VAL(dwIndex);
 
-		return IsValidElement(*ppElement);
+		return IsValidElement(*ppElement) ? GR_VALID : GR_INVALID;
 	}
 
 	BOOL Set(index_type dwIndex, TPTR pElement, TPTR* ppOldElement = nullptr)
 	{
 		TPTR pElement2 = nullptr;
-		Get(dwIndex, &pElement2);
+
+		if(Get(dwIndex, &pElement2) == GR_FAIL)
+			return FALSE;
 
 		if(ppOldElement != nullptr)
 			*ppOldElement = pElement2;
@@ -535,13 +537,14 @@ public:
 				f2 = 1;
 		}
 
-		INDEX_DEC(dwIndex);
+		BOOL bSetValueFirst		= (f1 + f2 >= 0);
+		index_type dwOuterIndex	= dwIndex;
 
-		BOOL bSetValueFirst = (f1 + f2 >= 0);
+		INDEX_DEC(dwIndex);
 
 		if(bSetValueFirst)	INDEX_VAL(dwIndex) = pElement;
 		if(f1 > 0)			::InterlockedIncrement(&m_dwCount);
-		if(f2 != 0)			(f2 > 0) ? EmplaceIndex(dwIndex) : EraseIndex(dwIndex);
+		if(f2 != 0)			(f2 > 0) ? EmplaceIndex(dwOuterIndex) : EraseIndex(dwOuterIndex);
 		if(f1 < 0)			::InterlockedDecrement(&m_dwCount);
 		if(!bSetValueFirst) INDEX_VAL(dwIndex) = pElement;
 
@@ -567,12 +570,12 @@ public:
 		TPTR pElement2 = nullptr;
 		Get(dwIndex, &pElement2);
 
+		ASSERT(pElement2 == E_LOCKED);
+
 		if(pElement2 != E_LOCKED)
 			return FALSE;
 
-		Set(dwIndex, pElement);
-
-		return TRUE;
+		return Set(dwIndex, pElement);
 	}
 
 public:
@@ -587,7 +590,7 @@ public:
 	
 	BOOL GetAllElementIndexes(index_type ids[], DWORD& dwCount, BOOL bCopy = TRUE)
 	{
-		if(ids == nullptr)
+		if(ids == nullptr || dwCount == 0)
 		{
 			dwCount = Elements();
 			return FALSE;
@@ -604,16 +607,13 @@ public:
 		BOOL isOK	 = FALSE;
 		DWORD dwSize = (DWORD)pIndexes->size();
 
-		if(dwSize <= dwCount)
+		if(dwSize > 0 && dwSize <= dwCount)
 		{
-			IndexSet::const_iterator it  = pIndexes->begin();
-			IndexSet::const_iterator end = pIndexes->end();
+			IndexSetCI it  = pIndexes->begin();
+			IndexSetCI end = pIndexes->end();
 
 			for(int i = 0; it != end; ++it, ++i)
-			{
-				index_type index = *it;
-				ids[i]			 = INDEX_INC(index);
-			}
+				ids[i] = *it;
 
 			isOK = TRUE;
 		}
@@ -639,14 +639,11 @@ public:
 		{
 			ids.reset(new index_type[dwCount]);
 
-			IndexSet::const_iterator it  = pIndexes->begin();
-			IndexSet::const_iterator end = pIndexes->end();
+			IndexSetCI it  = pIndexes->begin();
+			IndexSetCI end = pIndexes->end();
 
 			for(int i = 0; it != end; ++it, ++i)
-			{
-				index_type index = *it;
-				ids[i]			 = INDEX_INC(index);
-			}
+				ids[i] = *it;
 		}
 
 		return ids;
@@ -672,7 +669,7 @@ private:
 		m_dwSize	= dwSize;
 		m_pv		= (VTPTR*)malloc(m_dwSize * sizeof(TPTR));
 
-		::memset(m_pv, (int)E_EMPTY, m_dwSize * sizeof(TPTR));
+		::ZeroMemory(m_pv, m_dwSize * sizeof(TPTR));
 	}
 
 	void Destroy()
@@ -745,6 +742,367 @@ private:
 template <class T, class index_type, bool adjust_index> T* const CRingCache<T, index_type, adjust_index>::E_EMPTY		= (T*)0x00;
 template <class T, class index_type, bool adjust_index> T* const CRingCache<T, index_type, adjust_index>::E_LOCKED		= (T*)0x01;
 template <class T, class index_type, bool adjust_index> T* const CRingCache<T, index_type, adjust_index>::E_MAX_STATUS	= (T*)0x0F;
+
+// ------------------------------------------------------------------------------------------------------------- //
+
+template <class T, class index_type = DWORD, bool adjust_index = false> class CRingCache2
+{
+public:
+
+	enum EnGetResult {GR_FAIL = -1, GR_INVALID = 0, GR_VALID = 1};
+
+	typedef T*									TPTR;
+	typedef volatile T*							VTPTR;
+
+	typedef unordered_set<index_type>			IndexSet;
+	typedef typename IndexSet::const_iterator	IndexSetCI;
+	typedef typename IndexSet::iterator			IndexSetI;
+
+	static TPTR const E_EMPTY;
+	static TPTR const E_LOCKED;
+	static TPTR const E_MAX_STATUS;
+	static DWORD const MAX_SIZE;
+
+public:
+
+	static index_type& INDEX_INC(index_type& dwIndex)	{if(adjust_index) ++dwIndex; return dwIndex;}
+	static index_type& INDEX_DEC(index_type& dwIndex)	{if(adjust_index) --dwIndex; return dwIndex;}
+
+	index_type& INDEX_R2V(index_type& dwIndex)			{dwIndex += *(m_px + dwIndex) * m_dwSize; return dwIndex;}
+
+	BOOL INDEX_V2R(index_type& dwIndex)
+	{
+		index_type m = dwIndex % m_dwSize;
+		BYTE x		 = *(m_px + m);
+
+		if(dwIndex / m_dwSize != x)
+			return FALSE;
+
+		dwIndex = m;
+		return TRUE;
+	}
+
+
+private:
+
+	VTPTR& INDEX_VAL(index_type dwIndex) {return *(m_pv + dwIndex);}
+
+public:
+
+	BOOL Put(TPTR pElement, index_type& dwIndex)
+	{
+		ASSERT(pElement != nullptr);
+
+		BOOL isOK = FALSE;
+
+		while(true)
+		{
+			if(!HasSpace())
+				break;
+
+			DWORD dwCurSeq			= m_dwCurSeq;
+			index_type dwCurIndex	= dwCurSeq % m_dwSize;
+			VTPTR& pValue			= INDEX_VAL(dwCurIndex);
+
+			if(pValue == E_EMPTY)
+			{
+				if(::InterlockedCompareExchangePointer((volatile PVOID*)&pValue, pElement, E_EMPTY) == E_EMPTY)
+				{
+					::InterlockedIncrement(&m_dwCount);
+					::InterlockedCompareExchange(&m_dwCurSeq, dwCurSeq + 1, dwCurSeq);
+
+					dwIndex = INDEX_INC(INDEX_R2V(dwCurIndex));
+					isOK	= TRUE;
+
+					if(pElement != E_LOCKED)
+						EmplaceIndex(dwIndex);
+
+					break;
+				}
+			}
+
+			::InterlockedCompareExchange(&m_dwCurSeq, dwCurSeq + 1, dwCurSeq);
+		}
+
+		return isOK;
+	}
+
+	EnGetResult Get(index_type dwIndex, TPTR* ppElement, index_type* pdwRealIndex = nullptr)
+	{
+		ASSERT(ppElement != nullptr);
+
+		if(!INDEX_V2R(INDEX_DEC(dwIndex)))
+		{
+			*ppElement = nullptr;
+			return GR_FAIL;
+		}
+
+		*ppElement = (TPTR)INDEX_VAL(dwIndex);
+		if(pdwRealIndex) *pdwRealIndex = dwIndex;
+
+		return IsValidElement(*ppElement) ? GR_VALID : GR_INVALID;
+	}
+
+	BOOL Set(index_type dwIndex, TPTR pElement, TPTR* ppOldElement = nullptr, index_type* pdwRealIndex = nullptr)
+	{
+		TPTR pElement2 = nullptr;
+
+		if(pdwRealIndex == nullptr)
+			pdwRealIndex = (index_type*)_alloca(sizeof(index_type));
+
+		if(Get(dwIndex, &pElement2, pdwRealIndex) == GR_FAIL)
+			return FALSE;
+
+		if(ppOldElement != nullptr)
+			*ppOldElement = pElement2;
+
+		if(pElement == pElement2)
+			return FALSE;
+
+		int f1 = 0;
+		int f2 = 0;
+
+		if(pElement == E_EMPTY)
+		{
+			if(pElement2 == E_LOCKED)
+				f1 = -1;
+			else
+				f1 = f2 = -1;
+		}
+		else if(pElement == E_LOCKED)
+		{
+			if(pElement2 == E_EMPTY)
+				f1 = 1;
+			else
+				f2 = -1;
+		}
+		else
+		{
+			if(pElement2 == E_EMPTY)
+				f1 = f2 = 1;
+			else if(pElement2 == E_LOCKED)
+				f2 = 1;
+		}
+
+		BOOL bSetValueFirst		= (f1 + f2 >= 0);
+		index_type dwRealIndex	= *pdwRealIndex;
+
+		if(bSetValueFirst)	INDEX_VAL(dwRealIndex) = pElement;
+		if(f1 > 0)			::InterlockedIncrement(&m_dwCount);
+		if(f2 != 0)			(f2 > 0) ? EmplaceIndex(dwIndex) : EraseIndex(dwIndex);
+		if(f1 < 0)			{::InterlockedDecrement(&m_dwCount); ++(*(m_px + dwRealIndex));}
+		if(!bSetValueFirst) INDEX_VAL(dwRealIndex) = pElement;
+
+		ASSERT(Spaces() <= Size());
+
+		return TRUE;
+	}
+
+	BOOL Remove(index_type dwIndex, TPTR* ppElement = nullptr)
+	{
+		return Set(dwIndex, E_EMPTY, ppElement);
+	}
+
+	BOOL AcquireLock(index_type& dwIndex)
+	{
+		return Put(E_LOCKED, dwIndex);
+	}
+
+	BOOL ReleaseLock(index_type dwIndex, TPTR pElement)
+	{
+		ASSERT(pElement == nullptr || IsValidElement(pElement));
+
+		TPTR pElement2 = nullptr;
+		Get(dwIndex, &pElement2);
+
+		ASSERT(pElement2 == E_LOCKED);
+
+		if(pElement2 != E_LOCKED)
+			return FALSE;
+
+		return Set(dwIndex, pElement);
+	}
+
+public:
+
+	void Reset(DWORD dwSize = 0)
+	{
+		if(IsValid())
+			Destroy();
+		if(dwSize > 0)
+			Create(dwSize);
+	}
+	
+	BOOL GetAllElementIndexes(index_type ids[], DWORD& dwCount, BOOL bCopy = TRUE)
+	{
+		if(ids == nullptr || dwCount == 0)
+		{
+			dwCount = Elements();
+			return FALSE;
+		}
+
+		IndexSet* pIndexes = nullptr;
+		IndexSet indexes;
+
+		if(bCopy)
+			pIndexes = &CopyIndexes(indexes);
+		else
+			pIndexes = &m_indexes;
+
+		BOOL isOK	 = FALSE;
+		DWORD dwSize = (DWORD)pIndexes->size();
+
+		if(dwSize > 0 && dwSize <= dwCount)
+		{
+			IndexSetCI it  = pIndexes->begin();
+			IndexSetCI end = pIndexes->end();
+
+			for(int i = 0; it != end; ++it, ++i)
+				ids[i] = *it;
+
+			isOK = TRUE;
+		}
+
+		dwCount = dwSize;
+		return isOK;
+	}
+	
+	unique_ptr<index_type[]> GetAllElementIndexes(DWORD& dwCount, BOOL bCopy = TRUE)
+	{
+		IndexSet* pIndexes = nullptr;
+		IndexSet indexes;
+
+		if(bCopy)
+			pIndexes = &CopyIndexes(indexes);
+		else
+			pIndexes = &m_indexes;
+
+		unique_ptr<index_type[]> ids;
+		dwCount = (DWORD)pIndexes->size();
+
+		if(dwCount > 0)
+		{
+			ids.reset(new index_type[dwCount]);
+
+			IndexSetCI it  = pIndexes->begin();
+			IndexSetCI end = pIndexes->end();
+
+			for(int i = 0; it != end; ++it, ++i)
+				ids[i] = *it;
+		}
+
+		return ids;
+	}
+
+	static BOOL IsValidElement(TPTR pElement) {return pElement > E_MAX_STATUS;}
+
+	DWORD Size		()	{return m_dwSize;}
+	DWORD Elements	()	{return (DWORD)m_indexes.size();}
+	DWORD Spaces	()	{return m_dwSize - m_dwCount;}
+	BOOL HasSpace	()	{return m_dwCount < m_dwSize;}
+	BOOL IsEmpty	()	{return m_dwCount == 0;}
+	BOOL IsValid	()	{return m_pv != nullptr;}
+
+private:
+
+	void Create(DWORD dwSize)
+	{
+		ASSERT(!IsValid() && dwSize > 0 && dwSize <= MAX_SIZE);
+
+		m_dwCurSeq	= 0;
+		m_dwCount	= 0;
+		m_dwSize	= dwSize;
+		m_pv		= (VTPTR*)malloc(m_dwSize * sizeof(TPTR));
+		m_px		= (BYTE*)malloc(m_dwSize * sizeof(BYTE));
+
+		::ZeroMemory(m_pv, m_dwSize * sizeof(TPTR));
+		::ZeroMemory(m_px, m_dwSize * sizeof(BYTE));
+	}
+
+	void Destroy()
+	{
+		ASSERT(IsValid());
+
+		m_indexes.clear();
+		free((void*)m_pv);
+		free((void*)m_px);
+
+		m_pv		= nullptr;
+		m_px		= nullptr;
+		m_dwSize	= 0;
+		m_dwCount	= 0;
+		m_dwCurSeq	= 0;
+	}
+
+	IndexSet& CopyIndexes(IndexSet& indexes)
+	{
+		{
+			CReadLock locallock(m_cs);
+			indexes = m_indexes;
+		}
+
+		return indexes;
+	}
+
+	void EmplaceIndex(index_type dwIndex)
+	{
+		CWriteLock locallock(m_cs);
+		m_indexes.emplace(dwIndex);
+	}
+
+	void EraseIndex(index_type dwIndex)
+	{
+		CWriteLock locallock(m_cs);
+		m_indexes.erase(dwIndex);
+	}
+
+public:
+	CRingCache2	(DWORD dwSize = 0)
+	: m_pv		(nullptr)
+	, m_px		(nullptr)
+	, m_dwSize	(0)
+	, m_dwCount	(0)
+	, m_dwCurSeq(0)
+	{
+		Reset(dwSize);
+	}
+
+	~CRingCache2()
+	{
+		Reset(0);
+	}
+
+private:
+	CRingCache2(const CRingCache2&);
+	CRingCache2 operator = (const CRingCache2&);
+
+private:
+	DWORD				m_dwSize;
+	VTPTR*				m_pv;
+	char				pack1[PACK_SIZE_OF(VTPTR*)];
+	BYTE*				m_px;
+	char				pack2[PACK_SIZE_OF(BYTE*)];
+	volatile DWORD		m_dwCurSeq;
+	char				pack3[PACK_SIZE_OF(DWORD)];
+	volatile DWORD		m_dwCount;
+	char				pack4[PACK_SIZE_OF(DWORD)];
+
+	CSimpleRWLock		m_cs;
+	IndexSet			m_indexes;
+};
+
+template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, index_type, adjust_index>::E_EMPTY		= (T*)0x00;
+template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, index_type, adjust_index>::E_LOCKED		= (T*)0x01;
+template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, index_type, adjust_index>::E_MAX_STATUS	= (T*)0x0F;
+
+template <class T, class index_type, bool adjust_index> DWORD const CRingCache2<T, index_type, adjust_index>::MAX_SIZE	= 
+#if !defined(_WIN64)
+																														  0x00FFFFFF
+#else
+																														  0xFFFFFFFF
+#endif
+																																	;
+// ------------------------------------------------------------------------------------------------------------- //
 
 template <class T> class CRingPool
 {
@@ -948,7 +1306,7 @@ private:
 		m_dwSize = dwSize;
 		m_pv	 = (VTPTR*)malloc(m_dwSize * sizeof(TPTR));
 
-		::memset(m_pv, (int)E_EMPTY, m_dwSize * sizeof(TPTR));
+		::ZeroMemory(m_pv, m_dwSize * sizeof(TPTR));
 	}
 
 	void Destroy()
@@ -997,6 +1355,8 @@ template <class T> T* const CRingPool<T>::E_RELEASED	= (T*)0x02;
 template <class T> T* const CRingPool<T>::E_OCCUPIED	= (T*)0x03;
 template <class T> T* const CRingPool<T>::E_MAX_STATUS	= (T*)0x0F;
 
+// ------------------------------------------------------------------------------------------------------------- //
+
 template <class T> class CCASQueue
 {
 private:
@@ -1040,6 +1400,17 @@ public:
 		::InterlockedIncrement(&m_lSize);
 	}
 
+	void UnsafePushBack(T* pVal)
+	{
+		ASSERT(pVal != nullptr);
+
+		NPTR pNode		= new Node(pVal);
+		m_pTail->pNext	= pNode;
+		m_pTail			= pNode;
+		
+		::InterlockedIncrement(&m_lSize);
+	}
+
 	BOOL PopFront(T** ppVal)
 	{
 		ASSERT(ppVal != nullptr);
@@ -1079,6 +1450,35 @@ public:
 		}
 
 		return isOK;
+	}
+
+	BOOL UnsafePopFront(T** ppVal)
+	{
+		if(!UnsafePeekFront(ppVal))
+			return FALSE;
+
+		NPTR pHead	= (NPTR)m_pHead;
+		NPTR pNext	= (NPTR)pHead->pNext;
+		m_pHead		= pNext;
+
+		::InterlockedDecrement(&m_lSize);
+
+		delete pHead;
+		return TRUE;
+	}
+
+	BOOL UnsafePeekFront(T** ppVal)
+	{
+		ASSERT(ppVal != nullptr);
+
+		NPTR pNext = (NPTR)m_pHead->pNext;
+
+		if(pNext == nullptr)
+			return FALSE;
+
+		*ppVal = pNext->pValue;
+
+		return TRUE;
 	}
 
 public:

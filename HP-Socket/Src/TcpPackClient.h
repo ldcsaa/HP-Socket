@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -43,16 +43,16 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireReceive(IClient* pClient, const BYTE* pData, int iLength)
+	virtual EnHandleResult DoFireReceive(ITcpClient* pSender, const BYTE* pData, int iLength)
 	{
-		return ParsePack(this, &m_pkInfo, &m_lsBuffer, pClient, m_dwMaxPackSize, m_usHeaderFlag, pData, iLength);
+		return ParsePack(this, &m_pkInfo, &m_lsBuffer, pSender, m_dwMaxPackSize, m_usHeaderFlag, pData, iLength);
 	}
 
 	virtual BOOL CheckParams()
 	{
-		if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
-			if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
-				return __super::CheckParams();
+		if	((m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)	&&
+			(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)	)
+			return __super::CheckParams();
 
 		SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 		return FALSE;
@@ -63,7 +63,7 @@ protected:
 		m_lsBuffer.Clear();
 		m_pkInfo.Reset();
 
-		return __super::Reset();
+		__super::Reset();
 	}
 
 public:
@@ -73,15 +73,15 @@ public:
 	virtual USHORT GetPackHeaderFlag()							{return m_usHeaderFlag;}
 
 private:
-	EnHandleResult DoFireSuperReceive(IClient* pClient, const BYTE* pData, int iLength)
-		{return __super::DoFireReceive(pClient, pData, iLength);}
+	EnHandleResult DoFireSuperReceive(ITcpClient* pSender, const BYTE* pData, int iLength)
+		{return __super::DoFireReceive(pSender, pData, iLength);}
 
-	friend EnHandleResult ParsePack<>	(CTcpPackClientT* pThis, TPackInfo<TItemListEx>* pInfo, TItemListEx* pBuffer, IClient* pSocket,
+	friend EnHandleResult ParsePack<>	(CTcpPackClientT* pThis, TPackInfo<TItemListEx>* pInfo, TItemListEx* pBuffer, ITcpClient* pSocket,
 										DWORD dwMaxPackSize, USHORT usPackHeaderFlag, const BYTE* pData, int iLength);
 
 public:
-	CTcpPackClientT(ITcpClientListener* psoListener)
-	: T(psoListener)
+	CTcpPackClientT(ITcpClientListener* pListener)
+	: T					(pListener)
 	, m_dwMaxPackSize	(TCP_PACK_DEFAULT_MAX_SIZE)
 	, m_usHeaderFlag	(TCP_PACK_DEFAULT_HEADER_FLAG)
 	, m_pkInfo			(nullptr)

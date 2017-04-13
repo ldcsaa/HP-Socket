@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -104,18 +104,19 @@ BOOL CUdpServer::Start(LPCTSTR pszBindAddress, USHORT usPort)
 
 BOOL CUdpServer::CheckParams()
 {
-	if(m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)
-		if((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)
-			if((int)m_dwFreeSocketObjLockTime >= 0)
-				if((int)m_dwFreeSocketObjPool >= 0)
-					if((int)m_dwFreeBufferObjPool >= 0)
-						if((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)
-							if((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)
-								if((int)m_dwMaxDatagramSize > 0)
-									if((int)m_dwPostReceiveCount > 0)
-										if((int)m_dwDetectAttempts >= 0)
-											if((int)m_dwDetectInterval >= 0)
-												return TRUE;
+	if	((m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)								&&
+		((int)m_dwMaxConnectionCount > 0)														&&
+		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
+		((int)m_dwFreeSocketObjLockTime >= 0)													&&
+		((int)m_dwFreeSocketObjPool >= 0)														&&
+		((int)m_dwFreeBufferObjPool >= 0)														&&
+		((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)									&&
+		((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)									&&
+		((int)m_dwMaxDatagramSize > 0)															&&
+		((int)m_dwPostReceiveCount > 0)															&&
+		((int)m_dwDetectAttempts >= 0)															&&
+		((int)m_dwDetectInterval >= 0)															)
+		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -123,13 +124,14 @@ BOOL CUdpServer::CheckParams()
 
 void CUdpServer::PrepareStart()
 {
+	m_bfActiveSockets.Reset(m_dwMaxConnectionCount);
 	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
 
-	m_bfPool.SetItemCapacity((int)m_dwMaxDatagramSize);
-	m_bfPool.SetPoolSize((int)m_dwFreeBufferObjPool);
-	m_bfPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+	m_bfObjPool.SetItemCapacity((int)m_dwMaxDatagramSize);
+	m_bfObjPool.SetPoolSize((int)m_dwFreeBufferObjPool);
+	m_bfObjPool.SetPoolHold((int)m_dwFreeBufferObjHold);
 
-	m_bfPool.Prepare();
+	m_bfObjPool.Prepare();
 }
 
 BOOL CUdpServer::CheckStarting()
@@ -309,24 +311,20 @@ void CUdpServer::CloseListenSocket()
 
 void CUdpServer::DisconnectClientSocket()
 {
-	CReentrantReadLock locallock(m_csClientSocket);
+	DWORD size					= 0;
+	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
 
-	for(TUdpSocketObjPtrMapI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
-		Disconnect(it->first);
+	for(DWORD i = 0; i < size; i++)
+		Disconnect(ids[i]);
 }
 
 void CUdpServer::ReleaseClientSocket()
 {
+	VERIFY(m_bfActiveSockets.IsEmpty());
+	m_bfActiveSockets.Reset();
+
 	CReentrantWriteLock locallock(m_csClientSocket);
-
-	for(TUdpSocketObjPtrMapI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
-	{
-		TUdpSocketObj* pSocketObj = it->second;
-		DeleteSocketObj(pSocketObj);
-	}
-
 	m_mpClientAddr.clear();
-	m_mpClientSocket.clear();
 }
 
 TUdpSocketObj* CUdpServer::GetFreeSocketObj(CONNID dwConnID)
@@ -361,15 +359,15 @@ void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag e
 	if(!InvalidSocketObj(pSocketObj))
 		return;
 
-	CloseClientUdpSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+	CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
 	TUdpSocketObj::Release(pSocketObj);
 
 	{
 		CReentrantWriteLock locallock(m_csClientSocket);
-
 		m_mpClientAddr.erase(&pSocketObj->remoteAddr);
-		m_mpClientSocket.erase(pSocketObj->connID);
 	}
+
+	m_bfActiveSockets.Remove(pSocketObj->connID);
 
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 	{
@@ -387,7 +385,7 @@ void CUdpServer::ReleaseGCSocketObj(BOOL bForce)
 
 	while(m_lsGCSocket.PopFront(&pSocketObj))
 	{
-		if(bForce || (now - pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
+		if(bForce || (int)(now - pSocketObj->freeTime) >= (int)m_dwFreeSocketObjLockTime)
 			DeleteSocketObj(pSocketObj);
 		else
 		{
@@ -416,16 +414,16 @@ BOOL CUdpServer::InvalidSocketObj(TUdpSocketObj* pSocketObj)
 	return bDone;
 }
 
-void CUdpServer::AddClientUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj)
+void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
 	pSocketObj->connTime	= ::TimeGetTime();
 	pSocketObj->activeTime	= pSocketObj->connTime;
 
-	CReentrantWriteLock locallock(m_csClientSocket);
+	VERIFY(m_bfActiveSockets.ReleaseLock(dwConnID, pSocketObj));
 
-	m_mpClientSocket[dwConnID]				= pSocketObj;
+	CReentrantWriteLock locallock(m_csClientSocket);
 	m_mpClientAddr[&pSocketObj->remoteAddr]	= dwConnID;
 }
 
@@ -448,7 +446,7 @@ TUdpSocketObj* CUdpServer::CreateSocketObj()
 	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)m_phSocket.Alloc(sizeof(TUdpSocketObj));
 	ASSERT(pSocketObj);
 
-	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_bfPool);
+	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_bfObjPool);
 	
 	return pSocketObj;
 }
@@ -465,7 +463,7 @@ TUdpBufferObj* CUdpServer::GetFreeBufferObj(int iLen)
 {
 	ASSERT(iLen >= -1 && iLen <= (int)m_dwMaxDatagramSize);
 
-	TUdpBufferObj* pBufferObj	= m_bfPool.PickFreeItem();;
+	TUdpBufferObj* pBufferObj	= m_bfObjPool.PickFreeItem();;
 	if(iLen < 0) iLen			= m_dwMaxDatagramSize;
 	pBufferObj->addrLen			= sizeof(SOCKADDR_IN);
 	pBufferObj->buff.len		= iLen;
@@ -475,25 +473,20 @@ TUdpBufferObj* CUdpServer::GetFreeBufferObj(int iLen)
 
 void CUdpServer::AddFreeBufferObj(TUdpBufferObj* pBufferObj)
 {
-	m_bfPool.PutFreeItem(pBufferObj);
+	m_bfObjPool.PutFreeItem(pBufferObj);
 }
 
 void CUdpServer::ReleaseFreeBuffer()
 {
-	m_bfPool.Clear();
+	m_bfObjPool.Clear();
 }
 
 TUdpSocketObj* CUdpServer::FindSocketObj(CONNID dwConnID)
 {
 	TUdpSocketObj* pSocketObj = nullptr;
 
-	{
-		CReentrantReadLock locallock(m_csClientSocket);
-
-		TUdpSocketObjPtrMapCI it = m_mpClientSocket.find(dwConnID);
-		if(it != m_mpClientSocket.end())
-			pSocketObj = it->second;
-	}
+	if(m_bfActiveSockets.Get(dwConnID, &pSocketObj) != TUdpSocketObjPtrPool::GR_VALID)
+		pSocketObj = nullptr;
 
 	return pSocketObj;
 }
@@ -511,7 +504,7 @@ CONNID CUdpServer::FindConnectionID(SOCKADDR_IN* pAddr)
 	return dwConnID;
 }
 
-void CUdpServer::CloseClientUdpSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
+void CUdpServer::CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
 {
 	ASSERT(TUdpSocketObj::IsExist(pSocketObj));
 
@@ -678,33 +671,12 @@ BOOL CUdpServer::GetPendingDataLength(CONNID dwConnID, int& iPending)
 
 DWORD CUdpServer::GetConnectionCount()
 {
-	return (DWORD)m_mpClientSocket.size();
+	return m_bfActiveSockets.Elements();
 }
 
 BOOL CUdpServer::GetAllConnectionIDs(CONNID pIDs[], DWORD& dwCount)
 {
-	BOOL isOK	 = FALSE;
-	DWORD dwSize = 0;
-
-	{
-		CReentrantReadLock locallock(m_csClientSocket);
-
-		dwSize = (DWORD)m_mpClientSocket.size();
-
-		if(pIDs != nullptr && dwSize <= dwCount)
-		{
-			TUdpSocketObjPtrMapCI it	= m_mpClientSocket.begin();
-			TUdpSocketObjPtrMapCI end	= m_mpClientSocket.end();
-			
-			for(int i = 0; it != end; ++it, ++i)
-				pIDs[i] = it->first;
-
-			isOK = TRUE;
-		}
-	}
-
-	dwCount = dwSize;
-	return isOK;
+	return m_bfActiveSockets.GetAllElementIndexes(pIDs, dwCount);
 }
 
 BOOL CUdpServer::GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)
@@ -749,24 +721,20 @@ BOOL CUdpServer::Disconnect(CONNID dwConnID, BOOL bForce)
 
 BOOL CUdpServer::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 {
-	ulong_ptr_deque ls;
+	if(dwPeriod > MAX_CONNECTION_PERIOD)
+		return FALSE;
 
+	DWORD size					= 0;
+	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
+	DWORD now					= ::TimeGetTime();
+
+	for(DWORD i = 0; i < size; i++)
 	{
-		CReentrantReadLock locallock(m_csClientSocket);
+		CONNID connID				= ids[i];
+		TUdpSocketObj* pSocketObj	= FindSocketObj(connID);
 
-		DWORD now = ::TimeGetTime();
-
-		for(TUdpSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
-		{
-			if(now - it->second->connTime >= dwPeriod)
-				ls.push_back(it->first);
-		}
-	}
-	
-	if(!ls.empty())
-	{
-		for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
-			Disconnect(*it, bForce);
+		if(TUdpSocketObj::IsValid(pSocketObj) && (int)(now - pSocketObj->connTime) >= (int)dwPeriod)
+			Disconnect(connID, bForce);
 	}
 
 	return TRUE;
@@ -776,27 +744,20 @@ BOOL CUdpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 {
 	if(!m_bMarkSilence)
 		return FALSE;
-	if(dwPeriod > MAX_SILENCE_CONNECTION_PERIOD)
+	if(dwPeriod > MAX_CONNECTION_PERIOD)
 		return FALSE;
 
-	ulong_ptr_deque ls;
+	DWORD size					= 0;
+	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
+	DWORD now					= ::TimeGetTime();
 
+	for(DWORD i = 0; i < size; i++)
 	{
-		CReentrantReadLock locallock(m_csClientSocket);
+		CONNID connID				= ids[i];
+		TUdpSocketObj* pSocketObj	= FindSocketObj(connID);
 
-		DWORD now = ::TimeGetTime();
-
-		for(TUdpSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
-		{
-			if((int)(now - it->second->activeTime) >= (int)dwPeriod)
-				ls.push_back(it->first);
-		}
-	}
-
-	if(!ls.empty())
-	{
-		for(ulong_ptr_deque::const_iterator it = ls.begin(), end = ls.end(); it != end; ++it)
-			Disconnect(*it, bForce);
+		if(TUdpSocketObj::IsValid(pSocketObj) && (int)(now - pSocketObj->activeTime) >= (int)dwPeriod)
+			Disconnect(connID, bForce);
 	}
 
 	return TRUE;
@@ -804,28 +765,14 @@ BOOL CUdpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 
 void CUdpServer::WaitForPostReceiveRelease()
 {
-	DWORD dwWait = 0;
-	DWORD dwOrig = ::TimeGetTime();
-
 	while(m_iRemainPostReceives > 0)
-	{
 		::WaitWithMessageLoop(100);
-		dwWait = ::GetTimeGap32(dwOrig);
-	}
 }
 
 void CUdpServer::WaitForClientSocketClose()
 {
-	DWORD dwWait = 0;
-	DWORD dwOrig = ::TimeGetTime();
-
-	while(m_mpClientSocket.size() > 0)
-	{
+	while(m_bfActiveSockets.Elements() > 0)
 		::WaitWithMessageLoop(100);
-		dwWait = ::GetTimeGap32(dwOrig);
-	}
-
-	ASSERT(m_mpClientSocket.size() == 0);
 }
 
 void CUdpServer::WaitForWorkerThreadEnd()
@@ -864,6 +811,7 @@ void CUdpServer::WaitForDetectorThreadEnd()
 	{
 		m_evDetector.Set();
 		VERIFY(::WaitForSingleObject(m_hDetector, INFINITE) == WAIT_OBJECT_0);
+		m_evDetector.Reset();
 
 		::CloseHandle(m_hDetector);
 		m_hDetector = nullptr;
@@ -1054,18 +1002,20 @@ CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 			return dwConnID;
 		else
 		{
-			dwConnID	= ::GenerateConnectionID();
-			pSocketObj	= GetFreeSocketObj(dwConnID);
+			if(!m_bfActiveSockets.AcquireLock(dwConnID))
+				return 0;
+
+			pSocketObj = GetFreeSocketObj(dwConnID);
 
 			memcpy(&pSocketObj->remoteAddr, &pBufferObj->remoteAddr, sizeof(SOCKADDR_IN));
-			AddClientUdpSocketObj(dwConnID, pSocketObj);
+			AddClientSocketObj(dwConnID, pSocketObj);
 		}
 	}
 
 	if(TriggerFireAccept(pSocketObj) == HR_ERROR)
 	{
 		AddFreeSocketObj(pSocketObj);
-		dwConnID = 0;
+		return 0;
 	}
 
 	return dwConnID;
@@ -1202,7 +1152,7 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 		int iLength = 0;
 		int iMaxLen = (int)m_dwMaxDatagramSize;
 
-		TUdpBufferObj* pBufferObj = m_bfPool.PickFreeItem();
+		TUdpBufferObj* pBufferObj = m_bfObjPool.PickFreeItem();
 
 		for(int i = 0; i < iCount; i++)
 		{
@@ -1227,7 +1177,7 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 		else
 			result = ERROR_INCORRECT_SIZE;
 
-		m_bfPool.PutFreeItem(pBufferObj);
+		m_bfObjPool.PutFreeItem(pBufferObj);
 	}
 	else
 		result = ERROR_INVALID_PARAMETER;
@@ -1453,13 +1403,20 @@ UINT WINAPI CUdpServer::DetecotrThreadProc(LPVOID pv)
 
 void CUdpServer::DetectConnections()
 {
-	CReentrantReadLock locallock(m_csClientSocket);
+	DWORD size					= 0;
+	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
 
-	for(TUdpSocketObjPtrMapCI it = m_mpClientSocket.begin(), end = m_mpClientSocket.end(); it != end; ++it)
+	for(DWORD i = 0; i < size; i++)
 	{
-		if(it->second->detectFails >= m_dwDetectAttempts)
-			::PostIocpDisconnect(m_hCompletePort, it->first);
-		else
-			::InterlockedIncrement(&it->second->detectFails);
+		CONNID connID				= ids[i];
+		TUdpSocketObj* pSocketObj	= FindSocketObj(connID);
+
+		if(pSocketObj)
+		{
+			if(pSocketObj->detectFails >= m_dwDetectAttempts)
+				::PostIocpDisconnect(m_hCompletePort, connID);
+			else
+				::InterlockedIncrement(&pSocketObj->detectFails);
+		}
 	}
 }

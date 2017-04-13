@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -26,544 +26,11 @@
 
 #include <winsock2.h>
 
-/************************************************************************
-名称：连接 ID 数据类型
-描述：应用程序可以把 CONNID 定义为自身需要的类型（如：ULONG / ULONGLONG）
-************************************************************************/
-typedef ULONG_PTR	CONNID;
+#include "HPTypeDef.h"
 
-/*****************************************************************************************************/
-/******************************************** 公共类、接口 ********************************************/
-/*****************************************************************************************************/
-
-/************************************************************************
-名称：通信组件服务状态
-描述：应用程序可以通过通信组件的 GetState() 方法获取组件当前服务状态
-************************************************************************/
-enum EnServiceState
-{
-	SS_STARTING	= 0,	// 正在启动
-	SS_STARTED	= 1,	// 已经启动
-	SS_STOPPING	= 2,	// 正在停止
-	SS_STOPPED	= 3,	// 已经停止
-};
-
-/************************************************************************
-名称：Socket 操作类型
-描述：应用程序的 OnClose() 事件中通过该参数标识是哪种操作导致的错误
-************************************************************************/
-enum EnSocketOperation
-{
-	SO_UNKNOWN	= 0,	// Unknown
-	SO_ACCEPT	= 1,	// Acccept
-	SO_CONNECT	= 2,	// Connect
-	SO_SEND		= 3,	// Send
-	SO_RECEIVE	= 4,	// Receive
-	SO_CLOSE	= 5,	// Close
-};
-
-/************************************************************************
-名称：事件处理结果
-描述：事件的返回值，不同的返回值会影响通信组件的后续行为
-************************************************************************/
-enum EnHandleResult
-{
-	HR_OK		= 0,	// 成功
-	HR_IGNORE	= 1,	// 忽略
-	HR_ERROR	= 2,	// 错误
-};
-
-/************************************************************************
-名称：数据抓取结果
-描述：数据抓取操作的返回值
-************************************************************************/
-enum EnFetchResult
-{
-	FR_OK				= 0,	// 成功
-	FR_LENGTH_TOO_LONG	= 1,	// 抓取长度过大
-	FR_DATA_NOT_FOUND	= 2,	// 找不到 ConnID 对应的数据
-};
-
-/************************************************************************
-名称：数据发送策略
-描述：Server 组件和 Agent 组件的数据发送策略
-
-* 打包模式（默认）	：尽量把多个发送操作的数据组合在一起发送，增加传输效率
-* 安全模式			：尽量把多个发送操作的数据组合在一起发送，并控制传输速度，避免缓冲区溢出
-* 直接模式			：对每一个发送操作都直接投递，适用于负载不高但要求实时性较高的场合
-
-************************************************************************/
-enum EnSendPolicy
-{
-	SP_PACK				= 0,	// 打包模式（默认）
-	SP_SAFE				= 1,	// 安全模式
-	SP_DIRECT			= 2,	// 直接模式
-};
-
-/************************************************************************
-名称：操作结果代码
-描述：组件 Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
-************************************************************************/
-enum EnSocketError
-{
-	SE_OK						= NO_ERROR,	// 成功
-	SE_ILLEGAL_STATE			= 1,		// 当前状态不允许操作
-	SE_INVALID_PARAM			= 2,		// 非法参数
-	SE_SOCKET_CREATE			= 3,		// 创建 SOCKET 失败
-	SE_SOCKET_BIND				= 4,		// 绑定 SOCKET 失败
-	SE_SOCKET_PREPARE			= 5,		// 设置 SOCKET 失败
-	SE_SOCKET_LISTEN			= 6,		// 监听 SOCKET 失败
-	SE_CP_CREATE				= 7,		// 创建完成端口失败
-	SE_WORKER_THREAD_CREATE		= 8,		// 创建工作线程失败
-	SE_DETECT_THREAD_CREATE		= 9,		// 创建监测线程失败
-	SE_SOCKE_ATTACH_TO_CP		= 10,		// 绑定完成端口失败
-	SE_CONNECT_SERVER			= 11,		// 连接服务器失败
-	SE_NETWORK					= 12,		// 网络错误
-	SE_DATA_PROC				= 13,		// 数据处理错误
-	SE_DATA_SEND				= 14,		// 数据发送失败
-
-	/***** SSL Socket 扩展操作结果代码 *****/
-	SE_SSL_ENV_NOT_READY		= 101,		// SSL 环境未就绪
-};
-
-/************************************************************************
-名称：播送模式
-描述：UDP 组件的播送模式（组播或广播）
-************************************************************************/
-enum EnCastMode
-{
-	CM_MULTICAST	= 0,	// 组播
-	CM_BROADCAST	= 1,	// 广播
-};
-
-/************************************************************************
-名称：Socket 监听器基接口
-描述：定义服务端和客户端 Socket 监听器的公共信息
-************************************************************************/
-class IComplexSocketListener
-{
-public:
-
-	/*
-	* 名称：已发送数据通知
-	* 描述：成功发送数据后，Socket 监听器将收到该通知
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			pData		-- 已发送数据缓冲区
-	*			iLength		-- 已发送数据长度
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 该通知不允许返回 HR_ERROR（调试模式下引发断言错误）
-	*/
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)					= 0;
-
-	/*
-	* 名称：数据到达通知（PUSH 模型）
-	* 描述：对于 PUSH 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			pData		-- 已接收数据缓冲区
-	*			iLength		-- 已接收数据长度
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
-
-	/*
-	* 名称：数据到达通知（PULL 模型）
-	* 描述：对于 PULL 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			iLength		-- 已接收数据长度
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)									= 0;
-
-	/*
-	* 名称：通信错误通知
-	* 描述：通信发生错误后，Socket 监听器将收到该通知，并关闭连接
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			enOperation	-- Socket 操作类型
-	*			iErrorCode	-- 错误代码
-	* 返回值：	忽略返回值
-	*/
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)	= 0;
-
-	/*
-	* 名称：关闭通信组件通知
-	* 描述：通信组件关闭时，Socket 监听器将收到该通知
-	*		
-	* 参数：	
-	* 返回值：忽略返回值
-	*/
-	virtual EnHandleResult OnShutdown()																= 0;
-
-public:
-	virtual ~IComplexSocketListener() {}
-};
-
-/************************************************************************
-名称：服务端 Socket 监听器接口
-描述：定义服务端 Socket 监听器的所有事件
-************************************************************************/
-class IServerListener : public IComplexSocketListener
-{
-public:
-
-	/*
-	* 名称：准备监听通知
-	* 描述：通信服务端组件启动时，在监听 Socket 创建完成并开始执行监听前，Socket 监听
-	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
-	*		
-	* 参数：		soListen	-- 监听 Socket
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 终止启动通信服务组件
-	*/
-	virtual EnHandleResult OnPrepareListen(SOCKET soListen)				= 0;
-};
-
-/************************************************************************
-名称：TCP 服务端 Socket 监听器接口
-描述：定义 TCP 服务端 Socket 监听器的所有事件
-************************************************************************/
-class ITcpServerListener : public IServerListener
-{
-public:
-
-	/*
-	* 名称：接收连接通知
-	* 描述：接收到客户端连接请求时，Socket 监听器将收到该通知，监听器可以在通知处理方
-	*		法中执行 Socket 选项设置或拒绝客户端连接等额外工作
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			soClient	-- 客户端 Socket
-	* 返回值：	HR_OK / HR_IGNORE	-- 接受连接
-	*			HR_ERROR			-- 拒绝连接
-	*/
-	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient)	= 0;
-
-	/*
-	* 名称：握手完成通知（仅用于 SSL 连接）
-	* 描述：SSL 连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
-	*		数据收发操作
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnHandShake(CONNID dwConnID)					= 0;
-};
-
-/************************************************************************
-名称：PUSH 模型服务端 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CTcpServerListener : public ITcpServerListener
-{
-public:
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareListen(SOCKET soListen)							{return HR_IGNORE;}
-	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient)				{return HR_IGNORE;}
-	virtual EnHandleResult OnHandShake(CONNID dwConnID)								{return HR_IGNORE;}
-	virtual EnHandleResult OnShutdown()												{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：PULL 模型服务端 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CTcpPullServerListener : public CTcpServerListener
-{
-public:
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)						= 0;
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：UDP 服务端 Socket 监听器接口
-描述：定义 UDP 服务端 Socket 监听器的所有事件
-************************************************************************/
-class IUdpServerListener : public IServerListener
-{
-public:
-
-	/*
-	* 名称：接收连接通知
-	* 描述：接收到客户端连接请求时，Socket 监听器将收到该通知，监听器可以在通知处理方
-	*		法中执行 Socket 选项设置或拒绝客户端连接等额外工作
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			soClient	-- 客户端 Socket
-	* 返回值：	HR_OK / HR_IGNORE	-- 接受连接
-	*			HR_ERROR			-- 拒绝连接
-	*/
-	virtual EnHandleResult OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)	= 0;
-};
-
-/************************************************************************
-名称：UDP 服务端 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CUdpServerListener : public IUdpServerListener
-{
-public:
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)					{return HR_IGNORE;}
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareListen(SOCKET soListen)							{return HR_IGNORE;}
-	virtual EnHandleResult OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)	{return HR_IGNORE;}
-	virtual EnHandleResult OnShutdown()												{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：通信代理 Socket 监听器接口
-描述：定义 通信代理 Socket 监听器的所有事件
-************************************************************************/
-class IAgentListener : public IComplexSocketListener
-{
-public:
-
-	/*
-	* 名称：准备连接通知
-	* 描述：通信客户端组件启动时，在客户端 Socket 创建完成并开始执行连接前，Socket 监听
-	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	*			socket		-- 客户端 Socket
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 终止启动通信客户端组件
-	*/
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)		= 0;
-
-	/*
-	* 名称：连接完成通知
-	* 描述：与服务端成功建立连接时，Socket 监听器将收到该通知
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 同步连接：终止启动通信客户端组件
-	*								   异步连接：关闭连接
-	*/
-	virtual EnHandleResult OnConnect(CONNID dwConnID)							= 0;
-};
-
-/************************************************************************
-名称：TCP 通信代理 Socket 监听器接口
-描述：定义 TCP 通信代理 Socket 监听器的所有事件
-************************************************************************/
-class ITcpAgentListener : public IAgentListener
-{
-public:
-	
-	/*
-	* 名称：握手完成通知（仅用于 SSL 连接）
-	* 描述：SSL 连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
-	*		数据收发操作
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnHandShake(CONNID dwConnID)							= 0;
-};
-
-/************************************************************************
-名称：PUSH 模型通信代理 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CTcpAgentListener : public ITcpAgentListener
-{
-public:
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)						{return HR_IGNORE;}
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket)				{return HR_IGNORE;}
-	virtual EnHandleResult OnConnect(CONNID dwConnID)									{return HR_IGNORE;}
-	virtual EnHandleResult OnHandShake(CONNID dwConnID)									{return HR_IGNORE;}
-	virtual EnHandleResult OnShutdown()													{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：PULL 通信代理 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CTcpPullAgentListener : public CTcpAgentListener
-{
-public:
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength)						= 0;
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-};
-
-class IClient;
-
-/************************************************************************
-名称：客户端 Socket 监听器接口
-描述：定义客户端 Socket 监听器的所有事件
-************************************************************************/
-class IClientListener
-{
-public:
-
-	/*
-	* 名称：准备连接通知
-	* 描述：通信客户端组件启动时，在客户端 Socket 创建完成并开始执行连接前，Socket 监听
-	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
-	*		
-	* 参数：		pClient		-- 连接对象
-	*			socket		-- 客户端 Socket
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 终止启动通信客户端组件
-	*/
-	virtual EnHandleResult OnPrepareConnect(IClient* pClient, SOCKET socket)						= 0;
-
-	/*
-	* 名称：连接完成通知
-	* 描述：与服务端成功建立连接时，Socket 监听器将收到该通知
-	*		
-	* 参数：		pClient		-- 连接对象
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 同步连接：终止启动通信客户端组件
-	*								   异步连接：关闭连接
-	*/
-	virtual EnHandleResult OnConnect(IClient* pClient)												= 0;
-
-	/*
-	* 名称：已发送数据通知
-	* 描述：成功发送数据后，Socket 监听器将收到该通知
-	*		
-	* 参数：		pClient		-- 连接对象
-	*			pData		-- 已发送数据缓冲区
-	*			iLength		-- 已发送数据长度
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 该通知不允许返回 HR_ERROR（调试模式下引发断言错误）
-	*/
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)					= 0;
-
-	/*
-	* 名称：数据到达通知（PUSH 模型）
-	* 描述：对于 PUSH 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
-	*		
-	* 参数：		pClient		-- 连接对象
-	*			pData		-- 已接收数据缓冲区
-	*			iLength		-- 已接收数据长度
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)				= 0;
-
-	/*
-	* 名称：数据到达通知（PULL 模型）
-	* 描述：对于 PULL 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
-	*		
-	* 参数：		pClient		-- 连接对象
-	*			iLength		-- 已接收数据长度
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)									= 0;
-
-	/*
-	* 名称：通信错误通知
-	* 描述：通信发生错误后，Socket 监听器将收到该通知，并关闭连接
-	*		
-	* 参数：		pClient		-- 连接对象
-	*			enOperation	-- Socket 操作类型
-	*			iErrorCode	-- 错误代码
-	* 返回值：	忽略返回值
-	*/
-	virtual EnHandleResult OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)	= 0;
-
-public:
-	virtual ~IClientListener() {}
-};
-
-/************************************************************************
-名称：TCP 客户端 Socket 监听器接口
-描述：定义 TCP 客户端 Socket 监听器的所有事件
-************************************************************************/
-class ITcpClientListener : public IClientListener
-{
-public:
-	public:
-	
-	/*
-	* 名称：握手完成通知（仅用于 SSL 连接）
-	* 描述：SSL 连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
-	*		数据收发操作
-	*		
-	* 参数：		dwConnID	-- 连接 ID
-	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
-	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
-	*/
-	virtual EnHandleResult OnHandShake(IClient* pClient)								= 0;
-};
-
-/************************************************************************
-名称：PUSH 模型客户端 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CTcpClientListener : public ITcpClientListener
-{
-public:
-	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)						{return HR_IGNORE;}
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)		{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareConnect(IClient* pClient, SOCKET socket)			{return HR_IGNORE;}
-	virtual EnHandleResult OnConnect(IClient* pClient)									{return HR_IGNORE;}
-	virtual EnHandleResult OnHandShake(IClient* pClient)								{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：PULL 客户端 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CTcpPullClientListener : public CTcpClientListener
-{
-public:
-	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)						= 0;
-	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength)	{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：UDP 客户端 Socket 监听器接口
-描述：定义 UDP 客户端 Socket 监听器的所有事件
-************************************************************************/
-class IUdpClientListener : public IClientListener
-{
-};
-
-/************************************************************************
-名称：UDP 户端 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CUdpClientListener : public IUdpClientListener
-{
-public:
-	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)						{return HR_IGNORE;}
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)		{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareConnect(IClient* pClient, SOCKET socket)			{return HR_IGNORE;}
-	virtual EnHandleResult OnConnect(IClient* pClient)									{return HR_IGNORE;}
-};
-
-/************************************************************************
-名称：UDP 传播 Socket 监听器接口
-描述：定义 UDP 传播 Socket 监听器的所有事件
-************************************************************************/
-class IUdpCastListener : public IClientListener
-{
-};
-
-/************************************************************************
-名称：UDP 传播 Socket 监听器抽象基类
-描述：定义某些事件的默认处理方法（忽略事件）
-************************************************************************/
-class CUdpCastListener : public IUdpCastListener
-{
-public:
-	virtual EnHandleResult OnReceive(IClient* pClient, int iLength)						{return HR_IGNORE;}
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength)		{return HR_IGNORE;}
-	virtual EnHandleResult OnPrepareConnect(IClient* pClient, SOCKET socket)			{return HR_IGNORE;}
-	virtual EnHandleResult OnConnect(IClient* pClient)									{return HR_IGNORE;}
-};
+/*****************************************************************************************************************************************************/
+/***************************************************************** TCP/UDP Interfaces ****************************************************************/
+/*****************************************************************************************************************************************************/
 
 /************************************************************************
 名称：复合 Socket 组件接口
@@ -698,9 +165,11 @@ public:
 
 	/* 设置数据发送策略 */
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		= 0;
+	/* 设置最大连接数（组件会根据设置值预分配内存，因此需要根据实际情况设置，不宜过大）*/
+	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	= 0;
 	/* 设置 Socket 缓存对象锁定时间（毫秒，在锁定期间该 Socket 缓存对象不能被获取使用） */
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	= 0;
-	/* 设置 Socket 缓存池大小（通常设置为平均并发连接数量的 1/3 - 1/2） */
+	/* 设置 Socket 缓存池大小（通常设置为平均并发连接数的 1/3 - 1/2） */
 	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		= 0;
 	/* 设置内存块缓存池大小（通常设置为 Socket 缓存池大小的 2 - 3 倍） */
 	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)		= 0;
@@ -715,6 +184,8 @@ public:
 
 	/* 获取数据发送策略 */
 	virtual EnSendPolicy GetSendPolicy		()	= 0;
+	/* 获取最大连接数 */
+	virtual DWORD GetMaxConnectionCount		()	= 0;
 	/* 获取 Socket 缓存对象锁定时间 */
 	virtual DWORD GetFreeSocketObjLockTime	()	= 0;
 	/* 获取 Socket 缓存池大小 */
@@ -787,7 +258,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
+	virtual BOOL SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 public:
 
@@ -873,11 +344,11 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)						= 0;
+	virtual BOOL Start			(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)				= 0;
 
 	/*
 	* 名称：连接服务器
-	* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() 事件
+	* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
 	*		
 	* 参数：		lpszRemoteAddress	-- 服务端地址
 	*			usPort				-- 服务端端口
@@ -885,12 +356,15 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)				= 0;
+	virtual BOOL Connect		(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr)		= 0;
 
 public:
 
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
+
+	/* 获取某个连接的远程主机信息 */
+	virtual BOOL GetRemoteHost	(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort)			= 0;
 
 };
 
@@ -916,7 +390,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
+	virtual BOOL SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 public:
 
@@ -1024,7 +498,9 @@ public:
 	/* 获取该组件对象的连接 ID */
 	virtual CONNID			GetConnectionID	()													= 0;
 	/* 获取 Client Socket 的地址信息 */
-	virtual BOOL		GetLocalAddress	(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
+	virtual BOOL GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
+	/* 获取连接的远程主机信息 */
+	virtual BOOL GetRemoteHost			(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)		= 0;
 	/* 获取连接中未发出数据的长度 */
 	virtual BOOL GetPendingDataLength	(int& iPending)											= 0;
 
@@ -1063,13 +539,13 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
 	*/
-	virtual BOOL SendSmallFile	(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
+	virtual BOOL SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 public:
 
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
-	
+
 	/* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为：(N * 1024) - sizeof(TBufferObj)） */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)	= 0;
 	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
@@ -1162,6 +638,54 @@ public:
 };
 
 /************************************************************************
+名称：双接口模版类
+描述：定义双接口转换方法
+************************************************************************/
+template<class F, class S> class DualInterface : public F, public S
+{
+public:
+
+	/* this 转换为 F* */
+	inline static F* ToF(DualInterface* pThis)
+	{
+		return (F*)(pThis);
+	}
+
+	/* F* 转换为 this */
+	inline static DualInterface* FromF(F* pF)
+	{
+		return (DualInterface*)(pF);
+	}
+
+	/* this 转换为 S* */
+	inline static S* ToS(DualInterface* pThis)
+	{
+		return (S*)(F2S(ToF(pThis)));
+	}
+
+	/* S* 转换为 this */
+	inline static DualInterface* FromS(S* pS)
+	{
+		return FromF(S2F(pS));
+	}
+
+	/* S* 转换为 F* */
+	inline static F* S2F(S* pS)
+	{
+		return (F*)((char*)pS - sizeof(F));
+	}
+
+	/* F* 转换为 S* */
+	inline static S* F2S(F* pF)
+	{
+		return (S*)((char*)pF + sizeof(F));
+	}
+
+public:
+	~DualInterface() {}
+};
+
+/************************************************************************
 名称：Server/Agent PULL 模型组件接口
 描述：定义 Server/Agent 组件的 PULL 模型组件的所有操作方法
 ************************************************************************/
@@ -1228,64 +752,12 @@ public:
 };
 
 /************************************************************************
-名称：TCP Server PULL 模型组件接口
-描述：继承了 ITcpServer 和 IPullSocket
+名称：TCP PULL 模型组件接口
+描述：继承了 PULL 和 Socket 接口
 ************************************************************************/
-class ITcpPullServer : public IPullSocket, public ITcpServer
-{
-public:
-	/* IServer* 转换为 IPullSocket* */
-	inline static IPullSocket* ToPull(IServer* pServer)
-	{
-		return (IPullSocket*)((char*)pServer - sizeof(IPullSocket));
-	}
-
-	/* IPullSocket* 转换为 ITcpServer* */
-	inline static ITcpServer* ToServer(IPullSocket* pPullSocket)
-	{
-		return (ITcpServer*)((char*)pPullSocket + sizeof(IPullSocket));
-	}
-};
-
-/************************************************************************
-名称：TCP Agent PULL 模型组件接口
-描述：继承了 ITcpAgent 和 IPullSocket
-************************************************************************/
-class ITcpPullAgent : public IPullSocket, public ITcpAgent
-{
-public:
-	/* IAgent* 转换为 IPullSocket* */
-	inline static IPullSocket* ToPull(IAgent* pAgent)
-	{
-		return (IPullSocket*)((char*)pAgent - sizeof(IPullSocket));
-	}
-
-	/* IPullSocket* 转换为 ITcpAgent* */
-	inline static ITcpAgent* ToAgent(IPullSocket* pPullSocket)
-	{
-		return (ITcpAgent*)((char*)pPullSocket + sizeof(IPullSocket));
-	}
-};
-
-/************************************************************************
-名称：TCP Client PULL 模型组件接口
-描述：继承了 ITcpClient 和 IPullClient
-************************************************************************/
-class ITcpPullClient : public IPullClient, public ITcpClient
-{
-public:
-	/* IClient* 转换为 IPullClient* */
-	inline static IPullClient* ToPull(IClient* pClient)
-	{
-		return (IPullClient*)((char*)pClient - sizeof(IPullClient));
-	}
-
-	/* IPullClient* 转换为 ITcpClient* */
-	inline static ITcpClient* ToClient(IPullClient* pPullClient)
-	{
-		return (ITcpClient*)((char*)pPullClient + sizeof(IPullClient));
-	}
-};
+typedef	DualInterface<IPullSocket, ITcpServer>	ITcpPullServer;
+typedef	DualInterface<IPullSocket, ITcpAgent>	ITcpPullAgent;
+typedef	DualInterface<IPullClient, ITcpClient>	ITcpPullClient;
 
 /************************************************************************
 名称：Server/Agent PACK 模型组件接口
@@ -1338,61 +810,1161 @@ public:
 };
 
 /************************************************************************
-名称：TCP Server PACK 模型组件接口
-描述：继承了 ITcpServer 和 IPackSocket
+名称：TCP PACK 模型组件接口
+描述：继承了 PACK 和 Socket 接口
 ************************************************************************/
-class ITcpPackServer : public IPackSocket, public ITcpServer
+typedef	DualInterface<IPackSocket, ITcpServer>	ITcpPackServer;
+typedef	DualInterface<IPackSocket, ITcpAgent>	ITcpPackAgent;
+typedef	DualInterface<IPackClient, ITcpClient>	ITcpPackClient;
+
+/************************************************************************
+名称：Socket 监听器基接口
+描述：定义组件监听器的公共方法
+************************************************************************/
+template<class T> class ISocketListenerT
 {
 public:
-	/* IServer* 转换为 IPackSocket* */
-	inline static IPackSocket* ToPack(IServer* pServer)
-	{
-		return (IPackSocket*)((char*)pServer - sizeof(IPackSocket));
-	}
 
-	/* IPackSocket* 转换为 ITcpServer* */
-	inline static ITcpServer* ToServer(IPackSocket* pPackSocket)
-	{
-		return (ITcpServer*)((char*)pPackSocket + sizeof(IPackSocket));
-	}
+	/*
+	* 名称：握手完成通知
+	* 描述：连接完成握手时，Socket 监听器将收到该通知，监听器接收到该通知后才能开始
+	*		数据收发操作
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnHandShake(T* pSender, CONNID dwConnID)												= 0;
+
+	/*
+	* 名称：已发送数据通知
+	* 描述：成功发送数据后，Socket 监听器将收到该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			pData		-- 已发送数据缓冲区
+	*			iLength		-- 已发送数据长度
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 该通知不允许返回 HR_ERROR（调试模式下引发断言错误）
+	*/
+	virtual EnHandleResult OnSend(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)					= 0;
+
+	/*
+	* 名称：数据到达通知（PUSH 模型）
+	* 描述：对于 PUSH 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			pData		-- 已接收数据缓冲区
+	*			iLength		-- 已接收数据长度
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnReceive(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
+
+	/*
+	* 名称：数据到达通知（PULL 模型）
+	* 描述：对于 PULL 模型的 Socket 通信组件，成功接收数据后将向 Socket 监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			iLength		-- 已接收数据长度
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnReceive(T* pSender, CONNID dwConnID, int iLength)									= 0;
+
+	/*
+	* 名称：通信错误通知
+	* 描述：通信发生错误后，Socket 监听器将收到该通知，并关闭连接
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			enOperation	-- Socket 操作类型
+	*			iErrorCode	-- 错误代码
+	* 返回值：	忽略返回值
+	*/
+	virtual EnHandleResult OnClose(T* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)	= 0;
+
+public:
+	virtual ~ISocketListenerT() {}
+};
+
+template<class T> class IComplexSocketListenerT : public ISocketListenerT<T>
+{
+public:
+
+	/*
+	* 名称：关闭通信组件通知
+	* 描述：通信组件关闭时，Socket 监听器将收到该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	* 返回值：忽略返回值
+	*/
+	virtual EnHandleResult OnShutdown(T* pSender)																= 0;
+
 };
 
 /************************************************************************
-名称：TCP Agent PACK 模型组件接口
-描述：继承了 ITcpAgent 和 IPackSocket
+名称：服务端 Socket 监听器接口
+描述：定义服务端 Socket 监听器的所有事件
 ************************************************************************/
-class ITcpPackAgent : public IPackSocket, public ITcpAgent
+template<class T> class IServerListenerT : public IComplexSocketListenerT<T>
 {
 public:
-	/* IAgent* 转换为 IPackSocket* */
-	inline static IPackSocket* ToPack(IAgent* pAgent)
-	{
-		return (IPackSocket*)((char*)pAgent - sizeof(IPackSocket));
-	}
 
-	/* IPackSocket* 转换为 ITcpAgent* */
-	inline static ITcpAgent* ToAgent(IPackSocket* pPackSocket)
-	{
-		return (ITcpAgent*)((char*)pPackSocket + sizeof(IPackSocket));
-	}
+	/*
+	* 名称：准备监听通知
+	* 描述：通信服务端组件启动时，在监听 Socket 创建完成并开始执行监听前，Socket 监听
+	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			soListen	-- 监听 Socket
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 终止启动通信服务组件
+	*/
+	virtual EnHandleResult OnPrepareListen(T* pSender, SOCKET soListen)						= 0;
+
+	/*
+	* 名称：接收连接通知
+	* 描述：接收到客户端连接请求时，Socket 监听器将收到该通知，监听器可以在通知处理方
+	*		法中执行 Socket 选项设置或拒绝客户端连接等额外工作
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			soClient	-- TCP: 客户端 Socket 句柄，UDP: 客户端 Socket SOCKADDR_IN 指针
+	* 返回值：	HR_OK / HR_IGNORE	-- 接受连接
+	*			HR_ERROR			-- 拒绝连接
+	*/
+	virtual EnHandleResult OnAccept(T* pSender, CONNID dwConnID, UINT_PTR soClient)			= 0;
 };
 
 /************************************************************************
-名称：TCP Client PACK 模型组件接口
-描述：继承了 ITcpClient 和 IPackClient
+名称：TCP 服务端 Socket 监听器接口
+描述：定义 TCP 服务端 Socket 监听器的所有事件
 ************************************************************************/
-class ITcpPackClient : public IPackClient, public ITcpClient
+class ITcpServerListener : public IServerListenerT<ITcpServer>
 {
 public:
-	/* IClient* 转换为 IPackClient* */
-	inline static IPackClient* ToPack(IClient* pClient)
-	{
-		return (IPackClient*)((char*)pClient - sizeof(IPackClient));
-	}
 
-	/* IPackClient* 转换为 ITcpClient* */
-	inline static ITcpClient* ToClient(IPackClient* pPackClient)
-	{
-		return (ITcpClient*)((char*)pPackClient + sizeof(IPackClient));
-	}
+};
+
+/************************************************************************
+名称：PUSH 模型服务端 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpServerListener : public ITcpServerListener
+{
+public:
+	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen)							{return HR_IGNORE;}
+	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient)				{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(ITcpServer* pSender, CONNID dwConnID)								{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, int iLength)						{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+	virtual EnHandleResult OnShutdown(ITcpServer* pSender)													{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：PULL 模型服务端 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpPullServerListener : public CTcpServerListener
+{
+public:
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, int iLength)						= 0;
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：UDP 服务端 Socket 监听器接口
+描述：定义 UDP 服务端 Socket 监听器的所有事件
+************************************************************************/
+class IUdpServerListener : public IServerListenerT<IUdpServer>
+{
+public:
+
+};
+
+/************************************************************************
+名称：UDP 服务端 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CUdpServerListener : public IUdpServerListener
+{
+public:
+	virtual EnHandleResult OnPrepareListen(IUdpServer* pSender, SOCKET soListen)						{return HR_IGNORE;}
+	virtual EnHandleResult OnAccept(IUdpServer* pSender, CONNID dwConnID, UINT_PTR pSockAddr)			{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(IUdpServer* pSender, CONNID dwConnID)							{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(IUdpServer* pSender, CONNID dwConnID, int iLength)					{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
+	virtual EnHandleResult OnShutdown(IUdpServer* pSender)												{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：通信代理 Socket 监听器接口
+描述：定义 通信代理 Socket 监听器的所有事件
+************************************************************************/
+template<class T> class IAgentListenerT : public IComplexSocketListenerT<T>
+{
+public:
+
+	/*
+	* 名称：准备连接通知
+	* 描述：通信客户端组件启动时，在客户端 Socket 创建完成并开始执行连接前，Socket 监听
+	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			socket		-- 客户端 Socket
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 终止启动通信客户端组件
+	*/
+	virtual EnHandleResult OnPrepareConnect(T* pSender, CONNID dwConnID, SOCKET socket)		= 0;
+
+	/*
+	* 名称：连接完成通知
+	* 描述：与服务端成功建立连接时，Socket 监听器将收到该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 同步连接：终止启动通信客户端组件
+	*								   异步连接：关闭连接
+	*/
+	virtual EnHandleResult OnConnect(T* pSender, CONNID dwConnID)							= 0;
+};
+
+/************************************************************************
+名称：TCP 通信代理 Socket 监听器接口
+描述：定义 TCP 通信代理 Socket 监听器的所有事件
+************************************************************************/
+class ITcpAgentListener : public IAgentListenerT<ITcpAgent>
+{
+public:
+
+};
+
+/************************************************************************
+名称：PUSH 模型通信代理 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpAgentListener : public ITcpAgentListener
+{
+public:
+	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, SOCKET socket)				{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(ITcpAgent* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(ITcpAgent* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpAgent* pSender, CONNID dwConnID, int iLength)						{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+	virtual EnHandleResult OnShutdown(ITcpAgent* pSender)													{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：PULL 通信代理 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpPullAgentListener : public CTcpAgentListener
+{
+public:
+	virtual EnHandleResult OnReceive(ITcpAgent* pSender, CONNID dwConnID, int iLength)						= 0;
+	virtual EnHandleResult OnReceive(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：客户端 Socket 监听器接口
+描述：定义客户端 Socket 监听器的所有事件
+************************************************************************/
+
+template<class T> class IClientListenerT : public ISocketListenerT<T>
+{
+public:
+	
+	/*
+	* 名称：准备连接通知
+	* 描述：通信客户端组件启动时，在客户端 Socket 创建完成并开始执行连接前，Socket 监听
+	*		器将收到该通知，监听器可以在通知处理方法中执行 Socket 选项设置等额外工作
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			socket		-- 客户端 Socket
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 终止启动通信客户端组件
+	*/
+	virtual EnHandleResult OnPrepareConnect(T* pSender, CONNID dwConnID, SOCKET socket)						= 0;
+
+	/*
+	* 名称：连接完成通知
+	* 描述：与服务端成功建立连接时，Socket 监听器将收到该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 同步连接：终止启动通信客户端组件
+	*								   异步连接：关闭连接
+	*/
+	virtual EnHandleResult OnConnect(T* pSender, CONNID dwConnID)											= 0;
+};
+
+/************************************************************************
+名称：TCP 客户端 Socket 监听器接口
+描述：定义 TCP 客户端 Socket 监听器的所有事件
+************************************************************************/
+class ITcpClientListener : public IClientListenerT<ITcpClient>
+{
+public:
+
+};
+
+/************************************************************************
+名称：PUSH 模型客户端 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpClientListener : public ITcpClientListener
+{
+public:
+	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, SOCKET socket)			{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(ITcpClient* pSender, CONNID dwConnID)								{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, int iLength)						{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：PULL 客户端 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CTcpPullClientListener : public CTcpClientListener
+{
+public:
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, int iLength)						= 0;
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：UDP 客户端 Socket 监听器接口
+描述：定义 UDP 客户端 Socket 监听器的所有事件
+************************************************************************/
+class IUdpClientListener : public IClientListenerT<IUdpClient>
+{
+public:
+
+};
+
+/************************************************************************
+名称：UDP 户端 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CUdpClientListener : public IUdpClientListener
+{
+public:
+	virtual EnHandleResult OnPrepareConnect(IUdpClient* pSender, CONNID dwConnID, SOCKET socket)			{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(IUdpClient* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(IUdpClient* pSender, CONNID dwConnID)								{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(IUdpClient* pSender, CONNID dwConnID, int iLength)						{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(IUdpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：UDP 传播 Socket 监听器接口
+描述：定义 UDP 传播 Socket 监听器的所有事件
+************************************************************************/
+class IUdpCastListener : public IClientListenerT<IUdpCast>
+{
+public:
+
+};
+
+/************************************************************************
+名称：UDP 传播 Socket 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CUdpCastListener : public IUdpCastListener
+{
+public:
+	virtual EnHandleResult OnPrepareConnect(IUdpCast* pSender, CONNID dwConnID, SOCKET socket)				{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(IUdpCast* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(IUdpCast* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(IUdpCast* pSender, CONNID dwConnID, int iLength)						{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(IUdpCast* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+};
+
+/*****************************************************************************************************************************************************/
+/****************************************************************** HTTP Interfaces ******************************************************************/
+/*****************************************************************************************************************************************************/
+
+/************************************************************************
+名称：复合 Http 组件接口
+描述：定义复合 Http 组件的所有操作方法和属性访问方法，复合 Http 组件同时管理多个 Http 连接
+************************************************************************/
+class IComplexHttp
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：发送 WebSocket 消息
+	* 描述：向对端端发送 WebSocket 消息
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			bFinal			-- 是否结束帧
+	*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+	*			iOperationCode	-- 操作码：0x0 - 0xF
+	*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+	*			pData			-- 消息体数据缓冲区
+	*			iLength			-- 消息体数据长度
+	*			ullBodyLen		-- 消息总长度
+	* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+	* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+	* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+	* 								ullBodyLen < iLength -> 错误参数，发送失败
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4] = nullptr, BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置本地协议版本 */
+	virtual void SetLocalVersion(EnHttpVersion usVersion)								= 0;
+	/* 获取本地协议版本 */
+	virtual EnHttpVersion GetLocalVersion()												= 0;
+
+	/* 检查是否升级协议 */
+	virtual BOOL IsUpgrade(CONNID dwConnID)												= 0;
+	/* 检查是否有 Keep-Alive 标识 */
+	virtual BOOL IsKeepAlive(CONNID dwConnID)											= 0;
+	/* 获取协议版本 */
+	virtual USHORT GetVersion(CONNID dwConnID)											= 0;
+	/* 获取内容长度 */
+	virtual ULONGLONG GetContentLength(CONNID dwConnID)									= 0;
+	/* 获取内容类型 */
+	virtual LPCSTR GetContentType(CONNID dwConnID)										= 0;
+	/* 获取内容编码 */
+	virtual LPCSTR GetContentEncoding(CONNID dwConnID)									= 0;
+	/* 获取传输编码 */
+	virtual LPCSTR GetTransferEncoding(CONNID dwConnID)									= 0;
+	/* 获取协议升级类型 */
+	virtual EnHttpUpgradeType GetUpgradeType(CONNID dwConnID)							= 0;
+	/* 获取解析错误代码 */
+	virtual USHORT GetParseErrorCode(CONNID dwConnID, LPCSTR* lpszErrorDesc = nullptr)	= 0;
+
+	/* 获取某个请求头（单值） */
+	virtual BOOL GetHeader(CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
+	/* 获取某个请求头（多值） */
+	virtual BOOL GetHeaders(CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue[], DWORD& dwCount)	= 0;
+	/* 获取所有请求头 */
+	virtual BOOL GetAllHeaders(CONNID dwConnID, THeader lpHeaders[], DWORD& dwCount)				= 0;
+	/* 获取所有请求头名称 */
+	virtual BOOL GetAllHeaderNames(CONNID dwConnID, LPCSTR lpszName[], DWORD& dwCount)				= 0;
+
+	/* 获取 Cookie */
+	virtual BOOL GetCookie(CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
+	/* 获取所有 Cookie */
+	virtual BOOL GetAllCookies(CONNID dwConnID, TCookie lpCookies[], DWORD& dwCount)				= 0;
+
+	/*
+	// !! maybe implemented in future !! //
+
+	virtual BOOL GetParam(CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
+	virtual BOOL GetParams(CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue[], DWORD& dwCount)	= 0;
+	virtual BOOL GetAllParams(CONNID dwConnID, LPPARAM lpszParam[], DWORD& dwCount)					= 0;
+	virtual BOOL GetAllParamNames(CONNID dwConnID, LPCSTR lpszName[], DWORD& dwCount)				= 0;
+	*/
+
+	/* 获取当前 WebSocket 消息状态，传入 nullptr 则不获取相应字段 */
+	virtual BOOL GetWSMessageState(CONNID dwConnID, BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain)	= 0;
+
+public:
+	virtual ~IComplexHttp() {}
+};
+
+/************************************************************************
+名称：复合 Http 请求者组件接口
+描述：定义复合 Http 请求者组件的所有操作方法和属性访问方法
+************************************************************************/
+class IComplexHttpRequester : public IComplexHttp
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：发送请求
+	* 描述：向服务端发送 HTTP 请求
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			lpszMethod		-- 请求方法
+	*			lpszPath		-- 请求路径
+	*			lpHeaders		-- 请求头
+	*			iHeaderCount	-- 请求头数量
+	*			pBody			-- 请求体
+	*			iLength			-- 请求体长度
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendRequest(CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0)	= 0;
+
+	/*
+	* 名称：发送本地文件
+	* 描述：向指定连接发送 4096 KB 以下的小文件
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			lpszFileName	-- 文件路径
+	*			lpszMethod		-- 请求方法
+	*			lpszPath		-- 请求路径
+	*			lpHeaders		-- 请求头
+	*			iHeaderCount	-- 请求头数量
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendLocalFile(CONNID dwConnID, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)							= 0;
+
+	/* 发送 POST 请求 */
+	virtual BOOL SendPost(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)													= 0;
+	/* 发送 PUT 请求 */
+	virtual BOOL SendPut(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)														= 0;
+	/* 发送 PATCH 请求 */
+	virtual BOOL SendPatch(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)													= 0;
+	/* 发送 GET 请求 */
+	virtual BOOL SendGet(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 DELETE 请求 */
+	virtual BOOL SendDelete(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
+	/* 发送 HEAD 请求 */
+	virtual BOOL SendHead(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 TRACE 请求 */
+	virtual BOOL SendTrace(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 OPTIONS 请求 */
+	virtual BOOL SendOptions(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
+	/* 发送 CONNECT 请求 */
+	virtual BOOL SendConnect(CONNID dwConnID, LPCSTR lpszHost, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 获取 HTTP 状态码 */
+	virtual USHORT GetStatusCode(CONNID dwConnID)														= 0;
+
+	/* 添加 Cookie */
+	virtual BOOL AddCookie(CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue, BOOL bRelpace = TRUE)	= 0;
+	/* 删除 Cookie */
+	virtual BOOL DeleteCookie(CONNID dwConnID, LPCSTR lpszName)											= 0;
+	/* 删除所有 Cookie */
+	virtual BOOL DeleteAllCookies(CONNID dwConnID)														= 0;
+
+
+};
+
+/************************************************************************
+名称：复合 Http 响应者组件接口
+描述：定义复合 Http 响应者组件的所有操作方法和属性访问方法
+************************************************************************/
+class IComplexHttpResponder : public IComplexHttp
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：回复请求
+	* 描述：向客户端回复 HTTP 请求
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			usStatusCode	-- HTTP 状态码
+	*			lpszDesc		-- HTTP 状态描述
+	*			lpHeaders		-- 回复请求头
+	*			iHeaderCount	-- 回复请求头数量
+	*			pData			-- 回复请求体
+	*			iLength			-- 回复请求体长度
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendResponse(CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc = nullptr, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pData = nullptr, int iLength = 0)	= 0;
+
+	/*
+	* 名称：发送本地文件
+	* 描述：向指定连接发送 4096 KB 以下的小文件
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			lpszFileName	-- 文件路径
+	*			usStatusCode	-- HTTP 状态码
+	*			lpszDesc		-- HTTP 状态描述
+	*			lpHeaders		-- 回复请求头
+	*			iHeaderCount	-- 回复请求头数量
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendLocalFile(CONNID dwConnID, LPCSTR lpszFileName, USHORT usStatusCode = HSC_OK, LPCSTR lpszDesc = nullptr, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)				= 0;
+
+	/*
+	* 名称：释放连接
+	* 描述：把连接放入释放队列，等待某个时间（通过 SetReleaseDelay() 设置）关闭连接
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL Release(CONNID dwConnID)								= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 获取主机 */
+	virtual LPCSTR GetHost(CONNID dwConnID)								= 0;
+
+	/* 设置连接释放延时（默认：3000 毫秒） */
+	virtual void SetReleaseDelay(DWORD dwReleaseDelay)					= 0;
+	/* 获取连接释放延时 */
+	virtual DWORD GetReleaseDelay()										= 0;
+
+	/* 获取请求行 URL 域掩码（URL 域参考：EnHttpUrlField） */
+	virtual USHORT GetUrlFieldSet(CONNID dwConnID)						= 0;
+	/* 获取某个 URL 域值 */
+	virtual LPCSTR GetUrlField(CONNID dwConnID, EnHttpUrlField enField)	= 0;
+	/* 获取请求方法 */
+	virtual LPCSTR GetMethod(CONNID dwConnID)							= 0;
+};
+
+/************************************************************************
+名称：简单 HTTP 组件接口
+描述：定义 简单 HTTP 组件的所有操作方法和属性访问方法
+************************************************************************/
+class IHttp
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：发送 WebSocket 消息
+	* 描述：向对端端发送 WebSocket 消息
+	*		
+	* 参数：		bFinal			-- 是否结束帧
+	*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+	*			iOperationCode	-- 操作码：0x0 - 0xF
+	*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+	*			pData			-- 消息体数据缓冲区
+	*			iLength			-- 消息体数据长度
+	*			ullBodyLen		-- 消息总长度
+	* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+	* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+	* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+	* 								ullBodyLen < iLength -> 错误参数，发送失败
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4] = nullptr, BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置本地协议版本 */
+	virtual void SetLocalVersion(EnHttpVersion usVersion)				= 0;
+	/* 获取本地协议版本 */
+	virtual EnHttpVersion GetLocalVersion()								= 0;
+
+	/* 检查是否升级协议 */
+	virtual BOOL IsUpgrade()											= 0;
+	/* 检查是否有 Keep-Alive 标识 */
+	virtual BOOL IsKeepAlive()											= 0;
+	/* 获取协议版本 */
+	virtual USHORT GetVersion()											= 0;
+	/* 获取内容长度 */
+	virtual ULONGLONG GetContentLength()								= 0;
+	/* 获取内容类型 */
+	virtual LPCSTR GetContentType()										= 0;
+	/* 获取内容编码 */
+	virtual LPCSTR GetContentEncoding()									= 0;
+	/* 获取传输编码 */
+	virtual LPCSTR GetTransferEncoding()								= 0;
+	/* 获取协议升级类型 */
+	virtual EnHttpUpgradeType GetUpgradeType()							= 0;
+	/* 获取解析错误代码 */
+	virtual USHORT GetParseErrorCode(LPCSTR* lpszErrorDesc = nullptr)	= 0;
+
+	/* 获取 HTTP 状态码 */
+	virtual USHORT GetStatusCode()										= 0;
+
+	/* 获取某个请求头（单值） */
+	virtual BOOL GetHeader(LPCSTR lpszName, LPCSTR* lpszValue)							= 0;
+	/* 获取某个请求头（多值） */
+	virtual BOOL GetHeaders(LPCSTR lpszName, LPCSTR lpszValue[], DWORD& dwCount)		= 0;
+	/* 获取所有请求头 */
+	virtual BOOL GetAllHeaders(THeader lpHeaders[], DWORD& dwCount)						= 0;
+	/* 获取所有请求头名称 */
+	virtual BOOL GetAllHeaderNames(LPCSTR lpszName[], DWORD& dwCount)					= 0;
+
+	/* 获取 Cookie */
+	virtual BOOL GetCookie(LPCSTR lpszName, LPCSTR* lpszValue)							= 0;
+	/* 获取所有 Cookie */
+	virtual BOOL GetAllCookies(TCookie lpCookies[], DWORD& dwCount)						= 0;
+	/* 添加 Cookie */
+	virtual BOOL AddCookie(LPCSTR lpszName, LPCSTR lpszValue, BOOL bRelpace = TRUE)		= 0;
+	/* 删除 Cookie */
+	virtual BOOL DeleteCookie(LPCSTR lpszName)											= 0;
+	/* 删除所有 Cookie */
+	virtual BOOL DeleteAllCookies()														= 0;
+
+	/*
+	// !! maybe implemented in future !! //
+
+	virtual BOOL GetParam(LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
+	virtual BOOL GetParams(LPCSTR lpszName, LPCSTR lpszValue[], DWORD& dwCount)		= 0;
+	virtual BOOL GetAllParams(LPPARAM lpszParam[], DWORD& dwCount)					= 0;
+	virtual BOOL GetAllParamNames(LPCSTR lpszName[], DWORD& dwCount)				= 0;
+	*/
+
+	/* 获取当前 WebSocket 消息状态，传入 nullptr 则不获取相应字段 */
+	virtual BOOL GetWSMessageState(BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain)	= 0;
+
+public:
+	virtual ~IHttp() {}
+};
+
+/************************************************************************
+名称：简单 Http 请求者组件接口
+描述：定义简单 Http 请求者组件的所有操作方法和属性访问方法
+************************************************************************/
+class IHttpRequester : public IHttp
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：发送请求
+	* 描述：向服务端发送 HTTP 请求
+	*		
+	* 参数：		lpszMethod		-- 请求方法
+	*			lpszPath		-- 请求路径
+	*			lpHeaders		-- 请求头
+	*			iHeaderCount	-- 请求头数量
+	*			pBody			-- 请求体
+	*			iLength			-- 请求体长度
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendRequest(LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0)	= 0;
+
+	/*
+	* 名称：发送本地文件
+	* 描述：向指定连接发送 4096 KB 以下的小文件
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			lpszFileName	-- 文件路径
+	*			lpszMethod		-- 请求方法
+	*			lpszPath		-- 请求路径
+	*			lpHeaders		-- 请求头
+	*			iHeaderCount	-- 请求头数量
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendLocalFile(LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)							= 0;
+
+	/* 发送 POST 请求 */
+	virtual BOOL SendPost(LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)														= 0;
+	/* 发送 PUT 请求 */
+	virtual BOOL SendPut(LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)														= 0;
+	/* 发送 PATCH 请求 */
+	virtual BOOL SendPatch(LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)													= 0;
+	/* 发送 GET 请求 */
+	virtual BOOL SendGet(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 DELETE 请求 */
+	virtual BOOL SendDelete(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 HEAD 请求 */
+	virtual BOOL SendHead(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 TRACE 请求 */
+	virtual BOOL SendTrace(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
+	/* 发送 OPTIONS 请求 */
+	virtual BOOL SendOptions(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
+	/* 发送 CONNECT 请求 */
+	virtual BOOL SendConnect(LPCSTR lpszHost, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+};
+
+/************************************************************************
+名称：简单 Http 同步请求者组件接口
+描述：定义简单 Http 同步请求者组件的所有操作方法和属性访问方法
+************************************************************************/
+class IHttpSyncRequester : public IHttpRequester
+{
+public:
+
+	/*
+	* 名称：发送 URL 请求
+	* 描述：向服务端发送 HTTP URL 请求
+	*		
+	* 参数：		lpszMethod		-- 请求方法
+	*			lpszUrl			-- 请求 URL
+	*			lpHeaders		-- 请求头
+	*			iHeaderCount	-- 请求头数量
+	*			pBody			-- 请求体
+	*			iLength			-- 请求体长度
+	*			bForceReconnect	-- 强制重新连接（默认：FALSE，当请求 URL 的主机和端口与现有连接一致时，重用现有连接）
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL OpenUrl(LPCSTR lpszMethod, LPCSTR lpszUrl, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0, BOOL bForceReconnect = FALSE)	= 0;
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：清除请求结果
+	* 描述：清除上一次请求的响应头和响应体等结果信息（该方法会在每次发送请求前自动调用）
+	*
+	* 参数：		
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL CleanupRequestResult	()									= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置连接超时（毫秒，0：系统默认超时，默认：5000） */
+	virtual void SetConnectTimeout		(DWORD dwConnectTimeout)			= 0;
+	/* 设置请求超时（毫秒，0：无限等待，默认：10000） */
+	virtual void SetRequestTimeout		(DWORD dwRequestTimeout)			= 0;
+
+	/* 获取连接超时 */
+	virtual DWORD GetConnectTimeout		()									= 0;
+	/* 获取请求超时 */
+	virtual DWORD GetRequestTimeout		()									= 0;
+
+	/* 获取响应体 */
+	virtual BOOL GetResponseBody		(LPCBYTE* lpszBody, int* iLength)	= 0;
+};
+
+
+/************************************************************************
+名称：HTTP 组件接口
+描述：继承了 HTTP 和 Socket 接口
+************************************************************************/
+typedef DualInterface<IComplexHttpResponder, ITcpServer>	IHttpServer;
+typedef DualInterface<IComplexHttpRequester, ITcpAgent>		IHttpAgent;
+typedef DualInterface<IHttpRequester, ITcpClient>			IHttpClient;
+typedef DualInterface<IHttpSyncRequester, ITcpClient>		IHttpSyncClient;
+
+/************************************************************************
+名称：IComplexHttp 组件监听器基接口
+描述：定义 IComplexHttp 组件监听器的所有事件
+************************************************************************/
+template<class T> class IHttpListenerT
+{
+public:
+
+	/*
+	* 名称：开始解析通知
+	* 描述：开始解析 HTTP 报文时，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnMessageBegin(T* pSender, CONNID dwConnID)										= 0;
+
+	/*
+	* 名称：请求行解析完成通知（仅用于 HTTP 服务端）
+	* 描述：请求行解析完成后，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			lpszMethod	-- 请求方法名
+	*			lpszUrl		-- 请求行中的 URL 域
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnRequestLine(T* pSender, CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)		= 0;
+
+	/*
+	* 名称：状态行解析完成通知（仅用于 HTTP 客户端）
+	* 描述：状态行解析完成后，向监听器发送该通知
+	*		
+	* 参数：		pSender			-- 事件源对象
+	*			dwConnID		-- 连接 ID
+	*			usStatusCode	-- HTTP 状态码
+	*			lpszDesc		-- 状态描述
+	* 返回值：	HPR_OK			-- 继续执行
+	*			HPR_ERROR		-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnStatusLine(T* pSender, CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc)	= 0;
+
+	/*
+	* 名称：请求头通知
+	* 描述：每当解析完成一个请求头后，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			lpszName	-- 请求头名称
+	*			lpszValue	-- 请求头值
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnHeader(T* pSender, CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)			= 0;
+
+	/*
+	* 名称：请求头完成通知
+	* 描述：解析完成所有请求头后，向监听器发送该通知
+	*		
+	* 参数：		pSender			-- 事件源对象
+	*			dwConnID		-- 连接 ID
+	* 返回值：	HPR_OK			-- 继续执行
+	*			HPR_SKIP_BODY	-- 跳过当前请求的 HTTP BODY
+	*			HPR_UPGRADE		-- 升级协议
+	*			HPR_ERROR		-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnHeadersComplete(T* pSender, CONNID dwConnID)									= 0;
+
+	/*
+	* 名称：BODY 报文通知
+	* 描述：每当接收到 HTTP BODY 报文，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			pData		-- 数据缓冲区
+	*			iLength		-- 数据长度
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnBody(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
+
+	/*
+	* 名称：Chunked 报文头通知
+	* 描述：每当解析出一个 Chunked 报文头，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			iLength		-- Chunked 报文体数据长度
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnChunkHeader(T* pSender, CONNID dwConnID, int iLength)							= 0;
+
+	/*
+	* 名称：Chunked 报文结束通知
+	* 描述：每当解析完一个 Chunked 报文，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnChunkComplete(T* pSender, CONNID dwConnID)										= 0;
+
+	/*
+	* 名称：完成解析通知
+	* 描述：每当解析完成一个完整 HTTP 报文，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HPR_OK		-- 继续执行
+	*			HPR_ERROR	-- 引发 OnParserError() 和 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnMessageComplete(T* pSender, CONNID dwConnID)									= 0;
+
+	/*
+	* 名称：升级协议通知
+	* 描述：当需要升级协议时，向监听器发送该通知
+	*		
+	* 参数：		pSender			-- 事件源对象
+	*			dwConnID		-- 连接 ID
+	*			enUpgradeType	-- 协议类型
+	* 返回值：	HPR_OK			-- 继续执行
+	*			HPR_ERROR		-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnUpgrade(T* pSender, CONNID dwConnID, EnHttpUpgradeType enUpgradeType)			= 0;
+
+	/*
+	* 名称：解析错误通知
+	* 描述：当解析 HTTP 报文错误时，向监听器发送该通知
+	*		
+	* 参数：		pSender			-- 事件源对象
+	*			dwConnID		-- 连接 ID
+	*			iErrorCode		-- 错误代码
+	*			lpszErrorDesc	-- 错误描述
+	* 返回值：	HPR_OK			-- 继续执行
+	*			HPR_ERROR		-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHttpParseResult OnParseError(T* pSender, CONNID dwConnID, int iErrorCode, LPCSTR lpszErrorDesc)	= 0;
+
+	/*
+	* 名称：WebSocket 数据包头通知
+	* 描述：当解析 WebSocket 数据包头时，向监听器发送该通知
+	*		
+	* 参数：		pSender			-- 事件源对象
+	*			dwConnID		-- 连接 ID
+	*			bFinal			-- 是否结束帧
+	*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+	*			iOperationCode	-- 操作码：0x0 - 0xF
+	*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+	*			ullBodyLen		-- 消息体长度
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnWSMessageHeader(T* pSender, CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)	= 0;
+
+	/*
+	* 名称：WebSocket 数据包体通知
+	* 描述：当接收到 WebSocket 数据包体时，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	*			pData		-- 消息体数据缓冲区
+	*			iLength		-- 消息体数据长度
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnWSMessageBody(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)			= 0;
+
+	/*
+	* 名称：WebSocket 数据包完成通知
+	* 描述：当完整接收一个 WebSocket 数据包时，向监听器发送该通知
+	*		
+	* 参数：		pSender		-- 事件源对象
+	*			dwConnID	-- 连接 ID
+	* 返回值：	HR_OK / HR_IGNORE	-- 继续执行
+	*			HR_ERROR			-- 引发 OnClose() 事件并关闭连接
+	*/
+	virtual EnHandleResult OnWSMessageComplete(T* pSender, CONNID dwConnID)										= 0;
+
+public:
+	virtual ~IHttpListenerT() {}
+};
+
+/************************************************************************
+名称：IHttpServer 组件端监听器接口
+描述：定义 IHttpServer 监听器的所有事件
+************************************************************************/
+class IHttpServerListener : public IHttpListenerT<IHttpServer>, public ITcpServerListener
+{
+public:
+
+};
+
+/************************************************************************
+名称：IHttpAgent 组件端监听器接口
+描述：定义 IHttpAgent 监听器的所有事件
+************************************************************************/
+class IHttpAgentListener : public IHttpListenerT<IHttpAgent>, public ITcpAgentListener
+{
+public:
+
+};
+
+/************************************************************************
+名称：IHttpClient 组件端监听器接口
+描述：定义 IHttpClient 监听器的所有事件
+************************************************************************/
+class IHttpClientListener : public IHttpListenerT<IHttpClient>, public ITcpClientListener
+{
+public:
+
+};
+
+/************************************************************************
+名称：IHttpServerListener 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CHttpServerListener : public IHttpServerListener
+{
+public:
+	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen)										{return HR_IGNORE;}
+	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient)							{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(ITcpServer* pSender, CONNID dwConnID)											{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, int iLength)									{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)					{return HR_IGNORE;}
+	virtual EnHandleResult OnShutdown(ITcpServer* pSender)																{return HR_IGNORE;}
+
+	virtual EnHttpParseResult OnMessageBegin(IHttpServer* pSender, CONNID dwConnID)										{return HPR_OK;}
+	virtual EnHttpParseResult OnRequestLine(IHttpServer* pSender, CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)	{return HPR_OK;}
+	virtual EnHttpParseResult OnStatusLine(IHttpServer* pSender, CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc)	{return HPR_OK;}
+	virtual EnHttpParseResult OnHeader(IHttpServer* pSender, CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)		{return HPR_OK;}
+	virtual EnHttpParseResult OnChunkHeader(IHttpServer* pSender, CONNID dwConnID, int iLength)							{return HPR_OK;}
+	virtual EnHttpParseResult OnChunkComplete(IHttpServer* pSender, CONNID dwConnID)									{return HPR_OK;}
+	virtual EnHttpParseResult OnUpgrade(IHttpServer* pSender, CONNID dwConnID, EnHttpUpgradeType enUpgradeType)			{return HPR_OK;}
+
+	virtual EnHandleResult OnWSMessageHeader(IHttpServer* pSender, CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)	{return HR_IGNORE;}
+	virtual EnHandleResult OnWSMessageBody(IHttpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+	virtual EnHandleResult OnWSMessageComplete(IHttpServer* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：IHttpAgentListener 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CHttpAgentListener : public IHttpAgentListener
+{
+public:
+	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, SOCKET socket)							{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(ITcpAgent* pSender, CONNID dwConnID)												{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(ITcpAgent* pSender, CONNID dwConnID)												{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpAgent* pSender, CONNID dwConnID, int iLength)									{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)					{return HR_IGNORE;}
+	virtual EnHandleResult OnShutdown(ITcpAgent* pSender)																{return HR_IGNORE;}
+
+	virtual EnHttpParseResult OnMessageBegin(IHttpAgent* pSender, CONNID dwConnID)										{return HPR_OK;}
+	virtual EnHttpParseResult OnRequestLine(IHttpAgent* pSender, CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)	{return HPR_OK;}
+	virtual EnHttpParseResult OnStatusLine(IHttpAgent* pSender, CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc)	{return HPR_OK;}
+	virtual EnHttpParseResult OnHeader(IHttpAgent* pSender, CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)			{return HPR_OK;}
+	virtual EnHttpParseResult OnChunkHeader(IHttpAgent* pSender, CONNID dwConnID, int iLength)							{return HPR_OK;}
+	virtual EnHttpParseResult OnChunkComplete(IHttpAgent* pSender, CONNID dwConnID)										{return HPR_OK;}
+	virtual EnHttpParseResult OnUpgrade(IHttpAgent* pSender, CONNID dwConnID, EnHttpUpgradeType enUpgradeType)			{return HPR_OK;}
+
+	virtual EnHandleResult OnWSMessageHeader(IHttpAgent* pSender, CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)	{return HR_IGNORE;}
+	virtual EnHandleResult OnWSMessageBody(IHttpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+	virtual EnHandleResult OnWSMessageComplete(IHttpAgent* pSender, CONNID dwConnID)									{return HR_IGNORE;}
+};
+
+/************************************************************************
+名称：IHttpClientListener 监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+
+class CHttpClientListener : public IHttpClientListener
+{
+public:
+	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, SOCKET socket)						{return HR_IGNORE;}
+	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID)												{return HR_IGNORE;}
+	virtual EnHandleResult OnHandShake(ITcpClient* pSender, CONNID dwConnID)											{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, int iLength)									{return HR_IGNORE;}
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				{return HR_IGNORE;}
+	virtual EnHandleResult OnSend(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)					{return HR_IGNORE;}
+
+	virtual EnHttpParseResult OnMessageBegin(IHttpClient* pSender, CONNID dwConnID)										{return HPR_OK;}
+	virtual EnHttpParseResult OnRequestLine(IHttpClient* pSender, CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)	{return HPR_OK;}
+	virtual EnHttpParseResult OnStatusLine(IHttpClient* pSender, CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc)	{return HPR_OK;}
+	virtual EnHttpParseResult OnHeader(IHttpClient* pSender, CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)		{return HPR_OK;}
+	virtual EnHttpParseResult OnChunkHeader(IHttpClient* pSender, CONNID dwConnID, int iLength)							{return HPR_OK;}
+	virtual EnHttpParseResult OnChunkComplete(IHttpClient* pSender, CONNID dwConnID)									{return HPR_OK;}
+	virtual EnHttpParseResult OnUpgrade(IHttpClient* pSender, CONNID dwConnID, EnHttpUpgradeType enUpgradeType)			{return HPR_OK;}
+
+	virtual EnHandleResult OnWSMessageHeader(IHttpClient* pSender, CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)	{return HR_IGNORE;}
+	virtual EnHandleResult OnWSMessageBody(IHttpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		{return HR_IGNORE;}
+	virtual EnHandleResult OnWSMessageComplete(IHttpClient* pSender, CONNID dwConnID)									{return HR_IGNORE;}
 };

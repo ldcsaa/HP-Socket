@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -33,6 +33,14 @@
 #include "TcpPackServer.h"
 #include "TcpPackClient.h"
 #include "TcpPackAgent.h"
+
+#include "HttpServer.h"
+#include "HttpAgent.h"
+#include "HttpClient.h"
+
+/*****************************************************************************************************************************************************/
+/******************************************************************** SSL Exports ********************************************************************/
+/*****************************************************************************************************************************************************/
 
 HPSOCKET_API ITcpServer* HP_Create_SSLServer(ITcpServerListener* pListener)
 {
@@ -124,9 +132,62 @@ HPSOCKET_API void HP_Destroy_SSLPackClient(ITcpPackClient* pClient)
 	delete pClient;
 }
 
-HPSOCKET_API BOOL HP_SSL_Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTPS Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API IHttpServer* HP_Create_HttpsServer(IHttpServerListener* pListener)
 {
-	return g_SSL.Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return (IHttpServer*)(new CHttpsServer(pListener));
+}
+
+HPSOCKET_API IHttpAgent* HP_Create_HttpsAgent(IHttpAgentListener* pListener)
+{
+	return (IHttpAgent*)(new CHttpsAgent(pListener));
+}
+
+HPSOCKET_API IHttpClient* HP_Create_HttpsClient(IHttpClientListener* pListener)
+{
+	return (IHttpClient*)(new CHttpsClient(pListener));
+}
+
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpsSyncClient()
+{
+	return (IHttpSyncClient*)(new CHttpsSyncClient());
+}
+
+HPSOCKET_API void HP_Destroy_HttpsServer(IHttpServer* pServer)
+{
+	delete pServer;
+}
+
+HPSOCKET_API void HP_Destroy_HttpsAgent(IHttpAgent* pAgent)
+{
+	delete pAgent;
+}
+
+HPSOCKET_API void HP_Destroy_HttpsClient(IHttpClient* pClient)
+{
+	delete pClient;
+}
+
+HPSOCKET_API void HP_Destroy_HttpsSyncClient(IHttpSyncClient* pClient)
+{
+	delete pClient;
+}
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API BOOL HP_SSL_Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath, Fn_SNI_ServerNameCallback fnServerNameCallback)
+{
+	return g_SSL.Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, fnServerNameCallback);
+}
+
+HPSOCKET_API int HP_SSL_AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+{
+	return g_SSL.AddServerContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
 }
 
 HPSOCKET_API void HP_SSL_Cleanup()
@@ -134,7 +195,7 @@ HPSOCKET_API void HP_SSL_Cleanup()
 	g_SSL.Cleanup();
 }
 
-HPSOCKET_API void HP_SSL_RemoveThreadLocalState()
+HPSOCKET_API void HP_SSL_RemoveThreadLocalState(DWORD dwThreadID)
 {
 	g_SSL.RemoveThreadLocalState();
 }

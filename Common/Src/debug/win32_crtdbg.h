@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.14
+ * Version	: 2.3.17
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -71,6 +71,9 @@ namespace __dbg_impl
 	static __dbg_impl::CDebugEnv __dbgEnv;
 }
 
+#pragma warning(push)
+#pragma warning(disable: 4595)
+
 inline void* __cdecl operator new(size_t nSize, const char* lpszFileName, int nLine)
 {
 	// __dbg_impl::CGuard guard;
@@ -132,6 +135,8 @@ inline void __cdecl operator delete[](void *p, const std::nothrow_t&)
 {
 	operator delete(p);
 }
+
+#pragma warning(pop)
 
 #define new new(__FILE__, __LINE__)
 

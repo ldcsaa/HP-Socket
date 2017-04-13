@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -43,9 +43,9 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj)
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
 	{
-		EnHandleResult result = __super::DoFireConnect(pSocketObj);
+		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
 
 		if(result != HR_ERROR)
 		{
@@ -93,6 +93,7 @@ protected:
 	{
 		__super::PrepareStart();
 
+		m_bfPool.SetMaxCacheSize	(GetMaxConnectionCount());
 		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
 		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
 		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
@@ -104,8 +105,8 @@ protected:
 	}
 
 public:
-	CTcpPullAgentT(ITcpAgentListener* psoListener)
-	: T(psoListener)
+	CTcpPullAgentT(ITcpAgentListener* pListener)
+	: T(pListener)
 	{
 
 	}

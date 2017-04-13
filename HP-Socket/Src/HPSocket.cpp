@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -37,43 +37,13 @@
 #include "UdpClient.h"
 #include "UdpCast.h"
 
-/*
-#if !defined(_WIN64) && !defined(HPSOCKET_STATIC_LIB)
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpServer=_HP_Create_TcpServer")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpAgent=_HP_Create_TcpAgent")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpClient=_HP_Create_TcpClient")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullServer=_HP_Create_TcpPullServer")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullAgent=_HP_Create_TcpPullAgent")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPullClient=_HP_Create_TcpPullClient")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPackServer=_HP_Create_TcpPackServer")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPackAgent=_HP_Create_TcpPackAgent")
-	#pragma comment(linker, "/EXPORT:HP_Create_TcpPackClient=_HP_Create_TcpPackClient")
-	#pragma comment(linker, "/EXPORT:HP_Create_UdpServer=_HP_Create_UdpServer")
-	#pragma comment(linker, "/EXPORT:HP_Create_UdpClient=_HP_Create_UdpClient")
-	#pragma comment(linker, "/EXPORT:HP_Create_UdpCast=_HP_Create_UdpCast")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpServer=_HP_Destroy_TcpServer")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpAgent=_HP_Destroy_TcpAgent")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpClient=_HP_Destroy_TcpClient")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullServer=_HP_Destroy_TcpPullServer")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullAgent=_HP_Destroy_TcpPullAgent")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPullClient=_HP_Destroy_TcpPullClient")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPackServer=_HP_Destroy_TcpPackServer")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPackAgent=_HP_Destroy_TcpPackAgent")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_TcpPackClient=_HP_Destroy_TcpPackClient")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpServer=_HP_Destroy_UdpServer")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpClient=_HP_Destroy_UdpClient")
-	#pragma comment(linker, "/EXPORT:HP_Destroy_UdpCast=_HP_Destroy_UdpCast")
-	#pragma comment(linker, "/EXPORT:HP_GetSocketErrorDesc=_HP_GetSocketErrorDesc")
-	#pragma comment(linker, "/EXPORT:SYS_GetLastError=_SYS_GetLastError")
-	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError")
-	#pragma comment(linker, "/EXPORT:SYS_SetSocketOption=_SYS_SetSocketOption")
-	#pragma comment(linker, "/EXPORT:SYS_GetSocketOption=_SYS_GetSocketOption")
-	#pragma comment(linker, "/EXPORT:SYS_IoctlSocket=_SYS_IoctlSocket")
-	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl")
-	#pragma comment(linker, "/EXPORT:SYS_GetSocketLocalAddress=_SYS_GetSocketLocalAddress")
-	#pragma comment(linker, "/EXPORT:SYS_GetSocketRemoteAddress=_SYS_GetSocketRemoteAddress")
-#endif
-*/
+#include "HttpServer.h"
+#include "HttpAgent.h"
+#include "HttpClient.h"
+
+/*****************************************************************************************************************************************************/
+/****************************************************************** TCP/UDP Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
 
 HPSOCKET_API ITcpServer* HP_Create_TcpServer(ITcpServerListener* pListener)
 {
@@ -195,6 +165,59 @@ HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast)
 	delete pCast;
 }
 
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTP Exports *******************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API IHttpServer* HP_Create_HttpServer(IHttpServerListener* pListener)
+{
+	return (IHttpServer*)(new CHttpServer(pListener));
+}
+
+HPSOCKET_API IHttpAgent* HP_Create_HttpAgent(IHttpAgentListener* pListener)
+{
+	return (IHttpAgent*)(new CHttpAgent(pListener));
+}
+
+HPSOCKET_API IHttpClient* HP_Create_HttpClient(IHttpClientListener* pListener)
+{
+	return (IHttpClient*)(new CHttpClient(pListener));
+}
+
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient()
+{
+	return (IHttpSyncClient*)(new CHttpSyncClient());
+}
+
+HPSOCKET_API void HP_Destroy_HttpServer(IHttpServer* pServer)
+{
+	delete pServer;
+}
+
+HPSOCKET_API void HP_Destroy_HttpAgent(IHttpAgent* pAgent)
+{
+	delete pAgent;
+}
+
+HPSOCKET_API void HP_Destroy_HttpClient(IHttpClient* pClient)
+{
+	delete pClient;
+}
+
+HPSOCKET_API void HP_Destroy_HttpSyncClient(IHttpSyncClient* pClient)
+{
+	delete pClient;
+}
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API DWORD HP_GetHPSocketVersion()
+{
+	return ::GetHPSocketVersion();
+}
+
 HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode)
 {
 	return ::GetSocketErrorDesc(enCode);
@@ -230,12 +253,197 @@ HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBu
 	return ::SSO_WSAIoctl(sock, dwIoControlCode, lpvInBuffer, cbInBuffer, lpvOutBuffer, cbOutBuffer, lpcbBytesReturned);
 }
 
-HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+HPSOCKET_API int SYS_SSO_NoDelay(SOCKET sock, BOOL bNoDelay)
 {
-	return ::GetSocketLocalAddress(socket, lpszAddress, *piAddressLen, *pusPort);
+	return ::SSO_NoDelay(sock, bNoDelay);
 }
 
-HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
+HPSOCKET_API int SYS_SSO_DontLinger(SOCKET sock, BOOL bDont)
 {
-	return ::GetSocketRemoteAddress(socket, lpszAddress, *piAddressLen, *pusPort);
+	return ::SSO_DontLinger(sock, bDont);
+}
+
+HPSOCKET_API int SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger)
+{
+	return ::SSO_Linger(sock, l_onoff, l_linger);
+}
+
+HPSOCKET_API int SYS_SSO_RecvBuffSize(SOCKET sock, int size)
+{
+	return ::SSO_RecvBuffSize(sock, size);
+}
+
+HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size)
+{
+	return ::SSO_SendBuffSize(sock, size);
+}
+
+HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse)
+{
+	return ::SSO_ReuseAddress(sock, bReuse);
+}
+
+HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
+{
+	return ::GetSocketLocalAddress(socket, lpszAddress, iAddressLen, usPort);
+}
+
+HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
+{
+	return ::GetSocketRemoteAddress(socket, lpszAddress, iAddressLen, usPort);
+}
+
+HPSOCKET_API ULONG SYS_GetIPv4InAddr(LPCTSTR lpszAddress)
+{
+	return ::GetIPv4InAddr(lpszAddress);
+}
+
+HPSOCKET_API BOOL SYS_IsIPAddress(LPCTSTR lpszAddress)
+{
+	return ::IsIPAddress(lpszAddress);
+}
+
+HPSOCKET_API BOOL SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int& iIPLenth)
+{
+	return ::GetIPAddress(lpszHost, lpszIP, iIPLenth);
+}
+
+HPSOCKET_API BOOL SYS_GetOptimalIPByHostName(LPCTSTR lpszHost, ULONG& ulAddr)
+{
+	IN_ADDR addr;
+
+	::GetOptimalIPByHostName(lpszHost, addr);
+	ulAddr = addr.s_addr;
+
+	return addr.s_addr != 0;
+}
+
+HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value)
+{
+	return ::NToH64(value);
+}
+
+HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value)
+{
+	return ::HToN64(value);
+}
+
+HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return ::CodePageToUnicode(iCodePage, szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return ::UnicodeToCodePage(iCodePage, szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return ::GbkToUnicode(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return ::UnicodeToGbk(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return ::Utf8ToUnicode(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return ::UnicodeToUtf8(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return ::GbkToUtf8(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Compress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel, int iMethod, int iWindowBits, int iMemLevel, int iStrategy)
+{
+	return ::CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy);
+}
+
+HPSOCKET_API int SYS_Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Uncompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits)
+{
+	return ::UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, iWindowBits);
+}
+
+HPSOCKET_API DWORD SYS_GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
+{
+	return ::GuessCompressBound(dwSrcLen, bGZip);
+}
+
+HPSOCKET_API int SYS_GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::GZipCompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::GZipUncompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GZipGuessUncompressBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
+{
+	return ::GuessBase64EncodeBound(dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }

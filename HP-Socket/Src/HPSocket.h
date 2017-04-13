@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,7 +28,7 @@ Module:  HPSocket
 Usage:
 		方法一：
 		--------------------------------------------------------------------------------------
-		0. 应用程序包含 SocketInterface.h 和 HPSocket.h 头文件
+		0. 应用程序包含 HPTypeDef.h / SocketInterface.h / HPSocket.h 头文件
 		1. 调用 HP_Create_Xxx() 函数创建 HPSocket 对象
 		2. 使用完毕后调用 HP_Destroy_Xxx() 函数销毁 HPSocket 对象
 
@@ -77,6 +77,79 @@ Release:
 #endif
 
 #include "SocketInterface.h"
+
+/*****************************************************************************************************************************************************/
+/****************************************************************** TCP/UDP Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
+
+/**************************************************/
+/************** HPSocket 对象智能指针 **************/
+
+template<class T, class _Listener, class _Creator> class CHPSocketPtr
+{
+public:
+	CHPSocketPtr(_Listener* pListener)
+	{
+		if(pListener)
+			m_pObj = _Creator::Create(pListener);
+		else
+			m_pObj = nullptr;
+	}
+
+	CHPSocketPtr(BOOL bCreate = TRUE)
+	{
+		if(bCreate)
+			m_pObj = _Creator::Create();
+		else
+			m_pObj = nullptr;
+	}
+
+	~CHPSocketPtr()
+	{
+		Reset();
+	}
+
+public:
+	CHPSocketPtr& Reset(T* pObj = nullptr)
+	{
+		if(pObj != m_pObj)
+		{
+			if(m_pObj)
+				_Creator::Destroy(m_pObj);
+
+			m_pObj = pObj;
+		}
+
+		return *this;
+	}
+
+	CHPSocketPtr& Attach(T* pObj)
+	{
+		return Reset(pObj);
+	}
+
+	T* Detach()
+	{
+		T* pObj	= m_pObj;
+		m_pObj	= nullptr;
+
+		return pObj;
+	}
+
+	BOOL IsValid	()	const	{return m_pObj != nullptr	;}
+	T* Get			()	const	{return m_pObj				;}
+	T* operator ->	()	const	{return m_pObj				;}
+	operator T*		()	const	{return m_pObj				;}
+
+	CHPSocketPtr& operator = (T* pObj)	{return Reset(pObj)	;}
+
+private:
+	CHPSocketPtr(const CHPSocketPtr&);
+	CHPSocketPtr& operator = (const CHPSocketPtr&);
+
+private:
+	T* m_pObj;
+};
 
 /**************************************************/
 /**************** HPSocket 导出函数 ****************/
@@ -130,25 +203,6 @@ HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient);
 // 销毁 IUdpCast 对象
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast);
-
-// 获取错误描述文本
-HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode);
-// 调用系统的 ::GetLastError() 方法获取系统错误代码
-HPSOCKET_API DWORD SYS_GetLastError	();
-// 调用系统的 ::WSAGetLastError() 方法获取通信错误代码
-HPSOCKET_API int SYS_WSAGetLastError();
-// 调用系统的 setsockopt()
-HPSOCKET_API int SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID val, int len);
-// 调用系统的 getsockopt()
-HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
-// 调用系统的 ioctlsocket()
-HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
-// 调用系统的 ::WSAIoctl()
-HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
-// 获取 SOCKET 本地地址信息
-HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
-// 获取 SOCKET 远程地址信息
-HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort);
 
 // ITcpServer 对象创建器
 struct TcpServer_Creator
@@ -318,67 +372,6 @@ struct UdpCast_Creator
 	}
 };
 
-/**************************************************/
-/************** HPSocket 对象智能指针 **************/
-
-template<class T, class _Listener, class _Creator> class CHPSocketPtr
-{
-public:
-	CHPSocketPtr(_Listener* pListener = nullptr)
-	{
-		if(pListener)
-			m_pObj = _Creator::Create(pListener);
-		else
-			m_pObj = nullptr;
-	}
-
-	~CHPSocketPtr()
-	{
-		Reset();
-	}
-
-public:
-	CHPSocketPtr& Reset(T* pObj = nullptr)
-	{
-		if(pObj != m_pObj)
-		{
-			if(m_pObj)
-				_Creator::Destroy(m_pObj);
-
-			m_pObj = pObj;
-		}
-
-		return *this;
-	}
-
-	CHPSocketPtr& Attach(T* pObj)
-	{
-		return Reset(pObj);
-	}
-
-	T* Detach()
-	{
-		T* pObj	= m_pObj;
-		m_pObj	= nullptr;
-
-		return pObj;
-	}
-
-	BOOL IsValid	()	const	{return m_pObj != nullptr	;}
-	T* Get			()	const	{return m_pObj				;}
-	T* operator ->	()	const	{return m_pObj				;}
-	operator T*		()	const	{return m_pObj				;}
-
-	CHPSocketPtr& operator = (T* pObj)	{return Reset(pObj)	;}
-
-private:
-	CHPSocketPtr(const CHPSocketPtr&);
-	CHPSocketPtr& operator = (const CHPSocketPtr&);
-
-private:
-	T* m_pObj;
-};
-
 // ITcpServer 对象智能指针
 typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
 // ITcpAgent 对象智能指针
@@ -403,3 +396,199 @@ typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpSe
 typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
 // IUdpCast 对象智能指针
 typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
+
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTP Exports *******************************************************************/
+/*****************************************************************************************************************************************************/
+
+// 创建 IHttpServer 对象
+HPSOCKET_API IHttpServer* HP_Create_HttpServer(IHttpServerListener* pListener);
+// 创建 IHttpAgent 对象
+HPSOCKET_API IHttpAgent* HP_Create_HttpAgent(IHttpAgentListener* pListener);
+// 创建 IHttpClient 对象
+HPSOCKET_API IHttpClient* HP_Create_HttpClient(IHttpClientListener* pListener);
+// 创建 IHttpSyncClient 对象
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient();
+
+// 销毁 IHttpServer 对象
+HPSOCKET_API void HP_Destroy_HttpServer(IHttpServer* pServer);
+// 销毁 IHttpAgent 对象
+HPSOCKET_API void HP_Destroy_HttpAgent(IHttpAgent* pAgent);
+// 销毁 IHttpClient 对象
+HPSOCKET_API void HP_Destroy_HttpClient(IHttpClient* pClient);
+// 销毁 IHttpSyncClient 对象
+HPSOCKET_API void HP_Destroy_HttpSyncClient(IHttpSyncClient* pClient);
+
+// IHttpServer 对象创建器
+struct HttpServer_Creator
+{
+	static IHttpServer* Create(IHttpServerListener* pListener)
+	{
+		return HP_Create_HttpServer(pListener);
+	}
+
+	static void Destroy(IHttpServer* pServer)
+	{
+		HP_Destroy_HttpServer(pServer);
+	}
+};
+
+// IHttpAgent 对象创建器
+struct HttpAgent_Creator
+{
+	static IHttpAgent* Create(IHttpAgentListener* pListener)
+	{
+		return HP_Create_HttpAgent(pListener);
+	}
+
+	static void Destroy(IHttpAgent* pAgent)
+	{
+		HP_Destroy_HttpAgent(pAgent);
+	}
+};
+
+// IHttpClient 对象创建器
+struct HttpClient_Creator
+{
+	static IHttpClient* Create(IHttpClientListener* pListener)
+	{
+		return HP_Create_HttpClient(pListener);
+	}
+
+	static void Destroy(IHttpClient* pClient)
+	{
+		HP_Destroy_HttpClient(pClient);
+	}
+};
+
+// IHttpSyncClient 对象创建器
+struct HttpSyncClient_Creator
+{
+	static IHttpSyncClient* Create()
+	{
+		return HP_Create_HttpSyncClient();
+	}
+
+	static void Destroy(IHttpSyncClient* pClient)
+	{
+		HP_Destroy_HttpSyncClient(pClient);
+	}
+};
+
+// IHttpServer 对象智能指针
+typedef CHPSocketPtr<IHttpServer, IHttpServerListener, HttpServer_Creator>		CHttpServerPtr;
+// IHttpAgent 对象智能指针
+typedef CHPSocketPtr<IHttpAgent, IHttpAgentListener, HttpAgent_Creator>			CHttpAgentPtr;
+// IHttpClient 对象智能指针
+typedef CHPSocketPtr<IHttpClient, IHttpClientListener, HttpClient_Creator>		CHttpClientPtr;
+// IHttpSyncClient 对象智能指针
+typedef CHPSocketPtr<IHttpSyncClient, BOOL, HttpSyncClient_Creator>				CHttpSyncClientPtr;
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
+HPSOCKET_API DWORD HP_GetHPSocketVersion();
+
+// 获取错误描述文本
+HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode);
+// 调用系统的 GetLastError() 方法获取系统错误代码
+HPSOCKET_API DWORD SYS_GetLastError	();
+// 调用系统的 WSAGetLastError() 方法获取系统错误代码
+HPSOCKET_API int SYS_WSAGetLastError();
+// 调用系统的 setsockopt()
+HPSOCKET_API int SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID val, int len);
+// 调用系统的 getsockopt()
+HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
+// 调用系统的 ioctlsocket()
+HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
+// 调用系统的 WSAIoctl()
+HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
+
+// 设置 socket 选项：IPPROTO_TCP -> TCP_NODELAY
+HPSOCKET_API int SYS_SSO_NoDelay(SOCKET sock, BOOL bNoDelay);
+// 设置 socket 选项：SOL_SOCKET -> SO_DONTLINGER
+HPSOCKET_API int SYS_SSO_DontLinger(SOCKET sock, BOOL bDont);
+// 设置 socket 选项：SOL_SOCKET -> SO_LINGER
+HPSOCKET_API int SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger);
+// 设置 socket 选项：SOL_SOCKET -> SO_RCVBUF
+HPSOCKET_API int SYS_SSO_RecvBuffSize(SOCKET sock, int size);
+// 设置 socket 选项：SOL_SOCKET -> SO_SNDBUF
+HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size);
+// 设置 socket 选项：SOL_SOCKET -> SO_REUSEADDR
+HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse);
+
+// 获取 SOCKET 本地地址信息
+HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+// 获取 SOCKET 远程地址信息
+HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+
+/* IPv4 字符串地址转换为整数 */
+HPSOCKET_API ULONG SYS_GetIPv4InAddr(LPCTSTR lpszAddress);
+/* 检查字符串是否符合 IP 地址格式 */
+HPSOCKET_API BOOL SYS_IsIPAddress(LPCTSTR lpszAddress);
+/* 通过主机名获取 IP 地址 */
+HPSOCKET_API BOOL SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int& iIPLenth);
+/* 通过主机名获取最优的 IP 地址 */
+HPSOCKET_API BOOL SYS_GetOptimalIPByHostName(LPCTSTR lpszHost, ULONG& ulAddr);
+
+/* 64 位网络字节序转主机字节序 */
+HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value);
+/* 64 位主机字节序转网络字节序 */
+HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value);
+
+// CP_XXX -> UNICODE
+HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> CP_XXX
+HPSOCKET_API BOOL SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength);
+// GBK -> UNICODE
+HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> GBK
+HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength);
+// UTF8 -> UNICODE
+HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> UTF8
+HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength);
+// GBK -> UTF8
+HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength);
+// UTF8 -> GBK
+HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
+
+// 普通压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// 高级压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+//（默认参数：iLevel -> -1，iMethod -> 8，iWindowBits -> 15，iMemLevel -> 8，iStrategy -> 0）
+HPSOCKET_API int SYS_CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel = -1, int iMethod = 8, int iWindowBits = 15, int iMemLevel = 8, int iStrategy = 0);
+// 普通解压（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// 高级解压（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+//（默认参数：iWindowBits -> 15）
+HPSOCKET_API int SYS_UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits = 15);
+// 推测压缩结果长度
+HPSOCKET_API DWORD SYS_GuessCompressBound(DWORD dwSrcLen, BOOL bGZip = FALSE);
+
+// Gzip 压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Gzip 解压（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// 推测 Gzip 解压结果长度（如果返回 0 或不合理值则说明输入内容并非有效的 Gzip 格式）
+HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+
+// 计算 Base64 编码后长度
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
+// 计算 Base64 解码后长度
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+// 计算 URL 编码后长度
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// 计算 URL 解码后长度
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);

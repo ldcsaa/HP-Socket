@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.14
+ * Version	: 2.3.17
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -601,7 +601,7 @@ class CBufferPool
 	typedef CRingPool<TBuffer>						TBufferList;
 	typedef CCASQueue<TBuffer>						TBufferQueue;
 
-	typedef CRingCache<TBuffer, ULONG_PTR, true>	TBufferCache;
+	typedef CRingCache2<TBuffer, ULONG_PTR, true>	TBufferCache;
 
 public:
 	void		PutFreeBuffer	(ULONG_PTR dwID);

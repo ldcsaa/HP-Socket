@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,10 +28,10 @@ Module:  HPSocket-SSL
 Usage:
 		方法一：
 		--------------------------------------------------------------------------------------
-		0. 应用程序包含 SocketInterface-SSL.h 和 HPSocket-SSL.h 头文件
-		1. 启动通信前调用 HP_SSL_Initialize() 函数初始化 SSL 全局环境参数，并确保方法返回成功
+		0. 应用程序包含 HPTypeDef.h / SocketInterface.h / HPSocket.h / HPSocket-SSL.h 头文件
+		1. 启动通信前调用 SSL_Initialize() 函数初始化 SSL 全局环境参数，并确保方法返回成功
 		2. 使用 HPSocket 组件执行通信（参考：HPSocket.h）
-		3. 通信结束后调用 HP_SSL_Cleanup() 函数清理 SSL 全局运行环境
+		3. 通信结束后调用 SSL_Cleanup() 函数清理 SSL 全局运行环境
 
 		方法二：
 		--------------------------------------------------------------------------------------
@@ -66,8 +66,15 @@ Release:
 
 #pragma once
 
+#ifndef _SSL_SUPPORT
+	#define _SSL_SUPPORT
+#endif
+
 #include "HPSocket.h"
-#include "SocketInterface-SSL.h"
+
+/*****************************************************************************************************************************************************/
+/******************************************************************** SSL Exports ********************************************************************/
+/*****************************************************************************************************************************************************/
 
 /**************************************************/
 /************** HPSocket-SSL 导出函数 **************/
@@ -109,49 +116,6 @@ HPSOCKET_API void HP_Destroy_SSLPackServer(ITcpPackServer* pServer);
 HPSOCKET_API void HP_Destroy_SSLPackAgent(ITcpPackAgent* pAgent);
 // 销毁 SSL ITcpPackClient 对象
 HPSOCKET_API void HP_Destroy_SSLPackClient(ITcpPackClient* pClient);
-
-/*
-* 名称：初始化 SSL 全局环境参数
-* 描述：SSL 全局环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
-*		
-* 参数：		enSessionMode			-- SSL 工作模式（参考 EnSSLSessionMode）
-*			iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
-*			lpszPemCertFile			-- 证书文件（客户端可选）
-*			lpszPemKeyFile			-- 私钥文件（客户端可选）
-*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
-*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
-*
-* 返回值：	TRUE	-- 成功
-*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
-*/
-HPSOCKET_API BOOL HP_SSL_Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr);
-
-/*
-* 名称：清理 SSL 全局运行环境
-* 描述：清理 SSL 全局运行环境，回收 SSL 相关内存
-*		1、应用程序退出时会自动调用本方法
-*		2、当要重新设置 SSL 全局环境参数时，需要先调用本方法清理原先的环境参数
-*		
-* 参数：	无
-* 
-* 返回值：无
-*/
-HPSOCKET_API void HP_SSL_Cleanup();
-
-/*
-* 名称：清理线程局部环境 SSL 资源
-* 描述：任何一个操作 SSL 的线程，在通信结束时都需要清理线程局部环境 SSL 资源
-*		1、主线程和 HP-Socket 工作线程在通信结束时会自动清理线程局部环境 SSL 资源。因此，一般情况下不必手工调用本方法
-*		2、特殊情况下，当自定义线程参与 HP-Socket 通信操作并检查到 SSL 内存泄漏时，需在每次通信结束时自定义线程调用本方法
-*		
-* 参数：	无
-* 
-* 返回值：无
-*/
-HPSOCKET_API void HP_SSL_RemoveThreadLocalState();
-
-/* 检查 SSL 全局运行环境是否初始化完成 */
-HPSOCKET_API BOOL HP_SSL_IsValid();
 
 // SSL ITcpServer 对象创建器
 struct SSLServer_Creator
@@ -298,15 +262,162 @@ typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, SSLPackAgent_Creator>	CSS
 // SSL ITcpPackClient 对象智能指针
 typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	CSSLPackClientPtr;
 
-/**************************************************/
-/****************** SSL 初始化器 ******************/
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTPS Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
+
+// 创建 IHttpServer 对象
+HPSOCKET_API IHttpServer* HP_Create_HttpsServer(IHttpServerListener* pListener);
+// 创建 IHttpAgent 对象
+HPSOCKET_API IHttpAgent* HP_Create_HttpsAgent(IHttpAgentListener* pListener);
+// 创建 IHttpClient 对象
+HPSOCKET_API IHttpClient* HP_Create_HttpsClient(IHttpClientListener* pListener);
+// 创建 IHttpSyncClient 对象
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpsSyncClient();
+
+// 销毁 IHttpServer 对象
+HPSOCKET_API void HP_Destroy_HttpsServer(IHttpServer* pServer);
+// 销毁 IHttpAgent 对象
+HPSOCKET_API void HP_Destroy_HttpsAgent(IHttpAgent* pAgent);
+// 销毁 IHttpClient 对象
+HPSOCKET_API void HP_Destroy_HttpsClient(IHttpClient* pClient);
+// 销毁 IHttpSyncClient 对象
+HPSOCKET_API void HP_Destroy_HttpsSyncClient(IHttpSyncClient* pClient);
+
+// IHttpServer 对象创建器
+struct HttpsServer_Creator
+{
+	static IHttpServer* Create(IHttpServerListener* pListener)
+	{
+		return HP_Create_HttpsServer(pListener);
+	}
+
+	static void Destroy(IHttpServer* pServer)
+	{
+		HP_Destroy_HttpsServer(pServer);
+	}
+};
+
+// IHttpAgent 对象创建器
+struct HttpsAgent_Creator
+{
+	static IHttpAgent* Create(IHttpAgentListener* pListener)
+	{
+		return HP_Create_HttpsAgent(pListener);
+	}
+
+	static void Destroy(IHttpAgent* pAgent)
+	{
+		HP_Destroy_HttpsAgent(pAgent);
+	}
+};
+
+// IHttpClient 对象创建器
+struct HttpsClient_Creator
+{
+	static IHttpClient* Create(IHttpClientListener* pListener)
+	{
+		return HP_Create_HttpsClient(pListener);
+	}
+
+	static void Destroy(IHttpClient* pClient)
+	{
+		HP_Destroy_HttpsClient(pClient);
+	}
+};
+
+// IHttpSyncClient 对象创建器
+struct HttpsSyncClient_Creator
+{
+	static IHttpSyncClient* Create()
+	{
+		return HP_Create_HttpsSyncClient();
+	}
+
+	static void Destroy(IHttpSyncClient* pClient)
+	{
+		HP_Destroy_HttpsSyncClient(pClient);
+	}
+};
+
+// IHttpServer 对象智能指针
+typedef CHPSocketPtr<IHttpServer, IHttpServerListener, HttpsServer_Creator>		CHttpsServerPtr;
+// IHttpAgent 对象智能指针
+typedef CHPSocketPtr<IHttpAgent, IHttpAgentListener, HttpsAgent_Creator>		CHttpsAgentPtr;
+// IHttpClient 对象智能指针
+typedef CHPSocketPtr<IHttpClient, IHttpClientListener, HttpsClient_Creator>		CHttpsClientPtr;
+// IHttpSyncClient 对象智能指针
+typedef CHPSocketPtr<IHttpSyncClient, BOOL, HttpsSyncClient_Creator>			CHttpsSyncClientPtr;
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+/*
+* 名称：初始化 SSL 全局环境参数
+* 描述：SSL 全局环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
+*		
+* 参数：		enSessionMode			-- SSL 工作模式（参考 EnSSLSessionMode）
+*			iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+*			lpszPemCertFile			-- 证书文件（客户端可选）
+*			lpszPemKeyFile			-- 私钥文件（客户端可选）
+*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
+*			fnServerNameCallback	-- SNI 回调函数指针（可选，只用于服务端）
+*
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+*/
+HPSOCKET_API BOOL HP_SSL_Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr);
+
+/*
+* 名称：增加 SNI 主机证书（只用于服务端）
+* 描述：SSL 服务端在 Initialize() 成功后可以调用本方法增加多个 SNI 主机证书
+*		
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+*			lpszPemCertFile			-- 证书文件
+*			lpszPemKeyFile			-- 私钥文件
+*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证可选）
+*
+* 返回值：	正数		-- 成功，并返回 SNI 主机证书对应的索引，该索引用于在 SNI 回调函数中定位 SNI 主机
+*			负数		-- 失败，可通过 SYS_GetLastError() 获取失败原因
+*/
+HPSOCKET_API int HP_SSL_AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr);
+
+/*
+* 名称：清理 SSL 全局运行环境
+* 描述：清理 SSL 全局运行环境，回收 SSL 相关内存
+*		1、应用程序退出时会自动调用本方法
+*		2、当要重新设置 SSL 全局环境参数时，需要先调用本方法清理原先的环境参数
+*		
+* 参数：	无
+* 
+* 返回值：无
+*/
+HPSOCKET_API void HP_SSL_Cleanup();
+
+/*
+* 名称：清理线程局部环境 SSL 资源
+* 描述：任何一个操作 SSL 的线程，在通信结束时都需要清理线程局部环境 SSL 资源
+*		1、主线程和 HP-Socket 工作线程在通信结束时会自动清理线程局部环境 SSL 资源。因此，一般情况下不必手工调用本方法
+*		2、特殊情况下，当自定义线程参与 HP-Socket 通信操作并检查到 SSL 内存泄漏时，需在每次通信结束时自定义线程调用本方法
+*		
+* 参数：		dwThreadID	-- 线程 ID（0：当前线程）
+* 
+* 返回值：无
+*/
+HPSOCKET_API void HP_SSL_RemoveThreadLocalState(DWORD dwThreadID = 0);
+
+/* 检查 SSL 全局运行环境是否初始化完成 */
+HPSOCKET_API BOOL HP_SSL_IsValid();
 
 class CHPSSLInitializer
 {
 public:
-	CHPSSLInitializer(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, BOOL bNeedClientVerification = FALSE)
+	CHPSSLInitializer(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)
 	{
-		HP_SSL_Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+		HP_SSL_Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, fnServerNameCallback);
 	}
 
 	~CHPSSLInitializer()
@@ -314,15 +425,20 @@ public:
 		HP_SSL_Cleanup();
 	}
 
-	BOOL Reset(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)
+	BOOL Reset(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)
 	{
 		HP_SSL_Cleanup();
-		return HP_SSL_Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+		return HP_SSL_Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, fnServerNameCallback);
 	}
 
-	void RemoveThreadLocalState()
+	int AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)
 	{
-		HP_SSL_RemoveThreadLocalState();
+		return HP_SSL_AddServerContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	}
+
+	void RemoveThreadLocalState(DWORD dwThreadID = 0)
+	{
+		HP_SSL_RemoveThreadLocalState(dwThreadID);
 	}
 
 	BOOL IsValid()

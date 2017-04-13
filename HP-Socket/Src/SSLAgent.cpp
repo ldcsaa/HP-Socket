@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -89,7 +89,8 @@ EnHandleResult CSSLAgent::FireConnect(TSocketObj* pSocketObj)
 
 	if(result != HR_ERROR)
 	{
-		CSSLSession* pSession = m_sslPool.PickFreeSession();
+		CSSLSession* pSession = m_sslPool.PickFreeSession(pSocketObj->host);
+
 		VERIFY(SetConnectionReserved2(pSocketObj, pSession));
 		VERIFY(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
 	}

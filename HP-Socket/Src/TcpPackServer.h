@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -44,9 +44,9 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj)
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
 	{
-		EnHandleResult result = __super::DoFireAccept(pSocketObj);
+		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
 
 		if(result != HR_ERROR)
 		{
@@ -97,9 +97,9 @@ protected:
 
 	virtual BOOL CheckParams()
 	{
-		if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
-			if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
-				return __super::CheckParams();
+		if	((m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)	&&
+			(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)	)
+			return __super::CheckParams();
 
 		SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 		return FALSE;
@@ -109,6 +109,7 @@ protected:
 	{
 		__super::PrepareStart();
 
+		m_bfPool.SetMaxCacheSize	(GetMaxConnectionCount());
 		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
 		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
 		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
@@ -133,8 +134,8 @@ private:
 										DWORD dwMaxPackSize, USHORT usPackHeaderFlag, const BYTE* pData, int iLength);
 
 public:
-	CTcpPackServerT(ITcpServerListener* psoListener)
-	: T(psoListener)
+	CTcpPackServerT(ITcpServerListener* pListener)
+	: T					(pListener)
 	, m_dwMaxPackSize	(TCP_PACK_DEFAULT_MAX_SIZE)
 	, m_usHeaderFlag	(TCP_PACK_DEFAULT_HEADER_FLAG)
 	{

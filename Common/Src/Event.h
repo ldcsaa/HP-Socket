@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.14
+ * Version	: 2.3.17
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -52,9 +52,13 @@ public:
 	BOOL Reset()	{return(::ResetEvent(m_hEvent));}
 	BOOL Set()		{return(::SetEvent(m_hEvent));}
 
-	HANDLE& GetHandle	() 	{return m_hEvent;}
-	operator HANDLE		()	{return m_hEvent;}
 	BOOL IsValid		()	{return m_hEvent != nullptr;}
+
+	HANDLE GetHandle		()			{return m_hEvent;}
+	const HANDLE GetHandle	()	const	{return m_hEvent;}
+
+	operator HANDLE			()			{return m_hEvent;}
+	operator const HANDLE	()	const	{return m_hEvent;}
 
 private:
 	CEvt(const CEvt&);

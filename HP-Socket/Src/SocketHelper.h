@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -28,6 +28,8 @@
 #include <mswsock.h>
 #include <malloc.h>
 
+#include <atlfile.h>
+
 #include "SocketInterface.h"
 #include "../../Common/Src/WaitFor.h"
 #include "../../Common/Src/bufferpool.h"
@@ -38,15 +40,23 @@
 描述：声明组件的公共全局常量
 ************************************************************************/
 
+#define HP_VERSION_MAJOR	4
+#define HP_VERSION_MINOR	1
+#define HP_VERSION_REVISE	3
+#define HP_VERSION_BUILD	1
+
 /* IOCP 最大工作线程数 */
 extern const DWORD MAX_WORKER_THREAD_COUNT;
 /* IOCP Socket 缓冲区最小值 */
 extern const DWORD MIN_SOCKET_BUFFER_SIZE;
 /* 小文件最大字节数 */
 extern const DWORD MAX_SMALL_FILE_SIZE;
-extern const DWORD MAX_SILENCE_CONNECTION_PERIOD;
+/* 最大连接时长 */
+extern const DWORD MAX_CONNECTION_PERIOD;
 
-/* IOCP 默认工作线程数 */
+/* Server/Agent 默认最大连接数 */
+extern const DWORD DEFAULT_MAX_CONNECTION_COUNT;
+/* Server/Agent 默认 IOCP 工作线程数 */
 extern const DWORD DEFAULT_WORKER_THREAD_COUNT;
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
 extern const DWORD DEFAULT_FREE_SOCKETOBJ_LOCK_TIME;
@@ -111,7 +121,7 @@ public:
 		if(!lpTemp)
 			lpTemp	= (LPWSADATA)_alloca(sizeof(WSADATA));
 
-		m_iResult	= ::WSAStartup(MAKEWORD(minorVersion, majorVersion), lpTemp);
+		m_iResult	= ::WSAStartup(MAKEWORD(majorVersion, minorVersion), lpTemp);
 	}
 
 	~CInitSocket()
@@ -344,6 +354,7 @@ struct TSocketObjBase
 struct TSocketObj : public TSocketObjBase
 {
 	SOCKET			socket;
+	CStringA		host;
 	TBufferObjList	sndBuff;
 	
 	TSocketObj(CBufferObjPool& bfPool)
@@ -361,6 +372,9 @@ struct TSocketObj : public TSocketObjBase
 	void Reset(CONNID dwConnID, SOCKET soClient)
 	{
 		__super::Reset(dwConnID);
+		
+		host.Empty();
+
 		socket = soClient;
 	}
 };
@@ -390,27 +404,19 @@ struct TUdpSocketObj : public TSocketObjBase
 	}
 };
 
-/* 数据缓冲区结构链表 */
-typedef CRingPool<TSocketObj>					TSocketObjPtrList;
-/* 数据缓冲区垃圾回收结构链表 */
-typedef CCASQueue<TSocketObj>					TSocketObjPtrQueue;
-/* 数据缓冲区结构哈希表 */
-typedef unordered_map<CONNID, TSocketObj*>		TSocketObjPtrMap;
-/* 数据缓冲区结构哈希表迭代器 */
-typedef TSocketObjPtrMap::iterator				TSocketObjPtrMapI;
-/* 数据缓冲区结构哈希表 const 迭代器 */
-typedef TSocketObjPtrMap::const_iterator		TSocketObjPtrMapCI;
+/* 有效 TSocketObj 缓存 */
+typedef CRingCache2<TSocketObj, CONNID, true>		TSocketObjPtrPool;
+/* 失效 TSocketObj 缓存 */
+typedef CRingPool<TSocketObj>						TSocketObjPtrList;
+/* 失效 TSocketObj 垃圾回收结构链表 */
+typedef CCASQueue<TSocketObj>						TSocketObjPtrQueue;
 
-/* UDP 数据缓冲区结构链表 */
-typedef CRingPool<TUdpSocketObj>				TUdpSocketObjPtrList;
-/* 数据缓冲区垃圾回收结构链表 */
-typedef CCASQueue<TUdpSocketObj>				TUdpSocketObjPtrQueue;
-/* UDP 数据缓冲区结构哈希表 */
-typedef unordered_map<CONNID, TUdpSocketObj*>	TUdpSocketObjPtrMap;
-/* UDP 数据缓冲区结构哈希表迭代器 */
-typedef TUdpSocketObjPtrMap::iterator			TUdpSocketObjPtrMapI;
-/* UDP 数据缓冲区结构哈希表 const 迭代器 */
-typedef TUdpSocketObjPtrMap::const_iterator		TUdpSocketObjPtrMapCI;
+/* 有效 TUdpSocketObj 缓存 */
+typedef CRingCache2<TUdpSocketObj, CONNID, true>	TUdpSocketObjPtrPool;
+/* 失效 TUdpSocketObj 缓存 */
+typedef CRingPool<TUdpSocketObj>					TUdpSocketObjPtrList;
+/* 失效 TUdpSocketObj 垃圾回收结构链表 */
+typedef CCASQueue<TUdpSocketObj>					TUdpSocketObjPtrQueue;
 
 /* SOCKADDR_IN 比较器 */
 struct sockaddr_func
@@ -466,9 +472,12 @@ struct TClientCloseContext
 /******************************************** 公共帮助方法 ********************************************/
 /*****************************************************************************************************/
 
+// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
+DWORD GetHPSocketVersion();
+
 /* 获取错误描述文本 */
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode);
-/* 获取 IPv4 地址 */
+/* IPv4 字符串地址转换为整数 */
 ULONG GetIPv4InAddr(LPCTSTR lpszAddress);
 /* 检查字符串是否符合 IP 地址格式 */
 BOOL IsIPAddress(LPCTSTR lpszAddress);
@@ -489,6 +498,11 @@ BOOL GetSocketLocalAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int&
 /* 获取 Socket 的远程地址信息 */
 BOOL GetSocketRemoteAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 
+/* 64 位网络字节序转主机字节序 */
+ULONGLONG NToH64(ULONGLONG value);
+/* 64 位主机字节序转网络字节序 */
+ULONGLONG HToN64(ULONGLONG value);
+
 /* 获取 Socket 的某个扩展函数的指针 */
 PVOID GetExtensionFuncPtr					(SOCKET sock, GUID guid);
 /* 获取 AcceptEx 扩展函数指针 */
@@ -501,6 +515,9 @@ LPFN_CONNECTEX Get_ConnectEx_FuncPtr		(SOCKET sock);
 LPFN_TRANSMITFILE Get_TransmitFile_FuncPtr	(SOCKET sock);
 /* 获取 DisconnectEx 扩展函数指针 */
 LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock);
+
+HRESULT ReadSmallFile(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, DWORD dwMaxFileSize = MAX_SMALL_FILE_SIZE);
+HRESULT MakeSmallFilePackage(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, WSABUF szBuf[3], const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 
 /************************************************************************
 名称：IOCP 指令投递帮助方法
@@ -529,6 +546,7 @@ BOOL PostIocpExit(HANDLE hIOCP);
 BOOL PostIocpAccept(HANDLE hIOCP);
 BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID);
 BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID);
+BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode);
 
 /************************************************************************
 名称：setsockopt() 帮助方法

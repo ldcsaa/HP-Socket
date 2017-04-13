@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -24,10 +24,17 @@
 
 #pragma once
 
+#pragma warning(push)
+#pragma warning(disable: 4005)
+
 #include "openssl/ssl.h"
-#include "SocketHelper.h"
-#include "SocketInterface-SSL.h"
-#include "../../Common/Src/RingBuffer.h"
+
+#pragma warning(pop)
+
+#include "HPTypeDef.h"
+#include "../../Common/Src/bufferpool.h"
+
+#define OPENSSL_VERSION_1_1_0	0x10100000L
 
 /************************************************************************
 名称：SSL 握手状态
@@ -40,11 +47,15 @@ enum EnSSLHandShakeStatus
 	SSL_HSS_SUCC	= 2,	// 握手成功
 };
 
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+
 /* SSL CRYPTO DYNLOCK 结构 */
 typedef struct CRYPTO_dynlock_value
 {
 	CSimpleRWLock cs;
 } DynamicLock;
+
+#endif
 
 /************************************************************************
 名称：SSL Context
@@ -68,11 +79,27 @@ public:
 	*			lpszPemKeyFile			-- 私钥文件（客户端可选）
 	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
 	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
+	*			fnServerNameCallback	-- SNI 回调函数指针（可选，只用于服务端）
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 ::GetLastError() 获取失败原因
 	*/
-	BOOL Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr);
+	BOOL Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr);
+
+	/*
+	* 名称：增加 SNI 主机证书（只用于服务端）
+	* 描述：SSL 服务端在 Initialize() 成功后可以调用本方法增加多个 SNI 主机证书
+	*		
+	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+	*			lpszPemCertFile			-- 证书文件
+	*			lpszPemKeyFile			-- 私钥文件
+	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证可选）
+	*
+	* 返回值：	正数		-- 成功，并返回 SNI 主机证书对应的索引，该索引用于在 SNI 回调函数中定位 SNI 主机
+	*			负数		-- 失败，可通过 ::GetLastError() 获取失败原因
+	*/
+	int AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr);
 
 	/*
 	* 名称：清理 SSL 全局运行环境
@@ -92,62 +119,76 @@ public:
 	*		1、主线程和 HP-Socket 工作线程在通信结束时会自动清理线程局部环境 SSL 资源。因此，一般情况下不必手工调用本方法
 	*		2、特殊情况下，当自定义线程参与 HP-Socket 通信操作并检查到 SSL 内存泄漏时，需在每次通信结束时自定义线程调用本方法
 	*		
-	* 参数：	无
+	* 参数：		dwThreadID	-- 线程 ID（0：当前线程）
 	* 
 	* 返回值：无
 	*/
-	void RemoveThreadLocalState()	{CleanupThreadState();}
+	void RemoveThreadLocalState(DWORD dwThreadID = 0)	{CleanupThreadState(dwThreadID);}
 
-	/* 检查 SSL 全局运行环境是否初始化完成 */
-	BOOL IsValid					() const	{return m_bValid;}
 	/* 获取 SSL 全局运行环境 SSL_CTX 对象 */
-	SSL_CTX* GetContext				() const	{return m_sslCtx;}
+	SSL_CTX* GetContext				(int i) const;
+	/* 获取 SSL 全局运行环境默认 SSL_CTX 对象 */
+	SSL_CTX* GetDefaultContext		()		const	{return m_sslCtx;}
 	/* 获取 SSL 全局运行环境的配置模式，配置模式参考：EnSSLSessionMode */
-	EnSSLSessionMode GetSessionMode	() const	{return m_enSessionMode;}
+	EnSSLSessionMode GetSessionMode	()		const	{return m_enSessionMode;}
+	/* 检查 SSL 全局运行环境是否初始化完成 */
+	BOOL IsValid					()		const	{return m_sslCtx != nullptr;}
 
 private:
 
 	CSSLContext()
-	: m_bValid			(FALSE)
-	, m_iLockNum		(0)
-	, m_pcsLocks		(nullptr)
-	, m_sslCtx			(nullptr)
-	, m_enSessionMode	(SSL_SM_SERVER)
+	: m_enSessionMode		(SSL_SM_SERVER)
+	, m_sslCtx				(nullptr)
+	, m_fnServerNameCallback(nullptr)
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	, m_iLockNum			(0)
+	, m_pcsLocks			(nullptr)
+#endif
 	{
 
 	}
 
-	~CSSLContext()
-	{
-		Cleanup();
-	}
+	~CSSLContext() {Cleanup();}
 
 private:
 
-	void CreateContext();
-	BOOL LoadCertAndKey(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath);
+	void Setup();
+	void SetServerNameCallback(Fn_SNI_ServerNameCallback fn);
+	int AddContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath);
+	BOOL LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath);
 
 private:
 
 	static void CleanupGlobalState();
-	static void CleanupThreadState();
+	static void CleanupThreadState(DWORD dwThreadID = 0);
+
+	static int CALLBACK InternalServerNameCallback(SSL* ssl, int* ad, void* arg);
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
 
 	static void ssl_lock_callback(int mode, int n, const char *file, int line);
 	static CRYPTO_dynlock_value* ssl_lock_dyn_create_callback(const char *file, int line);
 	static void ssl_lock_dyn_callback(int mode, CRYPTO_dynlock_value* l, const char *file, int line);
 	static void ssl_lock_dyn_destroy_callback(CRYPTO_dynlock_value* l, const char *file, int line);
 
+#endif
+
 private:
 
-	BOOL				m_bValid;
 	EnSSLSessionMode	m_enSessionMode;
-	int					m_iLockNum;
-	CSimpleRWLock*		m_pcsLocks;
+	vector<SSL_CTX*>	m_lsSslCtxs;
 	SSL_CTX*			m_sslCtx;
 
+	Fn_SNI_ServerNameCallback m_fnServerNameCallback;
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	int					m_iLockNum;
+	CSimpleRWLock*		m_pcsLocks;
+#endif
+
 private:
 
-	static		CSSLContext sm_Instance;
+	static CSSLContext	sm_Instance;
 };
 
 extern CSSLContext& g_SSL;
@@ -166,7 +207,7 @@ public:
 	const WSABUF& GetRecvBuffer()	const	{return m_bufRecv;}
 	const WSABUF& GetSendBuffer()	const	{return m_bufSend;}
 
-	CSSLSession*			Renew();
+	CSSLSession*			Renew(LPCSTR lpszHostName = nullptr);
 	BOOL					Reset();
 	BOOL					IsValid()		const	{return GetStatus() != SSL_HSS_INIT;}
 	BOOL					IsHandShaking()	const	{return GetStatus() == SSL_HSS_PROC;}
@@ -221,7 +262,7 @@ class CSSLSessionPool
 	typedef CCASQueue<CSSLSession>	TSSLSessionQueue;
 
 public:
-	CSSLSession*	PickFreeSession	();
+	CSSLSession*	PickFreeSession	(LPCSTR lpszHostName = nullptr);
 	void			PutFreeSession	(CSSLSession* pSession);
 
 	void			Prepare			();
@@ -281,7 +322,7 @@ private:
 	TSSLSessionQueue	m_lsGCSession;
 };
 
-template<class T> EnHandleResult ProcessHandShake(T* pThis, TSocketObj* pSocketObj, CSSLSession* pSession)
+template<class T, class S> EnHandleResult ProcessHandShake(T* pThis, S* pSocketObj, CSSLSession* pSession)
 {
 	EnHandleResult result = HR_OK;
 
@@ -296,30 +337,6 @@ template<class T> EnHandleResult ProcessHandShake(T* pThis, TSocketObj* pSocketO
 			break;
 
 		if(!pThis->DoSendPackets(pSocketObj, &buffer, 1))
-		{
-			result = HR_ERROR;
-			break;
-		}
-	}
-
-	return result;
-}
-
-template<class T> EnHandleResult ProcessHandShake(T* pThis, CSSLSession* pSession)
-{
-	EnHandleResult result = HR_OK;
-
-	CCriSecLock locallock(pSession->GetSendLock());
-
-	while(TRUE)
-	{
-		VERIFY(pSession->ReadSendChannel());
-		const WSABUF& buffer = pSession->GetSendBuffer();
-
-		if(buffer.len == 0)
-			break;
-
-		if(!pThis->DoSendPackets(&buffer, 1))
 		{
 			result = HR_ERROR;
 			break;
@@ -373,51 +390,7 @@ template<class T, class S> EnHandleResult ProcessReceive(T* pThis, S* pSocketObj
 	return result;
 }
 
-template<class T> EnHandleResult ProcessReceive(T* pThis, CSSLSession* pSession, const BYTE* pData, int iLength)
-{
-	if(!pSession->WriteRecvChannel(pData, iLength))
-		return HR_ERROR;
-
-	EnHandleResult result			= HR_OK;
-	EnSSLHandShakeStatus enStatus	= pSession->GetStatus();
-
-	while(TRUE)
-	{
-		if(!pSession->ReadRecvChannel())
-			return HR_ERROR;
-
-		if(enStatus == SSL_HSS_PROC && pSession->IsReady())
-		{
-			result = ProcessHandShake(pThis, pSession);
-
-			if(result == HR_ERROR)
-				break;
-
-			enStatus = SSL_HSS_SUCC;
-			result	 = pThis->DoFireHandShake(pThis);
-
-			if(result == HR_ERROR)
-				break;
-		}
-
-		const WSABUF& buffer = pSession->GetRecvBuffer();
-
-		if(buffer.len == 0)
-			break;
-
-		result = pThis->DoFireReceive(pThis, (const BYTE*)buffer.buf, buffer.len);
-
-		if(result == HR_ERROR)
-			break;
-	}
-
-	if(result != HR_ERROR && pSession->IsHandShaking())
-		result = ::ProcessHandShake(pThis, pSession);
-
-	return result;
-}
-
-template<class T> BOOL ProcessSend(T* pThis, TSocketObj* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount)
+template<class T, class S> BOOL ProcessSend(T* pThis, S* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount)
 {
 	if(pSession == nullptr || !pSession->IsReady())
 	{
@@ -444,39 +417,6 @@ template<class T> BOOL ProcessSend(T* pThis, TSocketObj* pSocketObj, CSSLSession
 			break;
 
 		if(!pThis->DoSendPackets(pSocketObj, &buffer, 1))
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-template<class T> BOOL ProcessSend(T* pThis, CSSLSession* pSession, const WSABUF * pBuffers, int iCount)
-{
-	if(pSession == nullptr || !pSession->IsReady())
-	{
-		::SetLastError(ERROR_INVALID_STATE);
-		return FALSE;
-	}
-
-	CCriSecLock locallock(pSession->GetSendLock());
-
-	if(!pSession->IsReady())
-	{
-		::SetLastError(ERROR_INVALID_STATE);
-		return FALSE;
-	}
-
-	VERIFY(pSession->WriteSendChannel(pBuffers, iCount));
-
-	while(TRUE)
-	{
-		VERIFY(pSession->ReadSendChannel());
-		const WSABUF& buffer = pSession->GetSendBuffer();
-
-		if(buffer.len == 0)
-			break;
-
-		if(!pThis->DoSendPackets(&buffer, 1))
 			return FALSE;
 	}
 

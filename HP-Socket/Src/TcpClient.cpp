@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -23,7 +23,6 @@
  */
  
 #include "stdafx.h"
-#include <atlfile.h>
 #include "TcpClient.h"
 #include "../../Common/Src/WaitFor.h"
 
@@ -44,7 +43,7 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 	{
 		if(BindClientSocket(lpszBindAddress))
 		{
-			if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
+			if(FirePrepareConnect(m_soClient) != HR_ERROR)
 			{
 				if(ConnectToServer(lpszRemoteAddress, usPort))
 				{
@@ -76,12 +75,12 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 BOOL CTcpClient::CheckParams()
 {
-	if((int)m_dwSocketBufferSize > 0)
-		if((int)m_dwFreeBufferPoolSize >= 0)
-			if((int)m_dwFreeBufferPoolHold >= 0)
-				if((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)
-					if((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)
-						return TRUE;
+	if	(((int)m_dwSocketBufferSize > 0)									&&
+		((int)m_dwFreeBufferPoolSize >= 0)									&&
+		((int)m_dwFreeBufferPoolHold >= 0)									&&
+		((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)			&&
+		((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)	)
+		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -193,6 +192,8 @@ BOOL CTcpClient::ConnectToServer(LPCTSTR lpszRemoteAddress, USHORT usPort)
 		return FALSE;
 	}
 
+	SetRemoteHost(lpszRemoteAddress, usPort);
+
 	BOOL isOK = FALSE;
 
 	if(m_bAsyncConnect)
@@ -209,7 +210,7 @@ BOOL CTcpClient::ConnectToServer(LPCTSTR lpszRemoteAddress, USHORT usPort)
 		{
 			if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 			{
-				if(FireConnect(this) != HR_ERROR)
+				if(FireConnect() != HR_ERROR)
 				{
 					m_enState	= SS_STARTED;
 					isOK		= TRUE;
@@ -257,8 +258,13 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 			bCallStop = FALSE;
 			break;
 		}
+		else if(retval == WSA_WAIT_FAILED)
+		{
+			pClient->m_ccContext.Reset(TRUE, SO_UNKNOWN, ::WSAGetLastError());
+			break;
+		}
 		else
-			ASSERT(FALSE);
+			VERIFY(FALSE);
 	}
 
 	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
@@ -357,7 +363,7 @@ BOOL CTcpClient::HandleConnect(WSANETWORKEVENTS& events)
 	{
 		if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 		{
-			if(FireConnect(this) != HR_ERROR)
+			if(FireConnect() != HR_ERROR)
 				m_enState = SS_STARTED;
 			else
 				iCode = ERROR_CANCELLED;
@@ -399,7 +405,7 @@ BOOL CTcpClient::ReadData()
 
 		if(rc > 0)
 		{
-			if(FireReceive(this, m_rcBuffer, rc) == HR_ERROR)
+			if(FireReceive(m_rcBuffer, rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
@@ -495,7 +501,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 
 		if(rc > 0)
 		{
-			if(FireSend(this, pItem->Ptr(), rc) == HR_ERROR)
+			if(FireSend(pItem->Ptr(), rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
 				ASSERT(FALSE);
@@ -532,7 +538,7 @@ BOOL CTcpClient::Stop()
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
 	if(m_ccContext.bFireOnClose)
-		FireClose(this, m_ccContext.enOperation, m_ccContext.iErrorCode);
+		FireClose(m_ccContext.enOperation, m_ccContext.iErrorCode);
 
 	if(m_evSocket != nullptr)
 	{
@@ -562,6 +568,9 @@ void CTcpClient::Reset()
 	m_lsSend.Clear();
 	m_itPool.Clear();
 
+	m_strHost.Empty();
+
+	m_usPort	= 0;
 	m_iPending	= 0;
 	m_enState	= SS_STOPPED;
 }
@@ -655,48 +664,19 @@ BOOL CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount)
 
 BOOL CTcpClient::SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead, const LPWSABUF pTail)
 {
-	ASSERT(lpszFileName != nullptr);
-
 	CAtlFile file;
-	HRESULT hr = file.Create(lpszFileName, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
+	CAtlFileMapping<> fmap;
+	WSABUF szBuf[3];
 
-	if(SUCCEEDED(hr))
+	HRESULT hr = ::MakeSmallFilePackage(lpszFileName, file, fmap, szBuf, pHead, pTail);
+
+	if(FAILED(hr))
 	{
-		ULONGLONG ullLen;
-		hr = file.GetSize(ullLen);
-
-		if(SUCCEEDED(hr))
-		{
-			ULONGLONG ullTotal = ullLen + (pHead ? pHead->len : 0) + (pTail ? pTail->len : 0);
-
-			if(ullLen > 0 && ullTotal <= MAX_SMALL_FILE_SIZE)
-			{
-				CAtlFileMapping<> fmap;
-				hr = fmap.MapFile(file);
-
-				if(SUCCEEDED(hr))
-				{
-					WSABUF bufs[3] = {0};
-
-					bufs[1].len = (ULONG)ullLen;
-					bufs[1].buf = fmap;
-
-					if(pHead) memcpy(&bufs[0], pHead, sizeof(WSABUF));
-					if(pTail) memcpy(&bufs[2], pTail, sizeof(WSABUF));
-
-					return SendPackets(bufs, 3);
-				}
-			}
-			else if(ullLen == 0)
-				hr = HRESULT_FROM_WIN32(ERROR_FILE_INVALID);
-			else
-				hr = HRESULT_FROM_WIN32(ERROR_FILE_TOO_LARGE);
-		}
+		::SetLastError(HRESULT_CODE(hr));
+		return FALSE;
 	}
 
-	::SetLastError(hr & 0x0000FFFF);
-
-	return FALSE;
+	return SendPackets(szBuf, 3);
 }
 
 void CTcpClient::SetLastError(EnSocketError code, LPCSTR func, int ec)
@@ -712,4 +692,43 @@ BOOL CTcpClient::GetLocalAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& 
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
 	return ::GetSocketLocalAddress(m_soClient, lpszAddress, iAddressLen, usPort);
+}
+
+void CTcpClient::SetRemoteHost(LPCTSTR lpszHost, USHORT usPort)
+{
+	m_strHost = lpszHost;
+	m_usPort  = usPort;
+}
+
+BOOL CTcpClient::GetRemoteHost(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
+{
+	BOOL isOK = FALSE;
+
+	if(m_strHost.IsEmpty())
+		return isOK;
+
+	int iLen = m_strHost.GetLength() + 1;
+
+	if(iHostLen >= iLen)
+	{
+		memcpy(lpszHost, CA2CT(m_strHost), iLen * sizeof(TCHAR));
+		usPort = m_usPort;
+
+		isOK = TRUE;
+	}
+
+	iHostLen = iLen;
+
+	return isOK;
+}
+
+
+BOOL CTcpClient::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
+{
+	*lpszHost = m_strHost;
+
+	if(pusPort != nullptr)
+		*pusPort = m_usPort;
+
+	return !m_strHost.IsEmpty();
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -26,46 +26,12 @@
 
 #include "SocketHelper.h"
 #include "../../Common/Src/Event.h"
-#include "../../Common/Src/RWLock.h"
 #include "../../Common/Src/STLHelper.h"
 #include "../../Common/Src/RingBuffer.h"
 #include "../../Common/Src/PrivateHeap.h"
 
 class CTcpAgent : public ITcpAgent
 {
-public:
-	CTcpAgent(ITcpAgentListener* psoListener)
-	: m_psoListener				(psoListener)
-	, m_hCompletePort			(nullptr)
-	, m_pfnConnectEx			(nullptr)
-	, m_pfnDisconnectEx			(nullptr)
-	, m_enLastError				(SE_OK)
-	, m_enState					(SS_STOPPED)
-	, m_bAsyncConnect			(TRUE)
-	, m_enSendPolicy			(SP_PACK)
-	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
-	, m_dwSocketBufferSize		(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
-	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
-	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
-	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
-	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
-	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
-	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
-	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
-	, m_bReuseAddress			(FALSE)
-	, m_bMarkSilence			(TRUE)
-	{
-		ASSERT(m_wsSocket.IsValid());
-		ASSERT(m_psoListener);
-
-		::ZeroMemory((void*)&m_soAddrIN, sizeof(SOCKADDR_IN));
-	}
-
-	virtual ~CTcpAgent()
-	{
-		Stop();
-	}
-
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
 	virtual BOOL Stop	();
@@ -80,7 +46,9 @@ public:
 	virtual BOOL			DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
-	
+	virtual BOOL			GetRemoteHost				(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort);
+
+
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
 	virtual DWORD GetConnectionCount	();
 	virtual BOOL GetAllConnectionIDs	(CONNID pIDs[], DWORD& dwCount);
@@ -94,6 +62,7 @@ public:
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
+	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{m_dwMaxConnectionCount		= dwMaxConnectionCount;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetSocketBufferSize		(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize		= dwSocketBufferSize;}
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
@@ -107,6 +76,7 @@ public:
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
+	virtual DWORD GetMaxConnectionCount		()	{return m_dwMaxConnectionCount;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetSocketBufferSize		()	{return m_dwSocketBufferSize;}
 	virtual DWORD GetFreeSocketObjLockTime	()	{return m_dwFreeSocketObjLockTime;}
@@ -123,7 +93,11 @@ protected:
 	virtual EnHandleResult FirePrepareConnect(CONNID dwConnID, SOCKET socket)
 		{return DoFirePrepareConnect(dwConnID, socket);}
 	virtual EnHandleResult FireConnect(TSocketObj* pSocketObj)
-		{return DoFireConnect(pSocketObj);}
+		{
+			EnHandleResult rs		= DoFireConnect(pSocketObj);
+			if(rs != HR_ERROR) rs	= FireHandShake(pSocketObj);
+			return rs;
+		}
 	virtual EnHandleResult FireHandShake(TSocketObj* pSocketObj)
 		{return DoFireHandShake(pSocketObj);}
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
@@ -138,21 +112,21 @@ protected:
 		{return DoFireShutdown();}
 
 	virtual EnHandleResult DoFirePrepareConnect(CONNID dwConnID, SOCKET socket)
-		{return m_psoListener->OnPrepareConnect(dwConnID, socket);}
+		{return m_pListener->OnPrepareConnect(this, dwConnID, socket);}
 	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj)
-		{return m_psoListener->OnConnect(pSocketObj->connID);}
+		{return m_pListener->OnConnect(this, pSocketObj->connID);}
 	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
-		{return m_psoListener->OnHandShake(pSocketObj->connID);}
+		{return m_pListener->OnHandShake(this, pSocketObj->connID);}
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);}
+		{return m_pListener->OnReceive(this, pSocketObj->connID, pData, iLength);}
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, iLength);}
+		{return m_pListener->OnReceive(this, pSocketObj->connID, iLength);}
 	virtual EnHandleResult DoFireSend(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pSocketObj->connID, pData, iLength);}
+		{return m_pListener->OnSend(this, pSocketObj->connID, pData, iLength);}
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnClose(pSocketObj->connID, enOperation, iErrorCode);}
+		{return m_pListener->OnClose(this, pSocketObj->connID, enOperation, iErrorCode);}
 	virtual EnHandleResult DoFireShutdown()
-		{return m_psoListener->OnShutdown();}
+		{return m_pListener->OnShutdown(this);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
@@ -164,6 +138,7 @@ protected:
 	BOOL DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	BOOL DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	TSocketObj* FindSocketObj(CONNID dwConnID);
+	BOOL GetRemoteHost(CONNID dwConnID, LPCSTR* lpszHost, USHORT* pusPort = nullptr);
 
 private:
 	EnHandleResult TriggerFireConnect(TSocketObj* pSocketObj);
@@ -215,8 +190,9 @@ private:
 
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 
-	DWORD CreateClientSocket(SOCKET& soClient);
-	DWORD ConnectToServer	(CONNID dwConnID, SOCKET& soClient, LPCTSTR lpszRemoteAddress, USHORT usPort);
+	DWORD CreateClientSocket( LPCTSTR lpszRemoteAddress, USHORT usPort, SOCKET& soClient, SOCKADDR_IN& addr);
+	DWORD PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
+	DWORD ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, USHORT usPort, SOCKET soClient, const SOCKADDR_IN& addr);
 	void ForceDisconnect	(CONNID dwConnID);
 
 	void HandleIo			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
@@ -242,8 +218,43 @@ private:
 
 	void CheckError	(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 
+public:
+	CTcpAgent(ITcpAgentListener* pListener)
+	: m_pListener				(pListener)
+	, m_hCompletePort			(nullptr)
+	, m_pfnConnectEx			(nullptr)
+	, m_pfnDisconnectEx			(nullptr)
+	, m_enLastError				(SE_OK)
+	, m_enState					(SS_STOPPED)
+	, m_bAsyncConnect			(TRUE)
+	, m_enSendPolicy			(SP_PACK)
+	, m_dwMaxConnectionCount	(DEFAULT_MAX_CONNECTION_COUNT)
+	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
+	, m_dwSocketBufferSize		(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
+	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
+	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
+	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
+	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
+	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
+	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
+	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
+	, m_bReuseAddress			(FALSE)
+	, m_bMarkSilence			(TRUE)
+	{
+		ASSERT(m_wsSocket.IsValid());
+		ASSERT(m_pListener);
+
+		::ZeroMemory((void*)&m_soAddrIN, sizeof(SOCKADDR_IN));
+	}
+
+	virtual ~CTcpAgent()
+	{
+		Stop();
+	}
+
 private:
 	EnSendPolicy m_enSendPolicy;
+	DWORD m_dwMaxConnectionCount;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwSocketBufferSize;
 	DWORD m_dwFreeSocketObjLockTime;
@@ -262,7 +273,7 @@ private:
 	LPFN_DISCONNECTEX	m_pfnDisconnectEx;
 
 private:
-	ITcpAgentListener*	m_psoListener;
+	ITcpAgentListener*	m_pListener;
 	BOOL				m_bAsyncConnect;
 	HANDLE				m_hCompletePort;
 	EnServiceState		m_enState;
@@ -271,13 +282,12 @@ private:
 	vector<HANDLE>		m_vtWorkerThreads;
 
 	CPrivateHeap		m_phSocket;
-	CBufferObjPool		m_bfPool;
+	CBufferObjPool		m_bfObjPool;
 
 	CSpinGuard			m_csState;
 
-	CRWLock				m_csClientSocket;
-	TSocketObjPtrMap	m_mpClientSocket;
-
+	TSocketObjPtrPool	m_bfActiveSockets;
+	
 	TSocketObjPtrList	m_lsFreeSocket;
 	TSocketObjPtrQueue	m_lsGCSocket;
 };

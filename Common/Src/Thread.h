@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.14
+ * Version	: 2.3.17
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -30,8 +30,11 @@
 
 template<class T> class CThread
 {
+private:
+	typedef UINT (T::*F)();
+
 public:
-	BOOL Start(T* pRunner, int iPriority = THREAD_PRIORITY_NORMAL, UINT uiStackSize = 0, LPSECURITY_ATTRIBUTES lpThreadAttributes = nullptr)
+	BOOL Start(T* pRunner, F pFunc, int iPriority = THREAD_PRIORITY_NORMAL, UINT uiStackSize = 0, LPSECURITY_ATTRIBUTES lpThreadAttributes = nullptr)
 	{
 		BOOL isOK = TRUE;
 
@@ -39,11 +42,14 @@ public:
 		{
 			Release();
 
+			m_pRunner	= pRunner;
+			m_pFunc		= pFunc;
+
 			if(iPriority == THREAD_PRIORITY_NORMAL)
-				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)pRunner, 0, &m_uiThreadID);
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)this, 0, &m_uiThreadID);
 			else
 			{
-				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)pRunner, CREATE_SUSPENDED, &m_uiThreadID);
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)this, CREATE_SUSPENDED, &m_uiThreadID);
 
 				if(IsValid())
 				{
@@ -52,9 +58,7 @@ public:
 				}
 			}
 
-			if(IsValid())
-				m_pRunner = pRunner;
-			else
+			if(!IsValid())
 			{
 				::SetLastError(_doserrno);
 				isOK = FALSE;
@@ -69,9 +73,15 @@ public:
 		return isOK;
 	}
 
-	DWORD Join(DWORD dwMilliseconds = INFINITE)
+	BOOL Join(BOOL bWithMessageLoop = FALSE, DWORD dwMilliseconds = INFINITE)
 	{
-		return ::WaitForSingleObject(m_hThread, dwMilliseconds);
+		BOOL isOK = bWithMessageLoop											?
+			::MsgWaitForSingleObject(m_hThread, dwMilliseconds)					:
+			::WaitForSingleObject(m_hThread, dwMilliseconds) == WAIT_OBJECT_0	;
+
+		Release();
+
+		return isOK;
 	}
 
 	BOOL IsRunning()
@@ -112,6 +122,7 @@ public:
 
 	BOOL IsValid		()	{return m_hThread != nullptr;}
 	T* GetRunner		()	{return m_pRunner;}
+	F GetFunc			()	{return m_pFunc;}
 	DWORD GetThreadID	()	{return m_uiThreadID;}
 
 	HANDLE& GetThreadHandle			() 			{return m_hThread;}
@@ -131,7 +142,9 @@ public:
 private:
 	static UINT WINAPI ThreadProc(LPVOID pv)
 	{
-		return ((T*)pv)->Run();
+		CThread* pThis = (CThread*)pv;
+
+		return ((pThis->m_pRunner)->*(pThis->m_pFunc))();
 	}
 
 	void Reset()
@@ -139,12 +152,14 @@ private:
 		m_uiThreadID = 0;
 		m_hThread	 = nullptr;
 		m_pRunner	 = nullptr;
+		m_pFunc		 = nullptr;
 	}
 
 private:
 	UINT	m_uiThreadID;
 	HANDLE	m_hThread;
 	T*		m_pRunner;
+	F		m_pFunc;
 
 	DECLARE_NO_COPY_CLASS(CThread)
 };

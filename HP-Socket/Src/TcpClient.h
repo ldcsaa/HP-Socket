@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -41,10 +41,12 @@ public:
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
 	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
-	virtual BOOL			GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
-	virtual BOOL GetPendingDataLength			(int& iPending) {iPending = m_iPending; return HasStarted();}
 	virtual EnSocketError	GetLastError		()	{return m_enLastError;}
 	virtual LPCTSTR			GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
+
+	virtual BOOL GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+	virtual BOOL GetRemoteHost			(TCHAR lpszHost[], int& iHostLen, USHORT& usPort);
+	virtual BOOL GetPendingDataLength	(int& iPending) {iPending = m_iPending; return HasStarted();}
 
 public:
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize	= dwSocketBufferSize;}
@@ -62,35 +64,39 @@ public:
 	virtual PVOID GetExtra				()	{return m_pExtra;}
 
 protected:
-	virtual EnHandleResult FirePrepareConnect(IClient* pClient, SOCKET socket)
-		{return DoFirePrepareConnect(pClient, socket);}
-	virtual EnHandleResult FireConnect(IClient* pClient)
-		{return DoFireConnect(pClient);}
-	virtual EnHandleResult FireHandShake(IClient* pClient)
-		{return DoFireHandShake(pClient);}
-	virtual EnHandleResult FireSend(IClient* pClient, const BYTE* pData, int iLength)
-		{return DoFireSend(pClient, pData, iLength);}
-	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength)
-		{return DoFireReceive(pClient, pData, iLength);}
-	virtual EnHandleResult FireReceive(IClient* pClient, int iLength)
-		{return DoFireReceive(pClient, iLength);}
-	virtual EnHandleResult FireClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
-		{return DoFireClose(pClient, enOperation, iErrorCode);}
+	virtual EnHandleResult FirePrepareConnect(SOCKET socket)
+		{return DoFirePrepareConnect(this, socket);}
+	virtual EnHandleResult FireConnect()
+		{
+			EnHandleResult rs		= DoFireConnect(this);
+			if(rs != HR_ERROR) rs	= FireHandShake();
+			return rs;
+		}
+	virtual EnHandleResult FireHandShake()
+		{return DoFireHandShake(this);}
+	virtual EnHandleResult FireSend(const BYTE* pData, int iLength)
+		{return DoFireSend(this, pData, iLength);}
+	virtual EnHandleResult FireReceive(const BYTE* pData, int iLength)
+		{return DoFireReceive(this, pData, iLength);}
+	virtual EnHandleResult FireReceive(int iLength)
+		{return DoFireReceive(this, iLength);}
+	virtual EnHandleResult FireClose(EnSocketOperation enOperation, int iErrorCode)
+		{return DoFireClose(this, enOperation, iErrorCode);}
 
-	virtual EnHandleResult DoFirePrepareConnect(IClient* pClient, SOCKET socket)
-		{return m_psoListener->OnPrepareConnect(pClient, socket);}
-	virtual EnHandleResult DoFireConnect(IClient* pClient)
-		{return m_psoListener->OnConnect(pClient);}
-	virtual EnHandleResult DoFireHandShake(IClient* pClient)
-		{return m_psoListener->OnHandShake(pClient);}
-	virtual EnHandleResult DoFireSend(IClient* pClient, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pClient, pData, iLength);}
-	virtual EnHandleResult DoFireReceive(IClient* pClient, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pClient, pData, iLength);}
-	virtual EnHandleResult DoFireReceive(IClient* pClient, int iLength)
-		{return m_psoListener->OnReceive(pClient, iLength);}
-	virtual EnHandleResult DoFireClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnClose(pClient, enOperation, iErrorCode);}
+	virtual EnHandleResult DoFirePrepareConnect(ITcpClient* pSender, SOCKET socket)
+		{return m_pListener->OnPrepareConnect(pSender, pSender->GetConnectionID(), socket);}
+	virtual EnHandleResult DoFireConnect(ITcpClient* pSender)
+		{return m_pListener->OnConnect(pSender, pSender->GetConnectionID());}
+	virtual EnHandleResult DoFireHandShake(ITcpClient* pSender)
+		{return m_pListener->OnHandShake(pSender, pSender->GetConnectionID());}
+	virtual EnHandleResult DoFireSend(ITcpClient* pSender, const BYTE* pData, int iLength)
+		{return m_pListener->OnSend(pSender, pSender->GetConnectionID(), pData, iLength);}
+	virtual EnHandleResult DoFireReceive(ITcpClient* pSender, const BYTE* pData, int iLength)
+		{return m_pListener->OnReceive(pSender, pSender->GetConnectionID(), pData, iLength);}
+	virtual EnHandleResult DoFireReceive(ITcpClient* pSender, int iLength)
+		{return m_pListener->OnReceive(pSender, pSender->GetConnectionID(), iLength);}
+	virtual EnHandleResult DoFireClose(ITcpClient* pSender, EnSocketOperation enOperation, int iErrorCode)
+		{return m_pListener->OnClose(pSender, pSender->GetConnectionID(), enOperation, iErrorCode);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
@@ -101,11 +107,17 @@ protected:
 
 	BOOL DoSendPackets(const WSABUF pBuffers[], int iCount);
 
+	static BOOL DoSendPackets(CTcpClient* pClient, const WSABUF pBuffers[], int iCount)
+		{return pClient->DoSendPackets(pBuffers, iCount);}
+
 protected:
 	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
 	PVOID GetReserved	()					{return m_pReserved;}
+	BOOL GetRemoteHost	(LPCSTR* lpszHost, USHORT* pusPort = nullptr);
 
 private:
+	void SetRemoteHost	(LPCTSTR lpszHost, USHORT usPort);
+
 	BOOL CheckStarting();
 	BOOL CheckStoping(DWORD dwCurrentThreadID);
 	BOOL CreateClientSocket();
@@ -129,12 +141,13 @@ private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
 public:
-	CTcpClient(ITcpClientListener* psoListener)
-	: m_psoListener			(psoListener)
+	CTcpClient(ITcpClientListener* pListener)
+	: m_pListener			(pListener)
 	, m_lsSend				(m_itPool)
 	, m_soClient			(INVALID_SOCKET)
 	, m_evSocket			(nullptr)
 	, m_dwConnID			(0)
+	, m_usPort				(0)
 	, m_hWorker				(nullptr)
 	, m_dwWorkerID			(0)
 	, m_bAsyncConnect		(FALSE)
@@ -149,7 +162,7 @@ public:
 	, m_dwKeepAliveTime		(DEFALUT_TCP_KEEPALIVE_TIME)
 	, m_dwKeepAliveInterval	(DEFALUT_TCP_KEEPALIVE_INTERVAL)
 	{
-		ASSERT(m_psoListener);
+		ASSERT(m_pListener);
 	}
 
 	virtual ~CTcpClient()
@@ -161,13 +174,14 @@ private:
 	CInitSocket			m_wsSocket;
 
 private:
-	ITcpClientListener*	m_psoListener;
+	ITcpClientListener*	m_pListener;
 	TClientCloseContext m_ccContext;
 
 	BOOL				m_bAsyncConnect;
 	SOCKET				m_soClient;
 	HANDLE				m_evSocket;
 	CONNID				m_dwConnID;
+
 
 	DWORD				m_dwSocketBufferSize;
 	DWORD				m_dwFreeBufferPoolSize;
@@ -187,6 +201,9 @@ private:
 	CBufferPtr			m_rcBuffer;
 
 protected:
+	CStringA			m_strHost;
+	USHORT				m_usPort;
+
 	CItemPool			m_itPool;
 
 private:

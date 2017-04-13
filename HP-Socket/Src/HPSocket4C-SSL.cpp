@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
+ * Version	: 4.1.3
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -35,6 +35,10 @@
 #include "TcpPackClient.h"
 #include "TcpPackAgent.h"
 
+#include "HttpServer.h"
+#include "HttpAgent.h"
+#include "HttpClient.h"
+
 #if !defined(_WIN64) && !defined(HPSOCKET_STATIC_LIB)
 
 	#pragma comment(linker, "/EXPORT:Create_HP_SSLAgent=_Create_HP_SSLAgent@4")
@@ -56,69 +60,41 @@
 	#pragma comment(linker, "/EXPORT:Destroy_HP_SSLPackServer=_Destroy_HP_SSLPackServer@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_SSLServer=_Destroy_HP_SSLServer@4")
 
-	#pragma comment(linker, "/EXPORT:HP_SSL_Initialize=_HP_SSL_Initialize@24")
+	#pragma comment(linker, "/EXPORT:Create_HP_HttpsAgent=_Create_HP_HttpsAgent@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_HttpsClient=_Create_HP_HttpsClient@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_HttpsServer=_Create_HP_HttpsServer@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_HttpsSyncClient=_Create_HP_HttpsSyncClient@0")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_HttpsAgent=_Destroy_HP_HttpsAgent@4")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_HttpsClient=_Destroy_HP_HttpsClient@4")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_HttpsServer=_Destroy_HP_HttpsServer@4")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_HttpsSyncClient=_Destroy_HP_HttpsSyncClient@4")
+
+	#pragma comment(linker, "/EXPORT:HP_SSL_Initialize=_HP_SSL_Initialize@28")
+	#pragma comment(linker, "/EXPORT:HP_SSL_AddServerContext=_HP_SSL_AddServerContext@20")
 	#pragma comment(linker, "/EXPORT:HP_SSL_Cleanup=_HP_SSL_Cleanup@0")
-	#pragma comment(linker, "/EXPORT:HP_SSL_RemoveThreadLocalState=_HP_SSL_RemoveThreadLocalState@0")
+	#pragma comment(linker, "/EXPORT:HP_SSL_RemoveThreadLocalState=_HP_SSL_RemoveThreadLocalState@4")
 	#pragma comment(linker, "/EXPORT:HP_SSL_IsValid=_HP_SSL_IsValid@0")
 
 #endif
 
-class C_HP_SSLServer : public C_HP_Object, public CSSLServer
-{
-public:
-	C_HP_SSLServer(ITcpServerListener* pListener) : CSSLServer(pListener) {}
-};
+/*****************************************************************************************************************************************************/
+/******************************************************************** SSL Exports ********************************************************************/
+/*****************************************************************************************************************************************************/
 
-class C_HP_SSLPullServer : public C_HP_Object, public CSSLPullServer
-{
-public:
-	C_HP_SSLPullServer(ITcpServerListener* pListener) : C_HP_Object(sizeof(IPullSocket)), CSSLPullServer(pListener) {}
-};
+typedef C_HP_ObjectT<CSSLServer, ITcpServerListener>							C_HP_SSLServer;
+typedef C_HP_ObjectT<CSSLPullServer, ITcpServerListener, sizeof(IPullSocket)>	C_HP_SSLPullServer;
+typedef C_HP_ObjectT<CSSLPackServer, ITcpServerListener, sizeof(IPackSocket)>	C_HP_SSLPackServer;
 
-class C_HP_SSLPackServer : public C_HP_Object, public CSSLPackServer
-{
-public:
-	C_HP_SSLPackServer(ITcpServerListener* pListener) : C_HP_Object(sizeof(IPackSocket)), CSSLPackServer(pListener) {}
-};
+typedef C_HP_ObjectT<CSSLAgent, ITcpAgentListener>								C_HP_SSLAgent;
+typedef C_HP_ObjectT<CSSLPullAgent, ITcpAgentListener, sizeof(IPullSocket)>		C_HP_SSLPullAgent;
+typedef C_HP_ObjectT<CSSLPackAgent, ITcpAgentListener, sizeof(IPackSocket)>		C_HP_SSLPackAgent;
 
-class C_HP_SSLAgent : public C_HP_Object, public CSSLAgent
-{
-public:
-	C_HP_SSLAgent(ITcpAgentListener* pListener) : CSSLAgent(pListener) {}
-};
-
-class C_HP_SSLPullAgent : public C_HP_Object, public CSSLPullAgent
-{
-public:
-	C_HP_SSLPullAgent(ITcpAgentListener* pListener) : C_HP_Object(sizeof(IPullSocket)), CSSLPullAgent(pListener) {}
-};
-
-class C_HP_SSLPackAgent : public C_HP_Object, public CSSLPackAgent
-{
-public:
-	C_HP_SSLPackAgent(ITcpAgentListener* pListener) : C_HP_Object(sizeof(IPackSocket)), CSSLPackAgent(pListener) {}
-};
-
-class C_HP_SSLClient : public C_HP_Object, public CSSLClient
-{
-public:
-	C_HP_SSLClient(ITcpClientListener* pListener) : CSSLClient(pListener) {}
-};
-
-class C_HP_SSLPullClient : public C_HP_Object, public CSSLPullClient
-{
-public:
-	C_HP_SSLPullClient(ITcpClientListener* pListener) : C_HP_Object(sizeof(IPullClient)), CSSLPullClient(pListener) {}
-};
-
-class C_HP_SSLPackClient : public C_HP_Object, public CSSLPackClient
-{
-public:
-	C_HP_SSLPackClient(ITcpClientListener* pListener) : C_HP_Object(sizeof(IPackClient)), CSSLPackClient(pListener) {}
-};
+typedef C_HP_ObjectT<CSSLClient, ITcpClientListener>							C_HP_SSLClient;
+typedef C_HP_ObjectT<CSSLPullClient, ITcpClientListener, sizeof(IPullClient)>	C_HP_SSLPullClient;
+typedef C_HP_ObjectT<CSSLPackClient, ITcpClientListener, sizeof(IPackClient)>	C_HP_SSLPackClient;
 
 /********************************************************/
-/**************** HPSocket4C-SSL 导出函数 ****************/
+/************** HPSocket4C-SSL 对象创建函数 **************/
 
 HPSOCKET_API HP_SSLServer __stdcall Create_HP_SSLServer(HP_TcpServerListener pListener)
 {
@@ -210,12 +186,70 @@ HPSOCKET_API void __stdcall Destroy_HP_SSLPackClient(HP_SSLPackClient pClient)
 	delete (C_HP_SSLPackClient*)pClient;
 }
 
-/***************************************************************************************/
-/************************************ SSL 初始化方法 ************************************/
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTPS Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
 
-HPSOCKET_API BOOL __stdcall HP_SSL_Initialize(En_HP_SSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+typedef C_HP_ObjectT<CHttpsServer, IHttpServerListener, sizeof(IComplexHttpResponder)>	C_HP_HttpsServer;
+typedef C_HP_ObjectT<CHttpsAgent, IHttpAgentListener, sizeof(IComplexHttpRequester)>	C_HP_HttpsAgent;
+typedef C_HP_ObjectT<CHttpsClient, IHttpClientListener, sizeof(IHttpRequester)>			C_HP_HttpsClient;
+typedef C_HP_ObjectT<CHttpsSyncClient, void, sizeof(IHttpSyncRequester)>				C_HP_HttpsSyncClient;
+
+/****************************************************/
+/**************** HTTPS 对象创建函数 *****************/
+
+HPSOCKET_API HP_HttpsServer __stdcall Create_HP_HttpsServer(HP_HttpServerListener pListener)
 {
-	return g_SSL.Initialize((EnSSLSessionMode)enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return (HP_HttpsServer)(new C_HP_HttpsServer((IHttpServerListener*)pListener));
+}
+
+HPSOCKET_API HP_HttpsAgent __stdcall Create_HP_HttpsAgent(HP_HttpAgentListener pListener)
+{
+	return (HP_HttpsAgent)(new C_HP_HttpsAgent((IHttpAgentListener*)pListener));
+}
+
+HPSOCKET_API HP_HttpsClient __stdcall Create_HP_HttpsClient(HP_HttpClientListener pListener)
+{
+	return (HP_HttpsClient)(new C_HP_HttpsClient((IHttpClientListener*)pListener));
+}
+
+HPSOCKET_API HP_HttpsSyncClient __stdcall Create_HP_HttpsSyncClient()
+{
+	return (HP_HttpsSyncClient)(new C_HP_HttpsSyncClient());
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_HttpsServer(HP_HttpsServer pServer)
+{
+	delete (C_HP_HttpsServer*)pServer;
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_HttpsAgent(HP_HttpsAgent pAgent)
+{
+	delete (C_HP_HttpsAgent*)pAgent;
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_HttpsClient(HP_HttpsClient pClient)
+{
+	delete (C_HP_HttpsClient*)pClient;
+}
+
+HPSOCKET_API void __stdcall Destroy_HP_HttpsSyncClient(HP_HttpsSyncClient pClient)
+{
+	delete (C_HP_HttpsSyncClient*)pClient;
+}
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API BOOL __stdcall HP_SSL_Initialize(En_HP_SSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
+{
+	return g_SSL.Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, fnServerNameCallback);
+}
+
+HPSOCKET_API int __stdcall HP_SSL_AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+{
+	return g_SSL.AddServerContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
 }
 
 HPSOCKET_API void __stdcall HP_SSL_Cleanup()
@@ -223,9 +257,9 @@ HPSOCKET_API void __stdcall HP_SSL_Cleanup()
 	g_SSL.Cleanup();
 }
 
-HPSOCKET_API void __stdcall HP_SSL_RemoveThreadLocalState()
+HPSOCKET_API void __stdcall HP_SSL_RemoveThreadLocalState(DWORD dwThreadID)
 {
-	g_SSL.RemoveThreadLocalState();
+	g_SSL.RemoveThreadLocalState(dwThreadID);
 }
 
 HPSOCKET_API BOOL __stdcall HP_SSL_IsValid()
