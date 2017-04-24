@@ -650,7 +650,12 @@ private:
 			return HPR_ERROR;
 
 		if(pCookie->Match(lpszDomain, lpszPath, TRUE, m_pContext->IsSecure()))
-			AddCookie(pCookie->name, pCookie->value);
+		{
+			if(pCookie->IsExpired())
+				DeleteCookie(pCookie->name);
+			else
+				AddCookie(pCookie->name, pCookie->value);
+		}
 
 		if(pCookieMgr->IsEnableThirdPartyCookie() || pCookie->IsSameDomain(lpszDomain))
 			pCookieMgr->SetCookie(*pCookie);
@@ -853,18 +858,18 @@ public:
 
 		TCookieMapI it = m_cookies.find(lpszName);
 
-		if(it != m_cookies.end())
-		{
-			if(bRelpace)
-			{
-				it->second = lpszValue;
-				return TRUE;
-			}
+		if(it == m_cookies.end())
+			return m_cookies.emplace(move(TCookieMap::value_type(lpszName, lpszValue))).second;
 
-			return FALSE;
+		BOOL isOK = FALSE;
+
+		if(bRelpace)
+		{
+			it->second	= lpszValue;
+			isOK		= TRUE;
 		}
-		
-		return m_cookies.emplace(move(TCookieMap::value_type(lpszName, lpszValue))).second;
+
+		return isOK;
 	}
 
 	BOOL DeleteCookie(LPCSTR lpszName)
