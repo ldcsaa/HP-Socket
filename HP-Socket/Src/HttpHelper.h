@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.2.1
+ * Version	: 4.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -396,6 +396,12 @@ public:
 		return hr;
 	}
 
+	void CheckBodyIdentityEof()
+	{
+		if(m_parser.state == s_body_identity_eof && !m_parser.upgrade)
+			::http_parser_execute(&m_parser, &sm_settings, nullptr, 0);
+	}
+
 	static int on_message_begin(http_parser* p)
 	{
 		THttpObjT* pSelf = Self(p);
@@ -490,7 +496,12 @@ public:
 		pSelf->CheckUpgrade();
 		pSelf->ResetHeaderBuffer();
 
-		return pSelf->m_pContext->FireHeadersComplete(pSelf->m_pSocket);
+		EnHttpParseResult rs = pSelf->m_pContext->FireHeadersComplete(pSelf->m_pSocket);
+
+		if(!pSelf->m_bRequest && pSelf->GetMethodInt() == HTTP_HEAD && rs == HPR_OK)
+			rs = HPR_SKIP_BODY;
+
+		return rs;
 	}
 
 	static int on_body(http_parser* p, const char* at, size_t length)
@@ -672,7 +683,8 @@ public:
 	USHORT GetVersion()				{return MAKEWORD(m_parser.http_major, m_parser.http_minor);}
 	ULONGLONG GetContentLength()	{return m_parser.content_length;}
 
-	LPCSTR GetMethod()				{return ::http_method_str((http_method)(m_parser.method));}
+	int GetMethodInt()				{return m_bRequest ? m_parser.method : m_sRequestMethod;}
+	LPCSTR GetMethod()				{return ::http_method_str((http_method)GetMethodInt());}
 	USHORT GetUrlFieldSet()			{return m_usUrlFieldSet;}
 	USHORT GetStatusCode()			{return m_parser.status_code;}
 
@@ -757,12 +769,35 @@ public:
 		return *m_pstrRequestPath;
 	}
 
-	void SetRequestPath(LPCSTR lpszPath)
+	void SetRequestPath(LPCSTR lpszMethod, LPCSTR lpszPath)
 	{
 		ASSERT(!m_bRequest);
 
-		if(!m_bRequest)
-			*m_pstrRequestPath = lpszPath;
+		if(m_bRequest)
+			return;
+
+		*m_pstrRequestPath = lpszPath;
+
+		if(_stricmp(lpszMethod, HTTP_METHOD_GET) == 0)
+			m_sRequestMethod = HTTP_GET;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_POST) == 0)
+			m_sRequestMethod = HTTP_POST;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_PUT) == 0)
+			m_sRequestMethod = HTTP_PUT;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_DELETE) == 0)
+			m_sRequestMethod = HTTP_DELETE;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_HEAD) == 0)
+			m_sRequestMethod = HTTP_HEAD;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_PATCH) == 0)
+			m_sRequestMethod = HTTP_PATCH;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_TRACE) == 0)
+			m_sRequestMethod = HTTP_TRACE;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_OPTIONS) == 0)
+			m_sRequestMethod = HTTP_OPTIONS;
+		else if(_stricmp(lpszMethod, HTTP_METHOD_CONNECT) == 0)
+			m_sRequestMethod = HTTP_CONNECT;
+		else
+			m_sRequestMethod = -1;
 	}
 
 	BOOL GetHeader(LPCSTR lpszName, LPCSTR* lpszValue)
@@ -957,7 +992,7 @@ public:
 	, m_bRequest		(bRequest)
 	, m_bReleased		(FALSE)
 	, m_dwFreeTime		(0)
-	, m_usUrlFieldSet	(0)
+	, m_usUrlFieldSet	(m_bRequest ? 0 : -1)
 	, m_pstrUrlFileds	(nullptr)
 	, m_enUpgrade		(HUT_NONE)
 	, m_pwsContext		(nullptr)
@@ -1028,7 +1063,8 @@ public:
 		}
 		else
 		{
-			*m_pstrRequestPath = *src.m_pstrRequestPath;
+			m_sRequestMethod	= src.m_sRequestMethod;
+			*m_pstrRequestPath	= *src.m_pstrRequestPath;
 		}
 
 		m_enUpgrade = src.m_enUpgrade;
@@ -1069,7 +1105,7 @@ private:
 		m_parser.data = this;		
 	}
 
-	void ResetHeaderState(BOOL bClearCookies = TRUE, BOOL bResetRequestPath = TRUE)
+	void ResetHeaderState(BOOL bClearCookies = TRUE, BOOL bResetRequestData = TRUE)
 	{
 		if(m_bRequest)
 		{
@@ -1083,8 +1119,11 @@ private:
 		}
 		else
 		{
-			if(bResetRequestPath)
+			if(bResetRequestData)
+			{
+				m_sRequestMethod = -1;
 				m_pstrRequestPath->Empty();
+			}
 		}
 
 		if(m_bRequest || bClearCookies)
@@ -1128,7 +1167,11 @@ private:
 	CStringA	m_strBuffer;
 	CStringA	m_strCurHeader;
 
-	USHORT		m_usUrlFieldSet;
+	union
+	{
+		USHORT		m_usUrlFieldSet;
+		short		m_sRequestMethod;
+	};
 
 	union
 	{

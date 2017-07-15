@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.2.1
+ * Version	: 4.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,15 @@ private:
 
 	EnHandleResult DoFireSuperReceive(IHttpClient* pSender, const BYTE* pData, int iLength)
 		{ASSERT(pSender == (IHttpClient*)this); return __super::DoFireReceive(pSender, pData, iLength);}
+
+	virtual EnHandleResult DoFireClose(ITcpClient* pSender, EnSocketOperation enOperation, int iErrorCode)
+	{
+		ASSERT(pSender == (IHttpClient*)this);
+
+		m_objHttp.CheckBodyIdentityEof();
+
+		return __super::DoFireClose(pSender, enOperation, iErrorCode);
+	}
 
 	virtual void Reset()
 	{

@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.2.1
+ * Version	: 4.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ protected:
 		{
 			EnHandleResult rs		= DoFireConnect(pSocketObj);
 			if(rs != HR_ERROR) rs	= FireHandShake(pSocketObj);
+			if(rs != HR_ERROR) pSocketObj->ResetSndBuffSize(pSocketObj->socket);
 			return rs;
 		}
 	virtual EnHandleResult FireHandShake(TSocketObj* pSocketObj)
@@ -209,7 +210,6 @@ private:
 	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
 
-	int DoConnect	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	int DoReceive	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
 	int DoSend		(CONNID dwConnID);

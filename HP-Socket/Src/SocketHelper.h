@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.2.1
+ * Version	: 4.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@
 
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR						4
-#define HP_VERSION_MINOR						2
+#define HP_VERSION_MINOR						3
 #define HP_VERSION_REVISE						1
-#define HP_VERSION_BUILD						5
+#define HP_VERSION_BUILD						1
 
 /* IOCP 最大工作线程数 */
 #define MAX_WORKER_THREAD_COUNT					500
@@ -294,6 +294,8 @@ typedef CRingPool<TUdpBufferObj>	TUdpBufferObjPtrList;
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
 {
+	static const long DEF_SNDBUFF_SIZE = 8192;
+
 	CONNID		connID;
 	SOCKADDR_IN	remoteAddr;
 	PVOID		extra;
@@ -311,9 +313,10 @@ struct TSocketObjBase
 
 	CCriSec		csSend;
 
-	volatile BOOL smooth;
-	volatile long pending;
-	volatile long sndCount;
+	long			sndBuffSize;
+	volatile BOOL	smooth;
+	volatile long	pending;
+	volatile long	sndCount;
 
 	CReentrantSpinGuard csRecv;
 
@@ -326,31 +329,35 @@ struct TSocketObjBase
 	static void Invalid(TSocketObjBase* pSocketObj)
 		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
 
-	static BOOL IsSmooth(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); return pSocketObj->valid && pSocketObj->smooth;}
-
-	static BOOL IsPending(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); return pSocketObj->valid && pSocketObj->pending > 0;}
-
 	static void Release(TSocketObjBase* pSocketObj)
+		{ASSERT(IsExist(pSocketObj)); pSocketObj->freeTime = ::TimeGetTime();}
+
+	long Pending()		{return pending;}
+	BOOL IsPending()	{return pending > 0;}
+	BOOL IsCanSend()	{return sndCount <= sndBuffSize;}
+	BOOL IsSmooth()		{return smooth;}
+	void TurnOnSmooth()	{smooth = TRUE;}
+
+	BOOL TurnOffSmooth()
+		{return ::InterlockedCompareExchange((volatile long*)&smooth, FALSE, TRUE) == TRUE;}
+	
+	BOOL ResetSndBuffSize(SOCKET socket)
 	{
-		ASSERT(IsExist(pSocketObj));
-
-		pSocketObj->freeTime = ::TimeGetTime();
+		int len = (int)(sizeof(sndBuffSize));
+		return getsockopt(socket, SOL_SOCKET, SO_SNDBUF, (CHAR*)&sndBuffSize, &len) != 0;
 	}
-
-	int Pending() {return pending;}
 
 	void Reset(CONNID dwConnID)
 	{
-		connID	 = dwConnID;
-		valid	 = TRUE;
-		smooth	 = TRUE;
-		pending	 = 0;
-		sndCount = 0;
-		extra	 = nullptr;
-		reserved = nullptr;
-		reserved2= nullptr;
+		connID		= dwConnID;
+		valid		= TRUE;
+		smooth		= TRUE;
+		pending		= 0;
+		sndCount	= 0;
+		sndBuffSize	= DEF_SNDBUFF_SIZE;
+		extra		= nullptr;
+		reserved	= nullptr;
+		reserved2	= nullptr;
 	}
 };
 
@@ -441,7 +448,7 @@ struct sockaddr_func
 	{
 		size_t operator() (const SOCKADDR_IN* pA) const
 		{
-			return ((pA->sin_family << 16) | ntohs(pA->sin_port)) ^ pA->sin_addr.s_addr;
+			return ((pA->sin_family << 16) | pA->sin_port) ^ pA->sin_addr.s_addr;
 		}
 	};
 

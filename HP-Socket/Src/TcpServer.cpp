@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.2.1
+ * Version	: 4.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,11 @@ BOOL CTcpServer::Start(LPCTSTR lpszBindAddress, USHORT usPort)
 					return TRUE;
 				}
 
+	DWORD dwCode = ::GetLastError();
+
 	Stop();
+
+	::SetLastError(dwCode);
 
 	return FALSE;
 }
@@ -1016,31 +1020,29 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 
 void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	int iLength = -(long)(pBufferObj->buff.len);
+
 	switch(m_enSendPolicy)
 	{
 	case SP_PACK:
 		{
-			long sndCount = ::InterlockedDecrement(&pSocketObj->sndCount);
+			long sndCount = ::InterlockedExchangeAdd(&pSocketObj->sndCount, iLength);
+			ASSERT(sndCount + iLength >= 0);
 
 			TriggerFireSend(pSocketObj, pBufferObj);
-			if(sndCount == 0) DoSendPack(pSocketObj);
+
+			DoSendPack(pSocketObj);
 		}
 
 		break;
 	case SP_SAFE:
 		{
-			long sndCount = ::InterlockedDecrement(&pSocketObj->sndCount);
-
-			if(sndCount == 0 && !pSocketObj->smooth)
-			{
-				CCriSecLock locallock(pSocketObj->csSend);
-
-				if((sndCount = pSocketObj->sndCount) == 0)
-					pSocketObj->smooth = TRUE;
-			}
+			long sndCount = ::InterlockedExchangeAdd(&pSocketObj->sndCount, iLength);
+			ASSERT(sndCount + iLength >= 0);
 
 			TriggerFireSend(pSocketObj, pBufferObj);
-			if(sndCount == 0) DoSendSafe(pSocketObj);
+
+			DoSendSafe(pSocketObj);
 		}
 
 		break;
@@ -1175,13 +1177,13 @@ int CTcpServer::SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], in
 
 int CTcpServer::SendPack(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
-	BOOL isPostSend = !TSocketObj::IsPending(pSocketObj);
+	BOOL isPostSend = pSocketObj->IsCanSend() && pSocketObj->IsSmooth();
 	return CatAndPost(pSocketObj, pBuffer, iLength, isPostSend);
 }
 
 int CTcpServer::SendSafe(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
-	BOOL isPostSend = !TSocketObj::IsPending(pSocketObj) && TSocketObj::IsSmooth(pSocketObj);
+	BOOL isPostSend = pSocketObj->IsCanSend() && pSocketObj->IsSmooth();
 	return CatAndPost(pSocketObj, pBuffer, iLength, isPostSend);
 }
 
@@ -1246,14 +1248,24 @@ int CTcpServer::DoSend(TSocketObj* pSocketObj)
 
 int CTcpServer::DoSendPack(TSocketObj* pSocketObj)
 {
+	if(!pSocketObj->IsCanSend())
+		return NO_ERROR;
+
 	int result = NO_ERROR;
 
-	if(TSocketObj::IsPending(pSocketObj))
+	if(pSocketObj->IsPending() && pSocketObj->TurnOffSmooth())
 	{
-		CCriSecLock locallock(pSocketObj->csSend);
+		{
+			CCriSecLock locallock(pSocketObj->csSend);
 
-		if(TSocketObj::IsValid(pSocketObj))
-			result = SendItem(pSocketObj);
+			if(pSocketObj->IsPending())
+				result = SendItem(pSocketObj);
+
+			pSocketObj->TurnOnSmooth();
+		}
+
+		if(result == WSA_IO_PENDING && pSocketObj->IsSmooth())
+			::PostIocpSend(m_hCompletePort, pSocketObj->connID);
 	}
 
 	if(!IOCP_SUCCESS(result))
@@ -1264,13 +1276,24 @@ int CTcpServer::DoSendPack(TSocketObj* pSocketObj)
 
 int CTcpServer::DoSendSafe(TSocketObj* pSocketObj)
 {
-	int result = NO_ERROR;
-
-	if(TSocketObj::IsPending(pSocketObj) && TSocketObj::IsSmooth(pSocketObj))
+	if(pSocketObj->sndCount == 0 && !pSocketObj->IsSmooth())
 	{
 		CCriSecLock locallock(pSocketObj->csSend);
 
-		if(TSocketObj::IsPending(pSocketObj) && TSocketObj::IsSmooth(pSocketObj))
+		if(pSocketObj->sndCount == 0)
+			pSocketObj->smooth = TRUE;
+	}
+
+	if(!pSocketObj->IsCanSend())
+		return NO_ERROR;
+
+	int result = NO_ERROR;
+
+	if(pSocketObj->IsPending() && pSocketObj->IsSmooth())
+	{
+		CCriSecLock locallock(pSocketObj->csSend);
+
+		if(pSocketObj->IsPending() && pSocketObj->IsSmooth())
 		{
 			pSocketObj->smooth = FALSE;
 
@@ -1293,14 +1316,13 @@ int CTcpServer::SendItem(TSocketObj* pSocketObj)
 
 	while(pSocketObj->sndBuff.Size() > 0)
 	{
-		::InterlockedIncrement(&pSocketObj->sndCount);
-
 		TBufferObj* pBufferObj	= pSocketObj->sndBuff.PopFront();
 		int iBufferSize			= pBufferObj->buff.len;
 
 		ASSERT(iBufferSize > 0 && iBufferSize <= (int)m_dwSocketBufferSize);
 
 		pSocketObj->pending	   -= iBufferSize;
+		::InterlockedExchangeAdd(&pSocketObj->sndCount, iBufferSize);
 
 		result = ::PostSendNotCheck(pSocketObj, pBufferObj);
 

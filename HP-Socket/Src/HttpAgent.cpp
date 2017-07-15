@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 4.2.1
+ * Version	: 4.3.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendRe
 	CStringA strPath;
 	::AdjustRequestPath(lpszPath, strPath);
 
-	pHttpObj->SetRequestPath(strPath);
+	pHttpObj->SetRequestPath(lpszMethod, strPath);
 	pHttpObj->ReloadCookies();
 
 	::MakeRequestLine(lpszMethod, lpszPath, m_enLocalVersion, strHeader);
@@ -138,9 +138,12 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 
 template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_port>::DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
 {
-	EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
-
 	THttpObj* pHttpObj = FindHttpObj(pSocketObj);
+
+	if(pHttpObj != nullptr)
+		pHttpObj->CheckBodyIdentityEof();
+
+	EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
 
 	if(pHttpObj != nullptr)
 		m_objPool.PutFreeHttpObj(pHttpObj);
