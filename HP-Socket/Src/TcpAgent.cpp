@@ -1221,14 +1221,12 @@ int CTcpAgent::SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], int
 
 int CTcpAgent::SendPack(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
-	BOOL isPostSend = pSocketObj->IsCanSend() && pSocketObj->IsSmooth();
-	return CatAndPost(pSocketObj, pBuffer, iLength, isPostSend);
+	return CatAndPost(pSocketObj, pBuffer, iLength);
 }
 
 int CTcpAgent::SendSafe(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
-	BOOL isPostSend = pSocketObj->IsCanSend() && pSocketObj->IsSmooth();
-	return CatAndPost(pSocketObj, pBuffer, iLength, isPostSend);
+	return CatAndPost(pSocketObj, pBuffer, iLength);
 }
 
 int CTcpAgent::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
@@ -1257,14 +1255,14 @@ int CTcpAgent::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLeng
 	return result;
 }
 
-int CTcpAgent::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend)
+int CTcpAgent::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
 	int result = NO_ERROR;
 
 	pSocketObj->sndBuff.Cat(pBuffer, iLength);
 	pSocketObj->pending += iLength;
 
-	if(isPostSend && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
+	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
 		result = ::GetLastError();
 
 	return result;

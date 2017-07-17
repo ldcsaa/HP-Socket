@@ -192,7 +192,7 @@ private:
 	int SendPack	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendSafe	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendDirect	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int CatAndPost	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
+	int CatAndPost	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
 	BOOL DoAccept	();
 	int DoReceive	(TUdpBufferObj* pBufferObj);

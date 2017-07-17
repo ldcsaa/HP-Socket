@@ -44,7 +44,7 @@
 #define HP_VERSION_MAJOR						4
 #define HP_VERSION_MINOR						3
 #define HP_VERSION_REVISE						1
-#define HP_VERSION_BUILD						1
+#define HP_VERSION_BUILD						2
 
 /* IOCP 最大工作线程数 */
 #define MAX_WORKER_THREAD_COUNT					500

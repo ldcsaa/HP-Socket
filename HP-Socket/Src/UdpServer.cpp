@@ -1219,14 +1219,12 @@ int CUdpServer::SendInternal(CONNID dwConnID, const BYTE* pBuffer, int iLength)
 
 int CUdpServer::SendPack(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
-	BOOL isPostSend = pSocketObj->IsCanSend() && pSocketObj->IsSmooth();
-	return CatAndPost(pSocketObj, pBuffer, iLength, isPostSend);
+	return CatAndPost(pSocketObj, pBuffer, iLength);
 }
 
 int CUdpServer::SendSafe(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
-	BOOL isPostSend = pSocketObj->IsCanSend() && pSocketObj->IsSmooth();
-	return CatAndPost(pSocketObj, pBuffer, iLength, isPostSend);
+	return CatAndPost(pSocketObj, pBuffer, iLength);
 }
 
 int CUdpServer::SendDirect(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
@@ -1247,14 +1245,14 @@ int CUdpServer::SendDirect(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int i
 	return result;
 }
 
-int CUdpServer::CatAndPost(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend)
+int CUdpServer::CatAndPost(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
 	int result = NO_ERROR;
 
 	pSocketObj->sndBuff.PushTail(pBuffer, iLength);
 	pSocketObj->pending += iLength;
 
-	if(isPostSend && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
+	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
 		result = ::GetLastError();
 
 	return result;

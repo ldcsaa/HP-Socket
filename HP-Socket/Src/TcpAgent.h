@@ -208,7 +208,7 @@ private:
 	int SendPack	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendSafe	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
+	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
 	int DoReceive	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
