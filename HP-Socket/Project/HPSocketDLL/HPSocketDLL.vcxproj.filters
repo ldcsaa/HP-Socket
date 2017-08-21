@@ -1,0 +1,362 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{039b40b4-14cf-45b3-bca5-65a981c86518}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HPSocket">
+      <UniqueIdentifier>{c1cdb45b-7c34-4b60-83c3-a6f06ec55fbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\http">
+      <UniqueIdentifier>{35660233-4025-4b0e-8db6-9260573c5a44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HPSocket\HTTP">
+      <UniqueIdentifier>{64a380f2-a94d-4f49-94e0-5b570118e94f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HPSocket\SSL">
+      <UniqueIdentifier>{fa3e4e47-f2bc-443a-b53b-10d2a109ab6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HPSocket\TCP">
+      <UniqueIdentifier>{9477332c-89df-46a5-b023-50fbaf15ce68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HPSocket\UDP">
+      <UniqueIdentifier>{1e3a879b-21fd-46ab-af5c-6900b778ebcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HPSocket\Public">
+      <UniqueIdentifier>{705a5a02-0c92-4df2-b6d0-818fef73bdf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\zlib">
+      <UniqueIdentifier>{00422575-92fd-4c03-9b0e-ec6e70d00482}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\bufferpool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\bufferptr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\CriticalSection.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\Event.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\RWLock.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\Semaphore.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\Singleton.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\STLHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\SysHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\WaitFor.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\Win32Helper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\RingBuffer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\http\http_parser.h">
+      <Filter>Common\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\Thread.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HttpHelper.h">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HttpServer.h">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HPSocket-SSL.h">
+      <Filter>HPSocket\SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SSLAgent.h">
+      <Filter>HPSocket\SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SSLClient.h">
+      <Filter>HPSocket\SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SSLHelper.h">
+      <Filter>HPSocket\SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SSLServer.h">
+      <Filter>HPSocket\SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HPSocket.h">
+      <Filter>HPSocket\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HPTypeDef.h">
+      <Filter>HPSocket\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\MiscHelper.h">
+      <Filter>HPSocket\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SocketHelper.h">
+      <Filter>HPSocket\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SocketInterface.h">
+      <Filter>HPSocket\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpAgent.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpClient.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPackAgent.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPackClient.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPackServer.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPullAgent.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPullClient.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpPullServer.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\TcpServer.h">
+      <Filter>HPSocket\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\UdpServer.h">
+      <Filter>HPSocket\UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\UdpCast.h">
+      <Filter>HPSocket\UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\UdpClient.h">
+      <Filter>HPSocket\UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HttpAgent.h">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HttpClient.h">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\crc32.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\deflate.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\gzguts.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\inffast.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\inffixed.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\inflate.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\inftrees.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\trees.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\zconf.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\zlib.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Src\zlib\zutil.h">
+      <Filter>Common\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HttpCookie.h">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\bufferpool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\RWLock.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\http\http_parser.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HttpHelper.cpp">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HttpServer.cpp">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HPSocket-SSL.cpp">
+      <Filter>HPSocket\SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\SSLAgent.cpp">
+      <Filter>HPSocket\SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\SSLClient.cpp">
+      <Filter>HPSocket\SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\SSLHelper.cpp">
+      <Filter>HPSocket\SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\SSLServer.cpp">
+      <Filter>HPSocket\SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HPSocket.cpp">
+      <Filter>HPSocket\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\MiscHelper.cpp">
+      <Filter>HPSocket\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\SocketHelper.cpp">
+      <Filter>HPSocket\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpAgent.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpServer.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpClient.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPackAgent.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPackClient.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPackServer.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPullAgent.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPullClient.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\TcpPullServer.cpp">
+      <Filter>HPSocket\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\UdpCast.cpp">
+      <Filter>HPSocket\UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\UdpClient.cpp">
+      <Filter>HPSocket\UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\UdpServer.cpp">
+      <Filter>HPSocket\UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HttpAgent.cpp">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HttpClient.cpp">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\adler32.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\compress.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\crc32.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\deflate.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\gzclose.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\gzlib.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\gzread.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\gzwrite.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\infback.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\inffast.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\inflate.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\inftrees.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\trees.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\uncompr.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Common\Src\zlib\zutil.c">
+      <Filter>Common\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HttpCookie.cpp">
+      <Filter>HPSocket\HTTP</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HPSocketDLL.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
