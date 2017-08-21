@@ -1,5 +1,37 @@
 
 # ======================================== #
+HP-Socket v5.0.1 API 更新列表：
+# ======================================== #
+--------------------
+1、SYS:
+--------------------
+enum En_HP_IPAddrType			(增加)
+struct HP_TIPAddr				(增加)
+
+SYS_GetIPv4InAddr				(删除)
+SYS_GetOptimalIPByHostName		(删除)
+SYS_IsIPAddress					(修改)
+SYS_GetIPAddress				(修改)
+SYS_EnumHostIPAddresses			(增加)
+SYS_FreeHostIPAddresses			(增加)
+
+--------------------
+2、SSL:
+--------------------
+HP_SSL_Initialize				(删除)
+HP_SSL_Cleanup					(删除)
+HP_SSL_AddServerContext			(删除)
+HP_SSL_IsValid					(删除)
+
+HP_SSLAgent_SetupSSLContext		(增加)
+HP_SSLClient_SetupSSLContext	(增加)
+HP_SSLServer_SetupSSLContext	(增加)
+HP_SSLServer_AddSSLContext		(增加)
+HP_SSLAgent_CleanupSSLContext	(增加)
+HP_SSLClient_CleanupSSLContext	(增加)
+HP_SSLServer_CleanupSSLContext	(增加)
+
+# ======================================== #
 HP-Socket v4.2.1 API 更新列表：
 # ======================================== #
 --------------------

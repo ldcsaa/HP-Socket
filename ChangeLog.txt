@@ -1,4 +1,49 @@
 ==========================================================================================
+v5.0.1 更新：
+==========================================================================================
+
+> IPv6 支持：
+-----------------
+1、所有通信组件支持 IPv6
+2、组件接口没有变化，组件内部通过传入的地址参数自动识别 IPv4 / IPv6
+3、API 更新：
+	1） enum En_HP_IPAddrType			(增加)
+	2） struct HP_TIPAddr				(增加)
+	3） SYS_GetIPv4InAddr				(删除)
+	4） SYS_GetOptimalIPByHostName		(删除)
+	5） SYS_IsIPAddress					(修改)
+	6） SYS_GetIPAddress					(修改)
+	7） SYS_EnumHostIPAddresses			(增加)
+	8） SYS_FreeHostIPAddresses			(增加)
+
+> SSL 通信组件：
+-----------------
+1、多 SSL 证书支持，每个通信组件对象可以使用不同的 SSL 证书
+2、通信组件对象绑定独立的 SSL Context，取代旧版本的全局唯一 SSL Context
+3、API 更新：
+	1） HP_SSL_Initialize				(删除)
+	2） HP_SSL_Cleanup					(删除)
+	3） HP_SSL_AddServerContext			(删除)
+	4） HP_SSL_IsValid					(删除)
+	5） HP_SSLAgent_SetupSSLContext		(增加)
+	6） HP_SSLClient_SetupSSLContext		(增加)
+	7） HP_SSLServer_SetupSSLContext		(增加)
+	8） HP_SSLServer_AddSSLContext		(增加)
+	9） HP_SSLAgent_CleanupSSLContext	(增加)
+	10） HP_SSLClient_CleanupSSLContext	(增加)
+	11） HP_SSLServer_CleanupSSLContext	(增加)
+
+> 其它更新：
+-----------------
+1、Demo 更新：所有 Demo 支持 IPv6；所有 SSL Demo 支持新的证书机制
+2、公共代码包 vc-common-src 版本升级到 v2.3.20
+
+> 升级说明：
+-----------------
+1、SSL 组件：需要调整 SSL Context 初始化方式
+2、其他组件：HP-Socket v5.0.1 完全兼容 HP-Socket v4.x.x 版本，可以直接替换升级
+
+==========================================================================================
 v4.3.1 更新：
 ==========================================================================================
 
