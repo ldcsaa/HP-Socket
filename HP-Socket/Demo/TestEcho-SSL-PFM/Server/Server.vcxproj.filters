@@ -69,7 +69,7 @@
     <ClInclude Include="..\..\..\Src\HPSocket-SSL.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\SocketInterface-SSL.h">
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>

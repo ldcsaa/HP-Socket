@@ -63,6 +63,9 @@
     <ClInclude Include="..\..\..\..\Common\Src\WaitFor.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+      <Filter>HPSocket4C</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">

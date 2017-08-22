@@ -10,9 +10,9 @@
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
-const USHORT CServerDlg::PORT		= 5555;
-CServerDlg* CServerDlg::m_spThis	= nullptr;
+const LPCTSTR CServerDlg::DEF_ADDRESS	= _T("0.0.0.0");
+const USHORT CServerDlg::PORT			= 5555;
+CServerDlg* CServerDlg::m_spThis		= nullptr;
 
 CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CServerDlg::IDD, pParent)
@@ -48,7 +48,8 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_INFO, m_Info);
 	DDX_Control(pDX, IDC_START, m_Start);
 	DDX_Control(pDX, IDC_STOP, m_Stop);
-	DDX_Control(pDX, IDC_ADDRESS, m_Address);
+	DDX_Control(pDX, IDC_BIND_ADDRESS, m_BindAddress);
+	DDX_Control(pDX, IDC_REJECT_ADDRESS, m_RejectAddress);
 	DDX_Control(pDX, IDC_CONN_ID, m_HP_CONNID);
 	DDX_Control(pDX, IDC_DISCONNECT, m_DisConn);
 }
@@ -81,7 +82,7 @@ BOOL CServerDlg::OnInitDialog()
 	CString strTitle;
 	CString strOriginTitle;
 	GetWindowText(strOriginTitle);
-	strTitle.Format(_T("%s - (%s:%d)"), strOriginTitle, ADDRESS, PORT);
+	strTitle.Format(_T("%s - #%d"), strOriginTitle, PORT);
 	SetWindowText(strTitle);
 
 	::SetMainWnd(this);
@@ -149,20 +150,28 @@ void CServerDlg::SetAppState(EnAppState state)
 
 	m_Start.EnableWindow(m_enState == ST_STOPPED);
 	m_Stop.EnableWindow(m_enState == ST_STARTED);
-	m_Address.EnableWindow(m_enState == ST_STOPPED);
+	m_BindAddress.EnableWindow(m_enState == ST_STOPPED);
+	m_RejectAddress.EnableWindow(m_enState == ST_STOPPED);
 	m_DisConn.EnableWindow(m_enState == ST_STARTED && m_HP_CONNID.GetWindowTextLength() > 0);
 }
 
 void CServerDlg::OnBnClickedStart()
 {
-	m_Address.GetWindowText(m_strAddress);
-	m_strAddress.Trim();
+	CString strBindAddress;
+	m_BindAddress.GetWindowText(strBindAddress);
+	strBindAddress.Trim();
+
+	if(strBindAddress.IsEmpty())
+		strBindAddress = DEF_ADDRESS;
+
+	m_RejectAddress.GetWindowText(m_strRejectAddress);
+	m_strRejectAddress.Trim();
 
 	SetAppState(ST_STARTING);
-	//m_Server->SetSocketBufferSize(64);
-	if(::HP_Server_Start(m_spThis->m_pServer, ADDRESS, PORT))
+
+	if(::HP_Server_Start(m_spThis->m_pServer, strBindAddress, PORT))
 	{
-		::LogServerStart(ADDRESS, PORT);
+		::LogServerStart(strBindAddress, PORT);
 		SetAppState(ST_STARTED);
 	}
 	else
@@ -191,12 +200,12 @@ void CServerDlg::OnBnClickedDisconnect()
 {
 	CString strHP_CONNID;
 	m_HP_CONNID.GetWindowText(strHP_CONNID);
-	HP_CONNID dwHP_CONNID = (HP_CONNID)_ttoi(strHP_CONNID);
+	HP_CONNID dwConnID = (HP_CONNID)_ttoi(strHP_CONNID);
 
-	if(::HP_Server_Disconnect(m_spThis->m_pServer, dwHP_CONNID, TRUE))
-		::LogDisconnect(dwHP_CONNID);
+	if(::HP_Server_Disconnect(m_spThis->m_pServer, dwConnID, TRUE))
+		::LogDisconnect(dwConnID);
 	else
-		::LogDisconnectFail(dwHP_CONNID);
+		::LogDisconnectFail(dwConnID);
 }
 
 void CServerDlg::OnEnChangeHP_CONNID()
@@ -221,48 +230,48 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-En_HP_HandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+En_HP_HandleResult CServerDlg::OnPrepareListen(HP_Server pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 	
-	::HP_Server_GetListenAddress(m_spThis->m_pServer, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetListenAddress(pSender, szAddress, &iAddressLen, &usPort);
 	::PostOnPrepareListen(szAddress, usPort);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwHP_CONNID, SOCKET soClient)
+En_HP_HandleResult CServerDlg::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetRemoteAddress(m_spThis->m_pServer, dwHP_CONNID, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetRemoteAddress(pSender, dwConnID, szAddress, &iAddressLen, &usPort);
 
-	if(!m_spThis->m_strAddress.IsEmpty())
+	if(!m_spThis->m_strRejectAddress.IsEmpty())
 	{
-		if(m_spThis->m_strAddress.CompareNoCase(szAddress) == 0)
+		if(m_spThis->m_strRejectAddress.CompareNoCase(szAddress) == 0)
 			bPass = FALSE;
 	}
 
-	::PostOnAccept(dwHP_CONNID, szAddress, usPort, bPass);
+	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	if(bPass) ::HP_Server_SetConnectionExtra(m_spThis->m_pServer, dwHP_CONNID, new TPkgInfo(true, sizeof(TPkgHeader)));
+	if(bPass) ::HP_Server_SetConnectionExtra(pSender, dwConnID, new TPkgInfo(true, sizeof(TPkgHeader)));
 
-	return bPass ? HP_HR_OK : HP_HR_ERROR;
+	return bPass ? HR_OK : HR_ERROR;
 }
 
-En_HP_HandleResult CServerDlg::OnSend(HP_CONNID dwHP_CONNID, const BYTE* pData, int iLength)
+En_HP_HandleResult CServerDlg::OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(dwHP_CONNID, pData, iLength);
-	return HP_HR_OK;
+	::PostOnSend(dwConnID, pData, iLength);
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwHP_CONNID, int iLength)
+En_HP_HandleResult CServerDlg::OnReceive(HP_Server pSender, HP_CONNID dwConnID, int iLength)
 {
-	TPkgInfo* pInfo = m_spThis->FindPkgInfo(dwHP_CONNID);
+	TPkgInfo* pInfo = m_spThis->FindPkgInfo(pSender, dwConnID);
 
 	if(pInfo != nullptr)
 	{
@@ -274,8 +283,8 @@ En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwHP_CONNID, int iLength)
 			remain -= required;
 			CBufferPtr buffer(required);
 
-			En_HP_FetchResult result = ::HP_TcpPullServer_Fetch(m_spThis->m_pServer, dwHP_CONNID, buffer, (int)buffer.Size());
-			if(result == HP_FR_OK)
+			En_HP_FetchResult result = ::HP_TcpPullServer_Fetch(pSender, dwConnID, buffer, (int)buffer.Size());
+			if(result == FR_OK)
 			{
 				if(pInfo->is_header)
 				{
@@ -295,47 +304,47 @@ En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwHP_CONNID, int iLength)
 				pInfo->is_header = !pInfo->is_header;
 				pInfo->length	 = required;
 
-				::PostOnReceive(dwHP_CONNID, buffer, (int)buffer.Size());
+				::PostOnReceive(dwConnID, buffer, (int)buffer.Size());
 
-				if(!::HP_Server_Send(m_spThis->m_pServer, dwHP_CONNID, buffer, (int)buffer.Size()))
-					return HP_HR_ERROR;
+				if(!::HP_Server_Send(pSender, dwConnID, buffer, (int)buffer.Size()))
+					return HR_ERROR;
 			}
 		}
 	}
 	
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnClose(HP_CONNID dwHP_CONNID, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult CServerDlg::OnClose(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == HP_SE_OK ? ::PostOnClose(dwHP_CONNID):
-	::PostOnError(dwHP_CONNID, enOperation, iErrorCode);
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID):
+	::PostOnError(dwConnID, enOperation, iErrorCode);
 
-	m_spThis->RemovePkgInfo(dwHP_CONNID);
+	m_spThis->RemovePkgInfo(pSender, dwConnID);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnShutdown()
+En_HP_HandleResult CServerDlg::OnShutdown(HP_Server pSender)
 {
 	::PostOnShutdown();
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-TPkgInfo* CServerDlg::FindPkgInfo(HP_CONNID dwHP_CONNID)
+TPkgInfo* CServerDlg::FindPkgInfo(HP_Server pSender, HP_CONNID dwConnID)
 {
 	PVOID pInfo = nullptr;
-	::HP_Server_GetConnectionExtra(m_spThis->m_pServer, dwHP_CONNID, &pInfo);
+	::HP_Server_GetConnectionExtra(pSender, dwConnID, &pInfo);
 
 	return (TPkgInfo*)pInfo;
 }
 
-void CServerDlg::RemovePkgInfo(HP_CONNID dwHP_CONNID)
+void CServerDlg::RemovePkgInfo(HP_Server pSender, HP_CONNID dwConnID)
 {
 	//CCriSecLock locallock(m_spThis->m_csPkgInfo);
 
-	TPkgInfo* pInfo = FindPkgInfo(dwHP_CONNID);
+	TPkgInfo* pInfo = FindPkgInfo(pSender, dwConnID);
 	ASSERT(pInfo != nullptr);
 
 	delete pInfo;

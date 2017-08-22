@@ -41,11 +41,11 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	static En_HP_HandleResult __stdcall OnConnect(HP_CONNID dwConnID);
-	static En_HP_HandleResult __stdcall OnSend(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-	static En_HP_HandleResult __stdcall OnReceive(HP_CONNID dwConnID, int iLength);
-	static En_HP_HandleResult __stdcall OnClose(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
-	static En_HP_HandleResult __stdcall OnShutdown();
+	static En_HP_HandleResult __stdcall OnConnect(HP_Agent pSender, HP_CONNID dwConnID);
+	static En_HP_HandleResult __stdcall OnSend(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+	static En_HP_HandleResult __stdcall OnReceive(HP_Agent pSender, HP_CONNID dwConnID, int iLength);
+	static En_HP_HandleResult __stdcall OnClose(HP_Agent pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+	static En_HP_HandleResult __stdcall OnShutdown(HP_Agent pSender);
 private:
 	CEdit m_Content;
 	CButton m_Send;

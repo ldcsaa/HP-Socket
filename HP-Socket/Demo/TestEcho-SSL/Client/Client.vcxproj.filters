@@ -105,6 +105,9 @@
     <ClInclude Include="..\..\..\..\Common\Src\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">

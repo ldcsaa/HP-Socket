@@ -230,28 +230,30 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CClientDlg::OnConnect(IClient* pClient)
+EnHandleResult CClientDlg::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	pClient->GetLocalAddress(szAddress, iAddressLen, usPort);
+	pSender->GetLocalAddress(szAddress, iAddressLen, usPort);
 
-	::PostOnConnect(pClient->GetConnectionID(), szAddress, usPort);
+	::PostOnConnect(dwConnID, szAddress, usPort);
 	SetAppState(ST_STARTED);
 
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnSend(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(pClient->GetConnectionID(), pData, iLength);
+	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnReceive(IClient* pClient, int iLength)
+EnHandleResult CClientDlg::OnReceive(ITcpClient* pSender, CONNID dwConnID, int iLength)
 {
+	ITcpPullClient* pClient	= ITcpPullClient::FromS(pSender);
+
 	int required = m_pkgInfo.length;
 	int remain = iLength;
 
@@ -260,7 +262,7 @@ EnHandleResult CClientDlg::OnReceive(IClient* pClient, int iLength)
 		remain -= required;
 		CBufferPtr buffer(required);
 
-		EnFetchResult result = ITcpPullClient::ToPull(pClient)->Fetch(buffer, (int)buffer.Size());
+		EnFetchResult result = pClient->Fetch(buffer, (int)buffer.Size());
 		if(result == FR_OK)
 		{
 			if(m_pkgInfo.is_header)
@@ -281,17 +283,17 @@ EnHandleResult CClientDlg::OnReceive(IClient* pClient, int iLength)
 			m_pkgInfo.is_header	= !m_pkgInfo.is_header;
 			m_pkgInfo.length	= required;
 
-			::PostOnReceive(pClient->GetConnectionID(), buffer, (int)buffer.Size());
+			::PostOnReceive(dwConnID, buffer, (int)buffer.Size());
 		}
 	}
 
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == SE_OK ? ::PostOnClose(pClient->GetConnectionID())		:
-	::PostOnError(pClient->GetConnectionID(), enOperation, iErrorCode)	;
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)		:
+	::PostOnError(dwConnID, enOperation, iErrorCode)	;
 
 	SetAppState(ST_STOPPED);
 

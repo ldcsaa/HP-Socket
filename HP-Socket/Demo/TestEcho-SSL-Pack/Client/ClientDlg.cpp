@@ -17,9 +17,9 @@
 
 CClientDlg::CClientDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CClientDlg::IDD, pParent), m_Client(this)
-	, m_sslInitializer(SSL_SM_CLIENT, g_c_iVerifyMode, g_c_lpszPemCertFile, g_c_lpszPemKeyFile, g_c_lpszKeyPasswod, g_c_lpszCAPemCertFileOrPath)
 {
-	VERIFY(m_sslInitializer.IsValid());
+
+	VERIFY(m_Client->SetupSSLContext(g_c_iVerifyMode, g_c_lpszPemCertFile, g_c_lpszPemKeyFile, g_c_lpszKeyPasswod, g_c_lpszCAPemCertFileOrPath));
 
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -224,42 +224,42 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CClientDlg::OnConnect(IClient* pClient)
+EnHandleResult CClientDlg::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	pClient->GetLocalAddress(szAddress, iAddressLen, usPort);
-	::PostOnConnect(pClient->GetConnectionID(), szAddress, usPort);
+	pSender->GetLocalAddress(szAddress, iAddressLen, usPort);
+	::PostOnConnect(dwConnID, szAddress, usPort);
 
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnHandShake(IClient* pClient)
+EnHandleResult CClientDlg::OnHandShake(ITcpClient* pSender, CONNID dwConnID)
 {
-	::PostOnHandShake(pClient->GetConnectionID());
+	::PostOnHandShake(dwConnID);
 
 	SetAppState(ST_STARTED);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnSend(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(pClient->GetConnectionID(), pData, iLength);
+	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnReceive(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnReceive(pClient->GetConnectionID(), pData, iLength);
+	::PostOnReceive(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == SE_OK ? ::PostOnClose(pClient->GetConnectionID())		:
-	::PostOnError(pClient->GetConnectionID(), enOperation, iErrorCode)	;
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)		:
+	::PostOnError(dwConnID, enOperation, iErrorCode)	;
 
 	SetAppState(ST_STOPPED);
 

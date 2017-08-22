@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,38 +25,51 @@
 #pragma once
 
 #include "TcpClient.h"
-#include "SocketInterface-SSL.h"
 #include "SSLHelper.h"
 
 class CSSLClient : public CTcpClient
 {
 public:
+	virtual BOOL IsSecure() {return TRUE;}
 	virtual BOOL SendPackets(const WSABUF pBuffers[], int iCount);
 
+	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)
+		{return m_sslCtx.Initialize(SSL_SM_CLIENT, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, nullptr);}
+	virtual void CleanupSSLContext()
+		{m_sslCtx.Cleanup();}
+
 protected:
-	virtual EnHandleResult FireConnect(IClient* pClient);
-	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength);
+	virtual EnHandleResult FireConnect();
+	virtual EnHandleResult FireReceive(const BYTE* pData, int iLength);
 
 	virtual BOOL CheckParams();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void PrepareStart();
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID);
 
 private:
-	friend EnHandleResult ProcessHandShake<>(CSSLClient* pThis, CSSLSession* pSession);
-	friend EnHandleResult ProcessReceive<>(CSSLClient* pThis, CSSLSession* pSession, const BYTE* pData, int iLength);
-	friend BOOL ProcessSend<>(CSSLClient* pThis, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
+
+	friend EnHandleResult ProcessHandShake<>(CSSLClient* pThis, CSSLClient* pSocketObj, CSSLSession* pSession);
+	friend EnHandleResult ProcessReceive<>(CSSLClient* pThis, CSSLClient* pSocketObj, CSSLSession* pSession, const BYTE* pData, int iLength);
+	friend BOOL ProcessSend<>(CSSLClient* pThis, CSSLClient* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
 
 public:
-	CSSLClient(ITcpClientListener* psoListener)
-	: CTcpClient(psoListener)
-	, m_sslSession(m_itPool)
+	CSSLClient(ITcpClientListener* pListener)
+	: CTcpClient(pListener)
+	, m_sslSession		(m_itPool)
+	, m_dwMainThreadID	(0)
 	{
 
 	}
 
-	virtual ~CSSLClient()	{if(HasStarted()) Stop();}
+	virtual ~CSSLClient()
+	{
+		Stop();
+	}
 
 private:
+	CSSLContext m_sslCtx;
 	CSSLSession m_sslSession;
+	DWORD		m_dwMainThreadID;
 };

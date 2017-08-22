@@ -245,13 +245,13 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
+EnHandleResult CClientDlg::OnConnect(ITcpAgent* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Agent->GetLocalAddress(dwConnID, szAddress, iAddressLen, usPort);
+	pSender->GetLocalAddress(dwConnID, szAddress, iAddressLen, usPort);
 
 	::PostOnConnect(dwConnID, szAddress, usPort);
 	SetAppState(ST_CONNECTED);
@@ -259,23 +259,25 @@ EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, int iLength)
+EnHandleResult CClientDlg::OnReceive(ITcpAgent* pSender, CONNID dwConnID, int iLength)
 {
+	ITcpPullAgent* pAgent = ITcpPullAgent::FromS(pSender);
+
 	int required = m_pkgInfo.length;
-	int remain = iLength;
+	int remain	 = iLength;
 
 	while(remain >= required)
 	{
 		remain -= required;
 		CBufferPtr buffer(required);
 
-		EnFetchResult result = m_Agent->Fetch(dwConnID, buffer, (int)buffer.Size());
+		EnFetchResult result = pAgent->Fetch(dwConnID, buffer, (int)buffer.Size());
 		if(result == FR_OK)
 		{
 			if(m_pkgInfo.is_header)
@@ -303,17 +305,18 @@ EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, int iLength)
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnClose(ITcpAgent* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
 	::PostOnError(dwConnID, enOperation, iErrorCode);
 
-	SetAppState(ST_STARTED);
+	if(m_enState != ST_STOPPING)
+		SetAppState(ST_STARTED);
 
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnShutdown()
+EnHandleResult CClientDlg::OnShutdown(ITcpAgent* pSender)
 {
 	::PostOnShutdown();
 	SetAppState(ST_STOPPED);

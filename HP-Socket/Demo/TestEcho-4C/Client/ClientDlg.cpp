@@ -171,7 +171,7 @@ void CClientDlg::OnBnClickedSend()
 	if(::HP_Client_Send(m_pClient, buffer->Ptr(), (int)buffer->Size()))
 		::LogSend(::HP_Client_GetConnectionID(m_pClient), strContent);
 	else
-		::LogSendFail(::HP_Client_GetConnectionID(m_pClient), ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(HP_SE_DATA_SEND));
+		::LogSendFail(::HP_Client_GetConnectionID(m_pClient), ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(SE_DATA_SEND));
 }
 
 void CClientDlg::OnBnClickedStart()
@@ -229,27 +229,27 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-En_HP_HandleResult CClientDlg::OnConnect(HP_Client pClient)
+En_HP_HandleResult CClientDlg::OnConnect(HP_Client pSender, HP_CONNID dwConnID)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Client_GetLocalAddress(pClient, szAddress, &iAddressLen, &usPort);
+	::HP_Client_GetLocalAddress(pSender, szAddress, &iAddressLen, &usPort);
 
-	::PostOnConnect(::HP_Client_GetConnectionID(pClient), szAddress, usPort);
+	::PostOnConnect(dwConnID, szAddress, usPort);
 	m_spThis->SetAppState(ST_STARTED);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnSend(HP_Client pClient, const BYTE* pData, int iLength)
+En_HP_HandleResult CClientDlg::OnSend(HP_Client pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(::HP_Client_GetConnectionID(pClient), pData, iLength);
-	return HP_HR_OK;
+	::PostOnSend(dwConnID, pData, iLength);
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnReceive(HP_Client pClient, int iLength)
+En_HP_HandleResult CClientDlg::OnReceive(HP_Client pSender, HP_CONNID dwConnID, int iLength)
 {
 	int required = m_spThis->m_pkgInfo.length;
 	int remain = iLength;
@@ -259,8 +259,8 @@ En_HP_HandleResult CClientDlg::OnReceive(HP_Client pClient, int iLength)
 		remain -= required;
 		CBufferPtr buffer(required);
 
-		En_HP_FetchResult result = ::HP_TcpPullClient_Fetch(pClient, buffer, (int)buffer.Size());
-		if(result == HP_FR_OK)
+		En_HP_FetchResult result = ::HP_TcpPullClient_Fetch(pSender, buffer, (int)buffer.Size());
+		if(result == FR_OK)
 		{
 			if(m_spThis->m_pkgInfo.is_header)
 			{
@@ -280,19 +280,19 @@ En_HP_HandleResult CClientDlg::OnReceive(HP_Client pClient, int iLength)
 			m_spThis->m_pkgInfo.is_header	= !m_spThis->m_pkgInfo.is_header;
 			m_spThis->m_pkgInfo.length		= required;
 
-			::PostOnReceive(::HP_Client_GetConnectionID(pClient), buffer, (int)buffer.Size());
+			::PostOnReceive(dwConnID, buffer, (int)buffer.Size());
 		}
 	}
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnClose(HP_Client pClient, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult CClientDlg::OnClose(HP_Client pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == HP_SE_OK ? ::PostOnClose(::HP_Client_GetConnectionID(pClient)):
-	::PostOnError(::HP_Client_GetConnectionID(pClient), enOperation, iErrorCode);
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID):
+	::PostOnError(dwConnID, enOperation, iErrorCode);
 
 	m_spThis->SetAppState(ST_STOPPED);
 
-	return HP_HR_OK;
+	return HR_OK;
 }

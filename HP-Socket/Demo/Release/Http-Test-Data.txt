@@ -1,0 +1,41 @@
+---------- chunk test ----------
+POST /push_admin/pushMessage?key=jara&level=4&bustCache=0.338728998018027 HTTP/1.1
+Content-Type: text/plain
+Transfer-Encoding: chunked
+
+23
+This is the data in the first chunk
+1A
+and this is the second one
+0
+
+
+--------------------------------
+-------- websocket test --------
+GET /demo HTTP/1.1
+Upgrade: WebSocket
+Connection: Upgrade
+Host: example.com
+Origin: http://example.com
+WebSocket-Protocol: sample
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+
+abcde
+--------------------------------
+HTTP/1.1 101 Switching Protocols 
+Connection: Upgrade
+Upgrade: WebSocket
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+Sec-WebSocket-Protocol: chat
+
+
+--------- CONNECT test ---------
+CONNECT www.web-tinker.com:80 HTTP/1.1
+Host: www.web-tinker.com:80
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Basic *
+
+--------------------------------
+HTTP/1.1 200 Connection Established
+Content-Length: 0
+

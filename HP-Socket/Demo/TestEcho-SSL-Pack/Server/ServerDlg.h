@@ -40,17 +40,13 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	static En_HP_HandleResult __stdcall OnPrepareListen(SOCKET soListen);
-	static En_HP_HandleResult __stdcall OnAccept(HP_CONNID dwConnID, SOCKET soClient);
-	static En_HP_HandleResult __stdcall OnHandShake(HP_CONNID dwConnID);
-	static En_HP_HandleResult __stdcall OnSend(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-	static En_HP_HandleResult __stdcall OnReceive(HP_CONNID dwConnID, const BYTE* pData, int iLength);
-	static En_HP_HandleResult __stdcall OnClose(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
-	static En_HP_HandleResult __stdcall OnShutdown();
-
-private:
-	TPkgInfo* FindPkgInfo(HP_CONNID dwConnID);
-	void RemovePkgInfo(HP_CONNID dwConnID);
+	static En_HP_HandleResult __stdcall OnPrepareListen(HP_Server pSender, SOCKET soListen);
+	static En_HP_HandleResult __stdcall OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient);
+	static En_HP_HandleResult __stdcall OnHandShake(HP_Server pSender, HP_CONNID dwConnID);
+	static En_HP_HandleResult __stdcall OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+	static En_HP_HandleResult __stdcall OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+	static En_HP_HandleResult __stdcall OnClose(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+	static En_HP_HandleResult __stdcall OnShutdown(HP_Server pSender);
 
 private:
 	CListBox m_Info;

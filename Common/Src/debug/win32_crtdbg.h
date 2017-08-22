@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.20
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,9 @@ namespace __dbg_impl
 	static __dbg_impl::CDebugEnv __dbgEnv;
 }
 
+#pragma warning(push)
+#pragma warning(disable: 4595)
+
 inline void* __cdecl operator new(size_t nSize, const char* lpszFileName, int nLine)
 {
 	// __dbg_impl::CGuard guard;
@@ -132,6 +135,8 @@ inline void __cdecl operator delete[](void *p, const std::nothrow_t&)
 {
 	operator delete(p);
 }
+
+#pragma warning(pop)
 
 #define new new(__FILE__, __LINE__)
 

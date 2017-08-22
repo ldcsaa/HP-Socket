@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,203 +30,375 @@
 #include <mstcpip.h>
 #pragma comment(lib, "ws2_32")
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const DWORD	MAX_WORKER_THREAD_COUNT					= 500;
-const DWORD	MIN_SOCKET_BUFFER_SIZE					= 64;
-const DWORD MAX_SMALL_FILE_SIZE						= 0x3FFFFF;
-const DWORD MAX_SILENCE_CONNECTION_PERIOD			= MAXLONG / 2;
-const DWORD	DEFAULT_WORKER_THREAD_COUNT				= min((::SysGetNumberOfProcessors() * 2 + 2), MAX_WORKER_THREAD_COUNT);
-const DWORD DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		= 10 * 1000;
-const DWORD	DEFAULT_FREE_SOCKETOBJ_POOL				= 150;
-const DWORD	DEFAULT_FREE_SOCKETOBJ_HOLD				= 600;
-const DWORD	DEFAULT_FREE_BUFFEROBJ_POOL				= 300;
-const DWORD	DEFAULT_FREE_BUFFEROBJ_HOLD				= 1200;
-const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	= 10;
-const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	= 40;
-const DWORD	DEFAULT_TCP_SOCKET_BUFFER_SIZE			= ::SysGetPageSize();
-const DWORD	DEFALUT_TCP_KEEPALIVE_TIME				= 30 * 1000;
-const DWORD	DEFALUT_TCP_KEEPALIVE_INTERVAL			= 10 * 1000;
-const DWORD	DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	= SOMAXCONN;
-const DWORD	DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT	= 300;
-const DWORD	DEFAULT_UDP_MAX_DATAGRAM_SIZE			= 1472;
-const DWORD	DEFAULT_UDP_POST_RECEIVE_COUNT			= 300;
-const DWORD DEFAULT_UDP_DETECT_ATTEMPTS				= 3;
-const DWORD DEFAULT_UDP_DETECT_INTERVAL				= 20;
-LPCTSTR DEFAULT_BIND_ADDRESS						= _T("0.0.0.0");
-
-const DWORD TCP_PACK_LENGTH_BITS					= 22;
-const DWORD TCP_PACK_LENGTH_MASK					= 0x3FFFFF;
-const DWORD TCP_PACK_MAX_SIZE_LIMIT					= 0x3FFFFF;
-const DWORD TCP_PACK_DEFAULT_MAX_SIZE				= 0x040000;
-const USHORT TCP_PACK_HEADER_FLAG_LIMIT				= 0x0003FF;
-const USHORT TCP_PACK_DEFAULT_HEADER_FLAG			= 0x000000;
+#if !defined(stscanf_s)
+	#ifdef _UNICODE
+		#define stscanf_s	swscanf_s
+	#else
+		#define stscanf_s	sscanf_s
+	#endif
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ULONG GetIPv4InAddr(LPCTSTR lpszAddress)
+DWORD GetDefaultWorkerThreadCount()
 {
-	if (!lpszAddress || lpszAddress[0] == '\0')
-		return INADDR_NONE;
+	static DWORD s_dwtc = min((::SysGetNumberOfProcessors() * 2 + 2), MAX_WORKER_THREAD_COUNT);
+	return s_dwtc;
+}
+
+DWORD GetDefaultTcpSocketBufferSize()
+{
+	static DWORD s_dtsbs = ::SysGetPageSize();
+	return s_dtsbs;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ADDRESS_FAMILY DetermineAddrFamily(LPCTSTR lpszAddress)
+{
+	if (!lpszAddress || lpszAddress[0] == 0)
+		return AF_UNSPEC;
+
+	if(::StrChr(lpszAddress, IPV6_ADDR_SEPARATOR_CHAR))
+		return AF_INET6;
+
+	TCHAR c;
+	int arr[4];
+
+	if(stscanf_s(lpszAddress, _T("%d.%d.%d.%d%c"), &arr[0], &arr[1], &arr[2], &arr[3], &c, 1) != 4)
+		return AF_UNSPEC;
+
+	for(int i = 0; i < 4; i++)
+	{
+		if(arr[i] < 0 || arr[i] > 255)
+			return AF_UNSPEC;
+	}
+
+	return AF_INET;
+}
+
+BOOL GetInAddr(LPCTSTR lpszAddress, HP_ADDR& addr)
+{
+	addr.family = DetermineAddrFamily(lpszAddress);
+
+	if (addr.family == AF_UNSPEC)
+		return FALSE;
 
 #if _WIN32_WINNT >= _WIN32_WINNT_VISTA
-	IN_ADDR addr;
-	if (::InetPton(AF_INET, lpszAddress, &addr.s_addr) == 1)
-		return addr.s_addr;
-
-	return INADDR_NONE;
+	return (::InetPton(addr.family, lpszAddress, addr.Addr()) == TRUE);
 #else
-	return ::inet_addr(CT2A(lpszAddress));
+	HP_SOCKADDR sockAddr(addr.family);
+
+	if(!GetSockAddr(lpszAddress, 0, sockAddr))
+		return FALSE;
+
+	memcpy(addr.Addr(), sockAddr.SinAddr(), addr.AddrSize());
+
+	return TRUE;
 #endif
 }
 
-BOOL IsIPAddress(LPCTSTR lpszAddress)
+BOOL GetSockAddr(LPCTSTR lpszAddress, USHORT usPort, HP_SOCKADDR& addr)
 {
-	return GetIPv4InAddr(lpszAddress) != INADDR_NONE;
+	if(addr.family != AF_INET && addr.family != AF_INET6)
+	{
+		::WSASetLastError(WSAEADDRNOTAVAIL);
+		return FALSE;
+	}
+
+	int iSize = addr.AddrSize();
+
+	if(::WSAStringToAddress((LPTSTR)lpszAddress, addr.family, nullptr, addr.Addr(), &iSize) != NO_ERROR)
+		return FALSE;
+
+	if(usPort != 0)
+		addr.SetPort(usPort);
+
+	return TRUE;
 }
 
-BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen)
+BOOL IsIPAddress(LPCTSTR lpszAddress, EnIPAddrType* penType)
 {
-	BOOL isOK = TRUE;
+	HP_ADDR addr;
 
-	if(IsIPAddress(lpszHost))
-	{
-		int iHostLen = lstrlen(lpszHost);
-		
-		if(iHostLen > 0)
-			++iHostLen;
+	BOOL isOK = GetInAddr(lpszAddress, addr);
 
-		if(iHostLen > 0 && iIPLen >= iHostLen)
-			lstrcpy(lpszIP, lpszHost);
-		else
-			isOK = FALSE;
-
-		iIPLen = iHostLen;
-	}
-	else
-	{
-		IN_ADDR addr;
-
-		if(GetOptimalIPByHostName(lpszHost, addr))
-			isOK = IN_ADDR_2_IP(addr, lpszIP, iIPLen);
-		else
-			isOK = FALSE;
-	}
+	if(isOK && penType)
+		*penType = addr.IsIPv4() ? IPT_IPV4 : IPT_IPV6;
 
 	return isOK;
 }
 
-BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, IN_ADDR& addr)
+BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen, EnIPAddrType& enType)
 {
-	addr.s_addr	= 0;
+	BOOL isOK = TRUE;
 
-	addrinfo*	pInfo = nullptr;
-	addrinfo	hints = {0};
+	HP_SOCKADDR addr;
+
+	if(!GetSockAddrByHostName(lpszHost, 0, addr))
+		return FALSE;
+
+	enType = addr.IsIPv4() ? IPT_IPV4 : IPT_IPV6;
+
+	USHORT usPort;
+	ADDRESS_FAMILY usFamily;
+	return sockaddr_IN_2_A(addr, usFamily, lpszIP, iIPLen, usPort);
+}
+
+BOOL GetSockAddrByHostName(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR& addr)
+{
+	addr.family = DetermineAddrFamily(lpszHost);
+
+	if(addr.family != AF_UNSPEC)
+		return GetSockAddr(lpszHost, usPort, addr);
+
+	return GetSockAddrByHostNameDirectly(lpszHost, usPort, addr);
+
+}
+
+BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR& addr)
+{
+	addr.ZeroAddr();
+
+	addrinfo* pInfo	= nullptr;
+	addrinfo hints	= {0};
 
 	hints.ai_flags	= AI_ALL;
-	hints.ai_family	= AF_INET;
+	hints.ai_family	= addr.family;
 
-	int rs = ::getaddrinfo((CT2A)lpszHost, nullptr, &hints, &pInfo);
+	int rs = ::getaddrinfo(CT2A(lpszHost), nullptr, &hints, &pInfo);
 
-	if(rs == NO_ERROR)
+	if(rs != NO_ERROR)
 	{
-		IN_ADDR inAddr;
-		ULONG addrs[3]  = {0};
-		char** pptr		= nullptr;
+		::WSASetLastError(rs);
+		return FALSE;
+	}
 
-		for(addrinfo* pCur = pInfo; pCur != nullptr; pCur = pCur->ai_next)
+	BOOL isOK = FALSE;
+
+	for(addrinfo* pCur = pInfo; pCur != nullptr; pCur = pCur->ai_next)
+	{
+		if(pCur->ai_family == AF_INET || pCur->ai_family == AF_INET6)
 		{
-			if(pCur->ai_family == AF_INET)
-			{
-				inAddr	= ((SOCKADDR_IN*)(pCur->ai_addr))->sin_addr;
-				UCHAR a	= inAddr.s_net;
-				UCHAR b	= inAddr.s_host;
+			memcpy(addr.Addr(), pCur->ai_addr, pCur->ai_addrlen);
+			isOK = TRUE;
 
-				if(addrs[0] == 0 && a == 127)
-				{
-					addrs[0] = inAddr.s_addr;
-					break;
-				}
-				else if(	addrs[1] == 0							&& 
-							(
-								(a == 10)							||
-								(a == 172 && b >= 16 && b <= 31)	||
-								(a == 192 && b == 168)
-								)
-							)
-					addrs[1] = inAddr.s_addr;
-				else if(addrs[2] == 0)
-					addrs[2] = inAddr.s_addr;
-			}
-		}
-
-		::freeaddrinfo(pInfo);
-
-		for(int i = 0; i < 3; i++)
-		{
-			if(addrs[i] != 0)
-			{
-				addr.s_addr = addrs[i];
-				break;
-			}
+			break;
 		}
 	}
 
-	return addr.s_addr != 0;
-}
+	::freeaddrinfo(pInfo);
 
-BOOL IN_ADDR_2_IP(const IN_ADDR& addr, LPTSTR lpszAddress, int& iAddressLen)
-{
-	BOOL isOK = TRUE;
-
-	TCHAR szAddr[16];
-	wsprintf(szAddr, _T("%hu.%hu.%hu.%hu"), addr.s_net, addr.s_host, addr.s_lh, addr.s_impno);
-
-	int iIPLen = lstrlen(szAddr) + 1;
-
-	if(iAddressLen >= iIPLen)
-		memcpy(lpszAddress, szAddr, iIPLen * sizeof(TCHAR));
+	if(isOK)
+		addr.SetPort(usPort);
 	else
-		isOK = FALSE;
-
-	iAddressLen = iIPLen;
+		::WSASetLastError(WSAHOST_NOT_FOUND);
 
 	return isOK;
 }
 
-BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, ADDRESS_FAMILY& usFamily, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
+BOOL EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, LPTIPAddr** lpppIPAddr, int& iIPAddrCount)
 {
-	usFamily = addr.sin_family;
-	usPort	 = ntohs(addr.sin_port);
+	*lpppIPAddr	 = nullptr;
+	iIPAddrCount = 0;
 
-	return IN_ADDR_2_IP(addr.sin_addr, lpszAddress, iAddressLen);
+	ADDRESS_FAMILY usFamily =	(enType == IPT_ALL					?
+								AF_UNSPEC	: (enType == IPT_IPV4	?
+								AF_INET		: (enType == IPT_IPV6	?
+								AF_INET6	: 0xFF)));
+	
+	if(usFamily == 0xFF)
+	{
+		::WSASetLastError(WSAEAFNOSUPPORT);
+		return FALSE;
+	}
+
+	vector<HP_PSOCKADDR> vt;
+
+	ADDRESS_FAMILY usFamily2 = DetermineAddrFamily(lpszHost);
+
+	if(usFamily2 != AF_UNSPEC)
+	{
+		if(usFamily != AF_UNSPEC && usFamily != usFamily2)
+		{
+			::WSASetLastError(WSAHOST_NOT_FOUND);
+			return FALSE;
+		}
+
+		HP_SOCKADDR addr(usFamily2);
+
+		if(!GetSockAddr(lpszHost, 0, addr))
+			return FALSE;
+
+		vt.emplace_back(&addr);
+
+		return RetrieveSockAddrIPAddresses(vt, lpppIPAddr, iIPAddrCount);
+	}
+
+	addrinfo* pInfo	= nullptr;
+	addrinfo hints	= {0};
+
+	hints.ai_flags	= AI_ALL;
+	hints.ai_family	= usFamily;
+
+	int rs = ::getaddrinfo(CT2A(lpszHost), nullptr, &hints, &pInfo);
+
+	if(rs != NO_ERROR)
+	{
+		::WSASetLastError(rs);
+		return FALSE;
+	}
+
+	for(addrinfo* pCur = pInfo; pCur != nullptr; pCur = pCur->ai_next)
+	{
+		if(pCur->ai_family == AF_INET || pCur->ai_family == AF_INET6)
+			vt.emplace_back((HP_PSOCKADDR)pCur->ai_addr);
+	}
+
+	BOOL isOK = RetrieveSockAddrIPAddresses(vt, lpppIPAddr, iIPAddrCount);
+
+	::freeaddrinfo(pInfo);
+
+	if(!isOK) ::WSASetLastError(WSAHOST_NOT_FOUND);
+
+	return isOK;
 }
 
-BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, SOCKADDR_IN& addr)
+BOOL RetrieveSockAddrIPAddresses(const vector<HP_PSOCKADDR>& vt, LPTIPAddr** lpppIPAddr, int& iIPAddrCount)
 {
-	ASSERT(usFamily == AF_INET);
+	iIPAddrCount = (int)vt.size();
 
-	addr.sin_family			= usFamily;
-	addr.sin_port			= htons(usPort);
-	addr.sin_addr.s_addr	= GetIPv4InAddr(pszAddress);
+	if(iIPAddrCount == 0) return FALSE;
 
-	return addr.sin_addr.s_addr != INADDR_NONE;
+	HP_PSOCKADDR	pSockAddr;
+	ADDRESS_FAMILY	usFamily;
+	USHORT			usPort;
+	int				iAddrLength;
+	LPTSTR			lpszAddr;
+	LPTIPAddr		lpItem;
+
+	(*lpppIPAddr) = new LPTIPAddr[iIPAddrCount + 1];
+	(*lpppIPAddr)[iIPAddrCount] = nullptr;
+
+	for(int i = 0; i < iIPAddrCount; i++)
+	{
+		pSockAddr	= vt[i];
+		iAddrLength	= HP_SOCKADDR::AddrMinStrLength(pSockAddr->family) + 6;
+		lpszAddr	= new TCHAR[iAddrLength];
+
+		VERIFY(sockaddr_IN_2_A(*vt[i], usFamily, lpszAddr, iAddrLength, usPort));
+
+		lpItem			= new TIPAddr;
+		lpItem->type	= pSockAddr->IsIPv4() ? IPT_IPV4 : IPT_IPV6;
+		lpItem->address	= lpszAddr;
+
+		(*lpppIPAddr)[i] = lpItem;
+	}
+
+	return TRUE;
+}
+
+BOOL FreeHostIPAddresses(LPTIPAddr* lppIPAddr)
+{
+	if(!lppIPAddr) return FALSE;
+
+	LPTIPAddr p;
+	LPTIPAddr* lppCur = lppIPAddr;
+
+	while((p = *lppCur++) != nullptr)
+	{
+		delete[] p->address;
+		delete p;
+	}
+
+	delete[] lppIPAddr;
+
+	return TRUE;
+}
+
+BOOL sockaddr_IN_2_A(const HP_SOCKADDR& addr, ADDRESS_FAMILY& usFamily, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
+{
+	BOOL isOK	= FALSE;
+
+	usFamily	= addr.family;
+	usPort		= addr.Port();
+
+#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+	if(::InetNtop(addr.family, addr.SinAddr(), lpszAddress, iAddressLen))
+	{
+		iAddressLen	= lstrlen(lpszAddress) + 1;
+		isOK		= TRUE;
+	}
+	else
+	{
+		if(::WSAGetLastError() == ERROR_INVALID_PARAMETER)
+			iAddressLen = HP_SOCKADDR::AddrMinStrLength(usFamily);
+	}
+#else
+	if(::WSAAddressToString((LPSOCKADDR)addr.Addr(), addr.AddrSize(), nullptr, lpszAddress, (LPDWORD)&iAddressLen) == NO_ERROR)
+	{
+		LPTSTR lpszEnd	= nullptr;
+		BOOL bIPv6		= addr.IsIPv6();
+		BOOL bHasPort	= (addr.Port() != 0);
+
+		if(!bIPv6)
+		{
+			if(bHasPort)
+				lpszEnd = ::StrChr(lpszAddress, PORT_SEPARATOR_CHAR);
+		}
+		else
+		{
+			if(bHasPort)
+			{
+				static const TCHAR s_szBrk[] = {IPV6_ADDR_END_CHAR, IPV6_ZONE_INDEX_CHAR, 0};
+
+				ASSERT(lpszAddress[0] == IPV6_ADDR_BEGIN_CHAR);
+				lpszEnd = ::StrPBrk(lpszAddress, s_szBrk);
+			}
+			else
+			{
+				lpszEnd = ::StrChr(lpszAddress, IPV6_ZONE_INDEX_CHAR);
+			}
+		}
+
+		ASSERT(!bHasPort || lpszEnd);
+
+		if(lpszEnd)
+		{
+			lpszEnd[0]	= 0;
+			iAddressLen	= lpszEnd - lpszAddress;
+		}
+
+		if(bIPv6 && bHasPort)
+			memcpy(lpszAddress, (lpszAddress + 1), iAddressLen * sizeof(TCHAR));
+		else
+			++iAddressLen;
+
+		isOK = TRUE;
+	}
+#endif
+
+	return isOK;
+}
+
+BOOL sockaddr_A_2_IN(LPCTSTR lpszAddress, USHORT usPort, HP_SOCKADDR& addr)
+{
+	addr.family = DetermineAddrFamily(lpszAddress);
+	return GetSockAddr(lpszAddress, usPort, addr);
 }
 
 BOOL GetSocketAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort, BOOL bLocal)
 {
-	sockaddr addr;
+	HP_SOCKADDR addr;
 
-	int addr_len = sizeof(addr);
-	int result	 = bLocal ? getsockname(socket, &addr, &addr_len) : getpeername(socket, &addr, &addr_len);
+	int addr_len = addr.AddrSize();
+	int result	 = bLocal ? getsockname(socket, addr.Addr(), &addr_len) : getpeername(socket, addr.Addr(), &addr_len);
 
-	if(result == NO_ERROR)
-	{
-		ADDRESS_FAMILY usFamily;
-		return sockaddr_IN_2_A((sockaddr_in&)addr, usFamily, lpszAddress, iAddressLen, usPort);
-	}
+	if(result != NO_ERROR)
+		return FALSE;
 
-	return FALSE;
+	ADDRESS_FAMILY usFamily;
+	return sockaddr_IN_2_A(addr, usFamily, lpszAddress, iAddressLen, usPort);
 }
 
 BOOL GetSocketLocalAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
@@ -237,6 +409,16 @@ BOOL GetSocketLocalAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, 
 BOOL GetSocketRemoteAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
 {
 	return GetSocketAddress(socket, lpszAddress, iAddressLen, usPort, FALSE);
+}
+
+ULONGLONG NToH64(ULONGLONG value)
+{
+	return (((ULONGLONG)ntohl((u_long)((value << 32) >> 32))) << 32) | ntohl((u_long)(value >> 32));
+}
+
+ULONGLONG HToN64(ULONGLONG value)
+{
+	return (((ULONGLONG)htonl((u_long)((value << 32) >> 32))) << 32) | htonl((u_long)(value >> 32));
 }
 
 PVOID GetExtensionFuncPtr(SOCKET sock, GUID guid)
@@ -289,6 +471,53 @@ LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock)
 	return (LPFN_DISCONNECTEX)GetExtensionFuncPtr(sock, guid);
 }
 
+HRESULT ReadSmallFile(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, DWORD dwMaxFileSize)
+{
+	ASSERT(lpszFileName != nullptr);
+
+	HRESULT hr = file.Create(lpszFileName, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
+
+	if(SUCCEEDED(hr))
+	{
+		ULONGLONG ullLen;
+		hr = file.GetSize(ullLen);
+
+		if(SUCCEEDED(hr))
+		{
+			if(ullLen > 0 && ullLen <= dwMaxFileSize)
+				hr = fmap.MapFile(file);
+			else if(ullLen == 0)
+				hr = HRESULT_FROM_WIN32(ERROR_FILE_INVALID);
+			else
+				hr = HRESULT_FROM_WIN32(ERROR_FILE_TOO_LARGE);
+		}
+	}
+
+	return hr;
+}
+
+HRESULT MakeSmallFilePackage(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, WSABUF szBuf[3], const LPWSABUF pHead, const LPWSABUF pTail)
+{
+	DWORD dwMaxFileSize = MAX_SMALL_FILE_SIZE - (pHead ? pHead->len : 0) - (pTail ? pTail->len : 0);
+	ASSERT(dwMaxFileSize <= MAX_SMALL_FILE_SIZE);
+
+	HRESULT hr = ReadSmallFile(lpszFileName, file, fmap, dwMaxFileSize);
+
+	if(SUCCEEDED(hr))
+	{
+		szBuf[1].len = (ULONG)fmap.GetMappingSize();
+		szBuf[1].buf = fmap;
+
+		if(pHead) memcpy(&szBuf[0], pHead, sizeof(WSABUF));
+		else	  memset(&szBuf[0], 0, sizeof(WSABUF));
+
+		if(pTail) memcpy(&szBuf[2], pTail, sizeof(WSABUF));
+		else	  memset(&szBuf[2], 0, sizeof(WSABUF));
+	}
+
+	return hr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam)
@@ -298,22 +527,27 @@ BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam)
 
 BOOL PostIocpExit(HANDLE hIOCP)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_EXIT, 0, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_EXIT, 0);
 }
 
 BOOL PostIocpAccept(HANDLE hIOCP)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_ACCEPT, 0, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_ACCEPT, 0);
 }
 
 BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_DISCONNECT, dwConnID, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_DISCONNECT, dwConnID);
 }
 
 BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID)
 {
-	return ::PostQueuedCompletionStatus(hIOCP, IOCP_CMD_SEND, dwConnID, nullptr);
+	return PostIocpCommand(hIOCP, IOCP_CMD_SEND, dwConnID);
+}
+
+BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode)
+{
+	return PostIocpCommand(hIOCP, (EnIocpCommand)iErrorCode, dwConnID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,6 +580,11 @@ int SSO_UpdateAcceptContext(SOCKET soClient, SOCKET soBind)
 int SSO_UpdateConnectContext(SOCKET soClient, int iOption)
 {
 	return setsockopt(soClient, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, (CHAR*)&iOption, sizeof(int));
+}
+
+int SSO_NoBlock(SOCKET sock, BOOL bNoBlock)
+{
+	return ioctlsocket(sock, FIONBIO, (ULONG*)&bNoBlock);
 }
 
 int SSO_NoDelay(SOCKET sock, BOOL bNoDelay)
@@ -463,9 +702,9 @@ int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful, BOOL bReus
 	return closesocket(sock);
 }
 
-int PostAccept(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj)
+int PostAccept(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj, ADDRESS_FAMILY usFamily)
 {
-	int result = PostAcceptNotCheck(pfnAcceptEx, soListen, soClient, pBufferObj);
+	int result = PostAcceptNotCheck(pfnAcceptEx, soListen, soClient, pBufferObj, usFamily);
 
 	if(result == WSA_IO_PENDING)
 		result = NO_ERROR;
@@ -473,19 +712,20 @@ int PostAccept(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBuf
 	return result;
 }
 
-int PostAcceptNotCheck(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj)
+int PostAcceptNotCheck(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj, ADDRESS_FAMILY usFamily)
 {
 	int result				= NO_ERROR;
 	pBufferObj->client		= soClient;
 	pBufferObj->operation	= SO_ACCEPT;
+	int iAddrLen			= HP_SOCKADDR::AddrSize(usFamily) + 16;
 
 	if(!pfnAcceptEx	(
 						soListen,
 						pBufferObj->client,
 						pBufferObj->buff.buf,
 						0,
-						sizeof(SOCKADDR_IN) + 16,
-						sizeof(SOCKADDR_IN) + 16,
+						iAddrLen,
+						iAddrLen,
 						nullptr,
 						&pBufferObj->ov
 					)
@@ -497,9 +737,9 @@ int PostAcceptNotCheck(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClie
 	return result;
 }
 
-int PostConnect(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj)
+int PostConnect(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, const HP_SOCKADDR& sockAddr, TBufferObj* pBufferObj)
 {
-	int result = PostConnectNotCheck(pfnConnectEx, soClient, soAddrIN, pBufferObj);
+	int result = PostConnectNotCheck(pfnConnectEx, soClient, sockAddr, pBufferObj);
 
 	if(result == WSA_IO_PENDING)
 		result = NO_ERROR;
@@ -507,7 +747,7 @@ int PostConnect(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAdd
 	return result;
 }
 
-int PostConnectNotCheck(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj)
+int PostConnectNotCheck(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, const HP_SOCKADDR& sockAddr, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
 	pBufferObj->client		= soClient;
@@ -515,8 +755,8 @@ int PostConnectNotCheck(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_I
 
 	if(!pfnConnectEx	(
 							soClient,
-							(SOCKADDR*)&soAddrIN,
-							sizeof(SOCKADDR_IN),
+							sockAddr.Addr(),
+							sockAddr.AddrSize(),
 							nullptr,
 							0,
 							nullptr,
@@ -576,8 +816,8 @@ int PostReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 int PostReceiveNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
-	DWORD dwFlag			= 0; 
-	DWORD dwBytes			= 0; 
+	DWORD dwFlag			= 0;
+	DWORD dwBytes			= 0;
 	pBufferObj->client		= pSocketObj->socket;
 	pBufferObj->operation	= SO_RECEIVE;
 
@@ -612,7 +852,7 @@ int PostSendToNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 	int result				= NO_ERROR;
 	DWORD dwBytes			= 0;
 	pBufferObj->operation	= SO_SEND;
-	pBufferObj->addrLen		= sizeof(SOCKADDR_IN);
+	pBufferObj->addrLen		= pBufferObj->remoteAddr.AddrSize();
 
 	if(::WSASendTo	(
 						sock,
@@ -620,7 +860,7 @@ int PostSendToNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 						1,
 						&dwBytes,
 						0,
-						(sockaddr*)&pBufferObj->remoteAddr,
+						pBufferObj->remoteAddr.Addr(),
 						pBufferObj->addrLen,
 						&pBufferObj->ov,
 						nullptr
@@ -648,9 +888,9 @@ int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 	DWORD dwFlag			= 0;
 	DWORD dwBytes			= 0;
 	pBufferObj->operation	= SO_RECEIVE;
-	pBufferObj->addrLen		= sizeof(SOCKADDR_IN);
+	pBufferObj->addrLen		= pBufferObj->remoteAddr.AddrSize();
 
-	::ZeroMemory(&pBufferObj->remoteAddr, pBufferObj->addrLen);
+	pBufferObj->remoteAddr.ZeroAddr();
 
 	if(::WSARecvFrom(
 						sock,
@@ -658,7 +898,7 @@ int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 						1,
 						&dwBytes,
 						&dwFlag,
-						(sockaddr*)&pBufferObj->remoteAddr,
+						pBufferObj->remoteAddr.Addr(),
 						&pBufferObj->addrLen,
 						&pBufferObj->ov,
 						nullptr
@@ -669,6 +909,46 @@ int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 
 	return result;
 }
+
+int NoBlockReceive(TBufferObj* pBufferObj)
+{
+	int result = NoBlockReceiveNotCheck(pBufferObj);
+
+	if(result == WSAEWOULDBLOCK)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int NoBlockReceiveNotCheck(TBufferObj* pBufferObj)
+{
+	int result				= NO_ERROR;
+	DWORD dwFlag			= 0;
+	DWORD dwBytes			= 0;
+
+	if(::WSARecv(
+					pBufferObj->client,
+					&pBufferObj->buff,
+					1,
+					&dwBytes,
+					&dwFlag,
+					nullptr,
+					nullptr
+				) == SOCKET_ERROR)
+	{
+		result = ::WSAGetLastError();
+	}
+	else
+	{
+		if(dwBytes > 0)
+			pBufferObj->buff.len = dwBytes;
+		else
+			result = WSAEDISCON;
+	}
+
+	return result;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -690,10 +970,17 @@ LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
 	case SE_CONNECT_SERVER:			return _T("Connect to Server Fail");
 	case SE_NETWORK:				return _T("Network Error");
 	case SE_DATA_PROC:				return _T("Process Data Error");
-	case SE_DATA_SEND:				return _T("Send Data Error");
+	case SE_DATA_SEND:				return _T("Send Data Fail");
 
 	case SE_SSL_ENV_NOT_READY:		return _T("SSL environment not ready");
 
 	default: ASSERT(FALSE);			return _T("UNKNOWN ERROR");
 	}
+}
+
+DWORD GetHPSocketVersion()
+{
+	static DWORD s_dwVersion = (HP_VERSION_MAJOR << 24) | (HP_VERSION_MINOR << 16) | (HP_VERSION_REVISE << 8) | HP_VERSION_BUILD;
+
+	return s_dwVersion;
 }

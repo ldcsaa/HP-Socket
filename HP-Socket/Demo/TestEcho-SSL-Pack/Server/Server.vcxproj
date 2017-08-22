@@ -199,6 +199,7 @@
     <ClInclude Include="..\..\..\..\Common\Src\WaitFor.h" />
     <ClInclude Include="..\..\..\Src\HPSocket4C-SSL.h" />
     <ClInclude Include="..\..\..\Src\HPSocket4C.h" />
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />

@@ -40,26 +40,27 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	virtual EnHandleResult OnPrepareListen(SOCKET soListen);
-	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient);
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnShutdown();
+	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen);
+	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient);
+	virtual EnHandleResult OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(ITcpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnShutdown(ITcpServer* pSender);
 
 private:
 	CListBox m_Info;
 	CButton m_Start;
 	CButton m_Stop;
-	CEdit m_Address;
+	CEdit m_BindAddress;
+	CEdit m_RejectAddress;
 	CEdit m_ConnID;
 	CButton m_DisConn;
 	EnAppState m_enState;
 
 private:
 	static const USHORT PORT;
-	static const LPCTSTR ADDRESS;
+	static const LPCTSTR DEF_ADDRESS;
 
-	CString m_strAddress;
+	CString m_strRejectAddress;
 	CTcpServer m_Server;
 };

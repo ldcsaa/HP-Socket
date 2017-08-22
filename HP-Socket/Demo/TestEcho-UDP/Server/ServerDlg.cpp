@@ -10,8 +10,8 @@
 
 // CServerDlg dialog
 
-const LPCTSTR CServerDlg::ADDRESS	= _T("0.0.0.0");
-const USHORT CServerDlg::PORT		= 5555;
+const LPCTSTR CServerDlg::DEF_ADDRESS	= _T("0.0.0.0");
+const USHORT CServerDlg::PORT			= 5555;
 
 CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CServerDlg::IDD, pParent), m_Server(this)
@@ -25,7 +25,8 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_INFO, m_Info);
 	DDX_Control(pDX, IDC_START, m_Start);
 	DDX_Control(pDX, IDC_STOP, m_Stop);
-	DDX_Control(pDX, IDC_ADDRESS, m_Address);
+	DDX_Control(pDX, IDC_BIND_ADDRESS, m_BindAddress);
+	DDX_Control(pDX, IDC_REJECT_ADDRESS, m_RejectAddress);
 	DDX_Control(pDX, IDC_CONN_ID, m_ConnID);
 	DDX_Control(pDX, IDC_DISCONNECT, m_DisConn);
 }
@@ -58,7 +59,7 @@ BOOL CServerDlg::OnInitDialog()
 	CString strTitle;
 	CString strOriginTitle;
 	GetWindowText(strOriginTitle);
-	strTitle.Format(_T("%s - (%s:%d)"), strOriginTitle, ADDRESS, PORT);
+	strTitle.Format(_T("%s - #%d"), strOriginTitle, PORT);
 	SetWindowText(strTitle);
 
 	::SetMainWnd(this);
@@ -126,7 +127,8 @@ void CServerDlg::SetAppState(EnAppState state)
 
 	m_Start.EnableWindow(m_enState == ST_STOPPED);
 	m_Stop.EnableWindow(m_enState == ST_STARTED);
-	m_Address.EnableWindow(m_enState == ST_STOPPED);
+	m_BindAddress.EnableWindow(m_enState == ST_STOPPED);
+	m_RejectAddress.EnableWindow(m_enState == ST_STOPPED);
 	m_DisConn.EnableWindow(m_enState == ST_STARTED && m_ConnID.GetWindowTextLength() > 0);
 }
 
@@ -136,20 +138,25 @@ void CServerDlg::OnBnClickedStart()
 	//m_Server.SetMaxShutdownWaitTime(100000000);
 	//m_Server.SetMaxDatagramSize(50);
 	//m_Server.SetDetectAttempts(0);
-
 	//m_Server.SetDetectAttempts(0);
 	//m_Server.SetDetectInterval(0);
-
 	//m_Server.SetSendPolicy(SP_SAFE);
 
-	m_Address.GetWindowText(m_strAddress);
-	m_strAddress.Trim();
+	CString strBindAddress;
+	m_BindAddress.GetWindowText(strBindAddress);
+	strBindAddress.Trim();
+
+	if(strBindAddress.IsEmpty())
+		strBindAddress = DEF_ADDRESS;
+
+	m_RejectAddress.GetWindowText(m_strRejectAddress);
+	m_strRejectAddress.Trim();
 
 	SetAppState(ST_STARTING);
 
-	if(m_Server.Start(ADDRESS, PORT))
+	if(m_Server.Start(strBindAddress, PORT))
 	{
-		::LogServerStart(ADDRESS, PORT);
+		::LogServerStart(strBindAddress, PORT);
 		SetAppState(ST_STARTED);
 	}
 	else
@@ -208,29 +215,29 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(IUdpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server.GetListenAddress(szAddress, iAddressLen, usPort);
+	pSender->GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)
+EnHandleResult CServerDlg::OnAccept(IUdpServer* pSender, CONNID dwConnID, UINT_PTR pSockAddr)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server.GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
+	pSender->GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
 
-	if(!m_strAddress.IsEmpty())
+	if(!m_strRejectAddress.IsEmpty())
 	{
-		if(m_strAddress.CompareNoCase(szAddress) == 0)
+		if(m_strRejectAddress.CompareNoCase(szAddress) == 0)
 			bPass = FALSE;
 	}
 
@@ -239,7 +246,7 @@ EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAdd
 	return bPass ? HR_OK : HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	//static int t = 0;
 	//if(++t % 3 == 0) return HR_ERROR;
@@ -248,20 +255,20 @@ EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLengt
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnReceive(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	//static int t = 0;
 	//if(++t % 3 == 0) return HR_ERROR;
 
 	::PostOnReceive(dwConnID, pData, iLength);
 
-	if(m_Server.Send(dwConnID, pData, iLength))
+	if(pSender->Send(dwConnID, pData, iLength))
 		return HR_OK;
 	else
 		return HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnClose(IUdpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
 	::PostOnError(dwConnID, enOperation, iErrorCode);
@@ -269,7 +276,7 @@ EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperatio
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnShutdown()
+EnHandleResult CServerDlg::OnShutdown(IUdpServer* pSender)
 {
 	::PostOnShutdown();
 	return HR_OK;

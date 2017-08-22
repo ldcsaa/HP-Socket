@@ -21,14 +21,14 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 
 	m_spThis = this;
 
-	// 初始化 SSL 全局环境参数
-	::HP_SSL_Initialize(HP_SSL_SM_SERVER, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath);
-	VERIFY(::HP_SSL_IsValid());
-
 	// 创建监听器对象
-	m_pListener	= ::Create_HP_TcpServerListener();
+	m_pListener	= ::Create_HP_TcpPackServerListener();
 	// 创建 Socket 对象
-	m_pServer		= ::Create_HP_SSLPackServer(m_pListener);
+	m_pServer	= ::Create_HP_SSLPackServer(m_pListener);
+
+	// 初始化 SSL 全局环境参数
+	VERIFY(::HP_SSLServer_SetupSSLContext(m_pServer, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath, nullptr));
+
 	// 设置 Socket 监听器回调函数
 	::HP_Set_FN_Server_OnPrepareListen(m_pListener, OnPrepareListen);
 	::HP_Set_FN_Server_OnAccept(m_pListener, OnAccept);
@@ -41,13 +41,13 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 
 CServerDlg::~CServerDlg()
 {
+	// 清理 SSL 全局运行环境
+	::HP_SSLServer_CleanupSSLContext(m_pServer);
+
 	// 销毁 Socket 对象
 	::Destroy_HP_SSLPackServer(m_spThis->m_pServer);
 	// 销毁监听器对象
 	::Destroy_HP_TcpServerListener(m_pListener);
-
-	// 清理 SSL 全局运行环境
-	::HP_SSL_Cleanup();
 }
 
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
@@ -232,25 +232,25 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-En_HP_HandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+En_HP_HandleResult CServerDlg::OnPrepareListen(HP_Server pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetListenAddress(m_spThis->m_pServer, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetListenAddress(pSender, szAddress, &iAddressLen, &usPort);
 	::PostOnPrepareListen(szAddress, usPort);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwConnID, SOCKET soClient)
+En_HP_HandleResult CServerDlg::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetRemoteAddress(m_spThis->m_pServer, dwConnID, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetRemoteAddress(pSender, dwConnID, szAddress, &iAddressLen, &usPort);
 
 	if(!m_spThis->m_strAddress.IsEmpty())
 	{
@@ -260,42 +260,42 @@ En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwConnID, SOCKET soClient)
 
 	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	return bPass ? HP_HR_OK : HP_HR_ERROR;
+	return bPass ? HR_OK : HR_ERROR;
 }
 
-En_HP_HandleResult CServerDlg::OnHandShake(HP_CONNID dwConnID)
+En_HP_HandleResult CServerDlg::OnHandShake(HP_Server pSender, HP_CONNID dwConnID)
 {
 	::PostOnHandShake(dwConnID);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnSend(HP_CONNID dwConnID, const BYTE* pData, int iLength)
+En_HP_HandleResult CServerDlg::OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnSend(dwConnID, pData, iLength);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwConnID, const BYTE* pData, int iLength)
+En_HP_HandleResult CServerDlg::OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnReceive(dwConnID, pData, iLength);
 
-	if(!::HP_Server_Send(m_spThis->m_pServer, dwConnID, pData, iLength))
-		return HP_HR_ERROR;
+	if(!::HP_Server_Send(pSender, dwConnID, pData, iLength))
+		return HR_ERROR;
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnClose(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult CServerDlg::OnClose(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == HP_SE_OK ? ::PostOnClose(dwConnID):
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID):
 	::PostOnError(dwConnID, enOperation, iErrorCode);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnShutdown()
+En_HP_HandleResult CServerDlg::OnShutdown(HP_Server pSender)
 {
 	::PostOnShutdown();
 
-	return HP_HR_OK;
+	return HR_OK;
 }

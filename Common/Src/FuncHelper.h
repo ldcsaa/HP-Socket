@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.20
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,6 @@
 
 #include <tlhelp32.h>
 #include <malloc.h>
-
-#define PATH_SEPARATOR				_T("\\")
-#define PATH_SEPARATOR_CHAR			_T('\\')
-#define FILE_EXTEND_SEPARATOR		_T(".")
-#define FILE_EXTEND_SEPARATOR_CHAR	_T('.')
-#define DISK_SYMBLE					_T(":")
-#define DISK_SYMBLE_CHAR			_T(':')
-#define EXE_FILE_EXTEND_NAME		_T(".exe")
 
 enum EnCodePage
 {

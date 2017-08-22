@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,41 +34,7 @@
 class CUdpServer : public IUdpServer
 {
 public:
-	CUdpServer(IUdpServerListener* psoListener)
-	: m_psoListener				(psoListener)
-	, m_hCompletePort			(nullptr)
-	, m_soListen				(INVALID_SOCKET)
-	, m_iRemainPostReceives		(0)
-	, m_enLastError				(SE_OK)
-	, m_enState					(SS_STOPPED)
-	, m_hDetector				(nullptr)
-	, m_enSendPolicy			(SP_PACK)
-	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
-	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
-	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
-	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
-	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
-	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
-	, m_dwMaxDatagramSize		(DEFAULT_UDP_MAX_DATAGRAM_SIZE)
-	, m_dwPostReceiveCount		(DEFAULT_UDP_POST_RECEIVE_COUNT)
-	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
-	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
-	, m_bMarkSilence			(TRUE)
-	{
-		ASSERT(m_wsSocket.IsValid());
-		ASSERT(m_psoListener);
-
-		Reset(FALSE);
-	}
-
-	virtual ~CUdpServer()
-	{
-		if(HasStarted())
-			Stop();
-	}
-
-public:
-	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort);
+	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
@@ -78,6 +44,7 @@ public:
 	virtual BOOL			DisconnectLongConnections	(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetListenAddress			(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
@@ -89,10 +56,13 @@ public:
 	virtual LPCTSTR GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 public:
+	virtual BOOL IsSecure				() {return FALSE;}
+
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
+	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{m_dwMaxConnectionCount		= dwMaxConnectionCount;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
 	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		{m_dwFreeSocketObjPool		= dwFreeSocketObjPool;}
@@ -106,6 +76,7 @@ public:
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
+	virtual DWORD GetMaxConnectionCount		()	{return m_dwMaxConnectionCount;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetFreeSocketObjLockTime	()	{return m_dwFreeSocketObjLockTime;}
 	virtual DWORD GetFreeSocketObjPool		()	{return m_dwFreeSocketObjPool;}
@@ -120,24 +91,31 @@ public:
 
 protected:
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
-		{return m_psoListener->OnPrepareListen(soListen);}
+		{return m_pListener->OnPrepareListen(this, soListen);}
 	virtual EnHandleResult FireAccept(TUdpSocketObj* pSocketObj)
-		{return m_psoListener->OnAccept(pSocketObj->connID, &pSocketObj->remoteAddr);}
+		{
+			pSocketObj->sndBuffSize	= m_dwMaxDatagramSize;
+			EnHandleResult rs		= m_pListener->OnAccept(this, pSocketObj->connID, (UINT_PTR)(&pSocketObj->remoteAddr));
+			if(rs != HR_ERROR) rs	= FireHandShake(pSocketObj);
+			return rs;
+		}
+	virtual EnHandleResult FireHandShake(TUdpSocketObj* pSocketObj)
+		{return m_pListener->OnHandShake(this, pSocketObj->connID);}
 	virtual EnHandleResult FireReceive(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);}
+		{return m_pListener->OnReceive(this, pSocketObj->connID, pData, iLength);}
 	virtual EnHandleResult FireReceive(TUdpSocketObj* pSocketObj, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, iLength);}
+		{return m_pListener->OnReceive(this, pSocketObj->connID, iLength);}
 	virtual EnHandleResult FireSend(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pSocketObj->connID, pData, iLength);}
+		{return m_pListener->OnSend(this, pSocketObj->connID, pData, iLength);}
 	virtual EnHandleResult FireClose(TUdpSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnClose(pSocketObj->connID, enOperation, iErrorCode);}
+		{return m_pListener->OnClose(this, pSocketObj->connID, enOperation, iErrorCode);}
 	virtual EnHandleResult FireShutdown()
-		{return m_psoListener->OnShutdown();}
+		{return m_pListener->OnShutdown(this);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
 
@@ -166,7 +144,7 @@ private:
 private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
-	BOOL CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort);
+	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort);
 	BOOL CreateCompletePort();
 	BOOL CreateWorkerThreads();
 	BOOL CreateDetectorThread();
@@ -193,11 +171,11 @@ private:
 	BOOL			InvalidSocketObj(TUdpSocketObj* pSocketObj);
 	void			ReleaseGCSocketObj(BOOL bForce = FALSE);
 
-	void			AddClienTUdpSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
-	void			CloseClientUdpSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
+	void			AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
+	void			CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
 
-	CONNID			FindConnectionID(SOCKADDR_IN* pAddr);
+	CONNID			FindConnectionID(const HP_SOCKADDR* pAddr);
 
 private:
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
@@ -214,7 +192,7 @@ private:
 	int SendPack	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendSafe	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendDirect	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int CatAndPost	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
+	int CatAndPost	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
 	BOOL DoAccept	();
 	int DoReceive	(TUdpBufferObj* pBufferObj);
@@ -229,8 +207,42 @@ private:
 	BOOL SendDetectPackage	(CONNID dwConnID, TUdpSocketObj* pSocketObj);
 	BOOL NeedDetectorThread	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
 
+public:
+	CUdpServer(IUdpServerListener* pListener)
+	: m_pListener				(pListener)
+	, m_hCompletePort			(nullptr)
+	, m_soListen				(INVALID_SOCKET)
+	, m_iRemainPostReceives		(0)
+	, m_enLastError				(SE_OK)
+	, m_enState					(SS_STOPPED)
+	, m_usFamily				(AF_UNSPEC)
+	, m_hDetector				(nullptr)
+	, m_enSendPolicy			(SP_PACK)
+	, m_dwMaxConnectionCount	(DEFAULT_MAX_CONNECTION_COUNT)
+	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
+	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
+	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
+	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
+	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
+	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
+	, m_dwMaxDatagramSize		(DEFAULT_UDP_MAX_DATAGRAM_SIZE)
+	, m_dwPostReceiveCount		(DEFAULT_UDP_POST_RECEIVE_COUNT)
+	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
+	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
+	, m_bMarkSilence			(TRUE)
+	{
+		ASSERT(sm_wsSocket.IsValid());
+		ASSERT(m_pListener);
+	}
+
+	virtual ~CUdpServer()
+	{
+		Stop();
+	}
+
 private:
 	EnSendPolicy m_enSendPolicy;
+	DWORD m_dwMaxConnectionCount;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwFreeSocketObjLockTime;
 	DWORD m_dwFreeSocketObjPool;
@@ -244,10 +256,12 @@ private:
 	BOOL  m_bMarkSilence;
 
 private:
-	CInitSocket				m_wsSocket;
+	static const CInitSocket sm_wsSocket;
+
+	ADDRESS_FAMILY			m_usFamily;
 
 private:
-	IUdpServerListener*		m_psoListener;
+	IUdpServerListener*		m_pListener;
 	SOCKET					m_soListen;
 	HANDLE					m_hCompletePort;
 	EnServiceState			m_enState;
@@ -257,15 +271,16 @@ private:
 	vector<HANDLE>			m_vtWorkerThreads;
 
 	CPrivateHeap			m_phSocket;
-	CUdpBufferObjPool		m_bfPool;
+	CUdpBufferObjPool		m_bfObjPool;
 
 	CSpinGuard				m_csState;
 
 	CCriSec					m_csAccept;
 	CEvt					m_evDetector;
 
-	CRWLock					m_csClientSocket;
-	TUdpSocketObjPtrMap		m_mpClientSocket;
+	TUdpSocketObjPtrPool	m_bfActiveSockets;
+
+	CSimpleRWLock			m_csClientSocket;
 	TSockAddrMap			m_mpClientAddr;
 
 	TUdpSocketObjPtrList	m_lsFreeSocket;

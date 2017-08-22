@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 
 BOOL CSSLAgent::CheckParams()
 {
-	if(!g_SSL.IsValid())
+	if(!m_sslCtx.IsValid())
 	{
 		SetLastError(SE_SSL_ENV_NOT_READY, __FUNCTION__, ERROR_NOT_READY);
 		return FALSE;
@@ -51,16 +51,16 @@ void CSSLAgent::PrepareStart()
 	m_sslPool.Prepare();
 }
 
-void CSSLAgent::Reset(BOOL bAll)
+void CSSLAgent::Reset()
 {
-	g_SSL.RemoveThreadLocalState();
+	m_sslCtx.RemoveThreadLocalState();
 
-	__super::Reset(bAll);
+	__super::Reset();
 }
 
 void CSSLAgent::OnWorkerThreadEnd(DWORD dwThreadID)
 {
-	g_SSL.RemoveThreadLocalState();
+	m_sslCtx.RemoveThreadLocalState();
 
 	__super::OnWorkerThreadEnd(dwThreadID);
 }
@@ -89,7 +89,8 @@ EnHandleResult CSSLAgent::FireConnect(TSocketObj* pSocketObj)
 
 	if(result != HR_ERROR)
 	{
-		CSSLSession* pSession = m_sslPool.PickFreeSession();
+		CSSLSession* pSession = m_sslPool.PickFreeSession(pSocketObj->host);
+
 		VERIFY(SetConnectionReserved2(pSocketObj, pSession));
 		VERIFY(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
 	}

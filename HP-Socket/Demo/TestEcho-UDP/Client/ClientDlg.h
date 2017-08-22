@@ -40,10 +40,10 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnConnect(IClient* pClient);
+	virtual EnHandleResult OnSend(IUdpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(IUdpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(IUdpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnConnect(IUdpClient* pSender, CONNID dwConnID);
 private:
 	CEdit m_Content;
 	CButton m_Send;

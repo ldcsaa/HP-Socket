@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.20
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public:
 	{
 		PVOID pv = malloc(dwSize);
 		
-		if(pv && (dwFlags | HEAP_ZERO_MEMORY))
+		if(pv && (dwFlags & HEAP_ZERO_MEMORY))
 			ZeroMemory(pv, dwSize);
 		
 		return pv;
@@ -130,7 +130,7 @@ public:
 	{
 		PVOID pv = realloc(pvMemory, dwSize);
 
-		if(pv && (dwFlags | HEAP_ZERO_MEMORY))
+		if(pv && (dwFlags & HEAP_ZERO_MEMORY))
 			ZeroMemory(pv, dwSize);
 		else if(!pv)
 			free(pvMemory);
@@ -172,18 +172,12 @@ private:
 	typedef CGlobalHeapImpl		CPrivateHeap;
 #endif
 
-template<class T>
-class CPrivateHeapBuffer
+template<class T> class CPrivateHeapBuffer
 {
 public:
-	CPrivateHeapBuffer(CPrivateHeap& hpPrivate,
-						SIZE_T dwSize		= 0,
-						DWORD dwAllocFlags	= 0,
-						DWORD dwFreeFlags	= 0)
-	: m_hpPrivate(hpPrivate)
-	, m_dwAllocFlags(dwAllocFlags)
-	, m_dwFreeFlags(dwFreeFlags)
-	, m_pvMemory(nullptr)
+	CPrivateHeapBuffer(CPrivateHeap& hpPrivate, SIZE_T dwSize = 0)
+	: m_hpPrivate	(hpPrivate)
+	, m_pvMemory	(nullptr)
 	{
 		ASSERT(m_hpPrivate.IsValid());
 		Alloc(dwSize);
@@ -192,36 +186,39 @@ public:
 	~CPrivateHeapBuffer() {Free();}
 
 public:
-
-	T* Alloc(SIZE_T dwSize)
+	T* Alloc(SIZE_T dwSize, DWORD dwFlags = 0)
 	{
 		if(IsValid())
 			Free();
 
-		return m_pvMemory = (T*)m_hpPrivate.Alloc(dwSize * sizeof(T), m_dwAllocFlags);
+		if(dwSize > 0)
+			m_pvMemory = (T*)m_hpPrivate.Alloc(dwSize * sizeof(T), dwFlags);
+
+		return m_pvMemory;
 	}
 
 	T* ReAlloc(SIZE_T dwSize, DWORD dwFlags = 0)
 		{return m_pvMemory = (T*)m_hpPrivate.ReAlloc(m_pvMemory, dwSize * sizeof(T), dwFlags);}
 
 	SIZE_T Size(DWORD dwFlags = 0)
-		{return m_hpPrivate.Size(m_pvMemory, dwFlags);}
+		{return m_hpPrivate.Size(m_pvMemory, dwFlags) / sizeof(T);}
 
-	BOOL Free()
+	BOOL Free(DWORD dwFlags = 0)
 	{
 		BOOL isOK = TRUE;
 
 		if(IsValid())
 		{
-			isOK = m_hpPrivate.Free(m_pvMemory, m_dwFreeFlags);
-			m_pvMemory = nullptr;
+			isOK		= m_hpPrivate.Free(m_pvMemory, dwFlags);
+			m_pvMemory	= nullptr;
 		}
 
 		return isOK;
 	}
 
-	BOOL IsValid()			{return m_pvMemory != nullptr;}
-	operator T* ()	const	{return m_pvMemory;}
+	BOOL IsValid()					{return m_pvMemory != nullptr;}
+	operator T* ()			const	{return m_pvMemory;}
+	T& operator [] (int i)	const	{return *(m_pvMemory + i);}
 
 private:
 	CPrivateHeapBuffer(const CPrivateHeapBuffer&);
@@ -230,8 +227,6 @@ private:
 private:
 	CPrivateHeap&	m_hpPrivate;
 	T*				m_pvMemory;
-	DWORD			m_dwAllocFlags;
-	DWORD			m_dwFreeFlags;
 };
 
 typedef CPrivateHeapBuffer<BYTE>	CPrivateHeapByteBuffer;

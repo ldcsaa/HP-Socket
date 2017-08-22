@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 
 #include "SocketHelper.h"
 #include "../../Common/Src/Event.h"
-#include "../../Common/Src/RWLock.h"
 #include "../../Common/Src/STLHelper.h"
 #include "../../Common/Src/RingBuffer.h"
 #include "../../Common/Src/PrivateHeap.h"
@@ -34,44 +33,7 @@
 class CTcpServer : public ITcpServer
 {
 public:
-	CTcpServer(ITcpServerListener* psoListener)
-	: m_psoListener				(psoListener)
-	, m_hCompletePort			(nullptr)
-	, m_soListen				(INVALID_SOCKET)
-	, m_iRemainAcceptSockets	(0)
-	, m_pfnAcceptEx				(nullptr)
-	, m_pfnGetAcceptExSockaddrs	(nullptr)
-	, m_pfnDisconnectEx			(nullptr)
-	, m_enLastError				(SE_OK)
-	, m_enState					(SS_STOPPED)
-	, m_enSendPolicy			(SP_PACK)
-	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
-	, m_dwSocketListenQueue		(DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE)
-	, m_dwAcceptSocketCount		(DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT)
-	, m_dwSocketBufferSize		(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
-	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
-	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
-	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
-	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
-	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
-	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
-	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
-	, m_bMarkSilence			(TRUE)
-	{
-		ASSERT(m_wsSocket.IsValid());
-		ASSERT(m_psoListener);
-
-		Reset(FALSE);
-	}
-
-	virtual ~CTcpServer()
-	{
-		if(HasStarted())
-			Stop();
-	}
-
-public:
-	virtual BOOL Start	(LPCTSTR pszBindAddress, USHORT usPort);
+	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
@@ -82,6 +44,7 @@ public:
 	virtual BOOL			DisconnectLongConnections	(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE);
 	virtual BOOL			GetListenAddress			(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
@@ -92,11 +55,20 @@ public:
 	virtual EnSocketError GetLastError	()	{return m_enLastError;}
 	virtual LPCTSTR	GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
+#ifdef _SSL_SUPPORT
+	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)	{return FALSE;}
+	virtual BOOL AddSSLContext		(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)															{return FALSE;}
+	virtual void CleanupSSLContext	()																																																											{}
+#endif
+
 public:
+	virtual BOOL IsSecure				() {return FALSE;}
+
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		{m_enSendPolicy				= enSendPolicy;}
+	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{m_dwMaxConnectionCount		= dwMaxConnectionCount;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetSocketListenQueue		(DWORD dwSocketListenQueue)		{m_dwSocketListenQueue		= dwSocketListenQueue;}
 	virtual void SetAcceptSocketCount		(DWORD dwAcceptSocketCount)		{m_dwAcceptSocketCount		= dwAcceptSocketCount;}
@@ -111,6 +83,7 @@ public:
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
 
 	virtual EnSendPolicy GetSendPolicy		()	{return m_enSendPolicy;}
+	virtual DWORD GetMaxConnectionCount		()	{return m_dwMaxConnectionCount;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetSocketListenQueue		()	{return m_dwSocketListenQueue;}
 	virtual DWORD GetAcceptSocketCount		()	{return m_dwAcceptSocketCount;}
@@ -128,7 +101,12 @@ protected:
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
 		{return DoFirePrepareListen(soListen);}
 	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj)
-		{return DoFireAccept(pSocketObj);}
+		{
+			EnHandleResult rs		= DoFireAccept(pSocketObj);
+			if(rs != HR_ERROR) rs	= FireHandShake(pSocketObj);
+			if(rs != HR_ERROR) pSocketObj->ResetSndBuffSize(pSocketObj->socket);
+			return rs;
+		}
 	virtual EnHandleResult FireHandShake(TSocketObj* pSocketObj)
 		{return DoFireHandShake(pSocketObj);}
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
@@ -143,26 +121,26 @@ protected:
 		{return DoFireShutdown();}
 
 	virtual EnHandleResult DoFirePrepareListen(SOCKET soListen)
-		{return m_psoListener->OnPrepareListen(soListen);}
+		{return m_pListener->OnPrepareListen(this, soListen);}
 	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj)
-		{return m_psoListener->OnAccept(pSocketObj->connID, pSocketObj->socket);}
+		{return m_pListener->OnAccept(this, pSocketObj->connID, pSocketObj->socket);}
 	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
-		{return m_psoListener->OnHandShake(pSocketObj->connID);}
+		{return m_pListener->OnHandShake(this, pSocketObj->connID);}
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, pData, iLength);}
+		{return m_pListener->OnReceive(this, pSocketObj->connID, pData, iLength);}
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, int iLength)
-		{return m_psoListener->OnReceive(pSocketObj->connID, iLength);}
+		{return m_pListener->OnReceive(this, pSocketObj->connID, iLength);}
 	virtual EnHandleResult DoFireSend(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pSocketObj->connID, pData, iLength);}
+		{return m_pListener->OnSend(this, pSocketObj->connID, pData, iLength);}
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnClose(pSocketObj->connID, enOperation, iErrorCode);}
+		{return m_pListener->OnClose(this, pSocketObj->connID, enOperation, iErrorCode);}
 	virtual EnHandleResult DoFireShutdown()
-		{return m_psoListener->OnShutdown();}
+		{return m_pListener->OnShutdown(this);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
 
@@ -191,7 +169,7 @@ protected:
 private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
-	BOOL CreateListenSocket(LPCTSTR pszBindAddress, USHORT usPort);
+	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort);
 	BOOL CreateCompletePort();
 	BOOL CreateWorkerThreads();
 	BOOL StartAccept();
@@ -234,10 +212,11 @@ private:
 	int SendPack	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendSafe	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, BOOL isPostSend);
+	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
-	BOOL DoAccept	();
-	int DoReceive	(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj);
+	BOOL DoAccept		();
+	BOOL ContinueReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj, EnHandleResult& hr);
+	int DoReceive		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
 	int DoSend		(CONNID dwConnID);
 	int DoSend		(TSocketObj* pSocketObj);
@@ -247,8 +226,45 @@ private:
 
 	void CheckError	(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 
+public:
+	CTcpServer(ITcpServerListener* pListener)
+	: m_pListener				(pListener)
+	, m_hCompletePort			(nullptr)
+	, m_soListen				(INVALID_SOCKET)
+	, m_iRemainAcceptSockets	(0)
+	, m_pfnAcceptEx				(nullptr)
+	, m_pfnGetAcceptExSockaddrs	(nullptr)
+	, m_pfnDisconnectEx			(nullptr)
+	, m_enLastError				(SE_OK)
+	, m_enState					(SS_STOPPED)
+	, m_usFamily				(AF_UNSPEC)
+	, m_enSendPolicy			(SP_PACK)
+	, m_dwMaxConnectionCount	(DEFAULT_MAX_CONNECTION_COUNT)
+	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
+	, m_dwSocketListenQueue		(DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE)
+	, m_dwAcceptSocketCount		(DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT)
+	, m_dwSocketBufferSize		(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
+	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
+	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)
+	, m_dwFreeBufferObjPool		(DEFAULT_FREE_BUFFEROBJ_POOL)
+	, m_dwFreeSocketObjHold		(DEFAULT_FREE_SOCKETOBJ_HOLD)
+	, m_dwFreeBufferObjHold		(DEFAULT_FREE_BUFFEROBJ_HOLD)
+	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
+	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
+	, m_bMarkSilence			(TRUE)
+	{
+		ASSERT(sm_wsSocket.IsValid());
+		ASSERT(m_pListener);
+	}
+
+	virtual ~CTcpServer()
+	{
+		Stop();
+	}
+
 private:
 	EnSendPolicy m_enSendPolicy;
+	DWORD m_dwMaxConnectionCount;
 	DWORD m_dwWorkerThreadCount;
 	DWORD m_dwSocketListenQueue;
 	DWORD m_dwAcceptSocketCount;
@@ -263,13 +279,16 @@ private:
 	BOOL  m_bMarkSilence;
 
 private:
-	CInitSocket					m_wsSocket;
+	static const CInitSocket	sm_wsSocket;
+
 	LPFN_ACCEPTEX				m_pfnAcceptEx;
 	LPFN_GETACCEPTEXSOCKADDRS	m_pfnGetAcceptExSockaddrs;
 	LPFN_DISCONNECTEX			m_pfnDisconnectEx;
 
+	ADDRESS_FAMILY				m_usFamily;
+
 private:
-	ITcpServerListener*	m_psoListener;
+	ITcpServerListener*	m_pListener;
 	SOCKET				m_soListen;
 	HANDLE				m_hCompletePort;
 	EnServiceState		m_enState;
@@ -278,12 +297,11 @@ private:
 	vector<HANDLE>		m_vtWorkerThreads;
 
 	CPrivateHeap		m_phSocket;
-	CBufferObjPool		m_bfPool;
+	CBufferObjPool		m_bfObjPool;
 
 	CSpinGuard			m_csState;
 
-	CRWLock				m_csClientSocket;
-	TSocketObjPtrMap	m_mpClientSocket;
+	TSocketObjPtrPool	m_bfActiveSockets;
 
 	TSocketObjPtrList	m_lsFreeSocket;
 	TSocketObjPtrQueue	m_lsGCSocket;

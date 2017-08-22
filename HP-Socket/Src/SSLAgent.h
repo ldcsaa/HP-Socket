@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,18 @@
 #pragma once
 
 #include "TcpAgent.h"
-#include "SocketInterface-SSL.h"
 #include "SSLHelper.h"
 
 class CSSLAgent : public CTcpAgent
 {
 public:
+	virtual BOOL IsSecure() {return TRUE;}
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
+
+	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)
+		{return m_sslCtx.Initialize(SSL_SM_CLIENT, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, nullptr);}
+	virtual void CleanupSSLContext()
+		{m_sslCtx.Cleanup();}
 
 protected:
 	virtual EnHandleResult FireConnect(TSocketObj* pSocketObj);
@@ -41,7 +46,7 @@ protected:
 
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID);
 
@@ -51,18 +56,19 @@ private:
 	friend BOOL ProcessSend<>(CSSLAgent* pThis, TSocketObj* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
 
 public:
-	CSSLAgent(ITcpAgentListener* psoListener)
-	: CTcpAgent(psoListener)
+	CSSLAgent(ITcpAgentListener* pListener)
+	: CTcpAgent(pListener)
+	, m_sslPool(m_sslCtx)
 	{
 
 	}
 
 	virtual ~CSSLAgent()
 	{
-		if(HasStarted())
-			Stop();
+		Stop();
 	}
 
 private:
+	CSSLContext m_sslCtx;
 	CSSLSessionPool m_sslPool;
 };

@@ -96,6 +96,9 @@
     <ClInclude Include="..\..\..\Src\TcpServer.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">

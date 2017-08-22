@@ -40,13 +40,13 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	virtual EnHandleResult OnPrepareConnect(CONNID dwConnID, SOCKET socket);
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnConnect(CONNID dwConnID);
-	virtual EnHandleResult OnHandShake(CONNID dwConnID);
-	virtual EnHandleResult OnShutdown();
+	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, SOCKET socket);
+	virtual EnHandleResult OnSend(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(ITcpAgent* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnConnect(ITcpAgent* pSender, CONNID dwConnID);
+	virtual EnHandleResult OnHandShake(ITcpAgent* pSender, CONNID dwConnID);
+	virtual EnHandleResult OnShutdown(ITcpAgent* pSender);
 private:
 	BOOL CheckParams();
 private:
@@ -54,6 +54,7 @@ private:
 	CComboBox m_SocketCount;
 	CComboBox m_TestInterv;
 	CComboBox m_ThreadCount;
+	CComboBox m_MaxConnCount;
 	CComboBox m_DataLen;
 	CComboBox m_SendPolicy;
 	CListBox m_Info;
@@ -83,6 +84,5 @@ private:
 	CCriSec			m_cs;
 	vector<CONNID>	m_connIDs;
 
-	CHPSSLInitializer	m_sslInitializer;
 	CSSLAgentPtr		m_Agent;
 };

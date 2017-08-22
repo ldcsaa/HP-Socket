@@ -151,7 +151,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>HPSOCKET_STATIC_LIB;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,7 +182,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>HPSOCKET_STATIC_LIB;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -215,7 +215,7 @@
     <ClInclude Include="..\..\..\..\Common\Src\SysHelper.h" />
     <ClInclude Include="..\..\..\Src\HPSocket-SSL.h" />
     <ClInclude Include="..\..\..\Src\HPSocket.h" />
-    <ClInclude Include="..\..\..\Src\SocketInterface-SSL.h" />
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\..\Src\SocketInterface.h" />
     <ClInclude Include="..\..\..\..\Common\Src\WaitFor.h" />
     <ClInclude Include="..\..\Global\helper.h" />

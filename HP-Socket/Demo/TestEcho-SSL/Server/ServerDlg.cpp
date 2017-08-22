@@ -137,8 +137,8 @@ void CServerDlg::OnBnClickedStart()
 
 	SetAppState(ST_STARTING);
 
-	g_SSL.Cleanup();
-	if(!g_SSL.Initialize(SSL_SM_SERVER, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	m_Server.CleanupSSLContext();
+	if(!m_Server.SetupSSLContext(g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
 	{
 		::LogServerStartFail(::GetLastError(), _T("initialize SSL env fail"));
 		SetAppState(ST_STOPPED);
@@ -207,25 +207,25 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 	
-	m_Server.GetListenAddress(szAddress, iAddressLen, usPort);
+	pSender->GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
+EnHandleResult CServerDlg::OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server.GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
+	pSender->GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
 
 	if(!m_strAddress.IsEmpty())
 	{
@@ -238,26 +238,26 @@ EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
 	return bPass ? HR_OK : HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnHandShake(CONNID dwConnID)
+EnHandleResult CServerDlg::OnHandShake(ITcpServer* pSender, CONNID dwConnID)
 {
 	::PostOnHandShake(dwConnID);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnReceive(dwConnID, pData, iLength);
 
-	return m_Server.Send(dwConnID, pData, iLength) ? HR_OK : HR_ERROR;
+	return pSender->Send(dwConnID, pData, iLength) ? HR_OK : HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnClose(ITcpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
 	::PostOnError(dwConnID, enOperation, iErrorCode);
@@ -265,7 +265,7 @@ EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperatio
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnShutdown()
+EnHandleResult CServerDlg::OnShutdown(ITcpServer* pSender)
 {
 	::PostOnShutdown();
 	return HR_OK;

@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,55 +23,72 @@
  */
  
 #include "stdafx.h"
-#include <atlfile.h>
 #include "TcpClient.h"
 #include "../../Common/Src/WaitFor.h"
 
 #include <process.h>
 
-BOOL CTcpClient::Start(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
+const CInitSocket CTcpClient::sm_wsSocket;
+
+BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
 	PrepareStart();
+	m_ccContext.Reset();
 
 	BOOL isOK		= FALSE;
 	m_bAsyncConnect	= bAsyncConnect;
 
-	if(CreateClientSocket())
+	HP_SOCKADDR addrRemote, addrBind;
+
+	if(CreateClientSocket(lpszRemoteAddress, addrRemote, usPort, lpszBindAddress, addrBind))
 	{
-		if(FirePrepareConnect(this, m_soClient) != HR_ERROR)
+		if(BindClientSocket(addrBind))
 		{
-			if(ConnectToServer(pszRemoteAddress, usPort))
+			if(FirePrepareConnect(m_soClient) != HR_ERROR)
 			{
-				if(CreateWorkerThread())
-					isOK = TRUE;
+				if(ConnectToServer(addrRemote))
+				{
+					if(CreateWorkerThread())
+						isOK = TRUE;
+					else
+						SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
+				}
 				else
-					SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
+					SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
 			}
 			else
-				SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
+				SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
 		}
 		else
-			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ERROR_CANCELLED);
+			SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
 	}
 	else
 		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
 
-	if(!isOK) Stop();
+	if(!isOK)
+	{
+		DWORD dwCode = ::GetLastError();
+
+		m_ccContext.Reset(FALSE);
+		Stop();
+
+		::SetLastError(dwCode);
+	}
 
 	return isOK;
 }
 
 BOOL CTcpClient::CheckParams()
 {
-	if((int)m_dwSocketBufferSize > 0)
-		if((int)m_dwFreeBufferPoolSize >= 0)
-			if((int)m_dwFreeBufferPoolHold >= 0)
-				if((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)
-					if((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)
-						return TRUE;
+	if	(((int)m_dwSocketBufferSize > 0)									&&
+		((int)m_dwFreeBufferPoolSize >= 0)									&&
+		((int)m_dwFreeBufferPoolHold >= 0)									&&
+		((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)			&&
+		((int)m_dwKeepAliveInterval >= 1000 || m_dwKeepAliveInterval == 0)	)
+		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 	return FALSE;
@@ -101,75 +118,94 @@ BOOL CTcpClient::CheckStarting()
 	return TRUE;
 }
 
-BOOL CTcpClient::CheckStoping()
+BOOL CTcpClient::CheckStoping(DWORD dwCurrentThreadID)
 {
+	if(m_enState == SS_STOPPED)
+		return FALSE;
+
 	CSpinLock locallock(m_csState);
 
-	if(m_enState == SS_STARTED || m_enState == SS_STARTING)
+	if(HasStarted())
+	{
 		m_enState = SS_STOPPING;
-	else
-	{
-		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-BOOL CTcpClient::CreateClientSocket()
-{
-	m_soClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if(m_soClient != INVALID_SOCKET)
-	{
-		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-		VERIFY(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
-
-		m_evSocket = ::WSACreateEvent();
-		ASSERT(m_evSocket != WSA_INVALID_EVENT);
-
-		m_dwConnID = ::GenerateConnectionID();
-
 		return TRUE;
+	}
+	else if(m_enState == SS_STOPPING)
+	{
+		if(dwCurrentThreadID != m_dwWorkerID)
+		{
+			while(m_enState != SS_STOPPED)
+				::Sleep(30);
+		}
+
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
 	}
 
 	return FALSE;
 }
 
-BOOL CTcpClient::ConnectToServer(LPCTSTR pszRemoteAddress, USHORT usPort)
+BOOL CTcpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addrRemote, USHORT usPort, LPCTSTR lpszBindAddress, HP_SOCKADDR& addrBind)
 {
-	TCHAR szAddress[40];
-	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
-
-	if(!::GetIPAddress(pszRemoteAddress, szAddress, iAddressLen))
-	{
-		::WSASetLastError(WSAEADDRNOTAVAIL);
+	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addrRemote))
 		return FALSE;
+
+	if(lpszBindAddress && lpszBindAddress[0] != 0)
+	{
+		if(!::sockaddr_A_2_IN(lpszBindAddress, 0, addrBind))
+			return FALSE;
+
+		if(addrRemote.family != addrBind.family)
+		{
+			::WSASetLastError(WSAEAFNOSUPPORT);
+			return FALSE;
+		}
 	}
 
-	SOCKADDR_IN addr;
-	if(!::sockaddr_A_2_IN(AF_INET, szAddress, usPort, addr))
-	{
-		::WSASetLastError(WSAEADDRNOTAVAIL);
-		return FALSE;
-	}
+	m_soClient = socket(addrRemote.family, SOCK_STREAM, IPPROTO_TCP);
 
+	if(m_soClient == INVALID_SOCKET)
+		return FALSE;
+
+	BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
+	VERIFY(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
+
+	m_evSocket = ::WSACreateEvent();
+	ASSERT(m_evSocket != WSA_INVALID_EVENT);
+
+	SetRemoteHost(lpszRemoteAddress, usPort);
+
+	return TRUE;
+}
+
+BOOL CTcpClient::BindClientSocket(const HP_SOCKADDR& addrBind)
+{
+	if(addrBind.IsSpecified() && (::bind(m_soClient, addrBind.Addr(), addrBind.AddrSize()) == SOCKET_ERROR))
+		return FALSE;
+
+	m_dwConnID = ::GenerateConnectionID();
+
+	return TRUE;
+}
+
+BOOL CTcpClient::ConnectToServer(const HP_SOCKADDR& addrRemote)
+{
 	BOOL isOK = FALSE;
 
 	if(m_bAsyncConnect)
 	{
 		if(::WSAEventSelect(m_soClient, m_evSocket, FD_CONNECT | FD_CLOSE) != SOCKET_ERROR)
 		{
-			int rc = ::connect(m_soClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
+			int rc = ::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize());
 			isOK = (rc == NO_ERROR || (rc == SOCKET_ERROR && ::WSAGetLastError() == WSAEWOULDBLOCK));
 		}
 	}
 	else
 	{
-		if(::connect(m_soClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN)) != SOCKET_ERROR)
+		if(::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize()) != SOCKET_ERROR)
 		{
 			if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 			{
-				if(FireConnect(this) != HR_ERROR)
+				if(FireConnect() != HR_ERROR)
 				{
 					m_enState	= SS_STARTED;
 					isOK		= TRUE;
@@ -192,6 +228,7 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 {
 	TRACE("---------------> Client Worker Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
 
+	BOOL bCallStop		= TRUE;
 	CTcpClient* pClient	= (CTcpClient*)pv;
 	HANDLE hEvents[]	= {pClient->m_evSocket, pClient->m_evBuffer, pClient->m_evWorker};
 
@@ -204,30 +241,31 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 		if(retval == WSA_WAIT_EVENT_0)
 		{
 			if(!pClient->ProcessNetworkEvent())
-			{
-				if(pClient->HasStarted())
-					pClient->Stop();
-
 				break;
-			}
 		}
 		else if(retval == WSA_WAIT_EVENT_0 + 1)
 		{
 			if(!pClient->SendData())
-			{
-				if(pClient->HasStarted())
-					pClient->Stop();
-
 				break;
-			}
 		}
 		else if(retval == WSA_WAIT_EVENT_0 + 2)
+		{
+			bCallStop = FALSE;
 			break;
+		}
+		else if(retval == WSA_WAIT_FAILED)
+		{
+			pClient->m_ccContext.Reset(TRUE, SO_UNKNOWN, ::WSAGetLastError());
+			break;
+		}
 		else
-			ASSERT(FALSE);
+			VERIFY(FALSE);
 	}
 
 	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
+
+	if(bCallStop && pClient->HasStarted())
+		pClient->Stop();
 
 	TRACE("---------------> Client Worker Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
 
@@ -274,7 +312,7 @@ BOOL CTcpClient::HandleError(WSANETWORKEVENTS& events)
 		enOperation = SO_SEND;
 
 	VERIFY(::WSAResetEvent(m_evSocket));
-	FireClose(this, enOperation, iCode);
+	m_ccContext.Reset(TRUE, enOperation, iCode);
 
 	return FALSE;
 }
@@ -288,7 +326,7 @@ BOOL CTcpClient::HandleRead(WSANETWORKEVENTS& events)
 		bContinue = ReadData();
 	else
 	{
-		FireClose(this, SO_RECEIVE, iCode);
+		m_ccContext.Reset(TRUE, SO_RECEIVE, iCode);
 		bContinue = FALSE;
 	}
 
@@ -304,7 +342,7 @@ BOOL CTcpClient::HandleWrite(WSANETWORKEVENTS& events)
 		bContinue = SendData();
 	else
 	{
-		FireClose(this, SO_SEND, iCode);
+		m_ccContext.Reset(TRUE, SO_SEND, iCode);
 		bContinue = FALSE;
 	}
 
@@ -320,7 +358,7 @@ BOOL CTcpClient::HandleConnect(WSANETWORKEVENTS& events)
 	{
 		if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
 		{
-			if(FireConnect(this) != HR_ERROR)
+			if(FireConnect() != HR_ERROR)
 				m_enState = SS_STARTED;
 			else
 				iCode = ERROR_CANCELLED;
@@ -332,7 +370,9 @@ BOOL CTcpClient::HandleConnect(WSANETWORKEVENTS& events)
 	if(iCode != 0)
 	{
 		if(iCode != ERROR_CANCELLED)
-			FireClose(this, SO_CONNECT, iCode);
+			m_ccContext.Reset(TRUE, SO_CONNECT, iCode);
+		else
+			m_ccContext.Reset(FALSE);
 
 		bContinue = FALSE;
 	}
@@ -345,9 +385,9 @@ BOOL CTcpClient::HandleClose(WSANETWORKEVENTS& events)
 	int iCode = events.iErrorCode[FD_CLOSE_BIT];
 
 	if(iCode == 0)
-		FireClose(this, SO_CLOSE, SE_OK);
+		m_ccContext.Reset(TRUE, SO_CLOSE, SE_OK);
 	else
-		FireClose(this, SO_CLOSE, iCode);
+		m_ccContext.Reset(TRUE, SO_CLOSE, iCode);
 
 	return FALSE;
 }
@@ -360,11 +400,11 @@ BOOL CTcpClient::ReadData()
 
 		if(rc > 0)
 		{
-			if(FireReceive(this, m_rcBuffer, rc) == HR_ERROR)
+			if(FireReceive(m_rcBuffer, rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", m_dwConnID);
 
-				FireClose(this, SO_RECEIVE, ERROR_CANCELLED);
+				m_ccContext.Reset(TRUE, SO_RECEIVE, ERROR_CANCELLED);
 				return FALSE;
 			}
 		}
@@ -376,13 +416,13 @@ BOOL CTcpClient::ReadData()
 				break;
 			else
 			{
-				FireClose(this, SO_RECEIVE, code);
+				m_ccContext.Reset(TRUE, SO_RECEIVE, code);
 				return FALSE;
 			}
 		}
 		else if(rc == 0)
 		{
-			FireClose(this, SO_CLOSE, SE_OK);
+			m_ccContext.Reset(TRUE, SO_CLOSE, SE_OK);
 			return FALSE;
 		}
 		else
@@ -456,7 +496,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 
 		if(rc > 0)
 		{
-			if(FireSend(this, pItem->Ptr(), rc) == HR_ERROR)
+			if(FireSend(pItem->Ptr(), rc) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
 				ASSERT(FALSE);
@@ -472,7 +512,7 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 				break;
 			else
 			{
-				FireClose(this, SO_SEND, code);
+				m_ccContext.Reset(TRUE, SO_SEND, code);
 				return FALSE;
 			}
 		}
@@ -485,20 +525,15 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 
 BOOL CTcpClient::Stop()
 {
-	BOOL bNeedFireClose			= FALSE;
-	EnServiceState enCurState	= m_enState;
-	DWORD dwCurrentThreadID		= ::GetCurrentThreadId();
+	DWORD dwCurrentThreadID = ::GetCurrentThreadId();
 
-	if(!CheckStoping())
+	if(!CheckStoping(dwCurrentThreadID))
 		return FALSE;
-
-	if(enCurState == SS_STARTED && dwCurrentThreadID != m_dwWorkerID)
-		bNeedFireClose = TRUE;
 
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
-	if(bNeedFireClose)
-		FireClose(this, SO_CLOSE, SE_OK);
+	if(m_ccContext.bFireOnClose)
+		FireClose(m_ccContext.enOperation, m_ccContext.iErrorCode);
 
 	if(m_evSocket != nullptr)
 	{
@@ -518,17 +553,19 @@ BOOL CTcpClient::Stop()
 	return TRUE;
 }
 
-void CTcpClient::Reset(BOOL bAll)
+void CTcpClient::Reset()
 {
-	if(bAll)
-	{
-		m_rcBuffer.Free();
-		m_evBuffer.Reset();
-		m_evWorker.Reset();
-		m_lsSend.Clear();
-		m_itPool.Clear();
-	}
+	CCriSecLock locallock(m_csSend);
 
+	m_rcBuffer.Free();
+	m_evBuffer.Reset();
+	m_evWorker.Reset();
+	m_lsSend.Clear();
+	m_itPool.Clear();
+
+	m_strHost.Empty();
+
+	m_usPort	= 0;
 	m_iPending	= 0;
 	m_enState	= SS_STOPPED;
 }
@@ -622,48 +659,19 @@ BOOL CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount)
 
 BOOL CTcpClient::SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead, const LPWSABUF pTail)
 {
-	ASSERT(lpszFileName != nullptr);
-
 	CAtlFile file;
-	HRESULT hr = file.Create(lpszFileName, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
+	CAtlFileMapping<> fmap;
+	WSABUF szBuf[3];
 
-	if(SUCCEEDED(hr))
+	HRESULT hr = ::MakeSmallFilePackage(lpszFileName, file, fmap, szBuf, pHead, pTail);
+
+	if(FAILED(hr))
 	{
-		ULONGLONG ullLen;
-		hr = file.GetSize(ullLen);
-
-		if(SUCCEEDED(hr))
-		{
-			ULONGLONG ullTotal = ullLen + (pHead ? pHead->len : 0) + (pTail ? pTail->len : 0);
-
-			if(ullLen > 0 && ullTotal <= MAX_SMALL_FILE_SIZE)
-			{
-				CAtlFileMapping<> fmap;
-				hr = fmap.MapFile(file);
-
-				if(SUCCEEDED(hr))
-				{
-					WSABUF bufs[3] = {0};
-
-					bufs[1].len = (ULONG)ullLen;
-					bufs[1].buf = fmap;
-
-					if(pHead) memcpy(&bufs[0], pHead, sizeof(WSABUF));
-					if(pTail) memcpy(&bufs[2], pTail, sizeof(WSABUF));
-
-					return SendPackets(bufs, 3);
-				}
-			}
-			else if(ullLen == 0)
-				hr = HRESULT_FROM_WIN32(ERROR_FILE_INVALID);
-			else
-				hr = HRESULT_FROM_WIN32(ERROR_FILE_TOO_LARGE);
-		}
+		::SetLastError(HRESULT_CODE(hr));
+		return FALSE;
 	}
 
-	::SetLastError(hr & 0x0000FFFF);
-
-	return FALSE;
+	return SendPackets(szBuf, 3);
 }
 
 void CTcpClient::SetLastError(EnSocketError code, LPCSTR func, int ec)
@@ -679,4 +687,43 @@ BOOL CTcpClient::GetLocalAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& 
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
 	return ::GetSocketLocalAddress(m_soClient, lpszAddress, iAddressLen, usPort);
+}
+
+void CTcpClient::SetRemoteHost(LPCTSTR lpszHost, USHORT usPort)
+{
+	m_strHost = lpszHost;
+	m_usPort  = usPort;
+}
+
+BOOL CTcpClient::GetRemoteHost(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
+{
+	BOOL isOK = FALSE;
+
+	if(m_strHost.IsEmpty())
+		return isOK;
+
+	int iLen = m_strHost.GetLength() + 1;
+
+	if(iHostLen >= iLen)
+	{
+		memcpy(lpszHost, CA2CT(m_strHost), iLen * sizeof(TCHAR));
+		usPort = m_usPort;
+
+		isOK = TRUE;
+	}
+
+	iHostLen = iLen;
+
+	return isOK;
+}
+
+
+BOOL CTcpClient::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
+{
+	*lpszHost = m_strHost;
+
+	if(pusPort != nullptr)
+		*pusPort = m_usPort;
+
+	return !m_strHost.IsEmpty();
 }

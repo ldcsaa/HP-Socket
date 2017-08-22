@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj)
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
 	{
-		EnHandleResult result = __super::DoFireConnect(pSocketObj);
+		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
 
 		if(result != HR_ERROR)
 		{
@@ -93,6 +93,7 @@ protected:
 	{
 		__super::PrepareStart();
 
+		m_bfPool.SetMaxCacheSize	(GetMaxConnectionCount());
 		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
 		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
 		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
@@ -104,16 +105,15 @@ protected:
 	}
 
 public:
-	CTcpPullAgentT(ITcpAgentListener* psoListener)
-	: T(psoListener)
+	CTcpPullAgentT(ITcpAgentListener* pListener)
+	: T(pListener)
 	{
 
 	}
 
 	virtual ~CTcpPullAgentT()
 	{
-		if(HasStarted())
-			Stop();
+		Stop();
 	}
 
 private:

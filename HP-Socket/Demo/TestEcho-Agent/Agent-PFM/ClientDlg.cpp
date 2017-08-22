@@ -29,7 +29,7 @@
 
 #define DEFAULT_ADDRESS	_T("127.0.0.1")
 #define DEFAULT_PORT	_T("5555")
-#define LOCAL_ADDRESS	_T("0.0.0.0")
+#define LOCAL_ADDRESS	nullptr
 
 CClientDlg::CClientDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(CClientDlg::IDD, pParent), m_Agent(this)
@@ -51,6 +51,7 @@ void CClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DATA_LEN, m_DataLen);
 	DDX_Control(pDX, IDC_TEST_TIMES_INTERV, m_TestInterv);
 	DDX_Control(pDX, IDC_SEND_POLICY, m_SendPolicy);
+	DDX_Control(pDX, IDC_MAX_CONN_COUNT, m_MaxConnCount);
 }
 
 BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
@@ -83,6 +84,7 @@ BOOL CClientDlg::OnInitDialog()
 	m_ThreadCount.SetCurSel(0);
 	m_DataLen.SetCurSel(5);
 	m_SendPolicy.SetCurSel(0);
+	m_MaxConnCount.SetCurSel(0);
 	m_Address.SetWindowText(DEFAULT_ADDRESS);
 	m_Port.SetWindowText(DEFAULT_PORT);
 
@@ -168,6 +170,7 @@ void CClientDlg::SetAppState(EnAppState state)
 	m_ThreadCount.EnableWindow(m_enState == ST_STOPPED);
 	m_DataLen.EnableWindow(m_enState == ST_STOPPED);
 	m_SendPolicy.EnableWindow(m_enState == ST_STOPPED);
+	m_MaxConnCount.EnableWindow(m_enState == ST_STOPPED);
 }
 
 BOOL CClientDlg::CheckParams()
@@ -212,6 +215,11 @@ BOOL CClientDlg::CheckParams()
 
 	if(!isOK)
 		MessageBox(_T("One or more settings invalid, pls check!"), _T("Params Error"), MB_OK);
+	else
+	{
+		if(m_iThreadCount == 0)
+			m_iThreadCount = min((::SysGetNumberOfProcessors() * 2 + 2), 500);
+	}
 
 	return isOK;
 }
@@ -242,13 +250,19 @@ void CClientDlg::OnBnClickedStart()
 	m_iThreadCount	= _ttoi(strThreadCount);
 	m_iDataLen		= _ttoi(strDataLen);
 
-	EnSendPolicy enSendPolicy = (EnSendPolicy)m_SendPolicy.GetCurSel();
-
 	if(!CheckParams())
 		return;
 
-	if(m_iThreadCount == 0)
-		m_iThreadCount = min((::SysGetNumberOfProcessors() * 2 + 2), 500);
+	EnSendPolicy enSendPolicy = (EnSendPolicy)m_SendPolicy.GetCurSel();
+
+	CString strMaxConnCount;
+	m_MaxConnCount.GetWindowText(strMaxConnCount);
+	int iMaxConnCount = _ttoi(strMaxConnCount);
+
+	if(iMaxConnCount == 0)
+		iMaxConnCount = 10;
+
+	iMaxConnCount *= 1000;
 
 	SetAppState(ST_STARTING);
 
@@ -262,6 +276,7 @@ void CClientDlg::OnBnClickedStart()
 	BOOL isOK = FALSE;
 
 	m_Agent.SetWorkerThreadCount(m_iThreadCount);
+	m_Agent.SetMaxConnectionCount(iMaxConnCount);
 	m_Agent.SetSendPolicy(enSendPolicy);
 
 	if(m_Agent.Start(LOCAL_ADDRESS, FALSE))
@@ -388,7 +403,7 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CClientDlg::OnPrepareConnect(CONNID dwConnID, SOCKET socket)
+EnHandleResult CClientDlg::OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, SOCKET socket)
 {
 	//VERIFY(::SSO_SendBuffSize(socket, 512 * 1024) == NO_ERROR);
 	//VERIFY(::SSO_RecvBuffSize(socket, 512 * 1024) == NO_ERROR);
@@ -396,7 +411,7 @@ EnHandleResult CClientDlg::OnPrepareConnect(CONNID dwConnID, SOCKET socket)
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG2
 	::PostOnSend(dwConnID, pData, iLength);
@@ -411,7 +426,7 @@ EnHandleResult CClientDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLengt
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnReceive(ITcpAgent* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG2
 	::PostOnReceive(dwConnID, pData, iLength);
@@ -433,7 +448,7 @@ EnHandleResult CClientDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLe
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnClose(ITcpAgent* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	if(iErrorCode == SE_OK)
 		::PostOnClose(dwConnID);
@@ -446,7 +461,7 @@ EnHandleResult CClientDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperatio
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
+EnHandleResult CClientDlg::OnConnect(ITcpAgent* pSender, CONNID dwConnID)
 {
 	{
 		CCriSecLock locallock(m_cs);
@@ -457,7 +472,7 @@ EnHandleResult CClientDlg::OnConnect(CONNID dwConnID)
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnShutdown()
+EnHandleResult CClientDlg::OnShutdown(ITcpAgent* pSender)
 {
 	m_connIDs.clear();
 

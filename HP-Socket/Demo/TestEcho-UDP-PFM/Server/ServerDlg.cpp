@@ -41,9 +41,11 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_START, m_Start);
 	DDX_Control(pDX, IDC_STOP, m_Stop);
 	DDX_Control(pDX, IDC_STATISTICS, m_Statistics);
+	DDX_Control(pDX, IDC_BIND_ADDRESS, m_BindAddress);
 	DDX_Control(pDX, IDC_PORT, m_Port);
 	DDX_Control(pDX, IDC_SEND_POLICY, m_SendPolicy);
 	DDX_Control(pDX, IDC_RECV_COUNT, m_RecvCount);
+	DDX_Control(pDX, IDC_MAX_CONN_COUNT, m_MaxConnCount);
 }
 
 BEGIN_MESSAGE_MAP(CServerDlg, CDialogEx)
@@ -71,8 +73,10 @@ BOOL CServerDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
+	m_MaxConnCount.SetCurSel(0);
 	m_SendPolicy.SetCurSel(0);
 	m_RecvCount.SetCurSel(4);
+	m_BindAddress.SetWindowText(DEFAULT_ADDRESS);
 	m_Port.SetWindowText(DEFAULT_PORT);
 
 	::SetMainWnd(this);
@@ -158,13 +162,22 @@ void CServerDlg::SetAppState(EnAppState state)
 	m_Start.EnableWindow(m_enState == ST_STOPPED);
 	m_Stop.EnableWindow(m_enState == ST_STARTED);
 	m_Statistics.EnableWindow(m_enState == ST_STARTED);
+	m_BindAddress.EnableWindow(m_enState == ST_STOPPED);
 	m_Port.EnableWindow(m_enState == ST_STOPPED);
 	m_SendPolicy.EnableWindow(m_enState == ST_STOPPED);
 	m_RecvCount.EnableWindow(m_enState == ST_STOPPED);
+	m_MaxConnCount.EnableWindow(m_enState == ST_STOPPED);
 }
 
 void CServerDlg::OnBnClickedStart()
 {
+	CString strBindAddress;
+	m_BindAddress.GetWindowText(strBindAddress);
+	strBindAddress.Trim();
+
+	if(strBindAddress.IsEmpty())
+		strBindAddress = DEFAULT_ADDRESS;
+
 	CString strPort;
 	m_Port.GetWindowText(strPort);
 	USHORT usPort = (USHORT)_ttoi(strPort);
@@ -189,6 +202,15 @@ void CServerDlg::OnBnClickedStart()
 
 	EnSendPolicy enSendPolicy = (EnSendPolicy)m_SendPolicy.GetCurSel();
 
+	CString strMaxConnCount;
+	m_MaxConnCount.GetWindowText(strMaxConnCount);
+	int iMaxConnCount = _ttoi(strMaxConnCount);
+
+	if(iMaxConnCount == 0)
+		iMaxConnCount = 10;
+
+	iMaxConnCount *= 1000;
+
 	SetAppState(ST_STARTING);
 
 	Reset();
@@ -202,10 +224,11 @@ void CServerDlg::OnBnClickedStart()
 
 	m_Server->SetSendPolicy(enSendPolicy);
 	m_Server->SetPostReceiveCount(dwRecvCount);
+	m_Server->SetMaxConnectionCount(iMaxConnCount);
 
-	if(m_Server->Start(DEFAULT_ADDRESS, usPort))
+	if(m_Server->Start(strBindAddress, usPort))
 	{
-		::LogServerStart(DEFAULT_ADDRESS, usPort);
+		::LogServerStart(strBindAddress, usPort);
 		SetAppState(ST_STARTED);
 	}
 	else
@@ -263,18 +286,18 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(IUdpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server->GetListenAddress(szAddress, iAddressLen, usPort);
+	pSender->GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG
 	::PostOnSend(dwConnID, pData, iLength);
@@ -289,7 +312,7 @@ EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLengt
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnReceive(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG
 	::PostOnReceive(dwConnID, pData, iLength);
@@ -301,13 +324,13 @@ EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLe
 	::InterlockedExchangeAdd64(&m_llTotalReceived, iLength);
 #endif
 
-	if(m_Server->Send(dwConnID, pData, iLength))
+	if(pSender->Send(dwConnID, pData, iLength))
 		return HR_OK;
 	else
 		return HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnClose(IUdpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
 	::PostOnError(dwConnID, enOperation, iErrorCode);
@@ -317,7 +340,7 @@ EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperatio
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr)
+EnHandleResult CServerDlg::OnAccept(IUdpServer* pSender, CONNID dwConnID, UINT_PTR pSockAddr)
 {
 	if(m_lClientCount == 0)
 	{
@@ -335,7 +358,7 @@ EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAdd
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnShutdown()
+EnHandleResult CServerDlg::OnShutdown(IUdpServer* pSender)
 {
 	::PostOnShutdown();
 	return HR_OK;

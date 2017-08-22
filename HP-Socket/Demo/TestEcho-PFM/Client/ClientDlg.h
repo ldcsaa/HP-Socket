@@ -40,11 +40,11 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	virtual EnHandleResult OnPrepareConnect(IClient* pClient, SOCKET socket);
-	virtual EnHandleResult OnSend(IClient* pClient, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnReceive(IClient* pClient, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnConnect(IClient* pClient);
+	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, SOCKET socket);
+	virtual EnHandleResult OnSend(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
 private:
 	BOOL CheckParams();
 private:

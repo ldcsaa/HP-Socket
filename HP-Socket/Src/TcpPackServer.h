@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj)
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
 	{
-		EnHandleResult result = __super::DoFireAccept(pSocketObj);
+		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
 
 		if(result != HR_ERROR)
 		{
@@ -97,9 +97,9 @@ protected:
 
 	virtual BOOL CheckParams()
 	{
-		if(m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)
-			if(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)
-				return __super::CheckParams();
+		if	((m_dwMaxPackSize > 0 && m_dwMaxPackSize <= TCP_PACK_MAX_SIZE_LIMIT)	&&
+			(m_usHeaderFlag >= 0 && m_usHeaderFlag <= TCP_PACK_HEADER_FLAG_LIMIT)	)
+			return __super::CheckParams();
 
 		SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
 		return FALSE;
@@ -109,6 +109,7 @@ protected:
 	{
 		__super::PrepareStart();
 
+		m_bfPool.SetMaxCacheSize	(GetMaxConnectionCount());
 		m_bfPool.SetItemCapacity	(GetSocketBufferSize());
 		m_bfPool.SetItemPoolSize	(GetFreeBufferObjPool());
 		m_bfPool.SetItemPoolHold	(GetFreeBufferObjHold());
@@ -133,8 +134,8 @@ private:
 										DWORD dwMaxPackSize, USHORT usPackHeaderFlag, const BYTE* pData, int iLength);
 
 public:
-	CTcpPackServerT(ITcpServerListener* psoListener)
-	: T(psoListener)
+	CTcpPackServerT(ITcpServerListener* pListener)
+	: T					(pListener)
 	, m_dwMaxPackSize	(TCP_PACK_DEFAULT_MAX_SIZE)
 	, m_usHeaderFlag	(TCP_PACK_DEFAULT_HEADER_FLAG)
 	{
@@ -143,8 +144,7 @@ public:
 
 	virtual ~CTcpPackServerT()
 	{
-		if(HasStarted())
-			Stop();
+		Stop();
 	}
 
 private:

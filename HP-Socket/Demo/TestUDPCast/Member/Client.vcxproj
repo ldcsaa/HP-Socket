@@ -200,6 +200,7 @@
     <ClInclude Include="..\..\..\..\Common\Src\RWLock.h" />
     <ClInclude Include="..\..\..\..\Common\Src\Semaphore.h" />
     <ClInclude Include="..\..\..\..\Common\Src\Singleton.h" />
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\..\Src\SocketHelper.h" />
     <ClInclude Include="..\..\..\..\Common\Src\STLHelper.h" />
     <ClInclude Include="..\..\..\..\Common\Src\SysHelper.h" />

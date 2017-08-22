@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.20
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ Desc:
 #include "WaitFor.h"
 
 const DWORD TItem::DEFAULT_ITEM_CAPACITY			= ::SysGetPageSize();
+const DWORD CBufferPool::DEFAULT_MAX_CACHE_SIZE		= 0;
 const DWORD CBufferPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACITY;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
@@ -307,10 +308,7 @@ void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 	if(!pBuffer->IsValid())
 		return;
 
-	{
-		CWriteLock locallock(m_csBufferMap);
-		m_mpBuffer.erase(pBuffer->ID());
-	}
+	m_bfCache.Remove(pBuffer->ID());
 
 	BOOL bOK = FALSE;
 
@@ -345,7 +343,7 @@ void CBufferPool::ReleaseGCBuffer(BOOL bForce)
 
 	while(m_lsGCBuffer.PopFront(&pBuffer))
 	{
-		if(bForce || (now - pBuffer->freeTime) >= m_dwBufferLockTime)
+		if(bForce || (int)(now - pBuffer->freeTime) >= (int)m_dwBufferLockTime)
 			TBuffer::Destruct(pBuffer);
 		else
 		{
@@ -360,11 +358,7 @@ TBuffer* CBufferPool::PutCacheBuffer(ULONG_PTR dwID)
 	ASSERT(dwID != 0);
 
 	TBuffer* pBuffer = PickFreeBuffer(dwID);
-
-	{
-		CWriteLock locallock(m_csBufferMap);
-		m_mpBuffer[dwID] = pBuffer;
-	}
+	m_bfCache.Set(dwID, pBuffer);
 
 	return pBuffer;
 }
@@ -379,10 +373,10 @@ TBuffer* CBufferPool::PickFreeBuffer(ULONG_PTR dwID)
 	if(m_lsFreeBuffer.TryLock(&pBuffer, dwIndex))
 	{
 		if(::GetTimeGap32(pBuffer->freeTime) >= m_dwBufferLockTime)
-			m_lsFreeBuffer.ReleaseLock(nullptr, dwIndex);
+			VERIFY(m_lsFreeBuffer.ReleaseLock(nullptr, dwIndex));
 		else
 		{
-			m_lsFreeBuffer.ReleaseLock(pBuffer, dwIndex);
+			VERIFY(m_lsFreeBuffer.ReleaseLock(pBuffer, dwIndex));
 			pBuffer = nullptr;
 		}
 	}
@@ -400,11 +394,8 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 
 	TBuffer* pBuffer = nullptr;
 
-	CReadLock locallock(m_csBufferMap);
-
-	TBufferPtrMapCI it = m_mpBuffer.find(dwID);
-	if(it != m_mpBuffer.end())
-		pBuffer = it->second;
+	if(m_bfCache.Get(dwID, &pBuffer) != TBufferCache::GR_VALID)
+		pBuffer = nullptr;
 
 	return pBuffer;
 }
@@ -412,19 +403,23 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 void CBufferPool::Prepare()
 {
 	m_itPool.Prepare();
+
+	m_bfCache.Reset(m_dwMaxCacheSize);
 	m_lsFreeBuffer.Reset(m_dwBufferPoolHold);
 }
 
 void CBufferPool::Clear()
 {
+	DWORD size					= 0;
+	unique_ptr<ULONG_PTR[]> ids	= m_bfCache.GetAllElementIndexes(size, FALSE);
+
+	for(DWORD i = 0; i < size; i++)
 	{
-		CWriteLock locallock(m_csBufferMap);
-
-		for(TBufferPtrMapCI it = m_mpBuffer.begin(), end = m_mpBuffer.end(); it != end; ++it)
-			TBuffer::Destruct(it->second);
-
-		m_mpBuffer.clear();
+		TBuffer* pBuffer = FindCacheBuffer(ids[i]);
+		if(pBuffer) TBuffer::Destruct(pBuffer);
 	}
+
+	m_bfCache.Reset();
 
 	TBuffer* pBuffer = nullptr;
 

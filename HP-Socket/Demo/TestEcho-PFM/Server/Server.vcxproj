@@ -193,6 +193,7 @@
     <ClInclude Include="..\..\..\..\Common\Src\GeneralHelper.h" />
     <ClInclude Include="..\..\..\..\Common\Src\SysHelper.h" />
     <ClInclude Include="..\..\..\Src\HPSocket.h" />
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\..\Src\SocketInterface.h" />
     <ClInclude Include="..\..\..\..\Common\Src\WaitFor.h" />
     <ClInclude Include="..\..\Global\helper.h" />

@@ -9,7 +9,7 @@
 //#define _WIN32_WINNT _WIN32_WINNT_WIN7
 
 #define _USE_MFC
-//#define _DETECT_MEMORY_LEAK
+#define _DETECT_MEMORY_LEAK
 
 #define _SSL_SUPPORT
 

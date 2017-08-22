@@ -60,14 +60,14 @@
     <ClInclude Include="..\..\..\Src\HPSocket-SSL.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\SocketInterface-SSL.h">
-      <Filter>HPSocket</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Src\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Src\WaitFor.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+      <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

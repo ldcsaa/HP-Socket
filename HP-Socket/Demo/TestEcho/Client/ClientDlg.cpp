@@ -175,7 +175,7 @@ void CClientDlg::OnBnClickedStart()
 
 	::LogClientStarting(strAddress, usPort);
 
-	if(m_Client.Start(strAddress, usPort, m_bAsyncConn))
+	if(m_Client.Start(strAddress, usPort, m_bAsyncConn, ::GetAnyAddress(strAddress)))
 	{
 
 	}
@@ -214,36 +214,36 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CClientDlg::OnConnect(IClient* pClient)
+EnHandleResult CClientDlg::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	pClient->GetLocalAddress(szAddress, iAddressLen, usPort);
+	pSender->GetLocalAddress(szAddress, iAddressLen, usPort);
 
-	::PostOnConnect(pClient->GetConnectionID(), szAddress, usPort);
+	::PostOnConnect(dwConnID, szAddress, usPort);
 	SetAppState(ST_STARTED);
 
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnSend(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnSend(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(pClient->GetConnectionID(), pData, iLength);
+	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnReceive(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CClientDlg::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnReceive(pClient->GetConnectionID(), pData, iLength);
+	::PostOnReceive(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CClientDlg::OnClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CClientDlg::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == SE_OK ? ::PostOnClose(pClient->GetConnectionID())		:
-	::PostOnError(pClient->GetConnectionID(), enOperation, iErrorCode)	;
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)		:
+	::PostOnError(dwConnID, enOperation, iErrorCode)	;
 
 	SetAppState(ST_STOPPED);
 	return HR_OK;

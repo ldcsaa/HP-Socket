@@ -71,32 +71,32 @@
     <OutDir>..\..\$(Configuration)\x86\</OutDir>
     <IntDir>$(OutDir)obj\$(SolutionName)\$(ProjectName)\</IntDir>
     <TargetName>$(SolutionName)-$(ProjectName)</TargetName>
-    <IncludePath>..\..\..\..\Common\Lib\openssl\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\..\..\Common\Lib\openssl\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>..\..\..\..\Common\Lib\openssl\10.0\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\..\..\Common\Lib\openssl\10.0\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\$(Configuration)\x64\</OutDir>
     <IntDir>$(OutDir)obj\$(SolutionName)\$(ProjectName)\</IntDir>
     <TargetName>$(SolutionName)-$(ProjectName)</TargetName>
-    <IncludePath>..\..\..\..\Common\Lib\openssl\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\..\..\Common\Lib\openssl\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <IncludePath>..\..\..\..\Common\Lib\openssl\10.0\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\..\..\Common\Lib\openssl\10.0\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\$(Configuration)\x86\</OutDir>
     <IntDir>$(OutDir)obj\$(SolutionName)\$(ProjectName)\</IntDir>
     <TargetName>$(SolutionName)-$(ProjectName)</TargetName>
-    <IncludePath>..\..\..\..\Common\Lib\openssl\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\..\..\Common\Lib\openssl\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>..\..\..\..\Common\Lib\openssl\10.0\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\..\..\Common\Lib\openssl\10.0\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\$(Configuration)\x64\</OutDir>
     <IntDir>$(OutDir)obj\$(SolutionName)\$(ProjectName)\</IntDir>
     <TargetName>$(SolutionName)-$(ProjectName)</TargetName>
-    <IncludePath>..\..\..\..\Common\Lib\openssl\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\..\..\Common\Lib\openssl\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <IncludePath>..\..\..\..\Common\Lib\openssl\10.0\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\..\..\Common\Lib\openssl\10.0\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libeay32.lib;ssleay32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -131,7 +131,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libeay32.lib;ssleay32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -157,7 +157,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libeay32.lib;ssleay32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -184,7 +184,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libeay32.lib;ssleay32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -212,6 +212,7 @@
     <ClInclude Include="..\..\..\..\Common\Src\RWLock.h" />
     <ClInclude Include="..\..\..\..\Common\Src\Semaphore.h" />
     <ClInclude Include="..\..\..\..\Common\Src\Singleton.h" />
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\..\Src\SocketInterface.h" />
     <ClInclude Include="..\..\..\Src\SSLHelper.h" />
     <ClInclude Include="..\..\..\Src\SSLServer.h" />

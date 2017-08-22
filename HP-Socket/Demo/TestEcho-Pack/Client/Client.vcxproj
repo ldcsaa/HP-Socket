@@ -196,6 +196,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Src\GeneralHelper.h" />
     <ClInclude Include="..\..\..\Src\HPSocket.h" />
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\..\Src\SocketInterface.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Client.h" />

@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,24 +33,27 @@
 class CUdpCast : public IUdpCast
 {
 public:
-	virtual BOOL Start	(LPCTSTR pszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = FALSE);
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL			SendPackets			(const WSABUF pBuffers[], int iCount);
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
 	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
-	virtual BOOL			GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
-	virtual BOOL GetPendingDataLength			(int& iPending) {iPending = m_iPending; return HasStarted();}
 	virtual EnSocketError	GetLastError		()	{return m_enLastError;}
 	virtual LPCTSTR			GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
+	virtual BOOL GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+	virtual BOOL GetRemoteHost			(TCHAR lpszHost[], int& iHostLen, USHORT& usPort);
+	virtual BOOL GetPendingDataLength	(int& iPending) {iPending = m_iPending; return HasStarted();}
+
 public:
+	virtual BOOL IsSecure				() {return FALSE;}
+
 	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)		{m_dwMaxDatagramSize	= dwMaxDatagramSize;}
 	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize	= dwFreeBufferPoolSize;}
 	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold	= dwFreeBufferPoolHold;}
 	virtual void SetReuseAddress		(BOOL bReuseAddress)			{m_bReuseAddress		= bReuseAddress;}
-	virtual void SetBindAdddress		(LPCTSTR pszBindAddress)		{m_strBindAddress		= pszBindAddress;}
 	virtual void SetCastMode			(EnCastMode enCastMode)			{m_enCastMode			= enCastMode;}
 	virtual void SetMultiCastTtl		(int iMCTtl)					{m_iMCTtl				= iMCTtl;}
 	virtual void SetMultiCastLoop		(BOOL bMCLoop)					{m_bMCLoop				= bMCLoop;}
@@ -60,7 +63,6 @@ public:
 	virtual DWORD GetFreeBufferPoolSize	()	{return m_dwFreeBufferPoolSize;}
 	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
 	virtual BOOL  IsReuseAddress		()	{return m_bReuseAddress;}
-	virtual LPCTSTR GetBindAdddress		()	{return (LPCTSTR)m_strBindAddress;}
 	virtual EnCastMode GetCastMode		()	{return m_enCastMode;}
 	virtual int GetMultiCastTtl			()	{return m_iMCTtl;}
 	virtual BOOL IsMultiCastLoop		()	{return m_bMCLoop;}
@@ -73,35 +75,46 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult FirePrepareConnect(IClient* pClient, SOCKET socket)
-		{return m_psoListener->OnPrepareConnect(pClient, socket);}
-	virtual EnHandleResult FireConnect(IClient* pClient)
-		{return m_psoListener->OnConnect(pClient);}
-	virtual EnHandleResult FireSend(IClient* pClient, const BYTE* pData, int iLength)
-		{return m_psoListener->OnSend(pClient, pData, iLength);}
-	virtual EnHandleResult FireReceive(IClient* pClient, const BYTE* pData, int iLength)
-		{return m_psoListener->OnReceive(pClient, pData, iLength);}
-	virtual EnHandleResult FireReceive(IClient* pClient, int iLength)
-		{return m_psoListener->OnReceive(pClient, iLength);}
-	virtual EnHandleResult FireClose(IClient* pClient, EnSocketOperation enOperation, int iErrorCode)
-		{return m_psoListener->OnClose(pClient, enOperation, iErrorCode);}
+	virtual EnHandleResult FirePrepareConnect(SOCKET socket)
+		{return m_pListener->OnPrepareConnect(this, m_dwConnID, socket);}
+	virtual EnHandleResult FireConnect()
+		{
+			EnHandleResult rs		= m_pListener->OnConnect(this, m_dwConnID);
+			if(rs != HR_ERROR) rs	= FireHandShake();
+			return rs;
+		}
+	virtual EnHandleResult FireHandShake()
+		{return m_pListener->OnHandShake(this, m_dwConnID);}
+	virtual EnHandleResult FireSend(const BYTE* pData, int iLength)
+		{return m_pListener->OnSend(this, m_dwConnID, pData, iLength);}
+	virtual EnHandleResult FireReceive(const BYTE* pData, int iLength)
+		{return m_pListener->OnReceive(this, m_dwConnID, pData, iLength);}
+	virtual EnHandleResult FireReceive(int iLength)
+		{return m_pListener->OnReceive(this, m_dwConnID, iLength);}
+	virtual EnHandleResult FireClose(EnSocketOperation enOperation, int iErrorCode)
+		{return m_pListener->OnClose(this, m_dwConnID, enOperation, iErrorCode);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
 
 protected:
 	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
 	PVOID GetReserved	()					{return m_pReserved;}
+	BOOL GetRemoteHost	(LPCSTR* lpszHost, USHORT* pusPort = nullptr);
 
 private:
+	void SetRemoteHost	(LPCTSTR lpszHost, USHORT usPort);
+
 	BOOL CheckStarting();
-	BOOL CheckStoping();
-	BOOL CreateClientSocket();
-	BOOL ConnectToGroup(LPCTSTR pszRemoteAddress, USHORT usPort);
+	BOOL CheckStoping(DWORD dwCurrentThreadID);
+	BOOL CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszBindAddress, HP_SOCKADDR& bindAddr);
+	BOOL BindClientSocket(HP_SOCKADDR& bindAddr);
+	BOOL ConnectToGroup(const HP_SOCKADDR& bindAddr);
+	BOOL SetMultiCastSocketOptions(const HP_SOCKADDR& bindAddr);
 	BOOL CreateWorkerThread();
 	BOOL CreateDetectorThread();
 	BOOL ProcessNetworkEvent();
@@ -120,12 +133,13 @@ private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 
 public:
-	CUdpCast(IUdpCastListener* psoListener)
-	: m_psoListener			(psoListener)
+	CUdpCast(IUdpCastListener* pListener)
+	: m_pListener			(pListener)
 	, m_lsSend				(m_itPool)
 	, m_soClient			(INVALID_SOCKET)
 	, m_evSocket			(nullptr)
 	, m_dwConnID			(0)
+	, m_usPort				(0)
 	, m_hWorker				(nullptr)
 	, m_dwWorkerID			(0)
 	, m_iPending			(0)
@@ -140,19 +154,24 @@ public:
 	, m_iMCTtl				(1)
 	, m_bMCLoop				(FALSE)
 	, m_enCastMode			(CM_MULTICAST)
-	, m_strBindAddress		(DEFAULT_BIND_ADDRESS)
+	, m_castAddr			(AF_UNSPEC, TRUE)
+	, m_remoteAddr			(AF_UNSPEC, TRUE)
 	{
-		ASSERT(m_psoListener);
-		Reset(FALSE);
+		ASSERT(sm_wsSocket.IsValid());
+		ASSERT(m_pListener);
 	}
 
-	virtual ~CUdpCast()	{if(HasStarted()) Stop();}
+	virtual ~CUdpCast()
+	{
+		Stop();
+	}
 
 private:
-	CInitSocket			m_wsSocket;
+	static const CInitSocket sm_wsSocket;
 
 private:
-	IUdpCastListener*	m_psoListener;
+	IUdpCastListener*	m_pListener;
+	TClientCloseContext m_ccContext;
 
 	SOCKET				m_soClient;
 	HANDLE				m_evSocket;
@@ -166,23 +185,25 @@ private:
 	int					m_iMCTtl;
 	BOOL				m_bMCLoop;
 	EnCastMode			m_enCastMode;
-	CString				m_strBindAddress;
 
 	HANDLE				m_hWorker;
 	UINT				m_dwWorkerID;
 
-	EnServiceState		m_enState;
+	volatile EnServiceState	m_enState;
 	EnSocketError		m_enLastError;
 
 	PVOID				m_pExtra;
 	PVOID				m_pReserved;
 
-	SOCKADDR_IN			m_castAddr;
-	SOCKADDR_IN			m_remoteAddr;
+	HP_SOCKADDR			m_castAddr;
+	HP_SOCKADDR			m_remoteAddr;
 
 	CBufferPtr			m_rcBuffer;
 
 protected:
+	CStringA			m_strHost;
+	USHORT				m_usPort;
+
 	CItemPool			m_itPool;
 
 private:

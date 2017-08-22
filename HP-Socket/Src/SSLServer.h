@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,20 @@
 #pragma once
 
 #include "TcpServer.h"
-#include "SocketInterface-SSL.h"
 #include "SSLHelper.h"
 
 class CSSLServer : public CTcpServer
 {
 public:
+	virtual BOOL IsSecure() {return TRUE;}
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
+
+	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)
+		{return m_sslCtx.Initialize(SSL_SM_SERVER, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, fnServerNameCallback);}
+	virtual BOOL AddSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)
+		{return m_sslCtx.AddServerContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);}
+	virtual void CleanupSSLContext()
+		{m_sslCtx.Cleanup();}
 
 protected:
 	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj);
@@ -41,7 +48,7 @@ protected:
 
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
-	virtual void Reset(BOOL bAll = TRUE);
+	virtual void Reset();
 
 	virtual void OnWorkerThreadEnd(DWORD dwThreadID);
 
@@ -51,18 +58,19 @@ private:
 	friend BOOL ProcessSend<>(CSSLServer* pThis, TSocketObj* pSocketObj, CSSLSession* pSession, const WSABUF * pBuffers, int iCount);
 
 public:
-	CSSLServer(ITcpServerListener* psoListener)
-	: CTcpServer(psoListener)
+	CSSLServer(ITcpServerListener* pListener)
+	: CTcpServer(pListener)
+	, m_sslPool(m_sslCtx)
 	{
 
 	}
 
 	virtual ~CSSLServer()
 	{
-		if(HasStarted())
-			Stop();
+		Stop();
 	}
 
 private:
+	CSSLContext m_sslCtx;
 	CSSLSessionPool m_sslPool;
 };

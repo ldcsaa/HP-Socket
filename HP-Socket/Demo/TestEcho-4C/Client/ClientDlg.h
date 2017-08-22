@@ -42,10 +42,10 @@ public:
 	void SetAppState(EnAppState state);
 
 private:
-	static En_HP_HandleResult __stdcall OnConnect(HP_Client pClient);
-	static En_HP_HandleResult __stdcall OnSend(HP_Client pClient, const BYTE* pData, int iLength);
-	static En_HP_HandleResult __stdcall OnReceive(HP_Client pClient, int iLength);
-	static En_HP_HandleResult __stdcall OnClose(HP_Client pClient, En_HP_SocketOperation enOperation, int iErrorCode);
+	static En_HP_HandleResult __stdcall OnConnect(HP_Client pSender, HP_CONNID dwConnID);
+	static En_HP_HandleResult __stdcall OnSend(HP_Client pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+	static En_HP_HandleResult __stdcall OnReceive(HP_Client pSender, HP_CONNID dwConnID, int iLength);
+	static En_HP_HandleResult __stdcall OnClose(HP_Client pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
 
 private:
 	CEdit m_Content;

@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@
 #include <mswsock.h>
 #include <malloc.h>
 
+#include <atlfile.h>
+
 #include "SocketInterface.h"
 #include "../../Common/Src/WaitFor.h"
 #include "../../Common/Src/bufferpool.h"
@@ -38,65 +40,88 @@
 描述：声明组件的公共全局常量
 ************************************************************************/
 
-/* IOCP 最大工作线程数 */
-extern const DWORD MAX_WORKER_THREAD_COUNT;
-/* IOCP Socket 缓冲区最小值 */
-extern const DWORD MIN_SOCKET_BUFFER_SIZE;
-/* 小文件最大字节数 */
-extern const DWORD MAX_SMALL_FILE_SIZE;
-extern const DWORD MAX_SILENCE_CONNECTION_PERIOD;
+/* HP-Socket 版本号 */
+#define HP_VERSION_MAJOR						5
+#define HP_VERSION_MINOR						0
+#define HP_VERSION_REVISE						1
+#define HP_VERSION_BUILD						4
 
-/* IOCP 默认工作线程数 */
-extern const DWORD DEFAULT_WORKER_THREAD_COUNT;
+/* IOCP 最大工作线程数 */
+#define MAX_WORKER_THREAD_COUNT					500
+/* IOCP Socket 缓冲区最小值 */
+#define MIN_SOCKET_BUFFER_SIZE					88
+/* 小文件最大字节数 */
+#define MAX_SMALL_FILE_SIZE						0x3FFFFF
+/* 最大连接时长 */
+#define MAX_CONNECTION_PERIOD					(MAXLONG / 2)
+/* IOCP 处理接收事件时最大额外读取次数 */
+#define MAX_IOCP_CONTINUE_RECEIVE				25
+
+/* Server/Agent 默认最大连接数 */
+#define DEFAULT_MAX_CONNECTION_COUNT			10000
+/* Server/Agent 默认 IOCP 工作线程数 */
+#define DEFAULT_WORKER_THREAD_COUNT				GetDefaultWorkerThreadCount()
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
-extern const DWORD DEFAULT_FREE_SOCKETOBJ_LOCK_TIME;
+#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		(10 * 1000)
 /* Server/Agent 默认 Socket 缓存池大小 */
-extern const DWORD DEFAULT_FREE_SOCKETOBJ_POOL;
+#define DEFAULT_FREE_SOCKETOBJ_POOL				150
 /* Server/Agent 默认 Socket 缓存池回收阀值 */
-extern const DWORD DEFAULT_FREE_SOCKETOBJ_HOLD;
+#define DEFAULT_FREE_SOCKETOBJ_HOLD				600
 /* Server/Agent 默认内存块缓存池大小 */
-extern const DWORD DEFAULT_FREE_BUFFEROBJ_POOL;
+#define DEFAULT_FREE_BUFFEROBJ_POOL				300
 /* Server/Agent 默认内存块缓存池回收阀值 */
-extern const DWORD DEFAULT_FREE_BUFFEROBJ_HOLD;
+#define DEFAULT_FREE_BUFFEROBJ_HOLD				1200
 /* Client 默认内存块缓存池大小 */
-extern const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE;
+#define DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	10
 /* Client 默认内存块缓存池回收阀值 */
-extern const DWORD DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD;
-/* Agent 默认绑定地址 */
-extern LPCTSTR DEFAULT_BIND_ADDRESS;
+#define DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	40
+/* IPv4 默认绑定地址 */
+#define  DEFAULT_IPV4_BIND_ADDRESS				_T("0.0.0.0")
+/* IPv6 默认绑定地址 */
+#define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
 
 /* TCP 默认通信数据缓冲区大小 */
-extern const DWORD DEFAULT_TCP_SOCKET_BUFFER_SIZE;
+#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			GetDefaultTcpSocketBufferSize()
 /* TCP 默认心跳包间隔 */
-extern const DWORD DEFALUT_TCP_KEEPALIVE_TIME;
+#define DEFALUT_TCP_KEEPALIVE_TIME				(30 * 1000)
 /* TCP 默认心跳确认包检测间隔 */
-extern const DWORD DEFALUT_TCP_KEEPALIVE_INTERVAL;
+#define DEFALUT_TCP_KEEPALIVE_INTERVAL			(10 * 1000)
 /* TCP Server 默认 Listen 队列大小 */
-extern const DWORD DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE;
+#define DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	SOMAXCONN
 /* TCP Server 默认预投递 Accept 数量 */
-extern const DWORD DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT;
+#define DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT	300
 
 /* UDP 默认数据报文最大长度 */
-extern const DWORD DEFAULT_UDP_MAX_DATAGRAM_SIZE;
+#define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1472
 /* UDP 默认 Receive 预投递数量 */
-extern const DWORD DEFAULT_UDP_POST_RECEIVE_COUNT;
+#define DEFAULT_UDP_POST_RECEIVE_COUNT			300
 /* UDP 默认监测包尝试次数 */
-extern const DWORD DEFAULT_UDP_DETECT_ATTEMPTS;
+#define DEFAULT_UDP_DETECT_ATTEMPTS				3
 /* UDP 默认监测包发送间隔 */
-extern const DWORD DEFAULT_UDP_DETECT_INTERVAL;
+#define DEFAULT_UDP_DETECT_INTERVAL				20
 
 /* TCP Pack 包长度位数 */
-extern const DWORD TCP_PACK_LENGTH_BITS;
+#define TCP_PACK_LENGTH_BITS					22
 /* TCP Pack 包长度掩码 */
-extern const DWORD TCP_PACK_LENGTH_MASK;
+#define TCP_PACK_LENGTH_MASK					0x3FFFFF
 /* TCP Pack 包最大长度硬限制 */
-extern const DWORD TCP_PACK_MAX_SIZE_LIMIT;
+#define TCP_PACK_MAX_SIZE_LIMIT					0x3FFFFF
 /* TCP Pack 包默认最大长度 */
-extern const DWORD TCP_PACK_DEFAULT_MAX_SIZE;
+#define TCP_PACK_DEFAULT_MAX_SIZE				0x040000
 /* TCP Pack 包头标识值硬限制 */
-extern const USHORT TCP_PACK_HEADER_FLAG_LIMIT;
+#define TCP_PACK_HEADER_FLAG_LIMIT				0x0003FF
 /* TCP Pack 包头默认标识值 */
-extern const USHORT TCP_PACK_DEFAULT_HEADER_FLAG;
+#define TCP_PACK_DEFAULT_HEADER_FLAG			0x000000
+
+#define PORT_SEPARATOR_CHAR						':'
+#define IPV6_ADDR_BEGIN_CHAR					'['
+#define IPV6_ADDR_END_CHAR						']'
+#define IPV4_ADDR_SEPARATOR_CHAR				'.'
+#define IPV6_ADDR_SEPARATOR_CHAR				':'
+#define IPV6_ZONE_INDEX_CHAR					'%'
+
+DWORD GetDefaultWorkerThreadCount();
+DWORD GetDefaultTcpSocketBufferSize();
 
 /************************************************************************
 名称：Windows Socket 组件初始化类
@@ -111,7 +136,7 @@ public:
 		if(!lpTemp)
 			lpTemp	= (LPWSADATA)_alloca(sizeof(WSADATA));
 
-		m_iResult	= ::WSAStartup(MAKEWORD(minorVersion, majorVersion), lpTemp);
+		m_iResult	= ::WSAStartup(MAKEWORD(majorVersion, minorVersion), lpTemp);
 	}
 
 	~CInitSocket()
@@ -120,12 +145,171 @@ public:
 			::WSACleanup();
 	}
 
-	int		GetResult()	{return m_iResult;}
-	BOOL	IsValid()	{return m_iResult == 0;}
+	int	 GetResult() const {return m_iResult;}
+	BOOL IsValid()	 const {return m_iResult == 0;}
 
 private:
-	int		m_iResult;
+	int m_iResult;
 };
+
+typedef struct hp_addr
+{
+	ADDRESS_FAMILY family;
+
+	union
+	{
+		ULONG_PTR	addr;
+		IN_ADDR		addr4;
+		IN6_ADDR	addr6;
+	};
+
+	static const hp_addr any_addr4;
+	static const hp_addr any_addr6;
+
+	inline int AddrSize() const
+	{
+		return AddrSize(family);
+	}
+
+	inline static int AddrSize(ADDRESS_FAMILY f)
+	{
+		if(f == AF_INET)
+			return sizeof(IN_ADDR);
+
+		return sizeof(IN6_ADDR);
+	}
+
+	inline static const hp_addr& AnyAddr(ADDRESS_FAMILY f)
+	{
+		static const hp_addr s_any_addr4(AF_INET, TRUE);
+		static const hp_addr s_any_addr6(AF_INET6, TRUE);
+
+		if(f == AF_INET)
+			return s_any_addr4;
+
+		return s_any_addr6;
+	}
+
+	inline const ULONG_PTR* Addr()	const	{return &addr;}
+	inline ULONG_PTR* Addr()				{return &addr;}
+
+	inline BOOL IsIPv4()			const	{return family == AF_INET;}
+	inline BOOL IsIPv6()			const	{return family == AF_INET6;}
+	inline BOOL IsSpecified()		const	{return IsIPv4() || IsIPv6();}
+	inline void ZeroAddr()					{::ZeroMemory(&addr6, sizeof(addr6));}
+	inline void Reset()						{::ZeroMemory(this, sizeof(this));}
+
+	inline hp_addr& Copy(hp_addr& other) const
+	{
+		if(this != &other)
+			memcpy(&other, this, offsetof(hp_addr, addr) + AddrSize());
+
+		return other;
+	}
+
+	hp_addr(ADDRESS_FAMILY f = AF_UNSPEC, BOOL bZeroAddr = FALSE)
+	{
+		family = f;
+
+		if(bZeroAddr) ZeroAddr();
+	}
+
+} HP_ADDR, *HP_PADDR;
+
+typedef struct hp_sockaddr
+{
+	union
+	{
+		ADDRESS_FAMILY	family;
+		SOCKADDR		addr;
+		SOCKADDR_IN		addr4;
+		SOCKADDR_IN6	addr6;
+	};
+
+	inline int AddrSize() const
+	{
+		return AddrSize(family);
+	}
+
+	inline static int AddrSize(ADDRESS_FAMILY f)
+	{
+		if(f == AF_INET)
+			return sizeof(SOCKADDR_IN);
+
+		return sizeof(SOCKADDR_IN6);
+	}
+
+	inline static const hp_sockaddr& AnyAddr(ADDRESS_FAMILY f)
+	{
+		static const hp_sockaddr s_any_addr4(AF_INET, TRUE);
+		static const hp_sockaddr s_any_addr6(AF_INET6, TRUE);
+
+		if(f == AF_INET)
+			return s_any_addr4;
+
+		return s_any_addr6;
+	}
+
+	inline static int AddrMinStrLength(ADDRESS_FAMILY f)
+	{
+		if(f == AF_INET)
+			return 16;
+
+		return 46;
+	}
+
+	inline BOOL IsIPv4()			const	{return family == AF_INET;}
+	inline BOOL IsIPv6()			const	{return family == AF_INET6;}
+	inline BOOL IsSpecified()		const	{return IsIPv4() || IsIPv6();}
+	inline USHORT Port()			const	{return ntohs(addr4.sin_port);}
+	inline void SetPort(USHORT usPort)		{addr4.sin_port = htons(usPort);}
+	inline void* SinAddr()			const	{return IsIPv4() ? (void*)&addr4.sin_addr : (void*)&addr6.sin6_addr;}
+	inline void* SinAddr()					{return IsIPv4() ? (void*)&addr4.sin_addr : (void*)&addr6.sin6_addr;}
+
+	inline const SOCKADDR* Addr()	const	{return &addr;}
+	inline SOCKADDR* Addr()					{return &addr;}
+	inline void ZeroAddr()					{::ZeroMemory(((char*)this) + sizeof(family), sizeof(*this) - sizeof(family));}
+	inline void Reset()						{::ZeroMemory(this, sizeof(this));}
+
+	inline hp_sockaddr& Copy(hp_sockaddr& other) const
+	{
+		if(this != &other)
+			memcpy(&other, this, AddrSize());
+
+		return other;
+	}
+
+	size_t Hash() const
+	{
+		ASSERT(IsSpecified());
+
+		if(IsIPv4())
+			return ((addr4.sin_family << 16) | addr4.sin_port) ^ addr4.sin_addr.s_addr;
+		else
+		{
+			ULONG* p = (ULONG*)(((char*)this) + offsetof(SOCKADDR_IN6, sin6_addr));
+			return ((addr6.sin6_family << 16) | addr6.sin6_port) ^ addr6.sin6_flowinfo ^ p[0] ^ p[1] ^ p[2] ^ p[3] ^ p[4];
+		}
+	}
+
+	bool EqualTo(const hp_sockaddr& other) const
+	{
+		ASSERT(IsSpecified() && other.IsSpecified());
+
+		if(IsIPv4())
+			return memcmp(this, &other, offsetof(SOCKADDR_IN, sin_zero)) == 0;
+		else
+			return memcmp(this, &other, sizeof(addr6)) == 0;
+	}
+
+	hp_sockaddr(ADDRESS_FAMILY f = AF_UNSPEC, BOOL bZeroAddr = FALSE)
+	{
+		family = f;
+
+		if(bZeroAddr) ZeroAddr();
+	}
+
+} HP_SOCKADDR, *HP_PSOCKADDR;
 
 /* Server 组件和 Agent 组件内部使用的事件处理结果常量 */
 
@@ -208,7 +392,7 @@ struct TBufferObj : public TBufferObjBase<TBufferObj>
 /* UDP 数据缓冲区结构 */
 struct TUdpBufferObj : public TBufferObjBase<TUdpBufferObj>
 {
-	SOCKADDR_IN	remoteAddr;
+	HP_SOCKADDR	remoteAddr;
 	int			addrLen;
 };
 
@@ -280,8 +464,10 @@ typedef CRingPool<TUdpBufferObj>	TUdpBufferObjPtrList;
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
 {
+	static const long DEF_SNDBUFF_SIZE = 8192;
+
 	CONNID		connID;
-	SOCKADDR_IN	remoteAddr;
+	HP_SOCKADDR	remoteAddr;
 	PVOID		extra;
 	PVOID		reserved;
 	PVOID		reserved2;
@@ -297,9 +483,10 @@ struct TSocketObjBase
 
 	CCriSec		csSend;
 
-	volatile BOOL smooth;
-	volatile long pending;
-	volatile long sndCount;
+	long			sndBuffSize;
+	volatile BOOL	smooth;
+	volatile long	pending;
+	volatile long	sndCount;
 
 	CReentrantSpinGuard csRecv;
 
@@ -312,31 +499,35 @@ struct TSocketObjBase
 	static void Invalid(TSocketObjBase* pSocketObj)
 		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
 
-	static BOOL IsSmooth(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); return pSocketObj->valid && pSocketObj->smooth;}
-
-	static BOOL IsPending(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); return pSocketObj->valid && pSocketObj->pending > 0;}
-
 	static void Release(TSocketObjBase* pSocketObj)
+		{ASSERT(IsExist(pSocketObj)); pSocketObj->freeTime = ::TimeGetTime();}
+
+	long Pending()		{return pending;}
+	BOOL IsPending()	{return pending > 0;}
+	BOOL IsCanSend()	{return sndCount <= sndBuffSize;}
+	BOOL IsSmooth()		{return smooth;}
+	void TurnOnSmooth()	{smooth = TRUE;}
+
+	BOOL TurnOffSmooth()
+		{return ::InterlockedCompareExchange((volatile long*)&smooth, FALSE, TRUE) == TRUE;}
+	
+	BOOL ResetSndBuffSize(SOCKET socket)
 	{
-		ASSERT(IsExist(pSocketObj));
-
-		pSocketObj->freeTime = ::TimeGetTime();
+		int len = (int)(sizeof(sndBuffSize));
+		return getsockopt(socket, SOL_SOCKET, SO_SNDBUF, (CHAR*)&sndBuffSize, &len) != 0;
 	}
-
-	int Pending() {return pending;}
 
 	void Reset(CONNID dwConnID)
 	{
-		connID	 = dwConnID;
-		valid	 = TRUE;
-		smooth	 = TRUE;
-		pending	 = 0;
-		sndCount = 0;
-		extra	 = nullptr;
-		reserved = nullptr;
-		reserved2= nullptr;
+		connID		= dwConnID;
+		valid		= TRUE;
+		smooth		= TRUE;
+		pending		= 0;
+		sndCount	= 0;
+		sndBuffSize	= DEF_SNDBUFF_SIZE;
+		extra		= nullptr;
+		reserved	= nullptr;
+		reserved2	= nullptr;
 	}
 };
 
@@ -344,6 +535,7 @@ struct TSocketObjBase
 struct TSocketObj : public TSocketObjBase
 {
 	SOCKET			socket;
+	CStringA		host;
 	TBufferObjList	sndBuff;
 	
 	TSocketObj(CBufferObjPool& bfPool)
@@ -355,13 +547,27 @@ struct TSocketObj : public TSocketObjBase
 	static void Release(TSocketObj* pSocketObj)
 	{
 		__super::Release(pSocketObj);
+
 		pSocketObj->sndBuff.Release();
 	}
 
 	void Reset(CONNID dwConnID, SOCKET soClient)
 	{
 		__super::Reset(dwConnID);
+		
+		host.Empty();
+
 		socket = soClient;
+	}
+
+	BOOL GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort = nullptr)
+	{
+		*lpszHost = host;
+
+		if(pusPort)
+			*pusPort = remoteAddr.Port();
+
+		return (*lpszHost != nullptr && (*lpszHost)[0] != 0);
 	}
 };
 
@@ -380,6 +586,7 @@ struct TUdpSocketObj : public TSocketObjBase
 	static void Release(TUdpSocketObj* pSocketObj)
 	{
 		__super::Release(pSocketObj);
+
 		pSocketObj->sndBuff.Release();
 	}
 
@@ -390,83 +597,114 @@ struct TUdpSocketObj : public TSocketObjBase
 	}
 };
 
-/* 数据缓冲区结构链表 */
-typedef CRingPool<TSocketObj>					TSocketObjPtrList;
-/* 数据缓冲区垃圾回收结构链表 */
-typedef CCASQueue<TSocketObj>					TSocketObjPtrQueue;
-/* 数据缓冲区结构哈希表 */
-typedef unordered_map<CONNID, TSocketObj*>		TSocketObjPtrMap;
-/* 数据缓冲区结构哈希表迭代器 */
-typedef TSocketObjPtrMap::iterator				TSocketObjPtrMapI;
-/* 数据缓冲区结构哈希表 const 迭代器 */
-typedef TSocketObjPtrMap::const_iterator		TSocketObjPtrMapCI;
+/* 有效 TSocketObj 缓存 */
+typedef CRingCache2<TSocketObj, CONNID, true>		TSocketObjPtrPool;
+/* 失效 TSocketObj 缓存 */
+typedef CRingPool<TSocketObj>						TSocketObjPtrList;
+/* 失效 TSocketObj 垃圾回收结构链表 */
+typedef CCASQueue<TSocketObj>						TSocketObjPtrQueue;
 
-/* UDP 数据缓冲区结构链表 */
-typedef CRingPool<TUdpSocketObj>				TUdpSocketObjPtrList;
-/* 数据缓冲区垃圾回收结构链表 */
-typedef CCASQueue<TUdpSocketObj>				TUdpSocketObjPtrQueue;
-/* UDP 数据缓冲区结构哈希表 */
-typedef unordered_map<CONNID, TUdpSocketObj*>	TUdpSocketObjPtrMap;
-/* UDP 数据缓冲区结构哈希表迭代器 */
-typedef TUdpSocketObjPtrMap::iterator			TUdpSocketObjPtrMapI;
-/* UDP 数据缓冲区结构哈希表 const 迭代器 */
-typedef TUdpSocketObjPtrMap::const_iterator		TUdpSocketObjPtrMapCI;
+/* 有效 TUdpSocketObj 缓存 */
+typedef CRingCache2<TUdpSocketObj, CONNID, true>	TUdpSocketObjPtrPool;
+/* 失效 TUdpSocketObj 缓存 */
+typedef CRingPool<TUdpSocketObj>					TUdpSocketObjPtrList;
+/* 失效 TUdpSocketObj 垃圾回收结构链表 */
+typedef CCASQueue<TUdpSocketObj>					TUdpSocketObjPtrQueue;
 
-/* SOCKADDR_IN 比较器 */
-struct sockaddr_func
+/* HP_SOCKADDR 比较器 */
+struct hp_sockaddr_func
 {
 	struct hash
 	{
-		size_t operator() (const SOCKADDR_IN* pA) const
+		size_t operator() (const HP_SOCKADDR* pA) const
 		{
-			return ((pA->sin_family << 16) | ntohs(pA->sin_port)) ^ pA->sin_addr.s_addr;
+			return pA->Hash();
 		}
 	};
 
 	struct equal_to
 	{
-		bool operator () (const SOCKADDR_IN* pA, const SOCKADDR_IN* pB) const
+		bool operator () (const HP_SOCKADDR* pA, const HP_SOCKADDR* pB) const
 		{
-			return memcmp(pA, pB, offsetof(SOCKADDR_IN, sin_zero)) == 0;
+			return pA->EqualTo(*pB);
 		}
 	};
 
 };
 
 /* 地址-连接 ID 哈希表 */
-typedef unordered_map<SOCKADDR_IN*, CONNID, sockaddr_func::hash, sockaddr_func::equal_to>
+typedef unordered_map<const HP_SOCKADDR*, CONNID, hp_sockaddr_func::hash, hp_sockaddr_func::equal_to>
 										TSockAddrMap;
 /* 地址-连接 ID 哈希表迭代器 */
 typedef TSockAddrMap::iterator			TSockAddrMapI;
 /* 地址-连接 ID 哈希表 const 迭代器 */
 typedef TSockAddrMap::const_iterator	TSockAddrMapCI;
 
+/* IClient 组件关闭上下文 */
+struct TClientCloseContext
+{
+	BOOL bFireOnClose;
+	EnSocketOperation enOperation;
+	int iErrorCode;
+
+	TClientCloseContext(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK)
+	{
+		Reset(bFire, enOp, iCode);
+	}
+
+	void Reset(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK)
+	{
+		bFireOnClose = bFire;
+		enOperation	 = enOp;
+		iErrorCode	 = iCode;
+	}
+
+};
+
 /*****************************************************************************************************/
 /******************************************** 公共帮助方法 ********************************************/
 /*****************************************************************************************************/
 
+// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
+DWORD GetHPSocketVersion();
+
 /* 获取错误描述文本 */
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode);
-/* 获取 IPv4 地址 */
-ULONG GetIPv4InAddr(LPCTSTR lpszAddress);
+/* 确定地址簇 */
+ADDRESS_FAMILY DetermineAddrFamily(LPCTSTR lpszAddress);
+/* 地址字符串地址转换为 HP_ADDR */
+BOOL GetInAddr(LPCTSTR lpszAddress, __out HP_ADDR& addr);
+/* 地址字符串地址转换为 HP_SOCKADDR */
+BOOL GetSockAddr(LPCTSTR lpszAddress, USHORT usPort, __inout HP_SOCKADDR& addr);
 /* 检查字符串是否符合 IP 地址格式 */
-BOOL IsIPAddress(LPCTSTR lpszAddress);
+BOOL IsIPAddress(LPCTSTR lpszAddress, __out EnIPAddrType* penType = nullptr);
 /* 通过主机名获取 IP 地址 */
-BOOL GetIPAddress(LPCTSTR lpszHost, __out LPTSTR lpszIP, __inout int& iIPLenth);
-/* 通过主机名获取最优的 IP 地址 */
-BOOL GetOptimalIPByHostName(LPCTSTR lpszHost, __out IN_ADDR& addr);
-/* 获取 IN_ADDR 结构的 IP 地址 */
-BOOL IN_ADDR_2_IP(const IN_ADDR& addr, __out LPTSTR lpszAddress, __inout int& iAddressLen);
-/* 把 SOCKADDR_IN 结构转换为地址数据 */
-BOOL sockaddr_IN_2_A(const SOCKADDR_IN& addr, __out ADDRESS_FAMILY& usFamily, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
-/* 把地址数据转换为 SOCKADDR_IN 结构 */
-BOOL sockaddr_A_2_IN(ADDRESS_FAMILY usFamily, LPCTSTR pszAddress, USHORT usPort, __out SOCKADDR_IN& addr);
+BOOL GetIPAddress(LPCTSTR lpszHost, __out LPTSTR lpszIP, __inout int& iIPLenth, __out EnIPAddrType& enType);
+/* 通过主机名获取 HP_SOCKADDR */
+BOOL GetSockAddrByHostName(LPCTSTR lpszHost, USHORT usPort, __out HP_SOCKADDR& addr);
+/* 通过主机名获取 HP_SOCKADDR */
+BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR &addr);
+/* 枚举主机 IP 地址 */
+BOOL EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, __out LPTIPAddr** lpppIPAddr, __out int& iIPAddrCount);
+/* 填充 LPTIPAddr* */
+BOOL RetrieveSockAddrIPAddresses(const vector<HP_PSOCKADDR>& vt, __out LPTIPAddr** lpppIPAddr, __out int& iIPAddrCount);
+/* 释放 LPTIPAddr* */
+BOOL FreeHostIPAddresses(LPTIPAddr* lppIPAddr);
+/* 把 HP_SOCKADDR 结构转换为地址字符串 */
+BOOL sockaddr_IN_2_A(const HP_SOCKADDR& addr, __out ADDRESS_FAMILY& usFamily, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
+/* 把地址字符串转换为 HP_SOCKADDR 结构 */
+BOOL sockaddr_A_2_IN(LPCTSTR lpszAddress, USHORT usPort, __out HP_SOCKADDR& addr);
 /* 获取 Socket 的本地或远程地址信息 */
 BOOL GetSocketAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort, BOOL bLocal = TRUE);
 /* 获取 Socket 的本地地址信息 */
 BOOL GetSocketLocalAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 /* 获取 Socket 的远程地址信息 */
 BOOL GetSocketRemoteAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
+
+/* 64 位网络字节序转主机字节序 */
+ULONGLONG NToH64(ULONGLONG value);
+/* 64 位主机字节序转网络字节序 */
+ULONGLONG HToN64(ULONGLONG value);
 
 /* 获取 Socket 的某个扩展函数的指针 */
 PVOID GetExtensionFuncPtr					(SOCKET sock, GUID guid);
@@ -480,6 +718,9 @@ LPFN_CONNECTEX Get_ConnectEx_FuncPtr		(SOCKET sock);
 LPFN_TRANSMITFILE Get_TransmitFile_FuncPtr	(SOCKET sock);
 /* 获取 DisconnectEx 扩展函数指针 */
 LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock);
+
+HRESULT ReadSmallFile(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, DWORD dwMaxFileSize = MAX_SMALL_FILE_SIZE);
+HRESULT MakeSmallFilePackage(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, WSABUF szBuf[3], const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 
 /************************************************************************
 名称：IOCP 指令投递帮助方法
@@ -508,6 +749,7 @@ BOOL PostIocpExit(HANDLE hIOCP);
 BOOL PostIocpAccept(HANDLE hIOCP);
 BOOL PostIocpDisconnect(HANDLE hIOCP, CONNID dwConnID);
 BOOL PostIocpSend(HANDLE hIOCP, CONNID dwConnID);
+BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode);
 
 /************************************************************************
 名称：setsockopt() 帮助方法
@@ -521,6 +763,7 @@ int SSO_WSAIoctl			(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWOR
 
 int SSO_UpdateAcceptContext	(SOCKET soClient, SOCKET soBind);
 int SSO_UpdateConnectContext(SOCKET soClient, int iOption);
+int SSO_NoBlock				(SOCKET sock, BOOL bNoBlock = TRUE);
 int SSO_NoDelay				(SOCKET sock, BOOL bNoDelay = TRUE);
 int SSO_DontLinger			(SOCKET sock, BOOL bDont = TRUE);
 int SSO_Linger				(SOCKET sock, USHORT l_onoff, USHORT l_linger);
@@ -548,26 +791,30 @@ CONNID GenerateConnectionID	();
 /* 关闭 Socket */
 int ManualCloseSocket		(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE, BOOL bReuseAddress = FALSE);
 /* 投递 AccceptEx()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
-int PostAccept				(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj);
+int PostAccept				(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj, ADDRESS_FAMILY usFamily);
 /* 投递 AccceptEx() */
-int PostAcceptNotCheck		(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj);
+int PostAcceptNotCheck		(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj, ADDRESS_FAMILY usFamily);
 /* 投递 ConnectEx()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
-int PostConnect				(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj);
+int PostConnect				(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, const HP_SOCKADDR& sockAddr, TBufferObj* pBufferObj);
 /* 投递 ConnectEx() */
-int PostConnectNotCheck		(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, SOCKADDR_IN& soAddrIN, TBufferObj* pBufferObj);
+int PostConnectNotCheck		(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, const HP_SOCKADDR& sockAddr, TBufferObj* pBufferObj);
 /* 投递 WSASend()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostSend				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 /* 投递 WSASend() */
 int PostSendNotCheck		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* 投递 WSARecv() ，并把 WSA_IO_PENDING 转换为 NO_ERROR*/
+/* 投递 WSARecv()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostReceive				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 /* 投递 WSARecv() */
 int PostReceiveNotCheck		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* 投递 WSASendTo() ，并把 WSA_IO_PENDING 转换为 NO_ERROR*/
+/* 投递 WSASendTo()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostSendTo				(SOCKET sock, TUdpBufferObj* pBufferObj);
 /* 投递 WSASendTo() */
 int PostSendToNotCheck		(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* 投递 WSARecvFrom() ，并把 WSA_IO_PENDING 转换为 NO_ERROR*/
+/* 投递 WSARecvFrom()，并把 WSA_IO_PENDING 转换为 NO_ERROR */
 int PostReceiveFrom			(SOCKET sock, TUdpBufferObj* pBufferObj);
 /* 投递 WSARecvFrom() */
 int PostReceiveFromNotCheck	(SOCKET sock, TUdpBufferObj* pBufferObj);
+/* 执行非阻塞 WSARecv()，并把 WSAEWOULDBLOCK 转换为 NO_ERROR */
+int NoBlockReceive(TBufferObj* pBufferObj);
+/* 执行非阻塞 WSARecv() */
+int NoBlockReceiveNotCheck(TBufferObj* pBufferObj);

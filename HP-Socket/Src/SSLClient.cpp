@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 
 BOOL CSSLClient::CheckParams()
 {
-	if(!g_SSL.IsValid())
+	if(!m_sslCtx.IsValid())
 	{
 		SetLastError(SE_SSL_ENV_NOT_READY, __FUNCTION__, ERROR_NOT_READY);
 		return FALSE;
@@ -37,16 +37,29 @@ BOOL CSSLClient::CheckParams()
 	return __super::CheckParams();
 }
 
-void CSSLClient::Reset(BOOL bAll)
+void CSSLClient::PrepareStart()
+{
+	m_dwMainThreadID = ::GetCurrentThreadId();
+
+	__super::PrepareStart();
+}
+
+void CSSLClient::Reset()
 {
 	m_sslSession.Reset();
 
-	__super::Reset(bAll);
+	if(m_dwMainThreadID != 0)
+	{
+		m_sslCtx.RemoveThreadLocalState(m_dwMainThreadID);
+		m_dwMainThreadID = 0;
+	}
+
+	__super::Reset();
 }
 
 void CSSLClient::OnWorkerThreadEnd(DWORD dwThreadID)
 {
-	g_SSL.RemoveThreadLocalState();
+	m_sslCtx.RemoveThreadLocalState();
 
 	__super::OnWorkerThreadEnd(dwThreadID);
 }
@@ -55,23 +68,23 @@ BOOL CSSLClient::SendPackets(const WSABUF pBuffers[], int iCount)
 {
 	ASSERT(pBuffers && iCount > 0);
 
-	return ::ProcessSend(this, &m_sslSession, pBuffers, iCount);
+	return ::ProcessSend(this, this, &m_sslSession, pBuffers, iCount);
 }
 
-EnHandleResult CSSLClient::FireConnect(IClient* pClient)
+EnHandleResult CSSLClient::FireConnect()
 {
-	EnHandleResult result = DoFireConnect(pClient);
+	EnHandleResult result = DoFireConnect(this);
 
 	if(result != HR_ERROR)
 	{
-		m_sslSession.Renew();
-		VERIFY(::ProcessHandShake(this, &m_sslSession) == HR_OK);
+		m_sslSession.Renew(m_sslCtx, m_strHost);
+		VERIFY(::ProcessHandShake(this, this, &m_sslSession) == HR_OK);
 	}
 
 	return result;
 }
 
-EnHandleResult CSSLClient::FireReceive(IClient* pClient, const BYTE* pData, int iLength)
+EnHandleResult CSSLClient::FireReceive(const BYTE* pData, int iLength)
 {
-	return ::ProcessReceive(this, &m_sslSession, pData, iLength);
+	return ::ProcessReceive(this, this, &m_sslSession, pData, iLength);
 }

@@ -23,14 +23,14 @@ CClientDlg::CClientDlg(CWnd* pParent /*=NULL*/)
 
 	m_spThis = this;
 
-	// 初始化 SSL 全局环境参数
-	::HP_SSL_Initialize(HP_SSL_SM_CLIENT, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath);
-	VERIFY(::HP_SSL_IsValid());
-
 	// 创建监听器对象
 	m_pListener	= ::Create_HP_TcpPullClientListener();
 	// 创建 Socket 对象
 	m_pClient	= ::Create_HP_SSLPullClient(m_pListener);
+
+	// 初始化 SSL 环境参数
+	VERIFY(::HP_SSLClient_SetupSSLContext(m_pClient, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath));
+
 	// 设置 Socket 监听器回调函数
 	::HP_Set_FN_Client_OnConnect(m_pListener, OnConnect);
 	::HP_Set_FN_Client_OnHandShake(m_pListener, OnHandShake);
@@ -41,13 +41,13 @@ CClientDlg::CClientDlg(CWnd* pParent /*=NULL*/)
 
 CClientDlg::~CClientDlg()
 {
+	// 清理 SSL 运行环境
+	::HP_SSLClient_CleanupSSLContext(m_pClient);
+
 	// 销毁 Socket 对象
 	::Destroy_HP_SSLPullClient(m_pClient);
 	// 销毁监听器对象
 	::Destroy_HP_TcpPullClientListener(m_pListener);
-
-	// 清理 SSL 全局运行环境
-	::HP_SSL_Cleanup();
 }
 
 void CClientDlg::DoDataExchange(CDataExchange* pDX)
@@ -179,7 +179,7 @@ void CClientDlg::OnBnClickedSend()
 	if(::HP_Client_Send(m_pClient, buffer->Ptr(), (int)buffer->Size()))
 		::LogSend(::HP_Client_GetConnectionID(m_pClient), strContent);
 	else
-		::LogSendFail(::HP_Client_GetConnectionID(m_pClient), ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(HP_SE_DATA_SEND));
+		::LogSendFail(::HP_Client_GetConnectionID(m_pClient), ::SYS_GetLastError(), ::HP_GetSocketErrorDesc(SE_DATA_SEND));
 }
 
 void CClientDlg::OnBnClickedStart()
@@ -237,33 +237,33 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-En_HP_HandleResult CClientDlg::OnConnect(HP_Client pClient)
+En_HP_HandleResult CClientDlg::OnConnect(HP_Client pSender, HP_CONNID dwConnID)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Client_GetLocalAddress(pClient, szAddress, &iAddressLen, &usPort);
-	::PostOnConnect(::HP_Client_GetConnectionID(pClient), szAddress, usPort);
+	::HP_Client_GetLocalAddress(pSender, szAddress, &iAddressLen, &usPort);
+	::PostOnConnect(dwConnID, szAddress, usPort);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnHandShake(HP_Client pClient)
+En_HP_HandleResult CClientDlg::OnHandShake(HP_Client pSender, HP_CONNID dwConnID)
 {
-	::PostOnHandShake(::HP_Client_GetConnectionID(pClient));
+	::PostOnHandShake(dwConnID);
 	m_spThis->SetAppState(ST_STARTED);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnSend(HP_Client pClient, const BYTE* pData, int iLength)
+En_HP_HandleResult CClientDlg::OnSend(HP_Client pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(::HP_Client_GetConnectionID(pClient), pData, iLength);
-	return HP_HR_OK;
+	::PostOnSend(dwConnID, pData, iLength);
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnReceive(HP_Client pClient, int iLength)
+En_HP_HandleResult CClientDlg::OnReceive(HP_Client pSender, HP_CONNID dwConnID, int iLength)
 {
 	int required = m_spThis->m_pkgInfo.length;
 	int remain = iLength;
@@ -273,8 +273,8 @@ En_HP_HandleResult CClientDlg::OnReceive(HP_Client pClient, int iLength)
 		remain -= required;
 		CBufferPtr buffer(required);
 
-		En_HP_FetchResult result = ::HP_TcpPullClient_Fetch(pClient, buffer, (int)buffer.Size());
-		if(result == HP_FR_OK)
+		En_HP_FetchResult result = ::HP_TcpPullClient_Fetch(pSender, buffer, (int)buffer.Size());
+		if(result == FR_OK)
 		{
 			if(m_spThis->m_pkgInfo.is_header)
 			{
@@ -294,19 +294,19 @@ En_HP_HandleResult CClientDlg::OnReceive(HP_Client pClient, int iLength)
 			m_spThis->m_pkgInfo.is_header	= !m_spThis->m_pkgInfo.is_header;
 			m_spThis->m_pkgInfo.length		= required;
 
-			::PostOnReceive(::HP_Client_GetConnectionID(pClient), buffer, (int)buffer.Size());
+			::PostOnReceive(dwConnID, buffer, (int)buffer.Size());
 		}
 	}
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CClientDlg::OnClose(HP_Client pClient, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult CClientDlg::OnClose(HP_Client pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == HP_SE_OK ? ::PostOnClose(::HP_Client_GetConnectionID(pClient)):
-	::PostOnError(::HP_Client_GetConnectionID(pClient), enOperation, iErrorCode);
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
+	::PostOnError(dwConnID, enOperation, iErrorCode);
 
 	m_spThis->SetAppState(ST_STOPPED);
 
-	return HP_HR_OK;
+	return HR_OK;
 }

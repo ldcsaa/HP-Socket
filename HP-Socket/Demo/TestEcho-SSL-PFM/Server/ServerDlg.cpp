@@ -9,7 +9,6 @@
 #include "../../../../Common/Src/WaitFor.h"
 #include "../../../../Common/Src/SysHelper.h"
 
-
 #ifdef _WIN64
 	#ifdef _DEBUG
 		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket-SSL_UD.lib")
@@ -32,9 +31,8 @@
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(CServerDlg::IDD, pParent), m_Server(this)
 	, m_lClientCount(0L)
-	, m_sslInitializer(SSL_SM_SERVER, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath)
 {
-	VERIFY(m_sslInitializer.IsValid());
+	VERIFY(m_Server->SetupSSLContext(g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath));
 
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -48,6 +46,7 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PORT, m_Port);
 	DDX_Control(pDX, IDC_SEND_POLICY, m_SendPolicy);
 	DDX_Control(pDX, IDC_THREAD_COUNT, m_ThreadCount);
+	DDX_Control(pDX, IDC_MAX_CONN_COUNT, m_MaxConnCount);
 }
 
 BEGIN_MESSAGE_MAP(CServerDlg, CDialogEx)
@@ -78,6 +77,7 @@ BOOL CServerDlg::OnInitDialog()
 	CString strOriginTitle;
 	m_SendPolicy.SetCurSel(0);
 	m_ThreadCount.SetCurSel(0);
+	m_MaxConnCount.SetCurSel(0);
 	m_Port.SetWindowText(DEFAULT_PORT);
 
 	::SetMainWnd(this);
@@ -165,6 +165,7 @@ void CServerDlg::SetAppState(EnAppState state)
 	m_Port.EnableWindow(m_enState == ST_STOPPED);
 	m_SendPolicy.EnableWindow(m_enState == ST_STOPPED);
 	m_ThreadCount.EnableWindow(m_enState == ST_STOPPED);
+	m_MaxConnCount.EnableWindow(m_enState == ST_STOPPED);
 }
 
 void CServerDlg::OnBnClickedStart()
@@ -194,12 +195,22 @@ void CServerDlg::OnBnClickedStart()
 		return;
 	}
 
+	CString strMaxConnCount;
+	m_MaxConnCount.GetWindowText(strMaxConnCount);
+	int iMaxConnCount = _ttoi(strMaxConnCount);
+
+	if(iMaxConnCount == 0)
+		iMaxConnCount = 10;
+
+	iMaxConnCount *= 1000;
+
 	SetAppState(ST_STARTING);
 
 	Reset();
 
 	m_Server->SetSendPolicy(enSendPolicy);
 	m_Server->SetWorkerThreadCount(iThreadCount);
+	m_Server->SetMaxConnectionCount(iMaxConnCount);
 
 	//m_Server->SetFreeSocketObjPool(500);
 	//m_Server->SetFreeSocketObjHold(1500);
@@ -263,18 +274,18 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server->GetListenAddress(szAddress, iAddressLen, usPort);
+	pSender->GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG2
 	::PostOnSend(dwConnID, pData, iLength);
@@ -289,7 +300,7 @@ EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLengt
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 #ifdef _DEBUG2
 	::PostOnReceive(dwConnID, pData, iLength);
@@ -301,13 +312,13 @@ EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, const BYTE* pData, int iLe
 	::InterlockedExchangeAdd64(&m_llTotalReceived, iLength);
 #endif
 
-	if(m_Server->Send(dwConnID, pData, iLength))
+	if(pSender->Send(dwConnID, pData, iLength))
 		return HR_OK;
 	else
 		return HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnClose(ITcpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
 	::PostOnError(dwConnID, enOperation, iErrorCode);
@@ -317,13 +328,13 @@ EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperatio
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
+EnHandleResult CServerDlg::OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient)
 {
 	::PostOnAccept2(dwConnID);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnHandShake(CONNID dwConnID)
+EnHandleResult CServerDlg::OnHandShake(ITcpServer* pSender, CONNID dwConnID)
 {
 	if(m_lClientCount == 0)
 	{
@@ -341,7 +352,7 @@ EnHandleResult CServerDlg::OnHandShake(CONNID dwConnID)
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnShutdown()
+EnHandleResult CServerDlg::OnShutdown(ITcpServer* pSender)
 {
 	::PostOnShutdown();
 	return HR_OK;

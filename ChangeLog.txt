@@ -1,4 +1,256 @@
 ==========================================================================================
+v5.0.1 更新：
+==========================================================================================
+
+> IPv6 支持：
+-----------------
+1、所有通信组件支持 IPv6
+2、组件接口没有变化，组件内部通过传入的地址参数自动识别 IPv4 / IPv6
+3、API 更新：
+	1） enum En_HP_IPAddrType			(增加)
+	2） struct HP_TIPAddr				(增加)
+	3） SYS_GetIPv4InAddr				(删除)
+	4） SYS_GetOptimalIPByHostName		(删除)
+	5） SYS_IsIPAddress					(修改)
+	6） SYS_GetIPAddress					(修改)
+	7） SYS_EnumHostIPAddresses			(增加)
+	8） SYS_FreeHostIPAddresses			(增加)
+
+> SSL 通信组件：
+-----------------
+1、多 SSL 证书支持，每个通信组件对象可以使用不同的 SSL 证书
+2、通信组件对象绑定独立的 SSL Context，取代旧版本的全局唯一 SSL Context
+3、API 更新：
+	1） HP_SSL_Initialize				(删除)
+	2） HP_SSL_Cleanup					(删除)
+	3） HP_SSL_AddServerContext			(删除)
+	4） HP_SSL_IsValid					(删除)
+	5） HP_SSLAgent_SetupSSLContext		(增加)
+	6） HP_SSLClient_SetupSSLContext		(增加)
+	7） HP_SSLServer_SetupSSLContext		(增加)
+	8） HP_SSLServer_AddSSLContext		(增加)
+	9） HP_SSLAgent_CleanupSSLContext	(增加)
+	10） HP_SSLClient_CleanupSSLContext	(增加)
+	11） HP_SSLServer_CleanupSSLContext	(增加)
+
+> 其它更新：
+-----------------
+1、Demo 更新：所有 Demo 支持 IPv6；所有 SSL Demo 支持新的证书机制
+2、公共代码包 vc-common-src 版本升级到 v2.3.20
+
+> 升级说明：
+-----------------
+1、SSL 组件：需要调整 SSL Context 初始化方式
+2、其他组件：HP-Socket v5.0.1 完全兼容 HP-Socket v4.x.x 版本，可以直接替换升级
+
+==========================================================================================
+v4.3.1 更新：
+==========================================================================================
+
+> HTTP：
+-----------------
+1、IHttpClient 和 IHttpAgent 组件兼容没有长度标识（如：Content-Length Header）的 HTTP 响应报文
+2、IHttpClient 和 IHttpAgent 组件改进 HEAD 请求的响应处理方式，应用程序无需在 OnHeadersComplete 事件中返回特殊值 HPR_SKIP_BODY
+
+> 其它更新：
+-----------------
+1、公共代码包 vc-common-src 版本升级到 v2.3.19
+2、OpenSSL 版本升级到 1.1.0f
+3、优化 IServer/IAgent 组件，提升性能和稳定性
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.3.1 完全兼容 HP-Socket v4.2.1 版本，可以直接替换升级
+
+==========================================================================================
+v4.2.1 更新：
+==========================================================================================
+
+> HTTP Cookie 管理：
+-----------------
+1、新增 Cookie 管理器，可在不同连接、不同组件对象间共享 Cookie
+2、Cookie 管理器实现了标准 HTTP Cookie 功能，支持 Max-Age、expires、httpOnly、secure
+3、Cookie 管理器支持 Cookie 序列化与反序列化
+4、IHttpClient 和 IHttpAgent 组件可通过 SetUseCookie() 方法设置是否开启 Cookie 功能
+
+> HTTP Sync Client 通信组件：
+-----------------
+1、Create_HP_HttpSyncClient 和 Create_HP_HttpsSyncClient 方法增加可选参数 pListener
+2、如果 pListener 非空则可以通过 pListener 监听 HttpSyncClient 的所有通信事件
+
+> 其它更新：
+-----------------
+1、Demo 更新：HttpProxy，TestEcho-Http，TestEcho-Http-4C
+2、公共代码包 vc-common-src 版本升级到 v2.3.18
+3、OpenSSL 版本升级到 1.1.0e
+
+> 升级说明：
+-----------------
+1、HTTP Sync Client 组件：需要调整 Create_HP_HttpSyncClient 和 Create_HP_HttpsSyncClient 的调用参数
+2、其他组件：HP-Socket v4.2.1 完全兼容 HP-Socket v4.1.x 版本，可以直接替换升级
+
+==========================================================================================
+v4.1.3 更新：
+==========================================================================================
+
+> 代码调整：
+-----------------
+1、修正 ITcpServer 和 ITcpAgent 组件的 Onclose 事件在 SP_DIRECT 发送模式下的触发规则
+2、IClient 组件优化，提高稳定性
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.3 完全兼容 HP-Socket v4.1.2 版本，可以直接替换升级
+
+==========================================================================================
+v4.1.2 更新：
+==========================================================================================
+
+> 代码调整：
+-----------------
+1、采用新环形缓冲区算法提高异步操作安全性
+2、采用延时释放策略提高 HTTP 异步操作安全性
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.2 完全兼容 HP-Socket v4.1.1 版本，可以直接替换升级
+
+==========================================================================================
+v4.1.1 更新：
+==========================================================================================
+
+> WebSocket 支持：
+-----------------
+1、所有 HTTP 组件增加 WebSocket 方法：
+	1) SendWSMessage(): 发送 WebSocket 数据包
+	2） GetWSMessageState(): 获取当前 WebSocket 状态
+2、所有 HTTP 组件监听器增加 WebSocket 事件：
+	1) OnWSMessageHeader(): WebSocket 数据包头通知
+	2) OnWSMessageBody(): WebSocket 数据包体通知
+	3) OnWSMessageComplete(): WebSocket 数据包完成通知
+3、示例 Demo TestEcho-Http 和 TestEcho-Http-4C 支持 WebSocket
+
+> 增加 HTTP Sync Client 通信组件：
+-----------------
+1、HTTP Sync Client 实现同步 HTTP 通信，不需要事件监听器
+2、HTTP Sync Client 组件类： CHttpSyncClient、CHttpsSyncClient
+3、HTTP Sync Client 实现接口： ITcpClient / IHttpSyncRequester
+4、示例 Demo TestEcho-Http 和 TestEcho-Http-4C 提供 HTTP Sync Client 示例
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.1 完全兼容 HP-Socket v4.0.1 版本，可以直接替换升级
+
+==========================================================================================
+v4.0.1 更新：
+==========================================================================================
+
+> 增加 HTTP 系列通信组件：
+-----------------
+1、新增 HTTP Server 组件：
+	1) 组件类： CHttpServer、CHttpsServer
+	2) 实现接口： ITcpServer / IComplexHttpResponder
+	3) 监听器接口： IHttpServerListener
+2、新增 HTTP Agent 组件：
+	1) 组件类： CHttpAgent、CHttpsAgent
+	2) 实现接口： ITcpAgent / IComplexHttpRequester
+	3) 监听器接口： IHttpAgentListener
+3、新增 HTTP Client 组件：
+	1) 组件类： CHttpClient、CHttpsClient
+	2) 实现接口： ITcpClient / IHttpRequester
+	3) 监听器接口： IHttpClientListener
+4、新增 HTTP 示例 Demo：
+	1) TestEcho-Http		（源代码）
+	2) TestEcho-Http-4C		（4C LIB / 4C DLL）
+5、Http 监听器：
+	1) 监听器事件：
+		OnMessageBegin()	: 【可选】开始解析
+		OnRequestLine()		: 【可选】请求行解析完成（仅用于 HTTP 服务端）
+		OnStatusLine()		: 【可选】状态行解析完成（仅用于 HTTP 客户端）
+		OnHeader()			: 【可选】请求头通知
+		OnHeadersComplete()	: 【必须】请求头完成通知
+		OnBody()			: 【必须】请求体报文通知
+		OnChunkHeader()		: 【可选】Chunked 报文头通知
+		OnChunkComplete()	: 【可选】Chunked 报文结束通知
+		OnMessageComplete()	: 【必须】完成解析通知
+		OnUpgrade()			: 【可选】升级协议通知
+		OnParseError()		: 【必须】解析错误通知
+	2) 监听器事件返回值（EnHttpParseResult）：
+		HPR_OK				: 继续解析
+		HPR_SKIP_BODY		: 跳过当前请求 BODY（仅用于 OnHeadersComplete 事件）
+		HPR_UPGRADE			: 升级协议（仅用于 OnHeadersComplete 事件）
+		HPR_ERROR			: 终止解析，断开连接
+
+> 组件接口调整：
+-----------------
+1、IServer 和 IAgent 组件的所有监听器回调方法增加‘事件源’参数，如：OnShutdown() -> OnShutdown(T* pSender)
+2、IClient 组件的所有监听器回调方法增加‘连接ID’参数，如：OnHandShake(IClient* pClient) -> OnHandShake(T* pSender, CONNID dwConnID)
+3、IServer 和 IAgent 接口增加接口方法： Get/SetMaxConnectionCount() 用于设置最大连接数，最大连接数默认：10000
+4、OnHandShake() 事件触发规则调整：非 SSL 组件在 OnConnect() 事件后也触发 OnHandShake() 事件，使 SSL 组件和 SSL 组件处理流程一致
+5、HPSocket4C 增加 PACK 组件监听器的创建、销毁方法，新版本必须使用下列方法创建、销毁 PACK 组件监听器：
+	1) Create_HP_TcpPackServerListener / Destroy_HP_TcpPackServerListener
+	2) Create_HP_TcpPackAgentListener / Destroy_HP_TcpPackAgentListener
+	3) Create_HP_TcpPackClientListener / Destroy_HP_TcpPackClientListener
+6、SSL 组件支持 SNI：
+	1) SSL 初始化方法 HP_SSL_Initialize()，增加 SNI 回调函数指针参数
+	2) 新增方法 HP_SSL_AddServerContext()，用于 加载 SNI 主机证书
+	
+> 其他更新：
+-----------------
+1、IServer 和 IAgent 组件采用 Ring Pool 取代 R/W Lock + Map 维护活动连接，提升读写和并发性能
+2、更新所有 Demo 示例代码
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.0.1 与 HP-Socket v3.5.4 接口不兼容
+2、IServer、IAgent 和 IClient 的所有监听器回调方法参数都有变化
+3、注意：HPSocket4C 用新方法创建和销毁 PACK 组件监听器
+4、注意：IServer 和 IAgent 应用程序需要根据实际使用场景设置最大连接数
+
+==========================================================================================
+v3.5.4 更新：
+==========================================================================================
+
+> Bug 修复：
+-----------------
+1、修复 IClient 组件在连接发送数据时连接被断开可能导致程序崩溃 Bug
+2、优化 vc-common-src 公共代码包的 CCASQueue
+
+> 升级说明：
+-----------------
+1、HP-Socket v3.5.4 完全兼容 HP-Socket v3.5.3 版本，可以直接替换升级
+
+==========================================================================================
+v3.5.3 更新：
+==========================================================================================
+
+> Bug 修复：
+-----------------
+1、修复 IClient 组件在极端情况下触发两次 OnClose() 事件 Bug
+2、修复 IClient 组件在极端情况下销毁 IClient 对象导致程序崩溃 Bug
+
+> 升级说明：
+-----------------
+1、HP-Socket v3.5.3 完全兼容 HP-Socket v3.5.2 版本，可以直接替换升级
+
+==========================================================================================
+v3.5.2 更新：
+==========================================================================================
+
+> 组件接口调整：
+-----------------
+1、IClient 组件 Start() 方法默认连接方式改为异步连接
+2、IClient 组件 Start() 方法增加可选参数 lpszBindAddress，设置绑定地址
+3、HP-Socket 4C 增加导出方法 HP_Client_StartWithBindAddress() 方法，可设置绑定地址
+4、IUdpCast 组件删除接口方法 Get/SetBindAddress()
+5、IServer 接口 增加 GetLocalAddress() 方法用于获取连接的本地地址信息
+6、增加全局函数 SYS_GetSocketLocalAddress() 和 SYS_GetSocketRemoteAddress() 分别用于获取 SOCKET 本地和远程地址信息
+
+> 升级说明：
+-----------------
+1、HP-Socket v3.5.2 完全兼容 HP-Socket v3.5.1 版本，可以直接替换升级
+
+==========================================================================================
 v3.5.1 更新：
 ==========================================================================================
 

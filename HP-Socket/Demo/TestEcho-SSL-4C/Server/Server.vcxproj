@@ -215,6 +215,7 @@
     <ClInclude Include="..\..\..\Src\HPSocket4C.h">
       <FileType>CppHeader</FileType>
     </ClInclude>
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />

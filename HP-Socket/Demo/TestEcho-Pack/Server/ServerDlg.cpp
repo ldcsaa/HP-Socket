@@ -22,7 +22,7 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 	m_spThis = this;
 
 	// 创建监听器对象
-	m_pListener	= ::Create_HP_TcpServerListener();
+	m_pListener	= ::Create_HP_TcpPackServerListener();
 	// 创建 Socket 对象
 	m_pServer		= ::Create_HP_TcpPackServer(m_pListener);
 	// 设置 Socket 监听器回调函数
@@ -224,25 +224,25 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-En_HP_HandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+En_HP_HandleResult CServerDlg::OnPrepareListen(HP_Server pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetListenAddress(m_spThis->m_pServer, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetListenAddress(pSender, szAddress, &iAddressLen, &usPort);
 	::PostOnPrepareListen(szAddress, usPort);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwConnID, SOCKET soClient)
+En_HP_HandleResult CServerDlg::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetRemoteAddress(m_spThis->m_pServer, dwConnID, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetRemoteAddress(pSender, dwConnID, szAddress, &iAddressLen, &usPort);
 
 	if(!m_spThis->m_strAddress.IsEmpty())
 	{
@@ -252,36 +252,36 @@ En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwConnID, SOCKET soClient)
 
 	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	return bPass ? HP_HR_OK : HP_HR_ERROR;
+	return bPass ? HR_OK : HR_ERROR;
 }
 
-En_HP_HandleResult CServerDlg::OnSend(HP_CONNID dwConnID, const BYTE* pData, int iLength)
+En_HP_HandleResult CServerDlg::OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnSend(dwConnID, pData, iLength);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwConnID, const BYTE* pData, int iLength)
+En_HP_HandleResult CServerDlg::OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnReceive(dwConnID, pData, iLength);
 
-	if(!::HP_Server_Send(m_spThis->m_pServer, dwConnID, pData, iLength))
-		return HP_HR_ERROR;
+	if(!::HP_Server_Send(pSender, dwConnID, pData, iLength))
+		return HR_ERROR;
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnClose(HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult CServerDlg::OnClose(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == HP_SE_OK ? ::PostOnClose(dwConnID):
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID):
 	::PostOnError(dwConnID, enOperation, iErrorCode);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnShutdown()
+En_HP_HandleResult CServerDlg::OnShutdown(HP_Server pSender)
 {
 	::PostOnShutdown();
 
-	return HP_HR_OK;
+	return HR_OK;
 }

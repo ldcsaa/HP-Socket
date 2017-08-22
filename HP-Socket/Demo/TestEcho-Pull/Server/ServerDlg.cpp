@@ -198,25 +198,25 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-EnHandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+EnHandleResult CServerDlg::OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 	
-	m_Server->GetListenAddress(szAddress, iAddressLen, usPort);
+	pSender->GetListenAddress(szAddress, iAddressLen, usPort);
 	::PostOnPrepareListen(szAddress, usPort);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
+EnHandleResult CServerDlg::OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	m_Server->GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
+	pSender->GetRemoteAddress(dwConnID, szAddress, iAddressLen, usPort);
 
 	if(!m_strAddress.IsEmpty())
 	{
@@ -226,23 +226,21 @@ EnHandleResult CServerDlg::OnAccept(CONNID dwConnID, SOCKET soClient)
 
 	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	if(bPass) m_Server->SetConnectionExtra(dwConnID, new TPkgInfo(true, sizeof(TPkgHeader)));
+	if(bPass) pSender->SetConnectionExtra(dwConnID, new TPkgInfo(true, sizeof(TPkgHeader)));
 
 	return bPass ? HR_OK : HR_ERROR;
 }
 
-EnHandleResult CServerDlg::OnSend(CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult CServerDlg::OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	//static int t = 0;
-	//if(++t % 3 == 0) return HR_ERROR;
-
 	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, int iLength)
+EnHandleResult CServerDlg::OnReceive(ITcpServer* pSender, CONNID dwConnID, int iLength)
 {
-	TPkgInfo* pInfo = FindPkgInfo(dwConnID);
+	TPkgInfo* pInfo			= FindPkgInfo(pSender, dwConnID);
+	ITcpPullServer* pServer	= ITcpPullServer::FromS(pSender);
 
 	if(pInfo != nullptr)
 	{
@@ -254,7 +252,7 @@ EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, int iLength)
 			remain -= required;
 			CBufferPtr buffer(required);
 
-			EnFetchResult result = m_Server->Fetch(dwConnID, buffer, (int)buffer.Size());
+			EnFetchResult result = pServer->Fetch(dwConnID, buffer, (int)buffer.Size());
 			if(result == FR_OK)
 			{
 				if(pInfo->is_header)
@@ -277,7 +275,7 @@ EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, int iLength)
 
 				::PostOnReceive(dwConnID, buffer, (int)buffer.Size());
 
-				if(!m_Server->Send(dwConnID, buffer, (int)buffer.Size()))
+				if(!pSender->Send(dwConnID, buffer, (int)buffer.Size()))
 					return HR_ERROR;
 			}
 		}
@@ -286,37 +284,35 @@ EnHandleResult CServerDlg::OnReceive(CONNID dwConnID, int iLength)
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CServerDlg::OnClose(ITcpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID)	:
 	::PostOnError(dwConnID, enOperation, iErrorCode);
 
-	RemovePkgInfo(dwConnID);
+	RemovePkgInfo(pSender, dwConnID);
 
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnShutdown()
+EnHandleResult CServerDlg::OnShutdown(ITcpServer* pSender)
 {
 	::PostOnShutdown();
 
 	return HR_OK;
 }
 
-TPkgInfo* CServerDlg::FindPkgInfo(CONNID dwConnID)
+TPkgInfo* CServerDlg::FindPkgInfo(ITcpServer* pSender, CONNID dwConnID)
 {
 	PVOID pInfo = nullptr;
 
-	m_Server->GetConnectionExtra(dwConnID, &pInfo);
+	pSender->GetConnectionExtra(dwConnID, &pInfo);
 
 	return (TPkgInfo*)pInfo;
 }
 
-void CServerDlg::RemovePkgInfo(CONNID dwConnID)
+void CServerDlg::RemovePkgInfo(ITcpServer* pSender, CONNID dwConnID)
 {
-	//CCriSecLock locallock(m_csPkgInfo);
-
-	TPkgInfo* pInfo = FindPkgInfo(dwConnID);
+	TPkgInfo* pInfo = FindPkgInfo(pSender, dwConnID);
 	ASSERT(pInfo != nullptr);
 
 	delete pInfo;

@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,14 @@
 #include "TcpPackServer.h"
 #include "TcpPackClient.h"
 #include "TcpPackAgent.h"
+
+#include "HttpServer.h"
+#include "HttpAgent.h"
+#include "HttpClient.h"
+
+/*****************************************************************************************************************************************************/
+/******************************************************************** SSL Exports ********************************************************************/
+/*****************************************************************************************************************************************************/
 
 HPSOCKET_API ITcpServer* HP_Create_SSLServer(ITcpServerListener* pListener)
 {
@@ -124,22 +132,55 @@ HPSOCKET_API void HP_Destroy_SSLPackClient(ITcpPackClient* pClient)
 	delete pClient;
 }
 
-HPSOCKET_API BOOL HP_SSL_Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTPS Exports ******************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API IHttpServer* HP_Create_HttpsServer(IHttpServerListener* pListener)
 {
-	return g_SSL.Initialize(enSessionMode, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return (IHttpServer*)(new CHttpsServer(pListener));
 }
 
-HPSOCKET_API void HP_SSL_Cleanup()
+HPSOCKET_API IHttpAgent* HP_Create_HttpsAgent(IHttpAgentListener* pListener)
 {
-	g_SSL.Cleanup();
+	return (IHttpAgent*)(new CHttpsAgent(pListener));
 }
 
-HPSOCKET_API void HP_SSL_RemoveThreadLocalState()
+HPSOCKET_API IHttpClient* HP_Create_HttpsClient(IHttpClientListener* pListener)
 {
-	g_SSL.RemoveThreadLocalState();
+	return (IHttpClient*)(new CHttpsClient(pListener));
 }
 
-HPSOCKET_API BOOL HP_SSL_IsValid()
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpsSyncClient(IHttpClientListener* pListener)
 {
-	return g_SSL.IsValid();
+	return (IHttpSyncClient*)(new CHttpsSyncClient(pListener));
+}
+
+HPSOCKET_API void HP_Destroy_HttpsServer(IHttpServer* pServer)
+{
+	delete pServer;
+}
+
+HPSOCKET_API void HP_Destroy_HttpsAgent(IHttpAgent* pAgent)
+{
+	delete pAgent;
+}
+
+HPSOCKET_API void HP_Destroy_HttpsClient(IHttpClient* pClient)
+{
+	delete pClient;
+}
+
+HPSOCKET_API void HP_Destroy_HttpsSyncClient(IHttpSyncClient* pClient)
+{
+	delete pClient;
+}
+
+/*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API void __stdcall HP_SSL_RemoveThreadLocalState(DWORD dwThreadID)
+{
+	CSSLContext::RemoveThreadLocalState(dwThreadID);
 }

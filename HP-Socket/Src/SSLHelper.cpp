@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.1
+ * Version	: 5.0.1
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
  
 #include "stdafx.h"
 #include "SSLHelper.h"
+#include "SocketHelper.h"
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 #include "openssl/engine.h"
@@ -32,8 +33,23 @@
 
 #include <atlpath.h>
 
-CSSLContext CSSLContext::sm_Instance;
-CSSLContext& g_SSL = CSSLContext::getInstance();
+/*
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	#pragma comment(lib, "libeay32")
+	#pragma comment(lib, "ssleay32")
+#else
+	#pragma comment(lib, "libssl")
+	#pragma comment(lib, "libcrypto")
+	#pragma comment(lib, "crypt32")
+#endif
+*/
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	int CSSLInitializer::sm_iLockNum			= 0;
+	CSimpleRWLock* CSSLInitializer::sm_pcsLocks	= nullptr;
+#endif
+
+CSSLInitializer CSSLInitializer::sm_instance;
 
 const DWORD CSSLSessionPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACITY;
 const DWORD CSSLSessionPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
@@ -42,35 +58,13 @@ const DWORD CSSLSessionPool::DEFAULT_SESSION_LOCK_TIME	= 10 * 1000;
 const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_SIZE	= 150;
 const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_HOLD	= 600;
 
-BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+CSSLInitializer::CSSLInitializer()
 {
-	ASSERT(!IsValid());
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	sm_iLockNum = CRYPTO_num_locks();
 
-	if(IsValid())
-	{
-		::SetLastError(ERROR_INVALID_STATE);
-		return FALSE;
-	}
-
-	CreateContext();
-
-	m_enSessionMode = enSessionMode;
-
-	if(!LoadCertAndKey(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath))
-	{
-		Cleanup();
-		return FALSE;
-	}
-
-	return m_bValid = TRUE;
-}
-
-void CSSLContext::CreateContext()
-{
-	m_iLockNum = ::CRYPTO_num_locks();
-
-	if(m_iLockNum > 0)
-		m_pcsLocks = new CSimpleRWLock[m_iLockNum];
+	if(sm_iLockNum > 0)
+		sm_pcsLocks = new CSimpleRWLock[sm_iLockNum];
 /*
 #ifdef _DEBUG
 	CRYPTO_malloc_debug_init();
@@ -86,14 +80,161 @@ void CSSLContext::CreateContext()
 	SSL_library_init();
 	SSL_load_error_strings();
 	OpenSSL_add_all_algorithms();
+#else
+	OPENSSL_init_ssl(OPENSSL_INIT_SSL_DEFAULT, nullptr);
+#endif
 }
 
-BOOL CSSLContext::LoadCertAndKey(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+CSSLInitializer::~CSSLInitializer()
+{
+	CleanupThreadState();
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	CONF_modules_free();
+	ENGINE_cleanup();
+	EVP_cleanup();
+	CRYPTO_cleanup_all_ex_data();
+	ERR_free_strings();
+	SSL_COMP_free_compression_methods();
+
+	CRYPTO_set_locking_callback			(nullptr);
+	CRYPTO_set_dynlock_create_callback	(nullptr);
+	CRYPTO_set_dynlock_destroy_callback	(nullptr);
+	CRYPTO_set_dynlock_lock_callback	(nullptr);
+
+	if(sm_iLockNum > 0)
+	{
+		delete[] sm_pcsLocks;
+
+		sm_pcsLocks = nullptr;
+		sm_iLockNum = 0;
+	}
+#endif
+}
+
+void CSSLInitializer::CleanupThreadState(DWORD dwThreadID)
+{
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	CRYPTO_THREADID tid = {nullptr, dwThreadID};
+	
+	CRYPTO_THREADID_current(&tid);
+	ERR_remove_thread_state(&tid);
+#else
+	OPENSSL_thread_stop();
+#endif
+}
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+
+void CSSLInitializer::ssl_lock_callback(int mode, int n, const char *file, int line)
+{
+	mode & CRYPTO_LOCK
+	? (mode & CRYPTO_READ
+		? sm_pcsLocks[n].WaitToRead()
+		: sm_pcsLocks[n].WaitToWrite())
+	: (mode & CRYPTO_READ
+		? sm_pcsLocks[n].ReadDone()
+		: sm_pcsLocks[n].WriteDone());
+}
+
+CRYPTO_dynlock_value* CSSLInitializer::ssl_lock_dyn_create_callback(const char *file, int line)
+ {
+	 return new DynamicLock;
+ }
+
+void CSSLInitializer::ssl_lock_dyn_callback(int mode, CRYPTO_dynlock_value* l, const char *file, int line)
+{
+	mode & CRYPTO_LOCK
+	? (mode & CRYPTO_READ
+		? l->cs.WaitToRead()
+		: l->cs.WaitToWrite())
+	: (mode & CRYPTO_READ
+		? l->cs.ReadDone()
+		: l->cs.WriteDone());
+}
+
+void CSSLInitializer::ssl_lock_dyn_destroy_callback(CRYPTO_dynlock_value* l, const char *file, int line)
+{
+	delete l;
+}
+
+#endif
+
+BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
+{
+	ASSERT(!IsValid());
+
+	if(IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	m_enSessionMode	= enSessionMode;
+
+	if(AddContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath) == 0)
+		m_sslCtx = GetContext(0);
+	else
+	{
+		Cleanup();
+		return FALSE;
+	}
+
+	SetServerNameCallback(fnServerNameCallback);
+
+	return TRUE;
+}
+
+int CSSLContext::AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+{
+	ASSERT(IsValid());
+
+	if(!IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	if(m_enSessionMode != SSL_SM_SERVER)
+	{
+		::SetLastError(ERROR_INVALID_OPERATION);
+		return FALSE;
+	}
+
+	return AddContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+}
+
+int CSSLContext::AddContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+{
+	int iIndex		= -1;
+	SSL_CTX* sslCtx	= SSL_CTX_new(SSLv23_method());
+
+	SSL_CTX_set_quiet_shutdown(sslCtx, 1);
+	SSL_CTX_set_verify(sslCtx, iVerifyMode, nullptr);
+	SSL_CTX_set_cipher_list(sslCtx, "ALL:!aNULL:!eNULL");
+
+	if(m_enSessionMode == SSL_SM_SERVER)
+	{
+		static volatile ULONG s_session_id_context = 0;
+		ULONG session_id_context = ::InterlockedIncrement(&s_session_id_context);
+
+		SSL_CTX_set_session_id_context(sslCtx, (BYTE*)&session_id_context, sizeof(session_id_context));
+	}
+
+	if(!LoadCertAndKey(sslCtx, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath))
+		SSL_CTX_free(sslCtx);
+	else
+	{
+		iIndex = (int)m_lsSslCtxs.size();
+		m_lsSslCtxs.push_back(sslCtx);
+	}
+	
+	return iIndex;
+}
+
+BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
 {
 	USES_CONVERSION;
-
-	m_sslCtx = SSL_CTX_new(SSLv23_method());
-	SSL_CTX_set_verify(m_sslCtx, iVerifyMode, nullptr);
 
 	if(lpszCAPemCertFileOrPath != nullptr)
 	{
@@ -111,13 +252,13 @@ BOOL CSSLContext::LoadCertAndKey(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTS
 		else
 			lpszCAPemCertPath = lpszCAPemCertFileOrPath;
 
-		if(!SSL_CTX_load_verify_locations(m_sslCtx, T2CA(lpszCAPemCertFile), T2CA(lpszCAPemCertPath)))
+		if(!SSL_CTX_load_verify_locations(sslCtx, T2CA(lpszCAPemCertFile), T2CA(lpszCAPemCertPath)))
 		{
 			::SetLastError(ERROR_INVALID_DATA);
 			return FALSE;
 		}
 
-		if(!SSL_CTX_set_default_verify_paths(m_sslCtx))
+		if(!SSL_CTX_set_default_verify_paths(sslCtx))
 		{
 			::SetLastError(ERROR_FUNCTION_FAILED);
 			return FALSE;
@@ -133,7 +274,7 @@ BOOL CSSLContext::LoadCertAndKey(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTS
 				return FALSE;
 			}
 
-			SSL_CTX_set_client_CA_list(m_sslCtx, caCertNames);
+			SSL_CTX_set_client_CA_list(sslCtx, caCertNames);
 		}
 	}
 
@@ -155,21 +296,21 @@ BOOL CSSLContext::LoadCertAndKey(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTS
 		}
 		
 		if(lpszKeyPasswod != nullptr)
-			SSL_CTX_set_default_passwd_cb_userdata(m_sslCtx, (void*)T2CA(lpszKeyPasswod));
+			SSL_CTX_set_default_passwd_cb_userdata(sslCtx, (void*)T2CA(lpszKeyPasswod));
 
-		if(!SSL_CTX_use_PrivateKey_file(m_sslCtx, T2CA(lpszPemKeyFile), SSL_FILETYPE_PEM))
+		if(!SSL_CTX_use_PrivateKey_file(sslCtx, T2CA(lpszPemKeyFile), SSL_FILETYPE_PEM))
 		{
 			::SetLastError(ERROR_INVALID_PASSWORD);
 			return FALSE;
 		}
 
-		if(!SSL_CTX_use_certificate_chain_file(m_sslCtx, T2CA(lpszPemCertFile)))
+		if(!SSL_CTX_use_certificate_chain_file(sslCtx, T2CA(lpszPemCertFile)))
 		{
 			::SetLastError(ERROR_INVALID_DATA);
 			return FALSE;
 		}
 
-		if(!SSL_CTX_check_private_key(m_sslCtx))
+		if(!SSL_CTX_check_private_key(sslCtx))
 		{
 			::SetLastError(ERROR_INVALID_ACCESS);
 			return FALSE;
@@ -181,76 +322,80 @@ BOOL CSSLContext::LoadCertAndKey(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTS
 
 void CSSLContext::Cleanup()
 {
-	m_bValid = FALSE;
-
-	if(m_sslCtx != nullptr)
+	if(IsValid())
 	{
-		SSL_CTX_free(m_sslCtx);
+		int iCount = (int)m_lsSslCtxs.size();
+
+		for(int i = 0; i < iCount; i++)
+			SSL_CTX_free(m_lsSslCtxs[i]);
+
+		m_lsSslCtxs.clear();
 		m_sslCtx = nullptr;
 	}
 
-	CleanupThreadState();
-	CleanupGlobalState();
+	m_fnServerNameCallback = nullptr;
 
-	CRYPTO_set_locking_callback			(nullptr);
-	CRYPTO_set_dynlock_create_callback	(nullptr);
-	CRYPTO_set_dynlock_destroy_callback	(nullptr);
-	CRYPTO_set_dynlock_lock_callback	(nullptr);
+	RemoveThreadLocalState();
+}
 
-	if(m_iLockNum > 0)
+void CSSLContext::SetServerNameCallback(Fn_SNI_ServerNameCallback fn)
+{
+	if(m_enSessionMode != SSL_SM_SERVER)
+		return;
+
+	m_fnServerNameCallback = fn;
+
+	if(m_fnServerNameCallback == nullptr)
+		return;
+
+	VERIFY(SSL_CTX_set_tlsext_servername_callback(m_sslCtx, InternalServerNameCallback));
+	VERIFY(SSL_CTX_set_tlsext_servername_arg(m_sslCtx, this));
+}
+
+int CALLBACK CSSLContext::InternalServerNameCallback(SSL* ssl, int* ad, void* arg)
+{
+	USES_CONVERSION;
+
+	CSSLContext* pThis = (CSSLContext*)arg;
+	ASSERT(pThis->m_fnServerNameCallback != nullptr);
+
+	const char* lpszServerName = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
+
+	if(lpszServerName == nullptr)
+		return SSL_TLSEXT_ERR_NOACK;
+
+	int iIndex = pThis->m_fnServerNameCallback(A2CT(lpszServerName));
+
+	if(iIndex == 0)
+		return SSL_TLSEXT_ERR_OK;
+
+	if(iIndex < 0)
 	{
-		delete[] m_pcsLocks;
-
-		m_pcsLocks = nullptr;
-		m_iLockNum = 0;
+		::SetLastError(ERROR_INVALID_NAME);
+		return SSL_TLSEXT_ERR_ALERT_FATAL;
 	}
+
+	SSL_CTX* sslCtx = pThis->GetContext(iIndex);
+
+	if(sslCtx == nullptr)
+	{
+		::SetLastError(ERROR_INVALID_INDEX);
+		return SSL_TLSEXT_ERR_ALERT_FATAL;
+	}
+
+	SSL_set_SSL_CTX(ssl, sslCtx);
+
+	return SSL_TLSEXT_ERR_OK;
 }
 
-void CSSLContext::CleanupGlobalState()
+SSL_CTX* CSSLContext::GetContext(int i) const
 {
-	CONF_modules_free();
-	ENGINE_cleanup();
-	EVP_cleanup();
-	CRYPTO_cleanup_all_ex_data();
-	ERR_free_strings();
-	SSL_COMP_free_compression_methods();
-}
+	SSL_CTX* sslCtx = nullptr;
 
-void CSSLContext::CleanupThreadState()
-{
-	ERR_remove_thread_state(0);
-}
+	if(i >= 0 && i < (int)m_lsSslCtxs.size())
+		sslCtx = m_lsSslCtxs[i];
 
-void CSSLContext::ssl_lock_callback(int mode, int n, const char *file, int line)
-{
-	mode & CRYPTO_LOCK
-	? (mode & CRYPTO_READ
-		? g_SSL.m_pcsLocks[n].WaitToRead()
-		: g_SSL.m_pcsLocks[n].WaitToWrite())
-	: (mode & CRYPTO_READ
-		? g_SSL.m_pcsLocks[n].ReadDone()
-		: g_SSL.m_pcsLocks[n].WriteDone());
-}
-
-CRYPTO_dynlock_value* CSSLContext::ssl_lock_dyn_create_callback(const char *file, int line)
- {
-	 return new DynamicLock;
- }
-
-void CSSLContext::ssl_lock_dyn_callback(int mode, CRYPTO_dynlock_value* l, const char *file, int line)
-{
-	mode & CRYPTO_LOCK
-	? (mode & CRYPTO_READ
-		? l->cs.WaitToRead()
-		: l->cs.WaitToWrite())
-	: (mode & CRYPTO_READ
-		? l->cs.ReadDone()
-		: l->cs.WriteDone());
-}
-
-void CSSLContext::ssl_lock_dyn_destroy_callback(CRYPTO_dynlock_value* l, const char *file, int line)
-{
-	delete l;
+	return sslCtx;
 }
 
 BOOL CSSLSession::WriteRecvChannel(const BYTE* pData, int iLength)
@@ -312,10 +457,13 @@ BOOL CSSLSession::WriteSendChannel(const WSABUF pBuffers[], int iCount)
 	{
 		const WSABUF& buffer = pBuffers[i];
 
-		if(!WriteSendChannel((const BYTE*)buffer.buf, buffer.len))
+		if(buffer.len > 0)
 		{
-			isOK = FALSE;
-			break;
+			if(!WriteSendChannel((const BYTE*)buffer.buf, buffer.len))
+			{
+				isOK = FALSE;
+				break;
+			}
 		}
 	}
 
@@ -343,18 +491,27 @@ BOOL CSSLSession::ReadSendChannel()
 	return isOK;
 }
 
-CSSLSession* CSSLSession::Renew()
+CSSLSession* CSSLSession::Renew(const CSSLContext& sslCtx, LPCSTR lpszHostName)
 {
 	ASSERT(!IsValid());
 
-	m_ssl		= SSL_new(g_SSL.GetContext());
+	m_ssl		= SSL_new(sslCtx.GetDefaultContext());
 	m_bioSend	= BIO_new(BIO_s_mem());
 	m_bioRecv	= BIO_new(BIO_s_mem());
 
 	SSL_set_bio(m_ssl, m_bioRecv, m_bioSend);
 
-	g_SSL.GetSessionMode() == SSL_SM_CLIENT
-	? SSL_connect(m_ssl) : SSL_accept(m_ssl);
+	if(sslCtx.GetSessionMode() == SSL_SM_SERVER)
+		SSL_accept(m_ssl);
+	else
+	{
+		USES_CONVERSION;
+
+		if(lpszHostName && lpszHostName[0] != 0 && !::IsIPAddress(A2CT(lpszHostName)))
+			SSL_set_tlsext_host_name(m_ssl, lpszHostName);
+
+		SSL_connect(m_ssl);
+	}
 
 	m_pitSend		= m_itPool.PickFreeItem();
 	m_pitRecv		= m_itPool.PickFreeItem();
@@ -436,7 +593,7 @@ inline BOOL CSSLSession::IsFatalError(int iBytes)
 	return TRUE;
 }
 
-CSSLSession* CSSLSessionPool::PickFreeSession()
+CSSLSession* CSSLSessionPool::PickFreeSession(LPCSTR lpszHostName)
 {
 	DWORD dwIndex;
 	CSSLSession* pSession = nullptr;
@@ -444,10 +601,10 @@ CSSLSession* CSSLSessionPool::PickFreeSession()
 	if(m_lsFreeSession.TryLock(&pSession, dwIndex))
 	{
 		if(::GetTimeGap32(pSession->GetFreeTime()) >= m_dwSessionLockTime)
-			m_lsFreeSession.ReleaseLock(nullptr, dwIndex);
+			VERIFY(m_lsFreeSession.ReleaseLock(nullptr, dwIndex));
 		else
 		{
-			m_lsFreeSession.ReleaseLock(pSession, dwIndex);
+			VERIFY(m_lsFreeSession.ReleaseLock(pSession, dwIndex));
 			pSession = nullptr;
 		}
 	}
@@ -455,7 +612,7 @@ CSSLSession* CSSLSessionPool::PickFreeSession()
 	if(!pSession) pSession = new CSSLSession(m_itPool);
 
 	ASSERT(pSession);
-	return pSession->Renew();
+	return pSession->Renew(m_sslCtx, lpszHostName);
 }
 
 void CSSLSessionPool::PutFreeSession(CSSLSession* pSession)
@@ -479,7 +636,7 @@ void CSSLSessionPool::ReleaseGCSession(BOOL bForce)
 
 	while(m_lsGCSession.PopFront(&pSession))
 	{
-		if(bForce || (now - pSession->GetFreeTime()) >= m_dwSessionLockTime)
+		if(bForce || (int)(now - pSession->GetFreeTime()) >= (int)m_dwSessionLockTime)
 			delete pSession;
 		else
 		{

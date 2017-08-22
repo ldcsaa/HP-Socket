@@ -21,14 +21,14 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 
 	m_spThis = this;
 
-	// 初始化 SSL 全局环境参数
-	::HP_SSL_Initialize(HP_SSL_SM_SERVER, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath);
-	VERIFY(::HP_SSL_IsValid());
-
 	// 创建监听器对象
 	m_pListener	= ::Create_HP_TcpPullServerListener();
 	// 创建 Socket 对象
 	m_pServer		= ::Create_HP_SSLPullServer(m_pListener);
+
+	// 初始化 SSL 环境参数
+	VERIFY(::HP_SSLServer_SetupSSLContext(m_pServer, g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath, nullptr));
+
 	// 设置 Socket 监听器回调函数
 	::HP_Set_FN_Server_OnPrepareListen(m_pListener, OnPrepareListen);
 	::HP_Set_FN_Server_OnAccept(m_pListener, OnAccept);
@@ -41,13 +41,13 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 
 CServerDlg::~CServerDlg()
 {
+	// 清理 SSL 全局运行环境
+	::HP_SSLServer_CleanupSSLContext(m_pServer);
+
 	// 销毁 Socket 对象
-	::Destroy_HP_SSLPullServer(m_spThis->m_pServer);
+	::Destroy_HP_SSLPullServer(m_pServer);
 	// 销毁监听器对象
 	::Destroy_HP_TcpPullServerListener(m_pListener);
-
-	// 清理 SSL 全局运行环境
-	::HP_SSL_Cleanup();
 }
 
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
@@ -168,14 +168,14 @@ void CServerDlg::OnBnClickedStart()
 
 	SetAppState(ST_STARTING);
 	//m_Server->SetSocketBufferSize(64);
-	if(::HP_Server_Start(m_spThis->m_pServer, ADDRESS, PORT))
+	if(::HP_Server_Start(m_pServer, ADDRESS, PORT))
 	{
 		::LogServerStart(ADDRESS, PORT);
 		SetAppState(ST_STARTED);
 	}
 	else
 	{
-		::LogServerStartFail(::HP_Server_GetLastError(m_spThis->m_pServer), ::HP_Server_GetLastErrorDesc(m_spThis->m_pServer));
+		::LogServerStartFail(::HP_Server_GetLastError(m_pServer), ::HP_Server_GetLastErrorDesc(m_pServer));
 		SetAppState(ST_STOPPED);
 	}
 }
@@ -184,7 +184,7 @@ void CServerDlg::OnBnClickedStop()
 {
 	SetAppState(ST_STOPPING);
 
-	if(::HP_Server_Stop(m_spThis->m_pServer))
+	if(::HP_Server_Stop(m_pServer))
 	{
 		::LogServerStop();
 		SetAppState(ST_STOPPED);
@@ -199,12 +199,12 @@ void CServerDlg::OnBnClickedDisconnect()
 {
 	CString strHP_CONNID;
 	m_HP_CONNID.GetWindowText(strHP_CONNID);
-	HP_CONNID dwHP_CONNID = (HP_CONNID)_ttoi(strHP_CONNID);
+	HP_CONNID dwConnID = (HP_CONNID)_ttoi(strHP_CONNID);
 
-	if(::HP_Server_Disconnect(m_spThis->m_pServer, dwHP_CONNID, TRUE))
-		::LogDisconnect(dwHP_CONNID);
+	if(::HP_Server_Disconnect(m_pServer, dwConnID, TRUE))
+		::LogDisconnect(dwConnID);
 	else
-		::LogDisconnectFail(dwHP_CONNID);
+		::LogDisconnectFail(dwConnID);
 }
 
 void CServerDlg::OnEnChangeHP_CONNID()
@@ -229,25 +229,25 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 	return 0;
 }
 
-En_HP_HandleResult CServerDlg::OnPrepareListen(SOCKET soListen)
+En_HP_HandleResult CServerDlg::OnPrepareListen(HP_Server pSender, SOCKET soListen)
 {
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 	
-	::HP_Server_GetListenAddress(m_spThis->m_pServer, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetListenAddress(pSender, szAddress, &iAddressLen, &usPort);
 	::PostOnPrepareListen(szAddress, usPort);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwHP_CONNID, SOCKET soClient)
+En_HP_HandleResult CServerDlg::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[40];
+	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
-	::HP_Server_GetRemoteAddress(m_spThis->m_pServer, dwHP_CONNID, szAddress, &iAddressLen, &usPort);
+	::HP_Server_GetRemoteAddress(pSender, dwConnID, szAddress, &iAddressLen, &usPort);
 
 	if(!m_spThis->m_strAddress.IsEmpty())
 	{
@@ -255,28 +255,28 @@ En_HP_HandleResult CServerDlg::OnAccept(HP_CONNID dwHP_CONNID, SOCKET soClient)
 			bPass = FALSE;
 	}
 
-	::PostOnAccept(dwHP_CONNID, szAddress, usPort, bPass);
+	::PostOnAccept(dwConnID, szAddress, usPort, bPass);
 
-	if(bPass) ::HP_Server_SetConnectionExtra(m_spThis->m_pServer, dwHP_CONNID, new TPkgInfo(true, sizeof(TPkgHeader)));
+	if(bPass) ::HP_Server_SetConnectionExtra(pSender, dwConnID, new TPkgInfo(true, sizeof(TPkgHeader)));
 
-	return bPass ? HP_HR_OK : HP_HR_ERROR;
+	return bPass ? HR_OK : HR_ERROR;
 }
 
-En_HP_HandleResult CServerDlg::OnHandShake(HP_CONNID dwConnID)
+En_HP_HandleResult CServerDlg::OnHandShake(HP_Server pSender, HP_CONNID dwConnID)
 {
 	::PostOnHandShake(dwConnID);
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnSend(HP_CONNID dwHP_CONNID, const BYTE* pData, int iLength)
+En_HP_HandleResult CServerDlg::OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	::PostOnSend(dwHP_CONNID, pData, iLength);
-	return HP_HR_OK;
+	::PostOnSend(dwConnID, pData, iLength);
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwHP_CONNID, int iLength)
+En_HP_HandleResult CServerDlg::OnReceive(HP_Server pSender, HP_CONNID dwConnID, int iLength)
 {
-	TPkgInfo* pInfo = m_spThis->FindPkgInfo(dwHP_CONNID);
+	TPkgInfo* pInfo = m_spThis->FindPkgInfo(pSender, dwConnID);
 
 	if(pInfo != nullptr)
 	{
@@ -288,8 +288,8 @@ En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwHP_CONNID, int iLength)
 			remain -= required;
 			CBufferPtr buffer(required);
 
-			En_HP_FetchResult result = ::HP_TcpPullServer_Fetch(m_spThis->m_pServer, dwHP_CONNID, buffer, (int)buffer.Size());
-			if(result == HP_FR_OK)
+			En_HP_FetchResult result = ::HP_TcpPullServer_Fetch(pSender, dwConnID, buffer, (int)buffer.Size());
+			if(result == FR_OK)
 			{
 				if(pInfo->is_header)
 				{
@@ -309,47 +309,47 @@ En_HP_HandleResult CServerDlg::OnReceive(HP_CONNID dwHP_CONNID, int iLength)
 				pInfo->is_header = !pInfo->is_header;
 				pInfo->length	 = required;
 
-				::PostOnReceive(dwHP_CONNID, buffer, (int)buffer.Size());
+				::PostOnReceive(dwConnID, buffer, (int)buffer.Size());
 
-				if(!::HP_Server_Send(m_spThis->m_pServer, dwHP_CONNID, buffer, (int)buffer.Size()))
-					return HP_HR_ERROR;
+				if(!::HP_Server_Send(pSender, dwConnID, buffer, (int)buffer.Size()))
+					return HR_ERROR;
 			}
 		}
 	}
 	
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnClose(HP_CONNID dwHP_CONNID, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult CServerDlg::OnClose(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
-	iErrorCode == HP_SE_OK ? ::PostOnClose(dwHP_CONNID):
-	::PostOnError(dwHP_CONNID, enOperation, iErrorCode);
+	iErrorCode == SE_OK ? ::PostOnClose(dwConnID):
+	::PostOnError(dwConnID, enOperation, iErrorCode);
 
-	m_spThis->RemovePkgInfo(dwHP_CONNID);
+	m_spThis->RemovePkgInfo(pSender, dwConnID);
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnShutdown()
+En_HP_HandleResult CServerDlg::OnShutdown(HP_Server pSender)
 {
 	::PostOnShutdown();
 
-	return HP_HR_OK;
+	return HR_OK;
 }
 
-TPkgInfo* CServerDlg::FindPkgInfo(HP_CONNID dwHP_CONNID)
+TPkgInfo* CServerDlg::FindPkgInfo(HP_Server pSender, HP_CONNID dwConnID)
 {
 	PVOID pInfo = nullptr;
-	::HP_Server_GetConnectionExtra(m_spThis->m_pServer, dwHP_CONNID, &pInfo);
+	::HP_Server_GetConnectionExtra(pSender, dwConnID, &pInfo);
 
 	return (TPkgInfo*)pInfo;
 }
 
-void CServerDlg::RemovePkgInfo(HP_CONNID dwHP_CONNID)
+void CServerDlg::RemovePkgInfo(HP_Server pSender, HP_CONNID dwConnID)
 {
-	//CCriSecLock locallock(m_spThis->m_csPkgInfo);
+	//CCriSecLock locallock(m_csPkgInfo);
 
-	TPkgInfo* pInfo = FindPkgInfo(dwHP_CONNID);
+	TPkgInfo* pInfo = FindPkgInfo(pSender, dwConnID);
 	ASSERT(pInfo != nullptr);
 
 	delete pInfo;

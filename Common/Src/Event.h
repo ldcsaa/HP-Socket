@@ -1,13 +1,13 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.13
+ * Version	: 2.3.20
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912
+ * QQ Group	: 75375912, 44636872
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,13 @@ public:
 	BOOL Reset()	{return(::ResetEvent(m_hEvent));}
 	BOOL Set()		{return(::SetEvent(m_hEvent));}
 
-	HANDLE& GetHandle	() 	{return m_hEvent;}
-	operator HANDLE		()	{return m_hEvent;}
-	BOOL IsValid		()	{return m_hEvent != nullptr;}
+	BOOL IsValid()	{return m_hEvent != nullptr;}
+
+	HANDLE GetHandle		()			{return m_hEvent;}
+	const HANDLE GetHandle	()	const	{return m_hEvent;}
+
+	operator HANDLE			()			{return m_hEvent;}
+	operator const HANDLE	()	const	{return m_hEvent;}
 
 private:
 	CEvt(const CEvt&);

@@ -40,16 +40,16 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 private:
-	virtual EnHandleResult OnPrepareListen(SOCKET soListen);
-	virtual EnHandleResult OnAccept(CONNID dwConnID, SOCKET soClient);
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnReceive(CONNID dwConnID, int iLength);
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnShutdown();
+	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen);
+	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient);
+	virtual EnHandleResult OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, int iLength);
+	virtual EnHandleResult OnClose(ITcpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnShutdown(ITcpServer* pSender);
 
 private:
-	TPkgInfo* FindPkgInfo(CONNID dwConnID);
-	void RemovePkgInfo(CONNID dwConnID);
+	static TPkgInfo* FindPkgInfo(ITcpServer* pSender, CONNID dwConnID);
+	static void RemovePkgInfo(ITcpServer* pSender, CONNID dwConnID);
 
 private:
 	CListBox m_Info;

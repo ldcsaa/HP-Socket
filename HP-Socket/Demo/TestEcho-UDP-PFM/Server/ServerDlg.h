@@ -43,17 +43,19 @@ public:
 	void Statistics();
 	void Reset(BOOL bResetClientCount = TRUE);
 private:
-	virtual EnHandleResult OnPrepareListen(SOCKET soListen);
-	virtual EnHandleResult OnSend(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnReceive(CONNID dwConnID, const BYTE* pData, int iLength);
-	virtual EnHandleResult OnClose(CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnAccept(CONNID dwConnID, const SOCKADDR_IN* pSockAddr);
-	virtual EnHandleResult OnShutdown();
+	virtual EnHandleResult OnPrepareListen(IUdpServer* pSender, SOCKET soListen);
+	virtual EnHandleResult OnSend(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnReceive(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
+	virtual EnHandleResult OnClose(IUdpServer* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnAccept(IUdpServer* pSender, CONNID dwConnID, UINT_PTR pSockAddr);
+	virtual EnHandleResult OnShutdown(IUdpServer* pSender);
 
 private:
 	CListBox m_Info;
+	CEdit m_BindAddress;
 	CEdit m_Port;
 	CComboBox m_SendPolicy;
+	CComboBox m_MaxConnCount;
 	CComboBox m_RecvCount;
 	CButton m_Start;
 	CButton m_Stop;

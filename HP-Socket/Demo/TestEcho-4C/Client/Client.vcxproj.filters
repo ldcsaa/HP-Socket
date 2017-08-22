@@ -54,6 +54,9 @@
     <ClInclude Include="..\..\..\Src\HPSocket4C.h">
       <Filter>HPSocket4C</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+      <Filter>HPSocket4C</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">

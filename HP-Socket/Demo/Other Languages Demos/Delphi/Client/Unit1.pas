@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, HPSocketSDKUnit;
+  Dialogs, StdCtrls, HPTypeDef, HPSocketSDKUnit;
 
 type
   TForm1 = class(TForm)
@@ -32,7 +32,7 @@ type
 var
   Form1: TForm1;
   PClient: Integer;
-  PListener: Integer;
+  DPListener: Integer;
 implementation
 
 {$R *.dfm}
@@ -46,34 +46,46 @@ begin
 Result := PWideChar(WideString(s)); 
 end;
 
-function OnPrepareConnect(pClient: HP_Client; SOCKET: Pointer): En_HP_HandleResult; stdcall;
+function OnPrepareConnect(pSender: HP_Client; dwConnID: HP_CONNID; socket: Pointer): En_HP_HandleResult; stdcall;
 begin
     AddMsg('准备连接 -> ' + inttostr(pClient));
-    Result := HP_HR_OK;
+    Result := HR_OK;
 end;
 
-function OnConnect(pClient: HP_Client): En_HP_HandleResult; stdcall;
+function OnConnect(pSender: HP_Client; dwConnID: HP_CONNID): En_HP_HandleResult; stdcall;
 begin
     AddMsg('连接成功 -> ' + inttostr(pClient));
-    Result := HP_HR_OK;
+    Result := HR_OK;
 end;
 
-function OnSend(pClient: HP_Client; const pData: Pointer; iLength: Integer): En_HP_HandleResult; stdcall;
+function OnHandShake(pSender: HP_Client; dwConnID: HP_CONNID): En_HP_HandleResult; stdcall;
+begin
+    AddMsg('握手成功 -> ' + inttostr(pClient));
+    Result := HR_OK;
+end;
+
+function OnSend(pSender: HP_Client; dwConnID: HP_CONNID; const pData: Pointer; iLength: Integer): En_HP_HandleResult; stdcall;
 begin
     AddMsg('发送数据 -> ' + inttostr(pClient));
-    Result := HP_HR_OK;
+    Result := HR_OK;
 end;
 
-function OnReceive(pClient: HP_Client; const pData: Pointer; iLength: Integer): En_HP_HandleResult; stdcall;
+function OnReceive(pSender: HP_Client; dwConnID: HP_CONNID; const pData: Pointer; iLength: Integer): En_HP_HandleResult; stdcall;
 begin
     AddMsg('收到数据 -> ' + inttostr(iLength) + ' byte');
-    Result := HP_HR_OK;
+    Result :=HR_OK;
 end;
 
-function OnCloseCon(pClient: HP_Client; enOperation: En_HP_SocketOperation; iLength: Integer): En_HP_HandleResult; stdcall;
+function OnPullReceive(pSender: HP_Client; dwConnID: HP_CONNID; iLength: Integer): En_HP_HandleResult; stdcall;
+begin
+    AddMsg('收到数据 -> ' + inttostr(iLength) + ' byte');
+    Result :=HR_OK;
+end;
+
+function OnCloseCon(pSender: HP_Client; dwConnID: HP_CONNID; enOperation: En_HP_SocketOperation; iErrorCode: Integer): En_HP_HandleResult; stdcall;
 begin
     AddMsg('连接关闭 -> ' + inttostr(pClient) );
-    Result := HP_HR_OK;
+    Result := HR_OK;
 end;
 
 
@@ -81,27 +93,29 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   //创建监听器
-  PListener:= Create_HP_TcpClientListener();
+  DPListener:= Create_HP_TcpClientListener();
 
   //创建服务
-  PClient:= Create_HP_TcpClient(PListener);
+  PClient:= Create_HP_TcpClient(DPListener);
 
   //设置回调函数
-  HP_Set_FN_Client_OnPrepareConnect(PListener, OnPrepareConnect);
-  HP_Set_FN_Client_OnConnect(PListener, OnConnect);
-  HP_Set_FN_Client_OnSend(PListener, OnSend);
-  HP_Set_FN_Client_OnReceive(PListener, OnReceive);
-  HP_Set_FN_Client_OnClose(PListener,OnCloseCon);
+  HP_Set_FN_Client_OnPrepareConnect(DPListener, OnPrepareConnect);
+  HP_Set_FN_Client_OnConnect(DPListener, OnConnect);
+  HP_Set_FN_Client_OnHandShake(DPListener, OnHandShake);
+  HP_Set_FN_Client_OnSend(DPListener, OnSend);
+  HP_Set_FN_Client_OnReceive(DPListener, OnReceive);
+  HP_Set_FN_Client_OnPullReceive(DPListener, OnPullReceive);
+  HP_Set_FN_Client_OnClose(DPListener, OnCloseCon);
 
   AddMsg('客户端连接创建成功 -> ');
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  Ip:PWideChar;
+  Ip:PChar;
   Port:Word;
 begin
-    ip := DoStrToWideChar(Edit1.Text);
+    ip := PChar(Edit1.Text);
     port := StrToInt(Edit2.Text);
 
     if HP_Client_Start(PClient, ip, port, False) then
@@ -134,7 +148,7 @@ var
 begin
   s:= Edit3.Text;
   len:= Length(s);
-    HP_Client_Send(PClient, @s, len) ;
+    HP_Client_Send(PClient, Pointer(s), len) ;
 end;
 
 end.
