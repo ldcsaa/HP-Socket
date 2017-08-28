@@ -197,7 +197,7 @@ typedef struct hp_addr
 	inline BOOL IsIPv6()			const	{return family == AF_INET6;}
 	inline BOOL IsSpecified()		const	{return IsIPv4() || IsIPv6();}
 	inline void ZeroAddr()					{::ZeroMemory(&addr6, sizeof(addr6));}
-	inline void Reset()						{::ZeroMemory(this, sizeof(this));}
+	inline void Reset()						{::ZeroMemory(this, sizeof(*this));}
 
 	inline hp_addr& Copy(hp_addr& other) const
 	{
@@ -269,7 +269,7 @@ typedef struct hp_sockaddr
 	inline const SOCKADDR* Addr()	const	{return &addr;}
 	inline SOCKADDR* Addr()					{return &addr;}
 	inline void ZeroAddr()					{::ZeroMemory(((char*)this) + sizeof(family), sizeof(*this) - sizeof(family));}
-	inline void Reset()						{::ZeroMemory(this, sizeof(this));}
+	inline void Reset()						{::ZeroMemory(this, sizeof(*this));}
 
 	inline hp_sockaddr& Copy(hp_sockaddr& other) const
 	{
