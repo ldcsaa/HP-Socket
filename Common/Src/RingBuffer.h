@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.20
+ * Version	: 2.3.21
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -430,6 +430,7 @@ public:
 
 private:
 
+	index_type& INDEX_V2R(index_type& dwIndex)	{dwIndex %= m_dwSize; if(dwIndex == 0) dwIndex = m_dwSize; return dwIndex;}
 	VTPTR& INDEX_VAL(index_type dwIndex) {return *(m_pv + dwIndex);}
 
 public:
@@ -474,6 +475,11 @@ public:
 		return isOK;
 	}
 
+	EnGetResult GetEx(index_type dwIndex, TPTR* ppElement)
+	{
+		return Get(INDEX_V2R(dwIndex), ppElement);
+	}
+
 	EnGetResult Get(index_type dwIndex, TPTR* ppElement)
 	{
 		ASSERT(dwIndex <= m_dwSize);
@@ -488,6 +494,11 @@ public:
 		*ppElement = (TPTR)INDEX_VAL(dwIndex);
 
 		return IsValidElement(*ppElement) ? GR_VALID : GR_INVALID;
+	}
+
+	BOOL SetEx(index_type dwIndex, TPTR pElement, TPTR* ppOldElement = nullptr)
+	{
+		return Set(INDEX_V2R(dwIndex), pElement, ppOldElement);
 	}
 
 	BOOL Set(index_type dwIndex, TPTR pElement, TPTR* ppOldElement = nullptr)
@@ -542,6 +553,11 @@ public:
 		ASSERT(Spaces() <= Size());
 
 		return TRUE;
+	}
+
+	BOOL RemoveEx(index_type dwIndex, TPTR* ppElement = nullptr)
+	{
+		return Remove(INDEX_V2R(dwIndex), ppElement);
 	}
 
 	BOOL Remove(index_type dwIndex, TPTR* ppElement = nullptr)

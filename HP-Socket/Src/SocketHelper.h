@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 5.0.1
+ * Version	: 5.0.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -43,8 +43,8 @@
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR						5
 #define HP_VERSION_MINOR						0
-#define HP_VERSION_REVISE						1
-#define HP_VERSION_BUILD						4
+#define HP_VERSION_REVISE						2
+#define HP_VERSION_BUILD						1
 
 /* IOCP 最大工作线程数 */
 #define MAX_WORKER_THREAD_COUNT					500
@@ -380,7 +380,7 @@ template<class T> struct TBufferObjBase
 
 	void Reset()	{buff.len = 0;}
 	int Remain()	{return capacity - buff.len;}
-	BOOL IsFull()	{return buff.len == capacity;}
+	BOOL IsFull()	{return Remain() == 0;}
 };
 
 /* 数据缓冲区结构 */

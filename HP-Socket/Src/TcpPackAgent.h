@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 5.0.1
+ * Version	: 5.0.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -91,7 +91,7 @@ protected:
 
 		m_bfPool.Clear();
 
-		return HR_OK;
+		return result;
 	}
 
 	virtual BOOL CheckParams()

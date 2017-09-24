@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 5.0.1
+ * Version	: 5.0.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -643,7 +643,7 @@ int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwD
 		*p++ = '=';
 	}  
 
-	ASSERT(dwRealLen == p - lpszDest);
+	ASSERT(dwRealLen == (DWORD)(p - lpszDest));
 
 	if(dwDestLen > dwRealLen)
 	{

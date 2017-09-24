@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 5.0.1
+ * Version	: 5.0.2
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -131,8 +131,6 @@ BOOL IsIPAddress(LPCTSTR lpszAddress, EnIPAddrType* penType)
 
 BOOL GetIPAddress(LPCTSTR lpszHost, LPTSTR lpszIP, int& iIPLen, EnIPAddrType& enType)
 {
-	BOOL isOK = TRUE;
-
 	HP_SOCKADDR addr;
 
 	if(!GetSockAddrByHostName(lpszHost, 0, addr))

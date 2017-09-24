@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.20
+ * Version	: 2.3.21
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -149,7 +149,7 @@ public:
 		return FALSE;
 	}
 
-	SIZE_T Compact	(DWORD dwFlags = 0)					{return -1;}
+	SIZE_T Compact	(DWORD dwFlags = 0)					{return 0;}
 	SIZE_T Size		(PVOID pvMemory, DWORD dwFlags = 0)	{return _msize(pvMemory);}
 
 	BOOL IsValid()	{return TRUE;}

@@ -20,7 +20,6 @@ SYS_FreeHostIPAddresses			(增加)
 --------------------
 HP_SSL_Initialize				(删除)
 HP_SSL_Cleanup					(删除)
-HP_SSL_AddServerContext			(删除)
 HP_SSL_IsValid					(删除)
 
 HP_SSLAgent_SetupSSLContext		(增加)

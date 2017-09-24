@@ -1,7 +1,7 @@
 /*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 2.3.20
+ * Version	: 2.3.21
  * Author	: Bruce Liang
  * Website	: http://www.jessma.org
  * Project	: https://github.com/ldcsaa
@@ -308,7 +308,7 @@ void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 	if(!pBuffer->IsValid())
 		return;
 
-	m_bfCache.Remove(pBuffer->ID());
+	m_bfCache.RemoveEx(pBuffer->ID());
 
 	BOOL bOK = FALSE;
 
@@ -358,7 +358,7 @@ TBuffer* CBufferPool::PutCacheBuffer(ULONG_PTR dwID)
 	ASSERT(dwID != 0);
 
 	TBuffer* pBuffer = PickFreeBuffer(dwID);
-	m_bfCache.Set(dwID, pBuffer);
+	m_bfCache.SetEx(dwID, pBuffer);
 
 	return pBuffer;
 }
@@ -394,7 +394,7 @@ TBuffer* CBufferPool::FindCacheBuffer(ULONG_PTR dwID)
 
 	TBuffer* pBuffer = nullptr;
 
-	if(m_bfCache.Get(dwID, &pBuffer) != TBufferCache::GR_VALID)
+	if(m_bfCache.GetEx(dwID, &pBuffer) != TBufferCache::GR_VALID)
 		pBuffer = nullptr;
 
 	return pBuffer;
