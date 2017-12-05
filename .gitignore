@@ -2,16 +2,51 @@
 *.slo
 *.lo
 *.o
+*.pdb
+*.exp
+*.idb
+*.ipdb
+*.iobj
+*.ilk
+*.obj
+*.log
+*.tlog
+*.cki
+*.exe.config
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
+#*.so
+#*.dylib
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
+#*.lai
+#*.la
+#*.a
 
-# IDE files
-*.suo
+# Intermediate directorys
+Static/
+static/
+Debug/
+debug/
+!Windows/Common/Src/Debug/
+!Windows/Common/Src/debug/
+Obj/
+obj/
+tlog/
+log/
+readme/
+
+# IDE Internal Files
+*.xml
+*.layout
 *.sdf
+*.VC.db
+*.opendb
+*.aps
+*.swp
+*.suo
+.vs/
+
+# include directory symbolic link files
+**/Include/
+**/include/
