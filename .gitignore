@@ -48,5 +48,5 @@ readme/
 .vs/
 
 # include directory symbolic link files
-**/Include/
-**/include/
+Linux/Include/
+Linux/include/
