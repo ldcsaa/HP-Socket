@@ -116,12 +116,12 @@ int main(int argc, char* const argv[])
 ## Component List
 - ***Basic Components***
 
-![Basic Component](https://gitee.com/uploads/images/2017/1213/122948_52f9562e_81720.jpeg "Basic Component.jpg")
+![Basic Component](https://gitee.com/uploads/images/2017/1214/143803_15f6abc9_81720.jpeg "Basic Component- mini.jpg")
 
 - ***SSL Components***
 
-![SSL Component](https://gitee.com/uploads/images/2017/1214/121100_914635d4_81720.jpeg "SSL Component.jpg")
+![SSL Component](https://gitee.com/uploads/images/2017/1214/143622_d6c1f436_81720.jpeg "SSL Component - mini.jpg")
 
 - ***HTTP Components***
 
-![HTTP Component](https://gitee.com/uploads/images/2017/1213/123023_872fc11f_81720.jpeg "HTTP Component.jpg")
+![HTTP COmponent](https://gitee.com/uploads/images/2017/1214/143640_0eb6f9e4_81720.jpeg "HTTP Component - mini.jpg")

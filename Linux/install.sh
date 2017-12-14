@@ -218,6 +218,7 @@ cp_lib_a()
 		if [ -f "$FILE" ]; then
 			set_install_file $PREFIX_PATH/$DEST_LIB_DIR/$(basename $FILE)
 			cp -f $FILE $_INSTALL_FILE_
+			chmod -f +x $_INSTALL_FILE_
 		fi
 	done
 }
@@ -231,6 +232,7 @@ cp_lib_so()
 			FILE_NAME=$(basename $FILE)
 			set_install_file $DEST_LIB_PATH/$FILE_NAME.$VER_MAJOR.$VER_MINOR.$VER_REVISE
 			cp -f $FILE $_INSTALL_FILE_
+			chmod -f +x $_INSTALL_FILE_
 			set_install_file $DEST_LIB_PATH/$FILE_NAME.$VER_MAJOR
 			ln -snf $FILE_NAME.$VER_MAJOR.$VER_MINOR.$VER_REVISE $_INSTALL_FILE_
 			set_install_file $DEST_LIB_PATH/$FILE_NAME
@@ -262,6 +264,7 @@ cp_bin_exe()
 		if [ -f "$FILE" ]; then
 			set_install_file $PREFIX_PATH/$DEST_BIN_DIR/$(basename $FILE)
 			cp -f $FILE $_INSTALL_FILE_
+			chmod -f +x $_INSTALL_FILE_
 		fi
 	done
 }
