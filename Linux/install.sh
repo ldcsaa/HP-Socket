@@ -335,7 +335,7 @@ parse_args "$@"
 print_config
 
 if [ $IS_UNINSTALL -eq 0 ]; then
-    do_install
+	do_install
 else
 	do_uninstall
 fi
