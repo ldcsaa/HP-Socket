@@ -18,7 +18,7 @@ High Performance Network Framework
 ## Example
 - ***C++ Example***
 
-```
+``` C++
 #include <hpsocket/HPSocket.h>
 
 /* Listener Class */
@@ -62,7 +62,7 @@ int main(int argc, char* const argv[])
 
 - ***C Example***
 
-```
+``` C
 #include <hpsocket/HPSocket4C.h>
 
 // 5. process network events
