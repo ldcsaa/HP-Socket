@@ -1,0 +1,19 @@
+﻿==========================================================================================
+v1.0.0 Update:
+==========================================================================================
+
+> Create HP-Socket Basic Components
+-----------------
+1. Server: TCP Server, TCP Pull Server, TCP Pack Server, UDP Server
+2. Agent: TCP Agent, TCP Pull Agent, TCP Pack Agent
+3. Client: TCP Client, TCP Pull Client, TCP Pack Client, UDP Client, UDP Cast
+
+> Create Demos：
+-----------------
+1. testecho: tcp simple test echo server/agent/client
+2. testecho-pfm: tcp performance test echo server/agent/client
+3. testecho-pull: tcp pull echo server/agent/client
+4. testecho-pack: tcp pack echo server/agent/client
+5. testecho-udp: udp simple echo server/client/cast
+6. testecho-udp-pfm: udp performance test echo server/client
+7. testecho-lib: tcp pull echo server/agent/client (use hpsocket.so and hpsocket4c.so)
