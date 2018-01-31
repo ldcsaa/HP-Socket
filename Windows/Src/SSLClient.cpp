@@ -25,6 +25,8 @@
 #include "SSLClient.h"
 #include "SSLHelper.h"
 
+#ifdef _SSL_SUPPORT
+
 BOOL CSSLClient::CheckParams()
 {
 	if(!m_sslCtx.IsValid())
@@ -87,3 +89,5 @@ EnHandleResult CSSLClient::FireReceive(const BYTE* pData, int iLength)
 {
 	return ::ProcessReceive(this, this, &m_sslSession, pData, iLength);
 }
+
+#endif

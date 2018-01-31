@@ -174,7 +174,7 @@ BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR&
 
 	if(!IS_NO_ERROR(rs))
 	{
-		::WSASetLastError(rs);
+		::WSASetLastError(ERROR_HOSTUNREACH);
 		return FALSE;
 	}
 

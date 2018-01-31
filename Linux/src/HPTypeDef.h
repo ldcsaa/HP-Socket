@@ -25,19 +25,38 @@
 
 #include "common/GlobalDef.h"
 
-#ifdef HPSOCKET_STATIC_LIB
-	#define HPSOCKET_API	EXTERN_C
-#else
-	#define HPSOCKET_API	EXTERN_C __attribute__ ((visibility ("default")))
+/* HP-Socket 版本号 */
+#define HP_VERSION_MAJOR	5	// 主版本号
+#define HP_VERSION_MINOR	2	// 子版本号
+#define HP_VERSION_REVISE	1	// 修正版本号
+#define HP_VERSION_BUILD	2	// 构建编号
+
+//#define _SSL_DISABLED			// 禁用 SSL
+//#define _HTTP_DISABLED		// 禁用 HTTP
+
+/* 是否启用 SSL，如果定义了 _SSL_DISABLED 则禁用（默认：启用） */
+#if !defined(_SSL_DISABLED)
+	#ifndef _SSL_SUPPORT
+		#define _SSL_SUPPORT
+	#endif
 #endif
 
-/* HP-Socket 版本号 */
-#define HP_VERSION_MAJOR	1
-#define HP_VERSION_MINOR	0
-#define HP_VERSION_REVISE	0
-#define HP_VERSION_BUILD	1
+/* 是否启用 HTTP，如果定义了 _HTTP_DISABLED 则禁用（默认：启用） */
+#if !defined(_HTTP_DISABLED)
+	#ifndef _HTTP_SUPPORT
+		#define _HTTP_SUPPORT
+	#endif
+#endif
 
-typedef ULID				CONNID, HP_CONNID;
+#define HPSOCKET_API		EXTERN_C __attribute__ ((__visibility__("default")))
+
+#define __HP_CALL
+
+/************************************************************************
+名称：连接 ID 数据类型
+描述：应用程序可以把 CONNID 定义为自身需要的类型（如：ULONG / ULONGLONG）
+************************************************************************/
+typedef ULID	CONNID, HP_CONNID;
 
 /************************************************************************
 名称：通信组件服务状态

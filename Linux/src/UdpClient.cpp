@@ -247,6 +247,7 @@ void CUdpClient::Reset()
 	m_nEvents		= 0;
 	m_dwDetectFails	= 0;
 	m_bPaused		= FALSE;
+	m_bConnected	= FALSE;
 	m_enState		= SS_STOPPED;
 }
 
@@ -385,11 +386,11 @@ BOOL CUdpClient::ProcessNetworkEvent(SHORT events)
 {
 	BOOL bContinue = TRUE;
 
-	if(!HasConnected())
-		bContinue = HandleConnect(events);
-
 	if(bContinue && events & POLLERR)
 		bContinue = HandleClose(events);
+
+	if(bContinue && !HasConnected())
+		bContinue = HandleConnect(events);
 
 	if(bContinue && events & POLLIN)
 		bContinue = HandleRead(events);

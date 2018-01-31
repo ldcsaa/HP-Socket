@@ -24,6 +24,8 @@
 #include "stdafx.h"
 #include "HttpCookie.h"
 
+#ifdef _HTTP_SUPPORT
+
 #pragma warning(disable: 4503)
 
 static const char* s_short_week[]	= {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -938,3 +940,5 @@ CCookieMgr::CCookieMgr(BOOL bEnableThirdPartyCookie)
 {
 
 }
+
+#endif

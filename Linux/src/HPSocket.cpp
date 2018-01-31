@@ -284,6 +284,81 @@ HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value)
 	return ::HToN64(value);
 }
 
+HPSOCKET_API BOOL SYS_CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen)
+{
+	return ::CharsetConvert(lpszFromCharset, lpszToCharset, lpszInBuf, iInBufLen, lpszOutBuf, iOutBufLen);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return ::GbkToUnicode(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return ::UnicodeToGbk(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return ::Utf8ToUnicode(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return ::UnicodeToUtf8(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return ::GbkToUtf8(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
+{
+	return ::GuessBase64EncodeBound(dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
 /*****************************************************************************************************************************************************/
 /******************************************************************** HTTP Exports *******************************************************************/
 /*****************************************************************************************************************************************************/
@@ -407,46 +482,6 @@ HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires)
 /************************************************************ HTTP Global Function Exports ***********************************************************/
 /*****************************************************************************************************************************************************/
 
-HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength)
-{
-	return ::CodePageToUnicode(iCodePage, szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength)
-{
-	return ::UnicodeToCodePage(iCodePage, szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
-{
-	return ::GbkToUnicode(szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
-{
-	return ::UnicodeToGbk(szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
-{
-	return ::Utf8ToUnicode(szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
-{
-	return ::UnicodeToUtf8(szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
-{
-	return ::GbkToUtf8(szSrc, szDest, iDestLength);
-}
-
-HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
-{
-	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
-}
-
 HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
 	return ::Compress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
@@ -485,46 +520,6 @@ HPSOCKET_API int SYS_GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* l
 HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
 {
 	return ::GZipGuessUncompressBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
-{
-	return ::GuessBase64EncodeBound(dwSrcLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
 #endif

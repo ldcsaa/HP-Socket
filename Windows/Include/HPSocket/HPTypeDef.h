@@ -23,6 +23,44 @@
  
 #pragma once
 
+/* HP-Socket 版本号 */
+#define HP_VERSION_MAJOR		5	// 主版本号
+#define HP_VERSION_MINOR		2	// 子版本号
+#define HP_VERSION_REVISE		1	// 修正版本号
+#define HP_VERSION_BUILD		2	// 构建编号
+
+//#define _SSL_DISABLED			// 禁用 SSL
+//#define _HTTP_DISABLED		// 禁用 HTTP
+
+/* 是否启用 SSL，如果定义了 _SSL_DISABLED 则禁用（默认：启用） */
+#if !defined(_SSL_DISABLED)
+	#ifndef _SSL_SUPPORT
+		#define _SSL_SUPPORT
+	#endif
+#endif
+
+/* 是否启用 HTTP，如果定义了 _HTTP_DISABLED 则禁用（默认：启用） */
+#if !defined(_HTTP_DISABLED)
+	#ifndef _HTTP_SUPPORT
+		#define _HTTP_SUPPORT
+	#endif
+#endif
+
+/**************************************************/
+/********** imports / exports HPSocket4C **********/
+
+#ifdef HPSOCKET_STATIC_LIB
+	#define HPSOCKET_API		EXTERN_C
+#else
+	#ifdef HPSOCKET_EXPORTS
+		#define HPSOCKET_API	EXTERN_C __declspec(dllexport)
+	#else
+		#define HPSOCKET_API	EXTERN_C __declspec(dllimport)
+	#endif
+#endif
+
+#define __HP_CALL				__stdcall
+
 /*****************************************************************************************************************************************************/
 /**************************************************************** Base Type Definitions **************************************************************/
 /*****************************************************************************************************************************************************/
@@ -205,6 +243,8 @@ typedef Fn_SNI_ServerNameCallback	HP_Fn_SNI_ServerNameCallback;
 /**************************************************************** HTTP Type Definitions **************************************************************/
 /*****************************************************************************************************************************************************/
 
+#ifdef _HTTP_SUPPORT
+
 /************************************************************************
 名称：HTTP 版本
 描述：低字节：主版本号，高字节：次版本号
@@ -345,3 +385,14 @@ typedef struct TNVPair
 	TParam, HP_TParam, *LPPARAM, *HP_LPPARAM,
 	THeader, HP_THeader, *LPHEADER, *HP_LPHEADER,
 	TCookie, HP_TCookie, *LPCOOKIE, *HP_LPCOOKIE;
+
+#endif
+
+/************************************************************************
+名称：获取 HPSocket 版本号
+描述：版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
+************************************************************************/
+inline DWORD GetHPSocketVersion()
+{
+	return (HP_VERSION_MAJOR << 24) | (HP_VERSION_MINOR << 16) | (HP_VERSION_REVISE << 8) | HP_VERSION_BUILD;
+}

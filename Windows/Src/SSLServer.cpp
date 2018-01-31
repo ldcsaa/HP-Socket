@@ -25,6 +25,8 @@
 #include "SSLServer.h"
 #include "SSLHelper.h"
 
+#ifdef _SSL_SUPPORT
+
 BOOL CSSLServer::CheckParams()
 {
 	if(!m_sslCtx.IsValid())
@@ -127,3 +129,5 @@ EnHandleResult CSSLServer::FireShutdown()
 
 	return result;
 }
+
+#endif

@@ -101,7 +101,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x86\static\HPSocket4C-SSL_UD.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x86\static\HPSocket4C_UD.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -127,7 +127,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x64\static\HPSocket4C-SSL_UD.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x64\static\HPSocket4C_UD.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -156,7 +156,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x86\static\HPSocket4C-SSL_U.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x86\static\HPSocket4C_U.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <IgnoreAllDefaultLibraries>
@@ -188,7 +188,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x64\static\HPSocket4C-SSL_U.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\Bin\HPSocket4C\x64\static\HPSocket4C_U.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>

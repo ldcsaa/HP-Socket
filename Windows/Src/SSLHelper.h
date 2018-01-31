@@ -23,6 +23,11 @@
 
 #pragma once
 
+#include "HPTypeDef.h"
+#include "../Common/Src/BufferPool.h"
+
+#ifdef _SSL_SUPPORT
+
 #pragma warning(push)
 #pragma warning(disable: 4005)
 
@@ -30,9 +35,7 @@
 
 #pragma warning(pop)
 
-#include "HPTypeDef.h"
-#include "../Common/Src/BufferPool.h"
-
+#define OPENSSL_VERSION_1_0_2	0x10002000L
 #define OPENSSL_VERSION_1_1_0	0x10100000L
 
 /************************************************************************
@@ -427,3 +430,5 @@ template<class T, class S> BOOL ProcessSend(T* pThis, S* pSocketObj, CSSLSession
 
 	return TRUE;
 }
+
+#endif

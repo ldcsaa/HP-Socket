@@ -67,6 +67,9 @@ typedef LID						NTHR_ID;
 typedef ULID					THR_ID;
 typedef INT						LRESULT, HRESULT;
 
+typedef LLONG					__time64_t;
+typedef INT						__time32_t;
+
 #ifdef __x86_64__
 	typedef ULONG				SIZE_T;
 	typedef LONG				SSIZE_T;
@@ -128,6 +131,7 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 #define RS_FAIL					HAS_ERROR
 #define RS_TIMEOUT				TIMEOUT
 #define INVALID_FD				-1
+#define INVALID_PVOID			((PVOID)-1)
 #define _MAX_PATH				256
 #define MAX_PATH				_MAX_PATH
 #define TRUE					true
@@ -193,12 +197,12 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 #endif
 
 #if !defined(__stdcall)
-	#define __stdcall
-#endif	// __attribute__((__stdcall__))
+	#define __stdcall			__attribute__ ((__stdcall__))
+#endif
 
 #if !defined(__cdecl)
-	#define __cdecl
-#endif	// __attribute__((__cdecl__))
+	#define __cdecl				__attribute__ ((__cdecl__))
+#endif
 
 #if !defined(_GNU_SOURCE)
 	#define _GNU_SOURCE

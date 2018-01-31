@@ -36,9 +36,11 @@
 #include "UdpClient.h"
 #include "UdpCast.h"
 
+#ifdef _HTTP_SUPPORT
 #include "HttpServer.h"
 #include "HttpAgent.h"
 #include "HttpClient.h"
+#endif
 
 /*****************************************************************************************************************************************************/
 /****************************************************************** TCP/UDP Exports ******************************************************************/
@@ -162,123 +164,6 @@ HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient)
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast)
 {
 	delete pCast;
-}
-
-/*****************************************************************************************************************************************************/
-/******************************************************************** HTTP Exports *******************************************************************/
-/*****************************************************************************************************************************************************/
-
-HPSOCKET_API IHttpServer* HP_Create_HttpServer(IHttpServerListener* pListener)
-{
-	return (IHttpServer*)(new CHttpServer(pListener));
-}
-
-HPSOCKET_API IHttpAgent* HP_Create_HttpAgent(IHttpAgentListener* pListener)
-{
-	return (IHttpAgent*)(new CHttpAgent(pListener));
-}
-
-HPSOCKET_API IHttpClient* HP_Create_HttpClient(IHttpClientListener* pListener)
-{
-	return (IHttpClient*)(new CHttpClient(pListener));
-}
-
-HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient(IHttpClientListener* pListener)
-{
-	return (IHttpSyncClient*)(new CHttpSyncClient(pListener));
-}
-
-HPSOCKET_API void HP_Destroy_HttpServer(IHttpServer* pServer)
-{
-	delete pServer;
-}
-
-HPSOCKET_API void HP_Destroy_HttpAgent(IHttpAgent* pAgent)
-{
-	delete pAgent;
-}
-
-HPSOCKET_API void HP_Destroy_HttpClient(IHttpClient* pClient)
-{
-	delete pClient;
-}
-
-HPSOCKET_API void HP_Destroy_HttpSyncClient(IHttpSyncClient* pClient)
-{
-	delete pClient;
-}
-
-/**************************************************************************/
-/*************************** HTTP Cookie 管理方法 **************************/
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_LoadFromFile(LPCSTR lpszFile, BOOL bKeepExists)
-{
-	return g_CookieMgr.LoadFromFile(lpszFile, bKeepExists);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_SaveToFile(LPCSTR lpszFile, BOOL bKeepExists)
-{
-	return g_CookieMgr.SaveToFile(lpszFile, bKeepExists);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_ClearCookies(LPCSTR lpszDomain, LPCSTR lpszPath)
-{
-	return g_CookieMgr.ClearCookies(lpszDomain, lpszPath);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_RemoveExpiredCookies(LPCSTR lpszDomain, LPCSTR lpszPath)
-{
-	return g_CookieMgr.RemoveExpiredCookies(lpszDomain, lpszPath);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_SetCookie(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge, BOOL bHttpOnly, BOOL bSecure, int enSameSite, BOOL bOnlyUpdateValueIfExists)
-{
-	return g_CookieMgr.SetCookie(lpszName, lpszValue, lpszDomain, lpszPath, iMaxAge, bHttpOnly, bSecure, (CCookie::EnSameSite)enSameSite, bOnlyUpdateValueIfExists);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_DeleteCookie(LPCSTR lpszDomain, LPCSTR lpszPath, LPCSTR lpszName)
-{
-	return g_CookieMgr.DeleteCookie(lpszDomain, lpszPath, lpszName);
-}
-
-HPSOCKET_API void HP_HttpCookie_MGR_SetEnableThirdPartyCookie(BOOL bEnableThirdPartyCookie)
-{
-	g_CookieMgr.SetEnableThirdPartyCookie(bEnableThirdPartyCookie);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_MGR_IsEnableThirdPartyCookie()
-{
-	return g_CookieMgr.IsEnableThirdPartyCookie();
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_HLP_ParseExpires(LPCSTR lpszExpires, __time64_t& tmExpires)
-{
-	return CCookie::ParseExpires(lpszExpires, tmExpires);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_HLP_MakeExpiresStr(char lpszBuff[], int& iBuffLen, __time64_t tmExpires)
-{
-	return CCookie::MakeExpiresStr(lpszBuff, iBuffLen, tmExpires);
-}
-
-HPSOCKET_API BOOL HP_HttpCookie_HLP_ToString(char lpszBuff[], int& iBuffLen, LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge, BOOL bHttpOnly, BOOL bSecure, int enSameSite)
-{
-	return CCookie::ToString(lpszBuff, iBuffLen, lpszName, lpszValue, lpszDomain, lpszPath, iMaxAge, bHttpOnly, bSecure, (CCookie::EnSameSite)enSameSite);
-}
-
-HPSOCKET_API __time64_t HP_HttpCookie_HLP_CurrentUTCTime()
-{
-	return CCookie::CurrentUTCTime();
-}
-
-HPSOCKET_API __time64_t HP_HttpCookie_HLP_MaxAgeToExpires(int iMaxAge)
-{
-	return CCookie::MaxAgeToExpires(iMaxAge);
-}
-
-HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires)
-{
-	return CCookie::ExpiresToMaxAge(tmExpires);
 }
 
 /*****************************************************************************************************************************************************/
@@ -435,6 +320,169 @@ HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLen
 	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
 }
 
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
+{
+	return ::GuessBase64EncodeBound(dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+/*****************************************************************************************************************************************************/
+/******************************************************************** HTTP Exports *******************************************************************/
+/*****************************************************************************************************************************************************/
+
+#ifdef _HTTP_SUPPORT
+
+HPSOCKET_API IHttpServer* HP_Create_HttpServer(IHttpServerListener* pListener)
+{
+	return (IHttpServer*)(new CHttpServer(pListener));
+}
+
+HPSOCKET_API IHttpAgent* HP_Create_HttpAgent(IHttpAgentListener* pListener)
+{
+	return (IHttpAgent*)(new CHttpAgent(pListener));
+}
+
+HPSOCKET_API IHttpClient* HP_Create_HttpClient(IHttpClientListener* pListener)
+{
+	return (IHttpClient*)(new CHttpClient(pListener));
+}
+
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient(IHttpClientListener* pListener)
+{
+	return (IHttpSyncClient*)(new CHttpSyncClient(pListener));
+}
+
+HPSOCKET_API void HP_Destroy_HttpServer(IHttpServer* pServer)
+{
+	delete pServer;
+}
+
+HPSOCKET_API void HP_Destroy_HttpAgent(IHttpAgent* pAgent)
+{
+	delete pAgent;
+}
+
+HPSOCKET_API void HP_Destroy_HttpClient(IHttpClient* pClient)
+{
+	delete pClient;
+}
+
+HPSOCKET_API void HP_Destroy_HttpSyncClient(IHttpSyncClient* pClient)
+{
+	delete pClient;
+}
+
+/**************************************************************************/
+/*************************** HTTP Cookie 管理方法 **************************/
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_LoadFromFile(LPCSTR lpszFile, BOOL bKeepExists)
+{
+	return g_CookieMgr.LoadFromFile(lpszFile, bKeepExists);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_SaveToFile(LPCSTR lpszFile, BOOL bKeepExists)
+{
+	return g_CookieMgr.SaveToFile(lpszFile, bKeepExists);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_ClearCookies(LPCSTR lpszDomain, LPCSTR lpszPath)
+{
+	return g_CookieMgr.ClearCookies(lpszDomain, lpszPath);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_RemoveExpiredCookies(LPCSTR lpszDomain, LPCSTR lpszPath)
+{
+	return g_CookieMgr.RemoveExpiredCookies(lpszDomain, lpszPath);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_SetCookie(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge, BOOL bHttpOnly, BOOL bSecure, int enSameSite, BOOL bOnlyUpdateValueIfExists)
+{
+	return g_CookieMgr.SetCookie(lpszName, lpszValue, lpszDomain, lpszPath, iMaxAge, bHttpOnly, bSecure, (CCookie::EnSameSite)enSameSite, bOnlyUpdateValueIfExists);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_DeleteCookie(LPCSTR lpszDomain, LPCSTR lpszPath, LPCSTR lpszName)
+{
+	return g_CookieMgr.DeleteCookie(lpszDomain, lpszPath, lpszName);
+}
+
+HPSOCKET_API void HP_HttpCookie_MGR_SetEnableThirdPartyCookie(BOOL bEnableThirdPartyCookie)
+{
+	g_CookieMgr.SetEnableThirdPartyCookie(bEnableThirdPartyCookie);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_MGR_IsEnableThirdPartyCookie()
+{
+	return g_CookieMgr.IsEnableThirdPartyCookie();
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_HLP_ParseExpires(LPCSTR lpszExpires, __time64_t& tmExpires)
+{
+	return CCookie::ParseExpires(lpszExpires, tmExpires);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_HLP_MakeExpiresStr(char lpszBuff[], int& iBuffLen, __time64_t tmExpires)
+{
+	return CCookie::MakeExpiresStr(lpszBuff, iBuffLen, tmExpires);
+}
+
+HPSOCKET_API BOOL HP_HttpCookie_HLP_ToString(char lpszBuff[], int& iBuffLen, LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge, BOOL bHttpOnly, BOOL bSecure, int enSameSite)
+{
+	return CCookie::ToString(lpszBuff, iBuffLen, lpszName, lpszValue, lpszDomain, lpszPath, iMaxAge, bHttpOnly, bSecure, (CCookie::EnSameSite)enSameSite);
+}
+
+HPSOCKET_API __time64_t HP_HttpCookie_HLP_CurrentUTCTime()
+{
+	return CCookie::CurrentUTCTime();
+}
+
+HPSOCKET_API __time64_t HP_HttpCookie_HLP_MaxAgeToExpires(int iMaxAge)
+{
+	return CCookie::MaxAgeToExpires(iMaxAge);
+}
+
+HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires)
+{
+	return CCookie::ExpiresToMaxAge(tmExpires);
+}
+
+/*****************************************************************************************************************************************************/
+/************************************************************* HTTP Global Function Exports **********************************************************/
+/*****************************************************************************************************************************************************/
+
 HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
 	return ::Compress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
@@ -475,42 +523,4 @@ HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrc
 	return ::GZipGuessUncompressBound(lpszSrc, dwSrcLen);
 }
 
-HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
-{
-	return ::GuessBase64EncodeBound(dwSrcLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
+#endif

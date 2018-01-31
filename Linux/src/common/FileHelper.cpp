@@ -102,7 +102,53 @@ BOOL CFile::GetSize(SIZE_T& dwSize)
 	CHECK_IS_OK(Stat(st));
 
 	dwSize = st.st_size;
+
 	return TRUE;
+}
+
+BOOL CFile::IsDirectory()
+{
+	struct stat st;
+	CHECK_IS_OK(Stat(st));
+
+	return S_ISDIR(st.st_mode);
+}
+
+BOOL CFile::IsFile()
+{
+	struct stat st;
+	CHECK_IS_OK(Stat(st));
+
+	return S_ISREG(st.st_mode);
+}
+
+BOOL CFile::IsExist(LPCTSTR lpszFilePath)
+{
+	return IS_NO_ERROR(access(lpszFilePath, F_OK));
+}
+
+BOOL CFile::IsDirectory(LPCTSTR lpszFilePath)
+{
+	struct stat st;
+	CHECK_ERROR_INVOKE(stat(lpszFilePath, &st));
+
+	return S_ISDIR(st.st_mode);
+}
+
+BOOL CFile::IsFile(LPCTSTR lpszFilePath)
+{
+	struct stat st;
+	CHECK_ERROR_INVOKE(stat(lpszFilePath, &st));
+
+	return S_ISREG(st.st_mode);
+}
+
+BOOL CFile::IsLink(LPCTSTR lpszFilePath)
+{
+	struct stat st;
+	CHECK_ERROR_INVOKE(lstat(lpszFilePath, &st));
+
+	return S_ISLNK(st.st_mode);
 }
 
 BOOL CFileMapping::Map(LPCTSTR lpszFilePath, SIZE_T dwSize, SIZE_T dwOffset, int iProtected, int iFlag)
@@ -146,13 +192,13 @@ BOOL CFileMapping::Map(FD fd, SIZE_T dwSize, SIZE_T dwOffset, int iProtected, in
 	{
 		CHECK_EINVAL((iFlag & MAP_ANONYMOUS) == 0);
 
-		if(dwSize == 0)
-		{
-			struct stat st;
-			CHECK_ERROR_INVOKE(fstat(fd, &st));
+		struct stat st;
+		CHECK_ERROR_INVOKE(fstat(fd, &st));
 
+		CHECK_ERROR(S_ISREG(st.st_mode), ERROR_BAD_FILE_TYPE);
+
+		if(dwSize == 0)
 			dwSize = st.st_size;
-		}
 	}
 
 	m_pv = (PBYTE)mmap(nullptr, dwSize, iProtected, iFlag, fd, dwOffset);

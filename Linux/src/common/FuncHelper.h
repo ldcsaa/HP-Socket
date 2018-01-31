@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <sysexits.h>
 #include <stdio.h>
+#include <wchar.h>
 #include <time.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -131,41 +132,91 @@ inline void PrintError(LPCSTR subject)	{perror(subject);}
 #define IS_VALID_FD(fd)					((fd) != INVALID_FD)
 #define IS_INVALID_FD(fd)				(!IS_VALID_FD(fd))
 
+#define IS_VALID_PVOID(pv)				((pv) != INVALID_PVOID)
+#define IS_INVALID_PVOID(pv)			(!IS_VALID_PVOID(pv))
+
 #define TO_PVOID(v)						((PVOID)(UINT_PTR)(v))
 #define FROM_PVOID(T, pv)				((T)(UINT_PTR)(pv))
 
-#define StrChr							strchr
-#define StrPBrk							strpbrk
+#define stricmp							strcasecmp
+#define strnicmp						strncasecmp
+#define wcsicmp							wcscasecmp
+#define wcsnicmp						wcsncasecmp
 
 #ifdef _UNICODE
+	#define tstrchr						wcschr
+	#define tstrrchr					wcsrchr
+	#define tstrstr						wcsstr
+	#define tstrpbrk					wcspbrk
+	#define tstrtok						wcstok
+
 	#define stscanf						swscanf
 	#define tstrlen						wcslen
 	#define tstrcpy						wcscpy
 	#define tstrcmp						wcscmp
-	#define tstricmp					wcscasecmp
+	#define tstricmp					wcsicmp
 	#define tstrncpy					wcsncpy
 	#define tstrncmp					wcsncmp
-	#define tstrnicmp					wcsncasecmp
+	#define tstrnicmp					wcsnicmp
 	#define tstrspn						wcsspn
 	#define tstrcspn					wcscspn
 	#define wsprintf					swprintf
 #else
+	#define tstrchr						strchr
+	#define tstrrchr					strrchr
+	#define tstrstr						strstr
+	#define tstrpbrk					strpbrk
+	#define tstrtok						strtok_r
+
 	#define stscanf						sscanf
 	#define tstrlen						strlen
 	#define tstrcpy						strcpy
 	#define tstrcmp						strcmp
-	#define tstricmp					strcasecmp
+	#define tstricmp					stricmp
 	#define tstrncpy					strncpy
 	#define tstrncmp					strncmp
-	#define tstrnicmp					strncasecmp
+	#define tstrnicmp					strnicmp
 	#define tstrspn						strspn
 	#define tstrcspn					strcspn
 	#define wsprintf					sprintf
 #endif
 
-inline BOOL IsStrEmpty(LPCTSTR lpsz)					{return (lpsz == nullptr || lpsz[0] == 0);}
-inline LPCTSTR SafeStr(LPCTSTR lpsz)					{return (lpsz != nullptr) ? lpsz : _T("");}
-inline LPSTR StrSep2(LPSTR* lpStr, LPCSTR lpDelim)		{LPSTR lpTok; while((lpTok = strsep(lpStr, lpDelim)) != nullptr && lpTok[0] == 0); return lpTok;}
+inline const char* StrChr(const char* s, char c)					{return strchr(s, c);}
+inline const char* StrRChr(const char* s, char c)					{return strrchr(s, c);}
+inline const char* StrStr(const char* h, const char* n)				{return strstr(h, n);}
+inline const char* StrPBrk(const char* s, const char* a)			{return strpbrk(s, a);}
+inline const wchar_t* StrChr(const wchar_t* s, wchar_t c)			{return wcschr(s, c);}
+inline const wchar_t* StrRChr(const wchar_t* s, wchar_t c)			{return wcsrchr(s, c);}
+inline const wchar_t* StrStr(const wchar_t* h, const wchar_t* n)	{return wcsstr(h, n);}
+inline const wchar_t* StrPBrk(const wchar_t* s, const wchar_t* a)	{return wcspbrk(s, a);}
+inline LPSTR StrSep2(LPSTR* lpStr, LPCSTR lpDelim = " \t\r\n")		{LPSTR lpTok; while((lpTok = strsep(lpStr, lpDelim)) != nullptr && lpTok[0] == 0); return lpTok;}
+inline LPSTR TrimLeft(LPSTR* lpStr, LPCSTR lpDelim = " \t\r\n")		{while((*lpStr)[0] != 0 && ::StrChr(lpDelim, (*lpStr)[0]) != nullptr) ++(*lpStr); return (*lpStr);}
+inline LPSTR TrimRitht(LPSTR* lpStr, LPCSTR lpDelim = " \t\r\n")
+{
+	LPSTR lpEnd = (*lpStr) + strlen(*lpStr) - 1;
+	LPSTR lpCur = lpEnd;
+
+	while(lpCur >= (*lpStr) && ::StrChr(lpDelim, lpCur[0]) != nullptr)
+		--lpCur;
+
+	if(lpCur != lpEnd)
+		lpCur[1] = 0;
+
+	return (*lpStr);
+}
+
+inline BOOL IsStrEmptyA(LPCSTR lpsz)	{return (lpsz == nullptr || lpsz[0] == 0);}
+inline BOOL IsStrEmptyW(LPCWSTR lpsz)	{return (lpsz == nullptr || lpsz[0] == 0);}
+inline LPCSTR SafeStrA(LPCSTR lpsz)		{return (lpsz != nullptr) ? lpsz : "";}
+inline LPCWSTR SafeStrW(LPCWSTR lpsz)	{return (lpsz != nullptr) ? lpsz : L"";}
+
+#ifdef _UNICODE
+	#define IsStrEmpty					IsStrEmptyW
+	#define SafeStr						SafeStrW
+#else
+	#define IsStrEmpty					IsStrEmptyA
+	#define SafeStr						SafeStrA
+#endif
 
 inline int lstrlen(LPCTSTR p)							{return (int)tstrlen(p);}
 inline LPTSTR lstrcpy(LPTSTR d, LPCTSTR s)				{return tstrcpy(d, s);}
@@ -177,9 +228,26 @@ inline int lstrnicmp(LPCTSTR s1, LPCTSTR s2, size_t n)	{return tstrnicmp(s1, s2,
 inline int lstrspn(LPCTSTR s, LPCTSTR accept)			{return (int)tstrspn(s, accept);}
 inline int lstrcspn(LPCTSTR s, LPCTSTR accept)			{return (int)tstrcspn(s, accept);}
 
+template <typename T, size_t N> char (&_ArraySizeHelper(T(&arr)[N]))[N];
+template <typename T, size_t N> char (&_ArraySizeHelper(const T(&arr)[N]))[N];
+
+#define ARRAY_SIZE(arr)		(sizeof(_ArraySizeHelper(arr)))
+
+#ifndef _countof
+	#define _countof(arr)	ARRAY_SIZE(arr)
+#endif
+
+#ifndef __countof
+	#define __countof(arr)	ARRAY_SIZE(arr)
+#endif
+
 INT YieldThread(UINT i = INFINITE);
 INT WaitFor(DWORD dwMillSecond, DWORD dwSecond = 0);
 INT Sleep(DWORD dwMillSecond, DWORD dwSecond = 0);
+
+__time64_t	_time64(time_t* ptm = nullptr);
+__time64_t	_mkgmtime64(tm* ptm);
+tm*			_gmtime64(tm* ptm, __time64_t* pt);
 
 DWORD		TimeGetTime();
 ULLONG		TimeGetTime64();
@@ -242,7 +310,106 @@ inline void DestructObject(T* p)
 }
 
 template<typename T1, typename T2, typename = enable_if_t<is_same<decay_t<T1>, decay_t<T2>>::value>>
-inline void CopyPlainObject(T1* p1, T2* p2)
+inline void CopyPlainObject(T1* p1, const T2* p2)
 {
 	CopyMemory(p1, p2, sizeof(T1));
 }
+
+template<typename T, typename C, typename = enable_if_t<is_integral<T>::value  && (is_same<C, char>::value || is_same<C, wchar_t>::value)>>
+C* _n_2_c(T value, C* lpszDest, int radix)
+{
+	static const C* dig = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+	bool neg = false;
+
+	if(is_signed<T>::value && value < 0)
+	{
+		value = -value;
+		neg	  = true;
+	}
+
+	int n = 0;
+
+	do
+	{
+		lpszDest[n++] = dig[value % radix];
+		value /= radix;
+	} while(value);
+
+	if(neg) lpszDest[n++] = '-';
+	lpszDest[n]			  = 0;
+
+	C c, *p, *q;
+	for(p = lpszDest, q = p + n - 1; p < q; ++p, --q)
+		c = *p, *p = *q, *q = c;
+
+	return lpszDest;
+}
+
+#define itoa(v, p, r)		_n_2_c<INT, char>((v), (p), (r))
+#define ltoa(v, p, r)		_n_2_c<LONG, char>((v), (p), (r))
+#define lltoa(v, p, r)		_n_2_c<LLONG, char>((v), (p), (r))
+#define uitoa(v, p, r)		_n_2_c<UINT, char>((v), (p), (r))
+#define ultoa(v, p, r)		_n_2_c<ULONG, char>((v), (p), (r))
+#define ulltoa(v, p, r)		_n_2_c<ULLONG, char>((v), (p), (r))
+#define itow(v, p, r)		_n_2_c<INT, wchar_t>((v), (p), (r))
+#define ltow(v, p, r)		_n_2_c<LONG, wchar_t>((v), (p), (r))
+#define lltow(v, p, r)		_n_2_c<LLONG, wchar_t>((v), (p), (r))
+#define uitow(v, p, r)		_n_2_c<UINT, wchar_t>((v), (p), (r))
+#define ultow(v, p, r)		_n_2_c<ULONG, wchar_t>((v), (p), (r))
+#define ulltow(v, p, r)		_n_2_c<ULLONG, wchar_t>((v), (p), (r))
+
+#define HEX_CHAR_TO_VALUE(c)			(c <= '9' ? c - '0' : (c <= 'F' ? c - 'A' + 0x0A : c - 'a' + 0X0A))
+#define HEX_DOUBLE_CHAR_TO_VALUE(pc)	((BYTE)(((HEX_CHAR_TO_VALUE(*(pc))) << 4) | (HEX_CHAR_TO_VALUE(*((pc) + 1)))))
+#define HEX_VALUE_TO_CHAR(n)			(n <= 9 ? n + '0' : (n <= 'F' ? n + 'A' - 0X0A : n + 'a' - 0X0A))
+#define HEX_VALUE_TO_DOUBLE_CHAR(pc, n)	{*(pc) = (BYTE)HEX_VALUE_TO_CHAR((n >> 4)); *((pc) + 1) = (BYTE)HEX_VALUE_TO_CHAR((n & 0X0F));}
+
+
+#define CHARSET_GBK			"GBK"
+#define CHARSET_UTF_8		"UTF-8"
+#define CHARSET_UTF_16LE	"UTF-16LE"
+#define CHARSET_UTF_32LE	"UTF-32LE"
+
+// Charset A -> Charset B
+BOOL CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen);
+
+// GBK -> UNICODE
+BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> GBK
+BOOL UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength);
+// UTF8 -> UNICODE
+BOOL Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> UTF8
+BOOL UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength);
+// GBK -> UTF8
+BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength);
+// UTF8 -> GBK
+BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
+
+/*
+#define GbkToUtf8(in_buf, in_len, out_buf, out_len)		CharsetConvert("GBK", "UTF-8", (in_buf), (in_len), (out_buf), (out_len))
+#define Utf8ToGbk(in_buf, in_len, out_buf, out_len)		CharsetConvert("UTF-8", "GBK", (in_buf), (in_len), (out_buf), (out_len))
+#define GbkToUtf16(in_buf, in_len, out_buf, out_len)	CharsetConvert("GBK", "UTF-16LE", (in_buf), (in_len), (out_buf), (out_len))
+#define Utf16ToGbk(in_buf, in_len, out_buf, out_len)	CharsetConvert("UTF-16LE", "GBK", (in_buf), (in_len), (out_buf), (out_len))
+#define Utf16ToUtf8(in_buf, in_len, out_buf, out_len)	CharsetConvert("UTF-16LE", "UTF-8", (in_buf), (in_len), (out_buf), (out_len))
+#define Utf8ToUtf16(in_buf, in_len, out_buf, out_len)	CharsetConvert("UTF-8", "UTF-16LE", (in_buf), (in_len), (out_buf), (out_len))
+*/
+
+// 计算 Base64 编码后长度
+DWORD GuessBase64EncodeBound(DWORD dwSrcLen);
+// 计算 Base64 解码后长度
+DWORD GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+// 计算 URL 编码后长度
+DWORD GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// 计算 URL 解码后长度
+DWORD GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+

@@ -63,7 +63,8 @@ EnHandleResult CTcpServer::TriggerFireSend(TSocketObj* pSocketObj, TBufferObj* p
 		ASSERT(FALSE);
 	}
 
-	AddFreeBufferObj(pBufferObj);
+	if(pBufferObj->ReleaseSendCounter() == 0)
+		AddFreeBufferObj(pBufferObj);
 
 	return rs;
 }
@@ -1298,12 +1299,15 @@ int CTcpServer::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLen
 		TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
 		memcpy(pBufferObj->buff.buf, pBuffer, iBufferSize);
 
-		result = ::PostSend(pSocketObj, pBufferObj);
+		result			= ::PostSend(pSocketObj, pBufferObj);
+		LONG sndCounter	= pBufferObj->ReleaseSendCounter();
 
-		if(result != NO_ERROR)
+		if(sndCounter == 0 || result != NO_ERROR)
 		{
 			AddFreeBufferObj(pBufferObj);
-			break;
+			
+			if(result != NO_ERROR)
+				break;
 		}
 
 		iRemain -= iBufferSize;
@@ -1433,15 +1437,14 @@ int CTcpServer::SendItem(TSocketObj* pSocketObj)
 		pSocketObj->pending	   -= iBufferSize;
 		::InterlockedExchangeAdd(&pSocketObj->sndCount, iBufferSize);
 
-		result = ::PostSendNotCheck(pSocketObj, pBufferObj);
+		result			= ::PostSendNotCheck(pSocketObj, pBufferObj);
+		LONG sndCounter	= pBufferObj->ReleaseSendCounter();
+
+		if(sndCounter == 0 || !IOCP_SUCCESS(result))
+			AddFreeBufferObj(pBufferObj);
 
 		if(result != NO_ERROR)
-		{
-			if(result != WSA_IO_PENDING)
-				AddFreeBufferObj(pBufferObj);
-
 			break;
-		}
 	}
 
 	return result;

@@ -1,7 +1,12 @@
 #pragma once
 
-#include "../../src/HPTypeDef.h"
 #include "../../src/common/GeneralHelper.h"
+
+#ifdef _USE_HP_LIB
+#include <hpsocket/HPTypeDef.h>
+#else
+#include "../../src/HPTypeDef.h"
+#endif
 
 #include <cstdio>
 #include <stdio.h>
@@ -96,20 +101,14 @@ struct app_arg
 	bool reuse_addr;
 	// -u
 	bool ip_loop;
-	// -z
+	// -k
 	int ttl;
 
-	// -x port1[,port2]
-	USHORT http_port1;
-	// -x port1[,port2]
-	USHORT http_port2;
+	// -x
+	USHORT http_port;
 	// -y
-	bool http_secure;
-	// -d
-	CString http_method;
-	// -f
-	CString http_req_path;
-	// -k
+	USHORT https_port;
+	// -z
 	bool http_use_cookie;
 	// -w
 	bool http_with_listener;
@@ -197,7 +196,7 @@ public:
 	enum EnAppType {AT_SERVER, AT_AGENT, AT_CLIENT};
 	enum EnCmdType {CT_START = 0, CT_STOP, CT_STATUS, CT_CONNECT, CT_SEND, CT_PAUSE, CT_KICK, CT_KICK_L, CT_KICK_S, CT_STAT, CT_MAX};
 
-private:
+protected:
 
 	struct TCmdNameFunc
 	{
@@ -207,21 +206,25 @@ private:
 
 public:
 	BOOL Run();
-	void PrintStatus(EnServiceState enStatus);
+	void PrintStatus(EnServiceState enStatus, LPCTSTR lpszName = nullptr);
 
 public:
 	CCommandParser(EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX]);
-	~CCommandParser() {}
+	virtual ~CCommandParser() {}
 
 private:
 	BOOL WaitForExit();
 	void WorkerProc(PVOID pv);
 	void Parse(LPTSTR lpszLine, SSIZE_T nSize);
-	void ParseCmdArgs(EnCmdType type, LPTSTR lpszArg);
-	void Reset();
+
+protected:
+	virtual void ParseCmdArgs(EnCmdType type, LPTSTR lpszArg);
+	virtual void Reset();
 
 	void PrintUsage();
-	CString GetCmdUsage(EnCmdType type);
+	virtual void PrintCmdUsage();
+	virtual CString GetCmdUsage(EnCmdType type);
+
 
 public:
 	BOOL	m_bFlag;
@@ -231,12 +234,45 @@ public:
 	USHORT	m_usRemotePort;
 	DWORD	m_dwSeconds;
 
-private:
+protected:
 	EnAppType	 m_enAppType;
 	TCmdNameFunc m_szCmdNameFuncs[CT_MAX];
 
 	CThread<CCommandParser, VOID, VOID> m_thWorker;
 };
+
+#ifdef _NEED_HTTP
+
+class CHttpCommandParser : public CCommandParser
+{
+	using __super = CCommandParser;
+
+public:
+	CHttpCommandParser(EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX])
+	: __super(enAppType, fnCmds)
+	{
+	}
+
+protected:
+	virtual void ParseCmdArgs(EnCmdType type, LPTSTR lpszArg) override;
+	virtual void Reset() override;
+
+	virtual void PrintCmdUsage() override;
+	virtual CString GetCmdUsage(EnCmdType type) override;
+
+private:
+	BOOL ParseCmdOptions(LPCTSTR lpszArg, LPCTSTR lpszOptions);
+
+public:
+	BOOL	m_bHttps;
+	CString m_strPath;
+	CString m_strMethod;
+	CString m_strData;
+	CString m_strFilePath;
+	vector<CString> m_vtHeaders;
+};
+
+#endif
 
 struct server_statistics_info
 {
@@ -262,11 +298,17 @@ struct client_statistics_info
 	DWORD m_dwBeginTickCount;
 	DWORD m_dwTimeconsuming;
 
+	volatile int m_iConnected;
+
 	void Reset();
 	void StartTest();
-	void CheckStatistics();
+	void CheckStatistics(BOOL bCheckSend = TRUE);
 	void AddTotalRecv(int iLength);
 	void AddTotalSend(int iLength);
+
+	void TermConnected();
+	void AddConnected();
+	int GetConnected();
 };
 
 struct info_msg
@@ -348,6 +390,8 @@ inline void RemovePkgInfo(T* pSender, CONNID dwConnID)
 CBufferPtr* GeneratePkgBuffer(DWORD seq, LPCTSTR lpszName, short age, LPCTSTR lpszDesc);
 CBufferPtr* GeneratePkgBuffer(const TPkgHeader& header, const TPkgBody& body);
 
+BOOL SplitStr(LPCTSTR pszSrc, vector<CString>& vtItem, LPCTSTR pszSepectors = nullptr, LPCTSTR pszQMarks = nullptr);
+
 sa_family_t GuessAddrFamily(LPCTSTR lpszAddress);
 LPCTSTR GetLoopbackAddress(LPCTSTR lpszLikeAddress);
 LPCTSTR GetAnyAddress(LPCTSTR lpszLikeAddress);
@@ -371,11 +415,14 @@ void LogClientStop(LPCTSTR lpszName = nullptr);
 void LogClientStopFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
 void LogClientSendFail(int iSequence, int iSocketIndex, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
 void LogSend(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName = nullptr);
+void LogSending(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName = nullptr);
 void LogSendFail(CONNID dwConnID, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
 void LogDisconnect(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void LogDisconnectFail(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void LogDisconnect2(CONNID dwConnID, BOOL bForce, LPCTSTR lpszName = nullptr);
 void LogDisconnectFail2(CONNID dwConnID, BOOL bForce, LPCTSTR lpszName = nullptr);
+void LogDisconnectLong(DWORD dwSeconds, BOOL bForce, LPCTSTR lpszName = nullptr);
+void LogDisconnectFailLong(DWORD dwSeconds, BOOL bForce, LPCTSTR lpszName = nullptr);
 void LogPause(CONNID dwConnID, BOOL bPause, LPCTSTR lpszName = nullptr);
 void LogPauseFail(CONNID dwConnID, BOOL bPause, LPCTSTR lpszName = nullptr);
 void LogConnect(LPCTSTR lpszAddress, USHORT usPort, LPCTSTR lpszName = nullptr);
@@ -408,6 +455,7 @@ void PostServerStatics(const LONGLONG& llTotalSent, const LONGLONG& llTotalRecei
 void PostServerTemporaryStatics(const LONGLONG& llTotalSent, const LONGLONG& llTotalReceived, LPCTSTR lpszName = nullptr);
 void PostTimeConsuming(DWORD dwTickCount, LPCTSTR lpszName = nullptr);
 
+#ifdef _NEED_HTTP
 void PostOnMessageBegin(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void PostOnRequestLine(CONNID dwConnID, LPCSTR lpszMethod, USHORT usUrlFieldSet, LPCSTR lpszUrl, LPCTSTR lpszName = nullptr);
 void PostOnStatusLine(CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc, LPCTSTR lpszName = nullptr);
@@ -426,6 +474,7 @@ void PostOnWSMessageComplete(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 
 void PostUncompressBody(CONNID dwConnID, int iLength, LPCTSTR lpszName = nullptr);
 void PostUncompressBodyFail(CONNID dwConnID, int iResult, LPCTSTR lpszName = nullptr);
+#endif
 
 void PostInfoMsg(info_msg* msg);
 void LogInfoMsg(info_msg* pInfoMsg);
@@ -435,7 +484,7 @@ extern LPCTSTR g_lpszDefaultCookieFile;
 
 LPCTSTR GetDefaultCookieFile();
 
-#ifdef _SSL_SUPPORT
+#ifdef _NEED_SSL
 
 extern int g_c_iVerifyMode;
 extern BOOL g_c_bNeedClientVerification;
@@ -467,13 +516,14 @@ extern LPCTSTR g_s_lpszKeyPasswod2;
 
 #endif
 
-#ifdef _HTTP_SUPPORT
+#ifdef _NEED_HTTP
 
-#include "../../src/common/crypto/crypto.h"
+#include "../../src/common/crypto/Crypto.h"
 
 #define HTTP_NAME					_T("http")
 #define HTTPS_NAME					_T("https")
-
+#define STR_HTTP_SCHEMA				"http://"
+#define STR_HTTPS_SCHEMA			"https://"
 #define CRLF						"\r\n"
 #define NV_SEPARATOR_CHAR			'='
 #define HEADER_SEPARATOR			": "
@@ -500,6 +550,10 @@ extern LPCTSTR g_s_lpszKeyPasswod2;
 #define HTTP_METHOD_CONNECT			"CONNECT"
 
 #define HTTP_WEB_SOCKET_SEC_SALT	"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
+extern LPCSTR HTTP_WEB_SOCKET_CLOSE_FLAG;
+extern const BYTE HTTP_WEB_SOCKET_MASK_KEY[];
+
 
 struct THttpHeader
 {

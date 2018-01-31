@@ -24,6 +24,8 @@
 #include "stdafx.h"
 #include "HttpServer.h"
 
+#ifdef _HTTP_SUPPORT
+
 template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::Start(LPCTSTR lpszBindAddress, USHORT usPort)
 {
 	BOOL isOK = __super::Start(lpszBindAddress, usPort);
@@ -208,6 +210,22 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	return result;
 }
 
+template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_port>::DoFireHandShake(TSocketObj* pSocketObj)
+{
+	EnHandleResult result = __super::DoFireHandShake(pSocketObj);
+
+	if(result == HR_ERROR)
+	{
+		THttpObj* pHttpObj = FindHttpObj(pSocketObj);
+		VERIFY(pHttpObj);
+
+		m_objPool.PutFreeHttpObj(pHttpObj);
+		SetConnectionReserved(pSocketObj, nullptr);
+	}
+
+	return result;
+}
+
 template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_port>::DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
 {
 	THttpObj* pHttpObj = FindHttpObj(pSocketObj);
@@ -224,7 +242,6 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
 
 	THttpObj* pHttpObj = FindHttpObj(pSocketObj);
-	ASSERT(pHttpObj);
 
 	if(pHttpObj != nullptr)
 		m_objPool.PutFreeHttpObj(pHttpObj);
@@ -477,5 +494,7 @@ template class CHttpServerT<CTcpServer, HTTP_DEFAULT_PORT>;
 #include "SSLServer.h"
 
 template class CHttpServerT<CSSLServer, HTTPS_DEFAULT_PORT>;
+
+#endif
 
 #endif

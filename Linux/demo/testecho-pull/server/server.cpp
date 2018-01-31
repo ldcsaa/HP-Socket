@@ -123,14 +123,6 @@ CTcpPullServer s_server(&s_listener);
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(s_server.HasStarted())
-	{
-		::LogServerStartFail(SE_ILLEGAL_STATE, ::GetSocketErrorDesc(SE_ILLEGAL_STATE));
-		return;
-	}
-
-	s_server.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
-
 	if(s_server.Start(g_app_arg.bind_addr, g_app_arg.port))
 		::LogServerStart(g_app_arg.bind_addr, g_app_arg.port);
 	else
@@ -152,7 +144,11 @@ void OnCmdStatus(CCommandParser* pParser)
 
 void OnCmdSend(CCommandParser* pParser)
 {
-	if(s_server.Send(pParser->m_dwConnID, (LPBYTE)(LPCTSTR)pParser->m_strMessage, pParser->m_strMessage.GetLength()))
+	static DWORD SEQ = 0;
+
+	unique_ptr<CBufferPtr> buffer(::GeneratePkgBuffer(++SEQ, _T("HP-Server"), 32, pParser->m_strMessage));
+
+	if(s_server.Send(pParser->m_dwConnID, buffer->Ptr(), (int)buffer->Size()))
 		::LogSend(pParser->m_dwConnID, pParser->m_strMessage);
 	else
 		::LogSendFail(pParser->m_dwConnID, ::GetLastError(), ::GetLastErrorStr());
@@ -177,17 +173,17 @@ void OnCmdKick(CCommandParser* pParser)
 void OnCmdKickLong(CCommandParser* pParser)
 {
 	if(s_server.DisconnectLongConnections(pParser->m_dwSeconds * 1000, pParser->m_bFlag))
-		::LogDisconnect2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectLong(pParser->m_dwSeconds, pParser->m_bFlag);
 	else
-		::LogDisconnectFail2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectFailLong(pParser->m_dwSeconds, pParser->m_bFlag);
 }
 
 void OnCmdKickSilence(CCommandParser* pParser)
 {
 	if(s_server.DisconnectSilenceConnections(pParser->m_dwSeconds * 1000, pParser->m_bFlag))
-		::LogDisconnect2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectLong(pParser->m_dwSeconds, pParser->m_bFlag);
 	else
-		::LogDisconnectFail2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectFailLong(pParser->m_dwSeconds, pParser->m_bFlag);
 }
 
 int main(int argc, char* const argv[])
@@ -196,6 +192,8 @@ int main(int argc, char* const argv[])
 	CAppSignalHandler s_signal_handler({SIGTTOU, SIGINT});
 
 	g_app_arg.ParseArgs(argc, argv);
+
+	s_server.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

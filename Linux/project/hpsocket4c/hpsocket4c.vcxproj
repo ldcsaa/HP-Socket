@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp" />
+    <ClCompile Include="..\..\src\common\crypto\Crypto.cpp" />
     <ClCompile Include="..\..\src\common\Event.cpp" />
     <ClCompile Include="..\..\src\common\FileHelper.cpp" />
     <ClCompile Include="..\..\src\common\FuncHelper.cpp" />
@@ -35,9 +36,19 @@
     <ClCompile Include="..\..\src\common\PollHelper.cpp" />
     <ClCompile Include="..\..\src\common\RWLock.cpp" />
     <ClCompile Include="..\..\src\common\SysHelper.cpp" />
+    <ClCompile Include="..\..\src\HPSocket4C-SSL.cpp" />
     <ClCompile Include="..\..\src\HPSocket4C.cpp" />
+    <ClCompile Include="..\..\src\HttpAgent.cpp" />
+    <ClCompile Include="..\..\src\HttpClient.cpp" />
+    <ClCompile Include="..\..\src\HttpCookie.cpp" />
+    <ClCompile Include="..\..\src\HttpHelper.cpp" />
+    <ClCompile Include="..\..\src\HttpServer.cpp" />
     <ClCompile Include="..\..\src\MiscHelper.cpp" />
     <ClCompile Include="..\..\src\SocketHelper.cpp" />
+    <ClCompile Include="..\..\src\SSLAgent.cpp" />
+    <ClCompile Include="..\..\src\SSLClient.cpp" />
+    <ClCompile Include="..\..\src\SSLHelper.cpp" />
+    <ClCompile Include="..\..\src\SSLServer.cpp" />
     <ClCompile Include="..\..\src\TcpAgent.cpp" />
     <ClCompile Include="..\..\src\TcpClient.cpp" />
     <ClCompile Include="..\..\src\TcpPackAgent.cpp" />
@@ -55,6 +66,7 @@
     <ClInclude Include="..\..\src\common\BufferPool.h" />
     <ClInclude Include="..\..\src\common\BufferPtr.h" />
     <ClInclude Include="..\..\src\common\CriSec.h" />
+    <ClInclude Include="..\..\src\common\crypto\Crypto.h" />
     <ClInclude Include="..\..\src\common\Event.h" />
     <ClInclude Include="..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\src\common\FuncHelper.h" />
@@ -73,12 +85,22 @@
     <ClInclude Include="..\..\src\common\StringT.h" />
     <ClInclude Include="..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\src\common\Thread.h" />
+    <ClInclude Include="..\..\src\HPSocket4C-SSL.h" />
     <ClInclude Include="..\..\src\HPSocket4C.h" />
     <ClInclude Include="..\..\src\HPTypeDef.h" />
+    <ClInclude Include="..\..\src\HttpAgent.h" />
+    <ClInclude Include="..\..\src\HttpClient.h" />
+    <ClInclude Include="..\..\src\HttpCookie.h" />
+    <ClInclude Include="..\..\src\HttpHelper.h" />
+    <ClInclude Include="..\..\src\HttpServer.h" />
     <ClInclude Include="..\..\src\MiscHelper.h" />
     <ClInclude Include="..\..\src\SocketHelper.h" />
     <ClInclude Include="..\..\src\SocketInterface.h" />
     <ClInclude Include="..\..\src\SocketObject4C.h" />
+    <ClInclude Include="..\..\src\SSLAgent.h" />
+    <ClInclude Include="..\..\src\SSLClient.h" />
+    <ClInclude Include="..\..\src\SSLHelper.h" />
+    <ClInclude Include="..\..\src\SSLServer.h" />
     <ClInclude Include="..\..\src\TcpAgent.h" />
     <ClInclude Include="..\..\src\TcpClient.h" />
     <ClInclude Include="..\..\src\TcpPackAgent.h" />
@@ -162,6 +184,7 @@
     <TargetExt>.so</TargetExt>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -170,6 +193,7 @@
     <TargetExt>.so</TargetExt>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -178,6 +202,7 @@
     <TargetExt>.so</TargetExt>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -186,6 +211,7 @@
     <TargetExt>.so</TargetExt>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -194,6 +220,7 @@
     <TargetExt>.so</TargetExt>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -202,6 +229,7 @@
     <TargetExt>.so</TargetExt>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -218,16 +246,18 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread</LibraryDependencies>
-      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;http_parser;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreLinkEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); rm -rf $(TargetFileName).*;</Command>
+      <Command>
+      </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); [ -f "$(TargetFileName)" ] || exit 1; ln -snf $(TargetFileName) $(TargetFileName).$(VER_MAJOR); ln -snf $(TargetFileName).$(VER_MAJOR) $(TargetFileName).$(VER_MAJOR).$(VER_MINOR).$(VER_REVISE); </Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
@@ -244,16 +274,18 @@
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread</LibraryDependencies>
-      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;http_parser;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreLinkEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); rm -rf $(TargetFileName).*;</Command>
+      <Command>
+      </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); [ -f "$(TargetFileName)" ] || exit 1; ln -snf $(TargetFileName) $(TargetFileName).$(VER_MAJOR); ln -snf $(TargetFileName).$(VER_MAJOR) $(TargetFileName).$(VER_MAJOR).$(VER_MINOR).$(VER_REVISE); </Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -270,16 +302,18 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread</LibraryDependencies>
-      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;http_parser;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreLinkEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); rm -rf $(TargetFileName).*;</Command>
+      <Command>
+      </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); [ -f "$(TargetFileName)" ] || exit 1; ln -snf $(TargetFileName) $(TargetFileName).$(VER_MAJOR); ln -snf $(TargetFileName).$(VER_MAJOR) $(TargetFileName).$(VER_MAJOR).$(VER_MINOR).$(VER_REVISE); </Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -296,16 +330,18 @@
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread</LibraryDependencies>
-      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;http_parser;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreLinkEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); rm -rf $(TargetFileName).*;</Command>
+      <Command>
+      </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); [ -f "$(TargetFileName)" ] || exit 1; ln -snf $(TargetFileName) $(TargetFileName).$(VER_MAJOR); ln -snf $(TargetFileName).$(VER_MAJOR) $(TargetFileName).$(VER_MAJOR).$(VER_MINOR).$(VER_REVISE); </Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <ClCompile>
@@ -322,16 +358,18 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread</LibraryDependencies>
-      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;http_parser;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreLinkEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); rm -rf $(TargetFileName).*;</Command>
+      <Command>
+      </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); [ -f "$(TargetFileName)" ] || exit 1; ln -snf $(TargetFileName) $(TargetFileName).$(VER_MAJOR); ln -snf $(TargetFileName).$(VER_MAJOR) $(TargetFileName).$(VER_MAJOR).$(VER_MINOR).$(VER_REVISE); </Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <ClCompile>
@@ -348,16 +386,18 @@
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread</LibraryDependencies>
-      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;http_parser;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreLinkEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); rm -rf $(TargetFileName).*;</Command>
+      <Command>
+      </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>cd $(RemoteProjectDir)/$(OutDir); [ -f "$(TargetFileName)" ] || exit 1; ln -snf $(TargetFileName) $(TargetFileName).$(VER_MAJOR); ln -snf $(TargetFileName).$(VER_MAJOR) $(TargetFileName).$(VER_MAJOR).$(VER_MINOR).$(VER_REVISE); </Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

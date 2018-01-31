@@ -1,4 +1,34 @@
 ﻿==========================================================================================
+v5.2.1 Update:
+==========================================================================================
+
+> Create HP-Socket SSL Components
+-----------------
+1. Server: SSL Server, SSL Pull Server, SSL Pack Server
+2. Agent: SSL Agent, SSL Pull Agent, SSL Pack Agent
+3. Client: SSL Client, SSL Pull Client, SSL Pack Client
+
+> Create HP-Socket HTTP Components
+-----------------
+1. Server: HTTP Server, HTTPS Server
+2. Agent: HTTP Agent, HTTP Agent
+3. Client: HTTP Client, HTTP Client, HTTP Sync Client, HTTPS Sync Client
+
+> Create Demos：
+-----------------
+1. testecho-ssl: (SRC) SSL simple test echo server/agent/client
+2. testecho-ssl-pfm: (SO) SSL performance test echo server/agent/client
+3. testecho-ssl-pull: (SO) SSL pull echo server/agent/client
+4. testecho-ssl-pack: (4C SO) SSL pack echo server/agent/client
+5. testecho-http: (SRC) HTTP simple test echo server/agent/client/sync-client
+6. testecho-http-4c: (4C SO) HTTP simple test echo server/agent/client/sync-client
+
+> Other Updates：
+-----------------
+1. Version number revision: Use a unified version number for Windows & Linux distribution
+2. Code optimization and knowing bug fixed
+
+==========================================================================================
 v1.0.0 Update:
 ==========================================================================================
 

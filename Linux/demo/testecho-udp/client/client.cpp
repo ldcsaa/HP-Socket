@@ -55,8 +55,6 @@ CUdpClient s_cast(&s_listener);
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	s_cast.SetDetectAttempts(g_app_arg.keep_alive ? UDP_DETECT_ATTEMPTS : 0);
-
 	if(s_cast.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr))
 		::LogClientStart(g_app_arg.remote_addr, g_app_arg.port);
 	else
@@ -98,6 +96,8 @@ int main(int argc, char* const argv[])
 	CAppSignalHandler s_signal_handler({SIGTTOU, SIGINT});
 
 	g_app_arg.ParseArgs(argc, argv);
+
+	s_cast.SetDetectAttempts(g_app_arg.keep_alive ? UDP_DETECT_ATTEMPTS : 0);
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

@@ -321,6 +321,7 @@ void CUdpCast::Reset()
 	m_nRecvEvents	= 0;
 	m_nSendEvents	= 0;
 	m_bPaused		= FALSE;
+	m_bConnected	= FALSE;
 	m_enState		= SS_STOPPED;
 }
 

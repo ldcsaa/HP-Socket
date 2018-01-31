@@ -387,6 +387,8 @@ void PostTimeConsuming(DWORD dwTickCount, LPCTSTR lpszName)
 	PostInfoMsg(msg);
 }
 
+#ifdef _NEED_HTTP
+
 void PostOnMessageBegin(CONNID dwConnID, LPCTSTR lpszName)
 {
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_MESSAGE_BEGIN, 0, nullptr, lpszName);
@@ -557,6 +559,8 @@ void PostUncompressBodyFail(CONNID dwConnID, int iResult, LPCTSTR lpszName)
 
 	PostInfoMsg(msg);
 }
+
+#endif
 
 void PostInfoMsg(info_msg* msg)
 {
@@ -761,13 +765,10 @@ LPCTSTR GetDefaultCookieFile()
 		LPTSTR lpszName = strName.GetBuffer(MAX_PATH);
 
 		DWORD rs = ::GetModuleFileName(nullptr, lpszName, MAX_PATH);
-		ASSERT(rs > 0 && rs < MAX_PATH);
-
-		int iPos = strName.ReverseFind('.');
-		ASSERT(iPos == (int)(rs - 4));
-
-		strName.ReleaseBufferSetLength(iPos + 1);
-		strName.Append(_T("cki"));
+		VERIFY(rs > 0 && rs < MAX_PATH);
+		
+		strName.ReleaseBuffer();
+		strName.Append(_T(".cki"));
 
 		lstrcpy(c_szCookieFile, strName);
 	}
@@ -775,7 +776,23 @@ LPCTSTR GetDefaultCookieFile()
 	return c_szCookieFile;
 }
 
-#ifdef _SSL_SUPPORT
+BOOL SetCurrentPathToModulePath(HMODULE hModule)
+{
+	TCHAR szPath[MAX_PATH];
+	if(::GetModuleFileName(hModule, szPath, MAX_PATH))
+	{
+		TCHAR drive[MAX_PATH], dir[MAX_PATH], fname[MAX_PATH], ext[MAX_PATH];
+		_tsplitpath(szPath, drive, dir, fname, ext);
+		lstrcpy(szPath, drive);
+		lstrcat(szPath, dir);
+
+		return ::SetCurrentDirectory(szPath);
+	}
+
+	return FALSE;
+}
+
+#ifdef _NEED_SSL
 
 #include "../../Common/Src/FuncHelper.h"
 
@@ -910,7 +927,7 @@ BOOL InitSSLParams()
 
 #endif
 
-#ifdef _HTTP_SUPPORT
+#ifdef _NEED_HTTP
 
 CStringA& HttpVersionToString(EnHttpVersion enVersion, CStringA& strResult)
 {

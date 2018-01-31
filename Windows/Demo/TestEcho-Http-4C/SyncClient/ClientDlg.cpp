@@ -51,7 +51,7 @@ CClientDlg::~CClientDlg()
 {
 	// 销毁 HTTP 对象
 	if(m_HttpSyncClient != nullptr)
-		::Destroy_HP_HttpClient(m_HttpSyncClient);
+		::Destroy_HP_HttpSyncClient(m_HttpSyncClient);
 
 	// 销毁监听器对象
 	::Destroy_HP_HttpClientListener(m_HttpClientListener);

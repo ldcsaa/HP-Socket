@@ -17,11 +17,11 @@
 		£¨Configuration Properties -> VC++ Directories£©
 		
 			* Platform: Win32
-			* Configuration: Debug-SSL,uDebug-SSL,Release-SSL,uRelease-SSL
+			* Configuration: Debug,uDebug,Release,uRelease
 				> Include Directories => ..\..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);
 				> Library Directories => ..\..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86
 
 			* Platform: x64
-			* Configuration: Debug-SSL,uDebug-SSL,Release-SSL,uRelease-SSL
+			* Configuration: Debug,uDebug,Release,uRelease
 				> Include Directories => ..\..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);
 				> Library Directories => ..\..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64

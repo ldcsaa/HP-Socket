@@ -22,6 +22,9 @@
     <Filter Include="Global">
       <UniqueIdentifier>{4c9b4352-e894-44ad-ae59-b36cbebb43d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Crypto">
+      <UniqueIdentifier>{4414e583-3d94-4ed4-9450-651bc82f5cef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp">
@@ -92,6 +95,39 @@
     </ClCompile>
     <ClCompile Include="..\..\src\HPSocket4C.cpp">
       <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLAgent.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLClient.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLHelper.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLServer.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HPSocket4C-SSL.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\crypto\Crypto.cpp">
+      <Filter>Common\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpAgent.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpClient.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpCookie.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpHelper.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpServer.cpp">
+      <Filter>HTTP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +203,6 @@
     <ClInclude Include="..\..\src\HPTypeDef.h">
       <Filter>Public</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\SocketInterface.h">
-      <Filter>Public</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\TcpAgent.h">
       <Filter>TCP</Filter>
     </ClInclude>
@@ -211,6 +244,42 @@
     </ClInclude>
     <ClInclude Include="..\..\src\SocketObject4C.h">
       <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SocketInterface.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLAgent.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLClient.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLHelper.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLServer.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HPSocket4C-SSL.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\crypto\Crypto.h">
+      <Filter>Common\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpAgent.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpClient.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpCookie.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpHelper.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpServer.h">
+      <Filter>HTTP</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

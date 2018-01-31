@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <VER_MAJOR>1</VER_MAJOR>
-    <VER_MINOR>0</VER_MINOR>
-    <VER_REVISE>0</VER_REVISE>
-    <VER_BUILD>1</VER_BUILD>
+    <VER_MAJOR>5</VER_MAJOR>
+    <VER_MINOR>2</VER_MINOR>
+    <VER_REVISE>1</VER_REVISE>
+    <VER_BUILD>2</VER_BUILD>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />

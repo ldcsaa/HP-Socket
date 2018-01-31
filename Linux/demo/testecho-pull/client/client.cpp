@@ -93,17 +93,6 @@ TPkgInfo s_pkgInfo;
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(s_client.HasStarted())
-	{
-		::LogClientStartFail(SE_ILLEGAL_STATE, ::GetSocketErrorDesc(SE_ILLEGAL_STATE));
-		return;
-	}
-
-	if(s_client.GetExtra() == nullptr)
-		s_client.SetExtra(&s_pkgInfo);
-
-	s_client.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
-
 	if(s_client.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr))
 		::LogClientStart(g_app_arg.remote_addr, g_app_arg.port);
 	else
@@ -149,6 +138,9 @@ int main(int argc, char* const argv[])
 	CAppSignalHandler s_signal_handler({SIGTTOU, SIGINT});
 
 	g_app_arg.ParseArgs(argc, argv);
+
+	s_client.SetExtra(&s_pkgInfo);
+	s_client.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

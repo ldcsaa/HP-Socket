@@ -538,7 +538,7 @@ public:
 	virtual EnHandleResult OnWSMessageComplete(IHttpServer* pSender, CONNID dwConnID)
 		{return m_lsnHttp.OnWSMessageComplete(pSender, dwConnID);}
 
-	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, UINT_PTR soListen)
+	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 		{return m_lsnServer.OnPrepareListen(pSender, soListen);}
 	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient)
 		{return m_lsnServer.OnAccept(pSender, dwConnID, soClient);}
@@ -593,7 +593,7 @@ public:
 	virtual EnHandleResult OnWSMessageComplete(IHttpAgent* pSender, CONNID dwConnID)
 		{return m_lsnHttp.OnWSMessageComplete(pSender, dwConnID);}
 
-	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, UINT_PTR socket)
+	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, SOCKET socket)
 		{return m_lsnAgent.OnPrepareConnect(pSender, dwConnID, socket);}
 	virtual EnHandleResult OnConnect(ITcpAgent* pSender, CONNID dwConnID)
 		{return m_lsnAgent.OnConnect(pSender, dwConnID);}
@@ -648,7 +648,7 @@ public:
 	virtual EnHandleResult OnWSMessageComplete(IHttpClient* pSender, CONNID dwConnID)
 		{return m_lsnHttp.OnWSMessageComplete(pSender, dwConnID);}
 
-	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, UINT_PTR socket)
+	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, SOCKET socket)
 		{return m_lsnClient.OnPrepareConnect(pSender, dwConnID, socket);}
 	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID)
 		{return m_lsnClient.OnConnect(pSender, dwConnID);}

@@ -38,6 +38,8 @@ public:
 
 	using __super				 = basic_string<_CharT, _Traits, _Alloc>;
 
+	using XCHAR					 = _CharT;
+	using PXSTR					 = _CharT*;
 	using PCXSTR				 = const _CharT*;
 
 	using traits_type			 = typename __super::traits_type;
@@ -61,6 +63,9 @@ public:
 	using __super::data;
 	using __super::c_str;
 
+private:
+
+	constexpr static PCXSTR SPACE_CHARS = _T(" \t\r\n\f\v");
 
 public:
 
@@ -69,7 +74,7 @@ public:
 	int GetLength()				const	{return (int)size();}
 	const _CharT* GetString()	const	{return c_str();}
 
-	operator const _CharT* () const {return __super::c_str();}
+	operator const _CharT* ()	const	{return __super::c_str();}
 
 	_CharT* GetBuffer(int length)
 	{
@@ -81,13 +86,21 @@ public:
 	{
 		if(length == -1)
 			length = lstrlen(data());
-
+		
 		resize(length);
 	}
 
 	void ReleaseBufferSetLength(int length)
 	{
 		ASSERT(length >=0);
+		ReleaseBuffer(length);
+	}
+
+	void Truncate(int length)
+	{
+		if(length >= GetLength())
+			return;
+
 		ReleaseBuffer(length);
 	}
 
@@ -133,6 +146,12 @@ public:
 		return *this;
 	}
 
+	CStringT& Append(const _CharT* __s, int __n)
+	{
+		append(__s, __n);
+		return *this;
+	}
+
 	CStringT& AppendChar(_CharT __c)
 	{
 		push_back(__c);
@@ -161,22 +180,34 @@ public:
 
 	CStringT& MakeLower()
 	{
-		size_type s = size();
-		_CharT* p = (_CharT*)c_str();
+		size_type s	= size();
+		_CharT* p	= (_CharT*)c_str();
+		_CharT c;
 
 		for(size_type i = 0; i < s; i++)
-			p[i] = (_CharT)tolower(p[i]);
+		{
+			c = p[i];
+
+			if(c >= 'A' && c <= 'Z')
+				p[i] = (_CharT)(c + 32);
+		}
 
 		return *this;
 	}
 
 	CStringT& MakeUpper()
 	{
-		size_type s = size();
-		_CharT* p = (_CharT*)c_str();
+		size_type s	= size();
+		_CharT* p	= (_CharT*)c_str();
+		_CharT c;
 
 		for(size_type i = 0; i < s; i++)
-			p[i] = (_CharT)toupper(p[i]);
+		{
+			c = p[i];
+
+			if(c >= 'a' && c <= 'z')
+				p[i] = (_CharT)(c - 32);
+		}
 
 		return *this;
 	}
@@ -201,11 +232,11 @@ public:
 		return Mid(nLength - nCount, nCount);
 	}
 
-	CStringT Tokenize(const _CharT* pszTokens, int& iStart) const
+	CStringT Tokenize(PCXSTR lpszTokens, int& iStart) const
 	{
 		ASSERT(iStart >= 0);
 
-		if((pszTokens == nullptr) || (*pszTokens == (_CharT)0))
+		if((lpszTokens == nullptr) || (*lpszTokens == (_CharT)0))
 		{
 			if(iStart < GetLength())
 				return CStringT(GetString() + iStart);
@@ -217,12 +248,12 @@ public:
 
 			if(pszPlace < pszEnd)
 			{
-				int nIncluding = lstrspn(pszPlace, pszTokens);
+				int nIncluding = lstrspn(pszPlace, lpszTokens);
 
 				if((pszPlace + nIncluding) < pszEnd)
 				{
 					pszPlace		+= nIncluding;
-					int nExcluding	 = lstrcspn(pszPlace, pszTokens);
+					int nExcluding	 = lstrcspn(pszPlace, lpszTokens);
 
 					int iFrom	= iStart + nIncluding;
 					int nUntil	= nExcluding;
@@ -238,19 +269,310 @@ public:
 		return CStringT();
 	}
 
+	CStringT& Trim()
+	{
+		return Trim(SPACE_CHARS);
+	}
+
+	CStringT& TrimRight()
+	{
+		return TrimRight(SPACE_CHARS);
+	}
+
+	CStringT& TrimLeft()
+	{
+		return TrimLeft(SPACE_CHARS);
+	}
+
+	CStringT& Trim(XCHAR c)
+	{
+		return(TrimRight(c).TrimLeft(c));
+	}
+
+	CStringT& TrimRight(XCHAR c)
+	{
+		int iLength = GetLength();
+
+		if(iLength == 0)
+			return *this;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszEnd	 = lpszBegin + iLength;
+
+		while(lpszEnd > lpszBegin)
+		{
+			if(*(lpszEnd - 1) != c)
+				break;
+
+			--lpszEnd;
+		}
+
+		int iNewLength = (int)(lpszEnd - lpszBegin);
+
+		if(iNewLength < iLength)
+			Truncate(iNewLength);
+
+		return *this;
+	}
+
+	CStringT& TrimLeft(XCHAR c)
+	{
+		int iLength = GetLength();
+
+		if(iLength == 0)
+			return *this;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszEnd	 = lpszBegin;
+		int iOffset		 = 0;
+
+		while(*lpszEnd == c)
+		{
+			++lpszEnd;
+			++iOffset;
+
+			if(iOffset == iLength)
+				break;
+		}
+
+		if(iOffset != 0)
+		{
+			int iNewLength = iLength - iOffset;
+
+			if(iNewLength > 0)
+				memcpy((PXSTR)lpszBegin, lpszEnd, (iLength - iOffset) * sizeof(XCHAR));
+
+			ReleaseBufferSetLength(iNewLength);
+		}
+
+		return *this;
+	}
+
+	CStringT& Trim(PCXSTR lpszChars)
+	{
+		return(TrimRight(lpszChars).TrimLeft(lpszChars));
+	}
+
+	CStringT& TrimRight(PCXSTR lpszChars)
+	{
+		ASSERT(!::IsStrEmpty(lpszChars));
+
+		if(::IsStrEmpty(lpszChars))
+			return *this;
+
+		int iLength = GetLength();
+
+		if(iLength == 0)
+			return *this;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszEnd	 = lpszBegin + iLength;
+
+		while(lpszEnd > lpszBegin)
+		{
+			if(::StrChr(lpszChars, *(lpszEnd - 1)) == nullptr)
+				break;
+
+			--lpszEnd;
+		}
+
+		int iNewLength = (int)(lpszEnd - lpszBegin);
+
+		if(iNewLength < iLength)
+			Truncate(iNewLength);
+
+		return *this;
+	}
+
+	CStringT& TrimLeft(PCXSTR lpszChars)
+	{
+		ASSERT(!::IsStrEmpty(lpszChars));
+
+		if(::IsStrEmpty(lpszChars))
+			return *this;
+
+		int iLength = GetLength();
+
+		if(iLength == 0)
+			return *this;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszEnd	 = lpszBegin;
+		int iOffset		 = 0;
+
+		while(::StrChr(lpszChars, *lpszEnd) != nullptr)
+		{
+			++lpszEnd;
+			++iOffset;
+
+			if(iOffset == iLength)
+				break;
+		}
+
+		if(iOffset != 0)
+		{
+			int iNewLength = iLength - iOffset;
+
+			if(iNewLength > 0)
+				memcpy((PXSTR)lpszBegin, lpszEnd, (iLength - iOffset) * sizeof(XCHAR));
+
+			ReleaseBufferSetLength(iNewLength);
+		}
+
+		return *this;
+	}
+
+	int Find(XCHAR c, int iStart = 0) const
+	{
+		ASSERT(iStart >= 0);
+
+		int iLength = GetLength();
+
+		if(iStart < 0 || iStart >= iLength)
+			return -1;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszFind	 = ::StrChr(lpszBegin + iStart, c);
+
+		return ((lpszFind == nullptr) ? -1 : (int)(lpszFind - lpszBegin));
+	}
+
+	int Find(PCXSTR lpszSub, int iStart = 0) const
+	{
+		ASSERT(iStart >= 0 && !::IsStrEmpty(lpszSub));
+
+		int iLength = GetLength();
+
+		if(lpszSub == nullptr || iStart < 0 || iStart > iLength)
+			return -1;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszFind	 = ::StrStr(lpszBegin + iStart, lpszSub);
+		
+		return ((lpszFind == nullptr) ? -1 : (int)(lpszFind - lpszBegin));
+	}
+
+	int FindOneOf(PCXSTR lpszChars) const
+	{
+		ASSERT(!::IsStrEmpty(lpszChars));
+
+		if(lpszChars == nullptr)
+			return -1;
+
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszFind	 = ::StrPBrk(lpszBegin, lpszChars);
+
+		return ((lpszFind == nullptr) ? -1 : (int)(lpszFind - lpszBegin));
+	}
+
+	int ReverseFind(XCHAR c) const
+	{
+		PCXSTR lpszBegin = GetString();
+		PCXSTR lpszFind	 = ::StrRChr(lpszBegin, c);
+
+		return ((lpszFind == nullptr) ? -1 : (int)(lpszFind - lpszBegin));
+	}
+
+	int Remove(XCHAR c)
+	{
+		int iLength = GetLength();
+
+		if(iLength == 0)
+			return 0;
+
+		PCXSTR lpszBegin = GetString();
+		PXSTR lpszCur	 = (PXSTR)lpszBegin;
+		PCXSTR lpszEnd	 = lpszBegin + iLength;
+		int iRemoved	 = 0;
+
+		while(lpszCur < lpszEnd)
+		{
+			if(*lpszCur == c)
+				++iRemoved;
+			else if(iRemoved > 0)
+				*(lpszCur - iRemoved) = *lpszCur;
+
+			++lpszCur;
+		}
+
+		if(iRemoved > 0)
+			ReleaseBufferSetLength(iLength - iRemoved);
+
+		return iRemoved;
+	}
+
+	XCHAR GetAt(int i) const
+	{
+		return (*this)[i];
+	}
+
+	void SetAt(int i, XCHAR c)
+	{
+		(*this)[i] = c;
+	}
+
+	XCHAR operator[](int i) const
+	{
+		ASSERT(i >= 0 && i < GetLength());
+
+		return *(GetString() + i);
+	}
+
+	XCHAR& operator[](int i)
+	{
+		ASSERT(i >= 0 && i < GetLength());
+
+		return *(PXSTR)(GetString() + i);
+	}
+
+	CStringT& Insert(int i, XCHAR c)
+	{
+		return insert((size_type)i, 1, c);
+	}
+
+	CStringT& Insert(int i, PCXSTR lpszChars)
+	{
+		return insert((size_type)i, lpszChars);
+	}
+
+	CStringT& SetString(PCXSTR lpszStr)
+	{
+		return assign(lpszStr);
+	}
+
+	CStringT& SetString(PCXSTR lpszStr, int iLength)
+	{
+		return assign(lpszStr, iLength);
+	}
+
 	friend bool operator==(const CStringT& str1, const CStringT& str2)
 	{
-		return(str1.Compare(str2) == 0);
+		return (str1.Compare(str2) == 0);
 	}
 
 	friend bool operator==(const CStringT& str1, const _CharT* psz2)
 	{
-		return(str1.Compare(psz2) == 0);
+		return (str1.Compare(psz2) == 0);
 	}
 
 	friend bool operator==(const _CharT* psz1, const CStringT& str2)
 	{
-		return(str2.Compare(psz1) == 0);
+		return (str2.Compare(psz1) == 0);
+	}
+
+	friend bool operator!=(const CStringT& str1, const CStringT& str2)
+	{
+		return !(str1 == str2);
+	}
+
+	friend bool operator!=(const CStringT& str1, const _CharT* psz2)
+	{
+		return !(str1 == psz2);
+	}
+
+	friend bool operator!=(const _CharT* psz1, const CStringT& str2)
+	{
+		return !(psz1 == str2);
 	}
 
 public:

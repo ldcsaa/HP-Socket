@@ -473,6 +473,7 @@ EnHttpParseResult CHttpServerListenerImpl::OnUpgrade(IHttpServer* pSender, CONNI
 	}
 	else if(enUpgradeType == HUT_WEB_SOCKET)
 	{
+		int iHeaderCount = 2;
 		THeader header[] = {{"Connection", UPGRADE_HEADER},
 							{UPGRADE_HEADER, WEB_SOCKET_HEADER_VALUE},
 							{nullptr, nullptr},
@@ -488,6 +489,7 @@ EnHttpParseResult CHttpServerListenerImpl::OnUpgrade(IHttpServer* pSender, CONNI
 
 		header[2].name	= "Sec-WebSocket-Accept";
 		header[2].value	= strAccept;
+		++iHeaderCount;
 
 		LPCSTR lpszProtocol = nullptr;
 
@@ -501,10 +503,9 @@ EnHttpParseResult CHttpServerListenerImpl::OnUpgrade(IHttpServer* pSender, CONNI
 			{
 				header[3].name	= "Sec-WebSocket-Protocol";
 				header[3].value	= strFirst;
+				++iHeaderCount;
 			}
 		}
-
-		int iHeaderCount = sizeof(header) / sizeof(THeader);
 
 		pSender->SendResponse(dwConnID, HSC_SWITCHING_PROTOCOLS, nullptr, header, iHeaderCount);
 		pSender->SetConnectionExtra(dwConnID, new CBufferPtr);

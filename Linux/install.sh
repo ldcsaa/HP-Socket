@@ -2,6 +2,7 @@
 
 PRJ_DIR=project
 DEM_DIR=demo/Release
+CER_DIR=demo/ssl-cert
 DEM_FILE="hp-*.exe"
 LIB_DIR=lib
 HPSOCKET_LIB_NAME=hpsocket
@@ -19,9 +20,11 @@ VER_MINOR=
 VER_REVISE=
 VER_BUILD=
 
+DEFAULT_PREFIX="/usr/local"
 PREFIX_PATH=
 DEST_LIB_DIR=
 DEST_BIN_DIR=bin
+DEST_CER_DIR=hp-ssl-cert
 DEST_INC_DIR=include
 INSTALL_DEMO=1
 IS_UNINSTALL=0
@@ -186,8 +189,12 @@ parse_args()
 		esac
 	done
 	
+	if [[ ${PREFIX_PATH:0-1:1} == '/' ]]; then
+		PREFIX_PATH=${PREFIX_PATH%?}
+	fi
+	
 	if [ -z "$PREFIX_PATH" ]; then
-		PREFIX_PATH="/usr/local"
+		PREFIX_PATH=$DEFAULT_PREFIX
 	fi
 	
 	if [ -z "$DEST_LIB_DIR" ]; then
@@ -269,6 +276,16 @@ cp_bin_exe()
 	done
 }
 
+cp_bin_cert()
+{
+	for FILE in $CER_DIR/*; do
+		if [ -f "$FILE" ]; then
+			set_install_file $PREFIX_PATH/$DEST_BIN_DIR/$DEST_CER_DIR/$(basename $FILE)
+			cp -f $FILE $_INSTALL_FILE_
+		fi
+	done
+}
+
 rm_empty_dir()
 {
 	if [[ -d "$1" && -z $(ls -A "$1") ]]; then
@@ -295,36 +312,59 @@ do_install()
 	cp_inc $INC_DIR $PREFIX_PATH/$DEST_INC_DIR
 	
 	if [ $INSTALL_DEMO -eq 1 ]; then
-		mkdir -p $PREFIX_PATH/$DEST_BIN_DIR
-		
 		# copy demo .exe files
+		mkdir -p $PREFIX_PATH/$DEST_BIN_DIR
 		cp_bin_exe
+		
+		# copy demo ssl cert files
+		mkdir -p $PREFIX_PATH/$DEST_BIN_DIR/$DEST_CER_DIR
+		cp_bin_cert
 	fi
 }
 
 do_uninstall()
 {
-	# rm *.a
-	set_install_file "$PREFIX_PATH/$DEST_LIB_DIR/${LIB_FILE_PREFIX}*.a"
-	rm -rf $_INSTALL_FILE_
-	# rm *.so
-	set_install_file "$PREFIX_PATH/$DEST_LIB_DIR/${LIB_FILE_PREFIX}*.so"
-	rm -rf $_INSTALL_FILE_
-	set_install_file "$PREFIX_PATH/$DEST_LIB_DIR/${LIB_FILE_PREFIX}*.so.*"
-	rm -rf $_INSTALL_FILE_
+	local FILE_PATH=$PREFIX_PATH/$DEST_LIB_DIR
 	
-	# rm include
-	set_install_file "$PREFIX_PATH/$DEST_INC_DIR/$HPSOCKET_LIB_NAME"
-	rm -rf $_INSTALL_FILE_
+	if [ -d "$FILE_PATH" ]; then
+		# rm *.a
+		set_install_file "$FILE_PATH/${LIB_FILE_PREFIX}*.a"
+		rm -rf $_INSTALL_FILE_
+		# rm *.so
+		set_install_file "$FILE_PATH/${LIB_FILE_PREFIX}*.so"
+		rm -rf $_INSTALL_FILE_
+		set_install_file "$FILE_PATH/${LIB_FILE_PREFIX}*.so.*"
+		rm -rf $_INSTALL_FILE_
+		
+		rm_empty_dir $FILE_PATH
+	fi
 	
-	# rm demo
-	set_install_file "$PREFIX_PATH/$DEST_BIN_DIR/$DEM_FILE"
-	rm -rf $_INSTALL_FILE_
+	FILE_PATH=$PREFIX_PATH/$DEST_INC_DIR
 	
-	# rm empty dir
-	rm_empty_dir $PREFIX_PATH/$DEST_LIB_DIR
-	rm_empty_dir $PREFIX_PATH/$DEST_INC_DIR
-	rm_empty_dir $PREFIX_PATH/$DEST_BIN_DIR
+	if [ -d "$FILE_PATH" ]; then
+		# rm include
+		set_install_file "$FILE_PATH/$HPSOCKET_LIB_NAME"
+		rm -rf $_INSTALL_FILE_
+		
+		rm_empty_dir $FILE_PATH
+	fi
+	
+	FILE_PATH=$PREFIX_PATH/$DEST_BIN_DIR
+	
+	if [ -d "$FILE_PATH" ]; then
+		# rm demo cert
+		set_install_file "$FILE_PATH/$DEST_CER_DIR"
+		rm -rf $_INSTALL_FILE_
+		
+		# rm demo
+		set_install_file "$FILE_PATH/$DEM_FILE"
+		rm -rf $_INSTALL_FILE_
+		set_install_file "$FILE_PATH/$DEM_FILE.*"
+		rm -rf $_INSTALL_FILE_
+		
+		rm_empty_dir $PREFIX_PATH/$DEST_BIN_DIR
+	fi
+	
 	rm_empty_dir $PREFIX_PATH
 }
 

@@ -137,6 +137,7 @@ void PostOnShutdown(LPCTSTR lpszName = nullptr);
 void PostServerStatics(const LONGLONG& llTotalSent, const LONGLONG& llTotalReceived, LPCTSTR lpszName = nullptr);
 void PostTimeConsuming(DWORD dwTickCount, LPCTSTR lpszName = nullptr);
 
+#ifdef _NEED_HTTP
 void PostOnMessageBegin(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void PostOnRequestLine(CONNID dwConnID, LPCSTR lpszMethod, USHORT usUrlFieldSet, LPCSTR lpszUrl, LPCTSTR lpszName = nullptr);
 void PostOnStatusLine(CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc, LPCTSTR lpszName = nullptr);
@@ -148,13 +149,12 @@ void PostOnChunkComplete(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void PostOnMessageComplete(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void PostOnUpgrade(CONNID dwConnID, EnHttpUpgradeType enUpgradeType, LPCTSTR lpszName = nullptr);
 void PostOnParseError(CONNID dwConnID, int iErrorCode, LPCSTR lpszErrorDesc, LPCTSTR lpszName = nullptr);
-
 void PostOnWSMessageHeader(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen, LPCTSTR lpszName = nullptr);
 void PostOnWSMessageBody(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszName = nullptr);
 void PostOnWSMessageComplete(CONNID dwConnID, LPCTSTR lpszName = nullptr);
-
 void PostUncompressBody(CONNID dwConnID, int iLength, LPCTSTR lpszName = nullptr);
 void PostUncompressBodyFail(CONNID dwConnID, int iResult, LPCTSTR lpszName = nullptr);
+#endif
 
 void PostInfoMsg(info_msg* msg);
 void LogInfoMsg(info_msg* pInfoMsg);
@@ -163,8 +163,9 @@ void LogMsg(const CString& msg);
 extern LPCTSTR g_lpszDefaultCookieFile;
 
 LPCTSTR GetDefaultCookieFile();
+BOOL SetCurrentPathToModulePath(HMODULE hModule = nullptr);
 
-#ifdef _SSL_SUPPORT
+#ifdef _NEED_SSL
 
 extern int g_c_iVerifyMode;
 extern BOOL g_c_bNeedClientVerification;
@@ -196,7 +197,7 @@ extern LPCTSTR g_s_lpszKeyPasswod2;
 
 #endif
 
-#ifdef _HTTP_SUPPORT
+#ifdef _NEED_HTTP
 
 #include "../../Common/Src/crypto/crypto.h"
 

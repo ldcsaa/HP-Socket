@@ -3,7 +3,7 @@
 
 app_arg g_app_arg;
 
-char app_arg::OPTIONS[] = ":a:b:p:j:t:e:i:c:l:s:m:o:z:x:y:d:f:n:r:u:k:w:q:hv";
+char app_arg::OPTIONS[] = ":a:b:p:j:t:e:i:c:l:s:m:o:z:x:y:n:r:u:k:w:q:hv";
 
 app_arg::app_arg()
 {
@@ -40,20 +40,14 @@ app_arg::app_arg()
 	reuse_addr		= true;
 	// -u
 	ip_loop			= true;
-	// -z
+	// -k
 	ttl				= 1;
 
-	// -x port1[,port2]
-	http_port1		= DEF_HTTP_PORT;
-	// -x port1[,port2]
-	http_port2		= DEF_HTTPS_PORT;
+	// -x
+	http_port		= DEF_HTTP_PORT;
 	// -y
-	http_secure		= false;
-	// -d
-	http_method		= "GET";
-	// -f
-	http_req_path	= "req/path?p1=v1&p2=v2";
-	// -k
+	https_port		= DEF_HTTPS_PORT;
+	// -z
 	http_use_cookie	= true;
 	// -w
 	http_with_listener = true;;
@@ -67,7 +61,7 @@ app_arg::~app_arg()
 void app_arg::ParseArgs(int argc, char* const argv[])
 {
 	int c;
-	CString strOptArg, strHttpPorts;
+	CString strOptArg;
 
 
 	while((c = ::getopt(argc, argv, OPTIONS)) != -1)
@@ -95,12 +89,10 @@ void app_arg::ParseArgs(int argc, char* const argv[])
 		case 'o': cast_mode			= (EnCastMode)atoi(strOptArg);		break;
 		case 'r': reuse_addr		= (bool)atoi(strOptArg);			break;
 		case 'u': ip_loop			= (bool)atoi(strOptArg);			break;
-		case 'z': ttl				= (int)atoi(strOptArg);				break;
-		case 'x': strHttpPorts		= strOptArg;						break;
-		case 'y': http_secure		= (bool)atoi(strOptArg);			break;
-		case 'd': http_method		= strOptArg;						break;
-		case 'f': http_req_path		= strOptArg;						break;
-		case 'k': http_use_cookie	= (bool)atoi(strOptArg);			break;
+		case 'k': ttl				= (int)atoi(strOptArg);				break;
+		case 'x': http_port			= (USHORT)atoi(strOptArg);			break;
+		case 'y': https_port		= (USHORT)atoi(strOptArg);			break;
+		case 'z': http_use_cookie	= (bool)atoi(strOptArg);			break;
 		case 'w': http_with_listener= (bool)atoi(strOptArg);			break;
 		case 'v':					PrintVersion();	exit(EXIT_CODE_OK);
 		case 'h':					PrintUsage();	exit(EXIT_CODE_OK);
@@ -109,38 +101,19 @@ void app_arg::ParseArgs(int argc, char* const argv[])
 		default:					ERROR_EXIT2(EXIT_CODE_CONFIG, ERROR_OBJECT_NOT_FOUND);
 		}
 	}
-
-	if(!strHttpPorts.IsEmpty())
-	{
-		int iStart = 0;
-
-		CString strPort1 = strHttpPorts.Tokenize(",:", iStart);
-
-		if(!strPort1.IsEmpty())
-			http_port1 = (USHORT)atoi(strPort1);
-
-		if(iStart >= 0)
-		{
-			CString strPort2 = strHttpPorts.Tokenize(",:", iStart);
-
-			if(!strPort2.IsEmpty())
-				http_port2 = (USHORT)atoi(strPort2);
-		}
-	}
 }
 
 void app_arg::PrintUsage()
 {
 	PRINTLN("-------------------------- Command Line Args -------------------------");
 	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "a", "remote_addr", "b", "bind_addr", "c", "conn_count");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "d", "http_method", "e", "test_times", "f", "http_req_path");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "h", "(PRINT THIS USAGE)", "i", "test_interval", "j", "reject_addr");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "k", "http_use_cookie", "l", "data_length", "m", "max_conn");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "n", "async", "o", "cast_mode", "p", "port");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "q", "keep_alive", "r", "reuse_addr", "s", "send_policy");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "t", "thread_count", "u", "ip_loop", "v", "(PRINT VERSION)");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "w", "http_with_listener", "x", "http_port1,port2", "y", "http_secure");
-	PRINTLN("-%s: %-20s"					, "z", "ttl");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "e", "test_times", "h", "(PRINT THIS USAGE)", "i", "test_interval");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "j", "reject_addr", "k", "ttl", "l", "data_length");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "m", "max_conn", "n", "async", "o", "cast_mode");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "p", "port", "q", "keep_alive", "r", "reuse_addr");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "s", "send_policy", "t", "thread_count", "u", "ip_loop");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "v", "(PRINT VERSION)", "w", "http_with_listener", "x", "http_port");
+	PRINTLN("-%s: %-20s-%s: %-20s"			, "y", "https_port", "z", "http_use_cookie");
 	PRINTLN("-----------------------------------------------------------------------");
 }
 
@@ -276,7 +249,7 @@ void CCommandParser::Parse(LPTSTR lpszLine, SSIZE_T nLength)
 
 	if( (m_enAppType == AT_CLIENT &&
 			(type == CT_KICK || type == CT_KICK_L || type == CT_KICK_S))
-		|| (m_enAppType != AT_AGENT && type == CT_CONNECT)	)
+		|| (m_enAppType == AT_SERVER && type == CT_CONNECT)	)
 	{
 		PRINTLN("%s: command not SUPPORTED ...", lpszCmd);
 		return;
@@ -294,8 +267,6 @@ void CCommandParser::Parse(LPTSTR lpszLine, SSIZE_T nLength)
 void CCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 {
 	ASSERT(type >= CT_START && type < CT_MAX);
-
-	CMD_FUNC func = m_szCmdNameFuncs[type].func;
 
 	LPTSTR lpszParam1 = lpszArg;
 
@@ -423,7 +394,7 @@ void CCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 		}
 	}
 
-	func(this);
+	m_szCmdNameFuncs[type].func(this);
 
 	return;
 
@@ -445,6 +416,16 @@ void CCommandParser::PrintUsage()
 {
 	PRINTLN("------ ACTION -----+------------------------ USAGE ----------------------");
 
+	PrintCmdUsage();
+
+	PRINTLN("%-18s : %6s%s", "Print Usage", "", "?");
+	PRINTLN("%-18s : %3s%s", "Print Command Args", "", "args");
+	PRINTLN("%-18s : %1s%s", "Quit", "", "Ctrl+D");
+	PRINTLN("-------------------+-----------------------------------------------------");
+}
+
+void CCommandParser::PrintCmdUsage()
+{
 	if(m_szCmdNameFuncs[CT_START].func)
 	PRINTLN("%-18s : %2s%s", "Start Up", "", (LPCTSTR)GetCmdUsage(CT_START));
 	if(m_szCmdNameFuncs[CT_STOP].func)
@@ -467,10 +448,6 @@ void CCommandParser::PrintUsage()
 	if(m_enAppType == AT_SERVER) {
 	if(m_szCmdNameFuncs[CT_STAT].func)
 	PRINTLN("%-18s : %3s%s", "Stat R/S bytes", "", (LPCTSTR)GetCmdUsage(CT_STAT));	}
-	PRINTLN("%-18s : %6s%s", "Print Usage", "", "?");
-	PRINTLN("%-18s : %3s%s", "Print Command Args", "", "args");
-	PRINTLN("%-18s : %1s%s", "Quit", "", "Ctrl+D");
-	PRINTLN("-------------------+-----------------------------------------------------");
 }
 
 CString CCommandParser::GetCmdUsage(CCommandParser::EnCmdType type)
@@ -498,7 +475,7 @@ CString CCommandParser::GetCmdUsage(CCommandParser::EnCmdType type)
 	case CT_KICK_L:
 	case CT_KICK_S:
 		if(m_enAppType != AT_CLIENT)
-			strUsage += " {Seconds} [0|1]  # (default: {60, 1})";
+			strUsage += " [{Seconds}] [0|1]  # (default: {60, 1})";
 		else
 			strUsage = nullptr;
 		break;
@@ -515,18 +492,21 @@ CString CCommandParser::GetCmdUsage(CCommandParser::EnCmdType type)
 	return strUsage;
 }
 
-void CCommandParser::PrintStatus(EnServiceState enStatus)
+void CCommandParser::PrintStatus(EnServiceState enStatus, LPCTSTR lpszName)
 {
 	CString strStatus;
 
 	if(m_enAppType == AT_SERVER)
-		strStatus = "Server";
+		strStatus += "Server";
 	else if(m_enAppType == AT_AGENT)
-		strStatus = "Agent";
+		strStatus += "Agent";
 	else if(m_enAppType == AT_CLIENT)
-		strStatus = "Client";
+		strStatus += "Client";
 	else
 		ASSERT(FALSE);
+
+	if(!::IsStrEmpty(lpszName))
+		strStatus.AppendChar(' ').Append(lpszName);
 
 	if(enStatus == SS_STARTING)
 		strStatus += " is starting";
@@ -541,6 +521,470 @@ void CCommandParser::PrintStatus(EnServiceState enStatus)
 
 	puts(strStatus);
 }
+
+#ifdef _NEED_HTTP
+
+void CHttpCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
+{
+	ASSERT(type >= CT_START && type < CT_MAX);
+
+	switch(type)
+	{
+	case CT_START:
+		{
+			if(m_enAppType == CCommandParser::AT_SERVER)
+			{
+				LPTSTR lpszParam1 = ::StrSep2(&lpszArg, " \t");
+
+				if(!::IsStrEmpty(lpszParam1))
+					goto ERROR_USAGE;
+			}
+			else if(!ParseCmdOptions(lpszArg, ":s:"))
+				goto ERROR_USAGE;
+		}
+
+		break;
+
+	case CT_STOP:
+	case CT_STAT:
+	case CT_STATUS:
+		{
+			LPTSTR lpszParam1 = ::StrSep2(&lpszArg, " \t");
+
+			if(!::IsStrEmpty(lpszParam1))
+				goto ERROR_USAGE;
+		}
+
+		break;
+
+	case CT_SEND:
+		{
+			if(m_enAppType != AT_CLIENT)
+			{
+				LPTSTR lpszConnID = ::StrSep2(&lpszArg, " \t");
+
+				if(::IsStrEmpty(lpszConnID))
+					goto ERROR_USAGE;
+				if((m_dwConnID = atol(lpszConnID)) <= 0)
+					goto ERROR_USAGE;
+			}
+
+			if(m_enAppType == AT_SERVER)
+			{
+				if(!ParseCmdOptions(lpszArg, ":s:d:"))
+					goto ERROR_USAGE;
+			}
+			else
+			{
+				if(!ParseCmdOptions(lpszArg, ":p:x:h:d:f:"))
+					goto ERROR_USAGE;
+
+				if(m_strPath.IsEmpty())
+					m_strPath = "/";
+				if(m_strMethod.IsEmpty())
+					m_strMethod = HTTP_METHOD_GET;
+			}
+		}
+
+		break;
+
+	case CT_KICK:
+		{
+			LPTSTR lpszConnID = ::StrSep2(&lpszArg, " \t");
+
+			if(::IsStrEmpty(lpszConnID))
+				goto ERROR_USAGE;
+			if((m_dwConnID = atol(lpszConnID)) <= 0)
+				goto ERROR_USAGE;
+
+			if(m_enAppType == AT_SERVER && !ParseCmdOptions(lpszArg, ":s:"))
+				goto ERROR_USAGE;
+			else if(m_enAppType == AT_AGENT && !::IsStrEmpty(::StrSep2(&lpszArg, " \t")))
+				goto ERROR_USAGE;
+		}
+
+		break;
+
+	case CT_KICK_L:
+	case CT_KICK_S:
+		{
+			m_dwSeconds	= 60;
+
+			if(::IsStrEmpty(lpszArg))
+				break;
+
+			char c = ::TrimLeft(&lpszArg, " \t")[0];
+
+			if(c == 0)
+				break;
+			else if(c == '-')
+			{
+				if(m_enAppType != AT_SERVER || !ParseCmdOptions(lpszArg, ":s:"))
+					goto ERROR_USAGE;
+			}
+			else
+			{
+				LPTSTR lpszSeconds = ::StrSep2(&lpszArg, " \t");
+
+				if(((int)(m_dwSeconds = atoi(lpszSeconds))) <= 0)
+					goto ERROR_USAGE;
+
+				if(::IsStrEmpty(lpszArg))
+					break;
+
+				char c = ::TrimLeft(&lpszArg, " \t")[0];
+
+				if(c == 0)
+					break;
+				else if(c == '-')
+				{
+					if(m_enAppType != AT_SERVER || !ParseCmdOptions(lpszArg, ":s:"))
+						goto ERROR_USAGE;
+				}
+				else
+					goto ERROR_USAGE;
+			}
+		}
+
+		break;
+
+	case CT_PAUSE:
+		{
+			if(m_enAppType != AT_CLIENT)
+			{
+				LPTSTR lpszConnID = ::StrSep2(&lpszArg, " \t");
+
+				if(::IsStrEmpty(lpszConnID))
+					goto ERROR_USAGE;
+				if((m_dwConnID = atol(lpszConnID)) <= 0)
+					goto ERROR_USAGE;
+			}
+
+			m_bFlag = TRUE;
+
+			if(::IsStrEmpty(lpszArg))
+				break;
+
+			char c = ::TrimLeft(&lpszArg, " \t")[0];
+
+			if(c == 0)
+				break;
+			else if(c == '-')
+			{
+				if(m_enAppType != AT_SERVER || !ParseCmdOptions(lpszArg, ":s:"))
+					goto ERROR_USAGE;
+			}
+			else
+			{
+				LPTSTR lpszFlag = ::StrSep2(&lpszArg, " \t");
+
+				if((lpszFlag[0] != '0' && lpszFlag[0] != '1') || lpszFlag[1] != 0)
+					goto ERROR_USAGE;
+
+				m_bFlag = (BOOL)(lpszFlag[0] - '0');
+
+				if(::IsStrEmpty(lpszArg))
+					break;
+
+				char c = ::TrimLeft(&lpszArg, " \t")[0];
+
+				if(c == 0)
+					break;
+				else if(c == '-')
+				{
+					if(m_enAppType != AT_SERVER || !ParseCmdOptions(lpszArg, ":s:"))
+						goto ERROR_USAGE;
+				}
+				else
+					goto ERROR_USAGE;
+			}
+		}
+
+		break;
+
+	case CT_CONNECT:
+		{
+			if(m_enAppType == AT_AGENT)
+			{
+				LPTSTR lpszHost = ::StrSep2(&lpszArg, " \t");
+
+				if(::IsStrEmpty(lpszHost))
+				{
+					m_strRemoteAddr	= g_app_arg.remote_addr;
+					m_usRemotePort	= 0;
+				}
+				else
+				{
+					LPTSTR lpszPort = ::StrSep2(&lpszArg, " \t");
+
+					if(::IsStrEmpty(lpszPort) || !::IsStrEmpty(::StrSep2(&lpszArg, " \t")))
+						goto ERROR_USAGE;
+					if((m_usRemotePort = (USHORT)atoi(lpszPort)) <= 0)
+						goto ERROR_USAGE;
+
+					m_strRemoteAddr = lpszHost;
+				}
+			}
+			else if(m_enAppType == AT_CLIENT)
+			{
+				m_bFlag		= FALSE;	
+				m_strPath	= ::StrSep2(&lpszArg, " \t");
+
+				if(m_strPath.IsEmpty())
+					goto ERROR_USAGE;
+
+				if(strnicmp(m_strPath, STR_HTTPS_SCHEMA, strlen(STR_HTTPS_SCHEMA)) == 0)
+					m_bHttps = TRUE;
+				else if(strnicmp(m_strPath, STR_HTTP_SCHEMA, strlen(STR_HTTP_SCHEMA)) == 0)
+					m_bHttps = FALSE;
+				else
+					goto ERROR_USAGE;
+
+				if(!ParseCmdOptions(lpszArg, ":x:h:d:f:r:"))
+					goto ERROR_USAGE;
+
+				if(m_strMethod.IsEmpty())
+					m_strMethod = HTTP_METHOD_GET;
+			}
+		}
+
+		break;
+
+	default:
+		ASSERT(FALSE);
+	}
+
+	m_szCmdNameFuncs[type].func(this);
+
+	return;
+
+ERROR_USAGE:
+	PRINTLN("'%s' usage: %s", m_szCmdNameFuncs[type].name, (LPCTSTR)GetCmdUsage(type));
+}
+
+BOOL CHttpCommandParser::ParseCmdOptions(LPCTSTR lpszArg, LPCTSTR lpszOptions)
+{
+	if(::IsStrEmpty(lpszArg))
+		return TRUE;
+
+	vector<CString> vtItem;
+
+	if(!SplitStr(lpszArg, vtItem, " \t", "\'\""))
+		return FALSE;
+
+	int iSize = (int)vtItem.size();
+
+	if(iSize % 2 != 0)
+		return FALSE;
+
+	for(int i = 0; i < iSize; i += 2)
+	{
+		CString& strOpt = vtItem[i];
+		CString& strVal = vtItem[i + 1];
+
+		if(strOpt.GetLength() != 2 || strOpt[0] != '-')
+			return FALSE;
+
+		TCHAR c = strOpt[1];
+
+		if(c == ':' || ::StrChr(lpszOptions, c) == nullptr)
+			return FALSE;
+
+		if(c == 's')
+		{
+			if(strVal != "0" && strVal != "1")
+				return FALSE;
+
+			m_bHttps = (BOOL)(strVal[0] - '0');
+		}
+		else if(c == 'p')
+		{
+			m_strPath = strVal;
+		}
+		else if(c == 'x')
+		{
+			m_strMethod = strVal;
+			m_strMethod.MakeUpper();
+		}
+		else if(c == 'h')
+		{
+			int iPos = strVal.Find(':');
+
+			if(iPos <= 0)
+				return FALSE;
+
+			m_vtHeaders.push_back(strVal.Left(iPos));
+			m_vtHeaders.push_back(strVal.Mid(iPos + 1).Trim());
+		}
+		else if(c == 'd')
+		{
+			m_strData = strVal;
+		}
+		else if(c == 'f')
+		{
+			m_strFilePath = strVal;
+		}
+		else if(c == 'r')
+		{
+			if(strVal != "0" && strVal != "1")
+				return FALSE;
+
+			m_bFlag = (BOOL)(strVal[0] - '0');
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+void CHttpCommandParser::Reset()
+{
+	__super::Reset();
+	m_vtHeaders.clear();
+
+	m_bHttps		= FALSE;
+	m_strPath		= nullptr;
+	m_strMethod		= nullptr;
+	m_strData		= nullptr;
+	m_strFilePath	= nullptr;
+}
+
+void CHttpCommandParser::PrintCmdUsage()
+{
+	switch(m_enAppType)
+	{
+	case AT_SERVER:
+		if(m_szCmdNameFuncs[CT_START].func)
+		PRINTLN("%-18s : %2s%s", "Start Up", "", (LPCTSTR)GetCmdUsage(CT_START));
+		if(m_szCmdNameFuncs[CT_STOP].func)
+		PRINTLN("%-18s : %3s%s", "Shut Down", "", (LPCTSTR)GetCmdUsage(CT_STOP));
+		if(m_szCmdNameFuncs[CT_STATUS].func)
+		PRINTLN("%-18s : %1s%s", "Show Status", "", (LPCTSTR)GetCmdUsage(CT_STATUS));
+		if(m_szCmdNameFuncs[CT_SEND].func)
+		PRINTLN("%-18s : %3s%s", "Send WS Message", "", (LPCTSTR)GetCmdUsage(CT_SEND));
+		if(m_szCmdNameFuncs[CT_PAUSE].func)
+		PRINTLN("%-18s : %2s%s", "Pause/Unpause Recv", "", (LPCTSTR)GetCmdUsage(CT_PAUSE));
+		if(m_szCmdNameFuncs[CT_KICK].func)
+		PRINTLN("%-18s : %3s%s", "Release Connection", "", (LPCTSTR)GetCmdUsage(CT_KICK));
+		if(m_szCmdNameFuncs[CT_KICK_L].func)
+		PRINTLN("%-18s : %2s%s", "Kick Long Conns", "", (LPCTSTR)GetCmdUsage(CT_KICK_L));
+		if(m_szCmdNameFuncs[CT_KICK_S].func)
+		PRINTLN("%-18s : %2s%s", "Kick Silence Conns", "", (LPCTSTR)GetCmdUsage(CT_KICK_S));
+		if(m_szCmdNameFuncs[CT_STAT].func)
+		PRINTLN("%-18s : %3s%s", "Stat R/S bytes", "", (LPCTSTR)GetCmdUsage(CT_STAT));
+		break;
+	case AT_AGENT:
+		if(m_szCmdNameFuncs[CT_START].func)
+		PRINTLN("%-18s : %2s%s", "Start Up", "", (LPCTSTR)GetCmdUsage(CT_START));
+		if(m_szCmdNameFuncs[CT_STOP].func)
+		PRINTLN("%-18s : %3s%s", "Shut Down", "", (LPCTSTR)GetCmdUsage(CT_STOP));
+		if(m_szCmdNameFuncs[CT_STATUS].func)
+		PRINTLN("%-18s : %1s%s", "Show Status", "", (LPCTSTR)GetCmdUsage(CT_STATUS));
+		if(m_szCmdNameFuncs[CT_CONNECT].func)
+		PRINTLN("%-18s : %s%s", "Connect To", "", (LPCTSTR)GetCmdUsage(CT_CONNECT));
+		if(m_szCmdNameFuncs[CT_SEND].func)
+		PRINTLN("%-18s : %3s%s", "Send Message", "", (LPCTSTR)GetCmdUsage(CT_SEND));
+		if(m_szCmdNameFuncs[CT_PAUSE].func)
+		PRINTLN("%-18s : %2s%s", "Pause/Unpause Recv", "", (LPCTSTR)GetCmdUsage(CT_PAUSE));
+		if(m_szCmdNameFuncs[CT_KICK].func)
+		PRINTLN("%-18s : %3s%s", "Kick Connection", "", (LPCTSTR)GetCmdUsage(CT_KICK));
+		if(m_szCmdNameFuncs[CT_KICK_L].func)
+		PRINTLN("%-18s : %2s%s", "Kick Long Conns", "", (LPCTSTR)GetCmdUsage(CT_KICK_L));
+		if(m_szCmdNameFuncs[CT_KICK_S].func)
+		PRINTLN("%-18s : %2s%s", "Kick Silence Conns", "", (LPCTSTR)GetCmdUsage(CT_KICK_S));
+		break;
+	case AT_CLIENT:
+		if(m_szCmdNameFuncs[CT_START].func)
+		PRINTLN("%-18s : %2s%s", "Start Up", "", (LPCTSTR)GetCmdUsage(CT_START));
+		if(m_szCmdNameFuncs[CT_STOP].func)
+		PRINTLN("%-18s : %3s%s", "Shut Down", "", (LPCTSTR)GetCmdUsage(CT_STOP));
+		if(m_szCmdNameFuncs[CT_STATUS].func)
+		PRINTLN("%-18s : %1s%s", "Show Status", "", (LPCTSTR)GetCmdUsage(CT_STATUS));
+		if(m_szCmdNameFuncs[CT_CONNECT].func)
+		PRINTLN("%-18s : %s%s", "Open URL", "", (LPCTSTR)GetCmdUsage(CT_CONNECT));
+		if(m_szCmdNameFuncs[CT_SEND].func)
+		PRINTLN("%-18s : %3s%s", "Send Message", "", (LPCTSTR)GetCmdUsage(CT_SEND));
+		if(m_szCmdNameFuncs[CT_PAUSE].func)
+		PRINTLN("%-18s : %2s%s", "Pause/Unpause Recv", "", (LPCTSTR)GetCmdUsage(CT_PAUSE));
+		break;
+	default:
+		ASSERT(FALSE);
+	}
+}
+
+CString CHttpCommandParser::GetCmdUsage(CCommandParser::EnCmdType type)
+{
+	CString strUsage = m_szCmdNameFuncs[type].name;
+
+	switch(type)
+	{
+	case CT_START:
+		if(m_enAppType != AT_SERVER)
+			strUsage += " [-s 0|1]  # (s-0 - http, s-1 - https)";
+		break;
+	case CT_SEND:
+		if(m_enAppType == AT_SERVER)
+			strUsage += " {ConnID} [-s 0|1] -d {WS-Data}  # (WS only, s-0 - ws, s-1 - wss)";
+		else
+		{
+			if(m_enAppType != AT_CLIENT)
+				strUsage += " {ConnID}";
+			strUsage += " [-x {Method}] [-p {Path}] [-h {Header}]* [-d {Data}] [-f {File}]";
+		}
+		break;
+	case CT_PAUSE:
+		if(m_enAppType != AT_CLIENT)
+			strUsage += " {ConnID}";
+		strUsage += " [0|1]";
+		if(m_enAppType == AT_SERVER)
+			strUsage += " [-s 0|1]";
+		strUsage += "  # (0 - unpause, 1 - pause";
+		if(m_enAppType == AT_SERVER)
+			strUsage += ", s-0 - http, s-1 - https";
+		strUsage += ")";
+		break;
+	case CT_KICK:
+		if(m_enAppType == AT_CLIENT)
+			strUsage = nullptr;
+		else
+		{
+			strUsage += " {ConnID}";
+			if(m_enAppType == AT_SERVER)
+				strUsage += " [-s 0|1]  # (s-0 - http, s-1 - https)";
+		}
+		break;
+	case CT_KICK_L:
+	case CT_KICK_S:
+		if(m_enAppType == AT_CLIENT)
+			strUsage = nullptr;
+		else
+		{
+			strUsage += " [{Seconds}]";
+			if(m_enAppType == AT_SERVER)
+				strUsage += " [-s 0|1]  # (default: 60s, s-0 - http, s-1 - https)";
+			else
+				strUsage += "  # (default: 60s)";
+		}
+		break;
+	case CT_CONNECT:
+		if(m_enAppType == AT_AGENT)
+			strUsage += " [{Host} {Port}]";
+		else if(m_enAppType == AT_CLIENT)
+			strUsage += " {URL} [-x {Method}] [-h {Header}]* [-d {Data}] [-f {File}] [-r 0|1]  # (r-0 - reuse connection, r-1 - force reconnect)";
+		else
+			strUsage = nullptr;
+		break;
+	default	:
+		;
+	}
+
+	return strUsage;
+}
+
+#endif
 
 void server_statistics_info::Reset(BOOL bResetClientCount)
 {
@@ -600,6 +1044,7 @@ void server_statistics_info::CheckStatistics()
 
 void client_statistics_info::Reset()
 {
+	m_iConnected		= 0;
 	m_dwBeginTickCount	= 0;
 	m_dwTimeconsuming	= 0;
 	m_llTotalReceived	= 0;
@@ -633,7 +1078,23 @@ void client_statistics_info::AddTotalSend(int iLength)
 	::InterlockedExchangeAdd(&m_llTotalSent, iLength);
 }
 
-void client_statistics_info::CheckStatistics()
+void client_statistics_info::TermConnected()
+{
+	if(m_iConnected >= 0)
+		m_iConnected = -0xFFFFFF;
+}
+
+void client_statistics_info::AddConnected()
+{
+	::InterlockedIncrement(&m_iConnected);
+}
+
+int client_statistics_info::GetConnected()
+{
+	return m_iConnected;
+}
+
+void client_statistics_info::CheckStatistics(BOOL bCheckSend)
 {
 	::WaitFor(100L);
 
@@ -643,7 +1104,7 @@ void client_statistics_info::CheckStatistics()
 
 	::LogMsg(strMsg);
 
-	if(m_llExpectReceived == m_llTotalSent && m_llTotalSent == m_llTotalReceived)
+	if(m_llExpectReceived == m_llTotalReceived && (!bCheckSend || m_llTotalSent == m_llExpectReceived))
 		strMsg.Format(_T("*** Success: time consuming - %u millisecond ! ***"), m_dwTimeconsuming);
 	else
 		strMsg.Format(_T("*** Fail: manual terminated ? (or data lost) ***"));
@@ -845,98 +1306,119 @@ void LogClientSendFail(int iSequence, int iSocketIndex, DWORD code, LPCTSTR lpsz
 void LogSend(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Send OK --> %s"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszContent);
+	msg.Format(_T("# %s%Iu Send OK --> %s"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszContent);
+	LogMsg(msg);
+}
+
+void LogSending(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %s%Iu Sending --> %s"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszContent);
 	LogMsg(msg);
 }
 
 void LogSendFail(CONNID dwConnID, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Send Fail --> %s (%d)"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszDesc, code);
+	msg.Format(_T("# %s%Iu Send Fail --> %s (%d)"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszDesc, code);
 	LogMsg(msg);
 }
 
 void LogDisconnect(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Disconnect OK"), (LPCTSTR)SafeString2(lpszName), dwConnID);
+	msg.Format(_T("# %s%Iu, Disconnect OK"), (LPCTSTR)SafeString2(lpszName), dwConnID);
 	LogMsg(msg);
 }
 
 void LogDisconnectFail(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Disconnect Fail"), (LPCTSTR)SafeString2(lpszName), dwConnID);
+	msg.Format(_T("# %s%Iu, Disconnect Fail"), (LPCTSTR)SafeString2(lpszName), dwConnID);
 	LogMsg(msg);
 }
 
 void LogDisconnect2(CONNID dwConnID, BOOL bForce, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Disconnect OK (%c)"), (LPCTSTR)SafeString2(lpszName), dwConnID, bForce ? 'F' : 'N');
+	msg.Format(_T("# %s%Iu, Disconnect OK (%c)"), (LPCTSTR)SafeString2(lpszName), dwConnID, bForce ? 'F' : 'N');
 	LogMsg(msg);
 }
 
 void LogDisconnectFail2(CONNID dwConnID, BOOL bForce, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Disconnect Fail (%c)"), (LPCTSTR)SafeString2(lpszName), dwConnID, bForce ? 'F' : 'N');
+	msg.Format(_T("# %s%Iu, Disconnect Fail (%c)"), (LPCTSTR)SafeString2(lpszName), dwConnID, bForce ? 'F' : 'N');
+	LogMsg(msg);
+}
+
+void LogDisconnectLong(DWORD dwSeconds, BOOL bForce, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sDisconnect OK (%us, %c)"), (LPCTSTR)SafeString(lpszName), dwSeconds, bForce ? 'F' : 'N');
+	LogMsg(msg);
+}
+
+void LogDisconnectFailLong(DWORD dwSeconds, BOOL bForce, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sDisconnect Fail (%us, %c)"), (LPCTSTR)SafeString(lpszName), dwSeconds, bForce ? 'F' : 'N');
 	LogMsg(msg);
 }
 
 void LogPause(CONNID dwConnID, BOOL bPause, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) %s OK"), (LPCTSTR)SafeString2(lpszName), dwConnID, bPause ? "Pause" : "Unpause");
+	msg.Format(_T("# %s%Iu, %s OK"), (LPCTSTR)SafeString2(lpszName), dwConnID, bPause ? "Pause" : "Unpause");
 	LogMsg(msg);
 }
 
 void LogPauseFail(CONNID dwConnID, BOOL bPause, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) %s Fail --> %s (%d)"), (LPCTSTR)SafeString2(lpszName), dwConnID, bPause ? "Pause" : "Unpause", ::GetLastErrorStr(), ::GetLastError());
+	msg.Format(_T("# %s%Iu, %s Fail --> %s (%d)"), (LPCTSTR)SafeString2(lpszName), dwConnID, bPause ? "Pause" : "Unpause", ::GetLastErrorStr(), ::GetLastError());
 	LogMsg(msg);
 }
 
 void LogConnect(LPCTSTR lpszAddress, USHORT usPort, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %sConnecting to %s#%d ..."), (LPCTSTR)SafeString2(lpszName), lpszAddress, usPort);
+	msg.Format(_T("# %sConnecting to %s#%d ..."), (LPCTSTR)SafeString(lpszName), lpszAddress, usPort);
 	LogMsg(msg);
 }
 
 void LogConnectFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %sConnect Fail --> %s (%d)"), (LPCTSTR)SafeString2(lpszName), lpszDesc, code);
+	msg.Format(_T("# %sConnect Fail --> %s (%d)"), (LPCTSTR)SafeString(lpszName), lpszDesc, code);
 	LogMsg(msg);
 }
 
 void LogRelease(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Release OK"), (LPCTSTR)SafeString2(lpszName), dwConnID);
+	msg.Format(_T("# %s%Iu, Release OK"), (LPCTSTR)SafeString2(lpszName), dwConnID);
 	LogMsg(msg);
 }
 
 void LogReleaseFail(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Release Fail"), (LPCTSTR)SafeString2(lpszName), dwConnID);
+	msg.Format(_T("# %s%Iu, Release Fail"), (LPCTSTR)SafeString2(lpszName), dwConnID);
 	LogMsg(msg);
 }
 
 void LogDetect(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Detect Connection OK"), (LPCTSTR)SafeString2(lpszName), dwConnID);
+	msg.Format(_T("# %s%Iu, Detect Connection OK"), (LPCTSTR)SafeString2(lpszName), dwConnID);
 	LogMsg(msg);
 }
 
 void LogDetectFail(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
-	msg.Format(_T("# %s(%Iu) Detect Connection Fail"), (LPCTSTR)SafeString2(lpszName), dwConnID);
+	msg.Format(_T("# %s%Iu, Detect Connection Fail"), (LPCTSTR)SafeString2(lpszName), dwConnID);
 	LogMsg(msg);
 }
 
@@ -1133,6 +1615,8 @@ void PostTimeConsuming(DWORD dwTickCount, LPCTSTR lpszName)
 	PostInfoMsg(msg);
 }
 
+#ifdef _NEED_HTTP
+
 void PostOnMessageBegin(CONNID dwConnID, LPCTSTR lpszName)
 {
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_MESSAGE_BEGIN, 0, nullptr, lpszName);
@@ -1286,7 +1770,7 @@ void PostOnWSMessageComplete(CONNID dwConnID, LPCTSTR lpszName)
 
 void PostUncompressBody(CONNID dwConnID, int iLength, LPCTSTR lpszName)
 {
-	LPTSTR lpszContent = new TCHAR[20];
+	LPTSTR lpszContent = new TCHAR[40];
 	wsprintf(lpszContent, _T("(%d bytes)"), iLength);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_UNCOMPRESS_BODY, content_len, lpszContent, lpszName);
@@ -1296,13 +1780,15 @@ void PostUncompressBody(CONNID dwConnID, int iLength, LPCTSTR lpszName)
 
 void PostUncompressBodyFail(CONNID dwConnID, int iResult, LPCTSTR lpszName)
 {
-	LPTSTR lpszContent = new TCHAR[20];
+	LPTSTR lpszContent = new TCHAR[40];
 	wsprintf(lpszContent, _T("(rs: %d)"), iResult);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_UNCOMPRESS_BODY_FAIL, content_len, lpszContent, lpszName);
 
 	PostInfoMsg(msg);
 }
+
+#endif
 
 void PostInfoMsg(info_msg* msg)
 {
@@ -1356,6 +1842,58 @@ void LogInfoMsg(info_msg* pInfoMsg)
 void LogMsg(const CString& msg)
 {
 	puts(msg);
+}
+
+BOOL SplitStr(LPCTSTR lpszSrc, vector<CString>& vtItem, LPCTSTR pszSepectors, LPCTSTR pszQMarks)
+{
+	vtItem.clear();
+
+	CString strQMarks		= pszQMarks;
+	CString strSepectors	= pszSepectors;
+
+	if(strSepectors.IsEmpty())
+		strSepectors = _T(" ");
+
+	if(!strQMarks.IsEmpty())
+		if(strQMarks.FindOneOf(strSepectors) != -1)
+			return FALSE;
+
+	BOOL bRetVal	= TRUE;
+	CString strSrc	= lpszSrc;
+
+	while(!strSrc.Trim(strSepectors).IsEmpty())
+	{
+		CString strItem;
+
+		int iSrcLen	= strSrc.GetLength();
+		int iPos1	= strSrc.FindOneOf(strSepectors);
+		int iPos2	= !strQMarks.IsEmpty() ? strSrc.FindOneOf(strQMarks) : -1;
+		int iPos3	= -1;
+
+		if(iPos1 == -1 && iPos2 == -1)
+			strItem = strSrc;
+		else if(iPos1 != -1 && (iPos1 < iPos2 || iPos2 == -1))
+			strItem = strSrc.Left(iPos1);
+		else	// (iPos1 > iPos2 || iPos1 == -1)
+		{
+			TCHAR tc	= strSrc[iPos2];
+			iPos3		= strSrc.Find(tc, iPos2 + 1);
+			if(iPos3 != -1)
+				strItem = strSrc.Mid(iPos2 + 1, iPos3 - iPos2 - 1);
+			else
+			{
+				vtItem.clear();
+				bRetVal = FALSE;
+				break;
+			}
+		}
+
+		vtItem.push_back(strItem);
+
+		strSrc = strSrc.Right(iPos3 == -1 ? (iSrcLen - (iPos1 == -1 ? strItem.GetLength() : iPos1 + 1)) : (iSrcLen - iPos3 - 1));
+	}
+
+	return bRetVal;
 }
 
 sa_family_t GuessAddrFamily(LPCTSTR lpszAddress)
@@ -1459,11 +1997,12 @@ LPCTSTR GetDefaultCookieFile()
 	return c_szCookieFile;
 }
 
-#ifdef _SSL_SUPPORT
+#ifdef _NEED_SSL
 
 #include "../../src/common/FuncHelper.h"
 
-#define SSL_CERT_RELATIVE_PATH		_T("\\..\\..\\ssl-cert\\")
+#define SSL_CERT_RELATIVE_PATH_1		_T("/hp-ssl-cert/")
+#define SSL_CERT_RELATIVE_PATH_2		_T("/../../ssl-cert/")
 
 CString g_c_strCAPemCertFileOrPath;
 CString g_c_strPemCertFile;
@@ -1512,7 +2051,11 @@ BOOL InitSSLParams()
 {
 	::SetCurrentPathToModulePath();
 
-	CString strPath = ::GetCurrentDirectory() + SSL_CERT_RELATIVE_PATH;
+	CString strCur	= ::GetCurrentDirectory();
+	CString strPath	= strCur + SSL_CERT_RELATIVE_PATH_1;
+
+	if(!CFile::IsDirectory(strPath))
+		strPath = strCur + SSL_CERT_RELATIVE_PATH_2;
 
 	if(g_c_lpszPemCertFile)
 	{
@@ -1591,7 +2134,10 @@ BOOL InitSSLParams()
 
 #endif
 
-#ifdef _HTTP_SUPPORT
+#ifdef _NEED_HTTP
+
+LPCSTR HTTP_WEB_SOCKET_CLOSE_FLAG		= "$close";
+const BYTE HTTP_WEB_SOCKET_MASK_KEY[]	= {0x1, 0x2, 0x3, 0x4};
 
 CStringA& HttpVersionToString(EnHttpVersion enVersion, CStringA& strResult)
 {

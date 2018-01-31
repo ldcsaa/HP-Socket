@@ -26,6 +26,8 @@
 #include "TcpClient.h"
 #include "SSLHelper.h"
 
+#ifdef _SSL_SUPPORT
+
 class CSSLClient : public CTcpClient
 {
 public:
@@ -72,3 +74,5 @@ private:
 	CSSLSession m_sslSession;
 	DWORD		m_dwMainThreadID;
 };
+
+#endif

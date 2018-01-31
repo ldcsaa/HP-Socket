@@ -40,6 +40,9 @@
     <Filter Include="Common\zlib">
       <UniqueIdentifier>{1f98cd44-e05d-4553-81a2-6d4578951c3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HPSocket\GLobal">
+      <UniqueIdentifier>{d475d2d4-e2b6-4540-bcb8-02519cc10ae4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -93,9 +96,6 @@
     <ClInclude Include="..\..\Common\Src\http\http_parser.h">
       <Filter>Common\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Src\HPSocket4C-SSL.h">
-      <Filter>HPSocket\SSL</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Src\SSLServer.h">
       <Filter>HPSocket\SSL</Filter>
     </ClInclude>
@@ -108,19 +108,7 @@
     <ClInclude Include="..\..\Src\SSLAgent.h">
       <Filter>HPSocket\SSL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Src\SocketObject4C.h">
-      <Filter>HPSocket\Public</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Src\HPSocket4C.h">
-      <Filter>HPSocket\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Src\MiscHelper.h">
-      <Filter>HPSocket\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Src\SocketHelper.h">
-      <Filter>HPSocket\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Src\SocketInterface.h">
       <Filter>HPSocket\Public</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Src\TcpServer.h">
@@ -210,6 +198,24 @@
     <ClInclude Include="..\..\Src\HttpCookie.h">
       <Filter>HPSocket\HTTP</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\MiscHelper.h">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SocketHelper.h">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SocketObject4C.h">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\HPSocket4C-SSL.h">
+      <Filter>HPSocket\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\SocketInterface.h">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Src\FuncHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -233,9 +239,6 @@
     <ClCompile Include="..\..\Common\Src\http\http_parser.c">
       <Filter>Common\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Src\HPSocket4C-SSL.cpp">
-      <Filter>HPSocket\SSL</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Src\SSLAgent.cpp">
       <Filter>HPSocket\SSL</Filter>
     </ClCompile>
@@ -247,15 +250,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Src\SSLClient.cpp">
       <Filter>HPSocket\SSL</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Src\HPSocket4C.cpp">
-      <Filter>HPSocket\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Src\MiscHelper.cpp">
-      <Filter>HPSocket\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Src\SocketHelper.cpp">
-      <Filter>HPSocket\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\TcpAgent.cpp">
       <Filter>HPSocket\TCP</Filter>
@@ -352,6 +346,21 @@
     </ClCompile>
     <ClCompile Include="..\..\Src\HttpCookie.cpp">
       <Filter>HPSocket\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HPSocket4C.cpp">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\MiscHelper.cpp">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\SocketHelper.cpp">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HPSocket4C-SSL.cpp">
+      <Filter>HPSocket\GLobal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Src\FuncHelper.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

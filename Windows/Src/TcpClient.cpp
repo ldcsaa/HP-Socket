@@ -577,6 +577,7 @@ void CTcpClient::Reset()
 	m_usPort	= 0;
 	m_iPending	= 0;
 	m_bPaused	= FALSE;
+	m_bConnected= FALSE;
 	m_enState	= SS_STOPPED;
 }
 

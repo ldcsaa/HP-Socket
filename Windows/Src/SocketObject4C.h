@@ -350,6 +350,8 @@ typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener>						C_HP_UdpServer
 typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener>						C_HP_UdpClientListener;
 typedef C_HP_ClientListenerT<IUdpCast, IUdpCastListener>							C_HP_UdpCastListener;
 
+#ifdef _HTTP_SUPPORT
+
 template<class T> class C_HP_HttpListenerT : public IHttpListenerT<T>
 {
 public:
@@ -535,7 +537,7 @@ public:
 	virtual EnHandleResult OnWSMessageComplete(IHttpServer* pSender, CONNID dwConnID)
 		{return m_lsnHttp.OnWSMessageComplete(pSender, dwConnID);}
 
-	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, UINT_PTR soListen)
+	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 		{return m_lsnServer.OnPrepareListen(pSender, soListen);}
 	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient)
 		{return m_lsnServer.OnAccept(pSender, dwConnID, soClient);}
@@ -590,7 +592,7 @@ public:
 	virtual EnHandleResult OnWSMessageComplete(IHttpAgent* pSender, CONNID dwConnID)
 		{return m_lsnHttp.OnWSMessageComplete(pSender, dwConnID);}
 
-	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, UINT_PTR socket)
+	virtual EnHandleResult OnPrepareConnect(ITcpAgent* pSender, CONNID dwConnID, SOCKET socket)
 		{return m_lsnAgent.OnPrepareConnect(pSender, dwConnID, socket);}
 	virtual EnHandleResult OnConnect(ITcpAgent* pSender, CONNID dwConnID)
 		{return m_lsnAgent.OnConnect(pSender, dwConnID);}
@@ -645,7 +647,7 @@ public:
 	virtual EnHandleResult OnWSMessageComplete(IHttpClient* pSender, CONNID dwConnID)
 		{return m_lsnHttp.OnWSMessageComplete(pSender, dwConnID);}
 
-	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, UINT_PTR socket)
+	virtual EnHandleResult OnPrepareConnect(ITcpClient* pSender, CONNID dwConnID, SOCKET socket)
 		{return m_lsnClient.OnPrepareConnect(pSender, dwConnID, socket);}
 	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID)
 		{return m_lsnClient.OnConnect(pSender, dwConnID);}
@@ -664,3 +666,5 @@ public:
 	C_HP_HttpClientBaseListener1 m_lsnHttp;
 	C_HP_HttpClientBaseListener2 m_lsnClient;
 };
+
+#endif

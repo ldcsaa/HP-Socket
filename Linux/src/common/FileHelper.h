@@ -62,6 +62,16 @@ public:
 	BOOL IsValid()	{return IS_VALID_FD(m_fd);}
 	operator FD ()	{return m_fd;}
 
+	BOOL IsExist()	{return IsValid();}
+
+	BOOL IsDirectory();
+	BOOL IsFile();
+
+	static BOOL IsExist(LPCTSTR lpszFilePath);
+	static BOOL IsDirectory(LPCTSTR lpszFilePath);
+	static BOOL IsFile(LPCTSTR lpszFilePath);
+	static BOOL IsLink(LPCTSTR lpszFilePath);
+
 public:
 	CFile(LPCTSTR lpszFilePath = nullptr, int iFlag = O_RDONLY, mode_t iMode = 0)
 	: m_fd(INVALID_FD)
@@ -88,9 +98,10 @@ public:
 	BOOL Unmap();
 	BOOL MSync(int iFlag = MS_SYNC, SIZE_T dwSize = 0);
 	
-	BOOL IsValid()		{return m_pv != INVALID_MAP_ADDR;}
-	SIZE_T Size()		{return m_dwSize;}
-	operator PBYTE ()	{return m_pv;}
+	BOOL IsValid	()		{return m_pv != INVALID_MAP_ADDR;}
+	SIZE_T Size		()		{return m_dwSize;}
+	LPBYTE Ptr		()		{return m_pv;}
+	operator LPBYTE	()		{return Ptr();}
 
 public:
 	CFileMapping()

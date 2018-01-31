@@ -24,6 +24,8 @@
 #include "stdafx.h"
 #include "HttpClient.h"
 
+#ifdef _HTTP_SUPPORT
+
 template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::CheckParams()
 {
 	if(m_enLocalVersion != HV_1_1 && m_enLocalVersion != HV_1_0)
@@ -44,34 +46,29 @@ template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_
 
 	LPCSTR lpszHost	= nullptr;
 	USHORT usPort	= 0;
+	BOOL bConnect	= (_stricmp(lpszMethod, HTTP_METHOD_CONNECT) == 0);
 
-	GetRemoteHost(&lpszHost, &usPort);
-	if(usPort == default_port) usPort = 0;
+	if(!bConnect)
+	{
+		GetRemoteHost(&lpszHost, &usPort);
+		if(usPort == default_port) usPort = 0;
+	}
 
 	CStringA strPath;
-	::AdjustRequestPath(lpszPath, strPath);
+	::AdjustRequestPath(bConnect, lpszPath, strPath);
 
 	m_objHttp.SetRequestPath(lpszMethod, strPath);
 	m_objHttp.ReloadCookies();
 
-	::MakeRequestLine(lpszMethod, lpszPath, m_enLocalVersion, strHeader);
+	::MakeRequestLine(lpszMethod, strPath, m_enLocalVersion, strHeader);
 	::MakeHeaderLines(lpHeaders, iHeaderCount, &m_objHttp.GetCookieMap(), iLength, TRUE, -1, lpszHost, usPort, strHeader);
 	::MakeHttpPacket(strHeader, pBody, iLength, szBuffer);
 
 	return SendPackets(szBuffer, 2);
 }
 
-template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::SendLocalFile(LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)
+template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::SendLocalFile(LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount)
 {
-	if(
-		strcmp(lpszMethod, HTTP_METHOD_POST)  != 0	&&
-		strcmp(lpszMethod, HTTP_METHOD_PUT)	  != 0	&&
-		strcmp(lpszMethod, HTTP_METHOD_PATCH) != 0 	)
-	{
-		::SetLastError(ERROR_INVALID_PARAMETER);
-		return FALSE;
-	}
-
 	CAtlFile file;
 	CAtlFileMapping<> fmap;
 
@@ -235,6 +232,9 @@ template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::O
 		if(state == SS_STOPPED)
 			return FALSE;
 	}
+
+	if(iLength < 0 && !::IsStrEmptyA((LPCSTR)pBody))
+		return SendLocalFile((LPCSTR)pBody, lpszMethod, strPath, lpHeaders, iHeaderCount);
 
 	return SendRequest(lpszMethod, strPath, lpHeaders, iHeaderCount, pBody, iLength);
 }
@@ -506,5 +506,7 @@ template class CHttpSyncClientT<CTcpClient, HTTP_DEFAULT_PORT>;
 
 template class CHttpClientT<IHttpRequester, CSSLClient, HTTPS_DEFAULT_PORT>;
 template class CHttpSyncClientT<CSSLClient, HTTPS_DEFAULT_PORT>;
+
+#endif
 
 #endif

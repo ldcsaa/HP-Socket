@@ -22,6 +22,9 @@
     <Filter Include="Global">
       <UniqueIdentifier>{7c0a7de9-4368-4b7c-8772-ad172a4efc7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Crypto">
+      <UniqueIdentifier>{25547690-7ec1-4451-8a7d-74ee2b9cca18}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\common\GlobalDef.h">
@@ -138,6 +141,39 @@
     <ClInclude Include="..\..\src\common\GlobalErrno.h">
       <Filter>Public</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\SSLAgent.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLClient.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLHelper.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLServer.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HPSocket-SSL.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\crypto\Crypto.h">
+      <Filter>Common\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpAgent.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpClient.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpCookie.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpHelper.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpServer.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp">
@@ -208,6 +244,39 @@
     </ClCompile>
     <ClCompile Include="..\..\src\HPSocket.cpp">
       <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLAgent.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLClient.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLHelper.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLServer.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HPSocket-SSL.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\crypto\Crypto.cpp">
+      <Filter>Common\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpAgent.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpClient.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpCookie.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpHelper.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpServer.cpp">
+      <Filter>HTTP</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

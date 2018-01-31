@@ -18,7 +18,7 @@ void AgentRemovePkgInfo(HP_Agent pSender, CONNID dwConnID)
 	DestructPkgInfo(pInfo);
 }
 
-En_HP_HandleResult __stdcall OnConnect(HP_Agent pSender, HP_CONNID dwConnID)
+En_HP_HandleResult __HP_CALL OnConnect(HP_Agent pSender, HP_CONNID dwConnID)
 {
 	TCHAR szAddress[50];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
@@ -31,7 +31,7 @@ En_HP_HandleResult __stdcall OnConnect(HP_Agent pSender, HP_CONNID dwConnID)
 	return HR_OK;
 }
 
-En_HP_HandleResult __stdcall OnReceive(HP_Agent pSender, HP_CONNID dwConnID, int iLength)
+En_HP_HandleResult __HP_CALL OnReceive(HP_Agent pSender, HP_CONNID dwConnID, int iLength)
 {
 	TPkgInfo* pInfo = AgentFindPkgInfo(pSender, dwConnID);
 
@@ -74,13 +74,13 @@ En_HP_HandleResult __stdcall OnReceive(HP_Agent pSender, HP_CONNID dwConnID, int
 	return HR_OK;
 }
 
-En_HP_HandleResult __stdcall OnSend(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
+En_HP_HandleResult __HP_CALL OnSend(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	::PostOnSend(dwConnID, pData, iLength);
 	return HR_OK;
 }
 
-En_HP_HandleResult __stdcall OnClose(HP_Agent pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
+En_HP_HandleResult __HP_CALL OnClose(HP_Agent pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode)
 {
 	iErrorCode == SE_OK ? ::PostOnClose(dwConnID) :
 	::PostOnError(dwConnID, enOperation, iErrorCode);
@@ -90,7 +90,7 @@ En_HP_HandleResult __stdcall OnClose(HP_Agent pSender, HP_CONNID dwConnID, En_HP
 	return HR_OK;
 }
 
-En_HP_HandleResult __stdcall OnShutdown(HP_Agent pSender)
+En_HP_HandleResult __HP_CALL OnShutdown(HP_Agent pSender)
 {
 	::PostOnShutdown();
 	return HR_OK;
@@ -101,14 +101,6 @@ HP_TcpPullAgent s_agent;
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(::HP_Agent_HasStarted(s_agent))
-	{
-		::LogAgentStartFail(SE_ILLEGAL_STATE, ::HP_GetSocketErrorDesc(SE_ILLEGAL_STATE));
-		return;
-	}
-
-	::HP_TcpAgent_SetKeepAliveTime(s_agent, g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
-
 	if(::HP_Agent_Start(s_agent, g_app_arg.bind_addr, g_app_arg.async))
 		::LogAgentStart(g_app_arg.bind_addr, g_app_arg.async);
 	else
@@ -172,17 +164,17 @@ void OnCmdKick(CCommandParser* pParser)
 void OnCmdKickLong(CCommandParser* pParser)
 {
 	if(::HP_Agent_DisconnectLongConnections(s_agent, pParser->m_dwSeconds * 1000, pParser->m_bFlag))
-		::LogDisconnect2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectLong(pParser->m_dwSeconds, pParser->m_bFlag);
 	else
-		::LogDisconnectFail2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectFailLong(pParser->m_dwSeconds, pParser->m_bFlag);
 }
 
 void OnCmdKickSilence(CCommandParser* pParser)
 {
 	if(::HP_Agent_DisconnectSilenceConnections(s_agent, pParser->m_dwSeconds * 1000, pParser->m_bFlag))
-		::LogDisconnect2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectLong(pParser->m_dwSeconds, pParser->m_bFlag);
 	else
-		::LogDisconnectFail2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectFailLong(pParser->m_dwSeconds, pParser->m_bFlag);
 }
 
 void CreateHPSocketObjects()
@@ -198,6 +190,8 @@ void CreateHPSocketObjects()
 	::HP_Set_FN_Agent_OnPullReceive(s_listener, OnReceive);
 	::HP_Set_FN_Agent_OnClose(s_listener, OnClose);
 	::HP_Set_FN_Agent_OnShutdown(s_listener, OnShutdown);
+
+	::HP_TcpAgent_SetKeepAliveTime(s_agent, g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
 }
 
 void DestroyHPSocketObjects()
@@ -215,6 +209,8 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.ParseArgs(argc, argv);
 
+	CreateHPSocketObjects();
+
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 
 	fnCmds[CCommandParser::CT_START]	= OnCmdStart;
@@ -226,8 +222,6 @@ int main(int argc, char* const argv[])
 	fnCmds[CCommandParser::CT_KICK]		= OnCmdKick;
 	fnCmds[CCommandParser::CT_KICK_L]	= OnCmdKickLong;
 	fnCmds[CCommandParser::CT_KICK_S]	= OnCmdKickSilence;
-
-	CreateHPSocketObjects();
 
 	CCommandParser s_cmd_parser(CCommandParser::AT_AGENT, fnCmds);
 	s_cmd_parser.Run();

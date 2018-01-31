@@ -25,6 +25,9 @@
 
 #include "GlobalDef.h"
 #include "Singleton.h"
+#include "StringT.h"
+
+#include <math.h>
 
 #include <functional>
 #include <algorithm>
@@ -640,3 +643,377 @@ private:
 
 	DECLARE_NO_COPY_CLASS(MapWrapper)
 };
+
+/************************************************************************/
+/*                            比较仿函数                                */
+/************************************************************************/
+
+template<class T> struct char_comparator
+{
+	typedef T	row_type;
+	static row_type row_type_value(const T& v)		{return (row_type)v;}
+	static bool equal_to(const T& v1, const T& v2)	{return strcmp(v1, v2) == 0;}
+};
+
+template<class T> struct char_nc_comparator
+{
+	typedef T	row_type;
+	static row_type row_type_value(const T& v)		{return (row_type)v;}
+	static bool equal_to(const T& v1, const T& v2)	{return stricmp(v1, v2) == 0;}
+};
+
+template<class T> struct wchar_comparator
+{
+	typedef T	row_type;
+	static row_type row_type_value(const T& v)		{return (row_type)v;}
+	static bool equal_to(const T& v1, const T& v2)	{return wcscmp(v1, v2) == 0;}
+};
+
+template<class T> struct wchar_nc_comparator
+{
+	typedef T	row_type;
+	static row_type row_type_value(const T& v)		{return (row_type)v;}
+	static bool equal_to(const T& v1, const T& v2)	{return wcsicmp(v1, v2) == 0;}
+};
+
+template<class T> struct cstring_comparator
+{
+	typedef typename T::PCXSTR	row_type;
+	static row_type row_type_value(const T& v)		{return (row_type)v;}
+	static bool equal_to(const T& v1, const T& v2)	{return v1.Compare(v2) == 0;}
+};
+
+template<class T> struct cstring_nc_comparator
+{
+	typedef typename T::PCXSTR	row_type;
+	static row_type row_type_value(const T& v)		{return (row_type)v;}
+	static bool equal_to(const T& v1, const T& v2)	{return v1.CompareNoCase(v2) == 0;}
+};
+
+// char/wchar_t/CStringX hash function
+template<class T, class H> struct str_hash_func_t
+{
+	struct hash
+	{
+		size_t operator() (const T& t) const
+		{
+			return hash_value(H::row_type_value(t));
+		}
+	};
+
+	struct equal_to
+	{
+		bool operator() (const T& t1, const T& t2) const
+		{
+			return H::equal_to(t1, t2);
+		}
+	};
+
+};
+
+// char/wchar_t/CStringX hash function (no case)
+template<class T, class H> struct str_nc_hash_func_t
+{
+	struct hash
+	{
+		size_t operator() (const T& t) const
+		{
+			size_t _Val				  = 2166136261U;
+			typename H::row_type lpsz = H::row_type_value(t);
+			char c;
+
+			while((c = *lpsz++) != 0) 
+			{
+				if(c >= 'A' && c <= 'Z')
+					c = (char)(c + 32);
+
+				_Val = 16777619U * _Val ^ c;
+
+			}
+
+			return _Val;
+		}
+	};
+
+	struct equal_to
+	{
+		bool operator() (const T& t1, const T& t2) const
+		{
+			return H::equal_to(t1, t2);
+		}
+	};
+
+};
+
+typedef str_hash_func_t<LPCSTR, char_comparator<LPCSTR>>				str_hash_func;
+typedef str_hash_func_t<LPCWSTR, wchar_comparator<LPCWSTR>>				wstr_hash_func;
+typedef str_hash_func_t<CStringA, cstring_comparator<CStringA>>			cstringa_hash_func;
+typedef str_hash_func_t<CStringW, cstring_comparator<CStringW>>			cstringw_hash_func;
+typedef str_nc_hash_func_t<LPCSTR, char_nc_comparator<LPCSTR>>			str_nc_hash_func;
+typedef str_nc_hash_func_t<LPCWSTR, wchar_nc_comparator<LPCWSTR>>		wstr_nc_hash_func;
+typedef str_nc_hash_func_t<CStringA, cstring_nc_comparator<CStringA>>	cstringa_nc_hash_func;
+typedef str_nc_hash_func_t<CStringW, cstring_nc_comparator<CStringW>>	cstringw_nc_hash_func;
+
+#ifdef _UNICODE
+	typedef cstringw_hash_func		cstring_hash_func;
+	typedef cstringw_nc_hash_func	cstring_nc_hash_func;
+#else
+	typedef cstringa_hash_func		cstring_hash_func;
+	typedef cstringa_nc_hash_func	cstring_nc_hash_func;
+#endif
+
+struct bool_comp_func
+{
+	bool operator() (bool v1, bool v2) const
+	{
+		if(!v1)
+			return false;
+		if(v1 == v2)
+			return false;
+
+		return true;
+	}
+};
+
+template<class T>
+// T -> (signed / unsigned) short / int / long / int64_t
+struct integer_comp_func
+{
+	bool operator() (T v1, T v2) const
+	{
+		return v1 < v2;
+	}
+};
+
+typedef integer_comp_func<short>				short_comp_func;
+typedef integer_comp_func<int>					int_comp_func;
+typedef integer_comp_func<long>					long_comp_func;
+typedef integer_comp_func<int64_t>				int64_comp_func;
+typedef integer_comp_func<unsigned short>		ushort_comp_func;
+typedef integer_comp_func<unsigned int>			uint_comp_func;
+typedef integer_comp_func<unsigned long>		ulong_comp_func;
+typedef integer_comp_func<unsigned int64_t>		uint64_comp_func;
+
+struct float_comp_func
+{
+	bool operator() (float v1, float v2) const
+	{
+		float disc	= v1 - v2;
+		if(fabsf(disc) < 1E-5)
+			return false;
+
+		return disc < 0;
+	}
+};
+
+struct double_comp_func
+{
+	bool operator() (double v1, double v2) const
+	{
+		double disc	= v1 - v2;
+		if(fabs(disc) < 1E-8)
+			return false;
+
+		return disc < 0;
+	}
+};
+
+template<class T, bool CASE = false>
+// T -> (unsigned) char / wchar_t
+struct character_comp_func
+{
+	bool operator() (T v1, T v2) const
+	{
+		if(!CASE)
+		{
+			if(v1 >= 'A' && v1 <= 'Z')	v1 += 32;
+			if(v2 >= 'A' && v2 <= 'Z')	v2 += 32;
+		}
+
+		return v1 < v2;
+	}
+};
+
+typedef character_comp_func<char, true>				char_case_comp_func;
+typedef character_comp_func<unsigned char, true>	uchar_case_comp_func;
+typedef character_comp_func<wchar_t, true>			wchar_case_comp_func;
+typedef character_comp_func<char, false>			char_ucase_comp_func;
+typedef character_comp_func<unsigned char, false>	uchar_ucase_comp_func;
+typedef character_comp_func<wchar_t, false>			wchar_ucase_comp_func;
+
+template<class T, bool CASE = false>
+// T -> TCHAR* / CString
+struct str_comp_func
+{
+	//比较函数。
+	bool operator() (const T &A, const T &B) const
+	{
+		if(!CASE)
+			return lstricmp((LPCTSTR)A, (LPCTSTR)B) < 0;
+		else
+			return lstrcmp((LPCTSTR)A, (LPCTSTR)B) < 0;
+	}
+};
+
+typedef str_comp_func<LPCTSTR, true>		case_tchar_comp_func;
+typedef str_comp_func<LPCTSTR, false>		uncase_tchar_comp_func;
+typedef str_comp_func<CString, true>		case_string_comp_func;
+typedef str_comp_func<CString, false>		uncase_string_comp_func;
+typedef case_tchar_comp_func				tchar_ptr_case_comp_func;
+typedef uncase_tchar_comp_func				tchar_ptr_ucase_comp_func;
+typedef case_string_comp_func				string_case_comp_func;
+typedef uncase_string_comp_func				string_ucase_comp_func;
+/************************************************************************/
+/*                            排序仿函数                                */
+/************************************************************************/
+template<bool ASC = true>
+struct bool_sort_func
+{
+	bool operator() (bool v1, bool v2) const
+	{
+		if(v1 == v2)
+			return false;
+
+		bool result = !v1;
+		return ASC ? result : !result;
+	}
+};
+
+typedef bool_sort_func<true>	bool_asc_sort_func;
+typedef bool_sort_func<false>	bool_desc_sort_func;
+
+template<class T, bool ASC = true>
+// T -> (signed / unsigned) short / int / long / int64_t
+struct integer_sort_func
+{
+	bool operator() (T v1, T v2) const
+	{
+		if(v1 == v2)
+			return false;
+
+		bool result = v1 < v2;
+		return ASC ? result : !result;
+	}
+};
+
+typedef integer_sort_func<short,			true>		short_asc_sort_func;
+typedef integer_sort_func<unsigned short,	true>		ushort_asc_sort_func;
+typedef integer_sort_func<int,				true>		int_asc_sort_func;
+typedef integer_sort_func<unsigned int,		true>		uint_asc_sort_func;
+typedef integer_sort_func<long,				true>		long_asc_sort_func;
+typedef integer_sort_func<unsigned long,	true>		ulong_asc_sort_func;
+typedef integer_sort_func<int64_t,			true>		int64_asc_sort_func;
+typedef integer_sort_func<unsigned int64_t,	true>		uint64_asc_sort_func;
+typedef integer_sort_func<short,			false>		short_desc_sort_func;
+typedef integer_sort_func<unsigned short,	false>		ushort_desc_sort_func;
+typedef integer_sort_func<int,				false>		int_desc_sort_func;
+typedef integer_sort_func<unsigned int,		false>		uint_desc_sort_func;
+typedef integer_sort_func<long,				false>		long_desc_sort_func;
+typedef integer_sort_func<unsigned long,	false>		ulong_desc_sort_func;
+typedef integer_sort_func<int64_t,			false>		int64_desc_sort_func;
+typedef integer_sort_func<unsigned int64_t,	false>		uint64_desc_sort_func;
+
+template<bool ASC = true>
+struct float_sort_func
+{
+	bool operator() (float v1, float v2) const
+	{
+		float disc	= v1 - v2;
+		if(fabsf(disc) < 1E-5)
+			return false;
+
+		bool result = disc < 0;
+		return ASC ? result : !result;
+	}
+};
+
+typedef float_sort_func<true>		float_asc_sort_func;
+typedef float_sort_func<false>		float_desc_sort_func;
+
+template<bool ASC = true>
+struct double_sort_func
+{
+	bool operator() (double v1, double v2) const
+	{
+		double disc	= v1 - v2;
+		if(fabs(disc) < 1E-8)
+			return false;
+
+		bool result = disc < 0;
+		return ASC ? result : !result;
+	}
+};
+
+typedef double_sort_func<true>		double_asc_sort_func;
+typedef double_sort_func<false>		double_desc_sort_func;
+
+template<class T, bool ASC = true, bool CASE = false>
+// T -> (unsigned) char / wchar_t
+struct character_sort_func
+{
+	bool operator() (T v1, T v2) const
+	{
+		if(!CASE)
+		{
+			if(v1 >= 'A' && v1 <= 'Z')	v1 += 32;
+			if(v2 >= 'A' && v2 <= 'Z')	v2 += 32;
+		}
+
+		if(v1 == v2)
+			return false;
+
+		bool result = v1 < v2;
+		return ASC ? result : !result;
+	}
+};
+
+typedef character_sort_func<char, true, true>				char_asc_case_sort_func;
+typedef character_sort_func<unsigned char, true, true>		uchar_asc_case_sort_func;
+typedef character_sort_func<wchar_t, true, true>			wchar_asc_case_sort_func;
+typedef character_sort_func<char, true, false>				char_asc_ucase_sort_func;
+typedef character_sort_func<unsigned char, true, false>		uchar_asc_ucase_sort_func;
+typedef character_sort_func<wchar_t, true, false>			wchar_asc_ucase_sort_func;
+typedef character_sort_func<char, false, true>				char_desc_case_sort_func;
+typedef character_sort_func<unsigned char, false, true>		uchar_desc_case_sort_func;
+typedef character_sort_func<wchar_t, false, true>			wchar_desc_case_sort_func;
+typedef character_sort_func<char, false, false>				char_desc_ucase_sort_func;
+typedef character_sort_func<unsigned char, false, false>	uchar_desc_ucase_sort_func;
+typedef character_sort_func<wchar_t, false, false>			wchar_desc_ucase_sort_func;
+
+template<class T, bool ASC = true, bool CASE = false>
+// T -> TCHAR* / CString
+struct str_sort_func
+{
+	bool operator() (const T& v1, const T& v2) const
+	{
+		bool result;
+
+		if(CASE)
+		{
+			int v = lstrcmp((LPCTSTR)v1, (LPCTSTR)v2);
+			if(v == 0)
+				result = false;
+			else
+				result = v < 0;
+		}
+		else
+		{
+			int v = tstricmp((LPCTSTR)v1, (LPCTSTR)v2);
+			if(v == 0)
+				result = false;
+			else
+				result = v < 0;
+		}
+
+		return ASC ? result : !result;
+	}
+};
+
+typedef str_sort_func<TCHAR*, true, true>		tchar_ptr_asc_case_sort_func;
+typedef str_sort_func<CString, true, true>		string_asc_case_sort_func;
+typedef str_sort_func<TCHAR*, true, false>		tchar_ptr_asc_ucase_sort_func;
+typedef str_sort_func<CString, true, false>		string_asc_ucase_sort_func;
+typedef str_sort_func<TCHAR*, false, true>		tchar_ptr_desc_case_sort_func;
+typedef str_sort_func<CString, false, true>		string_desc_case_sort_func;
+typedef str_sort_func<TCHAR*, false, false>		tchar_ptr_desc_ucase_sort_func;
+typedef str_sort_func<CString, false, false>	string_desc_ucase_sort_func;

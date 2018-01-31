@@ -242,8 +242,12 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 	ASSERT(lpszRemoteAddress && usPort != 0);
 
 	DWORD result	= NO_ERROR;
-	CONNID dwConnID	= 0;
 	SOCKET soClient	= INVALID_SOCKET;
+
+	if(!pdwConnID)
+		pdwConnID	= CreateLocalObject(CONNID);
+
+	*pdwConnID = 0;
 
 	HP_SOCKADDR addr;
 
@@ -255,10 +259,10 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 
 		if(result == NO_ERROR)
 		{
-			result = PrepareConnect(dwConnID, soClient);
+			result = PrepareConnect(*pdwConnID, soClient);
 
 			if(result == NO_ERROR)
-				result = ConnectToServer(dwConnID, lpszRemoteAddress, usPort, soClient, addr, pExtra);
+				result = ConnectToServer(*pdwConnID, lpszRemoteAddress, usPort, soClient, addr, pExtra);
 		}
 	}
 
@@ -269,8 +273,6 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 
 		::SetLastError(result);
 	}
-
-	if(pdwConnID) *pdwConnID = dwConnID;
 
 	return (result == NO_ERROR);
 }
@@ -842,7 +844,7 @@ VOID CTcpAgent::OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)
 		ASSERT(rs && !(events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP)));
 
 		UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
-		VERIFY(m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj));
+		m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj);
 	}
 
 	pSocketObj->csIo.Unlock();
@@ -941,8 +943,6 @@ BOOL CTcpAgent::HandleClose(TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFla
 
 BOOL CTcpAgent::HandleConnect(TAgentSocketObj* pSocketObj, UINT events)
 {
-	ASSERT(events & EPOLLOUT);
-
 	int code = ::SSO_GetError(pSocketObj->socket);
 
 	if(!IS_NO_ERROR(code) || (events & _EPOLL_ERROR_EVENTS))
@@ -957,6 +957,8 @@ BOOL CTcpAgent::HandleConnect(TAgentSocketObj* pSocketObj, UINT events)
 		return FALSE;
 	}
 
+	ASSERT(events & EPOLLOUT);
+
 	pSocketObj->SetConnected();
 
 	if(TRIGGER(FireConnect(pSocketObj)) == HR_ERROR)
@@ -966,7 +968,7 @@ BOOL CTcpAgent::HandleConnect(TAgentSocketObj* pSocketObj, UINT events)
 	}
 
 	UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
-	VERIFY(m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj));
+	m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj);
 
 	return TRUE;
 }

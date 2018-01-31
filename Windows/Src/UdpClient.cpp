@@ -605,6 +605,7 @@ void CUdpClient::Reset()
 	m_iPending		= 0;
 	m_dwDetectFails	= 0;
 	m_bPaused		= FALSE;
+	m_bConnected	= FALSE;
 	m_enState		= SS_STOPPED;
 }
 

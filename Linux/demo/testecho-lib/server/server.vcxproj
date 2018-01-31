@@ -122,7 +122,6 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\common\BufferPool.cpp" />
     <ClCompile Include="..\..\..\src\common\FileHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\SysHelper.cpp" />
@@ -130,17 +129,14 @@
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\common\BufferPool.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h" />
     <ClInclude Include="..\..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\..\src\common\FuncHelper.h" />
     <ClInclude Include="..\..\..\src\common\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\src\common\GlobalDef.h" />
-    <ClInclude Include="..\..\..\src\common\GlobalErrno.h" />
     <ClInclude Include="..\..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\..\src\common\Thread.h" />
-    <ClInclude Include="..\..\..\src\HPSocket.h" />
-    <ClInclude Include="..\..\..\src\HPTypeDef.h" />
-    <ClInclude Include="..\..\..\src\SocketInterface.h" />
     <ClInclude Include="..\..\Global\helper.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -149,6 +145,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket_d;rt;pthread</LibraryDependencies>
@@ -163,6 +160,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket;rt;pthread</LibraryDependencies>
@@ -176,6 +174,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket_d;rt;pthread</LibraryDependencies>
@@ -190,6 +189,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket;rt;pthread</LibraryDependencies>
@@ -203,6 +203,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket_d;rt;pthread</LibraryDependencies>
@@ -217,6 +218,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket;rt;pthread</LibraryDependencies>

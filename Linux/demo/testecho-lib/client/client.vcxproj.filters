@@ -13,16 +13,10 @@
     <Filter Include="Global">
       <UniqueIdentifier>{88ead97d-e618-4da0-8572-fcfb5e5cd08c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HPSocket\common">
-      <UniqueIdentifier>{c353be7e-7793-4261-9ddf-9c5a990821ad}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
       <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\BufferPool.cpp">
-      <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\FileHelper.cpp">
       <Filter>Common</Filter>
@@ -38,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\common\BufferPool.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\common\FileHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -56,20 +47,14 @@
     <ClInclude Include="..\..\..\src\common\Thread.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\HPTypeDef.h">
-      <Filter>HPSocket</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Global\helper.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\HPSocket4C.h">
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\GlobalDef.h">
-      <Filter>HPSocket\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\common\GlobalErrno.h">
-      <Filter>HPSocket\common</Filter>
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h">
+      <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

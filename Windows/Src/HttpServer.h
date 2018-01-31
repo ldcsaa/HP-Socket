@@ -27,6 +27,8 @@
 #include "HttpHelper.h"
 #include "../Common/Src/Thread.h"
 
+#ifdef _HTTP_SUPPORT
+
 template<class T, USHORT default_port> class CHttpServerT : public IComplexHttpResponder, public T
 {
 protected:
@@ -85,6 +87,7 @@ private:
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
 	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj);
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj);
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult DoFireShutdown();
@@ -173,5 +176,7 @@ typedef CHttpServerT<CTcpServer, HTTP_DEFAULT_PORT> CHttpServer;
 #include "SSLServer.h"
 
 typedef CHttpServerT<CSSLServer, HTTPS_DEFAULT_PORT> CHttpsServer;
+
+#endif
 
 #endif

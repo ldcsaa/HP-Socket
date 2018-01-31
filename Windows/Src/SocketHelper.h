@@ -31,6 +31,8 @@
 
 #include "SocketInterface.h"
 #include "../Common/Src/WaitFor.h"
+#include "../Common/Src/SysHelper.h"
+#include "../Common/Src/FuncHelper.h"
 #include "../Common/Src/BufferPool.h"
 #include "../Common/Src/RingBuffer.h"
 
@@ -39,14 +41,6 @@
 描述：声明组件的公共全局常量
 ************************************************************************/
 
-/* HP-Socket 版本号 */
-#define HP_VERSION_MAJOR						5
-#define HP_VERSION_MINOR						1
-#define HP_VERSION_REVISE						1
-#define HP_VERSION_BUILD						6
-
-/* IOCP 最大工作线程数 */
-#define MAX_WORKER_THREAD_COUNT					500
 /* IOCP Socket 缓冲区最小值 */
 #define MIN_SOCKET_BUFFER_SIZE					88
 /* 小文件最大字节数 */
@@ -58,8 +52,6 @@
 
 /* Server/Agent 默认最大连接数 */
 #define DEFAULT_MAX_CONNECTION_COUNT			10000
-/* Server/Agent 默认 IOCP 工作线程数 */
-#define DEFAULT_WORKER_THREAD_COUNT				GetDefaultWorkerThreadCount()
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
 #define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		(10 * 1000)
 /* Server/Agent 默认 Socket 缓存池大小 */
@@ -80,7 +72,7 @@
 #define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
 
 /* TCP 默认通信数据缓冲区大小 */
-#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			GetDefaultTcpSocketBufferSize()
+#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_SIZE
 /* TCP 默认心跳包间隔 */
 #define DEFALUT_TCP_KEEPALIVE_TIME				(30 * 1000)
 /* TCP 默认心跳确认包检测间隔 */
@@ -118,15 +110,6 @@
 #define IPV4_ADDR_SEPARATOR_CHAR				'.'
 #define IPV6_ADDR_SEPARATOR_CHAR				':'
 #define IPV6_ZONE_INDEX_CHAR					'%'
-
-#define EXECUTE_RESET_ERROR(expr)				(::SetLastError(0), (expr))
-#define EXECUTE_RESTORE_ERROR(expr)				{int __le_ = ::GetLastError(); (expr); ::SetLastError(__le_);}
-inline int ENSURE_ERROR(int def_code)			{int __le_ = ::GetLastError(); if(__le_ == 0) __le_ = (def_code);  return __le_;}
-#define ENSURE_ERROR_CANCELLED					ENSURE_ERROR(ERROR_CANCELLED)
-#define TRIGGER(expr)							EXECUTE_RESET_ERROR((expr))
-
-DWORD GetDefaultWorkerThreadCount();
-DWORD GetDefaultTcpSocketBufferSize();
 
 /************************************************************************
 名称：Windows Socket 组件初始化类
@@ -336,6 +319,8 @@ template<class T> struct TBufferObjBase
 	int					capacity;
 	CPrivateHeap&		heap;
 
+	volatile LONG		sndCounter;
+
 	T* next;
 	T* last;
 
@@ -356,6 +341,16 @@ template<class T> struct TBufferObjBase
 	{
 		ASSERT(pBufferObj);
 		pBufferObj->heap.Free(pBufferObj);
+	}
+
+	void ResetSendCounter()
+	{
+		sndCounter = 2;
+	}
+
+	LONG ReleaseSendCounter()
+	{
+		return ::InterlockedDecrement(&sndCounter);
 	}
 
 	TBufferObjBase(CPrivateHeap& hp, DWORD dwCapacity)
@@ -683,9 +678,6 @@ struct TClientCloseContext
 /*****************************************************************************************************/
 /******************************************** 公共帮助方法 ********************************************/
 /*****************************************************************************************************/
-
-// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
-DWORD GetHPSocketVersion();
 
 /* 获取错误描述文本 */
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode);

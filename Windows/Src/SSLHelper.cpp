@@ -24,6 +24,9 @@
 #include "stdafx.h"
 #include "SSLHelper.h"
 #include "SocketHelper.h"
+
+#ifdef _SSL_SUPPORT
+
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 #include "openssl/engine.h"
@@ -94,7 +97,9 @@ CSSLInitializer::~CSSLInitializer()
 	EVP_cleanup();
 	CRYPTO_cleanup_all_ex_data();
 	ERR_free_strings();
+#if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_0_2
 	SSL_COMP_free_compression_methods();
+#endif
 
 	CRYPTO_set_locking_callback			(nullptr);
 	CRYPTO_set_dynlock_create_callback	(nullptr);
@@ -666,3 +671,5 @@ void CSSLSessionPool::Clear()
 
 	m_itPool.Clear();
 }
+
+#endif

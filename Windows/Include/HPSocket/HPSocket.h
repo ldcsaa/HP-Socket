@@ -62,19 +62,6 @@ Release:
 
 #pragma once
 
-/**************************************************/
-/*********** imports / exports HPSocket ***********/
-
-#ifdef HPSOCKET_STATIC_LIB
-	#define HPSOCKET_API EXTERN_C
-#else
-	#ifdef HPSOCKET_EXPORTS
-		#define HPSOCKET_API EXTERN_C __declspec(dllexport)
-	#else
-		#define HPSOCKET_API EXTERN_C __declspec(dllimport)
-	#endif
-#endif
-
 #include "SocketInterface.h"
 
 /*****************************************************************************************************************************************************/
@@ -391,8 +378,99 @@ typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpCl
 typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
 
 /*****************************************************************************************************************************************************/
+/*************************************************************** Global Function Exports *************************************************************/
+/*****************************************************************************************************************************************************/
+
+// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
+HPSOCKET_API DWORD HP_GetHPSocketVersion();
+
+// 获取错误描述文本
+HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode);
+// 调用系统的 GetLastError() 方法获取系统错误代码
+HPSOCKET_API DWORD SYS_GetLastError	();
+// 调用系统的 WSAGetLastError() 方法获取系统错误代码
+HPSOCKET_API int SYS_WSAGetLastError();
+// 调用系统的 setsockopt()
+HPSOCKET_API int SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID val, int len);
+// 调用系统的 getsockopt()
+HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
+// 调用系统的 ioctlsocket()
+HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
+// 调用系统的 WSAIoctl()
+HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
+
+// 设置 socket 选项：IPPROTO_TCP -> TCP_NODELAY
+HPSOCKET_API int SYS_SSO_NoDelay(SOCKET sock, BOOL bNoDelay);
+// 设置 socket 选项：SOL_SOCKET -> SO_DONTLINGER
+HPSOCKET_API int SYS_SSO_DontLinger(SOCKET sock, BOOL bDont);
+// 设置 socket 选项：SOL_SOCKET -> SO_LINGER
+HPSOCKET_API int SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger);
+// 设置 socket 选项：SOL_SOCKET -> SO_RCVBUF
+HPSOCKET_API int SYS_SSO_RecvBuffSize(SOCKET sock, int size);
+// 设置 socket 选项：SOL_SOCKET -> SO_SNDBUF
+HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size);
+// 设置 socket 选项：SOL_SOCKET -> SO_REUSEADDR
+HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse);
+
+// 获取 SOCKET 本地地址信息
+HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+// 获取 SOCKET 远程地址信息
+HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
+
+/* 枚举主机 IP 地址 */
+HPSOCKET_API BOOL SYS_EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, LPTIPAddr** lpppIPAddr, int& iIPAddrCount);
+/* 释放 LPTIPAddr* */
+HPSOCKET_API BOOL SYS_FreeHostIPAddresses(LPTIPAddr* lppIPAddr);
+/* 检查字符串是否符合 IP 地址格式 */
+HPSOCKET_API BOOL SYS_IsIPAddress(LPCTSTR lpszAddress, EnIPAddrType* penType = nullptr);
+/* 通过主机名获取 IP 地址 */
+HPSOCKET_API BOOL SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int& iIPLenth, EnIPAddrType& enType);
+
+/* 64 位网络字节序转主机字节序 */
+HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value);
+/* 64 位主机字节序转网络字节序 */
+HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value);
+
+// CP_XXX -> UNICODE
+HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> CP_XXX
+HPSOCKET_API BOOL SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength);
+// GBK -> UNICODE
+HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> GBK
+HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength);
+// UTF8 -> UNICODE
+HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
+// UNICODE -> UTF8
+HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength);
+// GBK -> UTF8
+HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength);
+// UTF8 -> GBK
+HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
+
+// 计算 Base64 编码后长度
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
+// 计算 Base64 解码后长度
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+// 计算 URL 编码后长度
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// 计算 URL 解码后长度
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+/*****************************************************************************************************************************************************/
 /******************************************************************** HTTP Exports *******************************************************************/
 /*****************************************************************************************************************************************************/
+
+#ifdef _HTTP_SUPPORT
 
 // 创建 IHttpServer 对象
 HPSOCKET_API IHttpServer* HP_Create_HttpServer(IHttpServerListener* pListener);
@@ -511,75 +589,8 @@ HPSOCKET_API __time64_t HP_HttpCookie_HLP_MaxAgeToExpires(int iMaxAge);
 HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires);
 
 /*****************************************************************************************************************************************************/
-/*************************************************************** Global Function Exports *************************************************************/
+/************************************************************* HTTP Global Function Exports **********************************************************/
 /*****************************************************************************************************************************************************/
-
-// 获取 HPSocket 版本号（4 个字节分别为：主版本号，子版本号，修正版本号，构建编号）
-HPSOCKET_API DWORD HP_GetHPSocketVersion();
-
-// 获取错误描述文本
-HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode);
-// 调用系统的 GetLastError() 方法获取系统错误代码
-HPSOCKET_API DWORD SYS_GetLastError	();
-// 调用系统的 WSAGetLastError() 方法获取系统错误代码
-HPSOCKET_API int SYS_WSAGetLastError();
-// 调用系统的 setsockopt()
-HPSOCKET_API int SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID val, int len);
-// 调用系统的 getsockopt()
-HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
-// 调用系统的 ioctlsocket()
-HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
-// 调用系统的 WSAIoctl()
-HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
-
-// 设置 socket 选项：IPPROTO_TCP -> TCP_NODELAY
-HPSOCKET_API int SYS_SSO_NoDelay(SOCKET sock, BOOL bNoDelay);
-// 设置 socket 选项：SOL_SOCKET -> SO_DONTLINGER
-HPSOCKET_API int SYS_SSO_DontLinger(SOCKET sock, BOOL bDont);
-// 设置 socket 选项：SOL_SOCKET -> SO_LINGER
-HPSOCKET_API int SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger);
-// 设置 socket 选项：SOL_SOCKET -> SO_RCVBUF
-HPSOCKET_API int SYS_SSO_RecvBuffSize(SOCKET sock, int size);
-// 设置 socket 选项：SOL_SOCKET -> SO_SNDBUF
-HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size);
-// 设置 socket 选项：SOL_SOCKET -> SO_REUSEADDR
-HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse);
-
-// 获取 SOCKET 本地地址信息
-HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
-// 获取 SOCKET 远程地址信息
-HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
-
-/* 枚举主机 IP 地址 */
-HPSOCKET_API BOOL SYS_EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, LPTIPAddr** lpppIPAddr, int& iIPAddrCount);
-/* 释放 LPTIPAddr* */
-HPSOCKET_API BOOL SYS_FreeHostIPAddresses(LPTIPAddr* lppIPAddr);
-/* 检查字符串是否符合 IP 地址格式 */
-HPSOCKET_API BOOL SYS_IsIPAddress(LPCTSTR lpszAddress, EnIPAddrType* penType = nullptr);
-/* 通过主机名获取 IP 地址 */
-HPSOCKET_API BOOL SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int& iIPLenth, EnIPAddrType& enType);
-
-/* 64 位网络字节序转主机字节序 */
-HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value);
-/* 64 位主机字节序转网络字节序 */
-HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value);
-
-// CP_XXX -> UNICODE
-HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);
-// UNICODE -> CP_XXX
-HPSOCKET_API BOOL SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength);
-// GBK -> UNICODE
-HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
-// UNICODE -> GBK
-HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength);
-// UTF8 -> UNICODE
-HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
-// UNICODE -> UTF8
-HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength);
-// GBK -> UTF8
-HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength);
-// UTF8 -> GBK
-HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
 
 // 普通压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
@@ -601,20 +612,4 @@ HPSOCKET_API int SYS_GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* l
 // 推测 Gzip 解压结果长度（如果返回 0 或不合理值则说明输入内容并非有效的 Gzip 格式）
 HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
 
-// 计算 Base64 编码后长度
-HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
-// 计算 Base64 解码后长度
-HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-
-// 计算 URL 编码后长度
-HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// 计算 URL 解码后长度
-HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+#endif

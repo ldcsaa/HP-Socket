@@ -63,7 +63,8 @@ EnHandleResult CTcpAgent::TriggerFireSend(TSocketObj* pSocketObj, TBufferObj* pB
 		ASSERT(FALSE);
 	}
 
-	AddFreeBufferObj(pBufferObj);
+	if(pBufferObj->ReleaseSendCounter() == 0)
+		AddFreeBufferObj(pBufferObj);
 
 	return rs;
 }
@@ -1110,8 +1111,12 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 	ASSERT(lpszRemoteAddress && usPort != 0);
 
 	DWORD result	= NO_ERROR;
-	CONNID dwConnID	= 0;
 	SOCKET soClient	= INVALID_SOCKET;
+
+	if(!pdwConnID)
+		pdwConnID	= CreateLocalObject(CONNID);
+
+	*pdwConnID = 0;
 
 	HP_SOCKADDR addr;
 
@@ -1123,10 +1128,10 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 
 		if(result == NO_ERROR)
 		{
-			result = PrepareConnect(dwConnID, soClient);
+			result = PrepareConnect(*pdwConnID, soClient);
 
 			if(result == NO_ERROR)
-				result = ConnectToServer(dwConnID, lpszRemoteAddress, usPort, soClient, addr, pExtra);
+				result = ConnectToServer(*pdwConnID, lpszRemoteAddress, usPort, soClient, addr, pExtra);
 		}
 	}
 
@@ -1137,8 +1142,6 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 
 		::SetLastError(result);
 	}
-
-	if(pdwConnID) *pdwConnID = dwConnID;
 
 	return (result == NO_ERROR);
 }
@@ -1362,12 +1365,15 @@ int CTcpAgent::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLeng
 		TBufferObj* pBufferObj = GetFreeBufferObj(iBufferSize);
 		memcpy(pBufferObj->buff.buf, pBuffer, iBufferSize);
 
-		result = ::PostSend(pSocketObj, pBufferObj);
+		result			= ::PostSend(pSocketObj, pBufferObj);
+		LONG sndCounter	= pBufferObj->ReleaseSendCounter();
 
-		if(result != NO_ERROR)
+		if(sndCounter == 0 || result != NO_ERROR)
 		{
 			AddFreeBufferObj(pBufferObj);
-			break;
+			
+			if(result != NO_ERROR)
+				break;
 		}
 
 		iRemain -= iBufferSize;
@@ -1497,15 +1503,14 @@ int CTcpAgent::SendItem(TSocketObj* pSocketObj)
 		pSocketObj->pending	   -= iBufferSize;
 		::InterlockedExchangeAdd(&pSocketObj->sndCount, iBufferSize);
 
-		result = ::PostSendNotCheck(pSocketObj, pBufferObj);
+		result			= ::PostSendNotCheck(pSocketObj, pBufferObj);
+		LONG sndCounter	= pBufferObj->ReleaseSendCounter();
+
+		if(sndCounter == 0 || !IOCP_SUCCESS(result))
+			AddFreeBufferObj(pBufferObj);
 
 		if(result != NO_ERROR)
-		{
-			if(result != WSA_IO_PENDING)
-				AddFreeBufferObj(pBufferObj);
-
 			break;
-		}
 	}
 
 	return result;

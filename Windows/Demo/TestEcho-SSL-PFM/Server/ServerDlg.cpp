@@ -11,15 +11,15 @@
 
 #ifdef _WIN64
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket-SSL_UD.lib")
+		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket-SSL_U.lib")
+		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket_U.lib")
 	#endif
 #else
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/static/HPSocket-SSL_UD.lib")
+		#pragma comment(lib, "../../../Bin/HPSocket/x86/static/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/static/HPSocket-SSL_U.lib")
+		#pragma comment(lib, "../../../Bin/HPSocket/x86/static/HPSocket_U.lib")
 	#endif
 #endif
 

@@ -85,11 +85,6 @@ void OnCmdStart(CCommandParser* pParser)
 
 	BOOL isOK = FALSE;
 
-	s_agent.SetWorkerThreadCount(g_app_arg.thread_count);
-	s_agent.SetMaxConnectionCount(g_app_arg.max_conn);
-	s_agent.SetSendPolicy(g_app_arg.send_policy);
-	s_agent.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
-
 	if(s_agent.Start(g_app_arg.bind_addr, FALSE))
 	{
 		for(DWORD i = 0; i < g_app_arg.conn_count; i++)
@@ -188,6 +183,11 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.async = FALSE;
 	g_app_arg.ShowPFMTestArgs(TRUE);
+
+	s_agent.SetWorkerThreadCount(g_app_arg.thread_count);
+	s_agent.SetMaxConnectionCount(g_app_arg.max_conn);
+	s_agent.SetSendPolicy(g_app_arg.send_policy);
+	s_agent.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

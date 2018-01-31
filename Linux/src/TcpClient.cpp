@@ -249,6 +249,7 @@ void CTcpClient::Reset()
 	m_usPort	= 0;
 	m_nEvents	= 0;
 	m_bPaused	= FALSE;
+	m_bConnected= FALSE;
 	m_enState	= SS_STOPPED;
 }
 
@@ -352,11 +353,11 @@ BOOL CTcpClient::ProcessNetworkEvent(SHORT events)
 {
 	BOOL bContinue = TRUE;
 
-	if(!HasConnected())
-		bContinue = HandleConnect(events);
-
 	if(bContinue && events & POLLERR)
 		bContinue = HandleClose(events);
+
+	if(bContinue && !HasConnected())
+		bContinue = HandleConnect(events);
 
 	if(bContinue && events & POLLIN)
 		bContinue = HandleRead(events);

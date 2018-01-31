@@ -24,6 +24,8 @@
 #include "stdafx.h"
 #include "HttpAgent.h"
 
+#ifdef _HTTP_SUPPORT
+
 template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::CheckParams()
 {
 	if(m_enLocalVersion != HV_1_1 && m_enLocalVersion != HV_1_0)
@@ -61,34 +63,29 @@ template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendRe
 
 	LPCSTR lpszHost	= nullptr;
 	USHORT usPort	= 0;
+	BOOL bConnect	= (_stricmp(lpszMethod, HTTP_METHOD_CONNECT) == 0);
 
-	GetRemoteHost(dwConnID, &lpszHost, &usPort);
-	if(usPort == default_port) usPort = 0;
+	if(!bConnect)
+	{
+		GetRemoteHost(dwConnID, &lpszHost, &usPort);
+		if(usPort == default_port) usPort = 0;
+	}
 
 	CStringA strPath;
-	::AdjustRequestPath(lpszPath, strPath);
+	::AdjustRequestPath(bConnect, lpszPath, strPath);
 
 	pHttpObj->SetRequestPath(lpszMethod, strPath);
 	pHttpObj->ReloadCookies();
 
-	::MakeRequestLine(lpszMethod, lpszPath, m_enLocalVersion, strHeader);
+	::MakeRequestLine(lpszMethod, strPath, m_enLocalVersion, strHeader);
 	::MakeHeaderLines(lpHeaders, iHeaderCount, &pHttpObj->GetCookieMap(), iLength, TRUE, -1, lpszHost, usPort, strHeader);
 	::MakeHttpPacket(strHeader, pBody, iLength, szBuffer);
 
 	return SendPackets(dwConnID, szBuffer, 2);
 }
 
-template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendLocalFile(CONNID dwConnID, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)
+template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendLocalFile(CONNID dwConnID, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount)
 {
-	if(
-		strcmp(lpszMethod, HTTP_METHOD_POST)  != 0	&&
-		strcmp(lpszMethod, HTTP_METHOD_PUT)	  != 0	&&
-		strcmp(lpszMethod, HTTP_METHOD_PATCH) != 0 	)
-	{
-		::SetLastError(ERROR_INVALID_PARAMETER);
-		return FALSE;
-	}
-
 	CAtlFile file;
 	CAtlFileMapping<> fmap;
 
@@ -122,6 +119,22 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 	{
 		THttpObj* pHttpObj = m_objPool.PickFreeHttpObj(this, pSocketObj);
 		VERIFY(SetConnectionReserved(pSocketObj, pHttpObj));
+	}
+
+	return result;
+}
+
+template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_port>::DoFireHandShake(TSocketObj* pSocketObj)
+{
+	EnHandleResult result = __super::DoFireHandShake(pSocketObj);
+
+	if(result == HR_ERROR)
+	{
+		THttpObj* pHttpObj = FindHttpObj(pSocketObj);
+		VERIFY(pHttpObj);
+
+		m_objPool.PutFreeHttpObj(pHttpObj);
+		SetConnectionReserved(pSocketObj, nullptr);
 	}
 
 	return result;
@@ -354,5 +367,7 @@ template class CHttpAgentT<CTcpAgent, HTTP_DEFAULT_PORT>;
 #include "SSLAgent.h"
 
 template class CHttpAgentT<CSSLAgent, HTTPS_DEFAULT_PORT>;
+
+#endif
 
 #endif

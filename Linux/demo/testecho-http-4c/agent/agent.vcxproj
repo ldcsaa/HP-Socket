@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8EDDD04C-42C3-40DD-B0E8-4CCAF77265F3}</ProjectGuid>
+    <Keyword>Linux</Keyword>
+    <RootNamespace>agent</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
+    <LinuxProjectType>{D51BCBC9-82E9-4017-911E-C93873C4EA2B}</LinuxProjectType>
+    <ProjectName>agent</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\crypto\Crypto.cpp" />
+    <ClCompile Include="..\..\..\src\common\FileHelper.cpp" />
+    <ClCompile Include="..\..\..\src\common\FuncHelper.cpp" />
+    <ClCompile Include="..\..\..\src\common\SysHelper.cpp" />
+    <ClCompile Include="..\..\Global\helper.cpp" />
+    <ClCompile Include="agent.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\HPSocket4C-SSL.h" />
+    <ClInclude Include="..\..\..\include\HPSocket4C.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\src\common\crypto\Crypto.h" />
+    <ClInclude Include="..\..\..\src\common\FileHelper.h" />
+    <ClInclude Include="..\..\..\src\common\FuncHelper.h" />
+    <ClInclude Include="..\..\..\src\common\GeneralHelper.h" />
+    <ClInclude Include="..\..\..\src\common\StringT.h" />
+    <ClInclude Include="..\..\..\src\common\SysHelper.h" />
+    <ClInclude Include="..\..\..\src\common\Thread.h" />
+    <ClInclude Include="..\..\Global\helper.h" />
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;_NEED_SSL;_NEED_HTTP;</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>hpsocket4c_d;rt;dl;pthread</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;_NEED_SSL;_NEED_HTTP;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>hpsocket4c;rt;dl;pthread</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;_NEED_SSL;_NEED_HTTP;</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>hpsocket4c_d;rt;dl;pthread</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib64:'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;_NEED_SSL;_NEED_HTTP;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>hpsocket4c;rt;dl;pthread</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib64:'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;_NEED_SSL;_NEED_HTTP;</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>hpsocket4c_d;rt;dl;pthread</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_HP_LIB;_NEED_SSL;_NEED_HTTP;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>hpsocket4c;rt;dl;pthread</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

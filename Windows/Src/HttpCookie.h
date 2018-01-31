@@ -23,7 +23,10 @@
  
 #pragma once
 
+#include "HPTypeDef.h"
 #include "../Common/Src/RWLock.h"
+
+#ifdef _HTTP_SUPPORT
 
 #define COOKIE_DOMAIN			"domain"
 #define COOKIE_PATH				"path"
@@ -190,3 +193,5 @@ private:
 extern CCookieMgr g_CookieMgr;
 
 #pragma warning(pop)
+
+#endif

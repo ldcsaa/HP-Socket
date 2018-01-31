@@ -26,6 +26,8 @@
 #include "TcpAgent.h"
 #include "HttpHelper.h"
 
+#ifdef _HTTP_SUPPORT
+
 template<class T, USHORT default_port> class CHttpAgentT : public IComplexHttpRequester, public T
 {
 protected:
@@ -91,6 +93,7 @@ private:
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
 	virtual EnHandleResult DoFireConnect(TSocketObj* pSocketObj);
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj);
 	virtual EnHandleResult DoFireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult DoFireShutdown();
@@ -166,5 +169,7 @@ typedef CHttpAgentT<CTcpAgent, HTTP_DEFAULT_PORT> CHttpAgent;
 #include "SSLAgent.h"
 
 typedef CHttpAgentT<CSSLAgent, HTTPS_DEFAULT_PORT> CHttpsAgent;
+
+#endif
 
 #endif

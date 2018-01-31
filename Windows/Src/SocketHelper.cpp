@@ -42,20 +42,6 @@ const hp_addr hp_addr::ANY_ADDR6(AF_INET6, TRUE);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DWORD GetDefaultWorkerThreadCount()
-{
-	static DWORD s_dwtc = min((::SysGetNumberOfProcessors() * 2 + 2), MAX_WORKER_THREAD_COUNT);
-	return s_dwtc;
-}
-
-DWORD GetDefaultTcpSocketBufferSize()
-{
-	static DWORD s_dtsbs = ::SysGetPageSize();
-	return s_dtsbs;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ADDRESS_FAMILY DetermineAddrFamily(LPCTSTR lpszAddress)
 {
 	if (!lpszAddress || lpszAddress[0] == 0)
@@ -787,6 +773,8 @@ int PostSendNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 	pBufferObj->client		= pSocketObj->socket;
 	pBufferObj->operation	= SO_SEND;
 
+	pBufferObj->ResetSendCounter();
+
 	if(::WSASend(
 					pBufferObj->client,
 					&pBufferObj->buff,
@@ -853,6 +841,8 @@ int PostSendToNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 	DWORD dwBytes			= 0;
 	pBufferObj->operation	= SO_SEND;
 	pBufferObj->addrLen		= pBufferObj->remoteAddr.AddrSize();
+
+	pBufferObj->ResetSendCounter();
 
 	if(::WSASendTo	(
 						sock,
@@ -976,11 +966,4 @@ LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
 
 	default: ASSERT(FALSE);			return _T("UNKNOWN ERROR");
 	}
-}
-
-DWORD GetHPSocketVersion()
-{
-	static DWORD s_dwVersion = (HP_VERSION_MAJOR << 24) | (HP_VERSION_MINOR << 16) | (HP_VERSION_REVISE << 8) | HP_VERSION_BUILD;
-
-	return s_dwVersion;
 }

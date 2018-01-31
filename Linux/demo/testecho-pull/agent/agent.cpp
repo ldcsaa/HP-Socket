@@ -101,14 +101,6 @@ CTcpPullAgent s_agent(&s_listener);
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(s_agent.HasStarted())
-	{
-		::LogAgentStartFail(SE_ILLEGAL_STATE, ::GetSocketErrorDesc(SE_ILLEGAL_STATE));
-		return;
-	}
-
-	s_agent.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
-
 	if(s_agent.Start(g_app_arg.bind_addr, g_app_arg.async))
 		::LogAgentStart(g_app_arg.bind_addr, g_app_arg.async);
 	else
@@ -172,17 +164,17 @@ void OnCmdKick(CCommandParser* pParser)
 void OnCmdKickLong(CCommandParser* pParser)
 {
 	if(s_agent.DisconnectLongConnections(pParser->m_dwSeconds * 1000, pParser->m_bFlag))
-		::LogDisconnect2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectLong(pParser->m_dwSeconds, pParser->m_bFlag);
 	else
-		::LogDisconnectFail2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectFailLong(pParser->m_dwSeconds, pParser->m_bFlag);
 }
 
 void OnCmdKickSilence(CCommandParser* pParser)
 {
 	if(s_agent.DisconnectSilenceConnections(pParser->m_dwSeconds * 1000, pParser->m_bFlag))
-		::LogDisconnect2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectLong(pParser->m_dwSeconds, pParser->m_bFlag);
 	else
-		::LogDisconnectFail2(pParser->m_dwSeconds, pParser->m_bFlag);
+		::LogDisconnectFailLong(pParser->m_dwSeconds, pParser->m_bFlag);
 }
 
 int main(int argc, char* const argv[])
@@ -191,6 +183,8 @@ int main(int argc, char* const argv[])
 	CAppSignalHandler s_signal_handler({SIGTTOU, SIGINT});
 
 	g_app_arg.ParseArgs(argc, argv);
+
+	s_agent.SetKeepAliveTime(g_app_arg.keep_alive ? TCP_KEEPALIVE_TIME : 0);
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

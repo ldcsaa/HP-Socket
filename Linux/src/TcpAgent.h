@@ -25,6 +25,7 @@
 
 #include "SocketHelper.h"
 #include "./common/GeneralHelper.h"
+#include "./common/IODispatcher.h"
 
 class CTcpAgent : public ITcpAgent, private CIOHandler
 {

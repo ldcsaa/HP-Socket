@@ -26,6 +26,8 @@
 #include "TcpAgent.h"
 #include "SSLHelper.h"
 
+#ifdef _SSL_SUPPORT
+
 class CSSLAgent : public CTcpAgent
 {
 public:
@@ -71,3 +73,5 @@ private:
 	CSSLContext m_sslCtx;
 	CSSLSessionPool m_sslPool;
 };
+
+#endif

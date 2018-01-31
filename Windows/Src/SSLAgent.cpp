@@ -25,6 +25,8 @@
 #include "SSLAgent.h"
 #include "SSLHelper.h"
 
+#ifdef _SSL_SUPPORT
+
 BOOL CSSLAgent::CheckParams()
 {
 	if(!m_sslCtx.IsValid())
@@ -127,3 +129,5 @@ EnHandleResult CSSLAgent::FireShutdown()
 
 	return result;
 }
+
+#endif

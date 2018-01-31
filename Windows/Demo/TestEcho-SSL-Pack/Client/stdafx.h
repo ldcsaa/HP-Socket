@@ -11,7 +11,7 @@
 #define _USE_MFC
 #define _DETECT_MEMORY_LEAK
 
-#define _SSL_SUPPORT
+#define _NEED_SSL
 
 #include "../../../Common/Src/GeneralHelper.h"
 

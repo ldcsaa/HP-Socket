@@ -141,8 +141,8 @@ private:
 	BOOL HandleRead		(SHORT events);
 	BOOL HandleWrite	(SHORT events);
 
-	void SetConnected	() {m_enState = SS_STARTED;}
-	BOOL HasConnected	() {return m_enState == SS_STARTED;}
+	void SetConnected	() {m_bConnected = TRUE; m_enState = SS_STARTED;}
+	BOOL HasConnected	() {return m_bConnected;}
 
 	UINT WINAPI WorkerThreadProc(LPVOID pv);
 
@@ -155,8 +155,9 @@ public:
 	, m_dwConnID			(0)
 	, m_usPort				(0)
 	, m_bPaused				(FALSE)
-	, m_enState				(SS_STOPPED)
+	, m_bConnected			(FALSE)
 	, m_enLastError			(SE_OK)
+	, m_enState				(SS_STOPPED)
 	, m_pExtra				(nullptr)
 	, m_pReserved			(nullptr)
 	, m_dwSocketBufferSize	(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
@@ -188,8 +189,9 @@ private:
 	DWORD				m_dwKeepAliveTime;
 	DWORD				m_dwKeepAliveInterval;
 
-	volatile EnServiceState	m_enState;
 	EnSocketError		m_enLastError;
+	volatile BOOL		m_bConnected;
+	volatile EnServiceState	m_enState;
 
 	PVOID				m_pExtra;
 	PVOID				m_pReserved;

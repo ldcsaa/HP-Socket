@@ -66,11 +66,11 @@ int main(int argc, char* const argv[])
 #include <hpsocket/HPSocket4C.h>
 
 // 5. process network events
-EnHandleResult __stdcall OnConnect(HP_Agent pSender, HP_CONNID dwConnID);
-EnHandleResult __stdcall OnReceive(HP_Agent pSender, HP_CONNID dwConnID, int iLength);
-EnHandleResult __stdcall OnSend(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
-EnHandleResult __stdcall OnClose(HP_Agent pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
-EnHandleResult __stdcall OnShutdown(HP_Agent pSender);
+EnHandleResult __HP_CALL OnConnect(HP_Agent pSender, HP_CONNID dwConnID);
+EnHandleResult __HP_CALL OnReceive(HP_Agent pSender, HP_CONNID dwConnID, int iLength);
+EnHandleResult __HP_CALL OnSend(HP_Agent pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength);
+EnHandleResult __HP_CALL OnClose(HP_Agent pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
+EnHandleResult __HP_CALL OnShutdown(HP_Agent pSender);
 
 int main(int argc, char* const argv[])
 {

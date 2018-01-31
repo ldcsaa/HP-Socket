@@ -26,6 +26,8 @@
 #include "TcpClient.h"
 #include "HttpHelper.h"
 
+#ifdef _HTTP_SUPPORT
+
 template<class R, class T, USHORT default_port> class CHttpClientT : public R, public T
 {
 protected:
@@ -322,5 +324,7 @@ typedef CHttpSyncClientT<CTcpClient, HTTP_DEFAULT_PORT>					CHttpSyncClient;
 
 typedef CHttpClientT<IHttpRequester, CSSLClient, HTTPS_DEFAULT_PORT>	CHttpsClient;
 typedef CHttpSyncClientT<CSSLClient, HTTPS_DEFAULT_PORT>				CHttpsSyncClient;
+
+#endif
 
 #endif

@@ -34,5 +34,3 @@ do_remove . *.cki
 if [ $RMV_ALL -eq 1 ]; then
     do_remove lib "*.so.*"
 fi
-
-./script/cp-include.sh

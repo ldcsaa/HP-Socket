@@ -65,7 +65,8 @@ EnHandleResult CUdpServer::TriggerFireSend(TUdpSocketObj* pSocketObj, TUdpBuffer
 		ASSERT(FALSE);
 	}
 
-	AddFreeBufferObj(pBufferObj);
+	if(pBufferObj->ReleaseSendCounter() == 0)
+		AddFreeBufferObj(pBufferObj);
 
 	return rs;
 }
@@ -1250,12 +1251,15 @@ int CUdpServer::SendDirect(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int i
 	pSocketObj->remoteAddr.Copy(pBufferObj->remoteAddr);
 	memcpy(pBufferObj->buff.buf, pBuffer, iLength);
 
-	int result = ::PostSendTo(m_soListen, pBufferObj);
+	int result		= ::PostSendTo(m_soListen, pBufferObj);
+	LONG sndCounter	= pBufferObj->ReleaseSendCounter();
 
-	if(result != NO_ERROR)
+	if(sndCounter == 0 || result != NO_ERROR)
 	{
-		VERIFY(!HasStarted());
 		AddFreeBufferObj(pBufferObj);
+		
+		if(result != NO_ERROR)
+			VERIFY(!HasStarted());
 	}
 
 	return result;
@@ -1383,15 +1387,14 @@ int CUdpServer::SendItem(TUdpSocketObj* pSocketObj)
 
 		memcpy(&pBufferObj->remoteAddr, &pSocketObj->remoteAddr, sizeof(SOCKADDR_IN));
 
-		result = ::PostSendToNotCheck(m_soListen, pBufferObj);
+		result			= ::PostSendToNotCheck(m_soListen, pBufferObj);
+		LONG sndCounter	= pBufferObj->ReleaseSendCounter();
+
+		if(sndCounter == 0 || !IOCP_SUCCESS(result))
+			AddFreeBufferObj(pBufferObj);
 
 		if(result != NO_ERROR)
-		{
-			if(result != WSA_IO_PENDING)
-				AddFreeBufferObj(pBufferObj);
-
 			break;
-		}
 	}
 
 	return result;

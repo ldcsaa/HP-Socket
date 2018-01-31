@@ -26,6 +26,8 @@
 #include "TcpServer.h"
 #include "SSLHelper.h"
 
+#ifdef _SSL_SUPPORT
+
 class CSSLServer : public CTcpServer
 {
 public:
@@ -73,3 +75,5 @@ private:
 	CSSLContext m_sslCtx;
 	CSSLSessionPool m_sslPool;
 };
+
+#endif

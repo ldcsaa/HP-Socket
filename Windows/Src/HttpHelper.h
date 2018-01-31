@@ -26,6 +26,8 @@
 #include "SocketHelper.h"
 #include "HttpCookie.h"
 
+#ifdef _HTTP_SUPPORT
+
 #include "../Common/Src/http/http_parser.h"
 #include "../Common/Src/zlib/zutil.h"
 
@@ -112,14 +114,14 @@ struct TDyingConnection
 };
 
 typedef unordered_multimap<CStringA, CStringA,
-		cstringa_hash_func::hash, cstringa_hash_func::equal_to>	THeaderMap;
-typedef THeaderMap::const_iterator								THeaderMapCI;
-typedef THeaderMap::iterator									THeaderMapI;
+		cstringa_nc_hash_func::hash, cstringa_nc_hash_func::equal_to>	THeaderMap;
+typedef THeaderMap::const_iterator										THeaderMapCI;
+typedef THeaderMap::iterator											THeaderMapI;
 
 typedef unordered_map<CStringA, CStringA,
-		cstringa_hash_func::hash, cstringa_hash_func::equal_to>	TCookieMap;
-typedef TCookieMap::const_iterator								TCookieMapCI;
-typedef TCookieMap::iterator									TCookieMapI;
+		cstringa_hash_func::hash, cstringa_hash_func::equal_to>			TCookieMap;
+typedef TCookieMap::const_iterator										TCookieMapCI;
+typedef TCookieMap::iterator											TCookieMapI;
 
 // ------------------------------------------------------------------------------------------------------------- //
 
@@ -1330,7 +1332,7 @@ template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request
 // ------------------------------------------------------------------------------------------------------------- //
 
 extern CStringA& GetHttpVersionStr(EnHttpVersion enVersion, CStringA& strResult);
-extern CStringA& AdjustRequestPath(LPCSTR lpszPath, CStringA& strPath);
+extern CStringA& AdjustRequestPath(BOOL bConnect, LPCSTR lpszPath, CStringA& strPath);
 extern LPCSTR GetHttpDefaultStatusCodeDesc(EnHttpStatusCode enCode);
 extern void MakeRequestLine(LPCSTR lpszMethod, LPCSTR lpszPath, EnHttpVersion enVersion, CStringA& strValue);
 extern void MakeStatusLine(EnHttpVersion enVersion, USHORT usStatusCode, LPCSTR lpszDesc, CStringA& strValue);
@@ -1338,23 +1340,6 @@ extern void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, const T
 extern void MakeHttpPacket(const CStringA& strHeader, const BYTE* pBody, int iLength, WSABUF szBuffer[2]);
 extern BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[HTTP_MAX_WS_HEADER_LEN], WSABUF szBuffer[2]);
 extern BOOL ParseUrl(const CStringA& strUrl, BOOL& bHttps, CStringA& strHost, USHORT& usPort, CStringA& strPath);
-
-// CP_XXX -> UNICODE
-BOOL CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);
-// UNICODE -> CP_XXX
-BOOL UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength);
-// GBK -> UNICODE
-BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
-// UNICODE -> GBK
-BOOL UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength);
-// UTF8 -> UNICODE
-BOOL Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
-// UNICODE -> UTF8
-BOOL UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength);
-// GBK -> UTF8
-BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength);
-// UTF8 -> GBK
-BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
 
 // 普通压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
@@ -1374,20 +1359,4 @@ int GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& d
 // 推测 Gzip 解压结果长度（如果返回 0 或不合理值则说明输入内容并非有效的 Gzip 格式）
 DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
 
-// 计算 Base64 编码后长度
-DWORD GuessBase64EncodeBound(DWORD dwSrcLen);
-// 计算 Base64 解码后长度
-DWORD GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-
-// 计算 URL 编码后长度
-DWORD GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// 计算 URL 解码后长度
-DWORD GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+#endif
