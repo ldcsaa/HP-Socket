@@ -4,6 +4,17 @@ High Performance Network Framework
 - ***Server*** Based on IOCP/EPOLL communication model, combined with technology of memory pool, private heap etc., efficient memory management is implemented to support large scale and high concurrent communication scenarios.
 - ***Agent*** The Agent component is essentially a Multi-Client component that uses the same technical architecture as the Server component. An Agent component object can create and efficiently handle large-scale Socket connections at the same time.
 - ***Client*** Based on Event-Select/POLL communication model, each component object creates a communication thread and manages a Socket connection. Client components are suitable for small-scale client scenarios.
+## Doc
+- HP-Socket Development Guide.pdf: 
+[download](https://gitee.com/ldcsaa/HP-Socket/blob/master/Doc)
+- HP-Socket Class Diagram.uml: 
+[download](https://gitee.com/ldcsaa/HP-Socket/blob/master/Doc)
+- HP-Socket Class Diagram.jpg: 
+[download](https://gitee.com/ldcsaa/HP-Socket/blob/master/Doc)
+- HP-Socket SSL Class Diagram.jpg: 
+[download](https://gitee.com/ldcsaa/HP-Socket/blob/master/Doc)
+- HP-Socket HTTP Class Diagram.jpg: 
+[download](https://gitee.com/ldcsaa/HP-Socket/blob/master/Doc)
 ## Workflow
 1. Create listener object
 2. Create component object (and binding with listener object)
