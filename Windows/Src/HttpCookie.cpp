@@ -27,6 +27,7 @@
 #ifdef _HTTP_SUPPORT
 
 #pragma warning(disable: 4503)
+#pragma warning(disable: 4840)
 
 static const char* s_short_week[]	= {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 static const char* s_short_month[]	= {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};

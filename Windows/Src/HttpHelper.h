@@ -269,7 +269,7 @@ public:
 
 				m_ullBodyRemain	-= iMin;
 
-				EnHandleResult hr = m_pHttpObj->on_ws_message_body(pTemp, iMin);
+				hr = m_pHttpObj->on_ws_message_body(pTemp, iMin);
 
 				if(hr == HR_ERROR)
 					break;

@@ -11,6 +11,8 @@ del *.ipdb /f /s /q
 del *.iobj /f /s /q
 del *.sdf /f /s /q
 del *.VC.db /f /s /q
+del *.VC.db-shm /f /s /q
+del *.VC.db-wal /f /s /q
 del *.aps /f /s /q
 del *.cki /f /s /q
 del *.exe.config /f /s /q

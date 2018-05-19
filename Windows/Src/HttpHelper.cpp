@@ -26,6 +26,8 @@
 
 #ifdef _HTTP_SUPPORT
 
+#pragma warning(disable: 4840)
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CStringA& GetHttpVersionStr(EnHttpVersion enVersion, CStringA& strResult)
