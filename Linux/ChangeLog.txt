@@ -27,8 +27,8 @@ v5.2.1 Update:
 > Create HP-Socket HTTP Components
 -----------------
 1. Server: HTTP Server, HTTPS Server
-2. Agent: HTTP Agent, HTTP Agent
-3. Client: HTTP Client, HTTP Client, HTTP Sync Client, HTTPS Sync Client
+2. Agent: HTTP Agent, HTTPS Agent
+3. Client: HTTP Client, HTTPS Client, HTTP Sync Client, HTTPS Sync Client
 
 > Create Demos：
 -----------------
