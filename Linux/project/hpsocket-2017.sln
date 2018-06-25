@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hpsocket", "hpsocket-2017\hpsocket.vcxproj", "{671672F0-6EF4-4C0A-B111-028AE375E433}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hpsocket4c", "hpsocket4c-2017\hpsocket4c.vcxproj", "{75842880-B2FF-482E-9117-5709ECCFF3B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Debug|ARM.ActiveCfg = Debug|ARM
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Debug|ARM.Build.0 = Debug|ARM
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Debug|x64.ActiveCfg = Debug|x64
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Debug|x64.Build.0 = Debug|x64
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Debug|x86.ActiveCfg = Debug|x86
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Debug|x86.Build.0 = Debug|x86
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Release|ARM.ActiveCfg = Release|ARM
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Release|ARM.Build.0 = Release|ARM
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Release|x64.ActiveCfg = Release|x64
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Release|x64.Build.0 = Release|x64
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Release|x86.ActiveCfg = Release|x86
+		{671672F0-6EF4-4C0A-B111-028AE375E433}.Release|x86.Build.0 = Release|x86
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Debug|ARM.ActiveCfg = Debug|ARM
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Debug|ARM.Build.0 = Debug|ARM
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Debug|x64.ActiveCfg = Debug|x64
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Debug|x64.Build.0 = Debug|x64
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Debug|x86.ActiveCfg = Debug|x86
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Debug|x86.Build.0 = Debug|x86
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Release|ARM.ActiveCfg = Release|ARM
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Release|ARM.Build.0 = Release|ARM
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Release|x64.ActiveCfg = Release|x64
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Release|x64.Build.0 = Release|x64
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Release|x86.ActiveCfg = Release|x86
+		{75842880-B2FF-482E-9117-5709ECCFF3B6}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

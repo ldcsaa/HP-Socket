@@ -1,0 +1,7 @@
+* C# SDK			作者： int 2e
+* 易语言支持库	作者： Yecate
+* 易语言模块		作者： 心冷、鱼儿
+
+1、C# Demo			作者： int 2e
+2、Delphi Demo		作者： 轻描●淡写~
+3、易语言 Demo		作者：  Yecate / 心冷、鱼儿
