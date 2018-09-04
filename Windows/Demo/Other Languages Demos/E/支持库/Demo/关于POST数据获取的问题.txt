@@ -1,0 +1,1 @@
+5.2.1 增加了新数据类型 BufferPtr 为了方便处理POST/WebSocket数据 ,详细请看下TestEcho-SSL-HttpServer目录下的例子(主要函数:OnBody/OnMessageComplete;OnWSMessageBody/OnWSMessageComplete)

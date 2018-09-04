@@ -1,0 +1,435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\common\BufferPool.h" />
+    <ClInclude Include="..\..\src\common\BufferPtr.h" />
+    <ClInclude Include="..\..\src\common\CriSec.h" />
+    <ClInclude Include="..\..\src\common\crypto\Crypto.h" />
+    <ClInclude Include="..\..\src\common\Event.h" />
+    <ClInclude Include="..\..\src\common\FileHelper.h" />
+    <ClInclude Include="..\..\src\common\FuncHelper.h" />
+    <ClInclude Include="..\..\src\common\GeneralHelper.h" />
+    <ClInclude Include="..\..\src\common\GlobalDef.h" />
+    <ClInclude Include="..\..\src\common\GlobalErrno.h" />
+    <ClInclude Include="..\..\src\common\http\http_parser.h" />
+    <ClInclude Include="..\..\src\common\IODispatcher.h" />
+    <ClInclude Include="..\..\src\common\PollHelper.h" />
+    <ClInclude Include="..\..\src\common\PrivateHeap.h" />
+    <ClInclude Include="..\..\src\common\RingBuffer.h" />
+    <ClInclude Include="..\..\src\common\RWLock.h" />
+    <ClInclude Include="..\..\src\common\Semaphore.h" />
+    <ClInclude Include="..\..\src\common\SignalHandler.h" />
+    <ClInclude Include="..\..\src\common\Singleton.h" />
+    <ClInclude Include="..\..\src\common\StringT.h" />
+    <ClInclude Include="..\..\src\common\STLHelper.h" />
+    <ClInclude Include="..\..\src\common\SysHelper.h" />
+    <ClInclude Include="..\..\src\common\Thread.h" />
+    <ClInclude Include="..\..\src\HPSocket-SSL.h" />
+    <ClInclude Include="..\..\src\HPSocket.h" />
+    <ClInclude Include="..\..\src\HPThreadPool.h" />
+    <ClInclude Include="..\..\src\HPTypeDef.h" />
+    <ClInclude Include="..\..\src\HttpAgent.h" />
+    <ClInclude Include="..\..\src\HttpClient.h" />
+    <ClInclude Include="..\..\src\HttpCookie.h" />
+    <ClInclude Include="..\..\src\HttpHelper.h" />
+    <ClInclude Include="..\..\src\HttpServer.h" />
+    <ClInclude Include="..\..\src\MiscHelper.h" />
+    <ClInclude Include="..\..\src\SocketHelper.h" />
+    <ClInclude Include="..\..\src\SocketInterface.h" />
+    <ClInclude Include="..\..\src\SSLAgent.h" />
+    <ClInclude Include="..\..\src\SSLClient.h" />
+    <ClInclude Include="..\..\src\SSLHelper.h" />
+    <ClInclude Include="..\..\src\SSLServer.h" />
+    <ClInclude Include="..\..\src\TcpAgent.h" />
+    <ClInclude Include="..\..\src\TcpClient.h" />
+    <ClInclude Include="..\..\src\TcpPackAgent.h" />
+    <ClInclude Include="..\..\src\TcpPackClient.h" />
+    <ClInclude Include="..\..\src\TcpPackServer.h" />
+    <ClInclude Include="..\..\src\TcpPullAgent.h" />
+    <ClInclude Include="..\..\src\TcpPullClient.h" />
+    <ClInclude Include="..\..\src\TcpPullServer.h" />
+    <ClInclude Include="..\..\src\TcpServer.h" />
+    <ClInclude Include="..\..\src\UdpCast.h" />
+    <ClInclude Include="..\..\src\UdpClient.h" />
+    <ClInclude Include="..\..\src\UdpServer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\common\BufferPool.cpp" />
+    <ClCompile Include="..\..\src\common\crypto\Crypto.cpp" />
+    <ClCompile Include="..\..\src\common\Event.cpp" />
+    <ClCompile Include="..\..\src\common\FileHelper.cpp" />
+    <ClCompile Include="..\..\src\common\FuncHelper.cpp" />
+    <ClCompile Include="..\..\src\common\http\http_parser.cpp" />
+    <ClCompile Include="..\..\src\common\IODispatcher.cpp" />
+    <ClCompile Include="..\..\src\common\PollHelper.cpp" />
+    <ClCompile Include="..\..\src\common\RWLock.cpp" />
+    <ClCompile Include="..\..\src\common\SysHelper.cpp" />
+    <ClCompile Include="..\..\src\common\Thread.cpp" />
+    <ClCompile Include="..\..\src\HPSocket-SSL.cpp" />
+    <ClCompile Include="..\..\src\HPSocket.cpp" />
+    <ClCompile Include="..\..\src\HPThreadPool.cpp" />
+    <ClCompile Include="..\..\src\HttpAgent.cpp" />
+    <ClCompile Include="..\..\src\HttpClient.cpp" />
+    <ClCompile Include="..\..\src\HttpCookie.cpp" />
+    <ClCompile Include="..\..\src\HttpHelper.cpp" />
+    <ClCompile Include="..\..\src\HttpServer.cpp" />
+    <ClCompile Include="..\..\src\MiscHelper.cpp" />
+    <ClCompile Include="..\..\src\SocketHelper.cpp" />
+    <ClCompile Include="..\..\src\SSLAgent.cpp" />
+    <ClCompile Include="..\..\src\SSLClient.cpp" />
+    <ClCompile Include="..\..\src\SSLHelper.cpp" />
+    <ClCompile Include="..\..\src\SSLServer.cpp" />
+    <ClCompile Include="..\..\src\TcpAgent.cpp" />
+    <ClCompile Include="..\..\src\TcpClient.cpp" />
+    <ClCompile Include="..\..\src\TcpPackAgent.cpp" />
+    <ClCompile Include="..\..\src\TcpPackClient.cpp" />
+    <ClCompile Include="..\..\src\TcpPackServer.cpp" />
+    <ClCompile Include="..\..\src\TcpPullAgent.cpp" />
+    <ClCompile Include="..\..\src\TcpPullClient.cpp" />
+    <ClCompile Include="..\..\src\TcpPullServer.cpp" />
+    <ClCompile Include="..\..\src\TcpServer.cpp" />
+    <ClCompile Include="..\..\src\UdpCast.cpp" />
+    <ClCompile Include="..\..\src\UdpClient.cpp" />
+    <ClCompile Include="..\..\src\UdpServer.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{671672f0-6ef4-4c0a-b111-028ae375e433}</ProjectGuid>
+    <Keyword>Linux</Keyword>
+    <RootNamespace>hpsocket</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
+    <LinuxProjectType>{2238F9CD-F817-4ECC-BD14-2524D2669B35}</LinuxProjectType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="..\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="..\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <Import Project="..\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="..\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="..\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <Import Project="..\Version.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
+    <TargetName>lib$(ProjectName)_d</TargetName>
+    <TargetExt>.so</TargetExt>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
+    <TargetExt>.so</TargetExt>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
+    <TargetName>lib$(ProjectName)_d</TargetName>
+    <TargetExt>.so</TargetExt>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
+    <TargetExt>.so</TargetExt>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
+    <TargetName>lib$(ProjectName)_d</TargetName>
+    <TargetExt>.so</TargetExt>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
+    <TargetExt>.so</TargetExt>
+    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PositionIndependentCode>true</PositionIndependentCode>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <RemotePreLinkEvent />
+    <Link />
+    <Link>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+    <RemotePostBuildEvent>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+    </RemotePostBuildEvent>
+    <RemotePreLinkEvent>
+      <Command>
+      </Command>
+    </RemotePreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PositionIndependentCode>true</PositionIndependentCode>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link />
+    <RemotePreLinkEvent />
+    <Link />
+    <Link>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+    <RemotePostBuildEvent>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+    </RemotePostBuildEvent>
+    <RemotePreLinkEvent>
+      <Command>
+      </Command>
+    </RemotePreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PositionIndependentCode>true</PositionIndependentCode>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <RemotePreLinkEvent />
+    <Link />
+    <Link>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+    <RemotePostBuildEvent>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+    </RemotePostBuildEvent>
+    <RemotePreLinkEvent>
+      <Command>
+      </Command>
+    </RemotePreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PositionIndependentCode>true</PositionIndependentCode>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link />
+    <RemotePreLinkEvent />
+    <Link />
+    <Link>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+    <RemotePostBuildEvent>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+    </RemotePostBuildEvent>
+    <RemotePreLinkEvent>
+      <Command>
+      </Command>
+    </RemotePreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <PositionIndependentCode>true</PositionIndependentCode>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <RemotePreLinkEvent />
+    <Link />
+    <Link>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+    <RemotePostBuildEvent>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+    </RemotePostBuildEvent>
+    <RemotePreLinkEvent>
+      <Command>
+      </Command>
+    </RemotePreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <PositionIndependentCode>true</PositionIndependentCode>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link />
+    <RemotePreLinkEvent />
+    <Link />
+    <Link>
+      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+    <RemotePostBuildEvent>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+    </RemotePostBuildEvent>
+    <RemotePreLinkEvent>
+      <Command>
+      </Command>
+    </RemotePreLinkEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
