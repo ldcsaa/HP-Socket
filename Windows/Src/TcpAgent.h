@@ -34,7 +34,7 @@ class CTcpAgent : public ITcpAgent
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
 	virtual BOOL Stop	();
-	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr);
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0);
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	{return DoSendPackets(dwConnID, pBuffers, iCount);}
@@ -48,6 +48,7 @@ public:
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteHost				(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort);
 
+	virtual BOOL IsConnected			(CONNID dwConnID);
 	virtual BOOL IsPauseReceive			(CONNID dwConnID, BOOL& bPaused);
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
 	virtual DWORD GetConnectionCount	();
@@ -190,7 +191,7 @@ private:
 	BOOL		InvalidSocketObj(TSocketObj* pSocketObj);
 	void		ReleaseGCSocketObj(BOOL bForce = FALSE);
 
-	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj);
+	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteAddress, PVOID pExtra);
 	void		CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SD_SEND);
 
 private:
@@ -198,9 +199,9 @@ private:
 
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 
-	DWORD CreateClientSocket( LPCTSTR lpszRemoteAddress, USHORT usPort, SOCKET& soClient, HP_SOCKADDR& addr);
+	DWORD CreateClientSocket( LPCTSTR lpszRemoteAddress, USHORT usPort, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
 	DWORD PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
-	DWORD ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, USHORT usPort, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
+	DWORD ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 	void ForceDisconnect	(CONNID dwConnID);
 
 	void HandleIo			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);
@@ -215,8 +216,8 @@ private:
 	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
+	int DoReceive	(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	BOOL ContinueReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj, EnHandleResult& hr);
-	int DoReceive		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
 	int DoSend		(CONNID dwConnID);
 	int DoSend		(TSocketObj* pSocketObj);

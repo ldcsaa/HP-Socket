@@ -33,28 +33,6 @@
 	#include <sys/timeb.h>
 #endif
 
-#define DEFAULT_CRISEC_SPIN_COUNT	4096
-
-#if defined (__x86_64__)
-	#define DEFAULT_PAUSE_RETRY		16
-	#define DEFAULT_PAUSE_YIELD		128
-	#define DEFAULT_PAUSE_CYCLE		8192
-#else
-	#define DEFAULT_PAUSE_RETRY		4
-	#define DEFAULT_PAUSE_YIELD		32
-	#define DEFAULT_PAUSE_CYCLE		4096
-#endif
-
-INT YieldThread(UINT i)
-{
-	if(IS_INFINITE(i))						return YieldProcessor();
-	else if(i < DEFAULT_PAUSE_RETRY)		return TRUE;
-	else if(i < DEFAULT_PAUSE_YIELD)		return YieldProcessor();
-	else if(i < DEFAULT_PAUSE_CYCLE - 1)	return YieldProcessor();
-	else if(i < DEFAULT_PAUSE_CYCLE)		return YieldProcessor();
-	else									return YieldThread(i & (DEFAULT_PAUSE_CYCLE - 1));
-}
-
 INT WaitFor(DWORD dwMillSecond, DWORD dwSecond, BOOL bExceptThreadInterrupted)
 {
 	timeval tv {(time_t)dwSecond, (suseconds_t)(dwMillSecond * 1000)};
@@ -130,14 +108,20 @@ ULLONG TimeGetTime64()
 	return 0ull;
 }
 
-DWORD GetTimeGap32(DWORD dwOriginal)
+DWORD GetTimeGap32(DWORD dwOriginal, DWORD dwCurrent)
 {
-	return TimeGetTime() - dwOriginal;
+	if(dwCurrent == 0)
+		dwCurrent = ::TimeGetTime();
+
+	return dwCurrent - dwOriginal;
 }
 
-ULLONG GetTimeGap64(ULLONG ullOriginal)
+ULLONG GetTimeGap64(ULLONG ullOriginal, ULONGLONG ullCurrent)
 {
-	return TimeGetTime64() - ullOriginal;
+	if(ullCurrent == 0)
+		ullCurrent = ::TimeGetTime64();
+
+	return ullCurrent - ullOriginal;
 }
 
 LLONG TimevalToMillisecond(const timeval& tv)

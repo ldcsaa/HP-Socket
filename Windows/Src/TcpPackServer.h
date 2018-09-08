@@ -50,7 +50,7 @@ protected:
 		if(result != HR_ERROR)
 		{
 			TBuffer* pBuffer = m_bfPool.PickFreeBuffer(pSocketObj->connID);
-			VERIFY(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
+			ENSURE(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
 		}
 
 		return result;
@@ -74,7 +74,6 @@ protected:
 
 		TBufferPackInfo* pInfo = nullptr;
 		GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
-		ASSERT(pInfo);
 
 		if(pInfo != nullptr)
 		{

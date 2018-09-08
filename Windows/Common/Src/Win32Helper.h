@@ -222,7 +222,7 @@ public:
 		if(h != m_h)
 		{
 			if(is_valid())
-				VERIFY(::CloseHandle(m_h));
+				ENSURE(::CloseHandle(m_h));
 
 			set(h);
 		}
@@ -415,9 +415,9 @@ public:
 			if(is_valid())
 			{
 				if(m_is_create)
-					VERIFY(::DeleteDC(m_h));
+					ENSURE(::DeleteDC(m_h));
 				else
-					VERIFY(::ReleaseDC(m_w, m_h));
+					ENSURE(::ReleaseDC(m_w, m_h));
 			}
 
 			set(h, w, is_create);
@@ -480,12 +480,12 @@ class paint_dc
 public:
 	paint_dc(HWND hwnd) : m_hwnd(hwnd)
 	{
-		VERIFY(m_hdc = ::BeginPaint(m_hwnd, &m_ps));
+		ENSURE(m_hdc = ::BeginPaint(m_hwnd, &m_ps));
 	}
 
 	~paint_dc()
 	{
-		VERIFY(::EndPaint(m_hwnd, &m_ps));
+		ENSURE(::EndPaint(m_hwnd, &m_ps));
 	}
 
 	operator HDC ()	const	{return m_hdc;}
@@ -515,7 +515,7 @@ public:
 		{
 			if(is_valid())
 			{
-				VERIFY(::DeleteObject(m_obj));
+				ENSURE(::DeleteObject(m_obj));
 			}
 
 			set(obj);

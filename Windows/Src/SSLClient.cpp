@@ -79,7 +79,7 @@ EnHandleResult CSSLClient::FireConnect()
 	if(result != HR_ERROR)
 	{
 		m_sslSession.Renew(m_sslCtx, m_strHost);
-		VERIFY(::ProcessHandShake(this, this, &m_sslSession) == HR_OK);
+		ENSURE(::ProcessHandShake(this, this, &m_sslSession) == HR_OK);
 	}
 
 	return result;

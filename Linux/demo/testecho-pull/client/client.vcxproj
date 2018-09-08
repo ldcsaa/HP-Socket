@@ -176,7 +176,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -190,7 +190,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -203,7 +203,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -217,7 +217,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -230,7 +230,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -244,7 +244,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

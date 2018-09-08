@@ -24,9 +24,10 @@
 #pragma once
 
 #include "GlobalDef.h"
-#include "Semaphore.h"
+#include "CriSec.h"
 
 #include <shared_mutex>
+#include <condition_variable>
 
 using namespace std;
 
@@ -67,18 +68,9 @@ public:
 	VOID WriteDone();
 
 private:
-	INT Done			();
-	BOOL IsOwner()		{return ::IsSelfThread(m_dwWriterTID);}
+	BOOL IsOwner()		{BOOL bOwner = ::IsSelfThread(m_dwWriterTID); ASSERT(!bOwner || m_nActive < 0); return bOwner;}
 	VOID SetOwner()		{m_dwWriterTID = SELF_THREAD_ID;}
 	VOID DetachOwner()	{m_dwWriterTID = 0;}
-
-	VOID Notify(INT iFlag)
-	{
-		if(iFlag > 0)
-			m_smRead.NotifyAll();
-		else if(iFlag < 0)
-			m_smWrite.NotifyOne();
-	}
 
 public:
 	CSEMRWLock();
@@ -92,9 +84,9 @@ private:
 	int		m_nActive;
 	THR_ID	m_dwWriterTID;
 
-	CSpinGuard	m_cs;
-	CSEM		m_smRead;
-	CSEM		m_smWrite;
+	CMTX				m_mtx;
+	condition_variable	m_cvRead;
+	condition_variable	m_cvWrite;
 };
 
 template<class CLockObj> class CLocalReadLock

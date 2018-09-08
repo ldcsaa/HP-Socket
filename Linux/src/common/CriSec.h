@@ -161,6 +161,19 @@ private:
 	CLockObj& m_lock;
 };
 
+template<class CLockObj> class CLocalTryLock
+{
+public:
+	CLocalTryLock(CLockObj& obj) : m_lock(obj) {m_bValid = m_lock.TryLock();}
+	~CLocalTryLock() {if(m_bValid) m_lock.Unlock();}
+
+	BOOL IsValid() {return m_bValid;}
+
+private:
+	CLockObj&	m_lock;
+	BOOL		m_bValid;
+};
+
 using CSpinLock				= CLocalLock<CSpinGuard>;
 using CReentrantSpinLock	= CLocalLock<CReentrantSpinGuard>;
 using CFakeLock				= CLocalLock<CFakeGuard>;

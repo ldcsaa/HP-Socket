@@ -33,7 +33,7 @@ const CInitSocket CUdpServer::sm_wsSocket;
 EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 {
 	EnHandleResult rs = TRIGGER(FireAccept(pSocketObj));
-	pSocketObj->csRecv.Unlock();
+	pSocketObj->csRecv.WriteDone();
 
 	return rs;
 }
@@ -44,7 +44,7 @@ EnHandleResult CUdpServer::TriggerFireReceive(TUdpSocketObj* pSocketObj, TUdpBuf
 
 	if(TUdpSocketObj::IsValid(pSocketObj))
 	{
-		CReentrantSpinLock locallock(pSocketObj->csRecv);
+		CReentrantReadLock locallock(pSocketObj->csRecv);
 
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
@@ -73,7 +73,7 @@ EnHandleResult CUdpServer::TriggerFireSend(TUdpSocketObj* pSocketObj, TUdpBuffer
 
 EnHandleResult CUdpServer::TriggerFireClose(TUdpSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
 {
-	CReentrantSpinLock locallock(pSocketObj->csRecv);
+	CReentrantWriteLock locallock(pSocketObj->csRecv);
 	return FireClose(pSocketObj, enOperation, iErrorCode);
 }
 
@@ -115,8 +115,8 @@ BOOL CUdpServer::CheckParams()
 		((int)m_dwFreeSocketObjLockTime >= 0)													&&
 		((int)m_dwFreeSocketObjPool >= 0)														&&
 		((int)m_dwFreeBufferObjPool >= 0)														&&
-		((int)m_dwFreeSocketObjHold >= m_dwFreeSocketObjPool)									&&
-		((int)m_dwFreeBufferObjHold >= m_dwFreeBufferObjPool)									&&
+		((int)m_dwFreeSocketObjHold >= 0)														&&
+		((int)m_dwFreeBufferObjHold >= 0)														&&
 		((int)m_dwMaxDatagramSize > 0)															&&
 		((int)m_dwPostReceiveCount > 0)															&&
 		((int)m_dwDetectAttempts >= 0)															&&
@@ -130,11 +130,11 @@ BOOL CUdpServer::CheckParams()
 void CUdpServer::PrepareStart()
 {
 	m_bfActiveSockets.Reset(m_dwMaxConnectionCount);
-	m_lsFreeSocket.Reset(m_dwFreeSocketObjHold);
+	m_lsFreeSocket.Reset(m_dwFreeSocketObjPool);
 
-	m_bfObjPool.SetItemCapacity((int)m_dwMaxDatagramSize);
-	m_bfObjPool.SetPoolSize((int)m_dwFreeBufferObjPool);
-	m_bfObjPool.SetPoolHold((int)m_dwFreeBufferObjHold);
+	m_bfObjPool.SetItemCapacity(m_dwMaxDatagramSize);
+	m_bfObjPool.SetPoolSize(m_dwFreeBufferObjPool);
+	m_bfObjPool.SetPoolHold(m_dwFreeBufferObjHold);
 
 	m_bfObjPool.Prepare();
 }
@@ -167,7 +167,7 @@ BOOL CUdpServer::CheckStoping()
 		}
 
 		while(m_enState != SS_STOPPED)
-			::Sleep(30);
+			::WaitFor(10);
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
@@ -191,7 +191,7 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 
 		if(m_soListen != INVALID_SOCKET)
 		{
-			VERIFY(::SSO_UDP_ConnReset(m_soListen, FALSE) == NO_ERROR);
+			ENSURE(::SSO_UDP_ConnReset(m_soListen, FALSE) == NO_ERROR);
 
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
 			{
@@ -263,7 +263,7 @@ BOOL CUdpServer::StartAccept()
 		m_iRemainPostReceives = m_dwPostReceiveCount;
 
 		for(DWORD i = 0; i < m_dwPostReceiveCount; i++)
-			VERIFY(::PostIocpAccept(m_hCompletePort));
+			ENSURE(::PostIocpAccept(m_hCompletePort));
 	}
 	else
 	{
@@ -318,7 +318,7 @@ void CUdpServer::CloseListenSocket()
 		::ManualCloseSocket(m_soListen);
 		m_soListen = INVALID_SOCKET;
 
-		::WaitWithMessageLoop(150);
+		::WaitWithMessageLoop(100);
 	}
 }
 
@@ -333,7 +333,7 @@ void CUdpServer::DisconnectClientSocket()
 
 void CUdpServer::ReleaseClientSocket()
 {
-	VERIFY(m_bfActiveSockets.IsEmpty());
+	ENSURE(m_bfActiveSockets.IsEmpty());
 	m_bfActiveSockets.Reset();
 
 	CWriteLock locallock(m_csClientSocket);
@@ -348,10 +348,10 @@ TUdpSocketObj* CUdpServer::GetFreeSocketObj(CONNID dwConnID)
 	if(m_lsFreeSocket.TryLock(&pSocketObj, dwIndex))
 	{
 		if(::GetTimeGap32(pSocketObj->freeTime) >= m_dwFreeSocketObjLockTime)
-			VERIFY(m_lsFreeSocket.ReleaseLock(nullptr, dwIndex));
+			ENSURE(m_lsFreeSocket.ReleaseLock(nullptr, dwIndex));
 		else
 		{
-			VERIFY(m_lsFreeSocket.ReleaseLock(pSocketObj, dwIndex));
+			ENSURE(m_lsFreeSocket.ReleaseLock(pSocketObj, dwIndex));
 			pSocketObj = nullptr;
 		}
 	}
@@ -383,59 +383,33 @@ void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag e
 
 	TUdpSocketObj::Release(pSocketObj);
 
+	ReleaseGCSocketObj();
+	
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
-	{
 		m_lsGCSocket.PushBack(pSocketObj);
-
-		if(m_lsGCSocket.Size() > m_dwFreeSocketObjPool)
-			ReleaseGCSocketObj();
-	}
 }
 
 void CUdpServer::ReleaseGCSocketObj(BOOL bForce)
 {
-	TUdpSocketObj* pSocketObj	= nullptr;
-	DWORD now					= ::TimeGetTime();
-
-	while(m_lsGCSocket.PopFront(&pSocketObj))
-	{
-		if(bForce || (int)(now - pSocketObj->freeTime) >= (int)m_dwFreeSocketObjLockTime)
-			DeleteSocketObj(pSocketObj);
-		else
-		{
-			m_lsGCSocket.PushBack(pSocketObj);
-			break;
-		}
-	}
+	::ReleaseGCObj(m_lsGCSocket, m_dwFreeSocketObjLockTime, bForce);
 }
 
 BOOL CUdpServer::InvalidSocketObj(TUdpSocketObj* pSocketObj)
 {
-	BOOL bDone = FALSE;
-
-	if(TUdpSocketObj::IsValid(pSocketObj))
-	{
-		CReentrantSpinLock	locallock(pSocketObj->csRecv);
-		CCriSecLock			locallock2(pSocketObj->csSend);
-
-		if(TUdpSocketObj::IsValid(pSocketObj))
-		{
-			TUdpSocketObj::Invalid(pSocketObj);
-			bDone = TRUE;
-		}
-	}
-
-	return bDone;
+	return TUdpSocketObj::InvalidSocketObj(pSocketObj);
 }
 
-void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj)
+void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
 	pSocketObj->connTime	= ::TimeGetTime();
 	pSocketObj->activeTime	= pSocketObj->connTime;
 
-	VERIFY(m_bfActiveSockets.ReleaseLock(dwConnID, pSocketObj));
+	remoteAddr.Copy(pSocketObj->remoteAddr);
+	pSocketObj->SetConnected();
+
+	ENSURE(m_bfActiveSockets.ReleaseLock(dwConnID, pSocketObj));
 
 	CWriteLock locallock(m_csClientSocket);
 	m_mpClientAddr[&pSocketObj->remoteAddr]	= dwConnID;
@@ -448,29 +422,21 @@ void CUdpServer::ReleaseFreeSocket()
 	while(m_lsFreeSocket.TryGet(&pSocketObj))
 		DeleteSocketObj(pSocketObj);
 
-	VERIFY(m_lsFreeSocket.IsEmpty());
+	ENSURE(m_lsFreeSocket.IsEmpty());
 	m_lsFreeSocket.Reset();
 
 	ReleaseGCSocketObj(TRUE);
-	VERIFY(m_lsGCSocket.IsEmpty());
+	ENSURE(m_lsGCSocket.IsEmpty());
 }
 
 TUdpSocketObj* CUdpServer::CreateSocketObj()
 {
-	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)m_phSocket.Alloc(sizeof(TUdpSocketObj));
-	ASSERT(pSocketObj);
-
-	pSocketObj->TUdpSocketObj::TUdpSocketObj(m_bfObjPool);
-	
-	return pSocketObj;
+	return TUdpSocketObj::Construct(m_phSocket, m_bfObjPool);
 }
 
 void CUdpServer::DeleteSocketObj(TUdpSocketObj* pSocketObj)
 {
-	ASSERT(pSocketObj);
-
-	pSocketObj->TUdpSocketObj::~TUdpSocketObj();
-	m_phSocket.Free(pSocketObj);
+	TUdpSocketObj::Destruct(pSocketObj);
 }
 
 TUdpBufferObj* CUdpServer::GetFreeBufferObj(int iLen)
@@ -680,6 +646,16 @@ BOOL CUdpServer::IsPauseReceive(CONNID dwConnID, BOOL& bPaused)
 	return FALSE;
 }
 
+BOOL CUdpServer::IsConnected(CONNID dwConnID)
+{
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	if(TUdpSocketObj::IsValid(pSocketObj))
+		return pSocketObj->HasConnected();
+
+	return FALSE;
+}
+
 BOOL CUdpServer::GetPendingDataLength(CONNID dwConnID, int& iPending)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
@@ -790,13 +766,13 @@ BOOL CUdpServer::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 void CUdpServer::WaitForPostReceiveRelease()
 {
 	while(m_iRemainPostReceives > 0)
-		::WaitWithMessageLoop(100);
+		::WaitWithMessageLoop(50);
 }
 
 void CUdpServer::WaitForClientSocketClose()
 {
 	while(m_bfActiveSockets.Elements() > 0)
-		::WaitWithMessageLoop(100);
+		::WaitWithMessageLoop(50);
 }
 
 void CUdpServer::WaitForWorkerThreadEnd()
@@ -817,7 +793,7 @@ void CUdpServer::WaitForWorkerThreadEnd()
 		for(int i = 0; i < wait; i++)
 			pHandles[i]	= m_vtWorkerThreads[i + index];
 
-		VERIFY(::WaitForMultipleObjects((DWORD)wait, pHandles, TRUE, INFINITE) == WAIT_OBJECT_0);
+		ENSURE(::WaitForMultipleObjects((DWORD)wait, pHandles, TRUE, INFINITE) == WAIT_OBJECT_0);
 
 		for(int i = 0; i < wait; i++)
 			::CloseHandle(pHandles[i]);
@@ -834,7 +810,7 @@ void CUdpServer::WaitForDetectorThreadEnd()
 	if(m_hDetector != nullptr)
 	{
 		m_evDetector.Set();
-		VERIFY(::WaitForSingleObject(m_hDetector, INFINITE) == WAIT_OBJECT_0);
+		ENSURE(::WaitForSingleObject(m_hDetector, INFINITE) == WAIT_OBJECT_0);
 		m_evDetector.Reset();
 
 		::CloseHandle(m_hDetector);
@@ -928,7 +904,7 @@ EnIocpAction CUdpServer::CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes
 	else if(dwBytes == IOCP_CMD_EXIT && ulCompKey == 0)
 		action = IOCP_ACT_BREAK;
 	else
-		VERIFY(FALSE);
+		ENSURE(FALSE);
 
 	return action;
 }
@@ -1003,7 +979,7 @@ void CUdpServer::HandleZeroBytes(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 		DoReceive(pBufferObj);
 	}
 	else
-		VERIFY(FALSE);
+		ENSURE(FALSE);
 }
 
 CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
@@ -1024,12 +1000,11 @@ CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 				return 0;
 
 			pSocketObj = GetFreeSocketObj(dwConnID);
-			pSocketObj->csRecv.Lock();
+			pSocketObj->csRecv.WaitToWrite();
 		}
 	}
 
-	pBufferObj->remoteAddr.Copy(pSocketObj->remoteAddr);
-	AddClientSocketObj(dwConnID, pSocketObj);
+	AddClientSocketObj(dwConnID, pSocketObj, pBufferObj->remoteAddr);
 
 	if(TriggerFireAccept(pSocketObj) == HR_ERROR)
 	{
@@ -1122,7 +1097,7 @@ int CUdpServer::DoReceive(TUdpBufferObj* pBufferObj)
 
 	if(result != NO_ERROR)
 	{
-		VERIFY(!HasStarted());
+		ENSURE(!HasStarted());
 
 		::InterlockedDecrement(&m_iRemainPostReceives);
 		ASSERT(m_iRemainPostReceives >= 0);
@@ -1259,7 +1234,7 @@ int CUdpServer::SendDirect(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int i
 		AddFreeBufferObj(pBufferObj);
 		
 		if(result != NO_ERROR)
-			VERIFY(!HasStarted());
+			ENSURE(!HasStarted());
 	}
 
 	return result;
@@ -1324,7 +1299,7 @@ int CUdpServer::DoSendPack(TUdpSocketObj* pSocketObj)
 	}
 
 	if(!IOCP_SUCCESS(result))
-		VERIFY(!HasStarted());
+		ENSURE(!HasStarted());
 
 	return result;
 }
@@ -1366,7 +1341,7 @@ int CUdpServer::DoSendSafe(TUdpSocketObj* pSocketObj)
 	}
 
 	if(!IOCP_SUCCESS(result))
-		VERIFY(!HasStarted());
+		ENSURE(!HasStarted());
 
 	return result;
 }
@@ -1416,7 +1391,7 @@ BOOL CUdpServer::SendDetectPackage(CONNID dwConnID, TUdpSocketObj* pSocketObj)
 		if(isOK)
 			TRACE("<S-CNNID: %Iu> send 0 bytes (detect package)\n", dwConnID);
 		else
-			VERIFY(!HasStarted());
+			ENSURE(!HasStarted());
 	}
 
 	return isOK;

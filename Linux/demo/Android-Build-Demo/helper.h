@@ -69,10 +69,12 @@ struct app_arg
 
 	// -a
 	CString remote_addr;
-	// -b
-	CString bind_addr;
 	// -p
 	USHORT port;
+	// -b
+	CString bind_addr;
+	// -d
+	USHORT local_port;
 	// -j
 	CString reject_addr;
 	// -n

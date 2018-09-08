@@ -116,8 +116,12 @@ _WIN32_WINNT_WIN10		0x0A00
 		#define _ATL_SECURE_NO_WARNINGS			1
 	#endif
 
-	#ifndef _CRT_NON_CONFORMING_SWPRINTFS
-		#define _CRT_NON_CONFORMING_SWPRINTFS	1
+	#ifndef _ATL_SECURE_NO_WARNINGS
+		#define _ATL_SECURE_NO_WARNINGS			1
+	#endif
+
+	#ifndef _ATL_DISABLE_NOTHROW_NEW
+		#define _ATL_DISABLE_NOTHROW_NEW		1
 	#endif
 
 	#ifndef _SECURE_ATL
@@ -196,6 +200,9 @@ _WIN32_WINNT_WIN10		0x0A00
 	#endif
 	#ifndef VERIFY
 		#define VERIFY(f)	ATLVERIFY(f)
+	#endif
+	#ifndef ENSURE
+		#define ENSURE(f)	ATLENSURE(f)
 	#endif
 
 	#ifndef TRACE

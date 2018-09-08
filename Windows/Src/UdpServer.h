@@ -47,6 +47,7 @@ public:
 	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 
+	virtual BOOL IsConnected			(CONNID dwConnID);
 	virtual BOOL IsPauseReceive			(CONNID dwConnID, BOOL& bPaused);
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
 	virtual DWORD GetConnectionCount	();
@@ -172,7 +173,7 @@ private:
 	BOOL			InvalidSocketObj(TUdpSocketObj* pSocketObj);
 	void			ReleaseGCSocketObj(BOOL bForce = FALSE);
 
-	void			AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj);
+	void			AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr);
 	void			CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
 

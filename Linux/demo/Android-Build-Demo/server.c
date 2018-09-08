@@ -10,7 +10,7 @@ En_HP_HandleResult OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* 
 
 int main(int argc, char* const argv[])
 {
-	printf("HP-Socket 5.2.2 for Android\n");
+	printf("HP-Socket for Android\n");
 	HP_TcpPackServerListener listener = Create_HP_TcpPackServerListener();
 	HP_TcpPackServer svr = Create_HP_TcpPackServer(listener);
 	HP_Set_FN_Server_OnReceive(listener, OnReceive);

@@ -1,4 +1,43 @@
 # ======================================== #
+HP-Socket v5.4.1 API 更新列表：
+# ======================================== #
+--------------------
+1、System:
+--------------------
+SYS_Malloc						(增加)
+SYS_Realloc						(增加)
+SYS_Free						(增加)
+
+--------------------
+2、TCP/UDP:
+--------------------
+HP_Agent_ConnectWithLocalPort				(增加)
+HP_Agent_ConnectWithExtraAndLocalPort		(增加)
+HP_Client_StartWithBindAddressAndLocalPort	(增加)
+HP_Agent_IsConnected						(增加)
+HP_Client_IsConnected						(增加)
+HP_Server_IsConnected						(增加)
+
+--------------------
+3、Thread Pool:
+--------------------
+Create_HP_ThreadPool			(增加)
+Destroy_HP_ThreadPool			(增加)
+Create_HP_SocketTaskObj			(增加)
+Destroy_HP_SocketTaskObj		(增加)
+HP_ThreadPool_Start				(增加)
+HP_ThreadPool_Stop				(增加)
+HP_ThreadPool_Submit			(增加)
+HP_ThreadPool_Submit_Task		(增加)
+HP_ThreadPool_AdjustThreadCount	(增加)
+HP_ThreadPool_HasStarted		(增加)
+HP_ThreadPool_GetState			(增加)
+HP_ThreadPool_GetQueueSize		(增加)
+HP_ThreadPool_GetThreadCount	(增加)
+HP_ThreadPool_GetMaxQueueSize	(增加)
+HP_ThreadPool_GetRejectedPolicy	(增加)
+
+# ======================================== #
 HP-Socket v5.1.1 API 更新列表：
 # ======================================== #
 --------------------

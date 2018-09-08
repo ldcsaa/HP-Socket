@@ -180,7 +180,7 @@ private:
 
 private:
 
-	static int CALLBACK InternalServerNameCallback(SSL* ssl, int* ad, void* arg);
+	static int InternalServerNameCallback(SSL* ssl, int* ad, void* arg);
 
 private:
 
@@ -236,6 +236,12 @@ public:
 	{
 		Reset();
 	}
+
+	static CSSLSession* Construct(CItemPool& itPool)
+		{return new CSSLSession(itPool);}
+
+	static void Destruct(CSSLSession* pSession)
+		{if(pSession) delete pSession;}
 
 private:
 	CItemPool&				m_itPool;

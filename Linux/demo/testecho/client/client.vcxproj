@@ -174,7 +174,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -189,7 +189,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -203,7 +203,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -218,7 +218,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -232,7 +232,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -247,7 +247,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

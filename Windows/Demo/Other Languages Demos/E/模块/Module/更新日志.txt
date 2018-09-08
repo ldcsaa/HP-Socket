@@ -1,3 +1,101 @@
+历史版本下载地址: https://pan.baidu.com/s/1nUXAJRK5fWZcNUwrylvOHw
+[18:41 2018/8/27]
+1、修复英文模块submit_task最后一个参数错误问题，莫名其妙变成了字节集
+
+[11:04 2018/8/27]
+1、更新hpsocket为 beta11
+2、submit_task 提交的任务不用去管回调里面的ptask参数。内部自动处理。
+
+
+[16:57 2018/8/24]
+1、修复中文模块部分命令错误问题
+2、修复英文模块几处命令错误问题
+3、增加websocket例程，本来httpclient里面人，有些人就是装看不见。
+4、更新hpsocket为 beta9
+
+
+[12:57 2018/8/15]
+1、修复模块汇编的bug，原因是取消了ww汇编库
+
+[11:55 2018/8/15]
+1、模块更新为beta8
+2、新增api：
+	HP_Agent_IsConnected  -->  Agent.IsConnected()  					
+	HP_Client_IsConnected  -->  Client.IsConnected()				
+	HP_Server_IsConnected  -->  Server.IsConnected()						
+
+[9:18 2018/8/6]
+1、性能优化
+2、由于某些人吐槽中文版模块吐槽的厉害，遂决定不再更新中文版。
+3、\demo\old 目录下放的是以前旧的例程源码，并不再更新
+
+[12:57 2018/8/1]
+修改模块IBufferPtr类，具体调用方式查看
+TestEcho-New-Agent.e
+TestEcho-New-Server.e
+TestEcho-Http-Serve.e 
+TestEcho-Http-Serve-bigfile.e  改名为 TestEcho-Http-Serve.e 
+
+[9:35 2018/8/1]
+==========================================================================================
+v5.4.1 bate5 更新：
+==========================================================================================
+1、模块新增IBufferPtr类，方便管理数据叠加，
+TestEcho-New-Agent.e和TestEcho-New-Server.e已经改为IBufferPtr接收数据
+
+2、新增Agent例程，全新四个例程
+TestEcho-New-Server.e
+TestEcho-New-Agent.e
+TestEcho-New-Client.e
+TestEcho-ThreadPool.e   线程池普通例程，
+TestEcho-Http-Serve.e  修改为线程池高级例程，在线程池中 m_Server.SendLocalFileEx() 在发送大数据时可判断连接是否当断，以前版本不支持
+
+3、新增多个汇编函数，请查看 asmfun 程序集
+
+4、优化部分汇编代码，修复中文版模块几个BUG。
+
+
+[12:08 2018/7/30]
+==========================================================================================
+v5.4.1 bate4 更新：
+==========================================================================================
+1、新增API
+SYS_Malloc						
+SYS_Realloc						
+SYS_Free						
+HP_Agent_ConnectWithLocalPort			
+HP_Agent_ConnectWithExtraAndLocalPort	
+HP_Client_StartWithBindAddressAndLocalPort	
+
+2、中文版模块优化部分参数显示
+3、两个模块优化部分代码
+
+
+[09:25 2018/7/26]
+==========================================================================================
+v5.4.1 更新：
+==========================================================================================
+
+> 加入线程池公共组件：
+-----------------
+1、加入 IHPThreadPool 线程池公共组件
+2、IHPThreadPool 主要方法：
+	1) Start：启动线程池
+	2) Stop：关闭线程池
+	3) Submit：提交任务
+	4) AdjustThreadCount：调整线程池大小
+
+> 其他更新：
+-----------------
+1、代码优化
+2、增加HPThreadPool例程
+3、httpserver发送大文件增加和HPThreadPool结合，能判断断开。可以自行添加其它扩展协议(如：断点续传)。
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.4.1 完全兼容 HP-Socket v5.3.2 版本，可以直接替换升级
+
+
 [09:53 2018/6/9]
 1、更新版本号，保持与 Linux 版的版本号同步
 2、HP-Socket v5.3.2 完全兼容 HP-Socket v5.3.1 版本，可以直接替换升级

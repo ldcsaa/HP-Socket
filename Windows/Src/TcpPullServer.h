@@ -50,7 +50,7 @@ protected:
 		if(result != HR_ERROR)
 		{
 			TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
-			VERIFY(SetConnectionReserved(pSocketObj, pBuffer));
+			ENSURE(SetConnectionReserved(pSocketObj, pBuffer));
 		}
 
 		return result;
@@ -73,7 +73,6 @@ protected:
 
 		TBuffer* pBuffer = nullptr;
 		GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
-		ASSERT(pBuffer);
 
 		if(pBuffer != nullptr)
 			m_bfPool.PutFreeBuffer(pBuffer);

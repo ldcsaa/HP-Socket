@@ -1217,10 +1217,10 @@ public:
 		if(m_lsFreeHttpObj.TryLock(&pHttpObj, dwIndex))
 		{
 			if(::GetTimeGap32(pHttpObj->GetFreeTime()) >= m_dwHttpObjLockTime)
-				VERIFY(m_lsFreeHttpObj.ReleaseLock(nullptr, dwIndex));
+				ENSURE(m_lsFreeHttpObj.ReleaseLock(nullptr, dwIndex));
 			else
 			{
-				VERIFY(m_lsFreeHttpObj.ReleaseLock(pHttpObj, dwIndex));
+				ENSURE(m_lsFreeHttpObj.ReleaseLock(pHttpObj, dwIndex));
 				pHttpObj = nullptr;
 			}
 		}
@@ -1240,18 +1240,15 @@ public:
 	{
 		pHttpObj->SetFree();
 
+		ReleaseGCHttpObj();
+		
 		if(!m_lsFreeHttpObj.TryPut(pHttpObj))
-		{
 			m_lsGCHttpObj.PushBack(pHttpObj);
-
-			if(m_lsGCHttpObj.Size() > m_dwHttpObjPoolSize)
-				ReleaseGCHttpObj();
-		}
 	}
 
 	void Prepare()
 	{
-		m_lsFreeHttpObj.Reset(m_dwHttpObjPoolHold);
+		m_lsFreeHttpObj.Reset(m_dwHttpObjPoolSize);
 	}
 
 	void Clear()
@@ -1259,31 +1256,19 @@ public:
 		THttpObj* pHttpObj = nullptr;
 
 		while(m_lsFreeHttpObj.TryGet(&pHttpObj))
-			delete pHttpObj;
+			THttpObj::Destruct(pHttpObj);
 
-		VERIFY(m_lsFreeHttpObj.IsEmpty());
+		ENSURE(m_lsFreeHttpObj.IsEmpty());
 		m_lsFreeHttpObj.Reset();
 
 		ReleaseGCHttpObj(TRUE);
-		VERIFY(m_lsGCHttpObj.IsEmpty());
+		ENSURE(m_lsGCHttpObj.IsEmpty());
 	}
 
 private:
 	void ReleaseGCHttpObj(BOOL bForce = FALSE)
 	{
-		THttpObj* pHttpObj	= nullptr;
-		DWORD now			= ::TimeGetTime();
-
-		while(m_lsGCHttpObj.PopFront(&pHttpObj))
-		{
-			if(bForce || (int)(now - pHttpObj->GetFreeTime()) >= (int)m_dwHttpObjLockTime)
-				delete pHttpObj;
-			else
-			{
-				m_lsGCHttpObj.PushBack(pHttpObj);
-				break;
-			}
-		}
+		::ReleaseGCObj(m_lsGCHttpObj, m_dwHttpObjLockTime, bForce);
 	}
 
 public:
@@ -1325,7 +1310,7 @@ private:
 };
 
 template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_LOCK_TIME	= 15 * 1000;
-template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_SIZE	= 150;
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_SIZE	= 600;
 template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_HOLD	= 600;
 
 // ------------------------------------------------------------------------------------------------------------- //

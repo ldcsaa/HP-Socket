@@ -29,20 +29,28 @@
 #include <MmSystem.h>
 #pragma comment(lib, "Winmm")
 
+static CEvt s_evWait;
+
 DWORD TimeGetTime()
 {
 	return ::timeGetTime();
 }
 
-DWORD GetTimeGap32(DWORD dwOriginal)
+DWORD GetTimeGap32(DWORD dwOriginal, DWORD dwCurrent)
 {
-	return ::timeGetTime() - dwOriginal;
+	if(dwCurrent == 0)
+		dwCurrent = ::timeGetTime();
+
+	return dwCurrent - dwOriginal;
 }
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WS08
-ULONGLONG GetTimeGap64(ULONGLONG ullOriginal)
+ULONGLONG GetTimeGap64(ULONGLONG ullOriginal, ULONGLONG ullCurrent)
 {
-	return ::GetTickCount64() - ullOriginal;
+	if(ullCurrent == 0)
+		ullCurrent = ::GetTickCount64();
+
+	return ullCurrent - ullOriginal;
 }
 #endif
 
@@ -97,7 +105,6 @@ DWORD WaitForMultipleObjectsWithMessageLoop(DWORD dwHandles, HANDLE szHandles[],
 	}
 
 	return dwResult;
-
 }
 
 BOOL MsgWaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds, DWORD dwWakeMask, DWORD dwFlags)
@@ -109,27 +116,36 @@ BOOL MsgWaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds, DWORD dwWakeMa
 	case WAIT_OBJECT_0:
 		return TRUE;
 	case WAIT_FAILED:
-		ASSERT(FALSE);
+		ENSURE(FALSE);
 	case WAIT_TIMEOUT:
 		return FALSE;
 	default:
-		ASSERT(FALSE);
+		ENSURE(FALSE);
 	}
 
 	return FALSE;
 }
 
+void WaitFor(DWORD dwMilliseconds)
+{
+	if(dwMilliseconds == 0)
+		::Sleep(0);
+	else
+		ENSURE(::WaitForSingleObject(s_evWait, dwMilliseconds) == WAIT_TIMEOUT);
+}
+
 void WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask, DWORD dwFlags)
 {
-	static CEvt evWait;
-
-	VERIFY(MsgWaitForSingleObject(evWait, dwMilliseconds, dwWakeMask, dwFlags) == FALSE);
+	if(dwMilliseconds == 0)
+		::Sleep(0);
+	else
+		ENSURE(MsgWaitForSingleObject(s_evWait, dwMilliseconds, dwWakeMask, dwFlags) == FALSE);
 }
 
 void WaitForWorkingQueue(long* plWorkingItemCount, long lMaxWorkingItemCount, DWORD dwCheckInterval)
 {
 	while(*plWorkingItemCount > lMaxWorkingItemCount)
-		::Sleep(dwCheckInterval);
+		WaitFor(dwCheckInterval);
 }
 
 void WaitForComplete(long* plWorkingItemCount, DWORD dwCheckInterval)

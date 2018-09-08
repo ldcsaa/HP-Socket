@@ -118,7 +118,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 	if(result != HR_ERROR)
 	{
 		THttpObj* pHttpObj = m_objPool.PickFreeHttpObj(this, pSocketObj);
-		VERIFY(SetConnectionReserved(pSocketObj, pHttpObj));
+		ENSURE(SetConnectionReserved(pSocketObj, pHttpObj));
 	}
 
 	return result;
@@ -131,7 +131,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 	if(result == HR_ERROR)
 	{
 		THttpObj* pHttpObj = FindHttpObj(pSocketObj);
-		VERIFY(pHttpObj);
+		ENSURE(pHttpObj);
 
 		m_objPool.PutFreeHttpObj(pHttpObj);
 		SetConnectionReserved(pSocketObj, nullptr);

@@ -34,6 +34,7 @@
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
+#include "HPThreadPool.h"
 
 #ifdef _HTTP_SUPPORT
 #include "HttpServer.h"
@@ -284,6 +285,21 @@ HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value)
 	return ::HToN64(value);
 }
 
+HPSOCKET_API LPBYTE SYS_Malloc(int size)
+{
+	return MALLOC(BYTE, size);
+}
+
+HPSOCKET_API LPBYTE SYS_Realloc(LPBYTE p, int size)
+{
+	return REALLOC(p, BYTE, size);
+}
+
+HPSOCKET_API VOID SYS_Free(LPBYTE p)
+{
+	FREE(p);
+}
+
 #ifdef _ICONV_SUPPORT
 
 HPSOCKET_API BOOL SYS_CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen)
@@ -531,3 +547,27 @@ HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires)
 /*****************************************************************************************************************************************************/
 
 #endif
+
+/*****************************************************************************************************************************************************/
+/**************************************************************** Thread Pool Exports ****************************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API IHPThreadPool* HP_Create_ThreadPool()
+{
+	return new CHPThreadPool;
+}
+
+HPSOCKET_API void HP_Destroy_ThreadPool(IHPThreadPool* pThreadPool)
+{
+	delete pThreadPool;
+}
+
+HPSOCKET_API LPTSocketTask HP_Create_SocketTaskObj(Fn_SocketTaskProc fnTaskProc, PVOID pSender, CONNID dwConnID, LPCBYTE pBuffer, INT iBuffLen, EnTaskBufferType enBuffType, WPARAM wParam, LPARAM lParam)
+{
+	return ::CreateSocketTaskObj(fnTaskProc, pSender, dwConnID, pBuffer, iBuffLen, enBuffType, wParam, lParam);
+}
+
+HPSOCKET_API void HP_Destroy_SocketTaskObj(LPTSocketTask pTask)
+{
+	::DestroySocketTaskObj(pTask);
+}

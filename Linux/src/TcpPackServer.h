@@ -88,7 +88,6 @@ protected:
 
 		TBufferPackInfo* pInfo = nullptr;
 		GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
-		ASSERT(pInfo);
 
 		if(pInfo != nullptr)
 		{

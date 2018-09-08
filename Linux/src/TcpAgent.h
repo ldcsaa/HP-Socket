@@ -32,7 +32,7 @@ class CTcpAgent : public ITcpAgent, private CIOHandler
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
 	virtual BOOL Stop	();
-	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr);
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0);
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	{return DoSendPackets(dwConnID, pBuffers, iCount);}
@@ -46,6 +46,7 @@ public:
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteHost				(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort);
 
+	virtual BOOL IsConnected			(CONNID dwConnID);
 	virtual BOOL IsPauseReceive			(CONNID dwConnID, BOOL& bPaused);
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
 	virtual DWORD GetConnectionCount	();
@@ -185,13 +186,13 @@ private:
 	void DeleteSocketObj	(TAgentSocketObj* pSocketObj);
 	BOOL InvalidSocketObj	(TAgentSocketObj* pSocketObj);
 	void ReleaseGCSocketObj	(BOOL bForce = FALSE);
-	void AddClientSocketObj	(CONNID dwConnID, TAgentSocketObj* pSocketObj);
+	void AddClientSocketObj	(CONNID dwConnID, TAgentSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteAddress, PVOID pExtra);
 	void CloseClientSocketObj(TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SHUT_WR);
 
 private:
-	int CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, SOCKET& soClient, HP_SOCKADDR& addr);
+	int CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
 	int PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
-	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, USHORT usPort, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
+	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 
 	VOID HandleCmdSend		(CONNID dwConnID);
 	VOID HandleCmdUnpause	(CONNID dwConnID);

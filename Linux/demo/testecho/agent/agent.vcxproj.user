@@ -4,34 +4,40 @@
     <RemoteTarget>460065450;192.168.56.12 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>
+    </RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <RemoteTarget>460065450;192.168.56.12 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>
+    </RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <RemoteTarget>970599627;192.168.56.11 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>
+    </RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <RemoteTarget>970599627;192.168.56.11 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>
+    </RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>
+    </RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>
+    </RemoteDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

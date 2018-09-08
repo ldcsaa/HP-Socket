@@ -29,37 +29,28 @@
 #pragma intrinsic(_WriteBarrier)
 #pragma intrinsic(_ReadWriteBarrier)
 
-#define DEFAULT_CRISEC_SPIN_COUNT	4096
-
-#if defined (_WIN64)
-	#define DEFAULT_PAUSE_RETRY		16
-	#define DEFAULT_PAUSE_YIELD		128
-	#define DEFAULT_PAUSE_CYCLE		8192
-#else
-	#define DEFAULT_PAUSE_RETRY		4
-	#define DEFAULT_PAUSE_YIELD		32
-	#define DEFAULT_PAUSE_CYCLE		4096
-#endif
+#define DEFAULT_CRISEC_SPIN_COUNT	0
+#define THREAD_YIELD_CYCLE			63
+#define THREAD_SWITCH_CYCLE			4095
 
 #ifndef YieldProcessor
 	#pragma intrinsic(_mm_pause)
 	#define YieldProcessor _mm_pause
 #endif
 
-static inline void YieldThread(UINT i = DEFAULT_PAUSE_RETRY)
+inline void YieldThread(UINT i = THREAD_YIELD_CYCLE)
 {
-	if		(i < DEFAULT_PAUSE_RETRY)		;
-	else if	(i < DEFAULT_PAUSE_YIELD)		YieldProcessor();
-	else if	(i < DEFAULT_PAUSE_CYCLE - 1)	SwitchToThread();
-	else if	(i < DEFAULT_PAUSE_CYCLE)		Sleep(0);
-	else									YieldThread(i & (DEFAULT_PAUSE_CYCLE - 1));
+	if((i & THREAD_SWITCH_CYCLE) == THREAD_SWITCH_CYCLE)
+		::SwitchToThread();
+	else if((i & THREAD_YIELD_CYCLE) == THREAD_YIELD_CYCLE)
+		::YieldProcessor();
 }
 
 class CInterCriSec
 {
 public:
 	CInterCriSec(DWORD dwSpinCount = DEFAULT_CRISEC_SPIN_COUNT)
-		{VERIFY(::InitializeCriticalSectionAndSpinCount(&m_crisec, dwSpinCount));}
+		{ENSURE(::InitializeCriticalSectionAndSpinCount(&m_crisec, dwSpinCount));}
 	~CInterCriSec()
 		{::DeleteCriticalSection(&m_crisec);}
 
@@ -86,7 +77,7 @@ public:
 		if(bInitialize)
 		{
 			m_pcrisec = new CRITICAL_SECTION;
-			VERIFY(::InitializeCriticalSectionAndSpinCount(m_pcrisec, dwSpinCount));
+			ENSURE(::InitializeCriticalSectionAndSpinCount(m_pcrisec, dwSpinCount));
 		}
 		else
 			m_pcrisec = nullptr;
@@ -150,7 +141,7 @@ public:
 	BOOL Open(DWORD dwAccess, BOOL bInheritHandle, LPCTSTR pszName)
 	{
 		if(IsValid())
-			VERIFY(::CloseHandle(m_hMutex));
+			ENSURE(::CloseHandle(m_hMutex));
 
 		m_hMutex = ::OpenMutex(dwAccess, bInheritHandle, pszName);
 		return(IsValid());
@@ -299,12 +290,33 @@ private:
 	CLockObj& m_lock;
 };
 
-typedef CInterCriSec					CCriSec;
+template<class CLockObj> class CLocalTryLock
+{
+public:
+	CLocalTryLock(CLockObj& obj) : m_lock(obj) {m_bValid = m_lock.TryLock();}
+	~CLocalTryLock() {if(m_bValid) m_lock.Unlock();}
 
-typedef CLocalLock<CCriSec>				CCriSecLock;
-typedef CLocalLock<CInterCriSec>		CInterCriSecLock;
-typedef CLocalLock<CInterCriSec2>		CInterCriSecLock2;
-typedef CLocalLock<CMTX>				CMutexLock;
-typedef CLocalLock<CSpinGuard>			CSpinLock;
-typedef CLocalLock<CReentrantSpinGuard>	CReentrantSpinLock;
-typedef	CLocalLock<CFakeGuard>			CFakeLock;
+	BOOL IsValid() {return m_bValid;}
+
+private:
+	CLockObj&	m_lock;
+	BOOL		m_bValid;
+};
+
+typedef CInterCriSec						CCriSec;
+
+typedef CLocalLock<CCriSec>					CCriSecLock;
+typedef CLocalLock<CInterCriSec>			CInterCriSecLock;
+typedef CLocalLock<CInterCriSec2>			CInterCriSecLock2;
+typedef CLocalLock<CMTX>					CMutexLock;
+typedef CLocalLock<CSpinGuard>				CSpinLock;
+typedef CLocalLock<CReentrantSpinGuard>		CReentrantSpinLock;
+typedef	CLocalLock<CFakeGuard>				CFakeLock;
+
+typedef CLocalTryLock<CCriSec>				CCriSecTryLock;
+typedef CLocalTryLock<CInterCriSec>			CInterCriSecTryLock;
+typedef CLocalTryLock<CInterCriSec2>		CInterCriSecTryLock2;
+typedef CLocalTryLock<CMTX>					CMutexTryLock;
+typedef CLocalTryLock<CSpinGuard>			CSpinTryLock;
+typedef CLocalTryLock<CReentrantSpinGuard>	CReentrantSpinTryLock;
+typedef	CLocalTryLock<CFakeGuard>			CFakeTryLock;

@@ -29,7 +29,7 @@
 class CUdpCast : public IUdpCast
 {
 public:
-	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr);
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usLocalPort = 0);
 	virtual BOOL Stop	();
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount);
@@ -44,6 +44,7 @@ public:
 	virtual BOOL GetRemoteHost			(TCHAR lpszHost[], int& iHostLen, USHORT& usPort);
 	virtual BOOL GetPendingDataLength	(int& iPending) {iPending = m_lsSend.Length(); return HasStarted();}
 	virtual BOOL IsPauseReceive			(BOOL& bPaused) {bPaused = m_bPaused; return HasStarted();}
+	virtual BOOL IsConnected			()				{return m_bConnected;}
 
 public:
 	virtual BOOL IsSecure				() {return FALSE;}
@@ -106,6 +107,7 @@ protected:
 
 private:
 	void SetRemoteHost	(LPCTSTR lpszHost, USHORT usPort);
+	void SetConnected	(BOOL bConnected = TRUE) {m_bConnected = bConnected; if(bConnected) m_enState = SS_STARTED;}
 
 	BOOL CheckStarting();
 	BOOL CheckStoping();
@@ -124,9 +126,6 @@ private:
 	BOOL HandleClose(SHORT events);
 	BOOL HandleRead(SHORT events);
 	BOOL HandleWrite(SHORT events);
-
-	void SetConnected	() {m_bConnected = TRUE; m_enState = SS_STARTED;}
-	BOOL HasConnected	() {return m_bConnected;}
 
 	UINT WINAPI WorkerThreadProc(LPVOID pv);
 

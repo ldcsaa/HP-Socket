@@ -286,7 +286,7 @@ public:
 
 	void Prepare()
 	{
-		m_lsFreeItem.Reset(m_dwPoolHold);
+		m_lsFreeItem.Reset(m_dwPoolSize);
 	}
 
 	void Clear()
@@ -342,7 +342,7 @@ private:
 };
 
 template<class T> const DWORD CNodePoolT<T>::DEFAULT_ITEM_CAPACITY	= TItem::DEFAULT_ITEM_CAPACITY;
-template<class T> const DWORD CNodePoolT<T>::DEFAULT_POOL_SIZE		= 300;
+template<class T> const DWORD CNodePoolT<T>::DEFAULT_POOL_SIZE		= 1200;
 template<class T> const DWORD CNodePoolT<T>::DEFAULT_POOL_HOLD		= 1200;
 
 using CItemPool = CNodePoolT<TItem>;
@@ -594,6 +594,8 @@ public:
 	ULONG_PTR ID		()	const	{return id;}
 	int Length			()	const	{return length;}
 	bool IsValid		()	const	{return id != 0;}
+
+	DWORD GetFreeTime	()	const	{return freeTime;}
 
 private:
 	int IncreaseLength	(int len)	{return (length += len);}

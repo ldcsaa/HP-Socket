@@ -1007,7 +1007,7 @@ template <class T> T* const CRingPool<T>::E_MAX_STATUS	= (T*)0x0F;
 
 // ------------------------------------------------------------------------------------------------------------- //
 
-template <class T> class CCASQueue
+template <class T> class CCASQueueX
 {
 private:
 	struct Node;
@@ -1074,22 +1074,22 @@ public:
 
 		while(true)
 		{
-			while(::InterlockedCompareExchange(&m_iLock, 1u, 0u) != 0)
-				::YieldProcessor();
+			Lock();
 
 			pHead = (NPTR)m_pHead;
 			pNext = (NPTR)pHead->pNext;
 
 			if(pNext == nullptr)
 			{
-				m_iLock = 0;
+				Unlock();
 				break;
 			}
 
 			*ppVal	= pNext->pValue;
 			m_pHead	= pNext;
 
-			m_iLock = 0;
+			Unlock();
+
 			isOK	= TRUE;
 
 			::InterlockedDecrement(&m_iSize);
@@ -1106,13 +1106,8 @@ public:
 		if(!UnsafePeekFront(ppVal))
 			return FALSE;
 
-		NPTR pHead	= (NPTR)m_pHead;
-		NPTR pNext	= (NPTR)pHead->pNext;
-		m_pHead		= pNext;
+		UnsafePopFrontNotCheck();
 
-		::InterlockedDecrement(&m_iSize);
-
-		delete pHead;
 		return TRUE;
 	}
 
@@ -1130,16 +1125,25 @@ public:
 		return TRUE;
 	}
 
-	void Clear()
+	void UnsafePopFrontNotCheck()
 	{
-		T* pVal;
-		while(PopFront(&pVal));
+		NPTR pHead	= (NPTR)m_pHead;
+		NPTR pNext	= (NPTR)pHead->pNext;
+		m_pHead		= pNext;
+
+		::InterlockedDecrement(&m_iSize);
+
+		delete pHead;
 	}
 
 	void UnsafeClear()
 	{
-		T* pVal;
-		while(UnsafePopFront(&pVal));
+		ASSERT(m_pHead != nullptr);
+
+		m_dwCheckTime = 0;
+
+		while(m_pHead->pNext != nullptr)
+			UnsafePopFrontNotCheck();
 	}
 
 public:
@@ -1147,40 +1151,65 @@ public:
 	UINT Size()		{return m_iSize;}
 	BOOL IsEmpty()	{return m_iSize == 0;}
 
-public:
+	void Lock()		{while(!TryLock()) ::YieldProcessor();}
+	void Unlock()	{m_iLock = 0;}
+	BOOL TryLock()	{return (::InterlockedCompareExchange(&m_iLock, 1u, 0u) == 0);}
 
-	CCASQueue() : m_iLock(0), m_iSize(0)
+	DWORD GetCheckTime()
 	{
-		NPTR pHead = new Node(nullptr);
-		m_pHead = m_pTail = pHead;
+		return m_dwCheckTime;
 	}
 
-	~CCASQueue()
+	void UpdateCheckTime(DWORD dwCurrent = 0)
+	{
+		if(dwCurrent == 0)
+			dwCurrent = ::TimeGetTime();
+
+		m_dwCheckTime = dwCurrent;
+	}
+
+	int GetCheckTimeGap(DWORD dwCurrent = 0)
+	{
+		int rs = (int)GetTimeGap32(m_dwCheckTime, dwCurrent);
+
+		if(rs < -60 * 1000)
+			rs = MAXINT;
+
+		return rs;
+	}
+
+public:
+
+	CCASQueueX() : m_iLock(0), m_iSize(0), m_dwCheckTime(0)
+	{
+		m_pHead = m_pTail = new Node(nullptr);
+	}
+
+	~CCASQueueX()
 	{
 		ASSERT(m_iLock == 0);
 		ASSERT(m_iSize == 0);
+		ASSERT(m_pTail == m_pHead);
 		ASSERT(m_pHead != nullptr);
 		ASSERT(m_pHead->pNext == nullptr);
 
-		while(m_pHead != nullptr)
-		{
-			VNPTR pNode = m_pHead->pNext;
+		UnsafeClear();
 
-			delete m_pHead;
-			m_pHead = pNode;
-		}
+		delete m_pHead;
 	}
 
-	DECLARE_NO_COPY_CLASS(CCASQueue)
+	DECLARE_NO_COPY_CLASS(CCASQueueX)
 
 private:
 	VUINT	m_iLock;
 	VUINT	m_iSize;
 	VNPTR	m_pHead;
 	VNPTR	m_pTail;
+
+	volatile DWORD m_dwCheckTime;
 };
 
-template <class T> class CCASSimpleQueue
+template <class T> class CCASSimpleQueueX
 {
 private:
 	struct Node;
@@ -1243,22 +1272,22 @@ public:
 
 		while(true)
 		{
-			while(::InterlockedCompareExchange(&m_iLock, 1u, 0u) != 0)
-				::YieldProcessor();
+			Lock();
 
 			pHead = (NPTR)m_pHead;
 			pNext = (NPTR)pHead->pNext;
 
 			if(pNext == nullptr)
 			{
-				m_iLock = 0;
+				Unlock();
 				break;
 			}
 
 			*ptVal	= pNext->tValue;
 			m_pHead	= pNext;
 
-			m_iLock = 0;
+			Unlock();
+
 			isOK	= TRUE;
 
 			::InterlockedDecrement(&m_iSize);
@@ -1275,13 +1304,8 @@ public:
 		if(!UnsafePeekFront(ptVal))
 			return FALSE;
 
-		NPTR pHead	= (NPTR)m_pHead;
-		NPTR pNext	= (NPTR)pHead->pNext;
-		m_pHead		= pNext;
+		UnsafePopFrontNotCheck();
 
-		::InterlockedDecrement(&m_iSize);
-
-		delete pHead;
 		return TRUE;
 	}
 
@@ -1294,21 +1318,30 @@ public:
 		if(pNext == nullptr)
 			return FALSE;
 
-		*ptVal = pNext->tValue;
+		*ptVal = pNext->pValue;
 
 		return TRUE;
 	}
 
-	void Clear()
+	void UnsafePopFrontNotCheck()
 	{
-		T tVal;
-		while(PopFront(&tVal));
+		NPTR pHead	= (NPTR)m_pHead;
+		NPTR pNext	= (NPTR)pHead->pNext;
+		m_pHead		= pNext;
+
+		::InterlockedDecrement(&m_iSize);
+
+		delete pHead;
 	}
 
 	void UnsafeClear()
 	{
-		T tVal;
-		while(UnsafePopFront(&tVal));
+		ASSERT(m_pHead != nullptr);
+
+		m_dwCheckTime = 0;
+
+		while(m_pHead->pNext != nullptr)
+			UnsafePopFrontNotCheck();
 	}
 
 public:
@@ -1316,38 +1349,408 @@ public:
 	UINT Size()		{return m_iSize;}
 	BOOL IsEmpty()	{return m_iSize == 0;}
 
-public:
+	void Lock()		{while(!TryLock()) ::YieldProcessor();}
+	void Unlock()	{m_iLock = 0;}
+	BOOL TryLock()	{return (::InterlockedCompareExchange(&m_iLock, 1u, 0u) == 0);}
 
-	CCASSimpleQueue() : m_iLock(0), m_iSize(0)
+	DWORD GetCheckTime()
 	{
-		NPTR pHead = new Node(0);
-		m_pHead = m_pTail = pHead;
+		return m_dwCheckTime;
 	}
 
-	~CCASSimpleQueue()
+	void UpdateCheckTime(DWORD dwCurrent = 0)
+	{
+		if(dwCurrent == 0)
+			dwCurrent = ::TimeGetTime();
+
+		m_dwCheckTime = dwCurrent;
+	}
+
+	int GetCheckTimeGap(DWORD dwCurrent = 0)
+	{
+		int rs = (int)GetTimeGap32(m_dwCheckTime, dwCurrent);
+
+		if(rs < -60 * 1000)
+			rs = MAXINT;
+
+		return rs;
+	}
+
+public:
+
+	CCASSimpleQueueX() : m_iLock(0), m_iSize(0), m_dwCheckTime(0)
+	{
+		m_pHead = m_pTail = new Node(0);
+	}
+
+	~CCASSimpleQueueX()
 	{
 		ASSERT(m_iLock == 0);
 		ASSERT(m_iSize == 0);
+		ASSERT(m_pTail == m_pHead);
 		ASSERT(m_pHead != nullptr);
 		ASSERT(m_pHead->pNext == nullptr);
 
-		while(m_pHead != nullptr)
-		{
-			VNPTR pNode = m_pHead->pNext;
+		UnsafeClear();
 
-			delete m_pHead;
-			m_pHead = pNode;
-		}
+		delete m_pHead;
 	}
 
-	DECLARE_NO_COPY_CLASS(CCASSimpleQueue)
+	DECLARE_NO_COPY_CLASS(CCASSimpleQueueX)
 
 private:
 	VUINT	m_iLock;
 	VUINT	m_iSize;
 	VNPTR	m_pHead;
 	VNPTR	m_pTail;
+
+	volatile DWORD m_dwCheckTime;
 };
+
+template <class T> class CCASQueueY
+{
+public:
+
+	void PushBack(T* pVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		UnsafePushBack(pVal);
+	}
+
+	void UnsafePushBack(T* pVal)
+	{
+		ASSERT(pVal != nullptr);
+
+		m_lsItems.push_back(pVal);
+	}
+
+	void PushFront(T* pVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		UnsafePushFront(pVal);
+	}
+
+	void UnsafePushFront(T* pVal)
+	{
+		ASSERT(pVal != nullptr);
+
+		m_lsItems.push_front(pVal);
+	}
+
+	BOOL PopFront(T** ppVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		return UnsafePopFront(ppVal);
+	}
+
+	BOOL UnsafePopFront(T** ppVal)
+	{
+		if(!UnsafePeekFront(ppVal))
+			return FALSE;
+
+		UnsafePopFrontNotCheck();
+
+		return TRUE;
+	}
+
+	BOOL PeekFront(T** ppVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		return UnsafePeekFront(ppVal);
+	}
+
+	BOOL UnsafePeekFront(T** ppVal)
+	{
+		ASSERT(ppVal != nullptr);
+
+		if(m_lsItems.empty())
+			return FALSE;
+
+		*ppVal = m_lsItems.front();
+
+		return TRUE;
+	}
+
+	void UnsafePopFrontNotCheck()
+	{
+		m_lsItems.pop_front();
+	}
+
+	void Clear()
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		UnsafeClear();
+	}
+
+	void UnsafeClear()
+	{
+		m_dwCheckTime = 0;
+
+		m_lsItems.clear();
+	}
+
+public:
+
+	ULONG Size()	{return (ULONG)m_lsItems.size();}
+	BOOL IsEmpty()	{return (BOOL)m_lsItems.empty();}
+
+	void Lock()		{m_csGuard.lock();}
+	void Unlock()	{m_csGuard.unlock();}
+	BOOL TryLock()	{return m_csGuard.try_lock();}
+	CCriSec& Guard(){return m_csGuard;}
+
+	DWORD GetCheckTime()
+	{
+		return m_dwCheckTime;
+	}
+
+	void UpdateCheckTime(DWORD dwCurrent = 0)
+	{
+		if(dwCurrent == 0)
+			dwCurrent = ::TimeGetTime();
+
+		m_dwCheckTime = dwCurrent;
+	}
+
+	int GetCheckTimeGap(DWORD dwCurrent = 0)
+	{
+		int rs = (int)GetTimeGap32(m_dwCheckTime, dwCurrent);
+
+		if(rs < -60 * 1000)
+			rs = MAXINT;
+
+		return rs;
+	}
+
+public:
+
+	CCASQueueY()
+	: m_dwCheckTime(0)
+	{
+
+	}
+
+	~CCASQueueY()
+	{
+		ASSERT(IsEmpty());
+
+		UnsafeClear();
+	}
+
+	DECLARE_NO_COPY_CLASS(CCASQueueY)
+
+private:
+	CCriSec		m_csGuard;
+	deque<T*>	m_lsItems;
+	
+	volatile DWORD m_dwCheckTime;
+};
+
+template <class T> class CCASSimpleQueueY
+{
+public:
+
+	void PushBack(T tVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		UnsafePushBack(tVal);
+	}
+
+	void UnsafePushBack(T tVal)
+	{
+		m_lsItems.push_back(tVal);
+	}
+
+	void PushFront(T tVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		UnsafePushFront(tVal);
+	}
+
+	void UnsafePushFront(T tVal)
+	{
+		m_lsItems.push_front(tVal);
+	}
+
+	BOOL PopFront(T* ptVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		return UnsafePopFront(ptVal);
+	}
+
+	BOOL UnsafePopFront(T* ptVal)
+	{
+		if(!UnsafePeekFront(ptVal))
+			return FALSE;
+
+		UnsafePopFrontNotCheck();
+
+		return TRUE;
+	}
+
+	BOOL PeekFront(T* ptVal)
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		return UnsafePeekFront(ptVal);
+	}
+
+	BOOL UnsafePeekFront(T* ptVal)
+	{
+		ASSERT(ptVal != nullptr);
+
+		if(m_lsItems.empty())
+			return FALSE;
+
+		*ptVal = m_lsItems.front();
+
+		return TRUE;
+	}
+
+	void UnsafePopFrontNotCheck()
+	{
+		m_lsItems.pop_front();
+	}
+
+	void Clear()
+	{
+		CCriSecLock locallock(m_csGuard);
+
+		UnsafeClear();
+	}
+
+	void UnsafeClear()
+	{
+		m_dwCheckTime = 0;
+
+		m_lsItems.clear();
+	}
+
+public:
+
+	ULONG Size()	{return (ULONG)m_lsItems.size();}
+	BOOL IsEmpty()	{return (BOOL)m_lsItems.empty();}
+
+	void Lock()		{m_csGuard.lock();}
+	void Unlock()	{m_csGuard.unlock();}
+	BOOL TryLock()	{return m_csGuard.try_lock();}
+	CCriSec& Guard(){return m_csGuard;}
+
+	DWORD GetCheckTime()
+	{
+		return m_dwCheckTime;
+	}
+
+	void UpdateCheckTime(DWORD dwCurrent = 0)
+	{
+		if(dwCurrent == 0)
+			dwCurrent = ::TimeGetTime();
+
+		m_dwCheckTime = dwCurrent;
+	}
+
+	int GetCheckTimeGap(DWORD dwCurrent = 0)
+	{
+		int rs = (int)GetTimeGap32(m_dwCheckTime, dwCurrent);
+
+		if(rs < -60 * 1000)
+			rs = MAXINT;
+
+		return rs;
+	}
+
+public:
+
+	CCASSimpleQueueY()
+	: m_dwCheckTime(0)
+	{
+
+	}
+
+	~CCASSimpleQueueY()
+	{
+		ASSERT(IsEmpty());
+
+		UnsafeClear();
+	}
+
+	DECLARE_NO_COPY_CLASS(CCASSimpleQueueY)
+
+private:
+	CCriSec		m_csGuard;
+	deque<T>	m_lsItems;
+	
+	volatile DWORD m_dwCheckTime;
+};
+
+template <class T> using CCASQueue			= CCASQueueX<T>;
+template <class T> using CCASSimpleQueue	= CCASSimpleQueueX<T>;
+
+template<typename T>
+void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
+{
+	static const int MAX_CHECK_INTERVAL = 15 * 1000;
+
+	T* pObj = nullptr;
+
+	if(bForce)
+	{
+		CLocalLock<CCASQueue<T>> locallock(lsGC);
+
+		while(lsGC.UnsafePeekFront(&pObj))
+		{
+			lsGC.UnsafePopFrontNotCheck();
+			T::Destruct(pObj);
+		}
+	}
+	else
+	{
+		if(lsGC.IsEmpty() || lsGC.GetCheckTimeGap() < min((int)(dwLockTime / 3), MAX_CHECK_INTERVAL))
+			return;
+
+		BOOL bFirst	= TRUE;
+		DWORD now	= 0;
+
+		while(TRUE)
+		{
+			ASSERT((pObj = nullptr) == nullptr);
+
+			{
+				CLocalTryLock<CCASQueue<T>> locallock(lsGC);
+
+				if(!locallock.IsValid())
+					break;
+
+				if(bFirst)
+				{
+					bFirst	= FALSE;
+					now		= ::TimeGetTime();
+
+					lsGC.UpdateCheckTime(now);
+				}
+
+				if(!lsGC.UnsafePeekFront(&pObj))
+					break;
+
+				if((int)(now - pObj->GetFreeTime()) < (int)dwLockTime)
+					break;
+
+				lsGC.UnsafePopFrontNotCheck();
+			}
+
+			ASSERT(pObj != nullptr);
+			T::Destruct(pObj);
+		}
+	}
+}
 
 #if !defined (__x86_64__)
 	#pragma pack(pop)

@@ -30,20 +30,22 @@ DWORD TimeGetTime();
 描述: 获取当前时间与原始时间的时间差
 参数: 
 		dwOriginal	: 原始时间（毫秒），通常用 timeGetTime() 或 GetTickCount() 获取
+		dwCurrent	: 当前时间（毫秒），通常用 timeGetTime() 或 GetTickCount() 获取
 
 返回值:	与当前 timeGetTime() 之间的时间差
 **********************************/
-DWORD GetTimeGap32(DWORD dwOriginal);
+DWORD GetTimeGap32(DWORD dwOriginal, DWORD dwCurrent = 0);
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WS08
 /**********************************
 描述: 获取当前时间与原始时间的时间差
 参数: 
 		ullOriginal	: 原始时间（毫秒），通常用 GetTickCount64() 获取
+		ullCurrent	: 当前时间（毫秒），通常用 GetTickCount64() 获取
 
 返回值:	与当前 GetTickCount64() 之间的时间差
 **********************************/
-ULONGLONG GetTimeGap64(ULONGLONG ullOriginal);
+ULONGLONG GetTimeGap64(ULONGLONG ullOriginal, ULONGLONG ullCurrent = 0);
 #endif
 
 /**********************************
@@ -86,18 +88,24 @@ DWORD WaitForMultipleObjectsWithMessageLoop(DWORD dwHandles, HANDLE szHandles[],
 BOOL MsgWaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds = INFINITE, DWORD dwWakeMask = QS_ALLINPUT, DWORD dwFlags = MWMO_INPUTAVAILABLE);
 
 /**********************************
+描述: 等待指定时间		
+返回值: (无)		
+**********************************/
+void WaitFor(DWORD dwMilliseconds);
+
+/**********************************
 描述: 等待指定时间, 同时处理Windows消息
 参数: (参考: MsgWaitForMultipleObjectsEx() )
 		dwMilliseconds	: 等待时间 (毫秒)
 		dwWakeMask		: 消息过滤标识
 		dwFlags			: 等待类型
 
-返回值: MsgWaitForMultipleObjectsEx() 函数的操作结果		
+返回值: (无)		
 **********************************/
 void WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask = QS_ALLINPUT, DWORD dwFlags = MWMO_INPUTAVAILABLE);
 
 /**********************************
-描述: 等待用Sleep()函数等待某个变量小于指定值
+描述: 等待某个变量小于指定值
 参数: 
 		plWorkingItemCount		: 监视变量
 		lMaxWorkingItemCount	: 指定值
@@ -107,7 +115,7 @@ void WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask = QS_ALLINPUT, D
 **********************************/
 void WaitForWorkingQueue(long* plWorkingItemCount, long lMaxWorkingItemCount, DWORD dwCheckInterval);
 /**********************************
-描述: 等待用Sleep()函数等待某个变量减小到 0
+描述: 等待某个变量减小到 0
 参数: 
 		plWorkingItemCount		: 监视变量
 		dwCheckInterval			: 检查间隔 (毫秒)

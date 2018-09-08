@@ -153,7 +153,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket_d;rt;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -167,7 +167,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket;rt;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -180,7 +180,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket_d;rt;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib64:'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -195,7 +195,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket;rt;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib64:'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -209,7 +209,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket_d;rt;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -224,7 +224,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket;rt;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

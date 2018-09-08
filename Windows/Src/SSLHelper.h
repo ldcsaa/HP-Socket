@@ -187,7 +187,7 @@ private:
 
 private:
 
-	static int CALLBACK InternalServerNameCallback(SSL* ssl, int* ad, void* arg);
+	static int InternalServerNameCallback(SSL* ssl, int* ad, void* arg);
 
 private:
 
@@ -243,6 +243,12 @@ public:
 	{
 		Reset();
 	}
+
+	static CSSLSession* Construct(CItemPool& itPool)
+		{return new CSSLSession(itPool);}
+
+	static void Destruct(CSSLSession* pSession)
+		{if(pSession) delete pSession;}
 
 private:
 	CItemPool&				m_itPool;
@@ -338,7 +344,7 @@ template<class T, class S> EnHandleResult ProcessHandShake(T* pThis, S* pSocketO
 
 	while(TRUE)
 	{
-		VERIFY(pSession->ReadSendChannel());
+		ENSURE(pSession->ReadSendChannel());
 		const WSABUF& buffer = pSession->GetSendBuffer();
 
 		if(buffer.len == 0)
@@ -414,11 +420,11 @@ template<class T, class S> BOOL ProcessSend(T* pThis, S* pSocketObj, CSSLSession
 		return FALSE;
 	}
 
-	VERIFY(pSession->WriteSendChannel(pBuffers, iCount));
+	ENSURE(pSession->WriteSendChannel(pBuffers, iCount));
 
 	while(TRUE)
 	{
-		VERIFY(pSession->ReadSendChannel());
+		ENSURE(pSession->ReadSendChannel());
 		const WSABUF& buffer = pSession->GetSendBuffer();
 
 		if(buffer.len == 0)

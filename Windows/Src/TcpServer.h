@@ -47,6 +47,7 @@ public:
 	virtual BOOL			GetLocalAddress				(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetRemoteAddress			(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	
+	virtual BOOL IsConnected			(CONNID dwConnID);
 	virtual BOOL IsPauseReceive			(CONNID dwConnID, BOOL& bPaused);
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending);
 	virtual DWORD GetConnectionCount	();
@@ -194,7 +195,7 @@ private:
 	BOOL		InvalidSocketObj(TSocketObj* pSocketObj);
 	void		ReleaseGCSocketObj(BOOL bForce = FALSE);
 
-	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj);
+	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr);
 	void		CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SD_SEND);
 
 private:
@@ -215,9 +216,9 @@ private:
 	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
-	BOOL DoAccept		();
+	BOOL DoAccept	();
+	int DoReceive	(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	BOOL ContinueReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj, EnHandleResult& hr);
-	int DoReceive		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 
 	int DoSend		(CONNID dwConnID);
 	int DoSend		(TSocketObj* pSocketObj);

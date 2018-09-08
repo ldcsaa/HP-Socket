@@ -35,13 +35,13 @@ public:
 	~CEvt()
 	{
 		if(IsValid())
-			VERIFY(::CloseHandle(m_hEvent));
+			ENSURE(::CloseHandle(m_hEvent));
 	}
 
 	BOOL Open(DWORD dwAccess, BOOL bInheritHandle, LPCTSTR pszName)
 	{
 		if(IsValid())
-			VERIFY(::CloseHandle(m_hEvent));
+			ENSURE(::CloseHandle(m_hEvent));
 
 		m_hEvent = ::OpenEvent(dwAccess, bInheritHandle, pszName);
 		return(IsValid());

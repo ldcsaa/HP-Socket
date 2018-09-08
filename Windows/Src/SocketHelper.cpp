@@ -272,7 +272,7 @@ BOOL RetrieveSockAddrIPAddresses(const vector<HP_PSOCKADDR>& vt, LPTIPAddr** lpp
 		iAddrLength	= HP_SOCKADDR::AddrMinStrLength(pSockAddr->family) + 6;
 		lpszAddr	= new TCHAR[iAddrLength];
 
-		VERIFY(sockaddr_IN_2_A(*vt[i], usFamily, lpszAddr, iAddrLength, usPort));
+		ENSURE(sockaddr_IN_2_A(*vt[i], usFamily, lpszAddr, iAddrLength, usPort));
 
 		lpItem			= new TIPAddr;
 		lpItem->type	= pSockAddr->IsIPv4() ? IPT_IPV4 : IPT_IPV6;
@@ -635,6 +635,11 @@ int SSO_ReuseAddress(SOCKET sock, BOOL bReuse)
 	return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (CHAR*)&bReuse, sizeof(BOOL));
 }
 
+int SSO_ExclusiveAddressUse(SOCKET sock, BOOL bExclusive)
+{
+	return setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (CHAR*)&bExclusive, sizeof(BOOL));
+}
+
 int SSO_UDP_ConnReset(SOCKET sock, BOOL bNewBehavior)
 {
 	int result = NO_ERROR;
@@ -674,13 +679,10 @@ CONNID GenerateConnectionID()
 	return dwConnID;
 }
 
-int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful, BOOL bReuseAddress)
+int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful)
 {
 	if(!bGraceful)
 		SSO_Linger(sock, 1, 0);
-
-	if(bReuseAddress)
-		SSO_ReuseAddress(sock, bReuseAddress);
 
 	if(iShutdownFlag != 0xFF)
 		shutdown(sock, iShutdownFlag);
@@ -1040,7 +1042,7 @@ BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
 	}
 
 	unique_ptr<WCHAR[]> p(new WCHAR[iMiddleLength]);
-	VERIFY(GbkToUnicode(szSrc, p.get(), iMiddleLength));
+	ENSURE(GbkToUnicode(szSrc, p.get(), iMiddleLength));
 
 	return UnicodeToUtf8(p.get(), szDest, iDestLength);
 }
@@ -1057,7 +1059,7 @@ BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
 	}
 
 	unique_ptr<WCHAR[]> p(new WCHAR[iMiddleLength]);
-	VERIFY(Utf8ToUnicode(szSrc, p.get(), iMiddleLength));
+	ENSURE(Utf8ToUnicode(szSrc, p.get(), iMiddleLength));
 
 	return UnicodeToGbk(p.get(), szDest, iDestLength);
 }

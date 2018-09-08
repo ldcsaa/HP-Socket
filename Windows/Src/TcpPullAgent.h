@@ -49,7 +49,7 @@ protected:
 		if(result != HR_ERROR)
 		{
 			TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
-			VERIFY(SetConnectionReserved(pSocketObj, pBuffer));
+			ENSURE(SetConnectionReserved(pSocketObj, pBuffer));
 		}
 
 		return result;

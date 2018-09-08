@@ -202,7 +202,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,7 +212,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -225,7 +226,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -235,7 +236,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -248,7 +250,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -258,7 +260,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -271,7 +274,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -281,7 +284,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -296,7 +300,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -308,7 +312,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -323,7 +328,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -335,7 +340,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -350,7 +356,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -362,7 +368,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -377,7 +384,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4100;4127;4510;4610</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4510;4610;4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -389,7 +396,8 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -423,6 +431,7 @@
     <ClInclude Include="..\..\Common\Src\zlib\zutil.h" />
     <ClInclude Include="..\..\Src\HPSocket4C.h" />
     <ClInclude Include="..\..\Src\HPSocket4C-SSL.h" />
+    <ClInclude Include="..\..\Src\HPThreadPool.h" />
     <ClInclude Include="..\..\Src\HPTypeDef.h" />
     <ClInclude Include="..\..\Src\HttpAgent.h" />
     <ClInclude Include="..\..\Src\HttpClient.h" />
@@ -868,6 +877,7 @@
     </ClCompile>
     <ClCompile Include="..\..\Src\HPSocket4C.cpp" />
     <ClCompile Include="..\..\Src\HPSocket4C-SSL.cpp" />
+    <ClCompile Include="..\..\Src\HPThreadPool.cpp" />
     <ClCompile Include="..\..\Src\HttpAgent.cpp" />
     <ClCompile Include="..\..\Src\HttpClient.cpp" />
     <ClCompile Include="..\..\Src\HttpCookie.cpp" />

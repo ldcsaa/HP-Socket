@@ -209,7 +209,7 @@ template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::O
 		{
 			do 
 			{
-				::Sleep(50);
+				::WaitFor(10);
 				state = GetState();
 			} while(state != SS_STARTED && state != SS_STOPPED);
 		}
@@ -217,7 +217,7 @@ template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::O
 		{
 			while(state != SS_STOPPED)
 			{
-				::Sleep(50);
+				::WaitFor(10);
 				state = GetState();
 			}
 

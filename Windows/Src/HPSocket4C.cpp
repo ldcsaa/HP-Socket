@@ -35,6 +35,7 @@
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
+#include "HPThreadPool.h"
 
 #ifdef _HTTP_SUPPORT
 #include "HttpServer.h"
@@ -94,6 +95,8 @@
 	#pragma comment(linker, "/EXPORT:Destroy_HP_UdpServerListener=_Destroy_HP_UdpServerListener@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Connect=_HP_Agent_Connect@16")
 	#pragma comment(linker, "/EXPORT:HP_Agent_ConnectWithExtra=_HP_Agent_ConnectWithExtra@20")
+	#pragma comment(linker, "/EXPORT:HP_Agent_ConnectWithLocalPort=_HP_Agent_ConnectWithLocalPort@20")
+	#pragma comment(linker, "/EXPORT:HP_Agent_ConnectWithExtraAndLocalPort=_HP_Agent_ConnectWithExtraAndLocalPort@24")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Disconnect=_HP_Agent_Disconnect@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_DisconnectLongConnections=_HP_Agent_DisconnectLongConnections@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_DisconnectSilenceConnections=_HP_Agent_DisconnectSilenceConnections@12")
@@ -120,6 +123,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Agent_HasStarted=_HP_Agent_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_IsMarkSilence=_HP_Agent_IsMarkSilence@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_IsPauseReceive=_HP_Agent_IsPauseReceive@12")
+	#pragma comment(linker, "/EXPORT:HP_Agent_IsConnected=_HP_Agent_IsConnected@8")
 	#pragma comment(linker, "/EXPORT:HP_Agent_IsSecure=_HP_Agent_IsSecure@4")
 	#pragma comment(linker, "/EXPORT:HP_Agent_PauseReceive=_HP_Agent_PauseReceive@12")
 	#pragma comment(linker, "/EXPORT:HP_Agent_Send=_HP_Agent_Send@16")
@@ -149,6 +153,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Client_GetState=_HP_Client_GetState@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_HasStarted=_HP_Client_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_IsPauseReceive=_HP_Client_IsPauseReceive@8")
+	#pragma comment(linker, "/EXPORT:HP_Client_IsConnected=_HP_Client_IsConnected@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_IsSecure=_HP_Client_IsSecure@4")
 	#pragma comment(linker, "/EXPORT:HP_Client_PauseReceive=_HP_Client_PauseReceive@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_Send=_HP_Client_Send@12")
@@ -159,6 +164,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Client_SetFreeBufferPoolSize=_HP_Client_SetFreeBufferPoolSize@8")
 	#pragma comment(linker, "/EXPORT:HP_Client_Start=_HP_Client_Start@16")
 	#pragma comment(linker, "/EXPORT:HP_Client_StartWithBindAddress=_HP_Client_StartWithBindAddress@20")
+	#pragma comment(linker, "/EXPORT:HP_Client_StartWithBindAddressAndLocalPort=_HP_Client_StartWithBindAddressAndLocalPort@24")
 	#pragma comment(linker, "/EXPORT:HP_Client_Stop=_HP_Client_Stop@4")
 	#pragma comment(linker, "/EXPORT:HP_GetHPSocketVersion=_HP_GetHPSocketVersion@0")
 	#pragma comment(linker, "/EXPORT:HP_GetSocketErrorDesc=_HP_GetSocketErrorDesc@4")
@@ -188,6 +194,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_HasStarted=_HP_Server_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsMarkSilence=_HP_Server_IsMarkSilence@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsPauseReceive=_HP_Server_IsPauseReceive@12")
+	#pragma comment(linker, "/EXPORT:HP_Server_IsConnected=_HP_Server_IsConnected@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsSecure=_HP_Server_IsSecure@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_PauseReceive=_HP_Server_PauseReceive@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_Send=_HP_Server_Send@16")
@@ -323,6 +330,7 @@
 	#pragma comment(linker, "/EXPORT:SYS_SSO_NoDelay=_SYS_SSO_NoDelay@8")
 	#pragma comment(linker, "/EXPORT:SYS_SSO_RecvBuffSize=_SYS_SSO_RecvBuffSize@8")
 	#pragma comment(linker, "/EXPORT:SYS_SSO_ReuseAddress=_SYS_SSO_ReuseAddress@8")
+	#pragma comment(linker, "/EXPORT:SYS_SSO_ExclusiveAddressUse=_SYS_SSO_ExclusiveAddressUse@8")
 	#pragma comment(linker, "/EXPORT:SYS_SSO_SendBuffSize=_SYS_SSO_SendBuffSize@8")
 	#pragma comment(linker, "/EXPORT:SYS_SetSocketOption=_SYS_SetSocketOption@20")
 	#pragma comment(linker, "/EXPORT:SYS_UnicodeToCodePage=_SYS_UnicodeToCodePage@16")
@@ -334,6 +342,9 @@
 	#pragma comment(linker, "/EXPORT:SYS_Utf8ToUnicode=_SYS_Utf8ToUnicode@12")
 	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError@0")
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl@28")
+	#pragma comment(linker, "/EXPORT:SYS_Malloc=_SYS_Malloc@4")
+	#pragma comment(linker, "/EXPORT:SYS_Realloc=_SYS_Realloc@8")
+	#pragma comment(linker, "/EXPORT:SYS_Free=_SYS_Free@4")
 
 #ifdef _ZLIB_SUPPORT
 	#pragma comment(linker, "/EXPORT:SYS_Compress=_SYS_Compress@16")
@@ -536,6 +547,22 @@
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_HttpServer_OnWSMessageComplete=_HP_Set_FN_HttpServer_OnWSMessageComplete@8")
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_HttpServer_OnWSMessageHeader=_HP_Set_FN_HttpServer_OnWSMessageHeader@8")
 #endif
+
+	#pragma comment(linker, "/EXPORT:Create_HP_ThreadPool=_Create_HP_ThreadPool@0")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_ThreadPool=_Destroy_HP_ThreadPool@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_SocketTaskObj=_Create_HP_SocketTaskObj@32")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_SocketTaskObj=_Destroy_HP_SocketTaskObj@4")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_Start=_HP_ThreadPool_Start@20")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_Stop=_HP_ThreadPool_Stop@8")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_Submit=_HP_ThreadPool_Submit@16")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_Submit_Task=_HP_ThreadPool_Submit_Task@12")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_AdjustThreadCount=_HP_ThreadPool_AdjustThreadCount@8")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_HasStarted=_HP_ThreadPool_HasStarted@4")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_GetState=_HP_ThreadPool_GetState@4")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_GetQueueSize=_HP_ThreadPool_GetQueueSize@4")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_GetThreadCount=_HP_ThreadPool_GetThreadCount@4")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_GetMaxQueueSize=_HP_ThreadPool_GetMaxQueueSize@4")
+	#pragma comment(linker, "/EXPORT:HP_ThreadPool_GetRejectedPolicy=_HP_ThreadPool_GetRejectedPolicy@4")
 
 #endif
 
@@ -1022,6 +1049,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Server_IsPauseReceive(HP_Server pServer, HP_CONNI
 	return C_HP_Object::ToSecond<IServer>(pServer)->IsPauseReceive(dwConnID, *pbPaused);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Server_IsConnected(HP_Server pServer, HP_CONNID dwConnID)
+{
+	return C_HP_Object::ToSecond<IServer>(pServer)->IsConnected(dwConnID);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_Server_GetConnectionCount(HP_Server pServer)
 {
 	return C_HP_Object::ToSecond<IServer>(pServer)->GetConnectionCount();
@@ -1274,6 +1306,16 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtra(HP_Agent pAgent, LPCTSTR l
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, pExtra);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, USHORT usLocalPort)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, nullptr, usLocalPort);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtraAndLocalPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, pExtra, usLocalPort);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_Agent_Send(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength)
 {
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->Send(dwConnID, pBuffer, iLength);
@@ -1355,6 +1397,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_GetPendingDataLength(HP_Agent pAgent, HP_CO
 HPSOCKET_API BOOL __HP_CALL HP_Agent_IsPauseReceive(HP_Agent pAgent, HP_CONNID dwConnID, BOOL* pbPaused)
 {
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->IsPauseReceive(dwConnID, *pbPaused);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Agent_IsConnected(HP_Agent pAgent, HP_CONNID dwConnID)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->IsConnected(dwConnID);
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_Agent_GetConnectionCount(HP_Agent pAgent)
@@ -1546,6 +1593,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Client_StartWithBindAddress(HP_Client pClient, LP
 	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Client_StartWithBindAddressAndLocalPort(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
+{
+	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress, usLocalPort);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_Client_Stop(HP_Client pClient)
 {
 	return C_HP_Object::ToSecond<IClient>(pClient)->Stop();
@@ -1632,6 +1684,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Client_GetPendingDataLength(HP_Client pClient, in
 HPSOCKET_API BOOL __HP_CALL HP_Client_IsPauseReceive(HP_Client pClient, BOOL* pbPaused)
 {
 	return C_HP_Object::ToSecond<IClient>(pClient)->IsPauseReceive(*pbPaused);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Client_IsConnected(HP_Client pClient)
+{
+	return C_HP_Object::ToSecond<IClient>(pClient)->IsConnected();
 }
 
 HPSOCKET_API void __HP_CALL HP_Client_SetFreeBufferPoolSize(HP_Client pClient, DWORD dwFreeBufferPoolSize)
@@ -1986,6 +2043,11 @@ HPSOCKET_API int __HP_CALL SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse)
 	return ::SSO_ReuseAddress(sock, bReuse);
 }
 
+HPSOCKET_API int __HP_CALL SYS_SSO_ExclusiveAddressUse(SOCKET sock, BOOL bExclusive)
+{
+	return ::SSO_ExclusiveAddressUse(sock, bExclusive);
+}
+
 HPSOCKET_API BOOL __HP_CALL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int* piAddressLen, USHORT* pusPort)
 {
 	return ::GetSocketLocalAddress(socket, lpszAddress, *piAddressLen, *pusPort);
@@ -2024,6 +2086,21 @@ HPSOCKET_API ULONGLONG __HP_CALL SYS_NToH64(ULONGLONG value)
 HPSOCKET_API ULONGLONG __HP_CALL SYS_HToN64(ULONGLONG value)
 {
 	return ::HToN64(value);
+}
+
+HPSOCKET_API LPBYTE __HP_CALL SYS_Malloc(int size)
+{
+	return MALLOC(BYTE, size);
+}
+
+HPSOCKET_API LPBYTE __HP_CALL SYS_Realloc(LPBYTE p, int size)
+{
+	return REALLOC(p, BYTE, size);
+}
+
+HPSOCKET_API VOID __HP_CALL SYS_Free(LPBYTE p)
+{
+	FREE(p);
 }
 
 HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int* piDestLength)
@@ -3146,3 +3223,91 @@ HPSOCKET_API int __HP_CALL HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpire
 /*****************************************************************************************************************************************************/
 
 #endif
+
+/*****************************************************************************************************************************************************/
+/**************************************************************** Thread Pool Exports ****************************************************************/
+/*****************************************************************************************************************************************************/
+
+/****************************************************/
+/******************* 对象创建函数 ********************/
+
+HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool()
+{
+	return (HP_ThreadPool)(new CHPThreadPool);
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPool(HP_ThreadPool pThreadPool)
+{
+	delete (IHPThreadPool*)pThreadPool;
+}
+
+HPSOCKET_API LPTSocketTask __HP_CALL Create_HP_SocketTaskObj(Fn_SocketTaskProc fnTaskProc, PVOID pSender, HP_CONNID dwConnID, LPCBYTE pBuffer, INT iBuffLen, En_HP_TaskBufferType enBuffType, WPARAM wParam, LPARAM lParam)
+{
+	return ::CreateSocketTaskObj(fnTaskProc, pSender, dwConnID, pBuffer, iBuffLen, enBuffType, wParam, lParam);
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_SocketTaskObj(LPTSocketTask pTask)
+{
+	::DestroySocketTaskObj(pTask);
+}
+
+/***********************************************************************/
+/***************************** 组件操作方法 *****************************/
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Start(HP_ThreadPool pThreadPool, DWORD dwThreadCount, DWORD dwMaxQueueSize, En_HP_RejectedPolicy enRejectedPolicy, DWORD dwStackSize)
+{
+	return ((IHPThreadPool*)pThreadPool)->Start(dwThreadCount, dwMaxQueueSize, enRejectedPolicy, dwStackSize);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Stop(HP_ThreadPool pThreadPool, DWORD dwMaxWait)
+{
+	return ((IHPThreadPool*)pThreadPool)->Stop(dwMaxWait);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Submit(HP_ThreadPool pThreadPool, HP_Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait)
+{
+	return ((IHPThreadPool*)pThreadPool)->Submit(fnTaskProc, pvArg, dwMaxWait);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Submit_Task(HP_ThreadPool pThreadPool, HP_LPTSocketTask pTask, DWORD dwMaxWait)
+{
+	return ((IHPThreadPool*)pThreadPool)->Submit(pTask, dwMaxWait);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_AdjustThreadCount(HP_ThreadPool pThreadPool, DWORD dwNewThreadCount)
+{
+	return ((IHPThreadPool*)pThreadPool)->AdjustThreadCount(dwNewThreadCount);
+}
+
+/***********************************************************************/
+/***************************** 属性访问方法 *****************************/
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_HasStarted(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->HasStarted();
+}
+
+HPSOCKET_API EnServiceState	__HP_CALL HP_ThreadPool_GetState(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetState();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetQueueSize(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetQueueSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetThreadCount(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetThreadCount();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetMaxQueueSize(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetMaxQueueSize();
+}
+
+HPSOCKET_API EnRejectedPolicy __HP_CALL HP_ThreadPool_GetRejectedPolicy(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetRejectedPolicy();
+}

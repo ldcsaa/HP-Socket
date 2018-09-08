@@ -70,19 +70,19 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* Server/Agent 默认最大连接数 */
 #define DEFAULT_MAX_CONNECTION_COUNT			10000
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
-#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		(15 * 1000)
+#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		(30 * 1000)
 /* Server/Agent 默认 Socket 缓存池大小 */
-#define DEFAULT_FREE_SOCKETOBJ_POOL				150
+#define DEFAULT_FREE_SOCKETOBJ_POOL				600
 /* Server/Agent 默认 Socket 缓存池回收阀值 */
 #define DEFAULT_FREE_SOCKETOBJ_HOLD				600
 /* Server/Agent 默认内存块缓存池大小 */
-#define DEFAULT_FREE_BUFFEROBJ_POOL				300
+#define DEFAULT_FREE_BUFFEROBJ_POOL				1200
 /* Server/Agent 默认内存块缓存池回收阀值 */
 #define DEFAULT_FREE_BUFFEROBJ_HOLD				1200
 /* Client 默认内存块缓存池大小 */
-#define DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	10
+#define DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	60
 /* Client 默认内存块缓存池回收阀值 */
-#define DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	40
+#define DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	60
 /* IPv4 默认绑定地址 */
 #define  DEFAULT_IPV4_BIND_ADDRESS				_T("0.0.0.0")
 /* IPv6 默认绑定地址 */
@@ -91,9 +91,9 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* TCP 默认通信数据缓冲区大小 */
 #define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_SIZE
 /* TCP 默认心跳包间隔 */
-#define DEFALUT_TCP_KEEPALIVE_TIME				(30 * 1000)
+#define DEFALUT_TCP_KEEPALIVE_TIME				(60 * 1000)
 /* TCP 默认心跳确认包检测间隔 */
-#define DEFALUT_TCP_KEEPALIVE_INTERVAL			(10 * 1000)
+#define DEFALUT_TCP_KEEPALIVE_INTERVAL			(20 * 1000)
 /* TCP Server 默认 Listen 队列大小 */
 #define DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	SOMAXCONN
 
@@ -104,7 +104,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* UDP 默认监测包尝试次数 */
 #define DEFAULT_UDP_DETECT_ATTEMPTS				3
 /* UDP 默认监测包发送间隔 */
-#define DEFAULT_UDP_DETECT_INTERVAL				30
+#define DEFAULT_UDP_DETECT_INTERVAL				60
 
 /* TCP Pack 包长度位数 */
 #define TCP_PACK_LENGTH_BITS					22
@@ -329,6 +329,8 @@ typedef TReceiveBufferMap::const_iterator	TReceiveBufferMapCI;
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
 {
+	CPrivateHeap& heap;
+
 	CONNID		connID;
 	HP_SOCKADDR	remoteAddr;
 	PVOID		extra;
@@ -343,17 +345,10 @@ struct TSocketObjBase
 		DWORD	connTime;
 	};
 
-	volatile BOOL		paused;
+	volatile BOOL connected;
+	volatile BOOL paused;
 
-	TBufferObjList		sndBuff;
-
-	CReentrantCriSec	csSend;
-
-	TSocketObjBase(CBufferObjPool& bfPool)
-	: sndBuff(bfPool)
-	{
-
-	}
+	TSocketObjBase(CPrivateHeap& hp) : heap(hp) {}
 
 	static BOOL IsExist(TSocketObjBase* pSocketObj)
 		{return pSocketObj != nullptr;}
@@ -365,20 +360,21 @@ struct TSocketObjBase
 		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
 
 	static void Release(TSocketObjBase* pSocketObj)
-	{
-		ASSERT(IsExist(pSocketObj));
+		{ASSERT(IsExist(pSocketObj)); pSocketObj->freeTime = ::TimeGetTime();}
 
-		pSocketObj->freeTime = ::TimeGetTime();
-		pSocketObj->sndBuff.Release();
-	}
+	BOOL IsPaused		()	const	{return paused;}
 
-	int Pending()		{return sndBuff.Length();}
-	BOOL IsPending()	{return Pending() > 0;}
-	BOOL IsPaused()		{return paused;}
+	DWORD GetConnTime	()	const	{return connTime;}
+	DWORD GetFreeTime	()	const	{return freeTime;}
+	DWORD GetActiveTime	()	const	{return activeTime;}
+
+	BOOL HasConnected()							{return connected;}
+	void SetConnected(BOOL bConnected = TRUE)	{connected = bConnected;}
 
 	void Reset(CONNID dwConnID)
 	{
 		connID		= dwConnID;
+		connected	= FALSE;
 		valid		= TRUE;
 		paused		= FALSE;
 		extra		= nullptr;
@@ -392,14 +388,43 @@ struct TSocketObj : public TSocketObjBase
 {
 	using __super = TSocketObjBase;
 
-	SOCKET				socket;
-	CReentrantSpinGuard	csIo;
+	CReentrantCriSec	csIo;
+	CReentrantCriSec	csSend;
 
-	TSocketObj(CBufferObjPool& bfPool)
-	: __super(bfPool)
+	SOCKET				socket;
+	TBufferObjList		sndBuff;
+
+	static TSocketObj* Construct(CPrivateHeap& hp, CBufferObjPool& bfPool)
+	{
+		TSocketObj* pSocketObj = (TSocketObj*)hp.Alloc(sizeof(TSocketObj));
+		ASSERT(pSocketObj);
+
+		return new (pSocketObj) TSocketObj(hp, bfPool);
+	}
+
+	static void Destruct(TSocketObj* pSocketObj)
+	{
+		ASSERT(pSocketObj);
+
+		CPrivateHeap& heap = pSocketObj->heap;
+		pSocketObj->TSocketObj::~TSocketObj();
+		heap.Free(pSocketObj);
+	}
+	
+	TSocketObj(CPrivateHeap& hp, CBufferObjPool& bfPool)
+	: __super(hp), sndBuff(bfPool)
 	{
 
 	}
+
+	static void Release(TSocketObj* pSocketObj)
+	{
+		__super::Release(pSocketObj);
+		pSocketObj->sndBuff.Release();
+	}
+
+	int Pending()		{return sndBuff.Length();}
+	BOOL IsPending()	{return Pending() > 0;}
 
 	static BOOL InvalidSocketObj(TSocketObj* pSocketObj)
 	{
@@ -407,7 +432,9 @@ struct TSocketObj : public TSocketObjBase
 
 		if(TSocketObjBase::IsValid(pSocketObj))
 		{
-			CReentrantSpinLock	 locallock(pSocketObj->csIo);
+			pSocketObj->SetConnected(FALSE);
+
+			CReentrantCriSecLock locallock(pSocketObj->csIo);
 			CReentrantCriSecLock locallock2(pSocketObj->csSend);
 
 			if(TSocketObjBase::IsValid(pSocketObj))
@@ -434,10 +461,26 @@ struct TAgentSocketObj : public TSocketObj
 	using __super = TSocketObj;
 
 	CStringA host;
-	BOOL connected;
 	
-	TAgentSocketObj(CBufferObjPool& bfPool)
-	: __super(bfPool)
+	static TAgentSocketObj* Construct(CPrivateHeap& hp, CBufferObjPool& bfPool)
+	{
+		TAgentSocketObj* pSocketObj = (TAgentSocketObj*)hp.Alloc(sizeof(TAgentSocketObj));
+		ASSERT(pSocketObj);
+
+		return new (pSocketObj) TAgentSocketObj(hp, bfPool);
+	}
+
+	static void Destruct(TAgentSocketObj* pSocketObj)
+	{
+		ASSERT(pSocketObj);
+
+		CPrivateHeap& heap = pSocketObj->heap;
+		pSocketObj->TAgentSocketObj::~TAgentSocketObj();
+		heap.Free(pSocketObj);
+	}
+	
+	TAgentSocketObj(CPrivateHeap& hp, CBufferObjPool& bfPool)
+	: __super(hp, bfPool)
 	{
 
 	}
@@ -447,8 +490,6 @@ struct TAgentSocketObj : public TSocketObj
 		__super::Reset(dwConnID, soClient);
 
 		host.Empty();
-
-		connected = FALSE;
 	}
 
 	BOOL GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort = nullptr)
@@ -460,16 +501,6 @@ struct TAgentSocketObj : public TSocketObj
 
 		return (!host.IsEmpty());
 	}
-
-	BOOL HasConnected()
-	{
-		return connected;
-	}
-
-	VOID SetConnected(BOOL bConnected = TRUE)
-	{
-		connected = bConnected;
-	}
 };
 
 /* UDP 数据缓冲区结构 */
@@ -478,14 +509,35 @@ struct TUdpSocketObj : public TSocketObjBase
 	using __super		= TSocketObjBase;
 	using CRecvQueue	= CCASQueue<TItem>;
 
-	CRecvQueue		recvQueue;
-	volatile DWORD	detectFails;
-	CSimpleRWLock	lcIo;
+	CBufferObjPool&		itPool;
 
-	CBufferObjPool&	itPool;
+	CSimpleRWLock		lcIo;
+	CReentrantCriSec	csSend;
 
-	TUdpSocketObj(CBufferObjPool& bfPool)
-	: __super(bfPool), itPool(bfPool)
+	TBufferObjList		sndBuff;
+	CRecvQueue			recvQueue;
+
+	volatile DWORD		detectFails;
+
+	static TUdpSocketObj* Construct(CPrivateHeap& hp, CBufferObjPool& bfPool)
+	{
+		TUdpSocketObj* pSocketObj = (TUdpSocketObj*)hp.Alloc(sizeof(TUdpSocketObj));
+		ASSERT(pSocketObj);
+
+		return new (pSocketObj) TUdpSocketObj(hp, bfPool);
+	}
+
+	static void Destruct(TUdpSocketObj* pSocketObj)
+	{
+		ASSERT(pSocketObj);
+
+		CPrivateHeap& heap = pSocketObj->heap;
+		pSocketObj->TUdpSocketObj::~TUdpSocketObj();
+		heap.Free(pSocketObj);
+	}
+	
+	TUdpSocketObj(CPrivateHeap& hp, CBufferObjPool& bfPool)
+	: __super(hp), sndBuff(bfPool), itPool(bfPool)
 	{
 
 	}
@@ -495,7 +547,15 @@ struct TUdpSocketObj : public TSocketObjBase
 		ClearRecvQueue();
 	}
 
-	BOOL HasRecvData() {return !recvQueue.IsEmpty();}
+	static void Release(TUdpSocketObj* pSocketObj)
+	{
+		__super::Release(pSocketObj);
+		pSocketObj->sndBuff.Release();
+	}
+
+	int Pending()		{return sndBuff.Length();}
+	BOOL IsPending()	{return Pending() > 0;}
+	BOOL HasRecvData()	{return !recvQueue.IsEmpty();}
 
 	static BOOL InvalidSocketObj(TUdpSocketObj* pSocketObj)
 	{
@@ -503,6 +563,8 @@ struct TUdpSocketObj : public TSocketObjBase
 
 		if(TSocketObjBase::IsValid(pSocketObj))
 		{
+			pSocketObj->SetConnected(FALSE);
+
 			CWriteLock			 locallock(pSocketObj->lcIo);
 			CReentrantCriSecLock locallock2(pSocketObj->csSend);
 
@@ -521,12 +583,6 @@ struct TUdpSocketObj : public TSocketObjBase
 		__super::Reset(dwConnID);
 
 		detectFails = 0;
-	}
-
-	static void Release(TUdpSocketObj* pSocketObj)
-	{
-		__super::Release(pSocketObj);
-		pSocketObj->ClearRecvQueue();
 	}
 
 	void ClearRecvQueue()
@@ -681,7 +737,7 @@ int SSO_GetError			(SOCKET sock);
 /* 生成 Connection ID */
 CONNID GenerateConnectionID();
 /* 关闭 Socket */
-int ManualCloseSocket(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE, BOOL bReuseAddress = FALSE);
+int ManualCloseSocket(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE);
 
 #ifdef _ICONV_SUPPORT
 

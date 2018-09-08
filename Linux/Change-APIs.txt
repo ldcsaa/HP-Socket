@@ -1,4 +1,43 @@
 ﻿# ======================================== #
+HP-Socket v5.4.1 API Update List:
+# ======================================== #
+--------------------
+1. System:
+--------------------
+SYS_Malloc						(ADD)
+SYS_Realloc						(ADD)
+SYS_Free						(ADD)
+
+--------------------
+2. TCP/UDP:
+--------------------
+HP_Agent_ConnectWithLocalPort				(ADD)
+HP_Agent_ConnectWithExtraAndLocalPort		(ADD)
+HP_Client_StartWithBindAddressAndLocalPort	(ADD)
+HP_Agent_IsConnected						(ADD)
+HP_Client_IsConnected						(ADD)
+HP_Server_IsConnected						(ADD)
+
+--------------------
+3. Thread Pool:
+--------------------
+Create_HP_ThreadPool			(ADD)
+Destroy_HP_ThreadPool			(ADD)
+Create_HP_SocketTaskObj			(ADD)
+Destroy_HP_SocketTaskObj		(ADD)
+HP_ThreadPool_Start				(ADD)
+HP_ThreadPool_Stop				(ADD)
+HP_ThreadPool_Submit			(ADD)
+HP_ThreadPool_Submit_Task		(ADD)
+HP_ThreadPool_AdjustThreadCount	(ADD)
+HP_ThreadPool_HasStarted		(ADD)
+HP_ThreadPool_GetState			(ADD)
+HP_ThreadPool_GetQueueSize		(ADD)
+HP_ThreadPool_GetThreadCount	(ADD)
+HP_ThreadPool_GetMaxQueueSize	(ADD)
+HP_ThreadPool_GetRejectedPolicy	(ADD)
+
+# ======================================== #
 HP-Socket v5.2.1 API Update List:
 # ======================================== #
 

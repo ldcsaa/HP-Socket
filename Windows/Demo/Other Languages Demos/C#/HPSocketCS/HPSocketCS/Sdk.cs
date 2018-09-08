@@ -1021,6 +1021,16 @@ public class Sdk
     public static extern bool HP_Server_IsPauseReceive(IntPtr pServer, IntPtr dwConnID, ref int pbPaused);
 
     /// <summary>
+    /// 检测是否有效连接
+    /// </summary>
+    /// <param name="pServer"></param>
+    /// <param name="dwConnID"></param>
+    /// <returns></returns>
+    [DllImport(HPSOCKET_DLL_PATH)]
+    public static extern bool HP_Server_IsConnected(IntPtr pServer, IntPtr dwConnID);
+
+
+    /// <summary>
     /// 获取客户端连接数
     /// </summary>
     /// <param name="pServer"></param>
@@ -1416,6 +1426,20 @@ public class Sdk
     [DllImport(HPSOCKET_DLL_PATH, CharSet = CharSet.Unicode)]
     public static extern bool HP_Client_StartWithBindAddress(IntPtr pClient, string lpszRemoteAddress, ushort usPort, bool bAsyncConnect, string lpszBindAddress);
 
+    /// <summary>
+    /// 名称：启动通信组件（并指定绑定地址）
+    /// 描述：启动客户端通信组件并连接服务端，启动完成后可开始收发数据
+    /// </summary>
+    /// <param name="pClient"></param>
+    /// <param name="lpszRemoteAddress">服务端地址</param>
+    /// <param name="usPort">服务端端口</param>
+    /// <param name="bAsyncConnect">是否采用异步 Connect</param>
+    /// <param name="lpszBindAddress">绑定地址（默认：nullptr，TcpClient/UdpClient -> 不执行绑定操作，UdpCast 绑定 -> 0.0.0.0）</param>
+    /// <param name="usLocalPort">本地端口（默认：0）</param>
+    /// <returns>失败，可通过 HP_Client_GetLastError() 获取错误代码</returns>
+    [DllImport(HPSOCKET_DLL_PATH, CharSet = CharSet.Unicode)]
+    public static extern bool HP_Client_StartWithBindAddressAndLocalPort(IntPtr pClient, string lpszRemoteAddress, ushort usPort, bool bAsyncConnect, string lpszBindAddress, ushort usLocalPort);
+
 
     /// <summary>
     /// 关闭客户端通信组件，关闭完成后断开与服务端的连接并释放所有资源
@@ -1605,6 +1629,15 @@ public class Sdk
     /// <returns></returns>
     [DllImport(HPSOCKET_DLL_PATH)]
     public static extern bool HP_Client_IsPauseReceive(IntPtr pClient, ref int pbPaused);
+
+    /// <summary>
+    /// 检测是否有效连接
+    /// </summary>
+    /// <param name="pClient"></param>
+    /// <returns></returns>
+    [DllImport(HPSOCKET_DLL_PATH)]
+    public static extern bool HP_Client_IsConnected(IntPtr pClient);
+
 
     /// <summary>
     /// 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ）
@@ -1894,6 +1927,35 @@ public class Sdk
     /// <returns>失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码</returns>
     [DllImport(HPSOCKET_DLL_PATH, CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool HP_Agent_ConnectWithExtra(IntPtr pAgent, string lpszRemoteAddress, ushort usPort, ref IntPtr pdwConnID, IntPtr pExtra);
+
+    /// <summary>
+    /// 名称：连接服务器
+    /// 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
+    /// </summary>
+    /// <param name="pAgent"></param>
+    /// <param name="lpszRemoteAddress">服务端地址</param>
+    /// <param name="usPort">服务端端口</param>
+    /// <param name="pdwConnID">连接 ID（默认：nullptr，不获取连接 ID）</param>
+    /// <param name="usLocalPort">本地端口（默认：0）</param>
+    /// <returns>失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码</returns>
+    [DllImport(HPSOCKET_DLL_PATH, CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern bool HP_Agent_ConnectWithLocalPort(IntPtr pAgent, string lpszRemoteAddress, ushort usPort, ref IntPtr pdwConnID, ushort usLocalPort);
+
+
+    /// <summary>
+    /// 名称：连接服务器
+    /// 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
+    /// </summary>
+    /// <param name="pAgent"></param>
+    /// <param name="lpszRemoteAddress">服务端地址</param>
+    /// <param name="usPort">服务端端口</param>
+    /// <param name="pdwConnID">连接 ID（默认：nullptr，不获取连接 ID）</param>
+    /// <param name="pExtra">连接附加数据（默认：nullptr）</param>
+    /// <param name="usLocalPort">本地端口（默认：0）</param>
+    /// <returns></returns>
+    [DllImport(HPSOCKET_DLL_PATH, CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern bool HP_Agent_ConnectWithExtraAndLocalPort(IntPtr pAgent, string lpszRemoteAddress, ushort usPort, ref IntPtr pdwConnID, IntPtr pExtra, ushort usLocalPort);
+ 
 
     /// <summary>
     /// 发送数据
@@ -2191,6 +2253,15 @@ public class Sdk
     /// <returns></returns>
     [DllImport(HPSOCKET_DLL_PATH)]
     public static extern bool HP_Agent_IsPauseReceive(IntPtr pAgent, IntPtr dwConnID, ref int pbPaused);
+
+    /// <summary>
+    /// 检测是否有效连接
+    /// </summary>
+    /// <param name="pAgent"></param>
+    /// <param name="dwConnID"></param>
+    /// <returns></returns>
+    [DllImport(HPSOCKET_DLL_PATH)]
+    public static extern bool HP_Agent_IsConnected(IntPtr pAgent, IntPtr dwConnID);
 
 
     /// <summary>
@@ -2856,6 +2927,31 @@ public class Sdk
     /// <returns></returns>
     [DllImport(HPSOCKET_DLL_PATH)]
     public static extern ulong SYS_HToN64(ulong value);
+
+
+    /// <summary>
+    /// 分配内存
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    [DllImport(HPSOCKET_DLL_PATH)]
+    public static extern IntPtr SYS_Malloc(int value);
+
+    /// <summary>
+    /// 重新分配内存
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    [DllImport(HPSOCKET_DLL_PATH)]
+    public static extern IntPtr SYS_Realloc(IntPtr p, int value);
+
+    /// <summary>
+    /// 释放内存
+    /// </summary>
+    /// <param name="p"></param>
+    [DllImport(HPSOCKET_DLL_PATH)]
+    public static extern void SYS_Free(IntPtr p);
 
 
     /*

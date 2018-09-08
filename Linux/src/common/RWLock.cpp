@@ -162,133 +162,72 @@ CSEMRWLock::~CSEMRWLock()
 
 VOID CSEMRWLock::WaitToRead()
 {
-	BOOL bWait = FALSE;
+	CMutexLock2 lock(m_mtx);
 
+	if(IsOwner())
+		return;
+
+	++m_nWaitingReaders;
+
+	m_cvRead.wait(lock, [=]() -> BOOL
 	{
-		CSpinLock locallock(m_cs);
+		return m_nActive >= 0 && m_nWaitingWriters == 0;
+	});
 
-		if(m_nActive > 0)
-			++m_nActive;
-		else if(m_nActive == 0)
-		{
-			if(m_nWaitingWriters == 0)
-				++m_nActive;
-			else
-			{
-				++m_nWaitingReaders;
-				bWait = TRUE;
-			}
-		}
-		else
-		{
-			if(!IsOwner())
-			{
-				++m_nWaitingReaders;
-				bWait = TRUE;
-			}
-		}
-	}
-
-	if(bWait)
-	{
-		m_smRead.Wait();
-	}
+	--m_nWaitingReaders;
+	++m_nActive;
 }
 
 VOID CSEMRWLock::WaitToWrite()
 {
-	BOOL bWait = FALSE;
+	CMutexLock2 lock(m_mtx);
 
+	if(IsOwner())
 	{
-		CSpinLock locallock(m_cs);
+		--m_nActive;
 
-		if(m_nActive > 0)
-		{
-			++m_nWaitingWriters;
-			bWait = TRUE;
-		}
-		else if(m_nActive == 0)
-		{
-			--m_nActive;
-			SetOwner();
-		}
-		else
-		{
-			if(IsOwner())
-				--m_nActive;
-			else
-			{
-				++m_nWaitingWriters;
-				bWait = TRUE;
-			}
-		}
+		return;
 	}
 
-	if(bWait)
+	++m_nWaitingWriters;
+
+	m_cvWrite.wait(lock, [=]() -> BOOL
 	{
-		m_smWrite.Wait();
-		SetOwner();
-	}
+		return m_nActive == 0;
+	});
+
+	--m_nWaitingWriters;
+	--m_nActive;
+
+	SetOwner();
 }
 
 VOID CSEMRWLock::ReadDone()
 {
-	ASSERT(m_nActive != 0);
+	CMutexLock2 locallock(m_mtx);
 
-	INT iFlag = 0;
+	if(IsOwner())
+		return;
 
-	if(m_nActive > 0)
-	{
-		CSpinLock locallock(m_cs);
+	ASSERT(m_nActive > 0);
 
-		if(--m_nActive == 0)
-			iFlag = Done();
-	}
-	else
-		ASSERT(IsOwner());
-
-	Notify(iFlag);
+	if(--m_nActive == 0 && m_nWaitingWriters > 0)
+		m_cvWrite.notify_one();
 }
 
 VOID CSEMRWLock::WriteDone()
 {
 	ASSERT(IsOwner());
-	ASSERT(m_nActive < 0);
 
-	INT iFlag = 0;
+	CMutexLock2 lock(m_mtx);
 
+	if(++m_nActive == 0)
 	{
-		CSpinLock locallock(m_cs);
+		DetachOwner();
 
-		if(++m_nActive == 0)
-		{
-			DetachOwner();
-			iFlag = Done();
-		}
+		if(m_nWaitingWriters > 0)
+			m_cvWrite.notify_one();
+		else if(m_nWaitingReaders > 0)
+			m_cvRead.notify_all();
 	}
-
-	Notify(iFlag);
-}
-
-INT CSEMRWLock::Done()
-{
-	ASSERT(m_nActive	 == 0);
-	ASSERT(m_dwWriterTID == 0);
-
-	if(m_nWaitingWriters > 0)
-	{
-		--m_nActive;
-		--m_nWaitingWriters;
-
-		return -1;
-	}
-	else if(m_nWaitingReaders > 0)
-	{
-		m_nActive			= m_nWaitingReaders;
-		m_nWaitingReaders	= 0;
-		
-		return 1;
-	}
-
-	return 0;
 }

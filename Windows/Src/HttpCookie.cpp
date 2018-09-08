@@ -339,7 +339,7 @@ CStringA CCookie::MakeExpiresStr(__time64_t tmExpires)
 	if(tmExpires < 1) tmExpires = 1;
 
 	tm t;
-	VERIFY(_gmtime64_s(&t, &tmExpires) == 0);
+	ENSURE(_gmtime64_s(&t, &tmExpires) == 0);
 
 	CStringA str;
 	str.Format("%s, %02d-%s-%04d %02d:%02d:%02d GMT", 

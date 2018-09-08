@@ -29,7 +29,7 @@
 
 const CInitSocket CTcpClient::sm_wsSocket;
 
-BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
@@ -43,7 +43,7 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 	if(CreateClientSocket(lpszRemoteAddress, addrRemote, usPort, lpszBindAddress, addrBind))
 	{
-		if(BindClientSocket(addrBind))
+		if(BindClientSocket(addrBind, addrRemote, usLocalPort))
 		{
 			if(TRIGGER(FirePrepareConnect(m_soClient)) != HR_ERROR)
 			{
@@ -127,7 +127,7 @@ BOOL CTcpClient::CheckStoping(DWORD dwCurrentThreadID)
 		if(dwCurrentThreadID != m_dwWorkerID)
 		{
 			while(m_enState != SS_STOPPED)
-				::Sleep(30);
+				::WaitFor(10);
 		}
 	}
 
@@ -159,7 +159,8 @@ BOOL CTcpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 		return FALSE;
 
 	BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-	VERIFY(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
+	ENSURE(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
+	ENSURE(::SSO_ReuseAddress(m_soClient, TRUE) == NO_ERROR);
 
 	m_evSocket = ::WSACreateEvent();
 	ASSERT(m_evSocket != WSA_INVALID_EVENT);
@@ -169,10 +170,22 @@ BOOL CTcpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 	return TRUE;
 }
 
-BOOL CTcpClient::BindClientSocket(const HP_SOCKADDR& addrBind)
+BOOL CTcpClient::BindClientSocket(const HP_SOCKADDR& addrBind, const HP_SOCKADDR& addrRemote, USHORT usLocalPort)
 {
-	if(addrBind.IsSpecified() && (::bind(m_soClient, addrBind.Addr(), addrBind.AddrSize()) == SOCKET_ERROR))
-		return FALSE;
+	if(addrBind.IsSpecified() && usLocalPort == 0)
+	{
+		if(::bind(m_soClient, addrBind.Addr(), addrBind.AddrSize()) == SOCKET_ERROR)
+			return FALSE;
+	}
+	else if(usLocalPort != 0)
+	{
+		HP_SOCKADDR realBindAddr = addrBind.IsSpecified() ? addrBind : HP_SOCKADDR::AnyAddr(addrRemote.family);
+
+		realBindAddr.SetPort(usLocalPort);
+
+		if(::bind(m_soClient, realBindAddr.Addr(), realBindAddr.AddrSize()) == SOCKET_ERROR)
+			return FALSE;
+	}
 
 	m_dwConnID = ::GenerateConnectionID();
 
@@ -252,7 +265,7 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 			break;
 		}
 		else
-			VERIFY(FALSE);
+			ENSURE(FALSE);
 	}
 
 	pClient->OnWorkerThreadEnd(::GetCurrentThreadId());
@@ -275,7 +288,7 @@ BOOL CTcpClient::ProcessNetworkEvent()
 	if(rc == SOCKET_ERROR)
 		bContinue = HandleError(events);
 
-	if(!HasConnected() && bContinue && events.lNetworkEvents & FD_CONNECT)
+	if(!IsConnected() && bContinue && events.lNetworkEvents & FD_CONNECT)
 		bContinue = HandleConnect(events);
 
 	if(bContinue && events.lNetworkEvents & FD_READ)
@@ -304,7 +317,7 @@ BOOL CTcpClient::HandleError(WSANETWORKEVENTS& events)
 	else if(events.lNetworkEvents & FD_WRITE)
 		enOperation = SO_SEND;
 
-	VERIFY(::WSAResetEvent(m_evSocket));
+	ENSURE(::WSAResetEvent(m_evSocket));
 	m_ccContext.Reset(TRUE, enOperation, iCode);
 
 	return FALSE;
@@ -423,7 +436,7 @@ BOOL CTcpClient::ReadData()
 
 BOOL CTcpClient::PauseReceive(BOOL bPause)
 {
-	if(!HasConnected())
+	if(!IsConnected())
 	{
 		::SetLastError(ERROR_INVALID_STATE);
 		return FALSE;
@@ -539,6 +552,8 @@ BOOL CTcpClient::Stop()
 	if(!CheckStoping(dwCurrentThreadID))
 		return FALSE;
 
+	SetConnected(FALSE);
+
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
 	if(m_ccContext.bFireOnClose)
@@ -577,7 +592,6 @@ void CTcpClient::Reset()
 	m_usPort	= 0;
 	m_iPending	= 0;
 	m_bPaused	= FALSE;
-	m_bConnected= FALSE;
 	m_enState	= SS_STOPPED;
 }
 
@@ -588,7 +602,7 @@ void CTcpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
 		if(dwCurrentThreadID != m_dwWorkerID)
 		{
 			m_evWorker.Set();
-			VERIFY(::WaitForSingleObject(m_hWorker, INFINITE) == WAIT_OBJECT_0);
+			ENSURE(::WaitForSingleObject(m_hWorker, INFINITE) == WAIT_OBJECT_0);
 		}
 
 		::CloseHandle(m_hWorker);
@@ -619,11 +633,11 @@ BOOL CTcpClient::DoSendPackets(const WSABUF pBuffers[], int iCount)
 
 	if(pBuffers && iCount > 0)
 	{
-		if(HasConnected())
+		if(IsConnected())
 		{
 			CCriSecLock locallock(m_csSend);
 
-			if(HasConnected())
+			if(IsConnected())
 				result = SendInternal(pBuffers, iCount);
 			else
 				result = ERROR_INVALID_STATE;

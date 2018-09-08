@@ -92,8 +92,8 @@ EnHandleResult CSSLAgent::FireConnect(TSocketObj* pSocketObj)
 	{
 		CSSLSession* pSession = m_sslPool.PickFreeSession(pSocketObj->host);
 
-		VERIFY(SetConnectionReserved2(pSocketObj, pSession));
-		VERIFY(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
+		ENSURE(SetConnectionReserved2(pSocketObj, pSession));
+		ENSURE(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
 	}
 
 	return result;

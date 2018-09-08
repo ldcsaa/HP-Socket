@@ -59,7 +59,7 @@ public:
 	*			iLength		-- 发送缓冲区长度
 	*			iOffset		-- 发送缓冲区指针偏移量
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0)	= 0;
 
@@ -73,7 +73,7 @@ public:
 	*			pBuffers	-- 发送缓冲区数组
 	*			iCount		-- 发送缓冲区数目
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	= 0;
 
@@ -174,6 +174,8 @@ public:
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending)	= 0;
 	/* 获取连接的数据接收状态 */
 	virtual BOOL IsPauseReceive			(CONNID dwConnID, BOOL& bPaused)	= 0;
+	/* 检测是否有效连接 */
+	virtual BOOL IsConnected			(CONNID dwConnID)					= 0;
 
 	/* 设置数据发送策略 （对 Linux 平台组件无效） */
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)		= 0;
@@ -268,7 +270,7 @@ public:
 	*			pHead			-- 头部附加数据
 	*			pTail			-- 尾部附加数据
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL SendSmallFile		(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
@@ -328,9 +330,9 @@ public:
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
 	/* 设置监听 Socket 的等候队列大小（根据并发连接数量调整设置） */
 	virtual void SetSocketListenQueue	(DWORD dwSocketListenQueue)		= 0;
-	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
+	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：60 * 1000） */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
-	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
 
 	/* 获取 EPOLL 等待事件的最大数量 */
@@ -401,7 +403,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)										= 0;
+	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)				= 0;
 
 	/*
 	* 名称：连接服务器
@@ -411,10 +413,11 @@ public:
 	*			usPort				-- 服务端端口
 	*			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
 	*			pExtra				-- 连接附加数据（默认：nullptr）
+	*			usLocalPort			-- 本地端口（默认：0）
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
-	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr)		= 0;
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0)	= 0;
 
 
 public:
@@ -423,7 +426,7 @@ public:
 	/***************************** 属性访问方法 *****************************/
 
 	/* 获取某个连接的远程主机信息 */
-	virtual BOOL GetRemoteHost	(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort)							= 0;
+	virtual BOOL GetRemoteHost	(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort)	= 0;
 
 };
 
@@ -447,7 +450,7 @@ public:
 	*			pHead			-- 头部附加数据
 	*			pTail			-- 尾部附加数据
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL SendSmallFile		(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
@@ -492,9 +495,9 @@ public:
 
 	/* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为 1024 的倍数） */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
-	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
+	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：60 * 1000） */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
-	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
 
 	/* 获取通信数据缓冲区大小 */
@@ -524,10 +527,11 @@ public:
 	*			usPort				-- 服务端端口
 	*			bAsyncConnect		-- 是否采用异步 Connect
 	*			lpszBindAddress		-- 绑定地址（默认：nullptr，TcpClient/UdpClient -> 不执行绑定操作，UdpCast 绑定 -> 任意地址）
+	*			usLocalPort			-- 本地端口（默认：0）
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 GetLastError() 获取错误代码
 	*/
-	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr)	= 0;
+	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usLocalPort = 0)	= 0;
 
 	/*
 	* 名称：关闭通信组件
@@ -547,7 +551,7 @@ public:
 	*			iLength		-- 发送缓冲区长度
 	*			iOffset		-- 发送缓冲区指针偏移量
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0)						= 0;
 
@@ -560,7 +564,7 @@ public:
 	* 参数：		pBuffers	-- 发送缓冲区数组
 	*			iCount		-- 发送缓冲区数目
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL SendPackets(const WSABUF pBuffers[], int iCount)								= 0;
 
@@ -605,6 +609,8 @@ public:
 	virtual BOOL GetPendingDataLength	(int& iPending)											= 0;
 	/* 获取连接的数据接收状态 */
 	virtual BOOL IsPauseReceive			(BOOL& bPaused)											= 0;
+	/* 检测是否有效连接 */
+	virtual BOOL IsConnected			()														= 0;
 
 	/* 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ） */
 	virtual void SetFreeBufferPoolSize		(DWORD dwFreeBufferPoolSize)						= 0;
@@ -639,7 +645,7 @@ public:
 	*			pHead			-- 头部附加数据
 	*			pTail			-- 尾部附加数据
 	* 返回值：	TRUE	-- 成功
-	*			FALSE	-- 失败，可通过 Windows API 函数 ::GetLastError() 获取 Windows 错误代码
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
 	virtual BOOL SendSmallFile		(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
@@ -679,9 +685,9 @@ public:
 
 	/* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为：(N * 1024) - sizeof(TBufferObj)） */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)	= 0;
-	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：30 * 1000） */
+	/* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：60 * 1000） */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)		= 0;
-	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：10 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
+	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)	= 0;
 
 	/* 获取通信数据缓冲区大小 */
@@ -2114,3 +2120,108 @@ public:
 };
 
 #endif
+
+/*****************************************************************************************************************************************************/
+/************************************************************** Thread Pool Interfaces ***************************************************************/
+/*****************************************************************************************************************************************************/
+
+/************************************************************************
+名称：线程池组件接口
+描述：定义线程池组件的所有操作方法和属性访问方法
+************************************************************************/
+class IHPThreadPool
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：启动线程池组件
+	* 描述：
+	*		
+	* 参数：		dwThreadCount		-- 线程数量，（默认：0）
+	*									>0 -> dwThreadCount
+	*									=0 -> (CPU核数 * 2 + 2)
+	*									<0 -> (CPU核数 * (-dwThreadCount))
+	*			dwMaxQueueSize		-- 任务队列最大容量（默认：0，不限制）
+	*			enRejectedPolicy	-- 任务拒绝处理策略
+	*									TRP_CALL_FAIL（默认）	：立刻返回失败
+	*									TRP_WAIT_FOR			：等待（直到成功、超时或线程池关闭等原因导致失败）
+	*									TRP_CALLER_RUN			：调用者线程直接执行
+	*			dwStackSize			-- 线程堆栈空间大小（默认：0 -> 操作系统默认）
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
+	*/
+	virtual BOOL Start	(DWORD dwThreadCount = 0, DWORD dwMaxQueueSize = 0, EnRejectedPolicy enRejectedPolicy = TRP_CALL_FAIL, DWORD dwStackSize = 0)	= 0;
+
+	/*
+	* 名称：关闭线程池组件
+	* 描述：在规定时间内关闭线程池组件，如果工作线程在最大等待时间内未能正常关闭，会尝试强制关闭，这种情况下很可能会造成系统资源泄漏
+	*		
+	* 参数：		dwMaxWait	-- 最大等待时间（毫秒，默认：INFINITE，一直等待）
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
+	*/
+	virtual BOOL Stop	(DWORD dwMaxWait = INFINITE)										= 0;
+
+	/*
+	* 名称：提交任务
+	* 描述：向线程池提交异步任务
+	*		
+	* 参数：		fnTaskProc	-- 任务处理函数
+	*			pvArg		-- 任务参数
+	*			dwMaxWait	-- 任务提交最大等待时间（仅对 TRP_WAIT_FOR 类型线程池生效，默认：INFINITE，一直等待）
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
+	*							其中，错误码 ERROR_DESTINATION_ELEMENT_FULL 表示任务队列已满
+	*/
+	virtual BOOL Submit	(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait = INFINITE)	= 0;
+
+	/*
+	* 名称：提交 Socket 任务
+	* 描述：向线程池提交异步 Socket 任务
+	*		
+	* 参数：		pTask		-- 任务参数
+	*			dwMaxWait	-- 任务提交最大等待时间（仅对 TRP_WAIT_FOR 类型线程池生效，默认：INFINITE，一直等待）
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
+	*							其中，错误码 ERROR_DESTINATION_ELEMENT_FULL 表示任务队列已满
+	*							注意：如果提交失败，需要手工调用 Destroy_HP_SocketTaskObj() 销毁 TSocketTask 对象
+	*/
+	virtual BOOL Submit	(LPTSocketTask pTask, DWORD dwMaxWait = INFINITE)					= 0;
+
+	/*
+	* 名称：调整线程池大小
+	* 描述：增加或减少线程池的工作线程数量
+	*		
+	* 参数：		dwNewThreadCount	-- 线程数量
+	*									>0 -> dwNewThreadCount
+	*									=0 -> (CPU核数 * 2 + 2)
+	*									<0 -> (CPU核数 * (-dwNewThreadCount))
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
+	*/
+	virtual BOOL AdjustThreadCount(DWORD dwNewThreadCount)									= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 检查线程池组件是否已启动 */
+	virtual BOOL HasStarted						()	= 0;
+	/* 查看线程池组件当前状态 */
+	virtual EnServiceState	GetState			()	= 0;
+	/* 获取当前任务队列大小 */
+	virtual DWORD GetQueueSize					()	= 0;
+	/* 获取工作线程数量 */
+	virtual DWORD GetThreadCount				()	= 0;
+	/* 获取任务队列最大容量 */
+	virtual DWORD GetMaxQueueSize				()	= 0;
+	/* 获取任务拒绝处理策略 */
+	virtual EnRejectedPolicy GetRejectedPolicy	()	= 0;
+
+public:
+	virtual ~IHPThreadPool() = default;
+};

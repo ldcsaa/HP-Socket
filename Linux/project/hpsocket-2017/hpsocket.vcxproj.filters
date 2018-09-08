@@ -28,6 +28,9 @@
     <Filter Include="Common\Http">
       <UniqueIdentifier>{9b71105f-c4f3-4968-b1f9-37a002dfe794}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pool">
+      <UniqueIdentifier>{636c9149-7025-4ca2-9bc4-bb46ea09ecd8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\common\GlobalDef.h">
@@ -180,6 +183,9 @@
     <ClInclude Include="..\..\src\common\http\http_parser.h">
       <Filter>Common\Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\HPThreadPool.h">
+      <Filter>Pool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp">
@@ -289,6 +295,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\Thread.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HPThreadPool.cpp">
+      <Filter>Pool</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

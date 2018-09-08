@@ -98,6 +98,15 @@ namespace HPSocketCS
 
         protected bool IsCreate = false;
 
+        public IntPtr Sender
+        {
+            get
+            {
+                return pServer;
+            }
+        }
+
+
         /// <summary>
         /// tcpserver构造
         /// </summary>

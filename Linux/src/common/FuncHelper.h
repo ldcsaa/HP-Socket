@@ -83,6 +83,8 @@ using namespace std;
 #define VERIFY(expr)					((expr) ? TRUE : (ERROR_EXIT2(EXIT_CODE_SOFTWARE, ERROR_VERIFY_CHECK), FALSE))
 #define ASSERT_IS_NO_ERROR(expr)		ASSERT(IS_NO_ERROR(expr))
 #define VERIFY_IS_NO_ERROR(expr)		VERIFY(IS_NO_ERROR(expr))
+#define	ENSURE(expr)					VERIFY(expr)
+#define ENSURE_IS_NO_ERROR(expr)		VERIFY_IS_NO_ERROR(expr)
 
 #define TEMP_FAILURE_RETRY_INT(exp)		((int)TEMP_FAILURE_RETRY(exp))
 
@@ -139,9 +141,13 @@ inline void PrintError(LPCSTR subject)	{perror(subject);}
 #define TRIGGER(expr)					EXECUTE_RESET_ERROR((expr))
 
 #define _msize(p)						malloc_usable_size(p)
-#define CreateLocalObjects(T, n)		((T*)alloca(sizeof(T) * n))
+#define CreateLocalObjects(T, n)		((T*)alloca(sizeof(T) * (n)))
 #define CreateLocalObject(T)			CreateLocalObjects(T, 1)
 #define CallocObjects(T, n)				((T*)calloc((n), sizeof(T)))
+
+#define MALLOC(T, n)					((T*)malloc(sizeof(T) * (n)))
+#define REALLOC(p, T, n)				((T*)realloc((PVOID)(p), sizeof(T) * (n)))
+#define FREE(p)							free((PVOID)(p))
 
 #define InterlockedExchangeAdd(p, n)	__atomic_add_fetch((p), (n), memory_order_seq_cst)
 #define InterlockedExchangeSub(p, n)	__atomic_sub_fetch((p), (n), memory_order_seq_cst)
@@ -268,7 +274,17 @@ template <typename T, size_t N> char (&_ArraySizeHelper(const T(&arr)[N]))[N];
 	#define __countof(arr)	ARRAY_SIZE(arr)
 #endif
 
-INT YieldThread(UINT i = INFINITE);
+#define THREAD_YIELD_CYCLE	63
+#define THREAD_SWITCH_CYCLE	4095
+
+inline void YieldThread(UINT i = THREAD_YIELD_CYCLE)
+{
+	if((i & THREAD_SWITCH_CYCLE) == THREAD_SWITCH_CYCLE)
+		::SwitchToThread();
+	else if((i & THREAD_YIELD_CYCLE) == THREAD_YIELD_CYCLE)
+		::YieldProcessor();
+}
+
 INT WaitFor(DWORD dwMillSecond, DWORD dwSecond = 0, BOOL bExceptThreadInterrupted = FALSE);
 INT Sleep(DWORD dwMillSecond, DWORD dwSecond = 0, BOOL bExceptThreadInterrupted = FALSE);
 
@@ -278,8 +294,8 @@ tm*			_gmtime64(tm* ptm, __time64_t* pt);
 
 DWORD		TimeGetTime();
 ULLONG		TimeGetTime64();
-DWORD		GetTimeGap32(DWORD dwOriginal);
-ULLONG		GetTimeGap64(ULLONG ullOriginal);
+DWORD		GetTimeGap32(DWORD dwOriginal, DWORD dwCurrent = 0);
+ULLONG		GetTimeGap64(ULLONG ullOriginal, ULONGLONG ullCurrent = 0);
 LLONG		TimevalToMillisecond(const timeval& tv);
 timeval&	MillisecondToTimeval(LLONG ms, timeval& tv);
 LLONG		TimespecToMillisecond(const timespec& ts);

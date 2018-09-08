@@ -52,6 +52,7 @@
     <ClInclude Include="..\..\src\common\Thread.h" />
     <ClInclude Include="..\..\src\HPSocket-SSL.h" />
     <ClInclude Include="..\..\src\HPSocket.h" />
+    <ClInclude Include="..\..\src\HPThreadPool.h" />
     <ClInclude Include="..\..\src\HPTypeDef.h" />
     <ClInclude Include="..\..\src\HttpAgent.h" />
     <ClInclude Include="..\..\src\HttpClient.h" />
@@ -92,6 +93,7 @@
     <ClCompile Include="..\..\src\common\Thread.cpp" />
     <ClCompile Include="..\..\src\HPSocket-SSL.cpp" />
     <ClCompile Include="..\..\src\HPSocket.cpp" />
+    <ClCompile Include="..\..\src\HPThreadPool.cpp" />
     <ClCompile Include="..\..\src\HttpAgent.cpp" />
     <ClCompile Include="..\..\src\HttpClient.cpp" />
     <ClCompile Include="..\..\src\HttpCookie.cpp" />
@@ -187,6 +189,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -195,6 +198,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -204,6 +208,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -212,6 +217,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -221,6 +227,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -229,6 +236,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
+    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -248,7 +256,7 @@
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
@@ -280,7 +288,7 @@
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
@@ -312,7 +320,7 @@
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
@@ -344,7 +352,7 @@
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
@@ -376,7 +384,7 @@
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
@@ -408,7 +416,7 @@
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>

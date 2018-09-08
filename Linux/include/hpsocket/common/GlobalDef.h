@@ -30,9 +30,9 @@ typedef float					FLOAT;
 typedef FLOAT					*PFLOAT, *LPFLOAT;
 typedef double					DOUBLE;
 typedef DOUBLE					*PDOUBLE, *LPDOUBLE;
-typedef short					SHORT;
+typedef short					SHORT, INT16;
 typedef SHORT					*PSHORT, *LPSHORT;
-typedef unsigned short			USHORT;
+typedef unsigned short			USHORT, UINT16;
 typedef USHORT					*PUSHORT, *LPUSHORT;
 typedef unsigned short			WORD;
 typedef WORD					*PWORD, *LPWORD;
@@ -42,27 +42,27 @@ typedef long					LONG, LID;
 typedef LONG					*PLONG, *LPLONG;
 typedef unsigned long			ULONG, ULID;
 typedef ULONG					*PULONG, *LPULONG;
-typedef long long				LONGLONG, LLONG;
+typedef long long				LONGLONG, LLONG, INT64;
 typedef LONGLONG				*PLONGLONG, *LPLONGLONG, *PLLONG, *LPLLONG;
-typedef unsigned long long		ULONGLONG, ULLONG;
+typedef unsigned long long		ULONGLONG, ULLONG, UINT64;
 typedef ULONGLONG				*PULONGLONG, *LPULONGLONG, *PULLONG, *LPULLONG;
-typedef int						INT, IID;
+typedef int						INT, IID, INT32;
 typedef INT						*PINT, *LPINT;
-typedef unsigned int			UINT, UIID;
+typedef unsigned int			UINT, UIID, UINT32;
 typedef UINT					*PUINT, *LPUINT;
 typedef void					VOID;
 typedef VOID					*PVOID, *LPVOID;
-typedef char					CHAR;
+typedef char					CHAR, INT8;
 typedef CHAR					*PCHAR, *LPCHAR, *PSTR, *LPSTR;
 typedef const char				*PCSTR, *LPCSTR;
-typedef unsigned char			BYTE;
+typedef unsigned char			BYTE, UINT8;
 typedef BYTE					*PBYTE, *LPBYTE;
 typedef const BYTE				*PCBYTE, *LPCBYTE;
 typedef wchar_t					WCHAR;
 typedef WCHAR					*PWSTR, *LPWSTR;
 typedef const WCHAR				*PCWSTR, *LPCWSTR;
-typedef LONG					INT_PTR, LONG_PTR;
-typedef ULONG					UINT_PTR, ULONG_PTR, DWORD_PTR;
+typedef LONG					INT_PTR, LONG_PTR, LPARAM;
+typedef ULONG					UINT_PTR, ULONG_PTR, DWORD_PTR, WPARAM;
 
 typedef IID						FD, HANDLE, SOCKET;
 typedef INT						LRESULT, HRESULT;
@@ -90,17 +90,53 @@ typedef ssize_t					SSIZE_T;
 typedef TCHAR					*PTSTR, *LPTSTR;
 typedef const TCHAR				*PCTSTR, *LPCTSTR;
 
+#define MAXUINT8				((UINT8)~((UINT8)0))
+#define MAXINT8					((INT8)(MAXUINT8 >> 1))
+#define MININT8					((INT8)~MAXINT8)
+
+#define MAXUINT16				((UINT16)~((UINT16)0))
+#define MAXINT16				((INT16)(MAXUINT16 >> 1))
+#define MININT16				((INT16)~MAXINT16)
+
+#define MAXUINT32				((UINT32)~((UINT32)0))
+#define MAXINT32				((INT32)(MAXUINT32 >> 1))
+#define MININT32				((INT32)~MAXINT32)
+
+#define MAXUINT64				((UINT64)~((UINT64)0))
+#define MAXINT64				((INT64)(MAXUINT64 >> 1))
+#define MININT64				((INT64)~MAXINT64)
+
+#define MAXULONG				((ULONG)~((ULONG)0))
+#define MAXLONG					((LONG)(MAXULONG >> 1))
+#define MINLONG					((LONG)~MAXLONG)
+
+#define MAXULONGLONG			((ULONGLONG)~((ULONGLONG)0))
+#define MINLONGLONG				((LONGLONG)~MAXLONGLONG)
+
+#define MAXSIZE_T				((SIZE_T)~((SIZE_T)0))
+#define MAXSSIZE_T				((SSIZE_T)(MAXSIZE_T >> 1))
+#define MINSSIZE_T				((SSIZE_T)~MAXSSIZE_T)
+
+#define MAXUINT					((UINT)~((UINT)0))
+#define MAXINT					((INT)(MAXUINT >> 1))
+#define MININT					((INT)~MAXINT)
+
+#define MAXDWORD32				((DWORD32)~((DWORD32)0))
+#define MAXDWORD64				((DWORD64)~((DWORD64)0))
+
+#define MINBYTE					0x00
+#define MAXBYTE					0xFF
 #define MINCHAR					0x80
 #define MAXCHAR					0x7F
 #define MINSHORT				0x8000
 #define MAXSHORT				0x7FFF
-#define MAXBYTE					0xFF
+#define MINUSHORT				0x0000
+#define MAXUSHORT				0xFFFF
+#define MINWORD					0x0000
 #define MAXWORD					0xFFFF
+#define MINDWORD				0x00000000
 #define MAXDWORD				0xFFFFFFFF
-#define MININT					0x80000000
-#define MAXINT					0x7FFFFFFF
-#define MINLONG					0x8000000000000000
-#define MAXLONG					0x7FFFFFFFFFFFFFFF
+
 
 #ifdef _UNICODE
 	#define __T(x)				L ## x

@@ -31,7 +31,7 @@ const DWORD CBufferPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACI
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CBufferPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
 const DWORD CBufferPool::DEFAULT_BUFFER_LOCK_TIME	= 15 * 1000;
-const DWORD CBufferPool::DEFAULT_BUFFER_POOL_SIZE	= 150;
+const DWORD CBufferPool::DEFAULT_BUFFER_POOL_SIZE	= 600;
 const DWORD CBufferPool::DEFAULT_BUFFER_POOL_HOLD	= 600;
 
 TItem* TItem::Construct(CPrivateHeap& heap, int capacity, BYTE* pData, int length)
@@ -334,31 +334,16 @@ void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 	{
 		m_itPool.PutFreeItem(pBuffer->items);
 
-		if(!m_lsFreeBuffer.TryPut(pBuffer))
-		{
-			m_lsGCBuffer.PushBack(pBuffer);
+		ReleaseGCBuffer();
 
-			if(m_lsGCBuffer.Size() > m_dwBufferPoolSize)
-				ReleaseGCBuffer();
-		}
+		if(!m_lsFreeBuffer.TryPut(pBuffer))
+			m_lsGCBuffer.PushBack(pBuffer);
 	}
 }
 
 void CBufferPool::ReleaseGCBuffer(BOOL bForce)
 {
-	TBuffer* pBuffer = nullptr;
-	DWORD now		 = ::TimeGetTime();
-
-	while(m_lsGCBuffer.PopFront(&pBuffer))
-	{
-		if(bForce || (int)(now - pBuffer->freeTime) >= (int)m_dwBufferLockTime)
-			TBuffer::Destruct(pBuffer);
-		else
-		{
-			m_lsGCBuffer.PushBack(pBuffer);
-			break;
-		}
-	}
+	::ReleaseGCObj(m_lsGCBuffer, m_dwBufferLockTime, bForce);
 }
 
 TBuffer* CBufferPool::PutCacheBuffer(ULONG_PTR dwID)
@@ -413,7 +398,7 @@ void CBufferPool::Prepare()
 	m_itPool.Prepare();
 
 	m_bfCache.Reset(m_dwMaxCacheSize);
-	m_lsFreeBuffer.Reset(m_dwBufferPoolHold);
+	m_lsFreeBuffer.Reset(m_dwBufferPoolSize);
 }
 
 void CBufferPool::Clear()

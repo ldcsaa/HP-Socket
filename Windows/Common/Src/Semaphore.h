@@ -35,13 +35,13 @@ public:
 	~CSEM()
 	{
 		if(IsValid())
-			VERIFY(::CloseHandle(m_hsem));
+			ENSURE(::CloseHandle(m_hsem));
 	}
 
 	BOOL Open(DWORD dwAccess, BOOL bInheritHandle, LPCTSTR pszName)
 	{
 		if(IsValid())
-			VERIFY(::CloseHandle(m_hsem));
+			ENSURE(::CloseHandle(m_hsem));
 
 		m_hsem = ::OpenSemaphore(dwAccess, bInheritHandle, pszName);
 		return(IsValid());

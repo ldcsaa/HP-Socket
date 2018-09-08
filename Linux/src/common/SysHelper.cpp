@@ -31,6 +31,6 @@ DWORD GetDefaultBufferSize()
 
 DWORD GetDefaultWorkerThreadCount()
 {
-	static DWORD s_dwtc = MIN((::SysGetNumberOfProcessors() * 2 + 2), MAX_WORKER_THREAD_COUNT);
+	static DWORD s_dwtc = MIN((PROCESSOR_COUNT * 2 + 2), MAX_WORKER_THREAD_COUNT);
 	return s_dwtc;
 }

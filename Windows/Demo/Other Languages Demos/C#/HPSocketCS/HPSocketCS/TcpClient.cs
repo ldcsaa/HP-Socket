@@ -94,6 +94,15 @@ namespace HPSocketCS
             Destroy();
         }
 
+        public IntPtr Sender
+        {
+            get
+            {
+                return pClient;
+            }
+        }
+
+
         /// <summary>
         /// 创建socket监听&服务组件
         /// </summary>
@@ -200,6 +209,37 @@ namespace HPSocketCS
 
             return Sdk.HP_Client_StartWithBindAddress(pClient, address, port, async, bindAddress);
         }
+
+        /// <summary>
+        /// 启动通讯组件并连接到服务器
+        /// </summary>
+        /// <param name="address">远程地址</param>
+        /// <param name="port">远程端口</param>
+        /// <param name="bindAddress">本地绑定到哪个ip?,多ip下可以选择绑定到指定ip</param>
+        /// <param name="usLocalPort">本地端口</param>
+        /// <param name="async">是否异步</param>
+        /// <returns></returns>
+        public bool Connect(string address, ushort port, string bindAddress, ushort usLocalPort, bool async = true)
+        {
+            if (string.IsNullOrEmpty(address) == true)
+            {
+                throw new Exception("address is null");
+            }
+            else if (port == 0)
+            {
+                throw new Exception("port is zero");
+            }
+
+            if (IsStarted == true)
+            {
+                return false;
+            }
+
+            this.SetCallback();
+
+            return Sdk.HP_Client_StartWithBindAddressAndLocalPort(pClient, address, port, async, bindAddress, usLocalPort);
+        }
+        
 
         /// <summary>
         /// 停止通讯组件

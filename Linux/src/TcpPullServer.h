@@ -86,7 +86,6 @@ protected:
 
 		TBuffer* pBuffer = nullptr;
 		GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
-		ASSERT(pBuffer);
 
 		if(pBuffer != nullptr)
 			m_bfPool.PutFreeBuffer(pBuffer);

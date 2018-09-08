@@ -23,7 +23,7 @@
  
 #include "UdpClient.h"
 
-BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
@@ -36,7 +36,7 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 	if(CreateClientSocket(lpszRemoteAddress, addrRemote, usPort, lpszBindAddress, addrBind))
 	{
-		if(BindClientSocket(addrBind))
+		if(BindClientSocket(addrBind, addrRemote, usLocalPort))
 		{
 			if(TRIGGER(FirePrepareConnect(m_soClient)) != HR_ERROR)
 			{
@@ -120,7 +120,7 @@ BOOL CUdpClient::CheckStoping()
 		if(!m_thWorker.IsInMyThread())
 		{
 			while(m_enState != SS_STOPPED)
-				::Sleep(30);
+				::WaitFor(10);
 		}
 	}
 
@@ -156,10 +156,22 @@ BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 	return TRUE;
 }
 
-BOOL CUdpClient::BindClientSocket(const HP_SOCKADDR& addrBind)
+BOOL CUdpClient::BindClientSocket(const HP_SOCKADDR& addrBind, const HP_SOCKADDR& addrRemote, USHORT usLocalPort)
 {
-	if(addrBind.IsSpecified() && (::bind(m_soClient, addrBind.Addr(), addrBind.AddrSize()) == SOCKET_ERROR))
-		return FALSE;
+	if(addrBind.IsSpecified() && usLocalPort == 0)
+	{
+		if(::bind(m_soClient, addrBind.Addr(), addrBind.AddrSize()) == SOCKET_ERROR)
+			return FALSE;
+	}
+	else if(usLocalPort != 0)
+	{
+		HP_SOCKADDR realBindAddr = addrBind.IsSpecified() ? addrBind : HP_SOCKADDR::AnyAddr(addrRemote.family);
+
+		realBindAddr.SetPort(usLocalPort);
+
+		if(::bind(m_soClient, realBindAddr.Addr(), realBindAddr.AddrSize()) == SOCKET_ERROR)
+			return FALSE;
+	}
 
 	m_dwConnID = ::GenerateConnectionID();
 
@@ -210,6 +222,8 @@ BOOL CUdpClient::Stop()
 	if(!CheckStoping())
 		return FALSE;
 
+	SetConnected(FALSE);
+
 	WaitForWorkerThreadEnd();
 
 	if(m_ccContext.bFireOnClose)
@@ -247,7 +261,6 @@ void CUdpClient::Reset()
 	m_nEvents		= 0;
 	m_dwDetectFails	= 0;
 	m_bPaused		= FALSE;
-	m_bConnected	= FALSE;
 	m_enState		= SS_STOPPED;
 }
 
@@ -257,7 +270,7 @@ void CUdpClient::WaitForWorkerThreadEnd()
 		return;
 
 	if(m_thWorker.IsInMyThread())
-		m_thWorker.Detatch();
+		m_thWorker.Detach();
 	else
 	{
 		m_evStop.Set();
@@ -389,7 +402,7 @@ BOOL CUdpClient::ProcessNetworkEvent(SHORT events)
 	if(bContinue && events & POLLERR)
 		bContinue = HandleClose(events);
 
-	if(bContinue && !HasConnected())
+	if(bContinue && !IsConnected())
 		bContinue = HandleConnect(events);
 
 	if(bContinue && events & POLLIN)
@@ -506,7 +519,7 @@ BOOL CUdpClient::ReadData()
 
 BOOL CUdpClient::PauseReceive(BOOL bPause)
 {
-	if(!HasConnected())
+	if(!IsConnected())
 	{
 		::SetLastError(ERROR_INVALID_STATE);
 		return FALSE;
@@ -599,7 +612,7 @@ BOOL CUdpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 
 	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
 	{
-		if(HasConnected())
+		if(IsConnected())
 		{
 			if(iOffset != 0) pBuffer += iOffset;
 
@@ -626,7 +639,7 @@ BOOL CUdpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 
 	if(!pBuffers || iCount <= 0)
 		return ERROR_INVALID_PARAMETER;
-	if(!HasConnected())
+	if(!IsConnected())
 		return ERROR_INVALID_STATE;
 
 	int result = NO_ERROR;
@@ -669,7 +682,7 @@ int CUdpClient::SendInternal(TItemPtr& itPtr)
 {
 	CCriSecLock locallock(m_csSend);
 
-	if(!HasConnected())
+	if(!IsConnected())
 		return ERROR_INVALID_STATE;
 
 	BOOL isPending = !m_lsSend.IsEmpty();

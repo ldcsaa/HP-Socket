@@ -1,4 +1,28 @@
 ﻿==========================================================================================
+v5.4.1 Update:
+==========================================================================================
+
+> Add Thread Pool component
+-----------------
+1. add IHPThreadPool thread pool component
+2. important methods ofIHPThreadPool:
+	1) Start: startup thread pool
+	2) Stop: shutdown thread pool
+	3) Submit: submit task
+	4) AdjustThreadCount: adjust thread count
+
+> Interface Update
+-----------------
+1. The Connect() method of IAgent interface adds parameter 'usLocalPort', which can be bound to a local port when connecting
+2. The Start() method of IClient interface adds parameter 'usLocalPort', which can be bound to a local port when connecting
+3. IClient/IAgent/IServer interfaces add method IsConnected() to detect whether it is valid connection
+
+> Regular Update
+-----------------
+1. fix known issues
+2. performance optimization
+
+==========================================================================================
 v5.3.2 Update:
 ==========================================================================================
 

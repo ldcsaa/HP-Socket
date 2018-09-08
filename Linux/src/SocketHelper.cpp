@@ -558,13 +558,10 @@ CONNID GenerateConnectionID()
 	return dwConnID;
 }
 
-int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful, BOOL bReuseAddress)
+int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful)
 {
 	if(!bGraceful)
 		SSO_Linger(sock, 1, 0);
-
-	if(bReuseAddress)
-		SSO_ReuseAddress(sock, bReuseAddress);
 
 	if(iShutdownFlag != 0xFF)
 		shutdown(sock, iShutdownFlag);

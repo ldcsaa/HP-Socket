@@ -6,16 +6,18 @@ using namespace std;
 
 app_arg g_app_arg;
 
-char app_arg::OPTIONS[] = ":a:b:p:j:t:e:i:c:l:s:m:o:z:x:y:n:r:u:k:w:q:hv";
+char app_arg::OPTIONS[] = ":a:p:b:d:j:t:e:i:c:l:s:m:o:z:x:y:n:r:u:k:w:q:hv";
 
 app_arg::app_arg()
 {
 	// -a
 	remote_addr		= IPV4_LOOPBACK_ADDRESS;
-	// -b
-	bind_addr		= "";
 	// -p
 	port			= DEF_TCP_UDP_PORT;
+	// -b
+	bind_addr		= "";
+	// -d
+	local_port		= 0;
 	// -j
 	reject_addr		= "";
 	// -n
@@ -77,8 +79,9 @@ void app_arg::ParseArgs(int argc, char* const argv[])
 		switch(c)
 		{
 		case 'a': remote_addr		= strOptArg;						break;
-		case 'b': bind_addr			= strOptArg;						break;
 		case 'p': port				= (USHORT)atoi(strOptArg);			break;
+		case 'b': bind_addr			= strOptArg;						break;
+		case 'd': local_port		= (USHORT)atoi(strOptArg);			break;
 		case 'j': reject_addr		= strOptArg;						break;
 		case 'n': async				= (bool)atoi(strOptArg);			break;
 		case 't': thread_count		= (DWORD)atoi(strOptArg);			break;
@@ -110,13 +113,13 @@ void app_arg::PrintUsage()
 {
 	PRINTLN("-------------------------- Command Line Args -------------------------");
 	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "a", "remote_addr", "b", "bind_addr", "c", "conn_count");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "e", "test_times", "h", "(PRINT THIS USAGE)", "i", "test_interval");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "j", "reject_addr", "k", "ttl", "l", "data_length");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "m", "max_conn", "n", "async", "o", "cast_mode");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "p", "port", "q", "keep_alive", "r", "reuse_addr");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "s", "send_policy", "t", "thread_count", "u", "ip_loop");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "v", "(PRINT VERSION)", "w", "http_with_listener", "x", "http_port");
-	PRINTLN("-%s: %-20s-%s: %-20s"			, "y", "https_port", "z", "http_use_cookie");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "d", "local_port", "e", "test_times", "h", "(PRINT THIS USAGE)");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "i", "test_interval", "j", "reject_addr", "k", "ttl");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "l", "data_length", "m", "max_conn", "n", "async");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "o", "cast_mode", "p", "port", "q", "keep_alive");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "r", "reuse_addr", "s", "send_policy", "t", "thread_count");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "u", "ip_loop", "v", "(PRINT VERSION)", "w", "http_with_listener");
+	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "x", "http_port", "y", "https_port", "z", "http_use_cookie");
 	PRINTLN("-----------------------------------------------------------------------");
 }
 
@@ -2024,7 +2027,7 @@ LPCTSTR GetDefaultCookieFile()
 
 #ifdef _NEED_SSL
 
-#include "../../src/common/FuncHelper.h"
+#include "src/common/FuncHelper.h"
 
 #define SSL_CERT_RELATIVE_PATH_1		_T("/hp-ssl-cert/")
 #define SSL_CERT_RELATIVE_PATH_2		_T("/../../ssl-cert/")

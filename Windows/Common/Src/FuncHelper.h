@@ -59,9 +59,13 @@ inline int ENSURE_ERROR(int def_code)	{int __le_ = ::GetLastError(); if(__le_ ==
 #define ENSURE_ERROR_CANCELLED			ENSURE_ERROR(ERROR_CANCELLED)
 #define TRIGGER(expr)					EXECUTE_RESET_ERROR((expr))
 
-#define CreateLocalObjects(T, n)		((T*)alloca(sizeof(T) * n))
+#define CreateLocalObjects(T, n)		((T*)alloca(sizeof(T) * (n)))
 #define CreateLocalObject(T)			CreateLocalObjects(T, 1)
 #define CallocObjects(T, n)				((T*)calloc((n), sizeof(T)))
+
+#define MALLOC(T, n)					((T*)malloc(sizeof(T) * (n)))
+#define REALLOC(p, T, n)				((T*)realloc((PVOID)(p), sizeof(T) * (n)))
+#define FREE(p)							free((PVOID)(p))
 
 #define ERROR_EXIT2(code, err)			EXIT((code), (err), __FILE__, __LINE__, __FUNCTION__)
 #define ERROR__EXIT2(code, err)			_EXIT((code), (err), __FILE__, __LINE__, __FUNCTION__)

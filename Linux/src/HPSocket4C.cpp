@@ -34,6 +34,7 @@
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
+#include "HPThreadPool.h"
 
 #ifdef _HTTP_SUPPORT
 #include "HttpServer.h"
@@ -524,6 +525,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Server_IsPauseReceive(HP_Server pServer, HP_CONNI
 	return C_HP_Object::ToSecond<IServer>(pServer)->IsPauseReceive(dwConnID, *pbPaused);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Server_IsConnected(HP_Server pServer, HP_CONNID dwConnID)
+{
+	return C_HP_Object::ToSecond<IServer>(pServer)->IsConnected(dwConnID);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_Server_GetConnectionCount(HP_Server pServer)
 {
 	return C_HP_Object::ToSecond<IServer>(pServer)->GetConnectionCount();
@@ -776,6 +782,16 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtra(HP_Agent pAgent, LPCTSTR l
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, pExtra);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, USHORT usLocalPort)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, nullptr, usLocalPort);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtraAndLocalPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, pExtra, usLocalPort);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_Agent_Send(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength)
 {
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->Send(dwConnID, pBuffer, iLength);
@@ -857,6 +873,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_GetPendingDataLength(HP_Agent pAgent, HP_CO
 HPSOCKET_API BOOL __HP_CALL HP_Agent_IsPauseReceive(HP_Agent pAgent, HP_CONNID dwConnID, BOOL* pbPaused)
 {
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->IsPauseReceive(dwConnID, *pbPaused);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Agent_IsConnected(HP_Agent pAgent, HP_CONNID dwConnID)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->IsConnected(dwConnID);
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_Agent_GetConnectionCount(HP_Agent pAgent)
@@ -1048,6 +1069,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Client_StartWithBindAddress(HP_Client pClient, LP
 	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Client_StartWithBindAddressAndLocalPort(HP_Client pClient, LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
+{
+	return C_HP_Object::ToSecond<IClient>(pClient)->Start(lpszRemoteAddress, usPort, bAsyncConnect, lpszBindAddress, usLocalPort);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_Client_Stop(HP_Client pClient)
 {
 	return C_HP_Object::ToSecond<IClient>(pClient)->Stop();
@@ -1134,6 +1160,11 @@ HPSOCKET_API BOOL __HP_CALL HP_Client_GetPendingDataLength(HP_Client pClient, in
 HPSOCKET_API BOOL __HP_CALL HP_Client_IsPauseReceive(HP_Client pClient, BOOL* pbPaused)
 {
 	return C_HP_Object::ToSecond<IClient>(pClient)->IsPauseReceive(*pbPaused);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Client_IsConnected(HP_Client pClient)
+{
+	return C_HP_Object::ToSecond<IClient>(pClient)->IsConnected();
 }
 
 HPSOCKET_API void __HP_CALL HP_Client_SetFreeBufferPoolSize(HP_Client pClient, DWORD dwFreeBufferPoolSize)
@@ -1531,6 +1562,21 @@ HPSOCKET_API ULONGLONG __HP_CALL SYS_NToH64(ULONGLONG value)
 HPSOCKET_API ULONGLONG __HP_CALL SYS_HToN64(ULONGLONG value)
 {
 	return ::HToN64(value);
+}
+
+HPSOCKET_API LPBYTE __HP_CALL SYS_Malloc(int size)
+{
+	return MALLOC(BYTE, size);
+}
+
+HPSOCKET_API LPBYTE __HP_CALL SYS_Realloc(LPBYTE p, int size)
+{
+	return REALLOC(p, BYTE, size);
+}
+
+HPSOCKET_API VOID __HP_CALL SYS_Free(LPBYTE p)
+{
+	FREE(p);
 }
 
 #ifdef _ICONV_SUPPORT
@@ -2652,3 +2698,91 @@ HPSOCKET_API int __HP_CALL HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpire
 /*****************************************************************************************************************************************************/
 
 #endif
+
+/*****************************************************************************************************************************************************/
+/**************************************************************** Thread Pool Exports ****************************************************************/
+/*****************************************************************************************************************************************************/
+
+/****************************************************/
+/******************* 对象创建函数 ********************/
+
+HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool()
+{
+	return (HP_ThreadPool)(new CHPThreadPool);
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPool(HP_ThreadPool pThreadPool)
+{
+	delete (IHPThreadPool*)pThreadPool;
+}
+
+HPSOCKET_API LPTSocketTask __HP_CALL Create_HP_SocketTaskObj(Fn_SocketTaskProc fnTaskProc, PVOID pSender, HP_CONNID dwConnID, LPCBYTE pBuffer, INT iBuffLen, En_HP_TaskBufferType enBuffType, WPARAM wParam, LPARAM lParam)
+{
+	return ::CreateSocketTaskObj(fnTaskProc, pSender, dwConnID, pBuffer, iBuffLen, enBuffType, wParam, lParam);
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_SocketTaskObj(LPTSocketTask pTask)
+{
+	::DestroySocketTaskObj(pTask);
+}
+
+/***********************************************************************/
+/***************************** 组件操作方法 *****************************/
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Start(HP_ThreadPool pThreadPool, DWORD dwThreadCount, DWORD dwMaxQueueSize, En_HP_RejectedPolicy enRejectedPolicy, DWORD dwStackSize)
+{
+	return ((IHPThreadPool*)pThreadPool)->Start(dwThreadCount, dwMaxQueueSize, enRejectedPolicy, dwStackSize);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Stop(HP_ThreadPool pThreadPool, DWORD dwMaxWait)
+{
+	return ((IHPThreadPool*)pThreadPool)->Stop(dwMaxWait);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Submit(HP_ThreadPool pThreadPool, HP_Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait)
+{
+	return ((IHPThreadPool*)pThreadPool)->Submit(fnTaskProc, pvArg, dwMaxWait);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_Submit_Task(HP_ThreadPool pThreadPool, HP_LPTSocketTask pTask, DWORD dwMaxWait)
+{
+	return ((IHPThreadPool*)pThreadPool)->Submit(pTask, dwMaxWait);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_AdjustThreadCount(HP_ThreadPool pThreadPool, DWORD dwNewThreadCount)
+{
+	return ((IHPThreadPool*)pThreadPool)->AdjustThreadCount(dwNewThreadCount);
+}
+
+/***********************************************************************/
+/***************************** 属性访问方法 *****************************/
+
+HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_HasStarted(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->HasStarted();
+}
+
+HPSOCKET_API EnServiceState	__HP_CALL HP_ThreadPool_GetState(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetState();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetQueueSize(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetQueueSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetThreadCount(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetThreadCount();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetMaxQueueSize(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetMaxQueueSize();
+}
+
+HPSOCKET_API EnRejectedPolicy __HP_CALL HP_ThreadPool_GetRejectedPolicy(HP_ThreadPool pThreadPool)
+{
+	return ((IHPThreadPool*)pThreadPool)->GetRejectedPolicy();
+}

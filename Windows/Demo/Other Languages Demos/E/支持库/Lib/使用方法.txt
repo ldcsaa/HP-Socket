@@ -1,7 +1,7 @@
 Hp_Socket.fne 放入易语言Lib目录
-Hp_Socket_static.lib、HPSocket_4C.lib 放入static_Lib目录
+Hp_Socket_static.lib 放入static_Lib目录
 
-本支持库需要易语言vs2010链接器(链接: https://pan.baidu.com/s/1jIFbXWE 密码: ftas
+本支持库需要易语言vs2010链接器( 链接: https://pan.baidu.com/s/1sVDBhcoCI4NlHYfLhJ3P3Q 密码: uwag)
 
 点击链接加入群【怪兽乐园①群】：https://jq.qq.com/?_wv=1027&k=4BLM2hT(满)
 点击链接加入群【怪兽乐园②群】：https://jq.qq.com/?_wv=1027&k=4BLM1bH

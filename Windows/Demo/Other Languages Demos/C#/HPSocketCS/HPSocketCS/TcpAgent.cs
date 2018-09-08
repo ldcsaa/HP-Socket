@@ -103,6 +103,14 @@ namespace HPSocketCS
             Destroy();
         }
 
+        public IntPtr Sender
+        {
+            get
+            {
+                return pAgent;
+            }
+        }
+
         /// <summary>
         /// 创建socket监听&服务组件
         /// </summary>
@@ -205,6 +213,19 @@ namespace HPSocketCS
         public bool Connect(string address, ushort port, ref IntPtr connId)
         {
             return Sdk.HP_Agent_Connect(pAgent, address, port, ref connId);
+        }
+
+        /// <summary>
+        /// 连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() 事件
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        /// <param name="connId"></param>
+        /// <param name="usLocalPort">本地端口</param>
+        /// <returns></returns>
+        public bool Connect(string address, ushort port, ref IntPtr connId, ushort usLocalPort)
+        {
+            return Sdk.HP_Agent_ConnectWithLocalPort(pAgent, address, port, ref connId, usLocalPort);
         }
 
         public IntPtr Connect(string address, ushort port)

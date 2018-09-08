@@ -153,7 +153,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket4c_d;rt;dl;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -168,7 +168,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket4c;rt;dl;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -182,7 +182,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket4c_d;rt;dl;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib64:'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -197,7 +197,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket4c;rt;dl;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib64:'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -211,7 +211,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket4c_d;rt;dl;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -226,7 +226,7 @@
     </ClCompile>
     <Link>
       <LibraryDependencies>hpsocket4c;rt;dl;pthread</LibraryDependencies>
-      <AdditionalLibraryDirectories>$(RemoteRootDir)/../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib/hpsocket4c/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-Wl,-rpath,'$ORIGIN':'$ORIGIN'/../lib:'$ORIGIN'/../../../lib/hpsocket4c/$(Platform) %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

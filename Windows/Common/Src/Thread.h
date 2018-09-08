@@ -26,11 +26,42 @@
 #include <process.h>
 #include "RWLock.h"
 #include "STLHelper.h"
+#include "FuncHelper.h"
 
 template<class T, class P = VOID> class CThread
 {
 private:
 	typedef UINT (T::*F)(P*);
+
+	struct TWorker
+	{
+		T*	m_pRunner;
+		F	m_pFunc;
+		P*	m_pArg;
+
+	public:
+		static TWorker* Construct(T* pRunner, F pFunc, P* pArg)
+		{
+			return new TWorker(pRunner, pFunc, pArg);
+		}
+
+		static void Destruct(TWorker* pWorker)
+		{
+			if(pWorker != nullptr)
+				delete pWorker;
+		}
+
+		void CopyTo(TWorker& worker)
+		{
+			memcpy(&worker, this, sizeof(TWorker));
+		}
+
+		TWorker(T* pRunner = nullptr, F pFunc = nullptr, P* pArg = nullptr)
+		: m_pRunner(pRunner), m_pFunc(pFunc), m_pArg(pArg)
+		{
+
+		}
+	};
 
 public:
 	BOOL Start(T* pRunner, F pFunc, P* pArg = nullptr, int iPriority = THREAD_PRIORITY_NORMAL, UINT uiStackSize = 0, LPSECURITY_ATTRIBUTES lpThreadAttributes = nullptr)
@@ -41,15 +72,14 @@ public:
 		{
 			Release();
 
-			m_pRunner	= pRunner;
-			m_pFunc		= pFunc;
-			m_pArg		= pArg;
+			unique_ptr<TWorker> wkPtr(TWorker::Construct(pRunner, pFunc, pArg));
+			wkPtr->CopyTo(m_Worker);
 
 			if(iPriority == THREAD_PRIORITY_NORMAL)
-				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)this, 0, &m_uiThreadID);
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)wkPtr.get(), 0, &m_uiThreadID);
 			else
 			{
-				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)this, CREATE_SUSPENDED, &m_uiThreadID);
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)wkPtr.get(), CREATE_SUSPENDED, &m_uiThreadID);
 
 				if(IsValid())
 				{
@@ -58,7 +88,9 @@ public:
 				}
 			}
 
-			if(!IsValid())
+			if(IsValid())
+				wkPtr.release();
+			else
 			{
 				::SetLastError(ERROR_CREATE_FAILED);
 				isOK = FALSE;
@@ -106,7 +138,7 @@ public:
 		}
 	}
 
-	HANDLE Detatch()
+	HANDLE Detach()
 	{
 		HANDLE h = m_hThread;
 
@@ -121,9 +153,9 @@ public:
 	DWORD Resume		()						{return ::ResumeThread(m_hThread);}
 
 	BOOL IsValid		()	{return m_hThread != nullptr;}
-	T* GetRunner		()	{return m_pRunner;}
-	F GetFunc			()	{return m_pFunc;}
-	P* GetArg			()	{return m_pArg;}
+	T* GetRunner		()	{return m_Worker.m_pRunner;}
+	F GetFunc			()	{return m_Worker.m_pFunc;}
+	P* GetArg			()	{return m_Worker.m_pArg;}
 	DWORD GetThreadID	()	{return m_uiThreadID;}
 
 	HANDLE& GetThreadHandle			() 			{return m_hThread;}
@@ -143,26 +175,28 @@ public:
 private:
 	static UINT WINAPI ThreadProc(LPVOID pv)
 	{
-		CThread* pThis = (CThread*)pv;
+		TWorker* pWorker = (TWorker*)pv;
 
-		return ((pThis->m_pRunner)->*(pThis->m_pFunc))(pThis->m_pArg);
+		UINT rs = ((pWorker->m_pRunner)->*(pWorker->m_pFunc))(pWorker->m_pArg);
+
+		TWorker::Destruct(pWorker);
+
+		return rs;
 	}
 
 	void Reset()
 	{
 		m_uiThreadID = 0;
 		m_hThread	 = nullptr;
-		m_pRunner	 = nullptr;
-		m_pFunc		 = nullptr;
-		m_pArg		 = nullptr;
+
+		::ZeroObject(m_Worker);
 	}
 
 private:
 	UINT	m_uiThreadID;
 	HANDLE	m_hThread;
-	T*		m_pRunner;
-	F		m_pFunc;
-	P*		m_pArg;
+
+	TWorker m_Worker;
 
 	DECLARE_NO_COPY_CLASS(CThread)
 };

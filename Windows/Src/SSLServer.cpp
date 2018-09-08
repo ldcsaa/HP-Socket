@@ -91,8 +91,8 @@ EnHandleResult CSSLServer::FireAccept(TSocketObj* pSocketObj)
 	if(result != HR_ERROR)
 	{
 		CSSLSession* pSession = m_sslPool.PickFreeSession();
-		VERIFY(SetConnectionReserved2(pSocketObj, pSession));
-		VERIFY(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
+		ENSURE(SetConnectionReserved2(pSocketObj, pSession));
+		ENSURE(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
 	}
 
 	return result;

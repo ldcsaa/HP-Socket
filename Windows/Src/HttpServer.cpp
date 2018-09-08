@@ -30,7 +30,7 @@ template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::Start
 {
 	BOOL isOK = __super::Start(lpszBindAddress, usPort);
 
-	if(isOK) VERIFY(m_thCleaner.Start(this, &CHttpServerT::CleanerThreadProc));
+	if(isOK) ENSURE(m_thCleaner.Start(this, &CHttpServerT::CleanerThreadProc));
 
 	return isOK;
 }
@@ -154,7 +154,7 @@ template<class T, USHORT default_port> void CHttpServerT<T, default_port>::KillD
 		BOOL bDisconnect = TRUE;
 		BOOL bDestruct	 = TRUE;
 
-		VERIFY(m_lsDyingQueue.UnsafePopFront(&pDyingConn));
+		ENSURE(m_lsDyingQueue.UnsafePopFront(&pDyingConn));
 
 		int iPending;
 		if(!GetPendingDataLength(pDyingConn->connID, iPending))
@@ -194,7 +194,7 @@ template<class T, USHORT default_port> void CHttpServerT<T, default_port>::Relea
 	while(m_lsDyingQueue.UnsafePopFront(&pDyingConn))
 		TDyingConnection::Destruct(pDyingConn);
 
-	VERIFY(m_lsDyingQueue.IsEmpty());
+	ENSURE(m_lsDyingQueue.IsEmpty());
 }
 
 template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_port>::DoFireAccept(TSocketObj* pSocketObj)
@@ -204,7 +204,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	if(result != HR_ERROR)
 	{
 		THttpObj* pHttpObj = m_objPool.PickFreeHttpObj(this, pSocketObj);
-		VERIFY(SetConnectionReserved(pSocketObj, pHttpObj));
+		ENSURE(SetConnectionReserved(pSocketObj, pHttpObj));
 	}
 
 	return result;
@@ -217,7 +217,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	if(result == HR_ERROR)
 	{
 		THttpObj* pHttpObj = FindHttpObj(pSocketObj);
-		VERIFY(pHttpObj);
+		ENSURE(pHttpObj);
 
 		m_objPool.PutFreeHttpObj(pHttpObj);
 		SetConnectionReserved(pSocketObj, nullptr);
@@ -264,7 +264,7 @@ template<class T, USHORT default_port> void CHttpServerT<T, default_port>::WaitF
 	if(m_thCleaner.IsRunning())
 	{
 		m_evCleaner.Set();
-		VERIFY(m_thCleaner.Join(TRUE));
+		ENSURE(m_thCleaner.Join(TRUE));
 		m_evCleaner.Reset();
 	}
 }

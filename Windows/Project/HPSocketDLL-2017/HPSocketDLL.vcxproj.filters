@@ -43,6 +43,9 @@
     <Filter Include="HPSocket\Global">
       <UniqueIdentifier>{cb66d8b3-5199-4949-b1c6-7b61f955aa11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HPSocket\Pool">
+      <UniqueIdentifier>{05e8575c-d777-4068-9193-41304cda294f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -216,6 +219,9 @@
     <ClInclude Include="..\..\Common\Src\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\HPThreadPool.h">
+      <Filter>HPSocket\Pool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -361,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Src\FuncHelper.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HPThreadPool.cpp">
+      <Filter>HPSocket\Pool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

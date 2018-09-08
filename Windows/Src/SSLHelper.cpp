@@ -57,7 +57,7 @@ const DWORD CSSLSessionPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CA
 const DWORD CSSLSessionPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CSSLSessionPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
 const DWORD CSSLSessionPool::DEFAULT_SESSION_LOCK_TIME	= 15 * 1000;
-const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_SIZE	= 150;
+const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_SIZE	= 600;
 const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_HOLD	= 600;
 
 CSSLInitializer::CSSLInitializer()
@@ -352,11 +352,11 @@ void CSSLContext::SetServerNameCallback(Fn_SNI_ServerNameCallback fn)
 	if(m_fnServerNameCallback == nullptr)
 		return;
 
-	VERIFY(SSL_CTX_set_tlsext_servername_callback(m_sslCtx, InternalServerNameCallback));
-	VERIFY(SSL_CTX_set_tlsext_servername_arg(m_sslCtx, this));
+	ENSURE(SSL_CTX_set_tlsext_servername_callback(m_sslCtx, InternalServerNameCallback));
+	ENSURE(SSL_CTX_set_tlsext_servername_arg(m_sslCtx, this));
 }
 
-int CALLBACK CSSLContext::InternalServerNameCallback(SSL* ssl, int* ad, void* arg)
+int CSSLContext::InternalServerNameCallback(SSL* ssl, int* ad, void* arg)
 {
 	USES_CONVERSION;
 
@@ -605,15 +605,15 @@ CSSLSession* CSSLSessionPool::PickFreeSession(LPCSTR lpszHostName)
 	if(m_lsFreeSession.TryLock(&pSession, dwIndex))
 	{
 		if(::GetTimeGap32(pSession->GetFreeTime()) >= m_dwSessionLockTime)
-			VERIFY(m_lsFreeSession.ReleaseLock(nullptr, dwIndex));
+			ENSURE(m_lsFreeSession.ReleaseLock(nullptr, dwIndex));
 		else
 		{
-			VERIFY(m_lsFreeSession.ReleaseLock(pSession, dwIndex));
+			ENSURE(m_lsFreeSession.ReleaseLock(pSession, dwIndex));
 			pSession = nullptr;
 		}
 	}
 
-	if(!pSession) pSession = new CSSLSession(m_itPool);
+	if(!pSession) pSession = CSSLSession::Construct(m_itPool);
 
 	ASSERT(pSession);
 	return pSession->Renew(m_sslCtx, lpszHostName);
@@ -623,37 +623,22 @@ void CSSLSessionPool::PutFreeSession(CSSLSession* pSession)
 {
 	if(pSession->Reset())
 	{
+		ReleaseGCSession();
+		
 		if(!m_lsFreeSession.TryPut(pSession))
-		{
 			m_lsGCSession.PushBack(pSession);
-
-			if(m_lsGCSession.Size() > m_dwSessionPoolSize)
-				ReleaseGCSession();
-		}
 	}
 }
 
 void CSSLSessionPool::ReleaseGCSession(BOOL bForce)
 {
-	CSSLSession* pSession	= nullptr;
-	DWORD now				= ::TimeGetTime();
-
-	while(m_lsGCSession.PopFront(&pSession))
-	{
-		if(bForce || (int)(now - pSession->GetFreeTime()) >= (int)m_dwSessionLockTime)
-			delete pSession;
-		else
-		{
-			m_lsGCSession.PushBack(pSession);
-			break;
-		}
-	}
+	::ReleaseGCObj(m_lsGCSession, m_dwSessionLockTime, bForce);
 }
 
 void CSSLSessionPool::Prepare()
 {
 	m_itPool.Prepare();
-	m_lsFreeSession.Reset(m_dwSessionPoolHold);
+	m_lsFreeSession.Reset(m_dwSessionPoolSize);
 }
 
 void CSSLSessionPool::Clear()
@@ -663,11 +648,11 @@ void CSSLSessionPool::Clear()
 	while(m_lsFreeSession.TryGet(&pSession))
 		delete pSession;
 
-	VERIFY(m_lsFreeSession.IsEmpty());
+	ENSURE(m_lsFreeSession.IsEmpty());
 	m_lsFreeSession.Reset();
 
 	ReleaseGCSession(TRUE);
-	VERIFY(m_lsGCSession.IsEmpty());
+	ENSURE(m_lsGCSession.IsEmpty());
 
 	m_itPool.Clear();
 }

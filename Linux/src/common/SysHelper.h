@@ -47,6 +47,7 @@ using namespace std;
 #define SysGetPageSize					getpagesize
 #define DEFAULT_BUFFER_SIZE				GetDefaultBufferSize()
 
+#define PROCESSOR_COUNT					(::SysGetNumberOfProcessors())
 #define GetCurrentProcessId				getpid
 #define SELF_PROCESS_ID					(::GetCurrentProcessId())
 #define gettid()						syscall(__NR_gettid)
@@ -59,8 +60,21 @@ using namespace std;
 inline BOOL IsSameNativeThread(pid_t pid1, pid_t pid2)
 										{return (pid1 == pid2);}
 #define IsSelfNativeThread(pid)			IsSameNativeThread((pid), SELF_PROCESS_ID)
-#define YieldProcessor					sched_yield
 #define DEFAULT_WORKER_THREAD_COUNT		GetDefaultWorkerThreadCount()
+
+inline void __asm_nop()					{__asm__ __volatile__("nop" : : : "memory");}
+inline void __asm_rep_nop()				{__asm__ __volatile__("rep; nop" : : : "memory");}
+
+#if defined(__i386__) || defined(__x86_64__)
+inline void __asm_pause()				{__asm__ __volatile__("pause;");}
+#elif defined(__arm64__)
+inline void __asm_pause()				{__asm__ __volatile__("yield" : : : "memory");}
+#else
+inline void __asm_pause()				{__asm_nop();}
+#endif
+
+#define YieldProcessor					__asm_pause
+#define SwitchToThread					sched_yield
 
 DWORD GetDefaultBufferSize();
 DWORD GetDefaultWorkerThreadCount();

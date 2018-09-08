@@ -104,6 +104,8 @@
     <Compile Include="TcpPullServer.cs" />
     <Compile Include="TcpPackAgent.cs" />
     <Compile Include="TcpPackClient.cs" />
+    <Compile Include="HPThreadPool.cs" />
+    <Compile Include="ThreadPoolSdk.cs" />
     <Compile Include="WebSocketServer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

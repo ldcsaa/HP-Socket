@@ -23,8 +23,10 @@
  
 #include "UdpCast.h"
 
-BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress)
+BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
+	ASSERT(usLocalPort == 0);
+
 	if(!CheckParams() || !CheckStarting())
 		return FALSE;
 
@@ -122,7 +124,7 @@ BOOL CUdpCast::CheckStoping()
 		if(!m_thWorker.IsInMyThread())
 		{
 			while(m_enState != SS_STOPPED)
-				::Sleep(30);
+				::WaitFor(10);
 		}
 	}
 
@@ -274,6 +276,8 @@ BOOL CUdpCast::Stop()
 	if(!CheckStoping())
 		return FALSE;
 
+	SetConnected(FALSE);
+
 	WaitForWorkerThreadEnd();
 
 	if(m_ccContext.bFireOnClose)
@@ -321,7 +325,6 @@ void CUdpCast::Reset()
 	m_nRecvEvents	= 0;
 	m_nSendEvents	= 0;
 	m_bPaused		= FALSE;
-	m_bConnected	= FALSE;
 	m_enState		= SS_STOPPED;
 }
 
@@ -331,7 +334,7 @@ void CUdpCast::WaitForWorkerThreadEnd()
 		return;
 
 	if(m_thWorker.IsInMyThread())
-		m_thWorker.Detatch();
+		m_thWorker.Detach();
 	else
 	{
 		m_evStop.Set();
@@ -427,7 +430,7 @@ EXIT_WORKER_THREAD:
 
 BOOL CUdpCast::ProcessNetworkEvent(SHORT events)
 {
-	ASSERT(HasConnected());
+	ASSERT(IsConnected());
 
 	BOOL bContinue = TRUE;
 
@@ -513,7 +516,7 @@ BOOL CUdpCast::ReadData()
 
 BOOL CUdpCast::PauseReceive(BOOL bPause)
 {
-	if(!HasConnected())
+	if(!IsConnected())
 	{
 		::SetLastError(ERROR_INVALID_STATE);
 		return FALSE;
@@ -606,7 +609,7 @@ BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 
 	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
 	{
-		if(HasConnected())
+		if(IsConnected())
 		{
 			if(iOffset != 0) pBuffer += iOffset;
 
@@ -633,7 +636,7 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 
 	if(!pBuffers || iCount <= 0)
 		return ERROR_INVALID_PARAMETER;
-	if(!HasConnected())
+	if(!IsConnected())
 		return ERROR_INVALID_STATE;
 
 	int result = NO_ERROR;
@@ -676,7 +679,7 @@ int CUdpCast::SendInternal(TItemPtr& itPtr)
 {
 	CCriSecLock locallock(m_csSend);
 
-	if(!HasConnected())
+	if(!IsConnected())
 		return ERROR_INVALID_STATE;
 
 	BOOL isPending = !m_lsSend.IsEmpty();

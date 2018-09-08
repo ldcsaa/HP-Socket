@@ -43,6 +43,9 @@
     <Filter Include="HPSocket\Global">
       <UniqueIdentifier>{a392b23d-83be-4fea-acda-efafcf62752b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HPSocket\Pool">
+      <UniqueIdentifier>{bbd162ea-74c1-40a1-acfb-412ee569e0b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Src\BufferPool.h">
@@ -216,6 +219,9 @@
     <ClInclude Include="..\..\Common\Src\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\HPThreadPool.h">
+      <Filter>HPSocket\Pool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Common\Src\BufferPool.cpp">
@@ -340,6 +346,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Src\FuncHelper.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\HPThreadPool.cpp">
+      <Filter>HPSocket\Pool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
