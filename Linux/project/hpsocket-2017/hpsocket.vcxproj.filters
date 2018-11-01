@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{79da607d-7113-4666-ba65-c6aab68df41b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTP">
+      <UniqueIdentifier>{9ef8136e-bcb0-400f-9370-f59e45bc5a05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SSL">
+      <UniqueIdentifier>{a2f3b4aa-5fe3-42ac-acfc-be0b01023e09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TCP">
+      <UniqueIdentifier>{d0d4e01a-80d7-4c98-9e2f-f2223e9e98c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UDP">
+      <UniqueIdentifier>{4beac4a5-261d-4f90-b225-bb2cfef419e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Public">
+      <UniqueIdentifier>{cdf7b969-21e7-4291-a055-f81c5011a957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{7c0a7de9-4368-4b7c-8772-ad172a4efc7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Crypto">
+      <UniqueIdentifier>{25547690-7ec1-4451-8a7d-74ee2b9cca18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Http">
+      <UniqueIdentifier>{9b71105f-c4f3-4968-b1f9-37a002dfe794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pool">
+      <UniqueIdentifier>{636c9149-7025-4ca2-9bc4-bb46ea09ecd8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\common\GlobalDef.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HPSocket.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HPTypeDef.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SocketInterface.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\BufferPool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\BufferPtr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\CriSec.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Event.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\FuncHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\GeneralHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\IODispatcher.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\PollHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\PrivateHeap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\RingBuffer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\RWLock.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Semaphore.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\SignalHandler.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Singleton.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\STLHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\SysHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Thread.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SocketHelper.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\FileHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpServer.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\StringT.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpAgent.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpClient.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpPackAgent.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpPackClient.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpPackServer.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpPullAgent.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpPullClient.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TcpPullServer.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\MiscHelper.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\UdpCast.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\UdpClient.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\UdpServer.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\GlobalErrno.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLAgent.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLClient.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLHelper.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SSLServer.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HPSocket-SSL.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\crypto\Crypto.h">
+      <Filter>Common\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpAgent.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpClient.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpCookie.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpHelper.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HttpServer.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\http\http_parser.h">
+      <Filter>Common\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HPThreadPool.h">
+      <Filter>Pool</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\common\BufferPool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Event.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\FuncHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\IODispatcher.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\PollHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\RWLock.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\SysHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SocketHelper.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\FileHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpServer.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpAgent.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpClient.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpPackAgent.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpPackClient.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpPackServer.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpPullAgent.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpPullClient.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TcpPullServer.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\MiscHelper.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UdpCast.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UdpClient.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UdpServer.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HPSocket.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLAgent.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLClient.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLHelper.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SSLServer.cpp">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HPSocket-SSL.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\crypto\Crypto.cpp">
+      <Filter>Common\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpAgent.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpClient.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpCookie.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpHelper.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HttpServer.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\http\http_parser.cpp">
+      <Filter>Common\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Thread.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HPThreadPool.cpp">
+      <Filter>Pool</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
