@@ -131,7 +131,7 @@ template<class T, class _Listener, class _Creator> class CHPSocketPtr : public C
 public:
 	CHPSocketPtr(_Listener* pListener)
 	{
-		m_pObj = _Creator::Create(pListener);
+		__super::m_pObj = _Creator::Create(pListener);
 	}
 
 	CHPSocketPtr()
@@ -147,7 +147,7 @@ public:
 	CHPObjectPtr(BOOL bCreate = FALSE)
 	{
 		if(bCreate)
-			m_pObj = _Creator::Create();
+			__super::m_pObj = _Creator::Create();
 	}
 
 };
