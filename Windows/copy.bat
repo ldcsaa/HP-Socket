@@ -19,6 +19,4 @@ xcopy /y /s /f "Demo\Other Languages Demos\C#\HPSocketCS\bin\x64\Release\netstan
 xcopy /y /s /f Bin\HPSocket4C\x86\HPSocket4C.dll "Demo\Other Languages Demos\E\Ä£¿é\Module\"
 xcopy /y /s /f Bin\HPSocket4C\x86\HPSocket4C.dll "Demo\Other Languages Demos\E\Ä£¿é\Demo\"
 
-xcopy /y /s /f Bin\HPSocket4C\x86\HPSocket4C.dll "Demo\Other Languages Demos\Delphi\Http\"
-xcopy /y /s /f Bin\HPSocket4C\x86\HPSocket4C.dll "Demo\Other Languages Demos\Delphi\Client\"
-xcopy /y /s /f Bin\HPSocket4C\x86\HPSocket4C.dll "Demo\Other Languages Demos\Delphi\TcpServer\"
+xcopy /y /s /f Bin\HPSocket4C\x86\HPSocket4C.dll "Demo\Other Languages Demos\Delphi\Lib\"
