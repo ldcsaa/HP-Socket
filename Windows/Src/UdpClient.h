@@ -29,6 +29,8 @@
 #include "../Common/Src/BufferPool.h"
 #include "../Common/Src/CriticalSection.h"
 
+#ifdef _UDP_SUPPORT
+
 class CUdpClient : public IUdpClient
 {
 public:
@@ -113,7 +115,7 @@ private:
 	BOOL ReadData();
 	BOOL SendData();
 	TItem* GetSendBuffer();
-	int SendInternal(const BYTE* pBuffer, int iLength);
+	int SendInternal(TItemPtr& itPtr);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
 
 	BOOL HandleError(WSANETWORKEVENTS& events);
@@ -210,3 +212,5 @@ private:
 	volatile BOOL		m_bPaused;
 	volatile DWORD		m_dwDetectFails;
 };
+
+#endif

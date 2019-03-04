@@ -1,4 +1,19 @@
 ﻿==========================================================================================
+v5.4.4 Update:
+==========================================================================================
+
+> TCP Components Update
+-----------------
+1. The IAgent component supports specifying a local IP address and/or local port when connecting to the server.
+
+> Other Update
+-----------------
+1. Code optimization.
+2. http-parser upgrade to version 2.9.0
+3. openssl upgrade to version 1.1.0j
+4. provide _UDP_DISABLED precompiled macro to remove UDP components
+
+==========================================================================================
 v5.4.3 Update:
 ==========================================================================================
 

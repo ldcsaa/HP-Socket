@@ -23,6 +23,8 @@
  
 #include "UdpServer.h"
 
+#ifdef _UDP_SUPPORT
+
 EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 {
 	EnHandleResult rs = TRIGGER(FireAccept(pSocketObj));
@@ -40,12 +42,11 @@ BOOL CUdpServer::Start(LPCTSTR lpszBindAddress, USHORT usPort)
 
 	if(CreateListenSocket(lpszBindAddress, usPort))
 		if(CreateWorkerThreads())
-			if(CreateDetectorThread())
-				if(StartAccept())
-				{
-					m_enState = SS_STARTED;
-					return TRUE;
-				}
+			if(StartAccept())
+			{
+				m_enState = SS_STARTED;
+				return TRUE;
+			}
 
 	EXECUTE_RESTORE_ERROR(Stop());
 
@@ -69,7 +70,7 @@ BOOL CUdpServer::CheckParams()
 		((int)m_dwFreeBufferObjPool >= 0)														&&
 		((int)m_dwFreeSocketObjHold >= 0)														&&
 		((int)m_dwFreeBufferObjHold >= 0)														&&
-		((int)m_dwMaxDatagramSize > 0)															&&
+		((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)	&&
 		((int)m_dwPostReceiveCount > 0)															&&
 		((int)m_dwDetectAttempts >= 0)															&&
 		((int)m_dwDetectInterval >= 0)															)
@@ -168,14 +169,6 @@ BOOL CUdpServer::CreateWorkerThreads()
 	return m_ioDispatcher.Start(this, m_dwPostReceiveCount, m_dwWorkerThreadCount);
 }
 
-BOOL CUdpServer::CreateDetectorThread()
-{
-	if(!IsNeedRunDetector())
-		return TRUE;
-		
-	return m_thDetector.Start(this, &CUdpServer::DetecotrThreadProc);
-}
-
 BOOL CUdpServer::StartAccept()
 {
 	return m_ioDispatcher.AddFD(m_soListen, _EPOLL_READ_EVENTS | EPOLLET, TO_PVOID(&m_soListen));
@@ -191,7 +184,6 @@ BOOL CUdpServer::Stop()
 	DisconnectClientSocket();
 	WaitForClientSocketClose();
 
-	WaitForDetectorThreadEnd();
 	WaitForWorkerThreadEnd();
 	
 	ReleaseClientSocket();
@@ -229,16 +221,6 @@ void CUdpServer::WaitForClientSocketClose()
 {
 	while(m_bfActiveSockets.Elements() > 0)
 		::WaitFor(50);
-}
-
-void CUdpServer::WaitForDetectorThreadEnd()
-{
-	if(m_thDetector.IsRunning())
-	{
-		m_evStop.Set();
-		m_thDetector.Join();
-		m_evStop.Reset();
-	}
 }
 
 void CUdpServer::WaitForWorkerThreadEnd()
@@ -324,6 +306,12 @@ void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag e
 		m_mpClientAddr.erase(&pSocketObj->remoteAddr);
 	}
 
+	if(pSocketObj->fdTimer != INVALID_FD)
+	{
+		m_ioDispatcher.DelFD(pSocketObj->fdTimer);
+		close(pSocketObj->fdTimer);
+	}
+
 	TUdpSocketObj::Release(pSocketObj);
 
 	ReleaseGCSocketObj();
@@ -346,6 +334,21 @@ void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, 
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
+	if(IsNeedDetectConnection())
+	{
+		pSocketObj->fdTimer = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+
+		itimerspec its;
+		LLONG llInterval = m_dwDetectInterval * 1000LL;
+
+		::MillisecondToTimespec(llInterval, its.it_value);
+		::MillisecondToTimespec(llInterval, its.it_interval);
+
+		if(IS_NO_ERROR(timerfd_settime(pSocketObj->fdTimer, 0, &its, nullptr)))
+			m_ioDispatcher.AddFD(pSocketObj->fdTimer, EPOLLIN | EPOLLET, pSocketObj);
+	}
+
+	pSocketObj->pHolder		= this;
 	pSocketObj->connTime	= ::TimeGetTime();
 	pSocketObj->activeTime	= pSocketObj->connTime;
 
@@ -669,9 +672,13 @@ BOOL CUdpServer::PauseReceive(CONNID dwConnID, BOOL bPause)
 
 BOOL CUdpServer::OnBeforeProcessIo(PVOID pv, UINT events)
 {
-	ASSERT(pv == &m_soListen);
+	if(pv == &m_soListen)
+		return TRUE;
 
-	return TRUE;
+	if(!(events & _EPOLL_ALL_ERROR_EVENTS))
+		DetectConnection(pv);
+
+	return FALSE;
 }
 
 VOID CUdpServer::OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)
@@ -1082,58 +1089,24 @@ int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr)
 	return NO_ERROR;
 }
 
-UINT WINAPI CUdpServer::DetecotrThreadProc(LPVOID pv)
+void CUdpServer::DetectConnection(PVOID pv)
 {
-	ASSERT(IsNeedRunDetector());
+	static const SSIZE_T SIZE = sizeof(LLONG);
 
-	TRACE("---------------> Server Detecotr Thread 0x%08X started <---------------", SELF_THREAD_ID);
+	TUdpSocketObj* pSocketObj = (TUdpSocketObj*)pv;
 
-	pollfd pfd = {m_evStop.GetFD(), POLLIN};
-
-	while(HasStarted())
+	if(TUdpSocketObj::IsValid(pSocketObj))
 	{
-		int rs = (int)::PollForSingleObject(pfd, m_dwDetectInterval * 1000L);
-		ASSERT(rs >= TIMEOUT);
+		LLONG llExpirations;
+		read(pSocketObj->fdTimer, &llExpirations, SIZE);
 
-		if(rs < TIMEOUT)
-			ERROR_ABORT();
+		CUdpServer* pServer = (CUdpServer*)pSocketObj->pHolder;
 
-		if(rs == TIMEOUT)
-			DetectConnections();
-		else if(rs == 1)
-		{
-			m_evStop.Reset();
-			goto END_DETECTOR;
-		}
+		if(pSocketObj->detectFails >= pServer->m_dwDetectAttempts)
+			VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_DISCONNECT, pSocketObj->connID, TRUE));
 		else
-			ASSERT(FALSE);
-	}
-
-END_DETECTOR:
-
-	VERIFY(!HasStarted());
-
-	TRACE("---------------> Server Detecotr Thread 0x%08X stoped <---------------", SELF_THREAD_ID);
-
-	return 0;
-}
-
-void CUdpServer::DetectConnections()
-{
-	DWORD size					= 0;
-	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
-
-	for(DWORD i = 0; i < size; i++)
-	{
-		CONNID dwConnID			  = ids[i];
-		TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
-
-		if(pSocketObj)
-		{
-			if(pSocketObj->detectFails >= m_dwDetectAttempts)
-				VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_DISCONNECT, dwConnID, TRUE));
-			else
-				::InterlockedIncrement(&pSocketObj->detectFails);
-		}
+			::InterlockedIncrement(&pSocketObj->detectFails);
 	}
 }
+
+#endif

@@ -23,6 +23,8 @@
  
 #include "UdpCast.h"
 
+#ifdef _UDP_SUPPORT
+
 BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
 	ASSERT(usLocalPort == 0);
@@ -74,11 +76,11 @@ BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnec
 
 BOOL CUdpCast::CheckParams()
 {
-	if	(((int)m_dwMaxDatagramSize > 0)									&&
-		((int)m_dwFreeBufferPoolSize >= 0)								&&
-		((int)m_dwFreeBufferPoolHold >= 0)								&&
-		(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)	&&
-		(m_iMCTtl >= 0 && m_iMCTtl <= 255)								)
+	if	(((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)	&&
+		((int)m_dwFreeBufferPoolSize >= 0)														&&
+		((int)m_dwFreeBufferPoolHold >= 0)														&&
+		(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)							&&
+		(m_iMCTtl >= 0 && m_iMCTtl <= 255)														)
 		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -357,7 +359,7 @@ UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 						{m_evSend.GetFD(), POLLIN},
 						{m_evRecv.GetFD(), POLLIN},
 						{m_evStop.GetFD(), POLLIN}	};
-	int size		= (int)(sizeof(pfds) / sizeof(pfds[0]));
+	int size		= ARRAY_SIZE(pfds);
 
 	m_rcBuffer.Malloc(m_dwMaxDatagramSize);
 
@@ -639,10 +641,9 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 	if(!IsConnected())
 		return ERROR_INVALID_STATE;
 
-	int result = NO_ERROR;
-
-	int iLength = 0;
-	int iMaxLen = (int)m_dwMaxDatagramSize;
+	int result	= NO_ERROR;
+	int iLength	= 0;
+	int iMaxLen	= (int)m_dwMaxDatagramSize;
 
 	TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
 
@@ -744,3 +745,5 @@ BOOL CUdpCast::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 
 	return !m_strHost.IsEmpty();
 }
+
+#endif

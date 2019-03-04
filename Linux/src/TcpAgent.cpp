@@ -238,7 +238,7 @@ void CTcpAgent::Reset()
 	m_enState = SS_STOPPED;
 }
 
-BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort)
+BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort, LPCTSTR lpszLocalAddress)
 {
 	ASSERT(lpszRemoteAddress && usPort != 0);
 
@@ -256,7 +256,7 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 		result = ERROR_INVALID_STATE;
 	else
 	{
-		result = CreateClientSocket(lpszRemoteAddress, usPort, usLocalPort, soClient, addr);
+		result = CreateClientSocket(lpszRemoteAddress, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
 
 		if(result == NO_ERROR)
 		{
@@ -281,14 +281,24 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 	return (result == NO_ERROR);
 }
 
-int CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr)
+int CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszLocalAddress, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr)
 {
 	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addr))
 		return ERROR_ADDRNOTAVAIL;
 
-	BOOL bBind = m_soAddr.IsSpecified();
+	HP_SOCKADDR* lpBindAddr = &m_soAddr;
 
-	if(bBind && m_soAddr.family != addr.family)
+	if(::IsStrNotEmpty(lpszLocalAddress))
+	{
+		lpBindAddr = CreateLocalObject(HP_SOCKADDR);
+
+		if(!::sockaddr_A_2_IN(lpszLocalAddress, 0, *lpBindAddr))
+			return ::WSAGetLastError();
+	}
+
+	BOOL bBind = lpBindAddr->IsSpecified();
+
+	if(bBind && lpBindAddr->family != addr.family)
 		return ERROR_AFNOSUPPORT;
 
 	int result	= NO_ERROR;
@@ -304,12 +314,12 @@ int CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, USHO
 
 		if(bBind && usLocalPort == 0)
 		{
-			if(::bind(soClient, m_soAddr.Addr(), m_soAddr.AddrSize()) == SOCKET_ERROR)
+			if(::bind(soClient, lpBindAddr->Addr(), lpBindAddr->AddrSize()) == SOCKET_ERROR)
 				result = ::WSAGetLastError();
 		}
 		else if(usLocalPort != 0)
 		{
-			HP_SOCKADDR bindAddr = bBind ? m_soAddr : HP_SOCKADDR::AnyAddr(addr.family);
+			HP_SOCKADDR bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
 
 			bindAddr.SetPort(usLocalPort);
 

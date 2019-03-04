@@ -1,4 +1,13 @@
 ﻿# ======================================== #
+HP-Socket v5.4.4 API Update List:
+# ======================================== #
+--------------------
+1.Agent:
+--------------------
+HP_Agent_ConnectWithLocalAddress				(ADD)
+HP_Agent_ConnectWithExtraAndLocalAddressPort	(ADD)
+
+# ======================================== #
 HP-Socket v5.4.3 API Update List:
 # ======================================== #
 --------------------

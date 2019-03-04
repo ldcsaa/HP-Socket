@@ -27,6 +27,8 @@
 #include "./common/GeneralHelper.h"
 #include "./common/IODispatcher.h"
 
+#ifdef _UDP_SUPPORT
+
 class CUdpServer : public IUdpServer, private CIOHandler
 {
 	using CWorkerThread	= CThread<CUdpServer, VOID, UINT>;
@@ -145,20 +147,13 @@ protected:
 	BOOL GetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID* ppReserved2);
 
 private:
-	UINT WINAPI DetecotrThreadProc(LPVOID pv);
-
-	EnHandleResult TriggerFireAccept(TUdpSocketObj* pSocketObj);
-
-private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
 	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort);
 	BOOL CreateWorkerThreads();
-	BOOL CreateDetectorThread();
 	BOOL StartAccept();
 
 	void CloseListenSocket();
-	void WaitForDetectorThreadEnd();
 	void DisconnectClientSocket();
 	void WaitForClientSocketClose();
 	void ReleaseClientSocket();
@@ -176,6 +171,7 @@ private:
 	void AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr);
 	void CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 
+	EnHandleResult TriggerFireAccept(TUdpSocketObj* pSocketObj);
 
 private:
 	VOID HandleCmdSend		(CONNID dwConnID, int flag);
@@ -193,8 +189,8 @@ private:
 	BOOL SendItem		(TUdpSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocked);
 
 
-	void DetectConnections	();
-	BOOL IsNeedRunDetector	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
+	void DetectConnection		(PVOID pv);
+	BOOL IsNeedDetectConnection	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
 
 public:
 	CUdpServer(IUdpServerListener* pListener)
@@ -247,9 +243,6 @@ private:
 	EnServiceState			m_enState;
 	EnSocketError			m_enLastError;
 
-	CEvt					m_evStop;
-	CWorkerThread			m_thDetector;
-
 	CPrivateHeap			m_phSocket;
 	CBufferObjPool			m_bfObjPool;
 
@@ -269,3 +262,5 @@ private:
 
 	CIODispatcher			m_ioDispatcher;
 };
+
+#endif

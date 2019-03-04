@@ -60,7 +60,7 @@ BOOL CIODispatcher::Start(IIOHandler* pHandler, int iWorkerMaxEvents, int iWorke
 
 	if(llTimerInterval > 0)
 	{
-		m_evTimer = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);;
+		m_evTimer = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
 
 		if(IS_INVALID_FD(m_evTimer))
 			goto START_ERROR;

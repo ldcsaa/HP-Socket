@@ -347,9 +347,13 @@ typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener>						C_HP_TcpClient
 typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPullClient)>	C_HP_TcpPullClientListener;
 typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPackClient)>	C_HP_TcpPackClientListener;
 
+#ifdef _UDP_SUPPORT
+
 typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener>						C_HP_UdpServerListener;
 typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener>						C_HP_UdpClientListener;
 typedef C_HP_ClientListenerT<IUdpCast, IUdpCastListener>							C_HP_UdpCastListener;
+
+#endif
 
 #ifdef _HTTP_SUPPORT
 

@@ -86,8 +86,10 @@
 /* TCP Server 默认预投递 Accept 数量 */
 #define DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT	300
 
+/* UDP 最大数据报文最大长度 */
+#define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			DEFAULT_BUFFER_SIZE
 /* UDP 默认数据报文最大长度 */
-#define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1472
+#define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1432
 /* UDP 默认 Receive 预投递数量 */
 #define DEFAULT_UDP_POST_RECEIVE_COUNT			300
 /* UDP 默认监测包尝试次数 */
@@ -457,10 +459,15 @@ typedef TBufferObjListT<TBufferObj>		TBufferObjList;
 typedef TBufferObjListT<TUdpBufferObj>	TUdpBufferObjList;
 
 /* 数据缓冲区结构链表 */
-typedef CRingPool<TBufferObj>		TBufferObjPtrList;
+typedef CRingPool<TBufferObj>			TBufferObjPtrList;
 
 /* Udp 数据缓冲区结构链表 */
-typedef CRingPool<TUdpBufferObj>	TUdpBufferObjPtrList;
+typedef CRingPool<TUdpBufferObj>		TUdpBufferObjPtrList;
+
+/* TBufferObj 智能指针 */
+typedef TItemPtrT<TBufferObj>			TBufferObjPtr;
+/* TUdpBufferObj 智能指针 */
+typedef TItemPtrT<TUdpBufferObj>		TUdpBufferObjPtr;
 
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
@@ -634,6 +641,9 @@ struct TSocketObj : public TSocketObjBase
 /* UDP 数据缓冲区结构 */
 struct TUdpSocketObj : public TSocketObjBase
 {
+	PVOID				pHolder;
+	HANDLE				hTimer;
+
 	CRWLock				csRecv;
 	CCriSec				csSend;
 
@@ -697,7 +707,9 @@ struct TUdpSocketObj : public TSocketObjBase
 	{
 		__super::Reset(dwConnID);
 
-		detectFails = 0;
+		pHolder		= nullptr;
+		hTimer		= nullptr;
+		detectFails	= 0;
 	}
 };
 

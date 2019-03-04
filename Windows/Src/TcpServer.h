@@ -223,8 +223,8 @@ private:
 	int SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	int SendPack	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendSafe	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
 	BOOL DoAccept	();
 	int DoUnpause	(CONNID dwConnID);

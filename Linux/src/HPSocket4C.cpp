@@ -31,16 +31,20 @@
 #include "TcpPackServer.h"
 #include "TcpPackClient.h"
 #include "TcpPackAgent.h"
+
+#ifdef _UDP_SUPPORT
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
-#include "HPThreadPool.h"
+#endif
 
 #ifdef _HTTP_SUPPORT
 #include "HttpServer.h"
 #include "HttpAgent.h"
 #include "HttpClient.h"
 #endif
+
+#include "HPThreadPool.h"
 
 /*****************************************************************************************************************************************************/
 /****************************************************************** TCP/UDP Exports ******************************************************************/
@@ -58,9 +62,13 @@ typedef C_HP_ObjectT<CTcpClient, ITcpClientListener>							C_HP_TcpClient;
 typedef C_HP_ObjectT<CTcpPullClient, ITcpClientListener, sizeof(IPullClient)>	C_HP_TcpPullClient;
 typedef C_HP_ObjectT<CTcpPackClient, ITcpClientListener, sizeof(IPackClient)>	C_HP_TcpPackClient;
 
+#ifdef _UDP_SUPPORT
+
 typedef C_HP_ObjectT<CUdpServer, IUdpServerListener>							C_HP_UdpServer;
 typedef C_HP_ObjectT<CUdpClient, IUdpClientListener>							C_HP_UdpClient;
 typedef C_HP_ObjectT<CUdpCast, IUdpCastListener>								C_HP_UdpCast;
+
+#endif
 
 /****************************************************/
 /**************** TCP/UDP 对象创建函数 ***************/
@@ -110,21 +118,6 @@ HPSOCKET_API HP_TcpPackClient __HP_CALL Create_HP_TcpPackClient(HP_TcpClientList
 	return (HP_TcpPackClient)(new C_HP_TcpPackClient((ITcpClientListener*)pListener));
 }
 
-HPSOCKET_API HP_UdpServer __HP_CALL Create_HP_UdpServer(HP_UdpServerListener pListener)
-{
-	return (HP_UdpServer)(new C_HP_UdpServer((IUdpServerListener*)pListener));
-}
-
-HPSOCKET_API HP_UdpClient __HP_CALL Create_HP_UdpClient(HP_UdpClientListener pListener)
-{
-	return (HP_UdpClient)(new C_HP_UdpClient((IUdpClientListener*)pListener));
-}
-
-HPSOCKET_API HP_UdpCast __HP_CALL Create_HP_UdpCast(HP_UdpCastListener pListener)
-{
-	return (HP_UdpCast)(new C_HP_UdpCast((IUdpCastListener*)pListener));
-}
-
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpServer(HP_TcpServer pServer)
 {
 	delete (C_HP_TcpServer*)pServer;
@@ -168,21 +161,6 @@ HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackAgent(HP_TcpPackAgent pAgent)
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackClient(HP_TcpPackClient pClient)
 {
 	delete (C_HP_TcpPackClient*)pClient;
-}
-
-HPSOCKET_API void __HP_CALL Destroy_HP_UdpServer(HP_UdpServer pServer)
-{
-	delete (C_HP_UdpServer*)pServer;
-}
-
-HPSOCKET_API void __HP_CALL Destroy_HP_UdpClient(HP_UdpClient pClient)
-{
-	delete (C_HP_UdpClient*)pClient;
-}
-
-HPSOCKET_API void __HP_CALL Destroy_HP_UdpCast(HP_UdpCast pCast)
-{
-	delete (C_HP_UdpCast*)pCast;
 }
 
 HPSOCKET_API HP_TcpServerListener __HP_CALL Create_HP_TcpServerListener()
@@ -230,21 +208,6 @@ HPSOCKET_API HP_TcpPackClientListener __HP_CALL Create_HP_TcpPackClientListener(
 	return (HP_TcpPackClientListener)(new C_HP_TcpPackClientListener);
 }
 
-HPSOCKET_API HP_UdpServerListener __HP_CALL Create_HP_UdpServerListener()
-{
-	return (HP_UdpServerListener)(new C_HP_UdpServerListener);
-}
-
-HPSOCKET_API HP_UdpClientListener __HP_CALL Create_HP_UdpClientListener()
-{
-	return (HP_UdpClientListener)(new C_HP_UdpClientListener);
-}
-
-HPSOCKET_API HP_UdpCastListener __HP_CALL Create_HP_UdpCastListener()
-{
-	return (HP_UdpCastListener)(new C_HP_UdpCastListener);
-}
-
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpServerListener(HP_TcpServerListener pListener)
 {
 	delete (C_HP_TcpServerListener*)pListener;
@@ -290,6 +253,53 @@ HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackClientListener(HP_TcpPackClientLis
 	delete (C_HP_TcpPackClientListener*)pListener;
 }
 
+#ifdef _UDP_SUPPORT
+
+HPSOCKET_API HP_UdpServer __HP_CALL Create_HP_UdpServer(HP_UdpServerListener pListener)
+{
+	return (HP_UdpServer)(new C_HP_UdpServer((IUdpServerListener*)pListener));
+}
+
+HPSOCKET_API HP_UdpClient __HP_CALL Create_HP_UdpClient(HP_UdpClientListener pListener)
+{
+	return (HP_UdpClient)(new C_HP_UdpClient((IUdpClientListener*)pListener));
+}
+
+HPSOCKET_API HP_UdpCast __HP_CALL Create_HP_UdpCast(HP_UdpCastListener pListener)
+{
+	return (HP_UdpCast)(new C_HP_UdpCast((IUdpCastListener*)pListener));
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpServer(HP_UdpServer pServer)
+{
+	delete (C_HP_UdpServer*)pServer;
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpClient(HP_UdpClient pClient)
+{
+	delete (C_HP_UdpClient*)pClient;
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpCast(HP_UdpCast pCast)
+{
+	delete (C_HP_UdpCast*)pCast;
+}
+
+HPSOCKET_API HP_UdpServerListener __HP_CALL Create_HP_UdpServerListener()
+{
+	return (HP_UdpServerListener)(new C_HP_UdpServerListener);
+}
+
+HPSOCKET_API HP_UdpClientListener __HP_CALL Create_HP_UdpClientListener()
+{
+	return (HP_UdpClientListener)(new C_HP_UdpClientListener);
+}
+
+HPSOCKET_API HP_UdpCastListener __HP_CALL Create_HP_UdpCastListener()
+{
+	return (HP_UdpCastListener)(new C_HP_UdpCastListener);
+}
+
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpServerListener(HP_UdpServerListener pListener)
 {
 	delete (C_HP_UdpServerListener*)pListener;
@@ -304,6 +314,8 @@ HPSOCKET_API void __HP_CALL Destroy_HP_UdpCastListener(HP_UdpCastListener pListe
 {
 	delete (C_HP_UdpClientListener*)pListener;
 }
+
+#endif
 
 /**********************************************************************************/
 /***************************** Server 回调函数设置方法 *****************************/
@@ -726,6 +738,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveInterval(HP_TcpServer pSer
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetKeepAliveInterval();
 }
 
+#ifdef _UDP_SUPPORT
+
 /**********************************************************************************/
 /***************************** UDP Server 属性访问方法 *****************************/
 
@@ -769,6 +783,8 @@ HPSOCKET_API DWORD __HP_CALL HP_UdpServer_GetDetectInterval(HP_UdpServer pServer
 	return C_HP_Object::ToSecond<IUdpServer>(pServer)->GetDetectInterval();
 }
 
+#endif
+
 /**************************************************************************/
 /***************************** Agent 操作方法 *****************************/
 
@@ -797,9 +813,19 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalPort(HP_Agent pAgent, LPCTS
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, nullptr, usLocalPort);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalAddress(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, LPCTSTR lpszLocalAddress)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, nullptr, 0, lpszLocalAddress);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtraAndLocalPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort)
 {
 	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, pExtra, usLocalPort);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtraAndLocalAddressPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort, LPCTSTR lpszLocalAddress)
+{
+	return C_HP_Object::ToSecond<IAgent>(pAgent)->Connect(lpszRemoteAddress, usPort, pdwConnID, pExtra, usLocalPort, lpszLocalAddress);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_Agent_Send(HP_Agent pAgent, HP_CONNID dwConnID, const BYTE* pBuffer, int iLength)
@@ -1248,6 +1274,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pCli
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetKeepAliveInterval();
 }
 
+#ifdef _UDP_SUPPORT
+
 /**********************************************************************************/
 /***************************** UDP Client 属性访问方法 *****************************/
 
@@ -1338,6 +1366,8 @@ HPSOCKET_API BOOL __HP_CALL HP_UdpCast_IsMultiCastLoop(HP_UdpCast pCast)
 {
 	return C_HP_Object::ToSecond<IUdpCast>(pCast)->IsMultiCastLoop();
 }
+
+#endif
 
 /***************************************************************************************/
 /***************************** TCP Pull Server 组件操作方法 *****************************/

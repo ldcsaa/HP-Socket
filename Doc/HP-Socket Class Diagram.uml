@@ -11473,35 +11473,40 @@
 <XPD:ATTR name="DataValue" type="string">True</XPD:ATTR>
 <XPD:REF name="TaggedModel">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 </XPD:OBJ>
-<XPD:ATTR name="#Parameters" type="integer">6</XPD:ATTR>
-<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="M2gRNnU570ehOvH7hJHjvQAA">
+<XPD:ATTR name="#Parameters" type="integer">7</XPD:ATTR>
+<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="feQnTmY+TEqsi0tPJR5vcgAA">
 <XPD:ATTR name="DirectionKind" type="UMLParameterDirectionKind">pdkReturn</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">BOOL</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[1]" type="UMLParameter" guid="NfsFAz6670esNB9xIG8mYQAA">
-<XPD:ATTR name="Name" type="string">pszRemoteAddress</XPD:ATTR>
+<XPD:OBJ name="Parameters[1]" type="UMLParameter" guid="qaTkv/2qhU6i0doe/8YXNwAA">
+<XPD:ATTR name="Name" type="string">lpszRemoteAddress</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">LPCTSTR</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[2]" type="UMLParameter" guid="xekEY3fwFkWZNEB+gsKPHQAA">
+<XPD:OBJ name="Parameters[2]" type="UMLParameter" guid="cgvg8QR94EaxhUPP9K6STQAA">
 <XPD:ATTR name="Name" type="string">usPort</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">USHORT</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[3]" type="UMLParameter" guid="8aqyoYJrSU2aBqkApGQxDAAA">
+<XPD:OBJ name="Parameters[3]" type="UMLParameter" guid="hSaqihoftk+AstCRc4AnFgAA">
 <XPD:ATTR name="Name" type="string">pdwConnID</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 <XPD:REF name="Type_">G8TfQngB3UemVJWZg5KbggAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[4]" type="UMLParameter" guid="nqR8zRIKWEep8AhiGhtMywAA">
+<XPD:OBJ name="Parameters[4]" type="UMLParameter" guid="DILOrix9jUORDxfgU43flQAA">
 <XPD:ATTR name="Name" type="string">pExtra</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">PVOID</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[5]" type="UMLParameter" guid="AYu4Or7KWUSF4BuRb14RWwAA">
+<XPD:OBJ name="Parameters[5]" type="UMLParameter" guid="J5CZ1Bvtu0WyW3wj2gQIgQAA">
 <XPD:ATTR name="Name" type="string">usLocalPort</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">USHORT</XPD:ATTR>
+<XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Parameters[6]" type="UMLParameter" guid="g2R4nOah5ECOTmTOPUUw6QAA">
+<XPD:ATTR name="Name" type="string">lpszLocalAddress</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">LPCTSTR</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">SnDOnAla2Um3FMHR6Ey02AAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
@@ -13135,35 +13140,40 @@
 <XPD:ATTR name="DataValue" type="string">True</XPD:ATTR>
 <XPD:REF name="TaggedModel">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:ATTR name="#Parameters" type="integer">6</XPD:ATTR>
-<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="+a7NqfPsYE6qI/3I4HQi7wAA">
+<XPD:ATTR name="#Parameters" type="integer">7</XPD:ATTR>
+<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="I1IxLLqJzEG+LqFf0FycyAAA">
 <XPD:ATTR name="DirectionKind" type="UMLParameterDirectionKind">pdkReturn</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">BOOL</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[1]" type="UMLParameter" guid="sYqfUiEER0WqYRFr672KAgAA">
+<XPD:OBJ name="Parameters[1]" type="UMLParameter" guid="PRNpcCXh80OcRcn4obNtZwAA">
 <XPD:ATTR name="Name" type="string">pszRemoteAddress</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">LPCTSTR</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[2]" type="UMLParameter" guid="IU0p4fs2Q0+a1ua0LwP7OQAA">
+<XPD:OBJ name="Parameters[2]" type="UMLParameter" guid="fyKlvErn2kGbiKOCfSVwQwAA">
 <XPD:ATTR name="Name" type="string">usPort</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">USHORT</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[3]" type="UMLParameter" guid="H/pUoc8w9Uu5KRIgwbpHcQAA">
+<XPD:OBJ name="Parameters[3]" type="UMLParameter" guid="43w5TCR+zU6LWHKu3q6D1AAA">
 <XPD:ATTR name="Name" type="string">pdwConnID</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 <XPD:REF name="Type_">G8TfQngB3UemVJWZg5KbggAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[4]" type="UMLParameter" guid="1i6dhZoFiUK1THIsLtgUlAAA">
+<XPD:OBJ name="Parameters[4]" type="UMLParameter" guid="1A6vyj7Yt0eG+u52LU7rgQAA">
 <XPD:ATTR name="Name" type="string">pExtra</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">PVOID</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="Parameters[5]" type="UMLParameter" guid="pRlaNyvmL0G2p+f0hXPCgQAA">
+<XPD:OBJ name="Parameters[5]" type="UMLParameter" guid="RkhR8zhTfEWQKwxcMHTf5QAA">
 <XPD:ATTR name="Name" type="string">usLocalPort</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">USHORT</XPD:ATTR>
+<XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Parameters[6]" type="UMLParameter" guid="xirn2R13JUuNeGvvrtSUHwAA">
+<XPD:ATTR name="Name" type="string">lpszLocalAddress</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">LPCTSTR</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">jV8C++Q20k6V5b5C45yvlQAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
@@ -19761,7 +19771,7 @@
 <XPD:ATTR name="DataValue" type="string">ULONG_PTR</XPD:ATTR>
 <XPD:REF name="TaggedModel">G8TfQngB3UemVJWZg5KbggAA</XPD:REF>
 </XPD:OBJ>
-<XPD:ATTR name="#TypedParameters" type="integer">117</XPD:ATTR>
+<XPD:ATTR name="#TypedParameters" type="integer">118</XPD:ATTR>
 <XPD:REF name="TypedParameters[0]">Yum1OlPEt0S5Ak/0O2tPoAAA</XPD:REF>
 <XPD:REF name="TypedParameters[1]">PNCACarP0kqSZchxngLXXAAA</XPD:REF>
 <XPD:REF name="TypedParameters[2]">l9d06eLmGUmt8ehgftXXJQAA</XPD:REF>
@@ -19873,12 +19883,13 @@
 <XPD:REF name="TypedParameters[108]">3j140Dg8PEi6h13EGcoHygAA</XPD:REF>
 <XPD:REF name="TypedParameters[109]">v4Rsq88wJEe9LQXbGtOgTAAA</XPD:REF>
 <XPD:REF name="TypedParameters[110]">7z87doykLUGHDaACYgPncgAA</XPD:REF>
-<XPD:REF name="TypedParameters[111]">8aqyoYJrSU2aBqkApGQxDAAA</XPD:REF>
-<XPD:REF name="TypedParameters[112]">H/pUoc8w9Uu5KRIgwbpHcQAA</XPD:REF>
-<XPD:REF name="TypedParameters[113]">sMf5HkYlKEu5QyndPkpbjgAA</XPD:REF>
-<XPD:REF name="TypedParameters[114]">FxpIRg0pxEWRZNe8PgdpCgAA</XPD:REF>
-<XPD:REF name="TypedParameters[115]">/l9ruUkS/UOFX+UwwRjw9wAA</XPD:REF>
-<XPD:REF name="TypedParameters[116]">5ZA1UTQzyEqFesJKnJR8MwAA</XPD:REF>
+<XPD:REF name="TypedParameters[111]" pathname="pdwConnID">H/pUoc8w9Uu5KRIgwbpHcQAA</XPD:REF>
+<XPD:REF name="TypedParameters[112]">sMf5HkYlKEu5QyndPkpbjgAA</XPD:REF>
+<XPD:REF name="TypedParameters[113]">FxpIRg0pxEWRZNe8PgdpCgAA</XPD:REF>
+<XPD:REF name="TypedParameters[114]">/l9ruUkS/UOFX+UwwRjw9wAA</XPD:REF>
+<XPD:REF name="TypedParameters[115]">5ZA1UTQzyEqFesJKnJR8MwAA</XPD:REF>
+<XPD:REF name="TypedParameters[116]">hSaqihoftk+AstCRc4AnFgAA</XPD:REF>
+<XPD:REF name="TypedParameters[117]">43w5TCR+zU6LWHKu3q6D1AAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[52]" type="UMLGeneralization" guid="sCzG9DqxZkGTaKemcfKYcAAA">
 <XPD:REF name="Namespace">jvfBmo6uGkC61ckI99TMgAAA</XPD:REF>

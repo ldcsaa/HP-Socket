@@ -153,7 +153,7 @@ public:
 
 public:
 	
-		/*
+	/*
 	* 名称：清理线程局部环境 SSL 资源
 	* 描述：任何一个操作 SSL 的线程，在通信结束时都需要清理线程局部环境 SSL 资源
 	*		1、主线程和 HP-Socket 工作线程在通信结束时会自动清理线程局部环境 SSL 资源。因此，一般情况下不必手工调用本方法
@@ -164,8 +164,6 @@ public:
 	* 返回值：无
 	*/
 	static void RemoveThreadLocalState(DWORD dwThreadID = 0)	{CSSLInitializer::CleanupThreadState(dwThreadID);}
-
-
 
 public:
 

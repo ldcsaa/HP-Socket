@@ -369,6 +369,8 @@ public:
 
 };
 
+#ifdef _UDP_SUPPORT
+
 /************************************************************************
 名称：UDP 通信服务端组件接口
 描述：定义 UDP 通信服务端组件的所有操作方法和属性访问方法
@@ -405,6 +407,8 @@ public:
 	virtual DWORD GetDetectInterval		()							= 0;
 };
 
+#endif
+
 /************************************************************************
 名称：通信代理组件接口
 描述：定义通信代理组件的所有操作方法和属性访问方法，代理组件本质是一个同时连接多个服务器的客户端组件
@@ -436,10 +440,11 @@ public:
 	*			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
 	*			pExtra				-- 连接附加数据（默认：nullptr）
 	*			usLocalPort			-- 本地端口（默认：0）
+	*			lpszLocalAddress	-- 本地地址（默认：nullptr，使用 Start() 方法中绑定的地址）
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
-	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0)	= 0;
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0, LPCTSTR lpszLocalAddress = nullptr)	= 0;
 
 
 public:
@@ -756,6 +761,8 @@ public:
 
 };
 
+#ifdef _UDP_SUPPORT
+
 /************************************************************************
 名称：UDP 通信客户端组件接口
 描述：定义 UDP 通信客户端组件的所有操作方法和属性访问方法
@@ -831,6 +838,8 @@ public:
 	/* 获取当前数据报的远程地址信息（通常在 OnReceive 事件中调用） */
 	virtual BOOL GetRemoteAddress	(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 };
+
+#endif
 
 /************************************************************************
 名称：双接口模版类
@@ -1171,6 +1180,8 @@ public:
 	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	override {return HR_IGNORE;}
 };
 
+#ifdef _UDP_SUPPORT
+
 /************************************************************************
 名称：UDP 服务端 Socket 监听器接口
 描述：定义 UDP 服务端 Socket 监听器的所有事件
@@ -1195,6 +1206,8 @@ public:
 	virtual EnHandleResult OnSend(IUdpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	override {return HR_IGNORE;}
 	virtual EnHandleResult OnShutdown(IUdpServer* pSender)												override {return HR_IGNORE;}
 };
+
+#endif
 
 /************************************************************************
 名称：通信代理 Socket 监听器接口
@@ -1336,6 +1349,8 @@ public:
 	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)	{return HR_IGNORE;}
 };
 
+#ifdef _UDP_SUPPORT
+
 /************************************************************************
 名称：UDP 客户端 Socket 监听器接口
 描述：定义 UDP 客户端 Socket 监听器的所有事件
@@ -1383,6 +1398,8 @@ public:
 	virtual EnHandleResult OnReceive(IUdpCast* pSender, CONNID dwConnID, int iLength)						override {return HR_IGNORE;}
 	virtual EnHandleResult OnSend(IUdpCast* pSender, CONNID dwConnID, const BYTE* pData, int iLength)		override {return HR_IGNORE;}
 };
+
+#endif
 
 /*****************************************************************************************************************************************************/
 /****************************************************************** HTTP Interfaces ******************************************************************/

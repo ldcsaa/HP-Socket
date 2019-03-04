@@ -26,6 +26,8 @@
 #include "SocketHelper.h"
 #include "./common/GeneralHelper.h"
 
+#ifdef _UDP_SUPPORT
+
 class CUdpCast : public IUdpCast
 {
 public:
@@ -214,3 +216,5 @@ private:
 
 	CThread<CUdpCast, VOID, UINT> m_thWorker;
 };
+
+#endif

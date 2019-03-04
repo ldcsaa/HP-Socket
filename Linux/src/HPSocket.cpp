@@ -91,21 +91,6 @@ HPSOCKET_API ITcpPackClient* HP_Create_TcpPackClient(ITcpClientListener* pListen
 	return (ITcpPackClient*)(new CTcpPackClient(pListener));
 }
 
-HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener)
-{
-	return new CUdpServer(pListener);
-}
-
-HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener)
-{
-	return new CUdpClient(pListener);
-}
-
-HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener)
-{
-	return new CUdpCast(pListener);
-}
-
 HPSOCKET_API void HP_Destroy_TcpServer(ITcpServer* pServer)
 {
 	delete pServer;
@@ -151,6 +136,23 @@ HPSOCKET_API void HP_Destroy_TcpPackClient(ITcpPackClient* pClient)
 	delete pClient;
 }
 
+#ifdef _UDP_SUPPORT
+
+HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener)
+{
+	return new CUdpServer(pListener);
+}
+
+HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener)
+{
+	return new CUdpClient(pListener);
+}
+
+HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener)
+{
+	return new CUdpCast(pListener);
+}
+
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer)
 {
 	delete pServer;
@@ -165,6 +167,8 @@ HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast)
 {
 	delete pCast;
 }
+
+#endif
 
 /*****************************************************************************************************************************************************/
 /*************************************************************** Global Function Exports *************************************************************/

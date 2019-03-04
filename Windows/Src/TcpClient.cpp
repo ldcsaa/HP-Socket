@@ -141,7 +141,7 @@ BOOL CTcpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addrRemote))
 		return FALSE;
 
-	if(lpszBindAddress && lpszBindAddress[0] != 0)
+	if(::IsStrNotEmpty(lpszBindAddress))
 	{
 		if(!::sockaddr_A_2_IN(lpszBindAddress, 0, addrBind))
 			return FALSE;
@@ -237,12 +237,12 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 	BOOL bCallStop		= TRUE;
 	CTcpClient* pClient	= (CTcpClient*)pv;
 	HANDLE hEvents[]	= {pClient->m_evSocket, pClient->m_evBuffer, pClient->m_evWorker, pClient->m_evUnpause};
-
+	
 	pClient->m_rcBuffer.Malloc(pClient->m_dwSocketBufferSize);
 
 	while(pClient->HasStarted())
 	{
-		DWORD retval = ::WSAWaitForMultipleEvents(3, hEvents, FALSE, WSA_INFINITE, FALSE);
+		DWORD retval = ::WSAWaitForMultipleEvents(ARRAY_SIZE(hEvents), hEvents, FALSE, WSA_INFINITE, FALSE);
 
 		if(retval == WSA_WAIT_EVENT_0)
 		{

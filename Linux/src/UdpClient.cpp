@@ -23,6 +23,8 @@
  
 #include "UdpClient.h"
 
+#ifdef _UDP_SUPPORT
+
 BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
 	if(!CheckParams() || !CheckStarting())
@@ -70,11 +72,11 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 BOOL CUdpClient::CheckParams()
 {
-	if	(((int)m_dwMaxDatagramSize > 0)		&&
-		((int)m_dwFreeBufferPoolSize >= 0)	&&
-		((int)m_dwFreeBufferPoolHold >= 0)	&&
-		((int)m_dwDetectAttempts >= 0)		&&
-		((int)m_dwDetectInterval >= 0)		)
+	if	(((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)	&&
+		((int)m_dwFreeBufferPoolSize >= 0)														&&
+		((int)m_dwFreeBufferPoolHold >= 0)														&&
+		((int)m_dwDetectAttempts >= 0)															&&
+		((int)m_dwDetectInterval >= 0)															)
 		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -288,7 +290,8 @@ UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 	TRACE("---------------> Client Worker Thread 0x%08X started <---------------", SELF_THREAD_ID);
 
 	BOOL bCallStop	= TRUE;
-	int size		= IsNeedDetect() ? 5 : 4;
+	BOOL bDetect	= IsNeedDetect();
+	int size		= bDetect ? 5 : 4;
 	pollfd* pfds	= CreateLocalObjects(pollfd, size);
 
 	pfds[0] = {m_soClient, m_nEvents};
@@ -296,7 +299,7 @@ UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 	pfds[2] = {m_evRecv.GetFD(), POLLIN};
 	pfds[3] = {m_evStop.GetFD(), POLLIN};
 
-	if(IsNeedDetect())
+	if(bDetect)
 	{
 		m_evDetect.Set(m_dwDetectInterval * 1000, m_dwDetectInterval * 1000);
 		pfds[4] = {m_evDetect.GetFD(), POLLIN};
@@ -642,10 +645,9 @@ BOOL CUdpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 	if(!IsConnected())
 		return ERROR_INVALID_STATE;
 
-	int result = NO_ERROR;
-
-	int iLength = 0;
-	int iMaxLen = (int)m_dwMaxDatagramSize;
+	int result	= NO_ERROR;
+	int iLength	= 0;
+	int iMaxLen	= (int)m_dwMaxDatagramSize;
 
 	TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
 
@@ -746,3 +748,5 @@ BOOL CUdpClient::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 
 	return !m_strHost.IsEmpty();
 }
+
+#endif

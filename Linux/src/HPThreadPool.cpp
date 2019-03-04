@@ -140,9 +140,10 @@ BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 
 		if(!m_stThreads.empty())
 		{
+#if !defined(__ANDROID__)
 			for(auto it = m_stThreads.begin(), end = m_stThreads.end(); it != end; ++it)
 				pthread_cancel(*it);
-
+#endif
 			m_stThreads.clear();
 
 			::SetLastError(ERROR_CANCELLED);

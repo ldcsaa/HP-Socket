@@ -25,7 +25,7 @@
 #include "UdpClient.h"
 #include "../Common/Src/WaitFor.h"
 
-#include <process.h>
+#ifdef _UDP_SUPPORT
 
 const CInitSocket CUdpClient::sm_wsSocket;
 
@@ -79,11 +79,11 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 BOOL CUdpClient::CheckParams()
 {
-	if	(((int)m_dwMaxDatagramSize > 0)		&&
-		((int)m_dwFreeBufferPoolSize >= 0)	&&
-		((int)m_dwFreeBufferPoolHold >= 0)	&&
-		((int)m_dwDetectAttempts >= 0)		&&
-		((int)m_dwDetectInterval >= 0)		)
+	if	(((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)	&&
+		((int)m_dwFreeBufferPoolSize >= 0)														&&
+		((int)m_dwFreeBufferPoolHold >= 0)														&&
+		((int)m_dwDetectAttempts >= 0)															&&
+		((int)m_dwDetectInterval >= 0)															)
 		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -240,21 +240,32 @@ UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 
 	BOOL bCallStop		= TRUE;
 	CUdpClient* pClient	= (CUdpClient*)pv;
-	HANDLE hEvents[]	= {pClient->m_evSocket, pClient->m_evBuffer, pClient->m_evWorker, pClient->m_evUnpause};
-	DWORD dwWaitTime	= pClient->IsNeedDetect() ? pClient->m_dwDetectInterval * 1000L : WSA_INFINITE;
+	BOOL bDetect		= pClient->IsNeedDetect();
+	DWORD dwSize		= bDetect ? 5 : 4;
+
+	HANDLE* hEvents	= CreateLocalObjects(HANDLE, dwSize);
+
+	hEvents[0] = pClient->m_evSocket;
+	hEvents[1] = pClient->m_evBuffer;
+	hEvents[2] = pClient->m_evWorker;
+	hEvents[3] = pClient->m_evUnpause;
+
+	unique_ptr<CTimmerEvt> evDetectPtr;
+
+	if(bDetect)
+	{
+		evDetectPtr.reset(new CTimmerEvt());
+		evDetectPtr->Set(pClient->m_dwDetectInterval * 1000);
+		hEvents[4] = evDetectPtr->GetHandle();
+	}
 
 	pClient->m_rcBuffer.Malloc(pClient->m_dwMaxDatagramSize);
 
 	while(pClient->HasStarted())
 	{
-		DWORD retval = ::WSAWaitForMultipleEvents(3, hEvents, FALSE, dwWaitTime, FALSE);
+		DWORD retval = ::WSAWaitForMultipleEvents(dwSize, hEvents, FALSE, WSA_INFINITE, FALSE);
 
-		if(retval == WSA_WAIT_TIMEOUT)
-		{
-			if(!pClient->CheckConnection())
-				break;
-		}
-		else if(retval == WSA_WAIT_EVENT_0)
+		if(retval == WSA_WAIT_EVENT_0)
 		{
 			if(!pClient->ProcessNetworkEvent())
 				break;
@@ -272,6 +283,11 @@ UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 		else if(retval == WSA_WAIT_EVENT_0 + 3)
 		{
 			if(!pClient->ReadData())
+				break;
+		}
+		else if(retval == WSA_WAIT_EVENT_0 + 4)
+		{
+			if(!pClient->CheckConnection())
 				break;
 		}
 		else if(retval == WSA_WAIT_FAILED)
@@ -654,14 +670,23 @@ void CUdpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
 
 BOOL CUdpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 {
-	int result = NO_ERROR;
-
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
+
+	int result = NO_ERROR;
 
 	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
 	{
-		if(iOffset != 0) pBuffer += iOffset;
-		result = SendInternal(pBuffer, iLength);
+		if(IsConnected())
+		{
+			if(iOffset != 0) pBuffer += iOffset;
+
+			TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
+			itPtr->Cat(pBuffer, iLength);
+
+			result = SendInternal(itPtr);
+		}
+		else
+			result = ERROR_INVALID_STATE;
 	}
 	else
 		result = ERROR_INVALID_PARAMETER;
@@ -674,42 +699,41 @@ BOOL CUdpClient::Send(const BYTE* pBuffer, int iLength, int iOffset)
 
 BOOL CUdpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 {
-	int result = NO_ERROR;
-
 	ASSERT(pBuffers && iCount > 0);
 
-	if(pBuffers && iCount > 0)
+	if(!pBuffers || iCount <= 0)
+		return ERROR_INVALID_PARAMETER;
+	if(!IsConnected())
+		return ERROR_INVALID_STATE;
+
+	int result	= NO_ERROR;
+	int iLength	= 0;
+	int iMaxLen	= (int)m_dwMaxDatagramSize;
+
+	TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
+
+	for(int i = 0; i < iCount; i++)
 	{
-		int iLength = 0;
-		int iMaxLen = (int)m_dwMaxDatagramSize;
+		int iBufLen = pBuffers[i].len;
 
-		TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
-
-		for(int i = 0; i < iCount; i++)
+		if(iBufLen > 0)
 		{
-			int iBufLen = pBuffers[i].len;
+			BYTE* pBuffer = (BYTE*)pBuffers[i].buf;
+			ASSERT(pBuffer);
 
-			if(iBufLen > 0)
-			{
-				BYTE* pBuffer = (BYTE*)pBuffers[i].buf;
-				ASSERT(pBuffer);
+			iLength += iBufLen;
 
-				iLength += iBufLen;
-
-				if(iLength <= iMaxLen)
-					itPtr->Cat(pBuffer, iBufLen);
-				else
-					break;
-			}
+			if(iLength <= iMaxLen)
+				itPtr->Cat(pBuffer, iBufLen);
+			else
+				break;
 		}
-
-		if(iLength > 0 && iLength <= iMaxLen)
-			result = SendInternal(itPtr->Ptr(), iLength);
-		else
-			result = ERROR_INCORRECT_SIZE;
 	}
+
+	if(iLength > 0 && iLength <= iMaxLen)
+		result = SendInternal(itPtr);
 	else
-		result = ERROR_INVALID_PARAMETER;
+		result = ERROR_INCORRECT_SIZE;
 
 	if(result != NO_ERROR)
 		::SetLastError(result);
@@ -717,35 +741,20 @@ BOOL CUdpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 	return (result == NO_ERROR);
 }
 
-int CUdpClient::SendInternal(const BYTE* pBuffer, int iLength)
+int CUdpClient::SendInternal(TItemPtr& itPtr)
 {
-	int result = NO_ERROR;
+	CCriSecLock locallock(m_csSend);
 
-	if(IsConnected())
-	{
-		CCriSecLock locallock(m_csSend);
+	if(!IsConnected())
+		return ERROR_INVALID_STATE;
 
-		if(IsConnected())
-		{
-			ASSERT(m_iPending >= 0);
+	BOOL isPending = !m_lsSend.IsEmpty();
 
-			BOOL isPending = m_iPending > 0;
+	m_lsSend.PushBack(itPtr.Detach());
 
-			TItem* pItem = m_itPool.PickFreeItem();
-			pItem->Cat(pBuffer, iLength);
-			m_lsSend.PushBack(pItem);
+	if(!isPending) m_evBuffer.Set();
 
-			m_iPending += iLength;
-
-			if(!isPending) m_evBuffer.Set();
-		}
-		else
-			result = ERROR_INVALID_STATE;
-	}
-	else
-		result = ERROR_INVALID_STATE;
-
-	return result;
+	return NO_ERROR;
 }
 
 void CUdpClient::SetLastError(EnSocketError code, LPCSTR func, int ec)
@@ -801,3 +810,5 @@ BOOL CUdpClient::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 
 	return !m_strHost.IsEmpty();
 }
+
+#endif

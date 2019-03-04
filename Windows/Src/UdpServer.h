@@ -30,6 +30,8 @@
 #include "../Common/Src/RingBuffer.h"
 #include "../Common/Src/PrivateHeap.h"
 
+#ifdef _UDP_SUPPORT
+
 class CUdpServer : public IUdpServer
 {
 public:
@@ -143,7 +145,7 @@ protected:
 
 private:
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
-	static UINT WINAPI DetecotrThreadProc(LPVOID pv);
+	static void WINAPI DetectConnectionProc(LPVOID pv, BOOLEAN bTimerFired);
 
 private:
 	BOOL CheckStarting();
@@ -151,7 +153,6 @@ private:
 	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort);
 	BOOL CreateCompletePort();
 	BOOL CreateWorkerThreads();
-	BOOL CreateDetectorThread();
 	BOOL StartAccept();
 
 	void CloseListenSocket();
@@ -162,7 +163,6 @@ private:
 	void ReleaseFreeSocket();
 	void ReleaseFreeBuffer();
 	void WaitForWorkerThreadEnd();
-	void WaitForDetectorThreadEnd();
 	void CloseCompletePort();
 
 	TUdpBufferObj*	GetFreeBufferObj(int iLen = -1);
@@ -192,11 +192,11 @@ private:
 	void HandleSend		(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 	void HandleReceive	(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 
-	int SendInternal(CONNID dwConnID, const BYTE* pBuffer, int iLength);
-	int SendPack	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int SendSafe	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int SendDirect	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int CatAndPost	(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendInternal(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
+	int SendPack	(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
+	int SendSafe	(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
+	int CatAndPost	(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
+	int SendDirect	(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
 
 	int DoReceive	(TUdpBufferObj* pBufferObj);
 
@@ -206,9 +206,8 @@ private:
 	int DoSendSafe	(TUdpSocketObj* pSocketObj);
 	int SendItem	(TUdpSocketObj* pSocketObj);
 
-	void DetectConnections	();
-	BOOL SendDetectPackage	(CONNID dwConnID, TUdpSocketObj* pSocketObj);
-	BOOL NeedDetectorThread	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
+	BOOL SendDetectPackage		(CONNID dwConnID, TUdpSocketObj* pSocketObj);
+	BOOL IsNeedDetectConnection	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
 
 public:
 	CUdpServer(IUdpServerListener* pListener)
@@ -219,7 +218,6 @@ public:
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
 	, m_usFamily				(AF_UNSPEC)
-	, m_hDetector				(nullptr)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_NONE)
 	, m_dwMaxConnectionCount	(DEFAULT_MAX_CONNECTION_COUNT)
@@ -272,7 +270,6 @@ private:
 	EnServiceState			m_enState;
 	EnSocketError			m_enLastError;
 
-	HANDLE					m_hDetector;
 	vector<HANDLE>			m_vtWorkerThreads;
 
 	CPrivateHeap			m_phSocket;
@@ -281,7 +278,8 @@ private:
 	CSpinGuard				m_csState;
 
 	CCriSec					m_csAccept;
-	CEvt					m_evDetector;
+
+	CTimerQueue				m_qeTimer;
 
 	TUdpSocketObjPtrPool	m_bfActiveSockets;
 
@@ -293,3 +291,5 @@ private:
 
 	volatile long			m_iRemainPostReceives;
 };
+
+#endif

@@ -197,7 +197,7 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 {
 	BOOL isOK = FALSE;
 
-	if(!lpszBindAddress || lpszBindAddress[0] == 0)
+	if(::IsStrEmpty(lpszBindAddress))
 		lpszBindAddress = DEFAULT_IPV4_BIND_ADDRESS;
 
 	HP_SOCKADDR addr;
@@ -1322,6 +1322,19 @@ int CTcpServer::SendSafe(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLengt
 	return CatAndPost(pSocketObj, pBuffer, iLength);
 }
 
+int CTcpServer::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
+{
+	int result = NO_ERROR;
+
+	pSocketObj->sndBuff.Cat(pBuffer, iLength);
+	pSocketObj->pending += iLength;
+
+	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
+		result = ::GetLastError();
+
+	return result;
+}
+
 int CTcpServer::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
 	int result	= NO_ERROR;
@@ -1353,19 +1366,6 @@ int CTcpServer::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLen
 		iRemain -= iBufferSize;
 		pBuffer += iBufferSize;
 	}
-
-	return result;
-}
-
-int CTcpServer::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
-{
-	int result = NO_ERROR;
-
-	pSocketObj->sndBuff.Cat(pBuffer, iLength);
-	pSocketObj->pending += iLength;
-
-	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
-		result = ::GetLastError();
 
 	return result;
 }

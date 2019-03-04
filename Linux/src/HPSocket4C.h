@@ -181,12 +181,6 @@ HPSOCKET_API HP_TcpPackServer __HP_CALL Create_HP_TcpPackServer(HP_TcpServerList
 HPSOCKET_API HP_TcpPackAgent __HP_CALL Create_HP_TcpPackAgent(HP_TcpAgentListener pListener);
 // 创建 HP_TcpPackClient 对象
 HPSOCKET_API HP_TcpPackClient __HP_CALL Create_HP_TcpPackClient(HP_TcpClientListener pListener);
-// 创建 HP_UdpServer 对象
-HPSOCKET_API HP_UdpServer __HP_CALL Create_HP_UdpServer(HP_UdpServerListener pListener);
-// 创建 HP_UdpClient 对象
-HPSOCKET_API HP_UdpClient __HP_CALL Create_HP_UdpClient(HP_UdpClientListener pListener);
-// 创建 HP_UdpCast 对象
-HPSOCKET_API HP_UdpCast __HP_CALL Create_HP_UdpCast(HP_UdpCastListener pListener);
 
 // 销毁 HP_TcpServer 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpServer(HP_TcpServer pServer);
@@ -206,12 +200,6 @@ HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackServer(HP_TcpPackServer pServer);
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackAgent(HP_TcpPackAgent pAgent);
 // 销毁 HP_TcpPackClient 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackClient(HP_TcpPackClient pClient);
-// 销毁 HP_UdpServer 对象
-HPSOCKET_API void __HP_CALL Destroy_HP_UdpServer(HP_UdpServer pServer);
-// 销毁 HP_UdpClient 对象
-HPSOCKET_API void __HP_CALL Destroy_HP_UdpClient(HP_UdpClient pClient);
-// 销毁 HP_UdpCast 对象
-HPSOCKET_API void __HP_CALL Destroy_HP_UdpCast(HP_UdpCast pCast);
 
 // 创建 HP_TcpServerListener 对象
 HPSOCKET_API HP_TcpServerListener __HP_CALL Create_HP_TcpServerListener();
@@ -231,12 +219,6 @@ HPSOCKET_API HP_TcpPackServerListener __HP_CALL Create_HP_TcpPackServerListener(
 HPSOCKET_API HP_TcpPackAgentListener __HP_CALL Create_HP_TcpPackAgentListener();
 // 创建 HP_TcpPackClientListener 对象
 HPSOCKET_API HP_TcpPackClientListener __HP_CALL Create_HP_TcpPackClientListener();
-// 创建 HP_UdpServerListener 对象
-HPSOCKET_API HP_UdpServerListener __HP_CALL Create_HP_UdpServerListener();
-// 创建 HP_UdpClientListener 对象
-HPSOCKET_API HP_UdpClientListener __HP_CALL Create_HP_UdpClientListener();
-// 创建 HP_UdpCastListener 对象
-HPSOCKET_API HP_UdpCastListener __HP_CALL Create_HP_UdpCastListener();
 
 // 销毁 HP_TcpServerListener 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpServerListener(HP_TcpServerListener pListener);
@@ -256,12 +238,38 @@ HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackServerListener(HP_TcpPackServerLis
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackAgentListener(HP_TcpPackAgentListener pListener);
 // 销毁 HP_TcpPackClientListener 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_TcpPackClientListener(HP_TcpPackClientListener pListener);
+
+#ifdef _UDP_SUPPORT
+
+// 创建 HP_UdpServer 对象
+HPSOCKET_API HP_UdpServer __HP_CALL Create_HP_UdpServer(HP_UdpServerListener pListener);
+// 创建 HP_UdpClient 对象
+HPSOCKET_API HP_UdpClient __HP_CALL Create_HP_UdpClient(HP_UdpClientListener pListener);
+// 创建 HP_UdpCast 对象
+HPSOCKET_API HP_UdpCast __HP_CALL Create_HP_UdpCast(HP_UdpCastListener pListener);
+
+// 销毁 HP_UdpServer 对象
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpServer(HP_UdpServer pServer);
+// 销毁 HP_UdpClient 对象
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpClient(HP_UdpClient pClient);
+// 销毁 HP_UdpCast 对象
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpCast(HP_UdpCast pCast);
+
+// 创建 HP_UdpServerListener 对象
+HPSOCKET_API HP_UdpServerListener __HP_CALL Create_HP_UdpServerListener();
+// 创建 HP_UdpClientListener 对象
+HPSOCKET_API HP_UdpClientListener __HP_CALL Create_HP_UdpClientListener();
+// 创建 HP_UdpCastListener 对象
+HPSOCKET_API HP_UdpCastListener __HP_CALL Create_HP_UdpCastListener();
+
 // 销毁 HP_UdpServerListener 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpServerListener(HP_UdpServerListener pListener);
 // 销毁 HP_UdpClientListener 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpClientListener(HP_UdpClientListener pListener);
 // 销毁 HP_UdpCastListener 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpCastListener(HP_UdpCastListener pListener);
+
+#endif
 
 /**********************************************************************************/
 /***************************** Server 回调函数设置方法 *****************************/
@@ -544,6 +552,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveTime(HP_TcpServer pServer)
 /* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveInterval(HP_TcpServer pServer);
 
+#ifdef _UDP_SUPPORT
+
 /**********************************************************************************/
 /***************************** UDP Server 属性访问方法 *****************************/
 
@@ -565,6 +575,8 @@ HPSOCKET_API void __HP_CALL HP_UdpServer_SetDetectInterval(HP_UdpServer pServer,
 HPSOCKET_API DWORD __HP_CALL HP_UdpServer_GetDetectAttempts(HP_UdpServer pServer);
 /* 获取心跳检查间隔 */
 HPSOCKET_API DWORD __HP_CALL HP_UdpServer_GetDetectInterval(HP_UdpServer pServer);
+
+#endif
 
 /**************************************************************************/
 /***************************** Agent 操作方法 *****************************/
@@ -631,6 +643,19 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalPort(HP_Agent pAgent, LPCTS
 /*
 * 名称：连接服务器
 * 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
+*		
+* 参数：		lpszRemoteAddress	-- 服务端地址
+*			usPort				-- 服务端端口
+*			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
+*			lpszLocalAddress	-- 本地地址（默认：nullptr，使用 Start() 方法中绑定的地址）
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
+*/
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalAddress(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, LPCTSTR lpszLocalAddress);
+
+/*
+* 名称：连接服务器
+* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
 *
 * 参数：		lpszRemoteAddress	-- 服务端地址
 *			usPort				-- 服务端端口
@@ -641,6 +666,21 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithLocalPort(HP_Agent pAgent, LPCTS
 *			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
 */
 HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtraAndLocalPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort);
+
+/* 
+* 名称：连接服务器
+* 描述：连接服务器，连接成功后 IAgentListener 会接收到 OnConnect() / OnHandShake() 事件
+*		
+* 参数：		lpszRemoteAddress	-- 服务端地址
+*			usPort				-- 服务端端口
+*			pdwConnID			-- 连接 ID（默认：nullptr，不获取连接 ID）
+*			pExtra				-- 连接附加数据（默认：nullptr）
+*			usLocalPort			-- 本地端口（默认：0）
+*			lpszLocalAddress	-- 本地地址（默认：nullptr，使用 Start() 方法中绑定的地址）
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过函数 SYS_GetLastError() 获取 Windows 错误代码
+*/
+HPSOCKET_API BOOL __HP_CALL HP_Agent_ConnectWithExtraAndLocalAddressPort(HP_Agent pAgent, LPCTSTR lpszRemoteAddress, USHORT usPort, HP_CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort, LPCTSTR lpszLocalAddress);
 
 /*
 * 名称：发送数据
@@ -1030,6 +1070,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient)
 /* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient);
 
+#ifdef _UDP_SUPPORT
+
 /**********************************************************************************/
 /***************************** UDP Client 属性访问方法 *****************************/
 
@@ -1072,6 +1114,8 @@ HPSOCKET_API int __HP_CALL HP_UdpCast_GetMultiCastTtl(HP_UdpCast pCast);
 HPSOCKET_API void __HP_CALL HP_UdpCast_SetMultiCastLoop(HP_UdpCast pCast, BOOL bMCLoop);
 /* 检测是否启用组播环路 */
 HPSOCKET_API BOOL __HP_CALL HP_UdpCast_IsMultiCastLoop(HP_UdpCast pCast);
+
+#endif
 
 /***************************************************************************************/
 /***************************** TCP Pull Server 组件操作方法 *****************************/

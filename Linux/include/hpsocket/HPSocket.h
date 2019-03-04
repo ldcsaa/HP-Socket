@@ -169,12 +169,6 @@ HPSOCKET_API ITcpPackServer* HP_Create_TcpPackServer(ITcpServerListener* pListen
 HPSOCKET_API ITcpPackAgent* HP_Create_TcpPackAgent(ITcpAgentListener* pListener);
 // 创建 ITcpPackClient 对象
 HPSOCKET_API ITcpPackClient* HP_Create_TcpPackClient(ITcpClientListener* pListener);
-// 创建 IUdpServer 对象
-HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
-// 创建 IUdpClient 对象
-HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener);
-// 创建 IUdpCast 对象
-HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener);
 
 // 销毁 ITcpServer 对象
 HPSOCKET_API void HP_Destroy_TcpServer(ITcpServer* pServer);
@@ -194,12 +188,24 @@ HPSOCKET_API void HP_Destroy_TcpPackServer(ITcpPackServer* pServer);
 HPSOCKET_API void HP_Destroy_TcpPackAgent(ITcpPackAgent* pAgent);
 // 销毁 ITcpPackClient 对象
 HPSOCKET_API void HP_Destroy_TcpPackClient(ITcpPackClient* pClient);
+
+#ifdef _UDP_SUPPORT
+
+// 创建 IUdpServer 对象
+HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
+// 创建 IUdpClient 对象
+HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener);
+// 创建 IUdpCast 对象
+HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener);
+
 // 销毁 IUdpServer 对象
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
 // 销毁 IUdpClient 对象
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient);
 // 销毁 IUdpCast 对象
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast);
+
+#endif
 
 // ITcpServer 对象创建器
 struct TcpServer_Creator
@@ -327,6 +333,27 @@ struct TcpPackClient_Creator
 	}
 };
 
+// ITcpServer 对象智能指针
+typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
+// ITcpAgent 对象智能指针
+typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
+// ITcpClient 对象智能指针
+typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
+// ITcpPullServer 对象智能指针
+typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
+// ITcpPullAgent 对象智能指针
+typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
+// ITcpPullClient 对象智能指针
+typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
+// ITcpPackServer 对象智能指针
+typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, TcpPackServer_Creator>	CTcpPackServerPtr;
+// ITcpPackAgent 对象智能指针
+typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, TcpPackAgent_Creator>	CTcpPackAgentPtr;
+// ITcpPackClient 对象智能指针
+typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, TcpPackClient_Creator>	CTcpPackClientPtr;
+
+#ifdef _UDP_SUPPORT
+
 // IUdpServer 对象创建器
 struct UdpServer_Creator
 {
@@ -369,30 +396,14 @@ struct UdpCast_Creator
 	}
 };
 
-// ITcpServer 对象智能指针
-typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
-// ITcpAgent 对象智能指针
-typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
-// ITcpClient 对象智能指针
-typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
-// ITcpPullServer 对象智能指针
-typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
-// ITcpPullAgent 对象智能指针
-typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
-// ITcpPullClient 对象智能指针
-typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
-// ITcpPackServer 对象智能指针
-typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, TcpPackServer_Creator>	CTcpPackServerPtr;
-// ITcpPackAgent 对象智能指针
-typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, TcpPackAgent_Creator>	CTcpPackAgentPtr;
-// ITcpPackClient 对象智能指针
-typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, TcpPackClient_Creator>	CTcpPackClientPtr;
 // IUdpServer 对象智能指针
 typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
 // IUdpClient 对象智能指针
 typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
 // IUdpCast 对象智能指针
 typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
+
+#endif
 
 /*****************************************************************************************************************************************************/
 /*************************************************************** Global Function Exports *************************************************************/

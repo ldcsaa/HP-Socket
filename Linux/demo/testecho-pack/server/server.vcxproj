@@ -177,7 +177,7 @@
       <PreprocessorDefinitions>_ZLIB_DISABLED</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
+      <LibraryDependencies>rt;pthread;dl</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -204,7 +204,7 @@
       <PreprocessorDefinitions>_ZLIB_DISABLED</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
+      <LibraryDependencies>rt;pthread;dl</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -231,7 +231,7 @@
       <PreprocessorDefinitions>_ZLIB_DISABLED</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
+      <LibraryDependencies>rt;pthread;dl</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

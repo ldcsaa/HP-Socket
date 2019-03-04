@@ -170,6 +170,7 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 #define RS_FAIL					HAS_ERROR
 #define RS_TIMEOUT				TIMEOUT
 #define INVALID_FD				-1
+#define INVALID_HANDLE_VALUE	INVALID_FD
 #define INVALID_PVOID			((PVOID)-1)
 #define _MAX_PATH				256
 #define MAX_PATH				_MAX_PATH

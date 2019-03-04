@@ -295,7 +295,7 @@ UINT WINAPI CTcpClient::WorkerThreadProc(LPVOID pv)
 						{m_evSend.GetFD(), POLLIN}, 
 						{m_evRecv.GetFD(), POLLIN}, 
 						{m_evStop.GetFD(), POLLIN}	};
-	int size		= (int)(sizeof(pfds) / sizeof(pfds[0]));
+	int size		= ARRAY_SIZE(pfds);
 
 	m_rcBuffer.Malloc(m_dwSocketBufferSize);
 

@@ -26,12 +26,20 @@
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR		5	// 主版本号
 #define HP_VERSION_MINOR		4	// 子版本号
-#define HP_VERSION_REVISE		3	// 修正版本号
+#define HP_VERSION_REVISE		4	// 修正版本号
 #define HP_VERSION_BUILD		1	// 构建编号
 
+//#define _UDP_DISABLED				// 禁用 UDP
 //#define _SSL_DISABLED				// 禁用 SSL
 //#define _HTTP_DISABLED			// 禁用 HTTP
 //#define _ZLIB_DISABLED			// 禁用 ZLIB
+
+/* 是否启用 UDP，如果定义了 _UDP_DISABLED 则禁用（默认：启用） */
+#if !defined(_UDP_DISABLED)
+	#ifndef _UDP_SUPPORT
+		#define _UDP_SUPPORT
+	#endif
+#endif
 
 /* 是否启用 SSL，如果定义了 _SSL_DISABLED 则禁用（默认：启用） */
 #if !defined(_SSL_DISABLED)

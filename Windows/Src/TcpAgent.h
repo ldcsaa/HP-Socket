@@ -34,7 +34,7 @@ class CTcpAgent : public ITcpAgent
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
 	virtual BOOL Stop	();
-	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0);
+	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0, LPCTSTR lpszLocalAddress = nullptr);
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendSmallFile	(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	{return DoSendPackets(dwConnID, pBuffers, iCount);}
@@ -209,7 +209,7 @@ private:
 
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 
-	DWORD CreateClientSocket( LPCTSTR lpszRemoteAddress, USHORT usPort, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
+	DWORD CreateClientSocket( LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszLocalAddress, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
 	DWORD PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
 	DWORD ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 	void ForceDisconnect	(CONNID dwConnID);
@@ -223,8 +223,8 @@ private:
 	int SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	int SendPack	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int SendSafe	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
-	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 	int CatAndPost	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
+	int SendDirect	(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength);
 
 	int DoUnpause	(CONNID dwConnID);
 	int DoReceive	(TSocketObj* pSocketObj, TBufferObj* pBufferObj);

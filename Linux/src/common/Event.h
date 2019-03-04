@@ -465,7 +465,7 @@ public:
 	{
 		ASSERT(IsValid());
 
-		static const long SIZE = sizeof(signalfd_siginfo);
+		static const SSIZE_T SIZE = sizeof(signalfd_siginfo);
 
 		if(read(m_sig, &v, SIZE) == SIZE)
 			ok = TRUE;

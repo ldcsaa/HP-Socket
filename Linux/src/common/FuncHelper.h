@@ -240,15 +240,19 @@ inline LPSTR TrimRitht(LPSTR* lpStr, LPCSTR lpDelim = " \t\r\n")
 
 inline BOOL IsStrEmptyA(LPCSTR lpsz)	{return (lpsz == nullptr || lpsz[0] == 0);}
 inline BOOL IsStrEmptyW(LPCWSTR lpsz)	{return (lpsz == nullptr || lpsz[0] == 0);}
+inline BOOL IsStrNotEmptyA(LPCSTR lpsz)	{return !IsStrEmptyA(lpsz);}
+inline BOOL IsStrNotEmptyW(LPCWSTR lpsz){return !IsStrEmptyW(lpsz);}
 inline LPCSTR SafeStrA(LPCSTR lpsz)		{return (lpsz != nullptr) ? lpsz : "";}
 inline LPCWSTR SafeStrW(LPCWSTR lpsz)	{return (lpsz != nullptr) ? lpsz : L"";}
 
 #ifdef _UNICODE
-	#define IsStrEmpty					IsStrEmptyW
-	#define SafeStr						SafeStrW
+	#define IsStrEmpty(lpsz)			IsStrEmptyW(lpsz)
+	#define IsStrNotEmpty(lpsz)			IsStrNotEmptyW(lpsz)
+	#define SafeStr(lpsz)				SafeStrW(lpsz)
 #else
-	#define IsStrEmpty					IsStrEmptyA
-	#define SafeStr						SafeStrA
+	#define IsStrEmpty(lpsz)			IsStrEmptyA(lpsz)
+	#define IsStrNotEmpty(lpsz)			IsStrNotEmptyA(lpsz)
+	#define SafeStr(lpsz)				SafeStrA(lpsz)
 #endif
 
 inline int lstrlen(LPCTSTR p)							{return (int)tstrlen(p);}

@@ -39,12 +39,15 @@ using namespace std;
 
 #define SysGetSystemConfig				sysconf
 #define SysGetSystemInfo				sysinfo
+
 #if !defined(__ANDROID__)
+	#define SysGetPageSize				getpagesize
 	#define SysGetNumberOfProcessors	get_nprocs
 #else
+	#define SysGetPageSize()			sysconf(_SC_PAGESIZE)
 	#define SysGetNumberOfProcessors()	sysconf(_SC_NPROCESSORS_ONLN)
 #endif
-#define SysGetPageSize					getpagesize
+
 #define DEFAULT_BUFFER_SIZE				GetDefaultBufferSize()
 
 #define PROCESSOR_COUNT					(::SysGetNumberOfProcessors())
@@ -78,3 +81,28 @@ inline void __asm_pause()				{__asm_nop();}
 
 DWORD GetDefaultBufferSize();
 DWORD GetDefaultWorkerThreadCount();
+
+
+#if defined(__ANDROID__)
+
+#include<android/api-level.h>
+
+#define pthread_cancel(t)
+
+#if defined(__ANDROID_API__)
+#if (__ANDROID_API__ < 21)
+
+	#define ppoll(fd, nfds, ptmspec, sig)							poll((fd), (nfds), ((ptmspec) == nullptr) ? -1 : ((ptmspec)->tv_sec * 1000 + (ptmspec)->tv_nsec / 1000000))
+	#define epoll_create1(flag)										epoll_create(32)
+	#define epoll_pwait(epfd, events, maxevents, timeout, sigmask)	epoll_wait((epfd), (events), (maxevents), (timeout))
+
+	extern int sigaddset(sigset_t*, int);
+	extern int sigdelset(sigset_t*, int);
+	extern int sigemptyset(sigset_t*);
+	extern int sigfillset(sigset_t*);
+	extern int sigismember(const sigset_t*, int);
+
+#endif
+#endif
+
+#endif

@@ -36,8 +36,11 @@ public:
 	PVOID Alloc(SIZE_T dwSize, DWORD dwFlags = 0)
 	{
 		PVOID pv = malloc(dwSize);
-		
-		if(pv && (dwFlags & HEAP_ZERO_MEMORY))
+
+		if(!pv)
+			throw std::bad_alloc();
+
+		if(dwFlags & HEAP_ZERO_MEMORY)
 			ZeroMemory(pv, dwSize);
 		
 		return pv;
@@ -47,10 +50,16 @@ public:
 	{
 		PVOID pv = realloc(pvMemory, dwSize);
 
-		if(pv && (dwFlags & HEAP_ZERO_MEMORY))
+		if(!pv)
+		{
+			if(pvMemory)
+				free(pvMemory);
+
+			throw std::bad_alloc();
+		}
+
+		if(dwFlags & HEAP_ZERO_MEMORY)
 			ZeroMemory(pv, dwSize);
-		else if(!pv)
-			free(pvMemory);
 
 		return pv;
 	}

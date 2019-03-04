@@ -197,7 +197,7 @@ BOOL CTcpAgent::CheckStoping()
 BOOL CTcpAgent::ParseBindAddress(LPCTSTR lpszBindAddress)
 {
 	BOOL isOK	= FALSE;
-	BOOL bBind	= (lpszBindAddress && lpszBindAddress[0] != 0);
+	BOOL bBind	= ::IsStrNotEmpty(lpszBindAddress);
 
 	if(!bBind) lpszBindAddress = DEFAULT_IPV4_BIND_ADDRESS;
 
@@ -1139,7 +1139,7 @@ BOOL CTcpAgent::PauseReceive(CONNID dwConnID, BOOL bPause)
 	return TRUE;
 }
 
-BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort)
+BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID, PVOID pExtra, USHORT usLocalPort, LPCTSTR lpszLocalAddress)
 {
 	ASSERT(lpszRemoteAddress && usPort != 0);
 
@@ -1157,7 +1157,7 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 		result = ERROR_INVALID_STATE;
 	else
 	{
-		result = CreateClientSocket(lpszRemoteAddress, usPort, usLocalPort, soClient, addr);
+		result = CreateClientSocket(lpszRemoteAddress, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
 
 		if(result == NO_ERROR)
 		{
@@ -1182,14 +1182,24 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 	return (result == NO_ERROR);
 }
 
-DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr)
+DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszLocalAddress, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr)
 {
 	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addr))
 		return WSAEADDRNOTAVAIL;
 
-	BOOL bBind = m_soAddr.IsSpecified();
+	HP_SOCKADDR* lpBindAddr = &m_soAddr;
 
-	if(bBind && m_soAddr.family != addr.family)
+	if(::IsStrNotEmpty(lpszLocalAddress))
+	{
+		lpBindAddr = CreateLocalObject(HP_SOCKADDR);
+
+		if(!::sockaddr_A_2_IN(lpszLocalAddress, 0, *lpBindAddr))
+			return ::WSAGetLastError();
+	}
+
+	BOOL bBind = lpBindAddr->IsSpecified();
+
+	if(bBind && lpBindAddr->family != addr.family)
 		return WSAEAFNOSUPPORT;
 
 	DWORD result = NO_ERROR;
@@ -1205,14 +1215,14 @@ DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, US
 
 		if(usLocalPort == 0)
 		{
-			const HP_SOCKADDR& bindAddr = bBind ? m_soAddr : HP_SOCKADDR::AnyAddr(addr.family);
+			const HP_SOCKADDR& bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
 
 			if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
 				result = ::WSAGetLastError();
 		}
 		else
 		{
-			HP_SOCKADDR bindAddr = bBind ? m_soAddr : HP_SOCKADDR::AnyAddr(addr.family);
+			HP_SOCKADDR bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
 
 			bindAddr.SetPort(usLocalPort);
 
@@ -1398,6 +1408,19 @@ int CTcpAgent::SendSafe(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength
 	return CatAndPost(pSocketObj, pBuffer, iLength);
 }
 
+int CTcpAgent::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
+{
+	int result = NO_ERROR;
+
+	pSocketObj->sndBuff.Cat(pBuffer, iLength);
+	pSocketObj->pending += iLength;
+
+	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
+		result = ::GetLastError();
+
+	return result;
+}
+
 int CTcpAgent::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
 {
 	int result	= NO_ERROR;
@@ -1429,19 +1452,6 @@ int CTcpAgent::SendDirect(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLeng
 		iRemain -= iBufferSize;
 		pBuffer += iBufferSize;
 	}
-
-	return result;
-}
-
-int CTcpAgent::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLength)
-{
-	int result = NO_ERROR;
-
-	pSocketObj->sndBuff.Cat(pBuffer, iLength);
-	pSocketObj->pending += iLength;
-
-	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
-		result = ::GetLastError();
 
 	return result;
 }

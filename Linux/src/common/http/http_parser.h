@@ -26,8 +26,8 @@ extern "C" {
 
 /* Also update SONAME in the Makefile whenever you change these. */
 #define HTTP_PARSER_VERSION_MAJOR 2
-#define HTTP_PARSER_VERSION_MINOR 8
-#define HTTP_PARSER_VERSION_PATCH 1
+#define HTTP_PARSER_VERSION_MINOR 9
+#define HTTP_PARSER_VERSION_PATCH 0
 
 #include <stddef.h>
 #if defined(_WIN32) && !defined(__MINGW32__) && \
@@ -221,63 +221,65 @@ enum state
   , s_start_req_or_res
   , s_res_or_resp_H
   , s_start_res
-  , s_res_H = 5
+  , s_res_H
   , s_res_HT
   , s_res_HTT
   , s_res_HTTP
   , s_res_http_major
-  , s_res_http_dot = 10
+  , s_res_http_dot
   , s_res_http_minor
   , s_res_http_end
   , s_res_first_status_code
   , s_res_status_code
-  , s_res_status_start = 15
+  , s_res_status_start
   , s_res_status
   , s_res_line_almost_done
 
   , s_start_req
 
   , s_req_method
-  , s_req_spaces_before_url = 20
+  , s_req_spaces_before_url
   , s_req_schema
   , s_req_schema_slash
   , s_req_schema_slash_slash
   , s_req_server_start
-  , s_req_server = 25
+  , s_req_server
   , s_req_server_with_at
   , s_req_path
   , s_req_query_string_start
   , s_req_query_string
-  , s_req_fragment_start = 30
+  , s_req_fragment_start
   , s_req_fragment
   , s_req_http_start
   , s_req_http_H
   , s_req_http_HT
-  , s_req_http_HTT = 35
+  , s_req_http_HTT
   , s_req_http_HTTP
+  , s_req_http_I
+  , s_req_http_IC
   , s_req_http_major
   , s_req_http_dot
   , s_req_http_minor
-  , s_req_http_end = 40
+  , s_req_http_end
   , s_req_line_almost_done
 
   , s_header_field_start
   , s_header_field
   , s_header_value_discard_ws
-  , s_header_value_discard_ws_almost_done = 45
+  , s_header_value_discard_ws_almost_done
   , s_header_value_discard_lws
   , s_header_value_start
   , s_header_value
   , s_header_value_lws
 
-  , s_header_almost_done = 50
+  , s_header_almost_done
 
   , s_chunk_size_start
   , s_chunk_size
   , s_chunk_parameters
   , s_chunk_size_almost_done
 
-  , s_headers_almost_done = 55
+  , s_headers_almost_done
   , s_headers_done
 
   /* Important: 's_headers_done' must be the last 'header' state. All
@@ -289,13 +291,11 @@ enum state
   , s_chunk_data_almost_done
   , s_chunk_data_done
 
-  , s_body_identity = 60
+  , s_body_identity
   , s_body_identity_eof
 
   , s_message_done
   };
-
-
 /* Flag values for http_parser.flags field */
 enum flags
   { F_CHUNKED               = 1 << 0
@@ -488,6 +488,9 @@ int http_should_keep_alive(const http_parser *parser);
 /* Returns a string version of the HTTP method. */
 const char *http_method_str(enum http_method m);
 
+/* Returns a string version of the HTTP status code. */
+const char *http_status_str(enum http_status s);
+
 /* Return a string name of the given error */
 const char *http_errno_name(enum http_errno err);
 
@@ -507,6 +510,9 @@ void http_parser_pause(http_parser *parser, int paused);
 
 /* Checks if this is the final chunk of the body. */
 int http_body_is_final(const http_parser *parser);
+
+/* Change the maximum header size provided at compile time. */
+void http_parser_set_max_header_size(uint32_t size);
 
 #ifdef __cplusplus
 }

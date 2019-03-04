@@ -257,7 +257,7 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -313,7 +313,7 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -369,7 +369,7 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>

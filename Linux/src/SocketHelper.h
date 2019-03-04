@@ -97,8 +97,10 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* TCP Server 默认 Listen 队列大小 */
 #define DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	SOMAXCONN
 
+/* UDP 最大数据报文最大长度 */
+#define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			DEFAULT_BUFFER_SIZE
 /* UDP 默认数据报文最大长度 */
-#define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1472
+#define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1432
 /* UDP 默认 Receive 预投递数量 */
 #define DEFAULT_UDP_POST_RECEIVE_COUNT			DEFAULT_WORKER_MAX_EVENT_COUNT
 /* UDP 默认监测包尝试次数 */
@@ -508,6 +510,9 @@ struct TUdpSocketObj : public TSocketObjBase
 	using __super		= TSocketObjBase;
 	using CRecvQueue	= CCASQueue<TItem>;
 
+	PVOID				pHolder;
+	FD					fdTimer;
+
 	CBufferObjPool&		itPool;
 
 	CSimpleRWLock		lcIo;
@@ -581,6 +586,8 @@ struct TUdpSocketObj : public TSocketObjBase
 	{
 		__super::Reset(dwConnID);
 
+		pHolder		= nullptr;
+		fdTimer		= INVALID_FD;
 		detectFails = 0;
 	}
 

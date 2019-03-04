@@ -25,7 +25,7 @@
 #include "UdpCast.h"
 #include "../Common/Src/WaitFor.h"
 
-#include <process.h>
+#ifdef _UDP_SUPPORT
 
 const CInitSocket CUdpCast::sm_wsSocket;
 
@@ -80,12 +80,12 @@ BOOL CUdpCast::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnec
 
 BOOL CUdpCast::CheckParams()
 {
-	if	(((int)m_dwMaxDatagramSize > 0)									&&
-		((int)m_dwFreeBufferPoolSize >= 0)								&&
-		((int)m_dwFreeBufferPoolHold >= 0)								&&
-		(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)	&&
-		(m_iMCTtl >= 0 && m_iMCTtl <= 255)								&&
-		(m_bMCLoop >= 0 && m_bMCLoop <= 1)								)
+	if	(((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)	&&
+		((int)m_dwFreeBufferPoolSize >= 0)														&&
+		((int)m_dwFreeBufferPoolHold >= 0)														&&
+		(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)							&&
+		(m_iMCTtl >= 0 && m_iMCTtl <= 255)														&&
+		(m_bMCLoop >= 0 && m_bMCLoop <= 1)														)
 		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -290,7 +290,7 @@ UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 
 	while(pClient->HasStarted())
 	{
-		DWORD retval = ::WSAWaitForMultipleEvents(3, hEvents, FALSE, WSA_INFINITE, FALSE);
+		DWORD retval = ::WSAWaitForMultipleEvents(ARRAY_SIZE(hEvents), hEvents, FALSE, WSA_INFINITE, FALSE);
 
 		if(retval == WSA_WAIT_EVENT_0)
 		{
@@ -621,14 +621,23 @@ void CUdpCast::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
 
 BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 {
-	int result = NO_ERROR;
-
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
+
+	int result = NO_ERROR;
 
 	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
 	{
-		if(iOffset != 0) pBuffer += iOffset;
-		result = SendInternal(pBuffer, iLength);
+		if(IsConnected())
+		{
+			if(iOffset != 0) pBuffer += iOffset;
+
+			TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
+			itPtr->Cat(pBuffer, iLength);
+
+			result = SendInternal(itPtr);
+		}
+		else
+			result = ERROR_INVALID_STATE;
 	}
 	else
 		result = ERROR_INVALID_PARAMETER;
@@ -641,42 +650,41 @@ BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 
 BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 {
-	int result = NO_ERROR;
-
 	ASSERT(pBuffers && iCount > 0);
 
-	if(pBuffers && iCount > 0)
+	if(!pBuffers || iCount <= 0)
+		return ERROR_INVALID_PARAMETER;
+	if(!IsConnected())
+		return ERROR_INVALID_STATE;
+
+	int result	= NO_ERROR;
+	int iLength	= 0;
+	int iMaxLen	= (int)m_dwMaxDatagramSize;
+
+	TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
+
+	for(int i = 0; i < iCount; i++)
 	{
-		int iLength = 0;
-		int iMaxLen = (int)m_dwMaxDatagramSize;
+		int iBufLen = pBuffers[i].len;
 
-		TItemPtr itPtr(m_itPool, m_itPool.PickFreeItem());
-
-		for(int i = 0; i < iCount; i++)
+		if(iBufLen > 0)
 		{
-			int iBufLen = pBuffers[i].len;
+			BYTE* pBuffer = (BYTE*)pBuffers[i].buf;
+			ASSERT(pBuffer);
 
-			if(iBufLen > 0)
-			{
-				BYTE* pBuffer = (BYTE*)pBuffers[i].buf;
-				ASSERT(pBuffer);
+			iLength += iBufLen;
 
-				iLength += iBufLen;
-
-				if(iLength <= iMaxLen)
-					itPtr->Cat(pBuffer, iBufLen);
-				else
-					break;
-			}
+			if(iLength <= iMaxLen)
+				itPtr->Cat(pBuffer, iBufLen);
+			else
+				break;
 		}
-
-		if(iLength > 0 && iLength <= iMaxLen)
-			result = SendInternal(itPtr->Ptr(), iLength);
-		else
-			result = ERROR_INCORRECT_SIZE;
 	}
+
+	if(iLength > 0 && iLength <= iMaxLen)
+		result = SendInternal(itPtr);
 	else
-		result = ERROR_INVALID_PARAMETER;
+		result = ERROR_INCORRECT_SIZE;
 
 	if(result != NO_ERROR)
 		::SetLastError(result);
@@ -684,35 +692,20 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 	return (result == NO_ERROR);
 }
 
-int CUdpCast::SendInternal(const BYTE* pBuffer, int iLength)
+int CUdpCast::SendInternal(TItemPtr& itPtr)
 {
-	int result = NO_ERROR;
+	CCriSecLock locallock(m_csSend);
 
-	if(IsConnected())
-	{
-		CCriSecLock locallock(m_csSend);
+	if(!IsConnected())
+		return ERROR_INVALID_STATE;
 
-		if(IsConnected())
-		{
-			ASSERT(m_iPending >= 0);
+	BOOL isPending = !m_lsSend.IsEmpty();
 
-			BOOL isPending = m_iPending > 0;
+	m_lsSend.PushBack(itPtr.Detach());
 
-			TItem* pItem = m_itPool.PickFreeItem();
-			pItem->Cat(pBuffer, iLength);
-			m_lsSend.PushBack(pItem);
+	if(!isPending) m_evBuffer.Set();
 
-			m_iPending += iLength;
-
-			if(!isPending) m_evBuffer.Set();
-		}
-		else
-			result = ERROR_INVALID_STATE;
-	}
-	else
-		result = ERROR_INVALID_STATE;
-
-	return result;
+	return NO_ERROR;
 }
 
 void CUdpCast::SetLastError(EnSocketError code, LPCSTR func, int ec)
@@ -768,3 +761,5 @@ BOOL CUdpCast::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 
 	return !m_strHost.IsEmpty();
 }
+
+#endif
