@@ -39,3 +39,7 @@ Usage: install.sh [...O.P.T.I.O.N.S...]
 ```
   
 *&nbsp;&nbsp;&nbsp;&nbsp;Note: The **complle.sh** build script depends on the **script/**, **src/**, **include/**, and **dependent/** directories of the distribution; the **install.sh** install script depends on the **script/**, **include/**, and **lib/** directories of the distribution, if you want to install the sample executable files, it also need to depends on the **demo/Release/** directory.*
+## Android NDK
+&nbsp;&nbsp;&nbsp;&nbsp;HP-Socket provides Android NDK compilation script (script directory: *project/android-ndk/*). After installing and configuring the NDK, enter the compilation script directory and execute the *ndk-build* command to compile. By default, the compilation script will compile all of ABI's dynamic library and static library libs supported by the current NDK. If you have special needs, please modify the *jni/Application.mk* file.
+  
+*&nbsp;&nbsp;&nbsp;&nbsp;Note: The Android NDK compilation script provided by HP-Socket disables **SSL** and **ICONV** support, so the user applications need to define the **_SSL_DISABLED** and **_ICONV_DISABLED** macros.*
