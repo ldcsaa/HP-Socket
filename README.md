@@ -127,7 +127,7 @@ int main(int argc, char* const argv[])
 ## Component List
 - ***Basic Components***
 
-![Basic Component](https://gitee.com/uploads/images/2017/1214/143803_15f6abc9_81720.jpeg "Basic Component- mini.jpg")
+![Basic Component](https://images.gitee.com/uploads/images/2019/0331/102422_3eecfdb7_81720.jpeg "Basic Component - mini.jpg")
 
 - ***SSL Components***
 

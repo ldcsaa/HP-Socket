@@ -24,9 +24,10 @@
 #pragma once
 
 #include "HPTypeDef.h"
-#include "../Common/Src/RWLock.h"
 
 #ifdef _HTTP_SUPPORT
+
+#include "../Common/Src/RWLock.h"
 
 #define COOKIE_DOMAIN			"domain"
 #define COOKIE_PATH				"path"

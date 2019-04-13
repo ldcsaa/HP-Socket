@@ -96,7 +96,7 @@ public:
 
 	virtual ~CTcpPackClientT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

@@ -136,7 +136,7 @@ public:
 		}
 	};
 
-	friend class TWorker;
+	friend struct TWorker;
 
 public:
 
@@ -293,7 +293,7 @@ public:
 	THR_ID GetThreadID	() const {return m_ulThreadID;}
 	NTHR_ID GetNativeID	() const {return m_lNativeID;}
 
-	BOOL IsInMyThread		()					const {return IsMyThreadID(::GetCurrentThreadId());}
+	BOOL IsInMyThread		()					const {return IsMyThreadID(SELF_THREAD_ID);}
 	BOOL IsMyThreadID		(THR_ID ulThreadID)	const {return ::IsSameThread(ulThreadID, m_ulThreadID);}
 	BOOL IsMyNativeThreadID	(NTHR_ID lNativeID)	const {return ::IsSameNativeThread(lNativeID, m_lNativeID);}
 

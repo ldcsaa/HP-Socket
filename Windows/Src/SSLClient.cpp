@@ -23,7 +23,6 @@
  
 #include "stdafx.h"
 #include "SSLClient.h"
-#include "SSLHelper.h"
 
 #ifdef _SSL_SUPPORT
 
@@ -40,7 +39,7 @@ BOOL CSSLClient::CheckParams()
 
 void CSSLClient::PrepareStart()
 {
-	m_dwMainThreadID = ::GetCurrentThreadId();
+	m_dwMainThreadID = SELF_THREAD_ID;
 
 	__super::PrepareStart();
 }
@@ -58,7 +57,7 @@ void CSSLClient::Reset()
 	__super::Reset();
 }
 
-void CSSLClient::OnWorkerThreadEnd(DWORD dwThreadID)
+void CSSLClient::OnWorkerThreadEnd(THR_ID dwThreadID)
 {
 	m_sslCtx.RemoveThreadLocalState();
 

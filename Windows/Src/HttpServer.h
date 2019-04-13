@@ -159,7 +159,7 @@ public:
 
 	virtual ~CHttpServerT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

@@ -39,7 +39,7 @@ BOOL CSSLClient::CheckParams()
 
 void CSSLClient::PrepareStart()
 {
-	m_dwMainThreadID = ::GetCurrentThreadId();
+	m_dwMainThreadID = SELF_THREAD_ID;
 
 	__super::PrepareStart();
 }

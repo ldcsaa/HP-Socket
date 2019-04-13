@@ -307,6 +307,9 @@ timespec&	MillisecondToTimespec(LLONG ms, timespec& ts);
 timeval&	GetFutureTimeval(LLONG ms, timeval& tv, struct timezone* ptz = nullptr);
 timespec&	GetFutureTimespec(LLONG ms, timespec& ts, clockid_t clkid = CLOCK_MONOTONIC);
 
+FD			CreateTimer(LLONG llInterval, LLONG llStart = -1, BOOL bRealTimeClock = FALSE);
+BOOL		ReadTimer(FD tmr, ULLONG* pVal = nullptr, BOOL* pRs = nullptr);
+
 BOOL fcntl_SETFL(FD fd, INT fl, BOOL bSet = TRUE);
 
 void EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);

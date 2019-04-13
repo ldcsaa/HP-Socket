@@ -57,15 +57,15 @@
 /* Server/Agent 默认最大连接数 */
 #define DEFAULT_MAX_CONNECTION_COUNT			10000
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
-#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		(30 * 1000)
+#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		DEFAULT_OBJECT_CACHE_LOCK_TIME
 /* Server/Agent 默认 Socket 缓存池大小 */
-#define DEFAULT_FREE_SOCKETOBJ_POOL				600
+#define DEFAULT_FREE_SOCKETOBJ_POOL				DEFAULT_OBJECT_CACHE_POOL_SIZE
 /* Server/Agent 默认 Socket 缓存池回收阀值 */
-#define DEFAULT_FREE_SOCKETOBJ_HOLD				600
+#define DEFAULT_FREE_SOCKETOBJ_HOLD				DEFAULT_OBJECT_CACHE_POOL_HOLD
 /* Server/Agent 默认内存块缓存池大小 */
-#define DEFAULT_FREE_BUFFEROBJ_POOL				1200
+#define DEFAULT_FREE_BUFFEROBJ_POOL				DEFAULT_BUFFER_CACHE_POOL_SIZE
 /* Server/Agent 默认内存块缓存池回收阀值 */
-#define DEFAULT_FREE_BUFFEROBJ_HOLD				1200
+#define DEFAULT_FREE_BUFFEROBJ_HOLD				DEFAULT_BUFFER_CACHE_POOL_HOLD
 /* Client 默认内存块缓存池大小 */
 #define DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	60
 /* Client 默认内存块缓存池回收阀值 */
@@ -76,7 +76,7 @@
 #define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
 
 /* TCP 默认通信数据缓冲区大小 */
-#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_SIZE
+#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
 /* TCP 默认心跳包间隔 */
 #define DEFALUT_TCP_KEEPALIVE_TIME				(60 * 1000)
 /* TCP 默认心跳确认包检测间隔 */
@@ -87,7 +87,7 @@
 #define DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT	300
 
 /* UDP 最大数据报文最大长度 */
-#define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			DEFAULT_BUFFER_SIZE
+#define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
 /* UDP 默认数据报文最大长度 */
 #define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1432
 /* UDP 默认 Receive 预投递数量 */
@@ -95,7 +95,7 @@
 /* UDP 默认监测包尝试次数 */
 #define DEFAULT_UDP_DETECT_ATTEMPTS				3
 /* UDP 默认监测包发送间隔 */
-#define DEFAULT_UDP_DETECT_INTERVAL				60
+#define DEFAULT_UDP_DETECT_INTERVAL				(60 * 1000)
 
 /* TCP Pack 包长度位数 */
 #define TCP_PACK_LENGTH_BITS					22
@@ -117,6 +117,8 @@
 #define IPV6_ADDR_SEPARATOR_CHAR				':'
 #define IPV6_ZONE_INDEX_CHAR					'%'
 
+#define ENSURE_STOP()							{if(GetState() != SS_STOPPED) Stop();}
+
 /************************************************************************
 名称：Windows Socket 组件初始化类
 描述：自动加载和卸载 Windows Socket 组件
@@ -128,7 +130,7 @@ public:
 	{
 		LPWSADATA lpTemp = lpWSAData;
 		if(!lpTemp)
-			lpTemp	= (LPWSADATA)_alloca(sizeof(WSADATA));
+			lpTemp	= CreateLocalObject(WSADATA);
 
 		m_iResult	= ::WSAStartup(MAKEWORD(majorVersion, minorVersion), lpTemp);
 	}
@@ -472,7 +474,7 @@ typedef TItemPtrT<TUdpBufferObj>		TUdpBufferObjPtr;
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
 {
-	static const long DEF_SNDBUFF_SIZE = 8192;
+	static const long DEF_SNDBUFF_SIZE = 16 * 1024;
 
 	CPrivateHeap& heap;
 
@@ -491,7 +493,6 @@ struct TSocketObjBase
 
 	DWORD		activeTime;
 
-	long			sndBuffSize;
 	volatile BOOL	smooth;
 	volatile long	pending;
 	volatile long	sndCount;
@@ -521,19 +522,12 @@ struct TSocketObjBase
 
 	long Pending()		{return pending;}
 	BOOL IsPending()	{return pending > 0;}
-	BOOL IsCanSend()	{return sndCount <= sndBuffSize;}
 	BOOL IsSmooth()		{return smooth;}
 	void TurnOnSmooth()	{smooth = TRUE;}
 
 	BOOL TurnOffSmooth()
 		{return ::InterlockedCompareExchange((volatile long*)&smooth, FALSE, TRUE) == TRUE;}
 	
-	BOOL ResetSndBuffSize(SOCKET socket)
-	{
-		int len = (int)(sizeof(sndBuffSize));
-		return getsockopt(socket, SOL_SOCKET, SO_SNDBUF, (CHAR*)&sndBuffSize, &len) != 0;
-	}
-
 	BOOL HasConnected()							{return connected;}
 	void SetConnected(BOOL bConnected = TRUE)	{connected = bConnected;}
 
@@ -547,7 +541,6 @@ struct TSocketObjBase
 		recving		= FALSE;
 		pending		= 0;
 		sndCount	= 0;
-		sndBuffSize	= DEF_SNDBUFF_SIZE;
 		extra		= nullptr;
 		reserved	= nullptr;
 		reserved2	= nullptr;
@@ -564,6 +557,20 @@ struct TSocketObj : public TSocketObjBase
 	SOCKET			socket;
 	CStringA		host;
 	TBufferObjList	sndBuff;
+
+	BOOL IsCanSend() {return sndCount <= GetSendBufferSize();}
+
+	long GetSendBufferSize()
+	{
+		long lSize;
+		int len	= (int)(sizeof(lSize));
+		int rs	= getsockopt(socket, SOL_SOCKET, SO_SNDBUF, (CHAR*)&lSize, &len);
+
+		if(rs == SOCKET_ERROR || lSize <= 0)
+			lSize = DEF_SNDBUFF_SIZE;
+
+		return lSize;
+	}
 
 	static TSocketObj* Construct(CPrivateHeap& hp, CBufferObjPool& bfPool)
 	{
@@ -649,6 +656,9 @@ struct TUdpSocketObj : public TSocketObjBase
 
 	TUdpBufferObjList	sndBuff;
 	volatile DWORD		detectFails;
+
+	BOOL IsCanSend			() {return sndCount <= GetSendBufferSize();}
+	long GetSendBufferSize	() {return (4 * DEF_SNDBUFF_SIZE);}
 
 	static TUdpSocketObj* Construct(CPrivateHeap& hp, CUdpBufferObjPool& bfPool)
 	{

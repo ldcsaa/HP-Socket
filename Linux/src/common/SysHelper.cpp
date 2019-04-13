@@ -23,7 +23,7 @@
 
 #include "SysHelper.h"
 
-DWORD GetDefaultBufferSize()
+DWORD GetSysPageSize()
 {
 	static const DWORD s_dtsbs = (DWORD)SysGetPageSize();
 	return s_dtsbs;
@@ -34,57 +34,3 @@ DWORD GetDefaultWorkerThreadCount()
 	static const DWORD s_dwtc = MIN((PROCESSOR_COUNT * 2 + 2), MAX_WORKER_THREAD_COUNT);
 	return s_dwtc;
 }
-
-
-#if defined(__ANDROID__)
-
-#if defined(__ANDROID_API__)
-#if (__ANDROID_API__ < 21)
-
-#include <limits.h>
-#include <string.h>
-
-int sigaddset(sigset_t *set, int signum)
-{
-	signum--;
-	unsigned long *local_set = (unsigned long *)set;
-
-	local_set[signum/LONG_BIT] |= 1UL << (signum%LONG_BIT);
-
-	return 0;
-}
-
-int sigdelset(sigset_t *set, int signum)
-{
-	signum--;
-	unsigned long *local_set = (unsigned long *)set;
-
-	local_set[signum/LONG_BIT] &= ~(1UL << (signum%LONG_BIT));
-
-	return 0;
-}
-
-int sigemptyset(sigset_t *set)
-{
-	memset(set, 0, sizeof *set);
-	return 0;
-}
-
-int sigfillset(sigset_t *set)
-{
-	memset(set, ~0, sizeof *set);
-	return 0;
-}
-
-int sigismember(sigset_t *set, int signum)
-{
-	signum--;
-	unsigned long *local_set = (unsigned long *)set;
-
-	return (int)((local_set[signum/LONG_BIT] >> (signum%LONG_BIT)) & 1);
-}
-
-#endif
-#endif
-
-#endif

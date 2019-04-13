@@ -67,6 +67,7 @@ private:
 	virtual BOOL OnReadyWrite(PVOID pv, UINT events)				override;
 	virtual BOOL OnHungUp(PVOID pv, UINT events)					override;
 	virtual BOOL OnError(PVOID pv, UINT events)						override;
+	virtual VOID OnDispatchThreadStart(THR_ID tid)					override;
 	virtual VOID OnDispatchThreadEnd(THR_ID tid)					override;
 
 public:
@@ -107,24 +108,41 @@ public:
 
 protected:
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
-		{return m_pListener->OnPrepareListen(this, soListen);}
+		{return DoFirePrepareListen(soListen);}
 	virtual EnHandleResult FireAccept(TUdpSocketObj* pSocketObj)
 		{
-			EnHandleResult rs		= m_pListener->OnAccept(this, pSocketObj->connID, (UINT_PTR)(&pSocketObj->remoteAddr));
+			EnHandleResult rs		= DoFireAccept(pSocketObj);
 			if(rs != HR_ERROR) rs	= FireHandShake(pSocketObj);
 			return rs;
 		}
 	virtual EnHandleResult FireHandShake(TUdpSocketObj* pSocketObj)
-		{return m_pListener->OnHandShake(this, pSocketObj->connID);}
+		{return DoFireHandShake(pSocketObj);}
 	virtual EnHandleResult FireReceive(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_pListener->OnReceive(this, pSocketObj->connID, pData, iLength);}
+		{return DoFireReceive(pSocketObj, pData, iLength);}
 	virtual EnHandleResult FireReceive(TUdpSocketObj* pSocketObj, int iLength)
-		{return m_pListener->OnReceive(this, pSocketObj->connID, iLength);}
+		{return DoFireReceive(pSocketObj, iLength);}
 	virtual EnHandleResult FireSend(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength)
-		{return m_pListener->OnSend(this, pSocketObj->connID, pData, iLength);}
+		{return DoFireSend(pSocketObj, pData, iLength);}
 	virtual EnHandleResult FireClose(TUdpSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
-		{return m_pListener->OnClose(this, pSocketObj->connID, enOperation, iErrorCode);}
+		{return DoFireClose(pSocketObj, enOperation, iErrorCode);}
 	virtual EnHandleResult FireShutdown()
+		{return DoFireShutdown();}
+
+	virtual EnHandleResult DoFirePrepareListen(SOCKET soListen)
+		{return m_pListener->OnPrepareListen(this, soListen);}
+	virtual EnHandleResult DoFireAccept(TUdpSocketObj* pSocketObj)
+		{return m_pListener->OnAccept(this, pSocketObj->connID, (UINT_PTR)(&pSocketObj->remoteAddr));}
+	virtual EnHandleResult DoFireHandShake(TUdpSocketObj* pSocketObj)
+		{return m_pListener->OnHandShake(this, pSocketObj->connID);}
+	virtual EnHandleResult DoFireReceive(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return m_pListener->OnReceive(this, pSocketObj->connID, pData, iLength);}
+	virtual EnHandleResult DoFireReceive(TUdpSocketObj* pSocketObj, int iLength)
+		{return m_pListener->OnReceive(this, pSocketObj->connID, iLength);}
+	virtual EnHandleResult DoFireSend(TUdpSocketObj* pSocketObj, const BYTE* pData, int iLength)
+		{return m_pListener->OnSend(this, pSocketObj->connID, pData, iLength);}
+	virtual EnHandleResult DoFireClose(TUdpSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
+		{return m_pListener->OnClose(this, pSocketObj->connID, enOperation, iErrorCode);}
+	virtual EnHandleResult DoFireShutdown()
 		{return m_pListener->OnShutdown(this);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
@@ -132,7 +150,13 @@ protected:
 	virtual void PrepareStart();
 	virtual void Reset();
 
+	virtual void OnWorkerThreadStart(THR_ID tid) {}
 	virtual void OnWorkerThreadEnd(THR_ID tid) {}
+
+	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
+	int				SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr);
+
+	BOOL DoSend(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, int iOffset = 0);
 
 protected:
 	BOOL SetConnectionExtra(TUdpSocketObj* pSocketObj, PVOID pExtra);
@@ -160,7 +184,6 @@ private:
 	void ReleaseFreeSocket();
 	void WaitForWorkerThreadEnd();
 
-	TUdpSocketObj* FindSocketObj(CONNID dwConnID);
 	TUdpSocketObj* GetFreeSocketObj(CONNID dwConnID);
 	TUdpSocketObj* CreateSocketObj();
 	CONNID FindConnectionID(const HP_SOCKADDR* pAddr);
@@ -183,7 +206,6 @@ private:
 	BOOL HandleClose		();
 	void HandleZeroBytes	(TUdpSocketObj* pSocketObj);
 
-	int SendInternal	(TUdpSocketObj* pSocketObj, TItemPtr& itPtr);
 	BOOL DoSend			(CONNID dwConnID, int flag = 0);
 	BOOL DoReceive		(CONNID dwConnID, int flag = 0);
 	BOOL SendItem		(TUdpSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocked);
@@ -218,7 +240,7 @@ public:
 
 	virtual ~CUdpServer()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:
@@ -237,6 +259,9 @@ private:
 	DWORD m_dwDetectInterval;
 	BOOL  m_bMarkSilence;
 
+protected:
+	CBufferObjPool			m_bfObjPool;
+
 private:
 	IUdpServerListener*		m_pListener;
 	SOCKET					m_soListen;
@@ -244,7 +269,6 @@ private:
 	EnSocketError			m_enLastError;
 
 	CPrivateHeap			m_phSocket;
-	CBufferObjPool			m_bfObjPool;
 
 	CSpinGuard				m_csState;
 

@@ -53,6 +53,7 @@ void CSSLAgent::PrepareStart()
 
 void CSSLAgent::Reset()
 {
+	m_sslPool.Clear();
 	m_sslCtx.RemoveThreadLocalState();
 
 	__super::Reset();
@@ -116,15 +117,6 @@ EnHandleResult CSSLAgent::FireClose(TAgentSocketObj* pSocketObj, EnSocketOperati
 
 	if(pSession != nullptr)
 		m_sslPool.PutFreeSession(pSession);
-
-	return result;
-}
-
-EnHandleResult CSSLAgent::FireShutdown()
-{
-	EnHandleResult result = DoFireShutdown();
-
-	m_sslPool.Clear();
 
 	return result;
 }

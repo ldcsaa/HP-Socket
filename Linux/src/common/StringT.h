@@ -617,7 +617,7 @@ public:
 	CStringT(_InputIterator __beg, _InputIterator __end, const _Alloc& __a = _Alloc())
 	: __super(__beg, __end, __a) {}
 
-	~CStringT() _GLIBCXX_NOEXCEPT = default;
+	~CStringT() = default;
 
 	CStringT& operator=(const __super& __str)
 	{__super::operator=(__str); return *this;}

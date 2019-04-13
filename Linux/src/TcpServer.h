@@ -76,6 +76,7 @@ private:
 	virtual BOOL OnReadyWrite(PVOID pv, UINT events)				override;
 	virtual BOOL OnHungUp(PVOID pv, UINT events)					override;
 	virtual BOOL OnError(PVOID pv, UINT events)						override;
+	virtual VOID OnDispatchThreadStart(THR_ID tid)					override;
 	virtual VOID OnDispatchThreadEnd(THR_ID tid)					override;
 
 public:
@@ -161,6 +162,8 @@ protected:
 	virtual void Reset();
 
 	virtual BOOL BeforeUnpause(TSocketObj* pSocketObj) {return TRUE;}
+
+	virtual void OnWorkerThreadStart(THR_ID tid) {}
 	virtual void OnWorkerThreadEnd(THR_ID tid) {}
 
 	BOOL DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
@@ -241,7 +244,7 @@ public:
 
 	virtual ~CTcpServer()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

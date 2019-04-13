@@ -59,7 +59,7 @@ BOOL CTcpAgent::CheckParams()
 		((int)m_dwMaxConnectionCount > 0)														&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
 		((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)									&&
-		((int)m_dwFreeSocketObjLockTime >= 0)													&&
+		((int)m_dwFreeSocketObjLockTime >= 1000)												&&
 		((int)m_dwFreeSocketObjPool >= 0)														&&
 		((int)m_dwFreeBufferObjPool >= 0)														&&
 		((int)m_dwFreeSocketObjHold >= 0)														&&
@@ -92,7 +92,7 @@ BOOL CTcpAgent::CheckStarting()
 		m_enState = SS_STARTING;
 	else
 	{
-		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -115,7 +115,7 @@ BOOL CTcpAgent::CheckStoping()
 			::WaitFor(10);
 	}
 
-	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 
 	return FALSE;
 }
@@ -934,6 +934,11 @@ BOOL CTcpAgent::OnHungUp(PVOID pv, UINT events)
 BOOL CTcpAgent::OnError(PVOID pv, UINT events)
 {
 	return HandleClose((TAgentSocketObj*)pv, SCF_ERROR, events);
+}
+
+VOID CTcpAgent::OnDispatchThreadStart(THR_ID tid)
+{
+	OnWorkerThreadStart(tid);
 }
 
 VOID CTcpAgent::OnDispatchThreadEnd(THR_ID tid)

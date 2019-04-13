@@ -200,7 +200,7 @@ public:
 
 	virtual ~CHttpClientT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

@@ -104,7 +104,7 @@ BOOL CUdpCast::CheckStarting()
 		m_enState = SS_STARTING;
 	else
 	{
-		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -130,7 +130,7 @@ BOOL CUdpCast::CheckStoping()
 		}
 	}
 
-	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 
 	return FALSE;
 }
@@ -353,6 +353,8 @@ UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 {
 	TRACE("---------------> Cast Worker Thread 0x%08X started <---------------", SELF_THREAD_ID);
 
+	OnWorkerThreadStart(SELF_THREAD_ID);
+
 	BOOL bCallStop	= TRUE;
 	pollfd pfds[]	= {	{m_soRecv, m_nRecvEvents},
 						{m_soSend, m_nSendEvents},
@@ -481,13 +483,19 @@ BOOL CUdpCast::ReadData()
 {
 	while(TRUE)
 	{
+		if(m_bPaused)
+			break;
+
 		socklen_t addrLen = (socklen_t)m_remoteAddr.AddrSize();
 		int rc			  = (int)recvfrom(m_soRecv, (char*)(BYTE*)m_rcBuffer, m_dwMaxDatagramSize, MSG_TRUNC, m_remoteAddr.Addr(), &addrLen);
 
 		if(rc >= 0)
 		{
 			if(rc > (int)m_dwMaxDatagramSize)
-				continue;
+			{
+				m_ccContext.Reset(TRUE, SO_RECEIVE, ERROR_BAD_LENGTH);
+				return FALSE;
+			}
 
 			if(TRIGGER(FireReceive(m_rcBuffer, rc)) == HR_ERROR)
 			{

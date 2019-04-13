@@ -33,7 +33,7 @@ class CUdpClient : public IUdpClient
 public:
 	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usLocalPort = 0);
 	virtual BOOL Stop	();
-	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0);
+	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0)	{return DoSend(pBuffer, iLength, iOffset);}
 	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount);
 	virtual BOOL PauseReceive	(BOOL bPause = TRUE);
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
@@ -67,30 +67,52 @@ public:
 
 protected:
 	virtual EnHandleResult FirePrepareConnect(SOCKET socket)
-		{return m_pListener->OnPrepareConnect(this, m_dwConnID, socket);}
+		{return DoFirePrepareConnect(this, socket);}
 	virtual EnHandleResult FireConnect()
 		{
-			EnHandleResult rs		= m_pListener->OnConnect(this, m_dwConnID);
+			EnHandleResult rs		= DoFireConnect(this);
 			if(rs != HR_ERROR) rs	= FireHandShake();
 			return rs;
 		}
 	virtual EnHandleResult FireHandShake()
-		{return m_pListener->OnHandShake(this, m_dwConnID);}
+		{return DoFireHandShake(this);}
 	virtual EnHandleResult FireSend(const BYTE* pData, int iLength)
-		{return m_pListener->OnSend(this, m_dwConnID, pData, iLength);}
+		{return DoFireSend(this, pData, iLength);}
 	virtual EnHandleResult FireReceive(const BYTE* pData, int iLength)
-		{return m_pListener->OnReceive(this, m_dwConnID, pData, iLength);}
+		{return DoFireReceive(this, pData, iLength);}
 	virtual EnHandleResult FireReceive(int iLength)
-		{return m_pListener->OnReceive(this, m_dwConnID, iLength);}
+		{return DoFireReceive(this, iLength);}
 	virtual EnHandleResult FireClose(EnSocketOperation enOperation, int iErrorCode)
-		{return m_pListener->OnClose(this, m_dwConnID, enOperation, iErrorCode);}
+		{return DoFireClose(this, enOperation, iErrorCode);}
+
+	virtual EnHandleResult DoFirePrepareConnect(IUdpClient* pSender, SOCKET socket)
+		{return m_pListener->OnPrepareConnect(pSender, pSender->GetConnectionID(), socket);}
+	virtual EnHandleResult DoFireConnect(IUdpClient* pSender)
+		{return m_pListener->OnConnect(pSender, pSender->GetConnectionID());}
+	virtual EnHandleResult DoFireHandShake(IUdpClient* pSender)
+		{return m_pListener->OnHandShake(pSender, pSender->GetConnectionID());}
+	virtual EnHandleResult DoFireSend(IUdpClient* pSender, const BYTE* pData, int iLength)
+		{return m_pListener->OnSend(pSender, pSender->GetConnectionID(), pData, iLength);}
+	virtual EnHandleResult DoFireReceive(IUdpClient* pSender, const BYTE* pData, int iLength)
+		{return m_pListener->OnReceive(pSender, pSender->GetConnectionID(), pData, iLength);}
+	virtual EnHandleResult DoFireReceive(IUdpClient* pSender, int iLength)
+		{return m_pListener->OnReceive(pSender, pSender->GetConnectionID(), iLength);}
+	virtual EnHandleResult DoFireClose(IUdpClient* pSender, EnSocketOperation enOperation, int iErrorCode)
+		{return m_pListener->OnClose(pSender, pSender->GetConnectionID(), enOperation, iErrorCode);}
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
 	virtual void Reset();
 
+	virtual void OnWorkerThreadStart(THR_ID tid) {}
 	virtual void OnWorkerThreadEnd(THR_ID tid) {}
+
+	virtual FD GetUserEvent() {return INVALID_FD;}
+	virtual BOOL OnUserEvent() {return TRUE;}
+
+	static BOOL DoSend(CUdpClient* pClient, const BYTE* pBuffer, int iLength, int iOffset = 0)
+		{return pClient->DoSend(pBuffer, iLength, iOffset);}
 
 protected:
 	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
@@ -98,6 +120,8 @@ protected:
 	BOOL GetRemoteHost	(LPCSTR* lpszHost, USHORT* pusPort = nullptr);
 
 private:
+	BOOL DoSend			(const BYTE* pBuffer, int iLength, int iOffset = 0);
+
 	void SetRemoteHost	(LPCTSTR lpszHost, USHORT usPort);
 	void SetConnected	(BOOL bConnected = TRUE) {m_bConnected = bConnected; if(bConnected) m_enState = SS_STARTED;}
 
@@ -151,7 +175,7 @@ public:
 
 	virtual ~CUdpClient()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:
@@ -192,7 +216,6 @@ private:
 	CEvt				m_evSend;
 	CEvt				m_evRecv;
 	CEvt				m_evStop;
-	CTimerEvent			m_evDetect;
 
 	DWORD				m_dwDetectFails;
 	volatile BOOL		m_bPaused;

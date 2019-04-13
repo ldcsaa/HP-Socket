@@ -113,7 +113,6 @@ protected:
 		{
 			EnHandleResult rs		= DoFireConnect(pSocketObj);
 			if(rs != HR_ERROR) rs	= FireHandShake(pSocketObj);
-			if(rs != HR_ERROR) pSocketObj->ResetSndBuffSize(pSocketObj->socket);
 			return rs;
 		}
 	virtual EnHandleResult FireHandShake(TSocketObj* pSocketObj)
@@ -152,7 +151,9 @@ protected:
 	virtual void Reset();
 
 	virtual EnHandleResult BeforeUnpause(TSocketObj* pSocketObj) {return HR_IGNORE;}
-	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+
+	virtual void OnWorkerThreadStart(THR_ID dwThreadID) {}
+	virtual void OnWorkerThreadEnd(THR_ID dwThreadID) {}
 
 	BOOL DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	BOOL DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
@@ -269,7 +270,7 @@ public:
 
 	virtual ~CTcpAgent()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

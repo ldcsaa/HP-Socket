@@ -36,6 +36,8 @@
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
+#include "UdpArqServer.h"
+#include "UdpArqClient.h"
 #endif
 
 #ifdef _HTTP_SUPPORT
@@ -67,6 +69,9 @@ typedef C_HP_ObjectT<CTcpPackClient, ITcpClientListener, sizeof(IPackClient)>	C_
 typedef C_HP_ObjectT<CUdpServer, IUdpServerListener>							C_HP_UdpServer;
 typedef C_HP_ObjectT<CUdpClient, IUdpClientListener>							C_HP_UdpClient;
 typedef C_HP_ObjectT<CUdpCast, IUdpCastListener>								C_HP_UdpCast;
+
+typedef C_HP_ObjectT<CUdpArqServer, IUdpServerListener, sizeof(IArqSocket)>		C_HP_UdpArqServer;
+typedef C_HP_ObjectT<CUdpArqClient, IUdpClientListener, sizeof(IArqClient)>		C_HP_UdpArqClient;
 
 #endif
 
@@ -270,6 +275,16 @@ HPSOCKET_API HP_UdpCast __HP_CALL Create_HP_UdpCast(HP_UdpCastListener pListener
 	return (HP_UdpCast)(new C_HP_UdpCast((IUdpCastListener*)pListener));
 }
 
+HPSOCKET_API HP_UdpArqServer __HP_CALL Create_HP_UdpArqServer(HP_UdpServerListener pListener)
+{
+	return (HP_UdpArqServer)(new C_HP_UdpArqServer((IUdpServerListener*)pListener));
+}
+
+HPSOCKET_API HP_UdpArqClient __HP_CALL Create_HP_UdpArqClient(HP_UdpClientListener pListener)
+{
+	return (HP_UdpArqClient)(new C_HP_UdpArqClient((IUdpClientListener*)pListener));
+}
+
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpServer(HP_UdpServer pServer)
 {
 	delete (C_HP_UdpServer*)pServer;
@@ -283,6 +298,16 @@ HPSOCKET_API void __HP_CALL Destroy_HP_UdpClient(HP_UdpClient pClient)
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpCast(HP_UdpCast pCast)
 {
 	delete (C_HP_UdpCast*)pCast;
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpArqServer(HP_UdpArqServer pServer)
+{
+	delete (C_HP_UdpArqServer*)pServer;
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpArqClient(HP_UdpArqClient pClient)
+{
+	delete (C_HP_UdpArqClient*)pClient;
 }
 
 HPSOCKET_API HP_UdpServerListener __HP_CALL Create_HP_UdpServerListener()
@@ -300,6 +325,16 @@ HPSOCKET_API HP_UdpCastListener __HP_CALL Create_HP_UdpCastListener()
 	return (HP_UdpCastListener)(new C_HP_UdpCastListener);
 }
 
+HPSOCKET_API HP_UdpArqServerListener __HP_CALL Create_HP_UdpArqServerListener()
+{
+	return (HP_UdpArqServerListener)(new C_HP_UdpArqServerListener);
+}
+
+HPSOCKET_API HP_UdpArqClientListener __HP_CALL Create_HP_UdpArqClientListener()
+{
+	return (HP_UdpArqClientListener)(new C_HP_UdpArqClientListener);
+}
+
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpServerListener(HP_UdpServerListener pListener)
 {
 	delete (C_HP_UdpServerListener*)pListener;
@@ -313,6 +348,16 @@ HPSOCKET_API void __HP_CALL Destroy_HP_UdpClientListener(HP_UdpClientListener pL
 HPSOCKET_API void __HP_CALL Destroy_HP_UdpCastListener(HP_UdpCastListener pListener)
 {
 	delete (C_HP_UdpClientListener*)pListener;
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpArqServerListener(HP_UdpArqServerListener pListener)
+{
+	delete (C_HP_UdpArqServerListener*)pListener;
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_UdpArqClientListener(HP_UdpArqClientListener pListener)
+{
+	delete (C_HP_UdpArqClientListener*)pListener;
 }
 
 #endif
@@ -781,6 +826,114 @@ HPSOCKET_API DWORD __HP_CALL HP_UdpServer_GetDetectAttempts(HP_UdpServer pServer
 HPSOCKET_API DWORD __HP_CALL HP_UdpServer_GetDetectInterval(HP_UdpServer pServer)
 {
 	return C_HP_Object::ToSecond<IUdpServer>(pServer)->GetDetectInterval();
+}
+
+/**********************************************************************************/
+/*************************** UDP ARQ Server 属性访问方法 ***************************/
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetNoDelay(HP_UdpArqServer pServer, BOOL bNoDelay)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetNoDelay(bNoDelay);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetTurnoffCongestCtrl(HP_UdpArqServer pServer, BOOL bTurnOff)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetTurnoffCongestCtrl(bTurnOff);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetFlushInterval(HP_UdpArqServer pServer, DWORD dwFlushInterval)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetFlushInterval(dwFlushInterval);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetResendByAcks(HP_UdpArqServer pServer, DWORD dwResendByAcks)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetResendByAcks(dwResendByAcks);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetSendWndSize(HP_UdpArqServer pServer, DWORD dwSendWndSize)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetSendWndSize(dwSendWndSize);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetRecvWndSize(HP_UdpArqServer pServer, DWORD dwRecvWndSize)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetRecvWndSize(dwRecvWndSize);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetMinRto(HP_UdpArqServer pServer, DWORD dwMinRto)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetMinRto(dwMinRto);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetMaxTransUnit(HP_UdpArqServer pServer, DWORD dwMaxTransUnit)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetMaxTransUnit(dwMaxTransUnit);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetMaxMessageSize(HP_UdpArqServer pServer, DWORD dwMaxMessageSize)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetMaxMessageSize(dwMaxMessageSize);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqServer_SetHandShakeTimeout(HP_UdpArqServer pServer, DWORD dwHandShakeTimeout)
+{
+	C_HP_Object::ToFirst<IArqSocket>(pServer)->SetHandShakeTimeout(dwHandShakeTimeout);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpArqServer_IsNoDelay(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->IsNoDelay();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpArqServer_IsTurnoffCongestCtrl(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->IsTurnoffCongestCtrl();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetFlushInterval(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetFlushInterval();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetResendByAcks(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetResendByAcks();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetSendWndSize(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetSendWndSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetRecvWndSize(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetRecvWndSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetMinRto(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetMinRto();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetMaxTransUnit(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetMaxTransUnit();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetMaxMessageSize(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetMaxMessageSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqServer_GetHandShakeTimeout(HP_UdpArqServer pServer)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetHandShakeTimeout();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpArqServer_GetWaitingSendMessageCount(HP_UdpArqServer pServer, HP_CONNID dwConnID, int* piCount)
+{
+	return C_HP_Object::ToFirst<IArqSocket>(pServer)->GetWaitingSendMessageCount(dwConnID, *piCount);
 }
 
 #endif
@@ -1307,6 +1460,114 @@ HPSOCKET_API DWORD __HP_CALL HP_UdpClient_GetDetectAttempts(HP_UdpClient pClient
 HPSOCKET_API DWORD __HP_CALL HP_UdpClient_GetDetectInterval(HP_UdpClient pClient)
 {
 	return C_HP_Object::ToSecond<IUdpClient>(pClient)->GetDetectInterval();
+}
+
+/**********************************************************************************/
+/*************************** UDP ARQ Client 属性访问方法 ***************************/
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetNoDelay(HP_UdpArqClient pClient, BOOL bNoDelay)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetNoDelay(bNoDelay);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetTurnoffCongestCtrl(HP_UdpArqClient pClient, BOOL bTurnOff)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetTurnoffCongestCtrl(bTurnOff);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetFlushInterval(HP_UdpArqClient pClient, DWORD dwFlushInterval)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetFlushInterval(dwFlushInterval);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetResendByAcks(HP_UdpArqClient pClient, DWORD dwResendByAcks)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetResendByAcks(dwResendByAcks);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetSendWndSize(HP_UdpArqClient pClient, DWORD dwSendWndSize)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetSendWndSize(dwSendWndSize);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetRecvWndSize(HP_UdpArqClient pClient, DWORD dwRecvWndSize)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetRecvWndSize(dwRecvWndSize);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetMinRto(HP_UdpArqClient pClient, DWORD dwMinRto)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetMinRto(dwMinRto);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetMaxTransUnit(HP_UdpArqClient pClient, DWORD dwMaxTransUnit)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetMaxTransUnit(dwMaxTransUnit);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetMaxMessageSize(HP_UdpArqClient pClient, DWORD dwMaxMessageSize)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetMaxMessageSize(dwMaxMessageSize);
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpArqClient_SetHandShakeTimeout(HP_UdpArqClient pClient, DWORD dwHandShakeTimeout)
+{
+	C_HP_Object::ToFirst<IArqClient>(pClient)->SetHandShakeTimeout(dwHandShakeTimeout);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpArqClient_IsNoDelay(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->IsNoDelay();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpArqClient_IsTurnoffCongestCtrl(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->IsTurnoffCongestCtrl();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetFlushInterval(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetFlushInterval();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetResendByAcks(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetResendByAcks();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetSendWndSize(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetSendWndSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetRecvWndSize(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetRecvWndSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetMinRto(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetMinRto();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetMaxTransUnit(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetMaxTransUnit();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetMaxMessageSize(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetMaxMessageSize();
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_UdpArqClient_GetHandShakeTimeout(HP_UdpArqClient pClient)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetHandShakeTimeout();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpArqClient_GetWaitingSendMessageCount(HP_UdpArqClient pClient, int* piCount)
+{
+	return C_HP_Object::ToFirst<IArqClient>(pClient)->GetWaitingSendMessageCount(*piCount);
 }
 
 /**********************************************************************************/

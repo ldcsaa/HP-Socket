@@ -116,7 +116,7 @@ template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::SendW
 
 template<class T, USHORT default_port> UINT CHttpServerT<T, default_port>::CleanerThreadProc(PVOID pv)
 {
-	TRACE("---------------> Connection Cleaner Thread 0x%08X started <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Connection Cleaner Thread 0x%08X started <---------------\n", SELF_THREAD_ID);
 
 	DWORD dwRetValue = 0;
 	DWORD dwInterval = max(MIN_HTTP_RELEASE_CHECK_INTERVAL, (m_dwReleaseDelay - MIN_HTTP_RELEASE_DELAY / 2));
@@ -135,7 +135,7 @@ template<class T, USHORT default_port> UINT CHttpServerT<T, default_port>::Clean
 
 	ReleaseDyingConnection();
 
-	TRACE("---------------> Connection Cleaner Thread 0x%08X stoped <---------------\n", ::GetCurrentThreadId());
+	TRACE("---------------> Connection Cleaner Thread 0x%08X stoped <---------------\n", SELF_THREAD_ID);
 
 	return 0;
 }

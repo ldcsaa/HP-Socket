@@ -23,7 +23,6 @@
  
 #include "stdafx.h"
 #include "SSLServer.h"
-#include "SSLHelper.h"
 
 #ifdef _SSL_SUPPORT
 
@@ -54,12 +53,13 @@ void CSSLServer::PrepareStart()
 
 void CSSLServer::Reset()
 {
+	m_sslPool.Clear();
 	m_sslCtx.RemoveThreadLocalState();
 
 	__super::Reset();
 }
 
-void CSSLServer::OnWorkerThreadEnd(DWORD dwThreadID)
+void CSSLServer::OnWorkerThreadEnd(THR_ID dwThreadID)
 {
 	m_sslCtx.RemoveThreadLocalState();
 
@@ -117,15 +117,6 @@ EnHandleResult CSSLServer::FireClose(TSocketObj* pSocketObj, EnSocketOperation e
 
 	if(pSession != nullptr)
 		m_sslPool.PutFreeSession(pSession);
-
-	return result;
-}
-
-EnHandleResult CSSLServer::FireShutdown()
-{
-	EnHandleResult result = DoFireShutdown();
-
-	m_sslPool.Clear();
 
 	return result;
 }

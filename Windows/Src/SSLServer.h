@@ -51,13 +51,12 @@ protected:
 	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj);
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult FireShutdown();
 
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
 	virtual void Reset();
 
-	virtual void OnWorkerThreadEnd(DWORD dwThreadID);
+	virtual void OnWorkerThreadEnd(THR_ID dwThreadID);
 
 protected:
 	virtual BOOL StartSSLHandShake(TSocketObj* pSocketObj);
@@ -81,7 +80,7 @@ public:
 
 	virtual ~CSSLServer()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

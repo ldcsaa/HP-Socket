@@ -86,7 +86,7 @@ class IIOHandler
 public:
 
 	virtual VOID OnCommand(TDispCommand* pCmd)						= 0;
-	virtual VOID OnTimer(LLONG llExpirations)						= 0;
+	virtual VOID OnTimer(ULLONG llExpirations)						= 0;
 
 	virtual BOOL OnBeforeProcessIo(PVOID pv, UINT events)			= 0;
 	virtual VOID OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)	= 0;
@@ -96,6 +96,7 @@ public:
 	virtual BOOL OnError(PVOID pv, UINT events)						= 0;
 	virtual BOOL OnReadyPrivilege(PVOID pv, UINT events)			= 0;
 
+	virtual VOID OnDispatchThreadStart(THR_ID tid)					= 0;
 	virtual VOID OnDispatchThreadEnd(THR_ID tid)					= 0;
 
 public:
@@ -106,11 +107,15 @@ class CIOHandler : public IIOHandler
 {
 public:
 	virtual VOID OnCommand(TDispCommand* pCmd)						override {}
-	virtual VOID OnTimer(LLONG llExpirations)						override {}
+	virtual VOID OnTimer(ULLONG llExpirations)						override {}
 
 	virtual BOOL OnBeforeProcessIo(PVOID pv, UINT events)			override {return TRUE;}
 	virtual VOID OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)	override {}
+	virtual BOOL OnReadyWrite(PVOID pv, UINT events)				override {return TRUE;}
+	virtual BOOL OnHungUp(PVOID pv, UINT events)					override {return TRUE;}
+	virtual BOOL OnError(PVOID pv, UINT events)						override {return TRUE;}
 	virtual BOOL OnReadyPrivilege(PVOID pv, UINT events)			override {return TRUE;}
+	virtual VOID OnDispatchThreadStart(THR_ID tid)					override {}
 	virtual VOID OnDispatchThreadEnd(THR_ID tid)					override {}
 };
 
@@ -149,6 +154,9 @@ public:
 	BOOL CtlFD(FD fd, int op, UINT mask, PVOID pv);
 
 	BOOL ProcessIo(PVOID pv, UINT events);
+
+	FD AddTimer		(LLONG llInterval, PVOID pv);
+	BOOL DelTimer	(FD fdTimer);
 
 private:
 	int WorkerProc(PVOID pv = nullptr);

@@ -121,7 +121,9 @@ protected:
 	virtual void Reset();
 
 	virtual BOOL BeforeUnpause() {return TRUE;}
-	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+
+	virtual void OnWorkerThreadStart(THR_ID dwThreadID) {}
+	virtual void OnWorkerThreadEnd(THR_ID dwThreadID) {}
 
 	BOOL DoSendPackets(const WSABUF pBuffers[], int iCount);
 
@@ -189,7 +191,7 @@ public:
 
 	virtual ~CTcpClient()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

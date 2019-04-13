@@ -103,7 +103,8 @@ protected:
 	virtual void PrepareStart();
 	virtual void Reset();
 
-	virtual void OnWorkerThreadEnd(DWORD dwThreadID) {}
+	virtual void OnWorkerThreadStart(THR_ID dwThreadID) {}
+	virtual void OnWorkerThreadEnd(THR_ID dwThreadID) {}
 
 protected:
 	void SetReserved	(PVOID pReserved)	{m_pReserved = pReserved;}						
@@ -169,7 +170,7 @@ public:
 
 	virtual ~CUdpCast()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

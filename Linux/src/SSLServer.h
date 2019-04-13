@@ -53,7 +53,6 @@ protected:
 	virtual EnHandleResult FireAccept(TSocketObj* pSocketObj);
 	virtual EnHandleResult FireReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult FireShutdown();
 
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
@@ -83,7 +82,7 @@ public:
 
 	virtual ~CSSLServer()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

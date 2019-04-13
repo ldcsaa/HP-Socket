@@ -136,8 +136,7 @@ public:
 
 	virtual ~CHPThreadPool()
 	{
-		if(m_enState != SS_STOPPED)
-			Stop();
+		if(GetState() != SS_STOPPED) Stop();
 	}
 
 private:

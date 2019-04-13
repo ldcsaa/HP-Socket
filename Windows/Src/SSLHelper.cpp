@@ -23,9 +23,10 @@
  
 #include "stdafx.h"
 #include "SSLHelper.h"
-#include "SocketHelper.h"
 
 #ifdef _SSL_SUPPORT
+
+#include "SocketHelper.h"
 
 #include "openssl/ssl.h"
 #include "openssl/err.h"
@@ -56,9 +57,9 @@ CSSLInitializer CSSLInitializer::sm_instance;
 const DWORD CSSLSessionPool::DEFAULT_ITEM_CAPACITY		= CItemPool::DEFAULT_ITEM_CAPACITY;
 const DWORD CSSLSessionPool::DEFAULT_ITEM_POOL_SIZE		= CItemPool::DEFAULT_POOL_SIZE;
 const DWORD CSSLSessionPool::DEFAULT_ITEM_POOL_HOLD		= CItemPool::DEFAULT_POOL_HOLD;
-const DWORD CSSLSessionPool::DEFAULT_SESSION_LOCK_TIME	= 15 * 1000;
-const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_SIZE	= 600;
-const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_HOLD	= 600;
+const DWORD CSSLSessionPool::DEFAULT_SESSION_LOCK_TIME	= DEFAULT_OBJECT_CACHE_LOCK_TIME;
+const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_SIZE	= DEFAULT_OBJECT_CACHE_POOL_SIZE;
+const DWORD CSSLSessionPool::DEFAULT_SESSION_POOL_HOLD	= DEFAULT_OBJECT_CACHE_POOL_HOLD;
 
 CSSLInitializer::CSSLInitializer()
 {
@@ -630,11 +631,6 @@ void CSSLSessionPool::PutFreeSession(CSSLSession* pSession)
 	}
 }
 
-void CSSLSessionPool::ReleaseGCSession(BOOL bForce)
-{
-	::ReleaseGCObj(m_lsGCSession, m_dwSessionLockTime, bForce);
-}
-
 void CSSLSessionPool::Prepare()
 {
 	m_itPool.Prepare();
@@ -655,6 +651,11 @@ void CSSLSessionPool::Clear()
 	ENSURE(m_lsGCSession.IsEmpty());
 
 	m_itPool.Clear();
+}
+
+void CSSLSessionPool::ReleaseGCSession(BOOL bForce)
+{
+	::ReleaseGCObj(m_lsGCSession, m_dwSessionLockTime, bForce);
 }
 
 #endif

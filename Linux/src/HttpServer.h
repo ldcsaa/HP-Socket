@@ -38,6 +38,7 @@ template<class T, USHORT default_port> class CHttpServerT : public IComplexHttpR
 
 public:
 	using __super::Stop;
+	using __super::GetState;
 	using __super::SendPackets;
 	using __super::Disconnect;
 	using __super::HasStarted;
@@ -49,8 +50,11 @@ public:
 	using __super::IsSecure;
 	using __super::FireHandShake;
 	using __super::FindSocketObj;
+
+#ifdef _SSL_SUPPORT
 	using __super::StartSSLHandShake;
 	using __super::IsSSLAutoHandShake;
+#endif
 
 protected:
 	using CCleanThread	= CThread<CHttpServerT, VOID, UINT>;
@@ -181,7 +185,7 @@ public:
 
 	virtual ~CHttpServerT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

@@ -1,8 +1,65 @@
 ﻿# ======================================== #
+HP-Socket v5.5.1 API Update List:
+# ======================================== #
+--------------------
+1. UDP:
+--------------------
+Create_HP_UdpArqClient						(ADD)
+Create_HP_UdpArqServer						(ADD)
+Destroy_HP_UdpArqClient						(ADD)
+Destroy_HP_UdpArqServer						(ADD)
+Create_HP_UdpArqClientListener				(ADD)
+Create_HP_UdpArqServerListener				(ADD)
+Destroy_HP_UdpArqClientListener				(ADD)
+Destroy_HP_UdpArqServerListener				(ADD)
+HP_UdpArqServer_SetNoDelay					(ADD)
+HP_UdpArqServer_SetTurnoffCongestCtrl		(ADD)
+HP_UdpArqServer_SetFlushInterval			(ADD)
+HP_UdpArqServer_SetResendByAcks				(ADD)
+HP_UdpArqServer_SetSendWndSize				(ADD)
+HP_UdpArqServer_SetRecvWndSize				(ADD)
+HP_UdpArqServer_SetMinRto					(ADD)
+HP_UdpArqServer_SetMaxTransUnit				(ADD)
+HP_UdpArqServer_SetMaxMessageSize			(ADD)
+HP_UdpArqServer_SetHandShakeTimeout			(ADD)
+HP_UdpArqServer_IsNoDelay					(ADD)
+HP_UdpArqServer_IsTurnoffCongestCtrl		(ADD)
+HP_UdpArqServer_GetFlushInterval			(ADD)
+HP_UdpArqServer_GetResendByAcks				(ADD)
+HP_UdpArqServer_GetSendWndSize				(ADD)
+HP_UdpArqServer_GetRecvWndSize				(ADD)
+HP_UdpArqServer_GetMinRto					(ADD)
+HP_UdpArqServer_GetMaxTransUnit				(ADD)
+HP_UdpArqServer_GetMaxMessageSize			(ADD)
+HP_UdpArqServer_GetHandShakeTimeout			(ADD)
+HP_UdpArqServer_GetWaitingSendMessageCount	(ADD)
+HP_UdpArqClient_SetNoDelay					(ADD)
+HP_UdpArqClient_SetTurnoffCongestCtrl		(ADD)
+HP_UdpArqClient_SetFlushInterval			(ADD)
+HP_UdpArqClient_SetResendByAcks				(ADD)
+HP_UdpArqClient_SetSendWndSize				(ADD)
+HP_UdpArqClient_SetRecvWndSize				(ADD)
+HP_UdpArqClient_SetMinRto					(ADD)
+HP_UdpArqClient_SetMaxTransUnit				(ADD)
+HP_UdpArqClient_SetMaxMessageSize			(ADD)
+HP_UdpArqClient_SetHandShakeTimeout			(ADD)
+HP_UdpArqClient_IsNoDelay					(ADD)
+HP_UdpArqClient_IsTurnoffCongestCtrl		(ADD)
+HP_UdpArqClient_GetFlushInterval			(ADD)
+HP_UdpArqClient_GetResendByAcks				(ADD)
+HP_UdpArqClient_GetSendWndSize				(ADD)
+HP_UdpArqClient_GetRecvWndSize				(ADD)
+HP_UdpArqClient_GetMinRto					(ADD)
+HP_UdpArqClient_GetMaxTransUnit				(ADD)
+HP_UdpArqClient_GetMaxMessageSize			(ADD)
+HP_UdpArqClient_GetHandShakeTimeout			(ADD)
+HP_UdpArqClient_GetWaitingSendMessageCount	(ADD)
+
+# ======================================== #
 HP-Socket v5.4.4 API Update List:
 # ======================================== #
 --------------------
-1.Agent:
+1. Agent:
 --------------------
 HP_Agent_ConnectWithLocalAddress				(ADD)
 HP_Agent_ConnectWithExtraAndLocalAddressPort	(ADD)
@@ -11,7 +68,7 @@ HP_Agent_ConnectWithExtraAndLocalAddressPort	(ADD)
 HP-Socket v5.4.3 API Update List:
 # ======================================== #
 --------------------
-1.HTTP:
+1. HTTP:
 --------------------
 HP_HttpServer_StartHttp				(ADD)
 HP_HttpServer_SetHttpAutoStart		(ADD)
@@ -27,7 +84,7 @@ HP_HttpClient_IsHttpAutoStart		(ADD)
 HP-Socket v5.4.2 API Update List:
 # ======================================== #
 --------------------
-1.Server / Agent:
+1. Server / Agent:
 --------------------
 HP_Server_SetOnSendSyncPolicy		(ADD)
 HP_Server_GetOnSendSyncPolicy		(ADD)
@@ -35,7 +92,7 @@ HP_Agent_SetOnSendSyncPolicy		(ADD)
 HP_Agent_GetOnSendSyncPolicy		(ADD)
 
 --------------------
-2.SSL:
+2. SSL:
 --------------------
 HP_SSLServer_StartSSLHandShake		(ADD)
 HP_SSLServer_SetSSLAutoHandShake	(ADD)

@@ -226,6 +226,12 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 	#endif
 #endif
 
+#if defined(__arm64__) && !defined(__aarch64__)
+	#define __aarch64__
+#elif defined(__aarch64__) && !defined(__arm64__)
+	#define __arm64__
+#endif
+
 #ifdef __cplusplus
 	#define EXTERN_C			extern "C"
 	#define EXTERN_C_BEGIN		EXTERN_C {

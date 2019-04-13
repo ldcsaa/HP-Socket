@@ -785,14 +785,14 @@ struct integer_comp_func
 	}
 };
 
-typedef integer_comp_func<short>				short_comp_func;
-typedef integer_comp_func<int>					int_comp_func;
-typedef integer_comp_func<long>					long_comp_func;
-typedef integer_comp_func<int64_t>				int64_comp_func;
-typedef integer_comp_func<unsigned short>		ushort_comp_func;
-typedef integer_comp_func<unsigned int>			uint_comp_func;
-typedef integer_comp_func<unsigned long>		ulong_comp_func;
-typedef integer_comp_func<unsigned int64_t>		uint64_comp_func;
+typedef integer_comp_func<short>			short_comp_func;
+typedef integer_comp_func<int>				int_comp_func;
+typedef integer_comp_func<long>				long_comp_func;
+typedef integer_comp_func<int64_t>			int64_comp_func;
+typedef integer_comp_func<unsigned short>	ushort_comp_func;
+typedef integer_comp_func<unsigned int>		uint_comp_func;
+typedef integer_comp_func<unsigned long>	ulong_comp_func;
+typedef integer_comp_func<uint64_t>			uint64_comp_func;
 
 struct float_comp_func
 {
@@ -903,7 +903,7 @@ typedef integer_sort_func<unsigned int,		true>		uint_asc_sort_func;
 typedef integer_sort_func<long,				true>		long_asc_sort_func;
 typedef integer_sort_func<unsigned long,	true>		ulong_asc_sort_func;
 typedef integer_sort_func<int64_t,			true>		int64_asc_sort_func;
-typedef integer_sort_func<unsigned int64_t,	true>		uint64_asc_sort_func;
+typedef integer_sort_func<uint64_t,			true>		uint64_asc_sort_func;
 typedef integer_sort_func<short,			false>		short_desc_sort_func;
 typedef integer_sort_func<unsigned short,	false>		ushort_desc_sort_func;
 typedef integer_sort_func<int,				false>		int_desc_sort_func;
@@ -911,7 +911,7 @@ typedef integer_sort_func<unsigned int,		false>		uint_desc_sort_func;
 typedef integer_sort_func<long,				false>		long_desc_sort_func;
 typedef integer_sort_func<unsigned long,	false>		ulong_desc_sort_func;
 typedef integer_sort_func<int64_t,			false>		int64_desc_sort_func;
-typedef integer_sort_func<unsigned int64_t,	false>		uint64_desc_sort_func;
+typedef integer_sort_func<uint64_t,			false>		uint64_desc_sort_func;
 
 template<bool ASC = true>
 struct float_sort_func

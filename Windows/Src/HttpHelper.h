@@ -23,10 +23,12 @@
  
 #pragma once
 
-#include "SocketHelper.h"
-#include "HttpCookie.h"
+#include "HPTypeDef.h"
 
 #ifdef _HTTP_SUPPORT
+
+#include "SocketHelper.h"
+#include "HttpCookie.h"
 
 #include "../Common/Src/http/http_parser.h"
 
@@ -1322,9 +1324,9 @@ private:
 	TSSLHttpObjQueue	m_lsGCHttpObj;
 };
 
-template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_LOCK_TIME	= 15 * 1000;
-template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_SIZE	= 600;
-template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_HOLD	= 600;
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_LOCK_TIME	= DEFAULT_OBJECT_CACHE_LOCK_TIME;
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_SIZE	= DEFAULT_OBJECT_CACHE_POOL_SIZE;
+template<BOOL is_request, class T, class S> const DWORD CHttpObjPoolT<is_request, T, S>::DEFAULT_HTTPOBJ_POOL_HOLD	= DEFAULT_OBJECT_CACHE_POOL_HOLD;
 
 // ------------------------------------------------------------------------------------------------------------- //
 

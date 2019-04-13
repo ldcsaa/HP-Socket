@@ -44,7 +44,6 @@ Release:
 		4. x64/libhpsocket_d.so			- (64位/MBCS/DeBug)
 
 		<-- 静态链接库 -->
-		!!注意!!：使用 HPSocket 静态库时，需要在工程属性中定义预处理宏 -> HPSOCKET_STATIC_LIB
 		1. x86/static/libhpsocket.a		- (32位/MBCS/Release)
 		2. x86/static/libhpsocket_d.a	- (32位/MBCS/DeBug)
 		3. x64/static/libhpsocket.a		- (64位/MBCS/Release)
@@ -197,6 +196,10 @@ HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
 HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener);
 // 创建 IUdpCast 对象
 HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener);
+// 创建 IUdpArqServer 对象
+HPSOCKET_API IUdpArqServer* HP_Create_UdpArqServer(IUdpServerListener* pListener);
+// 创建 IUdpArqClient 对象
+HPSOCKET_API IUdpArqClient* HP_Create_UdpArqClient(IUdpClientListener* pListener);
 
 // 销毁 IUdpServer 对象
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
@@ -204,6 +207,10 @@ HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient);
 // 销毁 IUdpCast 对象
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast);
+// 销毁 IUdpArqServer 对象
+HPSOCKET_API void HP_Destroy_UdpArqServer(IUdpArqServer* pServer);
+// 销毁 IUdpArqClient 对象
+HPSOCKET_API void HP_Destroy_UdpArqClient(IUdpArqClient* pClient);
 
 #endif
 
@@ -396,12 +403,44 @@ struct UdpCast_Creator
 	}
 };
 
+// IUdpArqServer 对象创建器
+struct UdpArqServer_Creator
+{
+	static IUdpArqServer* Create(IUdpServerListener* pListener)
+	{
+		return HP_Create_UdpArqServer(pListener);
+	}
+
+	static void Destroy(IUdpArqServer* pServer)
+	{
+		HP_Destroy_UdpArqServer(pServer);
+	}
+};
+
+// IUdpArqClient 对象创建器
+struct UdpArqClient_Creator
+{
+	static IUdpArqClient* Create(IUdpClientListener* pListener)
+	{
+		return HP_Create_UdpArqClient(pListener);
+	}
+
+	static void Destroy(IUdpArqClient* pClient)
+	{
+		HP_Destroy_UdpArqClient(pClient);
+	}
+};
+
 // IUdpServer 对象智能指针
 typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
 // IUdpClient 对象智能指针
 typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
 // IUdpCast 对象智能指针
 typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
+// IUdpArqServer 对象智能指针
+typedef CHPSocketPtr<IUdpArqServer, IUdpServerListener, UdpArqServer_Creator>	CUdpArqServerPtr;
+// IUdpArqClient 对象智能指针
+typedef CHPSocketPtr<IUdpArqClient, IUdpClientListener, UdpArqClient_Creator>	CUdpArqClientPtr;
 
 #endif
 

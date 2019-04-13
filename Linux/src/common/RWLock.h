@@ -52,7 +52,6 @@ public:
 
 private:
 	int		m_nActive;
-	int		m_nReadCount;
 	THR_ID	m_dwWriterTID;
 
 	CSpinGuard			m_cs;

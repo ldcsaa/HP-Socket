@@ -751,12 +751,12 @@ BOOL CCookieMgr::SetCookieNoLock(const CCookie& cookie, BOOL bOnlyUpdateValueIfE
 	CCookieDomainMapI it = m_cookies.find(cookie.domain);
 
 	if(it == m_cookies.end())
-		it = m_cookies.emplace(move(CCookieDomainMap::value_type(cookie.domain, move(CCookiePathMap())))).first;
+		it = m_cookies.emplace(CCookieDomainMap::value_type(cookie.domain, CCookiePathMap())).first;
 
 	CCookiePathMapI it2 = it->second.find(cookie.path);
 
 	if(it2 == it->second.end())
-		it2 = it->second.emplace(move(CCookiePathMap::value_type(cookie.path, move(CCookieSet())))).first;
+		it2 = it->second.emplace(CCookiePathMap::value_type(cookie.path, CCookieSet())).first;
 
 	CCookieSet& cookies	= it2->second;
 	CCookieSetI it3		= cookies.find(cookie);

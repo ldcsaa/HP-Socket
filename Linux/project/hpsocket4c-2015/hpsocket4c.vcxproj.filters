@@ -31,6 +31,9 @@
     <Filter Include="Pool">
       <UniqueIdentifier>{0f453d67-4761-4d37-a757-65134f1a9059}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Kcp">
+      <UniqueIdentifier>{2d4c05ee-1396-4711-b9fc-ec2f73f36f91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp">
@@ -135,14 +138,26 @@
     <ClCompile Include="..\..\src\HttpServer.cpp">
       <Filter>HTTP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\http\http_parser.cpp">
-      <Filter>Common\Http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Thread.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\HPThreadPool.cpp">
       <Filter>Pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ArqHelper.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UdpArqClient.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UdpArqServer.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\kcp\ikcp.c">
+      <Filter>Common\Kcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\http\http_parser.c">
+      <Filter>Common\Http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -301,6 +316,18 @@
     </ClInclude>
     <ClInclude Include="..\..\src\HPThreadPool.h">
       <Filter>Pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ArqHelper.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\UdpArqClient.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\UdpArqServer.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\kcp\ikcp.h">
+      <Filter>Common\Kcp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -80,7 +80,7 @@ public:
 
 	virtual ~CSSLClient()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

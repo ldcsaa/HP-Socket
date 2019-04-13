@@ -51,43 +51,43 @@ public:
 };
 
 CListenerImpl s_listener;
-CUdpClient s_cast(&s_listener);
+CUdpClient s_client(&s_listener);
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(s_cast.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr))
+	if(s_client.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr))
 		::LogClientStart(g_app_arg.remote_addr, g_app_arg.port);
 	else
-		::LogClientStartFail(s_cast.GetLastError(), s_cast.GetLastErrorDesc());
+		::LogClientStartFail(s_client.GetLastError(), s_client.GetLastErrorDesc());
 }
 
 void OnCmdStop(CCommandParser* pParser)
 {
-	if(s_cast.Stop())
+	if(s_client.Stop())
 		::LogClientStop();
 	else
-		::LogClientStopFail(s_cast.GetLastError(), s_cast.GetLastErrorDesc());
+		::LogClientStopFail(s_client.GetLastError(), s_client.GetLastErrorDesc());
 }
 
 void OnCmdStatus(CCommandParser* pParser)
 {
-	pParser->PrintStatus(s_cast.GetState());
+	pParser->PrintStatus(s_client.GetState());
 }
 
 void OnCmdSend(CCommandParser* pParser)
 {
-	if(s_cast.Send((LPBYTE)(LPCTSTR)pParser->m_strMessage, pParser->m_strMessage.GetLength()))
-		::LogSend(s_cast.GetConnectionID(), pParser->m_strMessage);
+	if(s_client.Send((LPBYTE)(LPCTSTR)pParser->m_strMessage, pParser->m_strMessage.GetLength()))
+		::LogSend(s_client.GetConnectionID(), pParser->m_strMessage);
 	else
-		::LogSendFail(s_cast.GetConnectionID(), ::GetLastError(), ::GetLastErrorStr());
+		::LogSendFail(s_client.GetConnectionID(), ::GetLastError(), ::GetLastErrorStr());
 }
 
 void OnCmdPause(CCommandParser* pParser)
 {
-	if(s_cast.PauseReceive(pParser->m_bFlag))
-		::LogPause(s_cast.GetConnectionID(), pParser->m_bFlag);
+	if(s_client.PauseReceive(pParser->m_bFlag))
+		::LogPause(s_client.GetConnectionID(), pParser->m_bFlag);
 	else
-		::LogPauseFail(s_cast.GetConnectionID(), pParser->m_bFlag);
+		::LogPauseFail(s_client.GetConnectionID(), pParser->m_bFlag);
 }
 
 int main(int argc, char* const argv[])
@@ -97,7 +97,7 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.ParseArgs(argc, argv);
 
-	s_cast.SetDetectAttempts(g_app_arg.keep_alive ? UDP_DETECT_ATTEMPTS : 0);
+	s_client.SetDetectAttempts(g_app_arg.keep_alive ? UDP_DETECT_ATTEMPTS : 0);
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

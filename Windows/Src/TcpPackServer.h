@@ -162,7 +162,7 @@ public:
 
 	virtual ~CTcpPackServerT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

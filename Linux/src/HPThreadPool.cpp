@@ -423,7 +423,7 @@ BOOL CHPThreadPool::CheckStarting()
 {
 	if(::InterlockedCompareExchange(&m_enState, SS_STARTING, SS_STOPPED) != SS_STOPPED)
 	{
-		::SetLastError(ERROR_INVALID_OPERATION);
+		::SetLastError(ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -434,7 +434,7 @@ BOOL CHPThreadPool::CheckStarted()
 {
 	if(m_enState != SS_STARTED)
 	{
-		::SetLastError(ERROR_INVALID_OPERATION);
+		::SetLastError(ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -449,7 +449,7 @@ BOOL CHPThreadPool::CheckStoping()
 		while(m_enState != SS_STOPPED)
 			::WaitFor(5);
 
-		::SetLastError(ERROR_INVALID_OPERATION);
+		::SetLastError(ERROR_INVALID_STATE);
 		return FALSE;
 	}
 

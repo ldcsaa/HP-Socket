@@ -42,6 +42,7 @@ template<class T> class CTcpPackServerT : public IPackSocket, public T
 
 public:
 	using __super::Stop;
+	using __super::GetState;
 
 public:
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)
@@ -176,7 +177,7 @@ public:
 
 	virtual ~CTcpPackServerT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

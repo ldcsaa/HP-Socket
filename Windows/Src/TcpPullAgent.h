@@ -112,7 +112,7 @@ public:
 
 	virtual ~CTcpPullAgentT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

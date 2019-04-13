@@ -130,7 +130,7 @@ BOOL CUdpServer::CheckParams()
 		(m_enOnSendSyncPolicy >= OSSP_NONE && m_enOnSendSyncPolicy <= OSSP_CLOSE)				&&
 		((int)m_dwMaxConnectionCount > 0)														&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
-		((int)m_dwFreeSocketObjLockTime >= 0)													&&
+		((int)m_dwFreeSocketObjLockTime >= 1000)												&&
 		((int)m_dwFreeSocketObjPool >= 0)														&&
 		((int)m_dwFreeBufferObjPool >= 0)														&&
 		((int)m_dwFreeSocketObjHold >= 0)														&&
@@ -138,7 +138,7 @@ BOOL CUdpServer::CheckParams()
 		((int)m_dwMaxDatagramSize > 0 && m_dwMaxDatagramSize <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)	&&
 		((int)m_dwPostReceiveCount > 0)															&&
 		((int)m_dwDetectAttempts >= 0)															&&
-		((int)m_dwDetectInterval >= 0)															)
+		((int)m_dwDetectInterval >= 1000 || m_dwDetectInterval == 0)							)
 		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -165,7 +165,7 @@ BOOL CUdpServer::CheckStarting()
 		m_enState = SS_STARTING;
 	else
 	{
-		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -185,10 +185,10 @@ BOOL CUdpServer::CheckStoping()
 		}
 
 		while(m_enState != SS_STOPPED)
-			::WaitFor(10);
+			::WaitWithMessageLoop(10);
 	}
 
-	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 
 	return FALSE;
 }
@@ -308,7 +308,7 @@ BOOL CUdpServer::Stop()
 
 void CUdpServer::Reset()
 {
-	m_qeTimer.Reset();
+	m_tqDetect.Reset();
 	m_phSocket.Reset();
 
 	m_iRemainPostReceives	= 0;
@@ -388,7 +388,7 @@ void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag e
 	}
 
 	if(pSocketObj->hTimer != nullptr)
-		m_qeTimer.DeleteTimer(pSocketObj->hTimer);
+		m_tqDetect.DeleteTimer(pSocketObj->hTimer);
 
 	TUdpSocketObj::Release(pSocketObj);
 
@@ -413,7 +413,7 @@ void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, 
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
 	if(IsNeedDetectConnection())
-		pSocketObj->hTimer	= m_qeTimer.CreateTimer(DetectConnectionProc, pSocketObj, m_dwDetectInterval * 1000L);
+		pSocketObj->hTimer	= m_tqDetect.CreateTimer(DetectConnectionProc, pSocketObj, m_dwDetectInterval);
 
 	pSocketObj->pHolder		= this;
 	pSocketObj->connTime	= ::TimeGetTime();
@@ -803,7 +803,7 @@ void CUdpServer::WaitForWorkerThreadEnd()
 	while(remain > 0)
 	{
 		int wait = min(remain, MAXIMUM_WAIT_OBJECTS);
-		HANDLE* pHandles = (HANDLE*)_alloca(sizeof(HANDLE) * wait);
+		HANDLE* pHandles = CreateLocalObjects(HANDLE, wait);
 
 		for(int i = 0; i < wait; i++)
 			pHandles[i]	= m_vtWorkerThreads[i + index];
@@ -832,6 +832,7 @@ void CUdpServer::CloseCompletePort()
 UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 {
 	CUdpServer* pServer	= (CUdpServer*)pv;
+	pServer->OnWorkerThreadStart(SELF_THREAD_ID);
 
 	while(TRUE)
 	{
@@ -886,7 +887,7 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 		pServer->HandleIo(dwConnID, pBufferObj, dwBytes, dwErrorCode);
 	}
 
-	pServer->OnWorkerThreadEnd(::GetCurrentThreadId());
+	pServer->OnWorkerThreadEnd(SELF_THREAD_ID);
 
 	return 0;
 }
@@ -1002,9 +1003,9 @@ CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 				return 0;
 
 			pSocketObj = GetFreeSocketObj(dwConnID);
-			AddClientSocketObj(dwConnID, pSocketObj, pBufferObj->remoteAddr);
-
 			pSocketObj->csRecv.WaitToWrite();
+
+			AddClientSocketObj(dwConnID, pSocketObj, pBufferObj->remoteAddr);
 		}
 	}
 
@@ -1075,7 +1076,9 @@ void CUdpServer::HandleReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
+			pSocketObj->detectFails = 0;
 			if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
+
 			if(TriggerFireReceive(pSocketObj, pBufferObj) == HR_ERROR)
 			{
 				TRACE("<S-CNNID: %Iu> OnReceive() event return 'HR_ERROR', connection will be closed !\n", dwConnID);
@@ -1122,25 +1125,31 @@ BOOL CUdpServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOf
 {
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
 
+	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+	return DoSend(pSocketObj, pBuffer, iLength, iOffset);
+}
+
+BOOL CUdpServer::DoSend(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int iLength, int iOffset)
+{
 	int result = NO_ERROR;
 
-	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
+	if(TUdpSocketObj::IsValid(pSocketObj))
 	{
-		if(iOffset != 0) pBuffer += iOffset;
-		TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
-
-		if(TUdpSocketObj::IsValid(pSocketObj))
+		if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
 		{
+			if(iOffset != 0) pBuffer += iOffset;
+
 			TUdpBufferObjPtr bufPtr(m_bfObjPool, m_bfObjPool.PickFreeItem());
 			bufPtr->Cat(pBuffer, iLength);
 
 			result = SendInternal(pSocketObj, bufPtr);
 		}
 		else
-			result = ERROR_OBJECT_NOT_FOUND;
+			result = ERROR_INVALID_PARAMETER;
 	}
 	else
-		result = ERROR_INVALID_PARAMETER;
+		result = ERROR_OBJECT_NOT_FOUND;
 
 	if(result != NO_ERROR)
 		::SetLastError(result);
@@ -1196,7 +1205,6 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 		::SetLastError(result);
 
 	return (result == NO_ERROR);
-
 }
 
 int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr)
@@ -1323,19 +1331,18 @@ int CUdpServer::DoSendPack(TUdpSocketObj* pSocketObj)
 
 int CUdpServer::DoSendSafe(TUdpSocketObj* pSocketObj)
 {
-	if(pSocketObj->sndCount == 0 && !pSocketObj->IsSmooth())
+	long lRecvBuffSize = pSocketObj->GetSendBufferSize();
+
+	if(pSocketObj->sndCount < lRecvBuffSize && !pSocketObj->IsSmooth())
 	{
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))
 			return ERROR_OBJECT_NOT_FOUND;
 
-		if(pSocketObj->sndCount == 0)
+		if(pSocketObj->sndCount < lRecvBuffSize)
 			pSocketObj->smooth = TRUE;
 	}
-
-	if(!pSocketObj->IsCanSend())
-		return NO_ERROR;
 
 	int result = NO_ERROR;
 

@@ -133,7 +133,7 @@ BOOL CTcpAgent::CheckParams()
 		((int)m_dwMaxConnectionCount > 0)														&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
 		((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)									&&
-		((int)m_dwFreeSocketObjLockTime >= 0)													&&
+		((int)m_dwFreeSocketObjLockTime >= 1000)												&&
 		((int)m_dwFreeSocketObjPool >= 0)														&&
 		((int)m_dwFreeBufferObjPool >= 0)														&&
 		((int)m_dwFreeSocketObjHold >= 0)														&&
@@ -166,7 +166,7 @@ BOOL CTcpAgent::CheckStarting()
 		m_enState = SS_STARTING;
 	else
 	{
-		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -186,10 +186,10 @@ BOOL CTcpAgent::CheckStoping()
 		}
 
 		while(m_enState != SS_STOPPED)
-			::WaitFor(10);
+			::WaitWithMessageLoop(10);
 	}
 
-	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 
 	return FALSE;
 }
@@ -293,9 +293,9 @@ void CTcpAgent::Reset()
 	m_phSocket.Reset();
 	m_soAddr.Reset();
 
-	m_pfnConnectEx				= nullptr;
-	m_pfnDisconnectEx			= nullptr;
-	m_enState					= SS_STOPPED;
+	m_pfnConnectEx		= nullptr;
+	m_pfnDisconnectEx	= nullptr;
+	m_enState			= SS_STOPPED;
 }
 
 void CTcpAgent::DisconnectClientSocket()
@@ -774,7 +774,7 @@ void CTcpAgent::WaitForWorkerThreadEnd()
 	while(remain > 0)
 	{
 		int wait = min(remain, MAXIMUM_WAIT_OBJECTS);
-		HANDLE* pHandles = (HANDLE*)_alloca(sizeof(HANDLE) * wait);
+		HANDLE* pHandles = CreateLocalObjects(HANDLE, wait);
 
 		for(int i = 0; i < wait; i++)
 			pHandles[i]	= m_vtWorkerThreads[i + index];
@@ -803,6 +803,7 @@ void CTcpAgent::CloseCompletePort()
 UINT WINAPI CTcpAgent::WorkerThreadProc(LPVOID pv)
 {
 	CTcpAgent* pAgent = (CTcpAgent*)pv;
+	pAgent->OnWorkerThreadStart(SELF_THREAD_ID);
 
 	while(TRUE)
 	{
@@ -859,7 +860,7 @@ UINT WINAPI CTcpAgent::WorkerThreadProc(LPVOID pv)
 		pAgent->HandleIo(dwConnID, pSocketObj, pBufferObj, dwBytes, dwErrorCode);
 	}
 
-	pAgent->OnWorkerThreadEnd(::GetCurrentThreadId());
+	pAgent->OnWorkerThreadEnd(SELF_THREAD_ID);
 
 	return 0;
 }
@@ -1509,19 +1510,18 @@ int CTcpAgent::DoSendPack(TSocketObj* pSocketObj)
 
 int CTcpAgent::DoSendSafe(TSocketObj* pSocketObj)
 {
-	if(pSocketObj->sndCount == 0 && !pSocketObj->IsSmooth())
+	long lRecvBuffSize = pSocketObj->GetSendBufferSize();
+
+	if(pSocketObj->sndCount < lRecvBuffSize && !pSocketObj->IsSmooth())
 	{
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TSocketObj::IsValid(pSocketObj))
 			return ERROR_OBJECT_NOT_FOUND;
 
-		if(pSocketObj->sndCount == 0)
+		if(pSocketObj->sndCount < lRecvBuffSize)
 			pSocketObj->smooth = TRUE;
 	}
-
-	if(!pSocketObj->IsCanSend())
-		return NO_ERROR;
 
 	int result = NO_ERROR;
 

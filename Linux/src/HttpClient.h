@@ -34,6 +34,7 @@ template<class R, class T, USHORT default_port> class CHttpClientT : public R, p
 
 public:
 	using __super::Stop;
+	using __super::GetState;
 	using __super::SendPackets;
 	using __super::HasStarted;
 	using __super::GetRemoteHost;
@@ -41,8 +42,11 @@ public:
 	using __super::IsSecure;
 	using __super::IsConnected;
 	using __super::FireHandShake;
+
+#ifdef _SSL_SUPPORT
 	using __super::IsSSLAutoHandShake;
 	using __super::StartSSLHandShakeNoCheck;
+#endif
 
 protected:
 	using __super::SetLastError;
@@ -216,7 +220,7 @@ public:
 
 	virtual ~CHttpClientT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

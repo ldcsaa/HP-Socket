@@ -65,7 +65,7 @@ public:
 
 	virtual ~CTcpPullClientT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

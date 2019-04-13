@@ -32,6 +32,54 @@
 /*****************************************************************************************************************************************************/
 
 /************************************************************************
+名称：双接口模版类
+描述：定义双接口转换方法
+************************************************************************/
+template<class F, class S> class DualInterface : public F, public S
+{
+public:
+
+	/* this 转换为 F* */
+	inline static F* ToF(DualInterface* pThis)
+	{
+		return (F*)(pThis);
+	}
+
+	/* F* 转换为 this */
+	inline static DualInterface* FromF(F* pF)
+	{
+		return (DualInterface*)(pF);
+	}
+
+	/* this 转换为 S* */
+	inline static S* ToS(DualInterface* pThis)
+	{
+		return (S*)(F2S(ToF(pThis)));
+	}
+
+	/* S* 转换为 this */
+	inline static DualInterface* FromS(S* pS)
+	{
+		return FromF(S2F(pS));
+	}
+
+	/* S* 转换为 F* */
+	inline static F* S2F(S* pS)
+	{
+		return (F*)((char*)pS - sizeof(F));
+	}
+
+	/* F* 转换为 S* */
+	inline static S* F2S(F* pF)
+	{
+		return (S*)((char*)pF + sizeof(F));
+	}
+
+public:
+	virtual ~DualInterface() {}
+};
+
+/************************************************************************
 名称：复合 Socket 组件接口
 描述：定义复合 Socket 组件的所有操作方法和属性访问方法，复合 Socket 组件同时管理多个 Socket 连接
 ************************************************************************/
@@ -401,13 +449,84 @@ public:
 
 	/* 设置监测包尝试次数（0 则不发送监测跳包，如果超过最大尝试次数则认为已断线） */
 	virtual void SetDetectAttempts		(DWORD dwDetectAttempts)	= 0;
-	/* 设置监测包发送间隔（秒，0 不发送监测包） */
+	/* 设置监测包发送间隔（毫秒，0 不发送监测包） */
 	virtual void SetDetectInterval		(DWORD dwDetectInterval)	= 0;
 	/* 获取心跳检查次数 */
 	virtual DWORD GetDetectAttempts		()							= 0;
 	/* 获取心跳检查间隔 */
 	virtual DWORD GetDetectInterval		()							= 0;
 };
+
+/************************************************************************
+名称：Server/Agent ARQ 模型组件接口
+描述：定义 Server/Agent 组件的 ARQ 模型组件的所有操作方法
+************************************************************************/
+class IArqSocket
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+	virtual void SetNoDelay				(BOOL bNoDelay)				= 0;
+	/* 设置是否关闭拥塞控制（默认：FALSE，不关闭） */
+	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				= 0;
+	/* 设置数据刷新间隔（毫秒，默认：60） */
+	virtual void SetFlushInterval		(DWORD dwFlushInterval)		= 0;
+	/* 设置快速重传 ACK 跨越次数（默认：0，关闭快速重传） */
+	virtual void SetResendByAcks		(DWORD dwResendByAcks)		= 0;
+	/* 设置发送窗口大小（数据包数量，默认：128） */
+	virtual void SetSendWndSize			(DWORD dwSendWndSize)		= 0;
+	/* 设置接收窗口大小（数据包数量，默认：512） */
+	virtual void SetRecvWndSize			(DWORD dwRecvWndSize)		= 0;
+	/* 设置最小重传超时时间（毫秒，默认：30） */
+	virtual void SetMinRto				(DWORD dwMinRto)			= 0;
+	/* 设置最大传输单元（默认：0，与 SetMaxDatagramSize() 一致） */
+	virtual void SetMaxTransUnit		(DWORD dwMaxTransUnit)		= 0;
+	/* 设置最大数据包大小（默认：4096） */
+	virtual void SetMaxMessageSize		(DWORD dwMaxMessageSize)	= 0;
+	/* 设置握手超时时间（毫秒，默认：5000） */
+	virtual void SetHandShakeTimeout	(DWORD dwHandShakeTimeout)	= 0;
+
+	/* 检测是否开启 nodelay 模式 */
+	virtual BOOL IsNoDelay				()							= 0;
+	/* 检测是否关闭拥塞控制 */
+	virtual BOOL IsTurnoffCongestCtrl	()							= 0;
+	/* 获取数据刷新间隔 */
+	virtual DWORD GetFlushInterval		()							= 0;
+	/* 获取快速重传 ACK 跨越次数 */
+	virtual DWORD GetResendByAcks		()							= 0;
+	/* 获取发送窗口大小 */
+	virtual DWORD GetSendWndSize		()							= 0;
+	/* 获取接收窗口大小 */
+	virtual DWORD GetRecvWndSize		()							= 0;
+	/* 获取最小重传超时时间 */
+	virtual DWORD GetMinRto				()							= 0;
+	/* 获取最大传输单元 */
+	virtual DWORD GetMaxTransUnit		()							= 0;
+	/* 获取最大数据包大小 */
+	virtual DWORD GetMaxMessageSize		()							= 0;
+	/* 获取握手超时时间 */
+	virtual DWORD GetHandShakeTimeout	()							= 0;
+
+	/* 获取等待发送包数量 */
+	virtual BOOL GetWaitingSendMessageCount	(CONNID dwConnID, int& iCount)	= 0;
+
+public:
+	virtual ~IArqSocket() {}
+};
+
+/************************************************************************
+名称：UDP ARQ 通信服务端组件接口
+描述：继承了 ARQ 和 Server 接口
+************************************************************************/
+typedef	DualInterface<IArqSocket, IUdpServer>	IUdpArqServer;
 
 #endif
 
@@ -787,7 +906,7 @@ public:
 
 	/* 设置监测包尝试次数（0 则不发送监测跳包，如果超过最大尝试次数则认为已断线） */
 	virtual void SetDetectAttempts	(DWORD dwDetectAttempts)	= 0;
-	/* 设置监测包发送间隔（秒，0 不发送监测包） */
+	/* 设置监测包发送间隔（毫秒，0 不发送监测包） */
 	virtual void SetDetectInterval	(DWORD dwDetectInterval)	= 0;
 	/* 获取心跳检查次数 */
 	virtual DWORD GetDetectAttempts	()							= 0;
@@ -840,55 +959,78 @@ public:
 	virtual BOOL GetRemoteAddress	(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 };
 
-#endif
-
 /************************************************************************
-名称：双接口模版类
-描述：定义双接口转换方法
+名称：Client ARQ 模型组件接口
+描述：定义 Client 组件的 ARQ 模型组件的所有操作方法
 ************************************************************************/
-template<class F, class S> class DualInterface : public F, public S
+class IArqClient
 {
 public:
 
-	/* this 转换为 F* */
-	inline static F* ToF(DualInterface* pThis)
-	{
-		return (F*)(pThis);
-	}
-
-	/* F* 转换为 this */
-	inline static DualInterface* FromF(F* pF)
-	{
-		return (DualInterface*)(pF);
-	}
-
-	/* this 转换为 S* */
-	inline static S* ToS(DualInterface* pThis)
-	{
-		return (S*)(F2S(ToF(pThis)));
-	}
-
-	/* S* 转换为 this */
-	inline static DualInterface* FromS(S* pS)
-	{
-		return FromF(S2F(pS));
-	}
-
-	/* S* 转换为 F* */
-	inline static F* S2F(S* pS)
-	{
-		return (F*)((char*)pS - sizeof(F));
-	}
-
-	/* F* 转换为 S* */
-	inline static S* F2S(F* pF)
-	{
-		return (S*)((char*)pF + sizeof(F));
-	}
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
 
 public:
-	~DualInterface() {}
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+	virtual void SetNoDelay				(BOOL bNoDelay)				= 0;
+	/* 设置是否关闭拥塞控制（默认：FALSE，不关闭） */
+	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				= 0;
+	/* 设置数据刷新间隔（毫秒，默认：60） */
+	virtual void SetFlushInterval		(DWORD dwFlushInterval)		= 0;
+	/* 设置快速重传 ACK 跨越次数（默认：0，关闭快速重传） */
+	virtual void SetResendByAcks		(DWORD dwResendByAcks)		= 0;
+	/* 设置发送窗口大小（数据包数量，默认：128） */
+	virtual void SetSendWndSize			(DWORD dwSendWndSize)		= 0;
+	/* 设置接收窗口大小（数据包数量，默认：512） */
+	virtual void SetRecvWndSize			(DWORD dwRecvWndSize)		= 0;
+	/* 设置最小重传超时时间（毫秒，默认：30） */
+	virtual void SetMinRto				(DWORD dwMinRto)			= 0;
+	/* 设置最大传输单元（默认：0，与 SetMaxDatagramSize() 一致） */
+	virtual void SetMaxTransUnit		(DWORD dwMaxTransUnit)		= 0;
+	/* 设置最大数据包大小（默认：4096） */
+	virtual void SetMaxMessageSize		(DWORD dwMaxMessageSize)	= 0;
+	/* 设置握手超时时间（毫秒，默认：5000） */
+	virtual void SetHandShakeTimeout	(DWORD dwHandShakeTimeout)	= 0;
+
+	/* 检测是否开启 nodelay 模式 */
+	virtual BOOL IsNoDelay				()							= 0;
+	/* 检测是否关闭拥塞控制 */
+	virtual BOOL IsTurnoffCongestCtrl	()							= 0;
+	/* 获取数据刷新间隔 */
+	virtual DWORD GetFlushInterval		()							= 0;
+	/* 获取快速重传 ACK 跨越次数 */
+	virtual DWORD GetResendByAcks		()							= 0;
+	/* 获取发送窗口大小 */
+	virtual DWORD GetSendWndSize		()							= 0;
+	/* 获取接收窗口大小 */
+	virtual DWORD GetRecvWndSize		()							= 0;
+	/* 获取最小重传超时时间 */
+	virtual DWORD GetMinRto				()							= 0;
+	/* 获取最大传输单元 */
+	virtual DWORD GetMaxTransUnit		()							= 0;
+	/* 获取最大数据包大小 */
+	virtual DWORD GetMaxMessageSize		()							= 0;
+	/* 获取握手超时时间 */
+	virtual DWORD GetHandShakeTimeout	()							= 0;
+
+	/* 获取等待发送包数量 */
+	virtual BOOL GetWaitingSendMessageCount	(int& iCount)			= 0;
+
+public:
+	virtual ~IArqClient() {}
 };
+
+/************************************************************************
+名称：UDP ARQ 通信客户端组件接口
+描述：继承了 ARQ 和 Client 接口
+************************************************************************/
+typedef	DualInterface<IArqClient, IUdpClient>	IUdpArqClient;
+
+#endif
 
 /************************************************************************
 名称：Server/Agent PULL 模型组件接口

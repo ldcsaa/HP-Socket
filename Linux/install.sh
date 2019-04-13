@@ -1,24 +1,13 @@
 #!/bin/bash
 
-PRJ_DIR=project
+PACKAGE_PATH=$(cd "$(dirname "$0")"; pwd)
+SH_NAME=$(basename "$0")
+SCRIPT_DIR=script
+
 DEM_DIR=demo/Release
 CER_DIR=demo/ssl-cert
 DEM_FILE="hp-*.exe"
-LIB_DIR=lib
-HPSOCKET_LIB_NAME=hpsocket
-HPSOCKET4C_LIB_NAME=hpsocket4c
-HPSOCKET_LIB_DIR=$LIB_DIR/$HPSOCKET_LIB_NAME
-HPSOCKET4C_LIB_DIR=$LIB_DIR/$HPSOCKET4C_LIB_NAME
 LIB_FILE_PREFIX="lib${HPSOCKET_LIB_NAME}"
-INC_DIR=include
-PACKAGE_PATH=$(dirname "$0")
-SH_NAME=$(basename "$0")
-
-PLATFORM=
-VER_MAJOR=
-VER_MINOR=
-VER_REVISE=
-VER_BUILD=
 
 DEFAULT_PREFIX="/usr/local"
 PREFIX_PATH=
@@ -26,108 +15,41 @@ DEST_LIB_DIR=
 DEST_BIN_DIR=bin
 DEST_CER_DIR=hp-ssl-cert
 DEST_INC_DIR=include
-INSTALL_DEMO=1
+INSTALL_DEMO=0
 IS_UNINSTALL=0
 ACTION_NAME=
+
+source $PACKAGE_PATH/$SCRIPT_DIR/env.sh
 
 print_usage()
 {
 	printf "Usage: %s [...O.P.T.I.O.N.S...]\n" "$SH_NAME"
-	echo "-----------------+------------------------------------------------"
+	echo "-----------------+-------------------------------------------------------"
 	printf "  %-14s : %s\n" "-p|--prefix"	 "install/uninstall path (default: /usr/local)"
-	printf "  %-14s : %s\n" "-l|--libdir"	 "lib dir (default: x86 -> lib, x64 -> lib64)"
-	printf "  %-14s : %s\n" "-d|--with-demo" "install demos or not (default: true)"
+	printf "  %-14s : %s\n" "-l|--libdir"	 "lib dir (x86/ARM default: 'lib', x64 default: 'lib64')"
+	printf "  %-14s : %s\n" "-d|--with-demo" "install demos or not (default: false)"
 	printf "  %-14s : %s\n" "-u|--uninstall" "execute uninstall operation from install path"
-	printf "  %-14s : %s\n" "-v|--version"	 "print installing hp-socket version"
+	printf "  %-14s : %s\n" "-v|--version"	 "print hp-socket version"
 	printf "  %-14s : %s\n" "-h|--help"		 "print this usage message"
-	echo "-----------------+------------------------------------------------"
-}
-
-print_version()
-{
-	printf "HP-Socket for Linux v%d.%d.%d [BN:%02d]\n" $VER_MAJOR $VER_MINOR $VER_REVISE $VER_BUILD
+	echo "-----------------+-------------------------------------------------------"
 }
 
 print_config()
 {
 	printf "Action: %s\n" "$ACTION_NAME"
-	echo "-----------------------------------"
-	if [ $IS_UNINSTALL -eq 0 ]; then
-		printf "%14s : v%d.%d.%d [BN:%02d]\n" "HP-Socket" $VER_MAJOR $VER_MINOR $VER_REVISE $VER_BUILD
-	fi
-
+	echo "---------------+-------------------"
+	printf "%14s : v%d.%d.%d [BN:%02d]\n" "HP-Socket" $VER_MAJOR $VER_MINOR $VER_REVISE $VER_BUILD
 	printf "%14s : %s\n" "$ACTION_NAME path" "$PREFIX_PATH"
 	printf "%14s : %s\n" "lib path" "$PREFIX_PATH/$DEST_LIB_DIR"
+	printf "%14s : %s\n" "arch platform" "$PLATFORM"
 	
 	if [ $IS_UNINSTALL -eq 0 ]; then
-		printf "%14s : %s\n" "arch Platform" "$PLATFORM"
-		printf "%14s : %s\n" "install demos" "$([[ $INSTALL_DEMO -eq 1 ]] && echo 'true' || echo 'false')"
+		printf "%14s : %s\n" "install demos" $(int_to_bool "$INSTALL_DEMO")
 	fi
 	
-	echo "-----------------------------------"
+	echo "---------------+-------------------"
 
-	while true; do
-		read -p "Are you sure? [Y/n]: " ANSWER
-		
-		if [[ -z $ANSWER || $ANSWER == 'y' || $ANSWER == 'Y' ]]; then
-			return 0
-		elif [[ $ANSWER == 'n' || $ANSWER == 'N' ]]; then
-			echo "bye ~ bye ~"
-			exit 0
-		fi
-	done
-}
-
-parse_version()
-{
-	local VERSION=$(cat project/Version.props | grep --colour=never -E "<$1>\w+</$1>" | cut -d ">" -f 2 | cut -d "<" -f 1)
-	
-	if [ -z $VERSION ]; then
-		printf "Can not fetch HP-Socket version: %s\n" $1
-		exit 1
-	fi
-
-	echo $VERSION
-}
-
-check_platform()
-{
-	PLATFORM=
-	
-	if [ "$1" == "x86_64" ]; then
-		PLATFORM="x64"
-	elif [[ "$1" == "i686" || "$1" == "i386" ]]; then
-		PLATFORM="x86"
-	elif [[ "$1" =~ "arm" ]]; then
-		PLATFORM="ARM"
-	fi
-}
-
-parse_envs()
-{
-	local OS_NAME=$(uname -s | tr "[A-Z]" "[a-z]")
-
-	if [ "$OS_NAME" != "linux" ]; then
-		printf "OS Platform not supported: %s\n" $OS_NAME
-		exit 1
-	fi
-	
-	check_platform "$(arch | tr "[A-Z]" "[a-z]")"
-	
-	if [ -z $PLATFORM ]; then
-	
-		check_platform "$(uname -p | tr "[A-Z]" "[a-z]")"
-		
-		if [ -z $PLATFORM ]; then
-			printf "Can not determine Arch Platform\n"
-			exit 1
-		fi
-	fi
-
-	VER_MAJOR=$(parse_version "VER_MAJOR")
-	VER_MINOR=$(parse_version "VER_MINOR")
-	VER_REVISE=$(parse_version "VER_REVISE")
-	VER_BUILD=$(parse_version "VER_BUILD")
+	read_confirm
 }
 
 parse_args()
@@ -165,11 +87,9 @@ parse_args()
 				shift 2
 				;;
 			-d|--with-demo)
-				if [ "$2" == "true" ]; then
-					INSTALL_DEMO=1
-				elif [ "$2" == "false" ]; then
-					INSTALL_DEMO=0
-				else
+				INSTALL_DEMO=$(bool_to_int $2)
+				
+				if [ -z $INSTALL_DEMO ]; then
 					printf "Invalid arg value: %s %s\n" "$1" "$2"
 					print_usage
 					exit 2
@@ -216,12 +136,19 @@ _INSTALL_FILE_=
 set_install_file()
 {
 	_INSTALL_FILE_="$1"
-	printf "  > %s\n" "$_INSTALL_FILE_"
+	
+	if [ $IS_UNINSTALL -eq 0 ]; then
+		ACT="create"
+	else
+		ACT="remove"
+	fi
+	
+	printf "  > %s %s\n" "$ACT" "$_INSTALL_FILE_"
 }
 
 cp_lib_a()
 {
-	for FILE in $1/$PLATFORM/${LIB_FILE_PREFIX}*.a; do
+	for FILE in $1/${LIB_FILE_PREFIX}*.a; do
 		if [ -f "$FILE" ]; then
 			set_install_file $PREFIX_PATH/$DEST_LIB_DIR/$(basename $FILE)
 			cp -f $FILE $_INSTALL_FILE_
@@ -234,7 +161,7 @@ cp_lib_so()
 {
 	local DEST_LIB_PATH=$PREFIX_PATH/$DEST_LIB_DIR
 	
-	for FILE in $1/$PLATFORM/${LIB_FILE_PREFIX}*.so; do
+	for FILE in $1/${LIB_FILE_PREFIX}*.so; do
 		if [ -f "$FILE" ]; then
 			FILE_NAME=$(basename $FILE)
 			set_install_file $DEST_LIB_PATH/$FILE_NAME.$VER_MAJOR.$VER_MINOR.$VER_REVISE
@@ -299,19 +226,19 @@ do_install()
 	mkdir -p $PREFIX_PATH/$DEST_LIB_DIR
 	
 	# copy *.a
-	cp_lib_a $HPSOCKET_LIB_DIR
-	cp_lib_a $HPSOCKET4C_LIB_DIR
+	cp_lib_a $HPSOCKET_LIB_TARGET_DIR
+	cp_lib_a $HPSOCKET4C_LIB_TARGET_DIR
 	
 	# copy *.so
-	cp_lib_so $HPSOCKET_LIB_DIR
-	cp_lib_so $HPSOCKET4C_LIB_DIR
+	cp_lib_so $HPSOCKET_LIB_TARGET_DIR
+	cp_lib_so $HPSOCKET4C_LIB_TARGET_DIR
 	
 	mkdir -p $PREFIX_PATH/$DEST_INC_DIR
 	
 	# copy include dir
 	cp_inc $INC_DIR $PREFIX_PATH/$DEST_INC_DIR
 	
-	if [ $INSTALL_DEMO -eq 1 ]; then
+	if [[ $INSTALL_DEMO -eq 1 && -d $DEM_DIR/$PLATFORM && "$(ls -A $DEM_DIR/$PLATFORM)" != "" ]]; then
 		# copy demo .exe files
 		mkdir -p $PREFIX_PATH/$DEST_BIN_DIR
 		cp_bin_exe
@@ -368,9 +295,6 @@ do_uninstall()
 	rm_empty_dir $PREFIX_PATH
 }
 
-cd $PACKAGE_PATH
-
-parse_envs
 parse_args "$@"
 print_config
 

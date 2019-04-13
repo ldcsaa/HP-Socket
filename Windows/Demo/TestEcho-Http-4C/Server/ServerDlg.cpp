@@ -534,13 +534,14 @@ EnHttpParseResult CServerDlg::OnUpgrade(HP_HttpServer pSender, HP_CONNID dwConnI
 		header[2].name	= "Sec-WebSocket-Accept";
 		header[2].value	= strAccept;
 
+		CStringA strFirst;
 		LPCSTR lpszProtocol = nullptr;
 
 		if(::HP_HttpServer_GetHeader(pSender, dwConnID, "Sec-WebSocket-Protocol", &lpszProtocol))
 		{
 			int i = 0;
 			CStringA strProtocol(lpszProtocol);
-			CStringA strFirst = strProtocol.Tokenize(", ", i);
+			strFirst = strProtocol.Tokenize(", ", i);
 
 			if(!strFirst.IsEmpty())
 			{

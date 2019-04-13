@@ -38,7 +38,15 @@
 #include <arpa/inet.h>
 
 #ifdef _ZLIB_SUPPORT
+
+#if defined(ZLIB_CONST) && !defined(z_const)
+	#define z_const const
+#else
+	#define z_const
+#endif
+
 #include <zlib.h>
+
 #endif
 
 using ADDRESS_FAMILY	= sa_family_t;
@@ -70,15 +78,15 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* Server/Agent 默认最大连接数 */
 #define DEFAULT_MAX_CONNECTION_COUNT			10000
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
-#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		(30 * 1000)
+#define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		DEFAULT_OBJECT_CACHE_LOCK_TIME
 /* Server/Agent 默认 Socket 缓存池大小 */
-#define DEFAULT_FREE_SOCKETOBJ_POOL				600
+#define DEFAULT_FREE_SOCKETOBJ_POOL				DEFAULT_OBJECT_CACHE_POOL_SIZE
 /* Server/Agent 默认 Socket 缓存池回收阀值 */
-#define DEFAULT_FREE_SOCKETOBJ_HOLD				600
+#define DEFAULT_FREE_SOCKETOBJ_HOLD				DEFAULT_OBJECT_CACHE_POOL_HOLD
 /* Server/Agent 默认内存块缓存池大小 */
-#define DEFAULT_FREE_BUFFEROBJ_POOL				1200
+#define DEFAULT_FREE_BUFFEROBJ_POOL				DEFAULT_BUFFER_CACHE_POOL_SIZE
 /* Server/Agent 默认内存块缓存池回收阀值 */
-#define DEFAULT_FREE_BUFFEROBJ_HOLD				1200
+#define DEFAULT_FREE_BUFFEROBJ_HOLD				DEFAULT_BUFFER_CACHE_POOL_HOLD
 /* Client 默认内存块缓存池大小 */
 #define DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	60
 /* Client 默认内存块缓存池回收阀值 */
@@ -89,7 +97,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 #define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
 
 /* TCP 默认通信数据缓冲区大小 */
-#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_SIZE
+#define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
 /* TCP 默认心跳包间隔 */
 #define DEFALUT_TCP_KEEPALIVE_TIME				(60 * 1000)
 /* TCP 默认心跳确认包检测间隔 */
@@ -98,7 +106,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 #define DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	SOMAXCONN
 
 /* UDP 最大数据报文最大长度 */
-#define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			DEFAULT_BUFFER_SIZE
+#define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
 /* UDP 默认数据报文最大长度 */
 #define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1432
 /* UDP 默认 Receive 预投递数量 */
@@ -106,7 +114,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* UDP 默认监测包尝试次数 */
 #define DEFAULT_UDP_DETECT_ATTEMPTS				3
 /* UDP 默认监测包发送间隔 */
-#define DEFAULT_UDP_DETECT_INTERVAL				60
+#define DEFAULT_UDP_DETECT_INTERVAL				(60 * 1000)
 
 /* TCP Pack 包长度位数 */
 #define TCP_PACK_LENGTH_BITS					22
@@ -135,6 +143,8 @@ using SOCKADDR_IN6		= sockaddr_in6;
 #define InetPton								inet_pton
 #define InetNtop								inet_ntop
 #define closesocket								close
+
+#define ENSURE_STOP()							{if(GetState() != SS_STOPPED) Stop();}
 
 typedef struct hp_addr
 {
@@ -515,7 +525,7 @@ struct TUdpSocketObj : public TSocketObjBase
 
 	CBufferObjPool&		itPool;
 
-	CSimpleRWLock		lcIo;
+	CRWLock				lcIo;
 	CReentrantCriSec	csSend;
 
 	TBufferObjList		sndBuff;
@@ -554,6 +564,8 @@ struct TUdpSocketObj : public TSocketObjBase
 	static void Release(TUdpSocketObj* pSocketObj)
 	{
 		__super::Release(pSocketObj);
+
+		pSocketObj->ClearRecvQueue();
 		pSocketObj->sndBuff.Release();
 	}
 
@@ -569,7 +581,7 @@ struct TUdpSocketObj : public TSocketObjBase
 		{
 			pSocketObj->SetConnected(FALSE);
 
-			CWriteLock			 locallock(pSocketObj->lcIo);
+			CReentrantWriteLock	 locallock(pSocketObj->lcIo);
 			CReentrantCriSecLock locallock2(pSocketObj->csSend);
 
 			if(TSocketObjBase::IsValid(pSocketObj))

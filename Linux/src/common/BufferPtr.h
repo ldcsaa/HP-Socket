@@ -123,6 +123,7 @@ public:
 	T&			Get(int i)				{return *(m_pch + i);}
 	const T&	Get(int i)		const	{return *(m_pch + i);}
 	size_t		Size()			const	{return m_size;}
+	size_t		Capacity()		const	{return m_capacity;}
 	bool		IsValid()		const	{return m_pch != 0;}
 
 	operator							T*	()									{return Ptr();}

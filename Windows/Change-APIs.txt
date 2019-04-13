@@ -1,4 +1,61 @@
 # ======================================== #
+HP-Socket v5.5.1 API 更新列表：
+# ======================================== #
+--------------------
+1、UDP:
+--------------------
+Create_HP_UdpArqClient						(增加)
+Create_HP_UdpArqServer						(增加)
+Destroy_HP_UdpArqClient						(增加)
+Destroy_HP_UdpArqServer						(增加)
+Create_HP_UdpArqClientListener				(增加)
+Create_HP_UdpArqServerListener				(增加)
+Destroy_HP_UdpArqClientListener				(增加)
+Destroy_HP_UdpArqServerListener				(增加)
+HP_UdpArqServer_SetNoDelay					(增加)
+HP_UdpArqServer_SetTurnoffCongestCtrl		(增加)
+HP_UdpArqServer_SetFlushInterval			(增加)
+HP_UdpArqServer_SetResendByAcks				(增加)
+HP_UdpArqServer_SetSendWndSize				(增加)
+HP_UdpArqServer_SetRecvWndSize				(增加)
+HP_UdpArqServer_SetMinRto					(增加)
+HP_UdpArqServer_SetMaxTransUnit				(增加)
+HP_UdpArqServer_SetMaxMessageSize			(增加)
+HP_UdpArqServer_SetHandShakeTimeout			(增加)
+HP_UdpArqServer_IsNoDelay					(增加)
+HP_UdpArqServer_IsTurnoffCongestCtrl		(增加)
+HP_UdpArqServer_GetFlushInterval			(增加)
+HP_UdpArqServer_GetResendByAcks				(增加)
+HP_UdpArqServer_GetSendWndSize				(增加)
+HP_UdpArqServer_GetRecvWndSize				(增加)
+HP_UdpArqServer_GetMinRto					(增加)
+HP_UdpArqServer_GetMaxTransUnit				(增加)
+HP_UdpArqServer_GetMaxMessageSize			(增加)
+HP_UdpArqServer_GetHandShakeTimeout			(增加)
+HP_UdpArqServer_GetWaitingSendMessageCount	(增加)
+HP_UdpArqClient_SetNoDelay					(增加)
+HP_UdpArqClient_SetTurnoffCongestCtrl		(增加)
+HP_UdpArqClient_SetFlushInterval			(增加)
+HP_UdpArqClient_SetResendByAcks				(增加)
+HP_UdpArqClient_SetSendWndSize				(增加)
+HP_UdpArqClient_SetRecvWndSize				(增加)
+HP_UdpArqClient_SetMinRto					(增加)
+HP_UdpArqClient_SetMaxTransUnit				(增加)
+HP_UdpArqClient_SetMaxMessageSize			(增加)
+HP_UdpArqClient_SetHandShakeTimeout			(增加)
+HP_UdpArqClient_IsNoDelay					(增加)
+HP_UdpArqClient_IsTurnoffCongestCtrl		(增加)
+HP_UdpArqClient_GetFlushInterval			(增加)
+HP_UdpArqClient_GetResendByAcks				(增加)
+HP_UdpArqClient_GetSendWndSize				(增加)
+HP_UdpArqClient_GetRecvWndSize				(增加)
+HP_UdpArqClient_GetMinRto					(增加)
+HP_UdpArqClient_GetMaxTransUnit				(增加)
+HP_UdpArqClient_GetMaxMessageSize			(增加)
+HP_UdpArqClient_GetHandShakeTimeout			(增加)
+HP_UdpArqClient_GetWaitingSendMessageCount	(增加)
+
+# ======================================== #
 HP-Socket v5.4.4 API 更新列表：
 # ======================================== #
 --------------------

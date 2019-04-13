@@ -36,6 +36,19 @@ using namespace std;
 
 /* 最大工作线程数 */
 #define MAX_WORKER_THREAD_COUNT			500
+/* 默认对象缓存对象锁定时间 */
+#define DEFAULT_OBJECT_CACHE_LOCK_TIME	(20 * 1000)
+/* 默认对象缓存池大小 */
+#define DEFAULT_OBJECT_CACHE_POOL_SIZE	600
+/* 默认对象缓存池回收阀值 */
+#define DEFAULT_OBJECT_CACHE_POOL_HOLD	600
+/* 默认内存块缓存容量 */
+#define DEFAULT_BUFFER_CACHE_CAPACITY	4096
+/* 默认内存块缓存池大小 */
+#define DEFAULT_BUFFER_CACHE_POOL_SIZE	1024
+/* 默认内存块缓存池回收阀值 */
+#define DEFAULT_BUFFER_CACHE_POOL_HOLD	1024
+
 
 #define SysGetSystemConfig				sysconf
 #define SysGetSystemInfo				sysinfo
@@ -48,7 +61,7 @@ using namespace std;
 	#define SysGetNumberOfProcessors()	sysconf(_SC_NPROCESSORS_ONLN)
 #endif
 
-#define DEFAULT_BUFFER_SIZE				GetDefaultBufferSize()
+#define SYS_PAGE_SIZE					GetSysPageSize()
 
 #define PROCESSOR_COUNT					(::SysGetNumberOfProcessors())
 #define GetCurrentProcessId				getpid
@@ -79,7 +92,7 @@ inline void __asm_pause()				{__asm_nop();}
 #define YieldProcessor					__asm_pause
 #define SwitchToThread					sched_yield
 
-DWORD GetDefaultBufferSize();
+DWORD GetSysPageSize();
 DWORD GetDefaultWorkerThreadCount();
 
 
@@ -95,12 +108,6 @@ DWORD GetDefaultWorkerThreadCount();
 	#define ppoll(fd, nfds, ptmspec, sig)							poll((fd), (nfds), ((ptmspec) == nullptr) ? -1 : ((ptmspec)->tv_sec * 1000 + (ptmspec)->tv_nsec / 1000000))
 	#define epoll_create1(flag)										epoll_create(32)
 	#define epoll_pwait(epfd, events, maxevents, timeout, sigmask)	epoll_wait((epfd), (events), (maxevents), (timeout))
-
-	extern int sigaddset(sigset_t*, int);
-	extern int sigdelset(sigset_t*, int);
-	extern int sigemptyset(sigset_t*);
-	extern int sigfillset(sigset_t*);
-	extern int sigismember(const sigset_t*, int);
 
 #endif
 #endif

@@ -51,7 +51,6 @@ protected:
 	virtual EnHandleResult FireConnect(TAgentSocketObj* pSocketObj);
 	virtual EnHandleResult FireReceive(TAgentSocketObj* pSocketObj, const BYTE* pData, int iLength);
 	virtual EnHandleResult FireClose(TAgentSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult FireShutdown();
 
 	virtual BOOL CheckParams();
 	virtual void PrepareStart();
@@ -81,7 +80,7 @@ public:
 
 	virtual ~CSSLAgent()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

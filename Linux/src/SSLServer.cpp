@@ -53,6 +53,7 @@ void CSSLServer::PrepareStart()
 
 void CSSLServer::Reset()
 {
+	m_sslPool.Clear();
 	m_sslCtx.RemoveThreadLocalState();
 
 	__super::Reset();
@@ -116,15 +117,6 @@ EnHandleResult CSSLServer::FireClose(TSocketObj* pSocketObj, EnSocketOperation e
 
 	if(pSession != nullptr)
 		m_sslPool.PutFreeSession(pSession);
-
-	return result;
-}
-
-EnHandleResult CSSLServer::FireShutdown()
-{
-	EnHandleResult result = DoFireShutdown();
-
-	m_sslPool.Clear();
 
 	return result;
 }

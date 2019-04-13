@@ -162,7 +162,7 @@ public:
 
 	virtual ~CTcpPackAgentT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

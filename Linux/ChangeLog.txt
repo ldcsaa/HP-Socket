@@ -1,4 +1,22 @@
 ﻿==========================================================================================
+v5.5.1 Update:
+==========================================================================================
+
+> Add ARQ UDP TCP Component
+-----------------
+1. Add ARQ UDP component: IUdpArqServer, IUdpArqClient.
+2. Add ARQ UDP test demo "testecho-arq" and performance test demo testecho-arq-pfm.
+3. For details on the ARQ UDP components, please refer to document <HP-Socket Development Guide>.
+
+> Other Update
+-----------------
+1. .net core SDK adds UDP components implementation classes.
+2. provided shell script 'compile.sh' to compile hp-socket libs in local machine.
+3. provided Android NDK build script (script directory: /project/android-ndk).
+4. Optimize IUdpServer component to fix potential defects.
+5. jemalloc upgrade to version 5.2.0
+
+==========================================================================================
 v5.4.4 Update:
 ==========================================================================================
 

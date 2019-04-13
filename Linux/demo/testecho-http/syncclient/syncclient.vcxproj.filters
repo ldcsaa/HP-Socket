@@ -75,11 +75,11 @@
     <ClCompile Include="..\..\..\src\SSLHelper.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\http\http_parser.cpp">
-      <Filter>Common\Http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Thread.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\http\http_parser.c">
+      <Filter>Common\Http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

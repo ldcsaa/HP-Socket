@@ -55,7 +55,7 @@
 #define DEF_HTTP_PORT			8080
 #define DEF_HTTPS_PORT			8443
 
-#define TCP_KEEPALIVE_TIME		(30 * 1000)
+#define TCP_KEEPALIVE_TIME		(60 * 1000)
 #define UDP_DETECT_ATTEMPTS		3
 
 enum EnAppState

@@ -24,9 +24,10 @@
 #pragma once
 
 #include "HPTypeDef.h"
-#include "../Common/Src/BufferPool.h"
 
 #ifdef _SSL_SUPPORT
+
+#include "../Common/Src/BufferPool.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4005)

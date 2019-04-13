@@ -296,12 +296,16 @@ void CClientDlg::OnBnClickedStop()
 {
 	SetAppState(ST_STOPPING);
 
+	::LogClientStopping(m_vtClients.Size());
+
 	for(size_t i = 0; i < m_vtClients.Size(); i++)
 	{
 		CTcpClientPtr* pSocket = m_vtClients[i];
 
 		if((*pSocket)->Stop())
-			::LogClientStopping((DWORD)i + 1);
+		{
+
+		}
 		//else
 		//	ASSERT(FALSE);
 	}

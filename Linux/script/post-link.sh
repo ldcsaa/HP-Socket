@@ -22,13 +22,15 @@ add_dependent()
 {
 	local FILE_NAME="lib$1.a"
 	
-	rm -rf $OBJ_TEMP_DIR/*
-	
-	cd $OBJ_TEMP_DIR
-	ar -x $DEPENDENT_PATH/$FILE_NAME
-	cd $OUT_PATH
-	
-	ar -csr $TARGET_A_NAME $OBJ_TEMP_DIR/*.o
+	if [ -f $DEPENDENT_PATH/$FILE_NAME ]; then
+		rm -rf $OBJ_TEMP_DIR/*
+		
+		cd $OBJ_TEMP_DIR
+		ar -x $DEPENDENT_PATH/$FILE_NAME
+		
+		cd $OUT_PATH
+		ar -csr $TARGET_A_NAME $OBJ_TEMP_DIR/*.o
+	fi
 }
 
 $SCRIPT_PATH/pre-link.sh $OUT_PATH $TARGET_NAME
@@ -41,9 +43,9 @@ ln -snf $TARGET_SO_NAME $TARGET_SO_NAME.$VER_MAJOR.$VER_MINOR.$VER_REVISE
 
 [[ -f "$TARGET_SO_NAME.$VER_MAJOR" &&  -d "$INTERMEDIATE_DIR" && $(ls -l $INTERMEDIATE_DIR/*.o | grep '^-' | wc -l) -gt 0 ]] || exit 2
 
-mkdir -p $OBJ_TEMP_DIR
-
-add_dependent jemalloc_pic
+if [ $AR_FLAG -ne 0 ]; then
+	mkdir -p $OBJ_TEMP_DIR
+fi
 
 if [ $(($AR_FLAG & 1)) -gt 0 ]; then
 	add_dependent crypto
@@ -52,8 +54,13 @@ fi
 
 if [ $(($AR_FLAG & 2)) -gt 0 ]; then
 	add_dependent z
-	#add_dependent http_parser
 fi
+
+if [ $(($AR_FLAG & 4)) -gt 0 ]; then
+	add_dependent jemalloc_pic
+fi
+
+cd $OUT_PATH
 
 rm -rf $OBJ_TEMP_DIR
 

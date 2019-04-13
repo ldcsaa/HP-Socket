@@ -37,6 +37,7 @@ template<class T, USHORT default_port> class CHttpAgentT : public IComplexHttpRe
 
 public:
 	using __super::Stop;
+	using __super::GetState;
 	using __super::SendPackets;
 	using __super::HasStarted;
 	using __super::GetRemoteHost;
@@ -47,8 +48,11 @@ public:
 	using __super::IsSecure;
 	using __super::FireHandShake;
 	using __super::FindSocketObj;
+
+#ifdef _SSL_SUPPORT
 	using __super::StartSSLHandShake;
 	using __super::IsSSLAutoHandShake;
+#endif
 
 protected:
 	using CHttpObjPool	= CHttpObjPoolT<FALSE, CHttpAgentT, TAgentSocketObj>;
@@ -181,7 +185,7 @@ public:
 
 	virtual ~CHttpAgentT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

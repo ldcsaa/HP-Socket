@@ -60,7 +60,7 @@ BOOL CTcpServer::CheckParams()
 		((int)m_dwAcceptSocketCount > 0)														&&
 		((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)									&&
 		((int)m_dwSocketListenQueue > 0)														&&
-		((int)m_dwFreeSocketObjLockTime >= 0)													&&
+		((int)m_dwFreeSocketObjLockTime >= 1000)												&&
 		((int)m_dwFreeSocketObjPool >= 0)														&&
 		((int)m_dwFreeBufferObjPool >= 0)														&&
 		((int)m_dwFreeSocketObjHold >= 0)														&&
@@ -93,7 +93,7 @@ BOOL CTcpServer::CheckStarting()
 		m_enState = SS_STARTING;
 	else
 	{
-		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+		SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 		return FALSE;
 	}
 
@@ -116,7 +116,7 @@ BOOL CTcpServer::CheckStoping()
 			::WaitFor(10);
 	}
 
-	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_OPERATION);
+	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
 
 	return FALSE;
 }
@@ -765,6 +765,11 @@ BOOL CTcpServer::OnHungUp(PVOID pv, UINT events)
 BOOL CTcpServer::OnError(PVOID pv, UINT events)
 {
 	return HandleClose((TSocketObj*)pv, SCF_ERROR, events);
+}
+
+VOID CTcpServer::OnDispatchThreadStart(THR_ID tid)
+{
+	OnWorkerThreadStart(tid);
 }
 
 VOID CTcpServer::OnDispatchThreadEnd(THR_ID tid)

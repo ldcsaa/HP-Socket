@@ -160,7 +160,7 @@ public:
 
 	virtual ~CHttpAgentT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

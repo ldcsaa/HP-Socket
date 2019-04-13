@@ -34,7 +34,7 @@ using namespace std;
 #define CACHE_LINE		64
 #define PACK_SIZE_OF(T)	(CACHE_LINE - sizeof(T) % CACHE_LINE)
 
-#if !defined (__x86_64__)
+#if !defined (__x86_64__) && !defined(__arm64__)
 	#pragma pack(push, 4)
 #endif
 
@@ -491,7 +491,7 @@ public:
 		TPTR pElement2 = nullptr;
 
 		if(pdwRealIndex == nullptr)
-			pdwRealIndex = (index_type*)alloca(sizeof(index_type));
+			pdwRealIndex = CreateLocalObject(index_type);
 
 		if(Get(dwIndex, &pElement2, pdwRealIndex) == GR_FAIL)
 			return FALSE;
@@ -738,7 +738,7 @@ template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, 
 template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, index_type, adjust_index>::E_MAX_STATUS	= (T*)0x0F;
 
 template <class T, class index_type, bool adjust_index> DWORD const CRingCache2<T, index_type, adjust_index>::MAX_SIZE	= 
-#if !defined(__x86_64__)
+#if !defined(__x86_64__) && !defined(__arm64__)
 																														  0x00FFFFFF
 #else
 																														  0xFFFFFFFF
@@ -1697,6 +1697,7 @@ template <class T> using CCASSimpleQueue	= CCASSimpleQueueX<T>;
 template<typename T>
 void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 {
+	static const int MIN_CHECK_INTERVAL = 1 * 1000;
 	static const int MAX_CHECK_INTERVAL = 15 * 1000;
 
 	T* pObj = nullptr;
@@ -1713,7 +1714,7 @@ void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 	}
 	else
 	{
-		if(lsGC.IsEmpty() || lsGC.GetCheckTimeGap() < min((int)(dwLockTime / 3), MAX_CHECK_INTERVAL))
+		if(lsGC.IsEmpty() || lsGC.GetCheckTimeGap() < max(min((int)(dwLockTime / 3), MAX_CHECK_INTERVAL), MIN_CHECK_INTERVAL))
 			return;
 
 		BOOL bFirst	= TRUE;
@@ -1752,6 +1753,6 @@ void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 	}
 }
 
-#if !defined (__x86_64__)
+#if !defined(__x86_64__) && !defined(__arm64__)
 	#pragma pack(pop)
 #endif

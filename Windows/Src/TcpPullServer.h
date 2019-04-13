@@ -113,7 +113,7 @@ public:
 
 	virtual ~CTcpPullServerT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

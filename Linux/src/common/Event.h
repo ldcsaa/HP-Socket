@@ -312,14 +312,17 @@ public:
 		}
 	}
 
-	BOOL Set(LLONG lStart, LLONG lInterval)
+	BOOL Set(LLONG llInterval, LLONG llStart = -1)
 	{
-		ASSERT_CHECK_EINVAL(lStart >= 0L && lInterval >= 0L);
+		ASSERT_CHECK_EINVAL(llInterval >= 0L);
+
+		if(llStart < 0)
+			llStart = llInterval;
 
 		itimerspec its;
 
-		::MillisecondToTimespec(lStart, its.it_value);
-		::MillisecondToTimespec(lInterval, its.it_interval);
+		::MillisecondToTimespec(llStart, its.it_value);
+		::MillisecondToTimespec(llInterval, its.it_interval);
 
 		int rs = timerfd_settime(m_tmr, 0, &its, nullptr);
 		return VERIFY_IS_NO_ERROR(rs);
@@ -329,19 +332,7 @@ public:
 	{
 		ASSERT(IsValid());
 
-		static const SSIZE_T SIZE = sizeof(ULLONG);
-
-		if(read(m_tmr, &v, SIZE) == SIZE)
-			ok = TRUE;
-		else
-		{
-			if(IS_WOULDBLOCK_ERROR())
-				ok = FALSE;
-			else
-				return FALSE;
-		}
-
-		return ok;
+		return ::ReadTimer(m_tmr, &v, &ok);
 	}
 
 	BOOL Reset()
@@ -380,7 +371,7 @@ public:
 	FD GetFD	()	{return m_tmr;}
 
 public:
-	CTimerEvent(bool bRealTimeClock =  FALSE)
+	CTimerEvent(bool bRealTimeClock = FALSE)
 	{ 
 		int iCID = (bRealTimeClock ? CLOCK_REALTIME : CLOCK_MONOTONIC);
 		m_tmr	 = timerfd_create(iCID, TFD_NONBLOCK | TFD_CLOEXEC);

@@ -28,6 +28,7 @@
 #include <sched.h>
 #include <sys/time.h>
 #include <sys/select.h>
+#include <sys/timerfd.h>
 
 #if !defined(__ANDROID__)
 	#include <sys/timeb.h>
@@ -170,6 +171,51 @@ timespec& GetFutureTimespec(LLONG ms, timespec& ts, clockid_t clkid)
 	return ts;
 }
 
+FD CreateTimer(LLONG llInterval, LLONG llStart, BOOL bRealTimeClock)
+{
+	ASSERT_CHECK_EINVAL(llInterval >= 0L);
+
+	if(llStart < 0)
+		llStart = llInterval;
+
+	FD fdTimer = timerfd_create((bRealTimeClock ? CLOCK_REALTIME : CLOCK_MONOTONIC), TFD_NONBLOCK | TFD_CLOEXEC);
+
+	itimerspec its;
+
+	::MillisecondToTimespec(llStart, its.it_value);
+	::MillisecondToTimespec(llInterval, its.it_interval);
+
+	if(IS_HAS_ERROR(timerfd_settime(fdTimer, 0, &its, nullptr)))
+	{
+		close(fdTimer);
+		fdTimer = INVALID_FD;
+	}
+
+	return fdTimer;
+}
+
+BOOL ReadTimer(FD tmr, ULLONG* pVal, BOOL* pRs)
+{
+	static const SSIZE_T SIZE = sizeof(ULLONG);
+
+	if(pVal == nullptr)
+		pVal = CreateLocalObject(ULLONG);
+	if(pRs == nullptr)
+		pRs = CreateLocalObject(BOOL);
+
+	if(read(tmr, pVal, SIZE) == SIZE)
+		*pRs = TRUE;
+	else
+	{
+		*pRs = FALSE;
+
+		if(!IS_WOULDBLOCK_ERROR())
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 BOOL fcntl_SETFL(FD fd, INT fl, BOOL bSet)
 {
 	int val = fcntl(fd, F_GETFL);
@@ -194,9 +240,9 @@ void __EXIT_FN_(void (*fn)(int), LPCSTR lpszFnName, int* lpiExitCode, int iErrno
 		lpszTitle = CreateLocalObjects(char, 50);
 
 		if(lpiExitCode)
-			sprintf((LPSTR)lpszTitle, "(#%d, %u) > %s(%d) [%d]", SELF_NATIVE_THREAD_ID, SELF_THREAD_ID, lpszFnName, *lpiExitCode, iErrno);
+			sprintf((LPSTR)lpszTitle, "(#%ld, %ld) > %s(%d) [%d]", SELF_NATIVE_THREAD_ID, SELF_THREAD_ID, lpszFnName, *lpiExitCode, iErrno);
 		else
-			sprintf((LPSTR)lpszTitle, "(#%d, %u) > %s() [%d]", SELF_NATIVE_THREAD_ID, SELF_THREAD_ID, lpszFnName, iErrno);
+			sprintf((LPSTR)lpszTitle, "(#%ld, %ld) > %s() [%d]", SELF_NATIVE_THREAD_ID, SELF_THREAD_ID, lpszFnName, iErrno);
 	}
 
 	if(lpszFile && iLine > 0)

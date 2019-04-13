@@ -60,20 +60,9 @@ BOOL CIODispatcher::Start(IIOHandler* pHandler, int iWorkerMaxEvents, int iWorke
 
 	if(llTimerInterval > 0)
 	{
-		m_evTimer = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+		m_evTimer = AddTimer(llTimerInterval, &m_evTimer);
 
 		if(IS_INVALID_FD(m_evTimer))
-			goto START_ERROR;
-
-		itimerspec its;
-
-		::MillisecondToTimespec(llTimerInterval, its.it_value);
-		::MillisecondToTimespec(llTimerInterval, its.it_interval);
-
-		if(!VERIFY_IS_NO_ERROR(timerfd_settime(m_evTimer, 0, &its, nullptr)))
-			goto START_ERROR;
-
-		if(!VERIFY(AddFD(m_evTimer, EPOLLIN | EPOLLET, &m_evTimer)))
 			goto START_ERROR;
 	}
 
@@ -170,6 +159,8 @@ BOOL CIODispatcher::CtlFD(FD fd, int op, UINT mask, PVOID pv)
 
 int CIODispatcher::WorkerProc(PVOID pv)
 {
+	m_pHandler->OnDispatchThreadStart(SELF_THREAD_ID);
+
 	BOOL bRun							= TRUE;
 	unique_ptr<epoll_event[]> pEvents	= make_unique<epoll_event[]>(m_iMaxEvents);
 
@@ -239,25 +230,19 @@ BOOL CIODispatcher::ProcessCommand(UINT events)
 
 BOOL CIODispatcher::ProcessTimer(UINT events)
 {
-	static const SSIZE_T SIZE = sizeof(LLONG);
-
 	if(events & _EPOLL_ALL_ERROR_EVENTS)
 		ERROR_ABORT();
 
 	if(!(events & EPOLLIN))
 		return TRUE;
 
-	BOOL isOK = TRUE;
-	LLONG llExpirations;
+	BOOL isOK = FALSE;
+	ULLONG ullExpirations;
 
-	if(read(m_evTimer, &llExpirations, SIZE) == SIZE)
-		m_pHandler->OnTimer(llExpirations);
+	if(::ReadTimer(m_evTimer, &ullExpirations, &isOK) && isOK)
+		m_pHandler->OnTimer(ullExpirations);
 	else
-	{
 		ASSERT(IS_WOULDBLOCK_ERROR());
-
-		isOK = FALSE;
-	}
 
 	return isOK;
 }
@@ -312,4 +297,35 @@ BOOL CIODispatcher::DoProcessIo(PVOID pv, UINT events)
 		return FALSE;
 
 	return TRUE;
+}
+
+FD CIODispatcher::AddTimer(LLONG llInterval, PVOID pv)
+{
+	FD fdTimer = ::CreateTimer(llInterval);
+
+	if(IS_VALID_FD(fdTimer))
+	{
+		if(!AddFD(fdTimer, EPOLLIN | EPOLLET, pv))
+		{
+			close(fdTimer);
+			fdTimer = INVALID_FD;
+		}
+	}
+
+	return fdTimer;
+}
+
+BOOL CIODispatcher::DelTimer(FD fdTimer)
+{
+	BOOL isOK = FALSE;
+
+	if(IS_VALID_FD(fdTimer))
+	{
+		if(DelFD(fdTimer))
+			isOK = TRUE;
+
+		close(fdTimer);
+	}
+
+	return isOK;
 }

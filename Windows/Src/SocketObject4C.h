@@ -352,6 +352,9 @@ typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener>						C_HP_UdpServer
 typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener>						C_HP_UdpClientListener;
 typedef C_HP_ClientListenerT<IUdpCast, IUdpCastListener>							C_HP_UdpCastListener;
 
+typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener, sizeof(IArqSocket)>	C_HP_UdpArqServerListener;
+typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener, sizeof(IArqClient)>	C_HP_UdpArqClientListener;
+
 #endif
 
 #ifdef _HTTP_SUPPORT
