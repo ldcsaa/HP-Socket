@@ -51,7 +51,7 @@ LOCAL_MODULE     := hpsocket_a
 LOCAL_MODULE_FILENAME := libhpsocket
 LOCAL_SRC_FILES  := $(MY_SRC_FILES) \
                     ../../../src/HPSocket.cpp \
-					../../../src/HPSocket-SSL.cpp
+                    ../../../src/HPSocket-SSL.cpp
 LOCAL_C_INCLUDES := $(MY_C_INCLUDES)
 LOCAL_CFLAGS     := $(MY_CFLAGS)
 LOCAL_CPPFLAGS   := $(MY_CPPFLAGS)
@@ -74,7 +74,7 @@ LOCAL_MODULE     := hpsocket4c_a
 LOCAL_MODULE_FILENAME := libhpsocket4c
 LOCAL_SRC_FILES  := $(MY_SRC_FILES) \
                     ../../../src/HPSocket4C.cpp \
-					../../../src/HPSocket4C-SSL.cpp
+                    ../../../src/HPSocket4C-SSL.cpp
 LOCAL_C_INCLUDES := $(MY_C_INCLUDES)
 LOCAL_CFLAGS     := $(MY_CFLAGS)
 LOCAL_CPPFLAGS   := $(MY_CPPFLAGS)
