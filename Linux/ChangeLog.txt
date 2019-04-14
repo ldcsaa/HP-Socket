@@ -15,6 +15,7 @@ v5.5.1 Update:
 3. provided Android NDK build script (script directory: /project/android-ndk).
 4. Optimize IUdpServer component to fix potential defects.
 5. jemalloc upgrade to version 5.2.0
+6. http-parser upgrade to version 2.9.1
 
 ==========================================================================================
 v5.4.4 Update:

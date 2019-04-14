@@ -12,6 +12,8 @@ v5.5.1 更新：
 -----------------
 1、C# SDK 增加 UDP 组件封装类
 2、优化 IUdpServer 组件，修复潜在缺陷
+3、jemalloc 升级到 5.2.0 版本
+4、http-parser 升级到 2.9.1 版本
 
 > 升级说明：
 -----------------
@@ -28,8 +30,8 @@ v5.4.4 更新：
 > 其他更新：
 -----------------
 1、代码优化
-2、http-parser 解析器升级到 2.9.0 版本
-3、OpenSSL 版本升级到 1.1.0j 版本
+2、http-parser 升级到 2.9.0 版本
+3、OpenSSL 升级到 1.1.0j 版本
 4、提供 _UDP_DISABLED 预编译宏用于移除 UDP 组件
 
 > 升级说明：
@@ -77,7 +79,7 @@ v5.4.2 更新：
 	1) OSSP_NONE：不同步（默认）
 	2) OSSP_CLOSE：同步 OnClose
 	3) OSSP_RECEIVE：同步 OnClose 和 OnReceive（只用于 TCP 组件）
-5、OpenSSL 版本升级到 1.1.0i 版本
+5、OpenSSL 升级到 1.1.0i 版本
 
 > 升级说明：
 -----------------
@@ -130,8 +132,8 @@ v5.3.1 更新：
 > 常规更新：
 -----------------
 1、修复 C# SDK 关于 SSL 初始化失败 Bug
-2、http-parser 解析器升级到 2.8.1 版本
-3、OpenSSL 版本升级到 1.1.0h 版本
+2、http-parser 升级到 2.8.1 版本
+3、OpenSSL 升级到 1.1.0h 版本
 4、提供 _ZLIB_DISABLED 预编译宏用于关闭 zlib 库功能
 
 > 升级说明：
@@ -176,7 +178,7 @@ v5.1.1 更新：
 -----------------
 1、TCP Agent 增加方法 HP_Agent_ConnectWithExtra()，支持在连接完成前绑定附加数据
 2、公共代码包 vc-common-src 版本升级到 v2.3.22
-3、OpenSSL 版本升级到 1.1.0g
+3、OpenSSL 升级到 1.1.0g
 
 > 升级说明：
 -----------------
@@ -232,7 +234,7 @@ v5.0.1 更新：
 > 其它更新：
 -----------------
 1、Demo 更新：所有 Demo 支持 IPv6；所有 SSL Demo 支持新的证书机制
-2、公共代码包 vc-common-src 版本升级到 v2.3.20
+2、公共代码包 vc-common-src 升级到 v2.3.20
 
 > 升级说明：
 -----------------
@@ -250,8 +252,8 @@ v4.3.1 更新：
 
 > 其它更新：
 -----------------
-1、公共代码包 vc-common-src 版本升级到 v2.3.19
-2、OpenSSL 版本升级到 1.1.0f
+1、公共代码包 vc-common-src 升级到 v2.3.19
+2、OpenSSL 升级到 1.1.0f
 3、优化 IServer/IAgent 组件，提升性能和稳定性
 
 > 升级说明：
@@ -277,8 +279,8 @@ v4.2.1 更新：
 > 其它更新：
 -----------------
 1、Demo 更新：HttpProxy，TestEcho-Http，TestEcho-Http-4C
-2、公共代码包 vc-common-src 版本升级到 v2.3.18
-3、OpenSSL 版本升级到 1.1.0e
+2、公共代码包 vc-common-src 升级到 v2.3.18
+3、OpenSSL 升级到 1.1.0e
 
 > 升级说明：
 -----------------
