@@ -118,7 +118,7 @@ template<class T, USHORT default_port> UINT CHttpServerT<T, default_port>::Clean
 	TRACE("---------------> Connection Cleaner Thread 0x%08X started <---------------", SELF_THREAD_ID);
 
 	pollfd pfd		 = {m_evCleaner.GetFD(), POLLIN};
-	DWORD dwInterval = max(MIN_HTTP_RELEASE_CHECK_INTERVAL, (m_dwReleaseDelay - MIN_HTTP_RELEASE_DELAY / 2));
+	DWORD dwInterval = MAX(MIN_HTTP_RELEASE_CHECK_INTERVAL, (m_dwReleaseDelay - MIN_HTTP_RELEASE_DELAY / 2));
 
 	while(HasStarted())
 	{

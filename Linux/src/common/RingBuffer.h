@@ -1714,7 +1714,7 @@ void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 	}
 	else
 	{
-		if(lsGC.IsEmpty() || lsGC.GetCheckTimeGap() < max(min((int)(dwLockTime / 3), MAX_CHECK_INTERVAL), MIN_CHECK_INTERVAL))
+		if(lsGC.IsEmpty() || lsGC.GetCheckTimeGap() < MAX(MIN((int)(dwLockTime / 3), MAX_CHECK_INTERVAL), MIN_CHECK_INTERVAL))
 			return;
 
 		BOOL bFirst	= TRUE;

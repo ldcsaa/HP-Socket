@@ -213,7 +213,7 @@ public:
 		{
 			if(m_bHeader)
 			{
-				iMin = min(m_iHeaderRemain, iRemain);
+				iMin = MIN(m_iHeaderRemain, iRemain);
 				memcpy(m_szHeader + m_iHeaderLen - m_iHeaderRemain, pTemp, iMin);
 
 				m_iHeaderRemain	-= iMin;
@@ -257,7 +257,7 @@ public:
 			}
 			else
 			{
-				iMin = (int)min(m_ullBodyRemain, (ULONGLONG)iRemain);
+				iMin = (int)MIN(m_ullBodyRemain, (ULONGLONG)iRemain);
 
 				if(m_lpszMask)
 				{

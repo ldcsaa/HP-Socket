@@ -193,12 +193,12 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 	#define MIN(a,b)			(((a) <= (b)) ? (a) : (b))
 #endif
 
-#if !defined(max)
-	#define max(a,b)			MAX(a,b)
+#if !defined(_max)
+	#define _max(a,b)			MAX(a,b)
 #endif
 
-#if !defined(min)
-	#define min(a,b)			MIN(a,b)
+#if !defined(_min)
+	#define _min(a,b)			MIN(a,b)
 #endif
 
 #if defined(NDEBUG)
