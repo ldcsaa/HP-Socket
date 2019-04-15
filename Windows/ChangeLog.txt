@@ -2,18 +2,18 @@
 v5.5.1 更新：
 ==========================================================================================
 
-> 增加 ARQ UDP 通信组件：
+> UDP 更新：
 -----------------
 1、增加 ARQ UDP 组件：IUdpArqServer、IUdpArqClient
 2、增加 ARQ UDP 示例 TestEcho-ARQ 和性能测试示例 TestEcho-ARQ-PFM
 3、ARQ UDP 组件详细说明请参考开发文档 《HP-Socket Development Guide》
+4、优化 IUdpServer 组件，修复潜在缺陷
+5、C# SDK 增加 UDP 组件封装类
 
 > 其他更新：
 -----------------
-1、C# SDK 增加 UDP 组件封装类
-2、优化 IUdpServer 组件，修复潜在缺陷
-3、jemalloc 升级到 5.2.0 版本
-4、http-parser 升级到 2.9.1 版本
+1、jemalloc 升级到 5.2.0 版本
+2、http-parser 升级到 2.9.1 版本
 
 > 升级说明：
 -----------------
