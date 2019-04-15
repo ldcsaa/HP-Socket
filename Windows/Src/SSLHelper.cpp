@@ -413,7 +413,10 @@ BOOL CSSLSession::WriteRecvChannel(const BYTE* pData, int iLength)
 	if(bytes > 0)
 		ASSERT(bytes == iLength);
 	else if(!BIO_should_retry(m_bioRecv))
+	{
+		::SetLastError(ERROR_INVALID_DATA);
 		isOK = FALSE;
+	}
 
 	return isOK;
 }
@@ -491,7 +494,10 @@ BOOL CSSLSession::ReadSendChannel()
 	else if(BIO_should_retry(m_bioSend))
 		m_bufSend.len = 0;
 	else
+	{
+		::SetLastError(ERROR_INVALID_DATA);
 		isOK = FALSE;
+	}
 
 	return isOK;
 }
@@ -590,10 +596,9 @@ inline BOOL CSSLSession::IsFatalError(int iBytes)
 	}
 
 	if(iErrorCode == SSL_ERROR_SYSCALL && i == 1)
-	{
-		//ERR_clear_error();
 		return FALSE;
-	}
+
+	::SetLastError(WSAECONNRESET);
 
 	return TRUE;
 }
