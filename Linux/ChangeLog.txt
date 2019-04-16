@@ -14,8 +14,8 @@ v5.5.1 Update:
 -----------------
 1. provided shell script 'compile.sh' to compile hp-socket libs in local machine.
 2. provided Android NDK build script (script directory: /project/android-ndk).
-3. jemalloc upgrade to version 5.2.0
-4. http-parser upgrade to version 2.9.1
+3. http-parser upgrade to version 2.9.1
+4. jemalloc upgrade to version 5.2.0
 
 ==========================================================================================
 v5.4.4 Update:
