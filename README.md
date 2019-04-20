@@ -62,7 +62,7 @@ int main(int argc, char* const argv[])
 	// ... ... 
 	
 	// 6. (optional) Stop component object
-	s_pserver->Stop()
+	s_pserver->Stop();
 
 	return 0;
 	
@@ -113,7 +113,7 @@ int main(int argc, char* const argv[])
 	// ... ... 
 	
 	// 6. (optional) Stop component object
-	::HP_Agent_Stop(s_agent)
+	::HP_Agent_Stop(s_agent);
 
 	// 7. Destroy component object
 	::Destroy_HP_TcpPullAgent(s_agent);
