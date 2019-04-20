@@ -30,7 +30,7 @@ int main(int argc, char* const argv[])
 	// ... ... 
 	
 	// 6. (optional) Stop component object
-	s_pserver->Stop()
+	s_pserver->Stop();
 
 	return 0;
 	
