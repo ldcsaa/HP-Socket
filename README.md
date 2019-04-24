@@ -1,4 +1,7 @@
 # HP-Socket
+
+[![Join the chat at https://gitter.im/ldcsaa/community](https://badges.gitter.im/ldcsaa/community.svg)](https://gitter.im/ldcsaa/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 High Performance Network Framework
 ## Description
 - ***Server*** Based on IOCP/EPOLL communication model, combined with technology of memory pool, private heap etc., efficient memory management is implemented to support large scale and high concurrent communication scenarios.
