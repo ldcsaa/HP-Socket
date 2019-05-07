@@ -136,3 +136,11 @@ int main(int argc, char* const argv[])
 - ***HTTP组件***
 
 ![HTTP COmponent](https://gitee.com/uploads/images/2017/1214/143640_0eb6f9e4_81720.jpeg "HTTP Component - mini.jpg")
+
+## 引用项目
+
+- *[jemalloc](https://github.com/jemalloc/jemalloc)*
+- *[openssl](https://github.com/openssl/openssl)*
+- *[http-parser](https://github.com/nodejs/http-parser)*
+- *[zlib](https://github.com/madler/zlib)*
+- *[kcp](https://github.com/skywind3000/kcp)*
