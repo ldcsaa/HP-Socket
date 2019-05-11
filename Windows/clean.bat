@@ -29,8 +29,8 @@ for /f "delims=" %%i in ('dir /ad /b /s "netstandard2.0"') do (
 
 rd /s /q "Demo\Debug"
 
-rd /s /q "Demo\Other Languages Demos\C#\HPSocketCS\bin\Debug"
-rd /s /q "Demo\Other Languages Demos\C#\HPSocketCS\bin\Release"
+rd /s /q "Other Languages\C#\HPSocketCS\bin\Debug"
+rd /s /q "Other Languages\C#\HPSocketCS\bin\Release"
 
 set /a x=0
 
@@ -50,7 +50,7 @@ if %x% geq 1 (
 	del *.pdb /f /s /q
 )
 
-del "Demo\Other Languages Demos\E\*.exe" /f /s /q
+del "Other Languages\E\*.exe" /f /s /q
 
 echo --------------------------------------------------
 echo bye~ bye~
