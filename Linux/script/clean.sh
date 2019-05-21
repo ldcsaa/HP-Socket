@@ -1,9 +1,10 @@
 #!/bin/bash
 
 PRJ_DIR=project
-NDK_PRJ_DIR=$PRJ_DIR/android-ndk
 DEM_DIR=demo
 LIB_DIR=lib
+NDK_PRJ_DIR=$PRJ_DIR/android-ndk
+NDK_DEMO_DIR=$DEM_DIR/Release
 RMV_ALL=0
 DEST_BASE=$(dirname "$0")/..
 
@@ -28,6 +29,8 @@ do_remove $DEM_DIR obj
 do_remove $LIB_DIR Debug
 do_remove $LIB_DIR obj
 do_remove $NDK_PRJ_DIR obj
+do_remove $NDK_PRJ_DIR libs
+do_remove $NDK_DEMO_DIR android-ndk
 
 do_remove . *.sdf
 do_remove . *.VC.db
@@ -36,6 +39,5 @@ do_remove . *.VC.db-wal
 do_remove . *.cki
 
 if [ $RMV_ALL -eq 1 ]; then
-	do_remove $NDK_PRJ_DIR libs
     do_remove $LIB_DIR "*.so.*"
 fi

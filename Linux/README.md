@@ -40,6 +40,41 @@ Usage: install.sh [...O.P.T.I.O.N.S...]
   
 *&nbsp;&nbsp;&nbsp;&nbsp;Note: The **complle.sh** build script depends on the **script/**, **src/**, **include/**, and **dependent/** directories of the distribution; the **install.sh** install script depends on the **script/**, **include/**, and **lib/** directories of the distribution, if you want to install the sample executable files, it also need to depends on the **demo/Release/** directory.*
 ## Android NDK
-&nbsp;&nbsp;&nbsp;&nbsp;HP-Socket provides Android NDK compilation script (script directory: *project/android-ndk/*). After installing and configuring the NDK, enter the compilation script directory and execute the *ndk-build* command to compile. By default, the compilation script will compile all of ABI's dynamic library and static library libs supported by the current NDK. If you have special needs, please modify the *jni/Application.mk* file.
-  
-*&nbsp;&nbsp;&nbsp;&nbsp;Note: The Android NDK compilation script provided by HP-Socket disables **SSL** and **ICONV** support, so the user applications need to define the **_SSL_DISABLED** and **_ICONV_DISABLED** macros.*
+&nbsp;&nbsp;&nbsp;&nbsp;HP-Socket provides Android NDK build script __*build-android-ndk.sh*__ (__*build-android-ndk.bat*__ on Windows). After installing and configuring the NDK, execute *build-android-ndk.sh* to build it. By default, the build script will build all of ABI's dynamic libraries and static libraries supported by the current NDK, and output the library files to *lib/android-ndk/* directory. If you have special needs, please set the corresponding command line parameters for *build-android-ndk.sh*.  
+
+&nbsp;&nbsp;&nbsp;&nbsp;Build HP-Socket libraries use default settings:
+```
+$ cd HP-Socket/Linux
+$ ./build-android-ndk.sh
+```
+### ABIs
+&nbsp;&nbsp;&nbsp;&nbsp;By default, the build script generates libraries for all non-deprecated ABIs. You can modify the **APP_ABI** parameter for *build-android-ndk.sh* to generate libraries for specific ABIs.  
+
+&nbsp;&nbsp;&nbsp;&nbsp;(for example: only generate *armeabi-v7a* and *x86* libraries):
+```
+$ ./build-android-ndk.sh APP_ABI=armeabi-v7a,x86
+```
+### Features
+&nbsp;&nbsp;&nbsp;&nbsp;By default, all optional features (*UDP, SSL, HTTP, ZLIB, ICONV*) were enabled. You can set one or more ***_XXX_DISABLED=true*** parameters for *build-android-ndk.sh* to disable corresponding features.  
+  - *_UDP_DISABLED=true*&nbsp;&nbsp;&nbsp;(disable UDP)
+  - *_SSL_DISABLED=true*&nbsp;&nbsp;&nbsp;(disable SSL)
+  - *_HTTP_DISABLED=true*&nbsp;&nbsp;(disable HTTP)
+  - *_ZLIB_DISABLED=true*&nbsp;&nbsp;(disable ZLIB)
+  - *_ICONV_DISABLED=true*&nbsp;(disable ICONV)
+
+&nbsp;&nbsp;&nbsp;&nbsp;(for example: disable *SSL* and *ICONV* features):
+```
+$ ./build-android-ndk.sh _SSL_DISABLED=true _ICONV_DISABLED=true
+```
+*&nbsp;&nbsp;&nbsp;&nbsp;Note: If you disable one or more features, you need to define corresponding macros while compiling your application. for example: If you disable the **SSL** and **ICONV** features of HP-Socket library, when you compile the application that uses this library, need to define macro like: __-D_SSL_DISABLED -D_ICONV_DISABLED__.*  
+### Other Options
+&nbsp;&nbsp;&nbsp;&nbsp;For more details of *build-android-ndk.sh* command, please refer to the [*ndk-build official documentation*](https://developer.android.com/ndk/guides/ndk-build).  
+&nbsp;&nbsp;&nbsp;&nbsp;The following example demonstrates: building *armeabi-v7a* and *x86_64* ABI targets; disabling *UDP*, *ZLIB*, and *ICONV* features; library files output to *lib/android-ndk/* directory; obj files output to *lib/Android-ndk/obj/* directory:
+```
+$ ./build-android-ndk.sh APP_ABI=armeabi-v7a,x86_64 \
+                         _UDP_DISABLED=true \
+                         _ZLIB_DISABLED=true \
+                         _ICONV_DISABLED=true \
+                         NDK_LIBS_OUT=./lib/android-ndk \
+                         NDK_OUT=./lib/android-ndk/obj
+```

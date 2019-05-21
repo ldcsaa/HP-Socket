@@ -59,7 +59,7 @@ void CSSLAgent::Reset()
 	__super::Reset();
 }
 
-void CSSLAgent::OnWorkerThreadEnd(DWORD dwThreadID)
+void CSSLAgent::OnWorkerThreadEnd(THR_ID dwThreadID)
 {
 	m_sslCtx.RemoveThreadLocalState();
 

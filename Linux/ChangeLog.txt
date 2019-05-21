@@ -1,4 +1,20 @@
 ﻿==========================================================================================
+v5.5.2 Update:
+==========================================================================================
+
+> UDP Upadate
+-----------------
+1. Relax the maximum message length limit of UDP component, the maximum value of SetMaxDatagramSize() method can be set to 64KB.
+2. Relax the maximum transmission unit length limit of ARQ UDP component. The maximum value of SetMaxTransUnit() method can be set to 64KB.
+
+> Android NDK Update
+-----------------
+1. provided shell script 'build-android-ndk.sh' to build Android NDK libs.
+2. provided shell script 'demo/build-android-ndk-demo.sh' to build Android NDK demo executable files.
+3. provided Android NDK binary library files in the distribution package.
+4. Android NDK libs are full support SSL and ICONV features now.
+
+==========================================================================================
 v5.5.1 Update:
 ==========================================================================================
 

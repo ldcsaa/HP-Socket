@@ -59,7 +59,7 @@ void CSSLServer::Reset()
 	__super::Reset();
 }
 
-void CSSLServer::OnWorkerThreadEnd(DWORD dwThreadID)
+void CSSLServer::OnWorkerThreadEnd(THR_ID dwThreadID)
 {
 	m_sslCtx.RemoveThreadLocalState();
 

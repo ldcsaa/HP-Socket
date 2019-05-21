@@ -55,7 +55,7 @@ protected:
 	virtual void PrepareStart();
 	virtual void Reset();
 
-	virtual void OnWorkerThreadEnd(DWORD dwThreadID);
+	virtual void OnWorkerThreadEnd(THR_ID dwThreadID);
 
 protected:
 	virtual BOOL StartSSLHandShakeNoCheck();
