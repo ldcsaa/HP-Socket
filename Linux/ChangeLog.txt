@@ -1,4 +1,15 @@
 ﻿==========================================================================================
+v5.5.3 Update:
+==========================================================================================
+
+> Regular Upadate
+-----------------
+1. Fix bug: Component startup fail of net core SDK on Linux platform.
+2. Shell script 'compile.sh' support cross-compilation by use '-p|platform' command line parameter.
+3. Code optimization to improve stability.
+4. openssl upgrade to version 1.1.0k.
+
+==========================================================================================
 v5.5.2 Update:
 ==========================================================================================
 

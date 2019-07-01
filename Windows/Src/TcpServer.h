@@ -59,7 +59,7 @@ public:
 
 #ifdef _SSL_SUPPORT
 	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)	{return FALSE;}
-	virtual BOOL AddSSLContext		(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)															{return FALSE;}
+	virtual int AddSSLContext		(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)															{return FALSE;}
 	virtual void CleanupSSLContext	()						{}
 
 	virtual BOOL StartSSLHandShake	(CONNID dwConnID)		{return FALSE;}
@@ -71,7 +71,7 @@ protected:
 #endif
 
 public:
-	virtual BOOL IsSecure				() {return FALSE;}
+	virtual BOOL IsSecure			() {return FALSE;}
 
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);

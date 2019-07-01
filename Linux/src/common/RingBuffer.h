@@ -88,7 +88,7 @@ public:
 
 			if(pValue == E_EMPTY)
 			{
-				if(::InterlockedCompareExchangePointer((volatile PVOID*)&pValue, pElement, E_EMPTY) == E_EMPTY)
+				if(::InterlockedCompareExchangePointer(&pValue, pElement, E_EMPTY) == E_EMPTY)
 				{
 					::InterlockedIncrement(&m_dwCount);
 					::InterlockedCompareExchange(&m_dwCurSeq, dwCurSeq + 1, dwCurSeq);
@@ -755,8 +755,6 @@ private:
 
 	static TPTR const E_EMPTY;
 	static TPTR const E_LOCKED;
-	static TPTR const E_RELEASED;
-	static TPTR const E_OCCUPIED;
 	static TPTR const E_MAX_STATUS;
 
 private:
@@ -773,9 +771,8 @@ public:
 
 		BOOL isOK = FALSE;
 
-		while(true)
+		for(DWORD i = 0; i < m_dwSize; i++)
 		{
-			BOOL bOccupy = FALSE;
 			DWORD seqPut = m_seqPut;
 
 			if(!HasPutSpace(seqPut))
@@ -783,27 +780,21 @@ public:
 
 			DWORD dwIndex = seqPut % m_dwSize;
 			VTPTR& pValue = INDEX_VAL(dwIndex);
+			TPTR pCurrent = (TPTR)pValue;
 
-			if(pValue == E_RELEASED)
+			if(pCurrent == E_EMPTY)
 			{
-				if(::InterlockedCompareExchangePointer(&pValue, E_OCCUPIED, E_RELEASED) == E_RELEASED)
-					bOccupy = TRUE;
-				else
-					continue;
-			}
-
-			if(pValue == E_EMPTY || bOccupy)
-			{
-				if(::InterlockedCompareExchange(&m_seqPut, seqPut + 1, seqPut) == seqPut)
+				if(::InterlockedCompareExchangePointer(&pValue, pElement, pCurrent) == pCurrent)
 				{
-					pValue	= pElement;
-					isOK	= TRUE;
+					::InterlockedCompareExchange(&m_seqPut, seqPut + 1, seqPut);
+
+					isOK = TRUE;
 
 					break;
 				}
 			}
-			else if(pValue == E_LOCKED)
-				break;
+
+			::InterlockedCompareExchange(&m_seqPut, seqPut + 1, seqPut);
 		}
 
 		return isOK;
@@ -826,22 +817,22 @@ public:
 
 			DWORD dwIndex = seqGet % m_dwSize;
 			VTPTR& pValue = INDEX_VAL(dwIndex);
+			TPTR pCurrent = (TPTR)pValue;
 
-			if(pValue == E_LOCKED)
-				break;
-			else if(pValue != E_EMPTY && pValue != E_RELEASED && pValue != E_OCCUPIED)
+			if(pCurrent > E_MAX_STATUS)
 			{
-				if(::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet) == seqGet)
+				if(::InterlockedCompareExchangePointer(&pValue, E_EMPTY, pCurrent) == pCurrent)
 				{
-					ASSERT(pValue > E_MAX_STATUS);
+					::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet);
 
-					*(ppElement)	= (TPTR)pValue;
-					pValue			= E_EMPTY;
-					isOK			= TRUE;
+					*(ppElement) = pCurrent;
+					isOK		 = TRUE;
 
 					break;
 				}
 			}
+
+			::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet);
 		}
 
 		return isOK;
@@ -862,24 +853,24 @@ public:
 			if(!HasGetSpace(seqGet))
 				break;
 
-			dwIndex			= seqGet % m_dwSize;
-			VTPTR& pValue	= INDEX_VAL(dwIndex);
+			dwIndex		  = seqGet % m_dwSize;
+			VTPTR& pValue = INDEX_VAL(dwIndex);
+			TPTR pCurrent = (TPTR)pValue;
 
-			if(pValue == E_LOCKED)
-				break;
-			else if(pValue != E_EMPTY && pValue != E_RELEASED && pValue != E_OCCUPIED)
+			if(pCurrent > E_MAX_STATUS)
 			{
-				if(::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet) == seqGet)
+				if(::InterlockedCompareExchangePointer(&pValue, E_LOCKED, pCurrent) == pCurrent)
 				{
-					ASSERT(pValue > E_MAX_STATUS);
+					::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet);
 
-					*(ppElement)	= (TPTR)pValue;
-					pValue			= E_LOCKED;
-					isOK			= TRUE;
+					*(ppElement) = pCurrent;
+					isOK		 = TRUE;
 
 					break;
 				}
 			}
+
+			::InterlockedCompareExchange(&m_seqGet, seqGet + 1, seqGet);
 		}
 
 		return isOK;
@@ -893,30 +884,12 @@ public:
 		if(!IsValid()) return FALSE;
 
 		VTPTR& pValue = INDEX_VAL(dwIndex);
-		VERIFY(pValue == E_LOCKED);
+		ENSURE(pValue == E_LOCKED);
 
-		if(pElement != nullptr)
-		{
-			for(DWORD i = 0; ; i++)
-			{
-				if(TryPut(pElement))
-					break;
-
-				DWORD dwPutIndex = m_seqPut % m_dwSize;
-
-				if(dwIndex == dwPutIndex)
-				{
-					pValue = pElement;
-					::InterlockedIncrement(&m_seqPut);
-
-					return TRUE;
-				}
-
-				::YieldThread(i);
-			}
-		}
-
-		pValue = E_RELEASED;
+		if(pElement == nullptr)
+			pValue = E_EMPTY;
+		else
+			pValue = pElement;
 
 		return TRUE;
 	}
@@ -987,7 +960,9 @@ public:
 		Reset(0);
 	}
 
-	DECLARE_NO_COPY_CLASS(CRingPool)
+private:
+	CRingPool(const CRingPool&);
+	CRingPool operator = (const CRingPool&);
 
 private:
 	DWORD				m_dwSize;
@@ -1001,8 +976,6 @@ private:
 
 template <class T> T* const CRingPool<T>::E_EMPTY		= (T*)0x00;
 template <class T> T* const CRingPool<T>::E_LOCKED		= (T*)0x01;
-template <class T> T* const CRingPool<T>::E_RELEASED	= (T*)0x02;
-template <class T> T* const CRingPool<T>::E_OCCUPIED	= (T*)0x03;
 template <class T> T* const CRingPool<T>::E_MAX_STATUS	= (T*)0x0F;
 
 // ------------------------------------------------------------------------------------------------------------- //

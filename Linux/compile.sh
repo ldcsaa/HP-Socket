@@ -7,7 +7,7 @@ SCRIPT_DIR=script
 source $PACKAGE_PATH/$SCRIPT_DIR/env.sh
 
 WITH_DGBUG_LIB=1
-USE_JEMALLOC=$([[ $PLATFORM == "ARM" ]] && echo 0 || echo 1)
+USE_JEMALLOC=
 UDP_ENABLED=1
 HTTP_ENABLED=1
 SSL_ENABLED=1
@@ -36,12 +36,6 @@ HTTP_EXT_FILES=("http_parser.c")
 HPSOCKET_LIB_EXCLUDE_FILES=(HPSocket4C.cpp HPSocket4C-SSL.cpp)
 HPSOCKET4C_LIB_EXCLUDE_FILES=(HPSocket.cpp HPSocket-SSL.cpp)
 
-C_LAN_OPTS="-c -x c -I $DEPT_INC_DIR -Wall -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fvisibility=hidden -fexceptions -std=c11"
-CPP_LAN_OPTS="-c -x c++ -I $DEPT_INC_DIR -Wall -Wno-reorder -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fthreadsafe-statics -fvisibility=hidden -fexceptions -frtti -std=c++14"
-LINK_OPTS="-Wl,--no-undefined -Wl,-L$DEPT_LIB_DIR -L$DEPT_LIB_DIR -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -shared -Wl,-Bsymbolic"
-RELEASE_CFG_OPTS="-g0 -O3 -fomit-frame-pointer -DNDEBUG"
-DEBUG_CFG_OPTS="-g2 -gdwarf-2 -O0 -fno-omit-frame-pointer -DDEBUG -D_DEBUG"
-
 print_usage()
 {
 	printf "Usage: %s [...O.P.T.I.O.N.S...]\n" "$SH_NAME"
@@ -55,6 +49,8 @@ print_usage()
 	printf "  %-19s : %s\n" "-z|--zlib-enabled"		"enable ZLIB related functions (default: true)"
 	printf "  %-19s : %s\n" "-i|--iconv-enabled"	"enable ICONV related functions (default: true)"
 	printf "  %-19s : %s\n" "-c|--compiler"			"compiler (default: g++)"
+	printf "  %-19s : %s\n" "-p|--platform"			"platform: x86 / x64 / ARM"
+	printf "  %-19s : %s\n" ""						"(default: current machine arch platform)"
 	printf "  %-19s : %s\n" "-e|--clean"			"clean compilation intermediate temp files"
 	printf "  %-19s : %s\n" "-r|--remove"			"remove all compilation target files"
 	printf "  %-19s : %s\n" "-v|--version"			"print hp-socket version"
@@ -70,7 +66,7 @@ print_config()
 	
 	if [ $EXEC_FLAG -eq 0 ]; then
 		printf "%17s : %s\n" "$ACTION_NAME path" "$PACKAGE_PATH"
-		printf "%17s : %s\n" "arch platform" 	"$PLATFORM"
+		printf "%17s : %s\n" "--platform" 	"$PLATFORM"
 		printf "%17s : %s\n" "--compiler"		"$CC"
 		printf "%17s : %s\n" "--with-debug-lib"	"$(int_to_bool "$WITH_DGBUG_LIB")"
 		printf "%17s : %s\n" "--use-jemalloc"	"$(int_to_bool "$USE_JEMALLOC")"
@@ -90,7 +86,7 @@ print_config()
 
 parse_args()
 {
-	ARGS=$(getopt -o d:j:u:t:s:z:i:c:ervh -l with-debug-lib:,use-jemalloc:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,iconv-enabled:,compiler:,clean,remove,version,help -n "$SH_NAME" -- "$@")
+	ARGS=$(getopt -o d:j:u:t:s:z:i:c:p:ervh -l with-debug-lib:,use-jemalloc:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,iconv-enabled:,compiler:platform:,clean,remove,version,help -n "$SH_NAME" -- "$@")
 	RS=$?
 	
 	if [ $RS -ne 0 ]; then
@@ -99,6 +95,8 @@ parse_args()
 	fi
 	
 	eval set -- "${ARGS}"
+	
+	local _SET_JEMALLOC="false"
 	
 	while true; do
 		case "$1" in
@@ -115,6 +113,7 @@ parse_args()
 				;;
 			-j|--use-jemalloc)
 				USE_JEMALLOC=$(bool_to_int "$2")
+				_SET_JEMALLOC="true"
 				
 				if [[ -z "$USE_JEMALLOC" ]]; then
 					printf "Invalid arg value: %s %s\n" "$1" "$2"
@@ -190,6 +189,19 @@ parse_args()
 
 				shift 2
 				;;
+			-p|--platform)
+				PLATFORM="$2"
+				
+				if [[ -z "$PLATFORM" || ("$PLATFORM" != "x64" && "$PLATFORM" != "x86" && "$PLATFORM" != "ARM") ]]; then
+					printf "Invalid arg value: %s %s\n" "$1" "$2"
+					print_usage
+					exit 2
+				fi
+				
+				reset_env_args
+
+				shift 2
+				;;
 			-e|--clean)
 				EXEC_FLAG=1
 				shift
@@ -227,10 +239,20 @@ parse_args()
 	else
 		ACTION_NAME="compile"
 	fi
+	
+	if [ $_SET_JEMALLOC != "true" ]; then
+		USE_JEMALLOC=$([[ $PLATFORM == "ARM" ]] && echo 0 || echo 1)
+	fi
 }
 
 do_build()
 {
+	C_LAN_OPTS="-c -x c -I $DEPT_INC_DIR -Wall -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fvisibility=hidden -fexceptions -std=c11"
+	CPP_LAN_OPTS="-c -x c++ -I $DEPT_INC_DIR -Wall -Wno-reorder -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fthreadsafe-statics -fvisibility=hidden -fexceptions -frtti -std=c++14"
+	LINK_OPTS="-Wl,--no-undefined -Wl,-L$DEPT_LIB_DIR -L$DEPT_LIB_DIR -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -shared -Wl,-Bsymbolic"
+	RELEASE_CFG_OPTS="-g0 -O3 -fomit-frame-pointer -DNDEBUG"
+	DEBUG_CFG_OPTS="-g2 -gdwarf-2 -O0 -fno-omit-frame-pointer -DDEBUG -D_DEBUG"
+
 	if [ -d $HPSOCKET_LIB_TARGET_DIR ]; then
 		rm -rf $HPSOCKET_LIB_TARGET_DIR
 	fi

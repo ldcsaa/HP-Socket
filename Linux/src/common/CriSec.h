@@ -69,7 +69,7 @@ public:
 	DECLARE_NO_COPY_CLASS(CSpinGuard)
 
 private:
-	atomic_bool	m_atFlag;
+	atomic<BOOL>	m_atFlag;
 };
 
 class CReentrantSpinGuard

@@ -17,6 +17,8 @@ Usage: compile.sh [...O.P.T.I.O.N.S...]
   -z|--zlib-enabled   : enable ZLIB related functions (default: true)
   -i|--iconv-enabled  : enable ICONV related functions (default: true)
   -c|--compiler       : compiler (default: g++)
+  -p|--platform       : platform: x86 / x64 / ARM
+                      : (default: current machine arch platform)  
   -e|--clean          : clean compilation intermediate temp files
   -r|--remove         : remove all compilation target files
   -v|--version        : print hp-socket version

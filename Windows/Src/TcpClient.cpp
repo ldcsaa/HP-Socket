@@ -569,9 +569,9 @@ BOOL CTcpClient::Stop()
 	if(!CheckStoping(dwCurrentThreadID))
 		return FALSE;
 
-	SetConnected(FALSE);
-
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
+
+	SetConnected(FALSE);
 
 	if(m_ccContext.bFireOnClose)
 		FireClose(m_ccContext.enOperation, m_ccContext.iErrorCode);

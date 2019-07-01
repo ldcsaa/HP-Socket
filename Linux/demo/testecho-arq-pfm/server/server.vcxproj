@@ -146,7 +146,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_HP_LIB;_ZLIB_DISABLED;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>:libhpsocket_d.a;rt;pthread;dl</LibraryDependencies>
@@ -160,7 +160,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_HP_LIB;_ZLIB_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>:libhpsocket.a;rt;pthread;dl</LibraryDependencies>
@@ -173,7 +173,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_HP_LIB;_ZLIB_DISABLED;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>:libhpsocket_d.a;rt;pthread;dl</LibraryDependencies>
@@ -188,7 +188,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_HP_LIB;_ZLIB_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>:libhpsocket.a;rt;pthread;dl</LibraryDependencies>
@@ -202,7 +202,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_HP_LIB;_ZLIB_DISABLED;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>:libhpsocket_d.a;rt;pthread;dl</LibraryDependencies>
@@ -217,7 +217,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_HP_LIB;_ZLIB_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>:libhpsocket.a;rt;pthread;dl</LibraryDependencies>
