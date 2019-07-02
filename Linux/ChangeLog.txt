@@ -2,6 +2,11 @@
 v5.5.3 Update:
 ==========================================================================================
 
+> Typedef Update
+-----------------
+1. 'BOOL' typedef to int.
+2. 'TRUE' value define to 1, 'FALSE' value define to 0.
+
 > Regular Upadate
 -----------------
 1. Fix bug: Component startup fail of net core SDK on Linux platform.
