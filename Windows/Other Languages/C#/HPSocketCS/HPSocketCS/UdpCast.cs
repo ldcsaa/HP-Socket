@@ -44,12 +44,12 @@ namespace HPSocketCS
 
             if (pClient != IntPtr.Zero)
             {
-                Sdk.Destroy_HP_UdpCastListener(pClient);
+                Sdk.Destroy_HP_UdpCast(pClient);
                 pClient = IntPtr.Zero;
             }
             if (pListener != IntPtr.Zero)
             {
-                Sdk.Destroy_HP_UdpCast(pListener);
+                Sdk.Destroy_HP_UdpCastListener(pListener);
                 pListener = IntPtr.Zero;
             }
 
