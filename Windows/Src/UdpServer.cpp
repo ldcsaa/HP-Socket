@@ -34,7 +34,6 @@ const CInitSocket CUdpServer::sm_wsSocket;
 EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 {
 	EnHandleResult rs = TRIGGER(FireAccept(pSocketObj));
-	pSocketObj->csRecv.WriteDone();
 
 	return rs;
 }
@@ -430,13 +429,7 @@ void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, 
 
 void CUdpServer::ReleaseFreeSocket()
 {
-	TUdpSocketObj* pSocketObj = nullptr;
-
-	while(m_lsFreeSocket.TryGet(&pSocketObj))
-		DeleteSocketObj(pSocketObj);
-
-	ENSURE(m_lsFreeSocket.IsEmpty());
-	m_lsFreeSocket.Reset();
+	m_lsFreeSocket.Clear();
 
 	ReleaseGCSocketObj(TRUE);
 	ENSURE(m_lsGCSocket.IsEmpty());
@@ -1012,8 +1005,10 @@ CONNID CUdpServer::HandleAccept(TUdpBufferObj* pBufferObj)
 	if(TriggerFireAccept(pSocketObj) == HR_ERROR)
 	{
 		AddFreeSocketObj(pSocketObj);
-		return 0;
+		dwConnID = 0;
 	}
+
+	pSocketObj->csRecv.WriteDone();
 
 	return dwConnID;
 }

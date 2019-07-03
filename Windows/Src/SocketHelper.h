@@ -460,12 +460,6 @@ typedef TBufferObjListT<TBufferObj>		TBufferObjList;
 /* UDP 数据缓冲区链表模板 */
 typedef TBufferObjListT<TUdpBufferObj>	TUdpBufferObjList;
 
-/* 数据缓冲区结构链表 */
-typedef CRingPool<TBufferObj>			TBufferObjPtrList;
-
-/* Udp 数据缓冲区结构链表 */
-typedef CRingPool<TUdpBufferObj>		TUdpBufferObjPtrList;
-
 /* TBufferObj 智能指针 */
 typedef TItemPtrT<TBufferObj>			TBufferObjPtr;
 /* TUdpBufferObj 智能指针 */

@@ -28,7 +28,6 @@
 EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 {
 	EnHandleResult rs = TRIGGER(FireAccept(pSocketObj));
-	pSocketObj->lcIo.WriteDone();
 
 	return rs;
 }
@@ -239,13 +238,7 @@ void CUdpServer::ReleaseClientSocket()
 
 void CUdpServer::ReleaseFreeSocket()
 {
-	TUdpSocketObj* pSocketObj = nullptr;
-
-	while(m_lsFreeSocket.TryGet(&pSocketObj))
-		DeleteSocketObj(pSocketObj);
-
-	VERIFY(m_lsFreeSocket.IsEmpty());
-	m_lsFreeSocket.Reset();
+	m_lsFreeSocket.Clear();
 
 	ReleaseGCSocketObj(TRUE);
 	VERIFY(m_lsGCSocket.IsEmpty());
@@ -834,8 +827,10 @@ CONNID CUdpServer::HandleAccept(HP_SOCKADDR& addr)
 	if(TriggerFireAccept(pSocketObj) == HR_ERROR)
 	{
 		AddFreeSocketObj(pSocketObj);
-		return 0;
+		dwConnID = 0;
 	}
+
+	pSocketObj->lcIo.WriteDone();
 
 	return dwConnID;
 }

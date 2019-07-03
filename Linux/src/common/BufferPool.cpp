@@ -413,13 +413,7 @@ void CBufferPool::Clear()
 
 	m_bfCache.Reset();
 
-	TBuffer* pBuffer = nullptr;
-
-	while(m_lsFreeBuffer.TryGet(&pBuffer))
-		TBuffer::Destruct(pBuffer);
-
-	VERIFY(m_lsFreeBuffer.IsEmpty());
-	m_lsFreeBuffer.Reset();
+	m_lsFreeBuffer.Clear();
 
 	ReleaseGCBuffer(TRUE);
 	VERIFY(m_lsGCBuffer.IsEmpty());

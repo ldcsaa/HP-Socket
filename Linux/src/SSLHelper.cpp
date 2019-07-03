@@ -648,13 +648,7 @@ void CSSLSessionPool::Prepare()
 
 void CSSLSessionPool::Clear()
 {
-	CSSLSession* pSession = nullptr;
-
-	while(m_lsFreeSession.TryGet(&pSession))
-		CSSLSession::Destruct(pSession);
-
-	VERIFY(m_lsFreeSession.IsEmpty());
-	m_lsFreeSession.Reset();
+	m_lsFreeSession.Clear();
 
 	ReleaseGCSession(TRUE);
 	VERIFY(m_lsGCSession.IsEmpty());

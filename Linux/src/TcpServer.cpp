@@ -247,13 +247,7 @@ void CTcpServer::ReleaseClientSocket()
 
 void CTcpServer::ReleaseFreeSocket()
 {
-	TSocketObj* pSocketObj = nullptr;
-
-	while(m_lsFreeSocket.TryGet(&pSocketObj))
-		DeleteSocketObj(pSocketObj);
-
-	VERIFY(m_lsFreeSocket.IsEmpty());
-	m_lsFreeSocket.Reset();
+	m_lsFreeSocket.Clear();
 
 	ReleaseGCSocketObj(TRUE);
 	VERIFY(m_lsGCSocket.IsEmpty());

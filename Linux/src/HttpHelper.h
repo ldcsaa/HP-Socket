@@ -1266,13 +1266,7 @@ public:
 
 	void Clear()
 	{
-		THttpObj* pHttpObj = nullptr;
-
-		while(m_lsFreeHttpObj.TryGet(&pHttpObj))
-			THttpObj::Destruct(pHttpObj);
-
-		VERIFY(m_lsFreeHttpObj.IsEmpty());
-		m_lsFreeHttpObj.Reset();
+		m_lsFreeHttpObj.Clear();
 
 		ReleaseGCHttpObj(TRUE);
 		VERIFY(m_lsGCHttpObj.IsEmpty());

@@ -904,6 +904,22 @@ public:
 			Create(dwSize);
 	}
 
+	void Clear()
+	{
+		for(DWORD dwIndex = 0; dwIndex < m_dwSize; dwIndex++)
+		{
+			VTPTR& pValue = INDEX_VAL(dwIndex);
+
+			if(pValue > E_MAX_STATUS)
+			{
+				T::Destruct((TPTR)pValue);
+				pValue = E_EMPTY;
+			}
+		}
+
+		Reset();
+	}
+
 	DWORD Size()		{return m_dwSize;}
 	DWORD Elements()	{return m_seqPut - m_seqGet;}
 	BOOL IsFull()		{return Elements() == Size();}

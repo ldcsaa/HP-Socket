@@ -696,13 +696,7 @@ public:
 	{
 		m_ioDispatcher.Stop();
 
-		CArqSessionEx* pSession = nullptr;
-
-		while(m_lsFreeSession.TryGet(&pSession))
-			delete pSession;
-
-		ENSURE(m_lsFreeSession.IsEmpty());
-		m_lsFreeSession.Reset();
+		m_lsFreeSession.Clear();
 
 		ReleaseGCSession(TRUE);
 		ENSURE(m_lsGCSession.IsEmpty());
