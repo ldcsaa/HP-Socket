@@ -177,6 +177,7 @@ private:
 	BOOL CreateWorkerThreads();
 	BOOL StartAccept();
 
+	void SendCloseNotify();
 	void CloseListenSocket();
 	void DisconnectClientSocket();
 	void WaitForClientSocketClose();
@@ -187,12 +188,12 @@ private:
 	TUdpSocketObj* GetFreeSocketObj(CONNID dwConnID);
 	TUdpSocketObj* CreateSocketObj();
 	CONNID FindConnectionID(const HP_SOCKADDR* pAddr);
-	void AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
+	void AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, BOOL bNotify = TRUE);
 	void DeleteSocketObj(TUdpSocketObj* pSocketObj);
 	BOOL InvalidSocketObj(TUdpSocketObj* pSocketObj);
 	void ReleaseGCSocketObj(BOOL bForce = FALSE);
 	void AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr);
-	void CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
+	void CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, BOOL bNotify = TRUE);
 
 	EnHandleResult TriggerFireAccept(TUdpSocketObj* pSocketObj);
 
@@ -200,6 +201,8 @@ private:
 	VOID HandleCmdSend		(CONNID dwConnID, int flag);
 	VOID HandleCmdReceive	(CONNID dwConnID, int flag);
 	VOID HandleCmdDisconnect(CONNID dwConnID, BOOL bForce);
+	VOID HandleCmdTimeout	(CONNID dwConnID);
+
 	CONNID HandleAccept		(HP_SOCKADDR& addr);
 	BOOL HandleReceive		(int flag = 0);
 	BOOL HandleSend			(int flag = 0);
@@ -222,7 +225,7 @@ public:
 	, m_enState					(SS_STOPPED)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_NONE)
-	, m_dwMaxConnectionCount	(DEFAULT_MAX_CONNECTION_COUNT)
+	, m_dwMaxConnectionCount	(DEFAULT_CONNECTION_COUNT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
 	, m_dwFreeSocketObjPool		(DEFAULT_FREE_SOCKETOBJ_POOL)

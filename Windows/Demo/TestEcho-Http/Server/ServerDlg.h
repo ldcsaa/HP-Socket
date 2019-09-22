@@ -82,7 +82,7 @@ protected:
 public:
 	void SetAppState(EnAppState state);
 
-	static int CALLBACK SIN_ServerNameCallback(LPCTSTR lpszServerName);
+	static int __HP_CALL SIN_ServerNameCallback(LPCTSTR lpszServerName, PVOID pContext);
 
 private:
 	CListBox m_Info;

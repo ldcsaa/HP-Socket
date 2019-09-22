@@ -248,7 +248,7 @@ parse_args()
 do_build()
 {
 	C_LAN_OPTS="-c -x c -I $DEPT_INC_DIR -Wall -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fvisibility=hidden -fexceptions -std=c11"
-	CPP_LAN_OPTS="-c -x c++ -I $DEPT_INC_DIR -Wall -Wno-reorder -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fthreadsafe-statics -fvisibility=hidden -fexceptions -frtti -std=c++14"
+	CPP_LAN_OPTS="-c -x c++ -I $DEPT_INC_DIR -Wall -Wno-class-memaccess -Wno-reorder -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fpic -fthreadsafe-statics -fvisibility=hidden -fexceptions -frtti -std=c++14"
 	LINK_OPTS="-Wl,--no-undefined -Wl,-L$DEPT_LIB_DIR -L$DEPT_LIB_DIR -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -shared -Wl,-Bsymbolic"
 	RELEASE_CFG_OPTS="-g0 -O3 -fomit-frame-pointer -DNDEBUG"
 	DEBUG_CFG_OPTS="-g2 -gdwarf-2 -O0 -fno-omit-frame-pointer -DDEBUG -D_DEBUG"

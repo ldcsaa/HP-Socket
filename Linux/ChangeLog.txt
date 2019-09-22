@@ -1,4 +1,38 @@
 ﻿==========================================================================================
+v5.6.1 Update:
+==========================================================================================
+
+> SSL Update
+-----------------
+1. All SSL components add the following interface methods to support loading memory certificates:
+	1) Server: SetupSSLContextByMemory(), AddSSLContextByMemory()
+	2) Agent : SetupSSLContextByMemory()
+	3) Client: SetupSSLContextByMemory()
+2. All SSL components add GetSSLSessionInfo() method to obtain information about SSL session.
+3. SSL Server component provides a default SNI server domain name binding mechanism. In most cases, the application does not need to customize SNI callback function.
+	1) The default server domain name binding mechanism is enabled when the 'fnServerNameCallback' parameter value of SetupSSLContext() is nullptr.
+	2) BindSSLServerName() : Bind the server domain name to a specified certificate.
+	3) HP_SSL_DefaultServerNameCallback() : Default SNI callback function.
+
+> HTTP Update
+-----------------
+1. The SendWSMessage() method of HTTP Server component delete 'lpszMask' parameter.
+2. The 'pData' parameter type of the SendWSMessage() method for all HTTP components is changed to 'const BYTE*', so constants can be passed in.
+3. All HTTP components add SendChunkData() method to send chunked data conveniently.
+
+> UDP Update
+-----------------
+1. Optimize the UDP Cast component of Linux platform so that it behaves in accordance with the UDP Cast component of Windows platform.
+2. Enhance IPv6 compatibility of all UDP components.
+3. Automatically send a "close notification" datagram to the peer when the UDP Client/Server component is closing.
+
+> Other Update
+-----------------
+1. jemalloc upgrade to version 5.2.1
+2. openssl upgrade to version 1.1.1d.
+3. Code optimization to improve stability
+
+==========================================================================================
 v5.5.3 Update:
 ==========================================================================================
 
@@ -163,7 +197,7 @@ v5.2.1 Update:
 2. Agent: HTTP Agent, HTTPS Agent
 3. Client: HTTP Client, HTTPS Client, HTTP Sync Client, HTTPS Sync Client
 
-> Create Demos：
+> Create Demos:
 -----------------
 1. testecho-ssl: (SRC) SSL simple test echo server/agent/client
 2. testecho-ssl-pfm: (SO) SSL performance test echo server/agent/client
@@ -172,7 +206,7 @@ v5.2.1 Update:
 5. testecho-http: (SRC) HTTP simple test echo server/agent/client/sync-client
 6. testecho-http-4c: (4C SO) HTTP simple test echo server/agent/client/sync-client
 
-> Other Updates：
+> Other Updates:
 -----------------
 1. Version number revision: Use a unified version number for Windows & Linux distribution
 2. Code optimization and knowing bug fixed
@@ -187,7 +221,7 @@ v1.0.0 Update:
 2. Agent: TCP Agent, TCP Pull Agent, TCP Pack Agent
 3. Client: TCP Client, TCP Pull Client, TCP Pack Client, UDP Client, UDP Cast
 
-> Create Demos：
+> Create Demos:
 -----------------
 1. testecho: tcp simple test echo server/agent/client
 2. testecho-pfm: tcp performance test echo server/agent/client

@@ -37,6 +37,9 @@
 	#endif
 #endif
 
+static const BYTE s_szUdpCloseNotify[]	= {0xBE, 0xB6, 0x1F, 0xEB, 0xDA, 0x52, 0x46, 0xBA, 0x92, 0x33, 0x59, 0xDB, 0xBF, 0xE6, 0xC8, 0xE4};
+static int s_iUdpCloseNotifySize		= ARRAY_SIZE(s_szUdpCloseNotify);
+
 const hp_addr hp_addr::ANY_ADDR4(AF_INET, TRUE);
 const hp_addr hp_addr::ANY_ADDR6(AF_INET6, TRUE);
 
@@ -139,7 +142,6 @@ BOOL GetSockAddrByHostName(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR& addr)
 		return GetSockAddr(lpszHost, usPort, addr);
 
 	return GetSockAddrByHostNameDirectly(lpszHost, usPort, addr);
-
 }
 
 BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR& addr)
@@ -536,6 +538,11 @@ BOOL PostIocpUnpause(HANDLE hIOCP, CONNID dwConnID)
 	return PostIocpCommand(hIOCP, IOCP_CMD_UNPAUSE, dwConnID);
 }
 
+BOOL PostIocpTimeout(HANDLE hIOCP, CONNID dwConnID)
+{
+	return PostIocpCommand(hIOCP, IOCP_CMD_TIMEOUT, dwConnID);
+}
+
 BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode)
 {
 	return PostIocpCommand(hIOCP, (EnIocpCommand)iErrorCode, dwConnID);
@@ -682,6 +689,22 @@ CONNID GenerateConnectionID()
 		dwConnID = ::InterlockedIncrement(&s_dwConnID);
 
 	return dwConnID;
+}
+
+int IsUdpCloseNotify(const BYTE* pData, int iLength)
+{
+	return (iLength == s_iUdpCloseNotifySize								&&
+			memcmp(pData, s_szUdpCloseNotify, s_iUdpCloseNotifySize) == 0)	;
+}
+
+int SendUdpCloseNotify(SOCKET sock)
+{
+	return send(sock, (LPCSTR)s_szUdpCloseNotify, s_iUdpCloseNotifySize, 0);
+}
+
+int SendUdpCloseNotify(SOCKET sock, const HP_SOCKADDR& remoteAddr)
+{
+	return sendto(sock, (LPCSTR)s_szUdpCloseNotify, s_iUdpCloseNotifySize, 0, remoteAddr.Addr(), remoteAddr.AddrSize());
 }
 
 int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful)

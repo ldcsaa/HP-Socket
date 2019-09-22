@@ -1739,6 +1739,19 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendResponse(HP_HttpServer pServer, HP
 HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendLocalFile(HP_HttpServer pServer, HP_CONNID dwConnID, LPCSTR lpszFileName, USHORT usStatusCode, LPCSTR lpszDesc, const HP_THeader lpHeaders[], int iHeaderCount);
 
 /*
+* 名称：发送 Chunked 数据分片
+* 描述：向对端发送 Chunked 数据分片
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			pData			-- Chunked 数据分片
+*			iLength			-- 数据分片长度（为 0 表示结束分片）
+*			lpszExtensions	-- 扩展属性（默认：nullptr）
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendChunkData(HP_HttpServer pServer, HP_CONNID dwConnID, const BYTE* pData /*= nullptr*/, int iLength /*= 0*/, LPCSTR lpszExtensions /*= nullptr*/);
+
+/*
 * 名称：发送 WebSocket 消息
 * 描述：向对端端发送 WebSocket 消息
 *		
@@ -1746,7 +1759,6 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendLocalFile(HP_HttpServer pServer, H
 *			bFinal			-- 是否结束帧
 *			iReserved		-- RSV1/RSV2/RSV3 各 1 位
 *			iOperationCode	-- 操作码：0x0 - 0xF
-*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
 *			pData			-- 消息体数据缓冲区
 *			iLength			-- 消息体数据长度
 *			ullBodyLen		-- 消息总长度
@@ -1757,7 +1769,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendLocalFile(HP_HttpServer pServer, H
 * 返回值：	TRUE			-- 成功
 *			FALSE			-- 失败
 */
-HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendWSMessage(HP_HttpServer pServer, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen);
+HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendWSMessage(HP_HttpServer pServer, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE* pData, int iLength, ULONGLONG ullBodyLen);
 
 /*
 * 名称：释放连接
@@ -1874,6 +1886,19 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendRequest(HP_HttpAgent pAgent, HP_CON
 */
 HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendLocalFile(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
 
+/*
+* 名称：发送 Chunked 数据分片
+* 描述：向对端发送 Chunked 数据分片
+*		
+* 参数：		dwConnID		-- 连接 ID
+*			pData			-- Chunked 数据分片
+*			iLength			-- 数据分片长度（为 0 表示结束分片）
+*			lpszExtensions	-- 扩展属性（默认：nullptr）
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendChunkData(HP_HttpAgent pAgent, HP_CONNID dwConnID, const BYTE* pData /*= nullptr*/, int iLength /*= 0*/, LPCSTR lpszExtensions /*= nullptr*/);
+
 /* 发送 POST 请求 */
 HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendPost(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
 /* 发送 PUT 请求 */
@@ -1912,7 +1937,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendConnect(HP_HttpAgent pAgent, HP_CON
 * 返回值：	TRUE			-- 成功
 *			FALSE			-- 失败
 */
-HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendWSMessage(HP_HttpAgent pAgent, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen);
+HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendWSMessage(HP_HttpAgent pAgent, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen);
 
 /*
 * 名称：启动 HTTP 通信
@@ -2012,6 +2037,18 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendRequest(HP_HttpClient pClient, LPC
 */
 HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendLocalFile(HP_HttpClient pClient, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount);
 
+/*
+* 名称：发送 Chunked 数据分片
+* 描述：向对端发送 Chunked 数据分片
+*		
+* 参数：		pData			-- Chunked 数据分片
+*			iLength			-- 数据分片长度（为 0 表示结束分片）
+*			lpszExtensions	-- 扩展属性（默认：nullptr）
+* 返回值：	TRUE			-- 成功
+*			FALSE			-- 失败
+*/
+HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendChunkData(HP_HttpClient pClient, const BYTE* pData /*= nullptr*/, int iLength /*= 0*/, LPCSTR lpszExtensions /*= nullptr*/);
+
 /* 发送 POST 请求 */
 HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendPost(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength);
 /* 发送 PUT 请求 */
@@ -2049,7 +2086,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendConnect(HP_HttpClient pClient, LPC
 * 返回值：	TRUE			-- 成功
 *			FALSE			-- 失败
 */
-HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendWSMessage(HP_HttpClient pClient, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen);
+HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendWSMessage(HP_HttpClient pClient, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen);
 
 /*
 * 名称：启动 HTTP 通信
@@ -2133,7 +2170,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_IsHttpAutoStart(HP_HttpClient pClient)
 * 返回值：	TRUE			-- 成功
 *			FALSE			-- 失败
 */
-HPSOCKET_API BOOL __HP_CALL HP_HttpSyncClient_OpenUrl(HP_HttpSyncClient pClient, LPCSTR lpszMethod, LPCSTR lpszUrl, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength, BOOL bForceReconnect);
+HPSOCKET_API BOOL __HP_CALL HP_HttpSyncClient_OpenUrl(HP_HttpSyncClient pClient, LPCSTR lpszMethod, LPCSTR lpszUrl, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength, BOOL bForceReconnect);
 
 /*
 * 名称：清除请求结果

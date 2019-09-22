@@ -158,19 +158,39 @@ HPSOCKET_API void __HP_CALL Destroy_HP_SSLPackClient(HP_SSLPackClient pClient)
 /***************************************************************************************/
 /************************************ SSL 初始化方法 ************************************/
 
+HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
+{
+	return CSSLContext::DefaultServerNameCallback(lpszServerName, pContext);
+}
+
 HPSOCKET_API void __HP_CALL HP_SSL_RemoveThreadLocalState(THR_ID dwThreadID)
 {
 	CSSLContext::RemoveThreadLocalState(dwThreadID);
 }
 
-HPSOCKET_API BOOL __HP_CALL HP_SSLServer_SetupSSLContext(HP_SSLServer pServer, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
+HPSOCKET_API BOOL __HP_CALL HP_SSLServer_SetupSSLContext(HP_SSLServer pServer, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPassword, LPCTSTR lpszCAPemCertFileOrPath, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
 {
-	return C_HP_Object::ToSecond<ITcpServer>(pServer)->SetupSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath, fnServerNameCallback);
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->SetupSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPassword, lpszCAPemCertFileOrPath, fnServerNameCallback);
 }
 
-HPSOCKET_API int __HP_CALL HP_SSLServer_AddSSLContext(HP_SSLServer pServer, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+HPSOCKET_API BOOL __HP_CALL HP_SSLServer_SetupSSLContextByMemory(HP_SSLServer pServer, int iVerifyMode, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword, LPCSTR lpszCAPemCert, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
 {
-	return C_HP_Object::ToSecond<ITcpServer>(pServer)->AddSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->SetupSSLContextByMemory(iVerifyMode, lpszPemCert, lpszPemKey, lpszKeyPassword, lpszCAPemCert, fnServerNameCallback);
+}
+
+HPSOCKET_API int __HP_CALL HP_SSLServer_AddSSLContext(HP_SSLServer pServer, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPassword, LPCTSTR lpszCAPemCertFileOrPath)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->AddSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPassword, lpszCAPemCertFileOrPath);
+}
+
+HPSOCKET_API int __HP_CALL HP_SSLServer_AddSSLContextByMemory(HP_SSLServer pServer, int iVerifyMode, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword, LPCSTR lpszCAPemCert)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->AddSSLContextByMemory(iVerifyMode, lpszPemCert, lpszPemKey, lpszKeyPassword, lpszCAPemCert);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_SSLServer_BindSSLServerName(HP_SSLServer pServer, LPCTSTR lpszServerName, int iContextIndex)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->BindSSLServerName(lpszServerName, iContextIndex);
 }
 
 HPSOCKET_API void __HP_CALL HP_SSLServer_CleanupSSLContext(HP_SSLServer pServer)
@@ -178,9 +198,14 @@ HPSOCKET_API void __HP_CALL HP_SSLServer_CleanupSSLContext(HP_SSLServer pServer)
 	C_HP_Object::ToSecond<ITcpServer>(pServer)->CleanupSSLContext();
 }
 
-HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_SetupSSLContext(HP_SSLAgent pAgent, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_SetupSSLContext(HP_SSLAgent pAgent, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPassword, LPCTSTR lpszCAPemCertFileOrPath)
 {
-	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetupSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetupSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPassword, lpszCAPemCertFileOrPath);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_SetupSSLContextByMemory(HP_SSLAgent pAgent, int iVerifyMode, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword, LPCSTR lpszCAPemCert)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetupSSLContextByMemory(iVerifyMode, lpszPemCert, lpszPemKey, lpszKeyPassword, lpszCAPemCert);
 }
 
 HPSOCKET_API void __HP_CALL HP_SSLAgent_CleanupSSLContext(HP_SSLAgent pAgent)
@@ -188,9 +213,14 @@ HPSOCKET_API void __HP_CALL HP_SSLAgent_CleanupSSLContext(HP_SSLAgent pAgent)
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->CleanupSSLContext();
 }
 
-HPSOCKET_API BOOL __HP_CALL HP_SSLClient_SetupSSLContext(HP_SSLClient pClient, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+HPSOCKET_API BOOL __HP_CALL HP_SSLClient_SetupSSLContext(HP_SSLClient pClient, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPassword, LPCTSTR lpszCAPemCertFileOrPath)
 {
-	return C_HP_Object::ToSecond<ITcpClient>(pClient)->SetupSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->SetupSSLContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPassword, lpszCAPemCertFileOrPath);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_SSLClient_SetupSSLContextByMemory(HP_SSLClient pClient, int iVerifyMode, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword, LPCSTR lpszCAPemCert)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->SetupSSLContextByMemory(iVerifyMode, lpszPemCert, lpszPemKey, lpszKeyPassword, lpszCAPemCert);
 }
 
 HPSOCKET_API void __HP_CALL HP_SSLClient_CleanupSSLContext(HP_SSLClient pClient)
@@ -216,6 +246,11 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLServer_IsSSLAutoHandShake(HP_SSLServer pServer
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->IsSSLAutoHandShake();
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_SSLServer_GetSSLSessionInfo(HP_SSLServer pServer, HP_CONNID dwConnID, En_HP_SSLSessionInfo enInfo, LPVOID* lppInfo)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetSSLSessionInfo(dwConnID, enInfo, lppInfo);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_StartSSLHandShake(HP_SSLAgent pAgent, HP_CONNID dwConnID)
 {
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->StartSSLHandShake(dwConnID);
@@ -231,6 +266,11 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_IsSSLAutoHandShake(HP_SSLAgent pAgent)
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->IsSSLAutoHandShake();
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_GetSSLSessionInfo(HP_SSLAgent pAgent, HP_CONNID dwConnID, En_HP_SSLSessionInfo enInfo, LPVOID* lppInfo)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetSSLSessionInfo(dwConnID, enInfo, lppInfo);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_SSLClient_StartSSLHandShake(HP_SSLClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->StartSSLHandShake();
@@ -244,6 +284,11 @@ HPSOCKET_API void __HP_CALL HP_SSLClient_SetSSLAutoHandShake(HP_SSLClient pClien
 HPSOCKET_API BOOL __HP_CALL HP_SSLClient_IsSSLAutoHandShake(HP_SSLClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->IsSSLAutoHandShake();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_SSLClient_GetSSLSessionInfo(HP_SSLClient pClient, En_HP_SSLSessionInfo enInfo, LPVOID* lppInfo)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetSSLSessionInfo(enInfo, lppInfo);
 }
 
 /*****************************************************************************************************************************************************/

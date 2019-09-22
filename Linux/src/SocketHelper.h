@@ -75,8 +75,10 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* 默认工作队列等待的最大描述符事件数量 */
 #define DEFAULT_WORKER_MAX_EVENT_COUNT			CIODispatcher::DEF_WORKER_MAX_EVENTS
 
+/* Server/Agent 最大连接数 */
+#define MAX_CONNECTION_COUNT					(5 * 1000 * 1000)
 /* Server/Agent 默认最大连接数 */
-#define DEFAULT_MAX_CONNECTION_COUNT			10000
+#define DEFAULT_CONNECTION_COUNT				10000
 /* Server/Agent 默认 Socket 缓存对象锁定时间 */
 #define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		DEFAULT_OBJECT_CACHE_LOCK_TIME
 /* Server/Agent 默认 Socket 缓存池大小 */
@@ -95,6 +97,8 @@ using SOCKADDR_IN6		= sockaddr_in6;
 #define  DEFAULT_IPV4_BIND_ADDRESS				_T("0.0.0.0")
 /* IPv6 默认绑定地址 */
 #define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
+/* IPv4 广播地址 */
+#define IPV4_BROAD_CAST_ADDRESS					_T("255.255.255.255")
 
 /* TCP 默认通信数据缓冲区大小 */
 #define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
@@ -230,6 +234,16 @@ typedef struct hp_sockaddr
 		return sizeof(SOCKADDR_IN6);
 	}
 
+	inline int EffectAddrSize() const
+	{
+		return EffectAddrSize(family);
+	}
+
+	inline static int EffectAddrSize(ADDRESS_FAMILY f)
+	{
+		return (f == AF_INET) ? offsetof(SOCKADDR_IN, sin_zero) : sizeof(SOCKADDR_IN6);
+	}
+
 	inline static const hp_sockaddr& AnyAddr(ADDRESS_FAMILY f)
 	{
 		static const hp_sockaddr s_any_addr4(AF_INET, TRUE);
@@ -274,23 +288,21 @@ typedef struct hp_sockaddr
 	{
 		ASSERT(IsSpecified());
 
-		if(IsIPv4())
-			return ((addr4.sin_family << 16) | addr4.sin_port) ^ addr4.sin_addr.s_addr;
-		else
-		{
-			ULONG* p = (ULONG*)(((char*)this) + offsetof(SOCKADDR_IN6, sin6_addr));
-			return ((addr6.sin6_family << 16) | addr6.sin6_port) ^ addr6.sin6_flowinfo ^ p[0] ^ p[1] ^ p[2] ^ p[3] ^ p[4];
-		}
+		size_t _Val		  = 2166136261U;
+		const int size	  = EffectAddrSize();
+		const BYTE* pAddr = (const BYTE*)Addr();
+
+		for(int i = 0; i < size; i++)
+			_Val = 16777619U * _Val ^ (size_t)pAddr[i];
+
+		return (_Val);
 	}
 
 	bool EqualTo(const hp_sockaddr& other) const
 	{
 		ASSERT(IsSpecified() && other.IsSpecified());
 
-		if(IsIPv4())
-			return EqualMemory(this, &other, offsetof(SOCKADDR_IN, sin_zero));
-		else
-			return EqualMemory(this, &other, sizeof(addr6));
+		return EqualMemory(this, &other, EffectAddrSize());
 	}
 
 	hp_sockaddr(ADDRESS_FAMILY f = AF_UNSPEC, BOOL bZeroAddr = FALSE)
@@ -313,15 +325,16 @@ enum EnDispCmdType
 	DISP_CMD_SEND		= 0x01,	// 发送数据
 	DISP_CMD_RECEIVE	= 0x02,	// 接收数据
 	DISP_CMD_UNPAUSE	= 0x03,	// 恢复接收数据
-	DISP_CMD_DISCONNECT	= 0x04	// 断开连接
+	DISP_CMD_DISCONNECT	= 0x04,	// 断开连接
+	DISP_CMD_TIMEOUT	= 0x05	// 保活超时
 };
 
 /* 关闭连接标识 */
 enum EnSocketCloseFlag
 {
-	SCF_NONE	= 0,	// 不触发事件
-	SCF_CLOSE	= 1,	// 触发 正常关闭 OnClose 事件
-	SCF_ERROR	= 2		// 触发 异常关闭 OnClose 事件
+	SCF_NONE			= 0,	// 不触发事件
+	SCF_CLOSE			= 1,	// 触发 正常关闭 OnClose 事件
+	SCF_ERROR			= 2		// 触发 异常关闭 OnClose 事件
 };
 
 /* 数据缓冲节点 */
@@ -670,17 +683,19 @@ struct TClientCloseContext
 	BOOL bFireOnClose;
 	EnSocketOperation enOperation;
 	int iErrorCode;
+	BOOL bNotify;
 
-	TClientCloseContext(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK)
+	TClientCloseContext(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK, BOOL bNtf = TRUE)
 	{
-		Reset(bFire, enOp, iCode);
+		Reset(bFire, enOp, iCode, bNtf);
 	}
 
-	void Reset(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK)
+	void Reset(BOOL bFire = TRUE, EnSocketOperation enOp = SO_CLOSE, int iCode = SE_OK, BOOL bNtf = TRUE)
 	{
 		bFireOnClose = bFire;
 		enOperation	 = enOp;
 		iErrorCode	 = iCode;
+		bNotify		 = bNtf;
 	}
 
 };
@@ -754,6 +769,12 @@ int SSO_GetError			(SOCKET sock);
 
 /* 生成 Connection ID */
 CONNID GenerateConnectionID();
+/* 检测 UDP 连接关闭通知 */
+int IsUdpCloseNotify(const BYTE* pData, int iLength);
+/* 发送 UDP 连接关闭通知 */
+int SendUdpCloseNotify(SOCKET sock);
+/* 发送 UDP 连接关闭通知 */
+int SendUdpCloseNotify(SOCKET sock, const HP_SOCKADDR& remoteAddr);
 /* 关闭 Socket */
 int ManualCloseSocket(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE);
 

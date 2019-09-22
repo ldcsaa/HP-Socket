@@ -184,4 +184,29 @@ void CSSLServer::DoSSLHandShake(TSocketObj* pSocketObj)
 	ENSURE(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);
 }
 
+BOOL CSSLServer::GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo)
+{
+	ASSERT(lppInfo != nullptr);
+
+	*lppInfo				= nullptr;
+	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
+
+	if(!TSocketObj::IsValid(pSocketObj))
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
+	}
+
+	CSSLSession* pSession = nullptr;
+	GetConnectionReserved2(pSocketObj, (PVOID*)&pSession);
+
+	if(pSession == nullptr || !pSession->IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	return pSession->GetSessionInfo(enInfo, lppInfo);
+}
+
 #endif

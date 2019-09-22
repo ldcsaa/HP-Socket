@@ -1,4 +1,35 @@
 # ======================================== #
+HP-Socket v5.6.1 API 更新列表：
+# ======================================== #
+--------------------
+1、HTTP:
+--------------------
+HP_HttpServer_SendWSMessage					(修改：删除 lpszMask 参数，修改 pData 参数类型为 const BYTE*)
+HP_HttpAgent_SendWSMessage					(修改：修改 pData 参数类型为 const BYTE*)
+HP_HttpClient_SendWSMessage					(修改：修改 pData 参数类型为 const BYTE*)
+
+HP_HttpServer_SendChunkData					(增加)
+HP_HttpAgent_SendChunkData					(增加)
+HP_HttpClient_SendChunkData					(增加)
+
+--------------------
+2、SSL:
+--------------------
+enum En_HP_SSLSessionInfo					(增加)
+typedef HP_Fn_SNI_ServerNameCallback		(修改：增加参数 PVOID pContext)
+
+HP_SSLServer_BindSSLServerName				(增加)
+HP_SSL_DefaultServerNameCallback			(增加)
+
+HP_SSLServer_AddSSLContextByMemory			(增加)
+HP_SSLServer_SetupSSLContextByMemory		(增加)
+HP_SSLAgent_SetupSSLContextByMemory			(增加)
+HP_SSLClient_SetupSSLContextByMemory		(增加)
+HP_SSLServer_GetSSLSessionInfo				(增加)
+HP_SSLAgent_GetSSLSessionInfo				(增加)
+HP_SSLClient_GetSSLSessionInfo				(增加)
+
+# ======================================== #
 HP-Socket v5.5.1 API 更新列表：
 # ======================================== #
 --------------------

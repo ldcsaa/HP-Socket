@@ -533,13 +533,13 @@ public:
 	BOOL		IsValid()		const	{return GetStatus() != ARQ_HSS_INIT;}
 	BOOL		IsHandShaking()	const	{return GetStatus() == ARQ_HSS_PROC;}
 	BOOL		IsReady()		const	{return GetStatus() == ARQ_HSS_SUCC;}
-	CCriSec&	GetLock()				{return m_cs;}
 	IKCPCB*		GetKcp()				{return m_kcp;}
 	DWORD		GetConvID()		const	{if(!IsValid()) return 0; return m_kcp->conv;}
 	DWORD		GetSelfConvID()	const	{return m_dwSelfConvID;}
 	DWORD		GetPeerConvID()	const	{return m_dwPeerConvID;}
 	
-	EnArqHandShakeStatus GetStatus() const {return m_enStatus;}
+	CReentrantCriSec&		GetLock()			{return m_cs;}
+	EnArqHandShakeStatus	GetStatus()	const	{return m_enStatus;}
 
 protected:
 	virtual void RenewExtra(const TArqAttr& attr) {}

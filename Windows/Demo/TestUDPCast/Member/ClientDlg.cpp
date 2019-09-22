@@ -75,7 +75,7 @@ BOOL CClientDlg::OnInitDialog()
 	m_TTL.SetWindowText(DEFAULT_TTL);
 	m_CastMode.SetCheck(BST_CHECKED);
 	m_IPLoop.SetCheck(BST_CHECKED);
-	m_ReuseAddr.SetCheck(BST_UNCHECKED);
+	m_ReuseAddr.SetCheck(BST_CHECKED);
 
 	::SetMainWnd(this);
 	::SetInfoList(&m_Info);
@@ -211,6 +211,9 @@ void CClientDlg::OnBnClickedStart()
 	m_Cast.SetMultiCastLoop(bIPLoop);
 	m_Cast.SetReuseAddress(bReuseAddr);
 	m_Cast.SetMultiCastTtl(iTTL);
+
+	if(enMode == CM_BROADCAST)
+		strCastAddress = BROAD_CAST_ADDRESS;
 
 	::LogClientStarting(strCastAddress, usPort);
 

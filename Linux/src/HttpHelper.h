@@ -234,6 +234,14 @@ public:
 					}
 					else
 					{
+						if((m_pHttpObj->IsRequest() && iMaskLen == 0) || (!m_pHttpObj->IsRequest() && iMaskLen > 0))
+						{
+							::SetLastError(ERROR_INVALID_DATA);
+							hr = HR_ERROR;
+
+							break;
+						}
+
 						m_ullBodyLen	= iExtLen == 0 ? iLen : (iExtLen == 2 ? bh.extlen() : NToH64(*(ULONGLONG*)(m_szHeader + HTTP_MIN_WS_HEADER_LEN)));
 						m_ullBodyRemain	= m_ullBodyLen;
 						m_lpszMask		= iMaskLen > 0 ? m_szHeader + HTTP_MIN_WS_HEADER_LEN + iExtLen : nullptr;
@@ -287,7 +295,7 @@ public:
 			iRemain	-= iMin;
 		}
 
-		return HR_OK;
+		return hr;
 	}
 
 	BOOL GetMessageState(BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain)
@@ -677,6 +685,7 @@ public:
 	DWORD GetFreeTime() const		{return m_dwFreeTime;}
 	void SetFree()					{m_dwFreeTime = ::TimeGetTime();}
 
+	BOOL IsRequest()				{return m_bRequest;}
 	BOOL IsUpgrade()				{return m_parser.upgrade;}
 	BOOL IsKeepAlive()				{return ::http_should_keep_alive(&m_parser);}
 	USHORT GetVersion()				{return MAKEWORD(m_parser.http_major, m_parser.http_minor);}
@@ -1329,6 +1338,7 @@ extern void MakeRequestLine(LPCSTR lpszMethod, LPCSTR lpszPath, EnHttpVersion en
 extern void MakeStatusLine(EnHttpVersion enVersion, USHORT usStatusCode, LPCSTR lpszDesc, CStringA& strValue);
 extern void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, const TCookieMap* pCookies, int iBodyLength, BOOL bRequest, int iConnFlag, LPCSTR lpszDefaultHost, USHORT usPort, CStringA& strValue);
 extern void MakeHttpPacket(const CStringA& strHeader, const BYTE* pBody, int iLength, WSABUF szBuffer[2]);
+extern int MakeChunkPackage(const BYTE* pData, int iLength, LPCSTR lpszExtensions, char szLen[12], WSABUF bufs[5]);
 extern BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[HTTP_MAX_WS_HEADER_LEN], WSABUF szBuffer[2]);
 extern BOOL ParseUrl(const CStringA& strUrl, BOOL& bHttps, CStringA& strHost, USHORT& usPort, CStringA& strPath);
 

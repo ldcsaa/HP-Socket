@@ -311,7 +311,7 @@ EnHandleResult CHttpServerListenerImpl::OnWSMessageComplete(IHttpServer* pSender
 
 	VERIFY(pSender->GetWSMessageState(dwConnID, &bFinal, &iReserved, &iOperationCode, nullptr, nullptr, nullptr));
 
-	pSender->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, nullptr, pBuffer->Ptr(), (int)pBuffer->Size());
+	pSender->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, pBuffer->Ptr(), (int)pBuffer->Size());
 	pBuffer->Free();
 
 	if(iOperationCode == 0x8)
@@ -413,7 +413,7 @@ CHttpsServer s_https_server(&s_listener_2);
 const CString SPECIAL_SERVER_NAME	= _T("hpsocket.org");
 int SPECIAL_SERVER_INDEX			= -1;
 
-int CALLBACK SIN_ServerNameCallback(LPCTSTR lpszServerName)
+int __HP_CALL SIN_ServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
 {
 	if(::IsIPAddress(lpszServerName))
 		return 0;
@@ -508,7 +508,7 @@ void OnCmdSend(CHttpCommandParser* pParser)
 	strContent.Format(_T("[WebSocket] (oc: 0x%X, len: %d)"), bCode, iLength);
 	::LogSending(pParser->m_dwConnID, strContent, lpszName);
 
-	if(!pServer->SendWSMessage(pParser->m_dwConnID, TRUE, 0, bCode, nullptr, pData, iLength))
+	if(!pServer->SendWSMessage(pParser->m_dwConnID, TRUE, 0, bCode, pData, iLength))
 		::LogSendFail(pParser->m_dwConnID, ::GetLastError(), ::GetLastErrorStr(), lpszName);
 }
 
@@ -565,8 +565,17 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.ParseArgs(argc, argv);
 
+	/*
 	if(s_https_server.SetupSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath, SIN_ServerNameCallback))
 		SPECIAL_SERVER_INDEX = s_https_server.AddSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile2, g_s_lpszPemKeyFile2, g_s_lpszKeyPasswod2, g_s_lpszCAPemCertFileOrPath2);
+	*/
+	if(s_https_server.SetupSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	{
+		int iIndex = s_https_server.AddSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile2, g_s_lpszPemKeyFile2, g_s_lpszKeyPasswod2, g_s_lpszCAPemCertFileOrPath2);
+		ASSERT(iIndex > 0);
+
+		s_https_server.BindSSLServerName(SPECIAL_SERVER_NAME, iIndex);
+	}
 	else
 	{
 		::LogServerStartFail(::GetLastError(), _T("initialize SSL env fail"));

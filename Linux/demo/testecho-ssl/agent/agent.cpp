@@ -136,7 +136,8 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.ParseArgs(argc, argv);
 
-	if(!s_agent.SetupSSLContext(g_c_iVerifyMode, g_c_lpszPemCertFile, g_c_lpszPemKeyFile, g_c_lpszKeyPasswod, g_c_lpszCAPemCertFileOrPath))
+	//if(!s_agent.SetupSSLContext(g_c_iVerifyMode, g_c_lpszPemCertFile, g_c_lpszPemKeyFile, g_c_lpszKeyPasswod, g_c_lpszCAPemCertFileOrPath))
+	if(!s_agent.SetupSSLContextByMemory(g_c_iVerifyMode, g_c_lpszPemCert, g_c_lpszPemKey, g_c_lpszKeyPasswod, g_c_lpszCAPemCert))
 	{
 		::LogAgentStartFail(::GetLastError(), _T("initialize SSL env fail"));
 		return EXIT_CODE_CONFIG;

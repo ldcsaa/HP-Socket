@@ -59,12 +59,14 @@ public:
 	virtual LPCTSTR GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 
 #ifdef _SSL_SUPPORT
-	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	{return FALSE;}
+	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	{return FALSE;}
+	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)						{return FALSE;}
 	virtual void CleanupSSLContext	()						{}
 
 	virtual BOOL StartSSLHandShake	(CONNID dwConnID)		{return FALSE;}
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	{}
 	virtual BOOL IsSSLAutoHandShake	()						{return FALSE;}
+	virtual BOOL GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo)	{return FALSE;}
 
 protected:
 	virtual BOOL StartSSLHandShake	(TSocketObj* pSocketObj){return FALSE;}
@@ -250,7 +252,7 @@ public:
 	, m_bAsyncConnect			(TRUE)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_NONE)
-	, m_dwMaxConnectionCount	(DEFAULT_MAX_CONNECTION_COUNT)
+	, m_dwMaxConnectionCount	(DEFAULT_CONNECTION_COUNT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwSocketBufferSize		(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
 	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)

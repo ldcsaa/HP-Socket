@@ -33,7 +33,14 @@
 #define OPENSSL_VERSION_1_0_2	0x10002000L
 #define OPENSSL_VERSION_1_1_0	0x10100000L
 
-/************************************************************************
+ /************************************************************************
+ 名称：SSL 全局常量
+ 描述：声明 SSL 组件的公共全局常量
+ ************************************************************************/
+
+#define SSL_DOMAIN_SEP_CHAR		'.'
+
+ /************************************************************************
 名称：SSL 握手状态
 描述：标识当前连接的 SSL 握手状态
 ************************************************************************/
@@ -91,6 +98,8 @@ private:
 ************************************************************************/
 class CSSLContext
 {
+	typedef unordered_map<CString, int, cstring_nc_hash_func::hash, cstring_nc_hash_func::equal_to> CServerNameMap;
+
 public:
 
 	/*
@@ -99,31 +108,43 @@ public:
 	*		
 	* 参数：		enSessionMode			-- SSL 工作模式（参考 EnSSLSessionMode）
 	*			iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
-	*			lpszPemCertFile			-- 证书文件（客户端可选）
-	*			lpszPemKeyFile			-- 私钥文件（客户端可选）
-	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
-	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
-	*			fnServerNameCallback	-- SNI 回调函数指针（可选，只用于服务端）
+	*			lpPemCert				-- 证书文件（客户端可选）
+	*			lpPemKey				-- 私钥文件（客户端可选）
+	*			lpKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpCAPemCert				-- CA 证书文件或目录（单向验证或客户端可选）
+	*			fnServerNameCallback	-- SNI 回调函数指针（可选，只用于服务端，如果为 nullptr 则使用 SNI 默认回调函数）
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 ::GetLastError() 获取失败原因
 	*/
-	BOOL Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr);
+	BOOL Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode = SSL_VM_NONE, BOOL bMemory = FALSE, LPVOID lpPemCert = nullptr, LPVOID lpPemKey = nullptr, LPVOID lpKeyPasswod = nullptr, LPVOID lpCAPemCert = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr);
 
 	/*
 	* 名称：增加 SNI 主机证书（只用于服务端）
 	* 描述：SSL 服务端在 Initialize() 成功后可以调用本方法增加多个 SNI 主机证书
 	*		
 	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
-	*			lpszPemCertFile			-- 证书文件
-	*			lpszPemKeyFile			-- 私钥文件
-	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
-	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证可选）
+	*			lpPemCert				-- 证书文件
+	*			lpPemKey				-- 私钥文件
+	*			lpKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpCAPemCert				-- CA 证书文件或目录（单向验证可选）
 	*
 	* 返回值：	正数		-- 成功，并返回 SNI 主机证书对应的索引，该索引用于在 SNI 回调函数中定位 SNI 主机
 	*			负数		-- 失败，可通过 ::GetLastError() 获取失败原因
 	*/
-	int AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr);
+	int AddServerContext(int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod = nullptr, LPVOID lpCAPemCert = nullptr);
+
+	/*
+	* 名称：绑定 SNI 主机域名
+	* 描述：SSL 服务端在 AddServerContext() 成功后可以调用本方法绑定主机域名到 SNI 主机证书
+	*		
+	* 参数：		lpszServerName		-- 主机域名
+	*			iContextIndex		-- SNI 主机证书对应的索引
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 ::GetLastError() 获取失败原因
+	*/
+	virtual BOOL BindServerName(LPCTSTR lpszServerName, int iContextIndex);
 
 	/*
 	* 名称：清理 SSL 运行环境
@@ -175,16 +196,38 @@ public:
 private:
 
 	void SetServerNameCallback(Fn_SNI_ServerNameCallback fn);
-	int AddContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath);
-	BOOL LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath);
+	int AddContext(int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert);
+	BOOL LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert);
+	BOOL LoadCertAndKeyByFile(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPassword, LPCTSTR lpszCAPemCertFileOrPath);
+	BOOL LoadCertAndKeyByMemory(SSL_CTX* sslCtx, int iVerifyMode, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword, LPCSTR lpszCAPemCert);
+	BOOL LoadCAPemCertByMemory(SSL_CTX* sslCtx, int iVerifyMode, LPCSTR lpszCAPemCert);
+	BOOL LoadPemCertAndKeyByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword);
+	BOOL AddCAPemCertToStoreByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert);
+	BOOL SetClientCAListByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert);
+	BOOL SetPrivateKeyByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemKey);
+	BOOL SetCertChainByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert);
 
 private:
 
 	static int InternalServerNameCallback(SSL* ssl, int* ad, void* arg);
 
+public:
+
+	/*
+	* 名称：SNI 默认回调函数
+	* 描述：Initialize 方法中如果不指定 SNI 回调函数则使用此 SNI 默认回调函数
+	*		
+	* 参数：		lpszServerName	-- 请求域名
+	*			pContext		-- SSL Context 对象
+	* 
+	* 返回值：SNI 主机证书对应的索引
+	*/
+	static int __HP_CALL DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext);
+
 private:
 
 	EnSSLSessionMode	m_enSessionMode;
+	CServerNameMap		m_sslServerNames;
 	vector<SSL_CTX*>	m_lsSslCtxs;
 	SSL_CTX*			m_sslCtx;
 
@@ -213,6 +256,7 @@ public:
 	EnSSLHandShakeStatus	GetStatus()		const	{return m_enStatus;}
 	DWORD					GetFreeTime()	const	{return m_dwFreeTime;}
 	CCriSec&				GetSendLock()			{return m_csSend;}
+	BOOL					GetSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo);
 
 private:
 

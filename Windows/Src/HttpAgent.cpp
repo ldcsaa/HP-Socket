@@ -100,12 +100,27 @@ template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendLo
 	return SendRequest(dwConnID, lpszMethod, lpszPath, lpHeaders, iHeaderCount, (BYTE*)(char*)fmap, (int)fmap.GetMappingSize());
 }
 
-template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendChunkData(CONNID dwConnID, const BYTE* pData, int iLength, LPCSTR lpszExtensions)
 {
+	char szLen[12];
+	WSABUF bufs[5];
+
+	int iCount = MakeChunkPackage(pData, iLength, lpszExtensions, szLen, bufs);
+
+	return SendPackets(dwConnID, bufs, iCount);
+}
+
+template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+{
+	ASSERT(lpszMask);
+
 	WSABUF szBuffer[2];
 	BYTE szHeader[HTTP_MAX_WS_HEADER_LEN];
 
-	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen, szHeader, szBuffer))
+	unique_ptr<BYTE[]> szData(new BYTE[iLength]);
+	memcpy(szData.get(), pData, iLength);
+
+	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, szData.get(), iLength, ullBodyLen, szHeader, szBuffer))
 		return FALSE;
 
 	return SendPackets(dwConnID, szBuffer, 2);

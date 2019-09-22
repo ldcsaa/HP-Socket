@@ -33,9 +33,15 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 	m_HttpsServer = ::Create_HP_HttpsServer(m_HttpServerListener);
 
 	// 初始化 SSL 环境参数
+	/*
 	VERIFY(::HP_SSLServer_SetupSSLContext(m_HttpsServer, SSL_VM_NONE, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath, SIN_ServerNameCallback));
 	SPECIAL_SERVER_INDEX = ::HP_SSLServer_AddSSLContext(m_HttpsServer, SSL_VM_NONE, g_s_lpszPemCertFile2, g_s_lpszPemKeyFile2, g_s_lpszKeyPasswod2, g_s_lpszCAPemCertFileOrPath2);
 	VERIFY(SPECIAL_SERVER_INDEX > 0);
+	*/
+	VERIFY(::HP_SSLServer_SetupSSLContext(m_HttpsServer, SSL_VM_NONE, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath, nullptr));
+	int iIndex = ::HP_SSLServer_AddSSLContext(m_HttpsServer, SSL_VM_NONE, g_s_lpszPemCertFile2, g_s_lpszPemKeyFile2, g_s_lpszKeyPasswod2, g_s_lpszCAPemCertFileOrPath2);
+	VERIFY(::HP_SSLServer_BindSSLServerName(m_HttpsServer, SPECIAL_SERVER_NAME, iIndex));
+
 
 	// 设置 HTTP 监听器回调函数
 	::HP_Set_FN_HttpServer_OnPrepareListen(m_HttpServerListener, OnPrepareListen);
@@ -196,7 +202,7 @@ void CServerDlg::SetAppState(EnAppState state)
 	m_BindAddr.EnableWindow(m_enState == ST_STOPPED);
 }
 
-int CALLBACK CServerDlg::SIN_ServerNameCallback(LPCTSTR lpszServerName)
+int __HP_CALL CServerDlg::SIN_ServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
 {
 	if(::SYS_IsIPAddress(lpszServerName, nullptr))
 		return 0;
@@ -602,7 +608,7 @@ En_HP_HandleResult CServerDlg::OnWSMessageComplete(HP_HttpServer pSender, HP_CON
 
 	VERIFY(::HP_HttpServer_GetWSMessageState(pSender, dwConnID, &bFinal, &iReserved, &iOperationCode, nullptr, nullptr, nullptr));
 
-	::HP_HttpServer_SendWSMessage(pSender, dwConnID, bFinal, iReserved, iOperationCode, nullptr, pBuffer->Ptr(), (int)pBuffer->Size(), 0);
+	::HP_HttpServer_SendWSMessage(pSender, dwConnID, bFinal, iReserved, iOperationCode, pBuffer->Ptr(), (int)pBuffer->Size(), 0);
 	pBuffer->Free();
 
 	if(iOperationCode == 0x8)

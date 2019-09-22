@@ -1,5 +1,6 @@
-# HP-Socket
-High Performance Network Framework
+![HP-Socket](https://images.gitee.com/uploads/images/2019/0820/112616_5b8b37bf_81720.png "HP-Socket")
+---
+*High Performance Network Framework*
 ## Description
 - ***Server*** Based on IOCP/EPOLL communication model, combined with technology of memory pool, private heap etc., efficient memory management is implemented to support large scale and high concurrent communication scenarios.
 - ***Agent*** The Agent component is essentially a Multi-Client component that uses the same technical architecture as the Server component. An Agent component object can create and efficiently handle large-scale Socket connections at the same time.
@@ -25,7 +26,7 @@ High Performance Network Framework
 7. Destroy component object
 8. Destroy listener object
 
-![Agent Workflow](https://gitee.com/uploads/images/2017/1213/120601_c0d950fb_81720.jpeg "HP-Socket-Agent-Demo.JPG")
+![Agent Workflow](https://gitee.com/uploads/images/2017/1213/120601_c0d950fb_81720.jpeg "HP-Socket Agent Demo")
 ## Example
 - ***C++ Example***
 
@@ -127,15 +128,15 @@ int main(int argc, char* const argv[])
 ## Component List
 - ***Basic Components***
 
-![Basic Component](https://images.gitee.com/uploads/images/2019/0331/102422_3eecfdb7_81720.jpeg "Basic Component - mini.jpg")
+![Basic Component](https://images.gitee.com/uploads/images/2019/0331/102422_3eecfdb7_81720.jpeg "Basic Component")
 
 - ***SSL Components***
 
-![SSL Component](https://gitee.com/uploads/images/2017/1214/143622_d6c1f436_81720.jpeg "SSL Component - mini.jpg")
+![SSL Component](https://gitee.com/uploads/images/2017/1214/143622_d6c1f436_81720.jpeg "SSL Component")
 
 - ***HTTP Components***
 
-![HTTP COmponent](https://gitee.com/uploads/images/2017/1214/143640_0eb6f9e4_81720.jpeg "HTTP Component - mini.jpg")
+![HTTP COmponent](https://gitee.com/uploads/images/2017/1214/143640_0eb6f9e4_81720.jpeg "HTTP Component")
 
 ## Reference Projects
 
@@ -144,3 +145,13 @@ int main(int argc, char* const argv[])
 - *[http-parser](https://github.com/nodejs/http-parser)*
 - *[zlib](https://github.com/madler/zlib)*
 - *[kcp](https://github.com/skywind3000/kcp)*
+
+## Third-party Extension Projects
+
+- *[HP-Socket for macOS](https://gitee.com/xin_chong/HP-Socket-for-macOS)*
+
+## Donation
+
+![Alibaba Pay](https://images.gitee.com/uploads/images/2019/0918/190004_11ecea7c_81720.jpeg "Alibaba Pay")
+&nbsp;&nbsp;&nbsp;&nbsp;
+![Wechat Pay](https://images.gitee.com/uploads/images/2019/0918/190115_a1fc5ebf_81720.jpeg "Wechat Pay")

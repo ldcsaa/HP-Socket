@@ -141,6 +141,7 @@ private:
 	TItem* GetSendBuffer();
 	int SendInternal(TItemPtr& itPtr);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
+	void CheckConnected();
 
 	BOOL HandleError(WSANETWORKEVENTS& events);
 	BOOL HandleRead(WSANETWORKEVENTS& events);

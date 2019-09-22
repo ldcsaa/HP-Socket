@@ -27,14 +27,14 @@
 #ifdef _SSL_SUPPORT
 
 #include "SocketHelper.h"
+#include "../Common/Src/WaitFor.h"
+
+#include <atlpath.h>
 
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 #include "openssl/engine.h"
 #include "openssl/x509v3.h"
-#include "../Common/Src/WaitFor.h"
-
-#include <atlpath.h>
 
 /*
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
@@ -165,7 +165,7 @@ void CSSLInitializer::ssl_lock_dyn_destroy_callback(CRYPTO_dynlock_value* l, con
 
 #endif
 
-BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
+BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert, HP_Fn_SNI_ServerNameCallback fnServerNameCallback)
 {
 	ASSERT(!IsValid());
 
@@ -177,7 +177,7 @@ BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LP
 
 	m_enSessionMode	= enSessionMode;
 
-	if(AddContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath) == 0)
+	if(AddContext(iVerifyMode, bMemory, lpPemCert, lpPemKey, lpKeyPasswod, lpCAPemCert) == 0)
 		m_sslCtx = GetContext(0);
 	else
 	{
@@ -190,7 +190,7 @@ BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, LP
 	return TRUE;
 }
 
-int CSSLContext::AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+int CSSLContext::AddServerContext(int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert)
 {
 	ASSERT(IsValid());
 
@@ -206,13 +206,50 @@ int CSSLContext::AddServerContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCT
 		return FALSE;
 	}
 
-	return AddContext(iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath);
+	return AddContext(iVerifyMode, bMemory, lpPemCert, lpPemKey, lpKeyPasswod, lpCAPemCert);
 }
 
-int CSSLContext::AddContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+BOOL CSSLContext::BindServerName(LPCTSTR lpszServerName, int iContextIndex)
+{
+	ASSERT(lpszServerName && iContextIndex >= 0 && !::IsIPAddress(lpszServerName));
+
+	if(!lpszServerName || iContextIndex < 0 || ::IsIPAddress(lpszServerName))
+	{
+		::SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+
+	int iLen		= lstrlen(lpszServerName);
+	LPCTSTR lpszSep	= ::StrChr(lpszServerName, SSL_DOMAIN_SEP_CHAR);
+
+	if(lpszSep == nullptr || lpszSep == lpszServerName || lpszSep == (lpszServerName + iLen - 1))
+	{
+		::SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+
+	int iSize = (int)m_lsSslCtxs.size();
+
+	if(iSize <= iContextIndex)
+	{
+		::SetLastError(ERROR_INVALID_INDEX);
+		return FALSE;
+	}
+	
+	m_sslServerNames[lpszServerName] = iContextIndex;
+
+	return TRUE;
+}
+
+int CSSLContext::AddContext(int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert)
 {
 	int iIndex		= -1;
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
 	SSL_CTX* sslCtx	= SSL_CTX_new(SSLv23_method());
+#else
+	SSL_CTX* sslCtx	= SSL_CTX_new(TLS_method());
+#endif
 
 	SSL_CTX_set_quiet_shutdown(sslCtx, 1);
 	SSL_CTX_set_verify(sslCtx, iVerifyMode, nullptr);
@@ -226,7 +263,7 @@ int CSSLContext::AddContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lp
 		SSL_CTX_set_session_id_context(sslCtx, (BYTE*)&session_id_context, sizeof(session_id_context));
 	}
 
-	if(!LoadCertAndKey(sslCtx, iVerifyMode, lpszPemCertFile, lpszPemKeyFile, lpszKeyPasswod, lpszCAPemCertFileOrPath))
+	if(!LoadCertAndKey(sslCtx, iVerifyMode, bMemory, lpPemCert, lpPemKey, lpKeyPasswod, lpCAPemCert))
 		SSL_CTX_free(sslCtx);
 	else
 	{
@@ -237,11 +274,19 @@ int CSSLContext::AddContext(int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lp
 	return iIndex;
 }
 
-BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPasswod, LPCTSTR lpszCAPemCertFileOrPath)
+BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert)
+{
+	if(bMemory)
+		return LoadCertAndKeyByMemory(sslCtx, iVerifyMode, (LPCSTR)lpPemCert, (LPCSTR)lpPemKey, (LPCSTR)lpKeyPasswod, (LPCSTR)lpCAPemCert);
+	else
+		return LoadCertAndKeyByFile(sslCtx, iVerifyMode, (LPCTSTR)lpPemCert, (LPCTSTR)lpPemKey, (LPCTSTR)lpKeyPasswod, (LPCTSTR)lpCAPemCert);
+}
+
+BOOL CSSLContext::LoadCertAndKeyByFile(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszPemCertFile, LPCTSTR lpszPemKeyFile, LPCTSTR lpszKeyPassword, LPCTSTR lpszCAPemCertFileOrPath)
 {
 	USES_CONVERSION;
 
-	if(lpszCAPemCertFileOrPath != nullptr)
+	if(::IsStrNotEmpty(lpszCAPemCertFileOrPath))
 	{
 		LPCTSTR lpszCAPemCertFile = nullptr;
 		LPCTSTR lpszCAPemCertPath = nullptr;
@@ -269,9 +314,9 @@ BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszP
 			return FALSE;
 		}
 
-		if(m_enSessionMode == SSL_SM_SERVER && iVerifyMode & SSL_VM_PEER)
+		if(m_enSessionMode == SSL_SM_SERVER && (iVerifyMode & SSL_VM_PEER) && lpszCAPemCertFile != nullptr)
 		{
-			STACK_OF(X509_NAME)* caCertNames = SSL_load_client_CA_file(T2CA(lpszCAPemCertFileOrPath));
+			STACK_OF(X509_NAME)* caCertNames = SSL_load_client_CA_file(T2CA(lpszCAPemCertFile));
 
 			if(caCertNames == nullptr)
 			{
@@ -283,7 +328,7 @@ BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszP
 		}
 	}
 
-	if(lpszPemCertFile != nullptr)
+	if(::IsStrNotEmpty(lpszPemCertFile))
 	{
 		if(	!ATLPath::FileExists(lpszPemCertFile)	||
 			ATLPath::IsDirectory(lpszPemCertFile)	)
@@ -292,7 +337,7 @@ BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszP
 			return FALSE;
 		}
 
-		if(	lpszPemKeyFile == nullptr				||
+		if(	::IsStrEmpty(lpszPemKeyFile)			||
 			!ATLPath::FileExists(lpszPemKeyFile)	||
 			ATLPath::IsDirectory(lpszPemKeyFile)	)
 		{
@@ -300,8 +345,8 @@ BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszP
 			return FALSE;
 		}
 		
-		if(lpszKeyPasswod != nullptr)
-			SSL_CTX_set_default_passwd_cb_userdata(sslCtx, (void*)T2CA(lpszKeyPasswod));
+		if(::IsStrNotEmpty(lpszKeyPassword))
+			SSL_CTX_set_default_passwd_cb_userdata(sslCtx, (void*)T2CA(lpszKeyPassword));
 
 		if(!SSL_CTX_use_PrivateKey_file(sslCtx, T2CA(lpszPemKeyFile), SSL_FILETYPE_PEM))
 		{
@@ -325,6 +370,347 @@ BOOL CSSLContext::LoadCertAndKey(SSL_CTX* sslCtx, int iVerifyMode, LPCTSTR lpszP
 	return TRUE;
 }
 
+BOOL CSSLContext::LoadCertAndKeyByMemory(SSL_CTX* sslCtx, int iVerifyMode, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword, LPCSTR lpszCAPemCert)
+{
+	if(!LoadCAPemCertByMemory(sslCtx, iVerifyMode, lpszCAPemCert))
+		return FALSE;
+	if(!LoadPemCertAndKeyByMemory(sslCtx, lpszPemCert, lpszPemKey, lpszKeyPassword))
+		return FALSE;
+
+	return TRUE;
+}
+
+BOOL CSSLContext::LoadCAPemCertByMemory(SSL_CTX* sslCtx, int iVerifyMode, LPCSTR lpszCAPemCert)
+{
+	if(::IsStrEmptyA(lpszCAPemCert))
+		return TRUE;
+
+	if(!AddCAPemCertToStoreByMemory(sslCtx, lpszCAPemCert))
+		return FALSE;
+
+	if(!SSL_CTX_set_default_verify_paths(sslCtx))
+	{
+		::SetLastError(ERROR_FUNCTION_FAILED);
+		return FALSE;
+	}
+
+	if(m_enSessionMode == SSL_SM_SERVER && (iVerifyMode & SSL_VM_PEER))
+	{
+		if(!SetClientCAListByMemory(sslCtx, lpszCAPemCert))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CSSLContext::LoadPemCertAndKeyByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert, LPCSTR lpszPemKey, LPCSTR lpszKeyPassword)
+{
+	if(::IsStrEmptyA(lpszPemCert))
+		return TRUE;
+
+	if(::IsStrEmptyA(lpszPemKey))
+	{
+		::SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+
+	if(::IsStrNotEmptyA(lpszKeyPassword))
+		SSL_CTX_set_default_passwd_cb_userdata(sslCtx, (void*)(lpszKeyPassword));
+
+	if(!SetPrivateKeyByMemory(sslCtx, lpszPemKey))
+		return FALSE;
+
+	if(!SetCertChainByMemory(sslCtx, lpszPemCert))
+		return FALSE;
+
+	if(!SSL_CTX_check_private_key(sslCtx))
+	{
+		::SetLastError(ERROR_INVALID_ACCESS);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CSSLContext::AddCAPemCertToStoreByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert)
+{
+	BOOL isOK			= FALSE;
+	int iCount			= 0;
+	BIO* pBIO			= BIO_new_mem_buf(lpszPemCert, -1);
+	X509_STORE* pStore	= SSL_CTX_get_cert_store(sslCtx);
+	STACK_OF(X509_INFO) * pStack = nullptr;
+
+	if(pBIO == nullptr)
+	{
+		::SetLastError(ERROR_CREATE_FAILED);
+		goto _END;
+	}
+
+	if(pStore == nullptr)
+	{
+		::SetLastError(ERROR_NOT_FOUND);
+		goto _END;
+	}
+
+	pStack = PEM_X509_INFO_read_bio(pBIO, nullptr, nullptr, nullptr);
+
+	if(pStack == nullptr)
+	{
+		::SetLastError(ERROR_NO_DATA);
+		goto _END;
+	}
+
+	for(int i = 0; i < sk_X509_INFO_num(pStack); i++)
+	{
+		X509_INFO* pInfo = sk_X509_INFO_value(pStack, i);
+
+		if(pInfo->x509)
+		{
+			if(!X509_STORE_add_cert(pStore, pInfo->x509))
+			{
+				::SetLastError(ERROR_INVALID_DATA);
+				goto _END;
+			}
+
+			++iCount;
+		}
+
+		if(pInfo->crl)
+		{
+			if(!X509_STORE_add_crl(pStore, pInfo->crl))
+			{
+				::SetLastError(ERROR_INVALID_DATA);
+				goto _END;
+			}
+
+			++iCount;
+		}
+	}
+
+	if(iCount > 0)
+		isOK = TRUE;
+	else
+		::SetLastError(ERROR_EMPTY);
+
+_END:
+
+	if(pStack != nullptr)
+		sk_X509_INFO_pop_free(pStack, X509_INFO_free);
+
+	if(pBIO != nullptr)
+		BIO_free(pBIO);
+
+	return isOK;
+}
+
+BOOL CSSLContext::SetClientCAListByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert)
+{
+	BOOL isOK						= FALSE;
+	X509* pX509						= nullptr;
+	X509_NAME* pName				= nullptr;
+	STACK_OF(X509_NAME)* pStack		= nullptr;
+	BIO* pBIO						= BIO_new_mem_buf(lpszPemCert, -1);
+	OPENSSL_LHASH* pNameHash		= (OPENSSL_LHASH*)OPENSSL_LH_new((OPENSSL_LH_HASHFUNC)X509_NAME_hash, (OPENSSL_LH_COMPFUNC)X509_NAME_cmp);
+	
+	if(pBIO == nullptr || pNameHash == nullptr)
+	{
+		::SetLastError(ERROR_CREATE_FAILED);
+		goto _ERR;
+	}
+
+	while(TRUE)
+	{
+		if(PEM_read_bio_X509(pBIO, &pX509, nullptr, nullptr) == nullptr)
+			break;
+
+		if(pStack == nullptr)
+		{
+			pStack = sk_X509_NAME_new_null();
+
+			if(pStack == nullptr)
+			{
+				::SetLastError(ERROR_CREATE_FAILED);
+				goto _ERR;
+			}
+		}
+
+		if((pName = X509_get_subject_name(pX509)) == nullptr)
+		{
+			::SetLastError(ERROR_NO_DATA);
+			goto _ERR;
+		}
+
+		if((pName = X509_NAME_dup(pName)) == nullptr)
+		{
+			::SetLastError(ERROR_CREATE_FAILED);
+			goto _ERR;
+		}
+
+		if(OPENSSL_LH_retrieve(pNameHash, pName) != nullptr)
+		{
+			X509_NAME_free(pName);
+			pName = nullptr;
+		}
+		else
+		{
+			OPENSSL_LH_insert(pNameHash, pName);
+
+			if(!sk_X509_NAME_push(pStack, pName))
+			{
+				::SetLastError(ERROR_WRITE_FAULT);
+				goto _ERR;
+			}
+		}
+	}
+
+	if(pStack == nullptr)
+	{
+		::SetLastError(ERROR_EMPTY);
+		goto _ERR;
+	}
+
+	SSL_CTX_set_client_CA_list(sslCtx, pStack);
+
+	isOK = TRUE;
+	goto _END;
+
+_ERR:
+
+	if(pName != nullptr)
+		X509_NAME_free(pName);
+	if(pStack != nullptr)
+	{
+		sk_X509_NAME_pop_free(pStack, X509_NAME_free);
+		pStack = nullptr;
+	}
+
+_END:
+
+	if(pX509 != nullptr)
+		X509_free(pX509);
+
+	if(pNameHash != nullptr)
+		OPENSSL_LH_free(pNameHash);
+
+	if(pBIO != nullptr)
+		BIO_free(pBIO);
+
+	if(pStack != nullptr)
+		ERR_clear_error();
+
+	return isOK;
+}
+
+BOOL CSSLContext::SetPrivateKeyByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemKey)
+{
+	BOOL isOK		= FALSE;
+	BIO* pBIO		= BIO_new_mem_buf(lpszPemKey, -1);
+	EVP_PKEY* pKey	= nullptr;
+
+	if(pBIO == nullptr)
+	{
+		::SetLastError(ERROR_CREATE_FAILED);
+		goto _END;
+	}
+
+	pKey = PEM_read_bio_PrivateKey(pBIO, nullptr, SSL_CTX_get_default_passwd_cb(sslCtx), SSL_CTX_get_default_passwd_cb_userdata(sslCtx));
+
+	if(pKey == nullptr)
+	{
+		::SetLastError(ERROR_INVALID_PASSWORD);
+		goto _END;
+	}
+
+	if(!SSL_CTX_use_PrivateKey(sslCtx, pKey))
+	{
+		::SetLastError(ERROR_INVALID_DATA);
+		goto _END;
+	}
+
+	isOK = TRUE;
+
+_END:
+
+	if(pKey != nullptr)
+		EVP_PKEY_free(pKey);
+
+	if(pBIO != nullptr)
+		BIO_free(pBIO);
+
+	return isOK;
+}
+
+BOOL CSSLContext::SetCertChainByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert)
+{
+	BOOL isOK	= FALSE;
+	ULONG err	= 0;
+	BIO* pBIO	= BIO_new_mem_buf(lpszPemCert, -1);
+	X509* pX509	= nullptr;
+
+	pem_password_cb* cb	= SSL_CTX_get_default_passwd_cb(sslCtx);
+	LPVOID userdata		= SSL_CTX_get_default_passwd_cb_userdata(sslCtx);
+
+	if(pBIO == nullptr)
+	{
+		::SetLastError(ERROR_CREATE_FAILED);
+		goto _END;
+	}
+
+	pX509 = PEM_read_bio_X509_AUX(pBIO, nullptr, cb, userdata);
+
+	if(pX509 == nullptr)
+	{
+		::SetLastError(ERROR_NO_DATA);
+		goto _END;
+	}
+
+	if(!SSL_CTX_use_certificate(sslCtx, pX509) || (ERR_peek_error() != 0))
+	{
+		::SetLastError(ERROR_INVALID_DATA);
+		goto _END;
+	}
+
+	if(!SSL_CTX_clear_chain_certs(sslCtx))
+	{
+		::SetLastError(ERROR_FUNCTION_FAILED);
+		goto _END;
+	}
+
+	X509* pCA;
+	while((pCA = PEM_read_bio_X509(pBIO, nullptr, cb, userdata)) != nullptr)
+	{
+		if(!SSL_CTX_add0_chain_cert(sslCtx, pCA))
+		{
+			X509_free(pCA);
+
+			::SetLastError(ERROR_FUNCTION_FAILED);
+			goto _END;
+		}
+	}
+
+	err = ERR_peek_last_error();
+
+	if(ERR_GET_LIB(err) == ERR_LIB_PEM && ERR_GET_REASON(err) == PEM_R_NO_START_LINE)
+		ERR_clear_error();
+	else
+	{
+		::SetLastError(ERROR_FUNCTION_FAILED);
+		goto _END;
+	}
+
+	isOK = TRUE;
+
+_END:
+
+	if(pX509 != nullptr)
+		X509_free(pX509);
+
+	if(pBIO != nullptr)
+		BIO_free(pBIO);
+
+	return isOK;
+}
+
 void CSSLContext::Cleanup()
 {
 	if(IsValid())
@@ -335,6 +721,8 @@ void CSSLContext::Cleanup()
 			SSL_CTX_free(m_lsSslCtxs[i]);
 
 		m_lsSslCtxs.clear();
+		m_sslServerNames.clear();
+
 		m_sslCtx = nullptr;
 	}
 
@@ -348,10 +736,10 @@ void CSSLContext::SetServerNameCallback(Fn_SNI_ServerNameCallback fn)
 	if(m_enSessionMode != SSL_SM_SERVER)
 		return;
 
-	m_fnServerNameCallback = fn;
-
-	if(m_fnServerNameCallback == nullptr)
-		return;
+	if(fn == nullptr)
+		m_fnServerNameCallback = DefaultServerNameCallback;
+	else
+		m_fnServerNameCallback = fn;
 
 	ENSURE(SSL_CTX_set_tlsext_servername_callback(m_sslCtx, InternalServerNameCallback));
 	ENSURE(SSL_CTX_set_tlsext_servername_arg(m_sslCtx, this));
@@ -369,7 +757,7 @@ int CSSLContext::InternalServerNameCallback(SSL* ssl, int* ad, void* arg)
 	if(lpszServerName == nullptr)
 		return SSL_TLSEXT_ERR_NOACK;
 
-	int iIndex = pThis->m_fnServerNameCallback(A2CT(lpszServerName));
+	int iIndex = pThis->m_fnServerNameCallback(A2CT(lpszServerName), pThis);
 
 	if(iIndex == 0)
 		return SSL_TLSEXT_ERR_OK;
@@ -391,6 +779,30 @@ int CSSLContext::InternalServerNameCallback(SSL* ssl, int* ad, void* arg)
 	SSL_set_SSL_CTX(ssl, sslCtx);
 
 	return SSL_TLSEXT_ERR_OK;
+}
+
+int __HP_CALL CSSLContext::DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
+{
+	CSSLContext* pThis = (CSSLContext*)pContext;
+
+	if(pThis->m_sslServerNames.empty())
+		return 0;
+
+	LPCTSTR lpszTmp = lpszServerName;
+	LPCTSTR lpszSep = ::StrChr(lpszTmp, SSL_DOMAIN_SEP_CHAR);
+
+	while(lpszSep != nullptr)
+	{
+		CServerNameMap::const_iterator it = pThis->m_sslServerNames.find(lpszTmp);
+
+		if(it != pThis->m_sslServerNames.end())
+			return it->second;
+
+		lpszTmp = (lpszSep + 1);
+		lpszSep = ::StrChr(lpszTmp, SSL_DOMAIN_SEP_CHAR);
+	}
+
+	return 0;
 }
 
 SSL_CTX* CSSLContext::GetContext(int i) const
@@ -598,7 +1010,125 @@ inline BOOL CSSLSession::IsFatalError(int iBytes)
 	if(iErrorCode == SSL_ERROR_SYSCALL && i == 1)
 		return FALSE;
 
-	::SetLastError(WSAECONNRESET);
+	::SetLastError(ERROR_INVALID_DATA);
+
+	return TRUE;
+}
+
+BOOL CSSLSession::GetSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo)
+{
+	ASSERT(lppInfo != nullptr);
+
+	*lppInfo = nullptr;
+
+	if(enInfo < SSL_SSI_MIN || enInfo > SSL_SSI_MAX)
+	{
+		::SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	if(!IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	SSL_CTX* pContext = SSL_get_SSL_CTX(m_ssl);
+
+	switch(enInfo)
+	{
+	case SSL_SSI_CTX:
+		{
+			*lppInfo = (LPVOID)(pContext);
+		}
+		break;
+	case SSL_SSI_CTX_METHOD:
+		{
+			if(pContext != nullptr)
+				*lppInfo = (LPVOID)(SSL_CTX_get_ssl_method(pContext));
+		}
+		break;
+	case SSL_SSI_CTX_CIPHERS:
+		{
+			if(pContext != nullptr)
+				*lppInfo = (LPVOID)(SSL_CTX_get_ciphers(pContext));
+		}
+		break;
+	case SSL_SSI_CTX_CERT_STORE:
+		{
+			if(pContext != nullptr)
+				*lppInfo = (LPVOID)(SSL_CTX_get_cert_store(pContext));
+		}
+		break;
+	case SSL_SSI_SERVER_NAME_TYPE:
+		{
+			*lppInfo = (LPVOID)(UINT_PTR)(SSL_get_servername_type(m_ssl));
+		}
+		break;
+	case SSL_SSI_SERVER_NAME:
+		{
+			int type = SSL_get_servername_type(m_ssl);
+
+			if(type != -1)
+				*lppInfo = (LPVOID)(SSL_get_servername(m_ssl, type));
+		}
+		break;
+	case SSL_SSI_VERSION:
+		{
+			*lppInfo = (LPVOID)(SSL_get_version(m_ssl));
+		}
+		break;
+	case SSL_SSI_METHOD:
+		{
+			*lppInfo = (LPVOID)(SSL_get_ssl_method(m_ssl));
+		}
+		break;
+	case SSL_SSI_CERT:
+		{
+			*lppInfo = (LPVOID)(SSL_get_certificate(m_ssl));
+		}
+		break;
+	case SSL_SSI_PKEY:
+		{
+			*lppInfo = (LPVOID)(SSL_get_privatekey(m_ssl));
+		}
+		break;
+	case SSL_SSI_CURRENT_CIPHER:
+		{
+			*lppInfo = (LPVOID)(SSL_get_current_cipher(m_ssl));
+		}
+		break;
+	case SSL_SSI_CIPHERS:
+		{
+			*lppInfo = (LPVOID)(SSL_get_ciphers(m_ssl));
+		}
+		break;
+	case SSL_SSI_CLIENT_CIPHERS:
+		{
+			*lppInfo = (LPVOID)(SSL_get_client_ciphers(m_ssl));
+		}
+		break;
+	case SSL_SSI_PEER_CERT:
+		{
+			X509* pCert = SSL_get_peer_certificate(m_ssl);
+
+			if(pCert != nullptr)
+			{
+				*lppInfo = (LPVOID*)pCert;
+				X509_free(pCert);
+			}
+		}
+		break;
+	case SSL_SSI_PEER_CERT_CHAIN:
+		{
+			*lppInfo = (LPVOID)(SSL_get_peer_cert_chain(m_ssl));
+		}
+		break;
+	case SSL_SSI_VERIFIED_CHAIN:
+		{
+			*lppInfo = (LPVOID)(SSL_get0_verified_chain(m_ssl));
+		}
+		break;
+	}
 
 	return TRUE;
 }

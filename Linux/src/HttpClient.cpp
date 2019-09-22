@@ -82,12 +82,27 @@ template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_
 	return SendRequest(lpszMethod, lpszPath, lpHeaders, iHeaderCount, (BYTE*)fmap, (int)fmap.Size());
 }
 
-template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::SendChunkData(const BYTE* pData, int iLength, LPCSTR lpszExtensions)
 {
+	char szLen[12];
+	WSABUF bufs[5];
+
+	int iCount = MakeChunkPackage(pData, iLength, lpszExtensions, szLen, bufs);
+
+	return SendPackets(bufs, iCount);
+}
+
+template<class R, class T, USHORT default_port> BOOL CHttpClientT<R, T, default_port>::SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+{
+	ASSERT(lpszMask);
+
 	WSABUF szBuffer[2];
 	BYTE szHeader[HTTP_MAX_WS_HEADER_LEN];
 
-	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen, szHeader, szBuffer))
+	unique_ptr<BYTE[]> szData = make_unique<BYTE[]>(iLength);
+	memcpy(szData.get(), pData, iLength);
+
+	if(!::MakeWSPacket(bFinal, iReserved, iOperationCode, lpszMask, szData.get(), iLength, ullBodyLen, szHeader, szBuffer))
 		return FALSE;
 
 	return SendPackets(szBuffer, 2);
@@ -183,7 +198,7 @@ template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::S
 	return TRUE;
 }
 
-template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen)
 {
 	CleanupRequestResult();
 

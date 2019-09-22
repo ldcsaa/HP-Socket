@@ -324,7 +324,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
-	virtual BOOL SendSmallFile		(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
+	virtual BOOL SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 #ifdef _SSL_SUPPORT
 	/*
@@ -334,14 +334,30 @@ public:
 	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
 	*			lpszPemCertFile			-- 证书文件
 	*			lpszPemKeyFile			-- 私钥文件
-	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
 	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
 	*			fnServerNameCallback	-- SNI 回调函数指针（可选）
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)	= 0;
+	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)	= 0;
+
+	/*
+	* 名称：初始化通信组件 SSL 环境参数（通过内存加载证书）
+	* 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
+	*		
+	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+	*			lpszPemCert				-- 证书内容
+	*			lpszPemKey				-- 私钥内容
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
+	*			lpszCAPemCert			-- CA 证书内容（单向验证或客户端可选）
+	*			fnServerNameCallback	-- SNI 回调函数指针（可选，如果为 nullptr 则使用 SNI 默认回调函数）
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)				= 0;
 
 	/*
 	* 名称：增加 SNI 主机证书
@@ -350,13 +366,40 @@ public:
 	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
 	*			lpszPemCertFile			-- 证书文件
 	*			lpszPemKeyFile			-- 私钥文件
-	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
 	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证可选）
 	*
 	* 返回值：	正数		-- 成功，并返回 SNI 主机证书对应的索引，该索引用于在 SNI 回调函数中定位 SNI 主机
 	*			负数		-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual int AddSSLContext		(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)															= 0;
+	virtual int AddSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)																= 0;
+
+	/*
+	* 名称：增加 SNI 主机证书（通过内存加载证书）
+	* 描述：SSL 服务端在 SetupSSLContext() 成功后可以调用本方法增加多个 SNI 主机证书
+	*		
+	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+	*			lpszPemCert				-- 证书内容
+	*			lpszPemKey				-- 私钥内容
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
+	*			lpszCAPemCert			-- CA 证书内容（单向验证可选）
+	*
+	* 返回值：	正数		-- 成功，并返回 SNI 主机证书对应的索引，该索引用于在 SNI 回调函数中定位 SNI 主机
+	*			负数		-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual int AddSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)																			= 0;
+
+	/*
+	* 名称：绑定 SNI 主机域名
+	* 描述：SSL 服务端在 AddSSLContext() 成功后可以调用本方法绑定主机域名到 SNI 主机证书
+	*		
+	* 参数：		lpszServerName		-- 主机域名
+	*			iContextIndex		-- SNI 主机证书对应的索引
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL BindSSLServerName(LPCTSTR lpszServerName, int iContextIndex)	= 0;
 
 	/*
 	* 名称：清理通信组件 SSL 运行环境
@@ -368,7 +411,7 @@ public:
 	* 
 	* 返回值：无
 	*/
-	virtual void CleanupSSLContext	()																																																											= 0;
+	virtual void CleanupSSLContext()											= 0;
 
 	/*
 	* 名称：启动 SSL 握手
@@ -377,7 +420,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL StartSSLHandShake(CONNID dwConnID)			= 0;
+	virtual BOOL StartSSLHandShake(CONNID dwConnID)								= 0;
 
 #endif
 
@@ -410,9 +453,18 @@ public:
 
 #ifdef _SSL_SUPPORT
 	/* 设置通信组件握手方式（默认：TRUE，自动握手） */
-	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	= 0;
+	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)				= 0;
 	/* 获取通信组件握手方式 */
-	virtual BOOL IsSSLAutoHandShake()						= 0;
+	virtual BOOL IsSSLAutoHandShake()									= 0;
+
+	/*
+	* 名称：获取 SSL Session 信息
+	* 描述：获取指定类型的 SSL Session 信息（输出类型参考：EnSSLSessionInfo）
+	*		
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo)	= 0;
 #endif
 
 };
@@ -598,7 +650,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
-	virtual BOOL SendSmallFile		(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
+	virtual BOOL SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 #ifdef _SSL_SUPPORT
 	/*
@@ -608,13 +660,28 @@ public:
 	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
 	*			lpszPemCertFile			-- 证书文件（客户端可选）
 	*			lpszPemKeyFile			-- 私钥文件（客户端可选）
-	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
 	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	= 0;
+	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	= 0;
+
+	/*
+	* 名称：初始化通信组件 SSL 环境参数（通过内存加载证书）
+	* 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
+	*		
+	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+	*			lpszPemCert				-- 证书内容
+	*			lpszPemKey				-- 私钥内容
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
+	*			lpszCAPemCert			-- CA 证书内容（单向验证或客户端可选）
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)					= 0;
 
 	/*
 	* 名称：清理通信组件 SSL 运行环境
@@ -626,7 +693,7 @@ public:
 	* 
 	* 返回值：无
 	*/
-	virtual void CleanupSSLContext	()																																													= 0;
+	virtual void CleanupSSLContext()						= 0;
 
 	/*
 	* 名称：启动 SSL 握手
@@ -665,9 +732,18 @@ public:
 
 #ifdef _SSL_SUPPORT
 	/* 设置通信组件握手方式（默认：TRUE，自动握手） */
-	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	= 0;
+	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)				= 0;
 	/* 获取通信组件握手方式 */
-	virtual BOOL IsSSLAutoHandShake()						= 0;
+	virtual BOOL IsSSLAutoHandShake()									= 0;
+
+	/*
+	* 名称：获取 SSL Session 信息
+	* 描述：获取指定类型的 SSL Session 信息（输出类型参考：EnSSLSessionInfo）
+	*		
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo)	= 0;
 #endif
 
 };
@@ -811,7 +887,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过系统 API 函数 ::GetLastError() 获取错误代码
 	*/
-	virtual BOOL SendSmallFile		(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
+	virtual BOOL SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 #ifdef _SSL_SUPPORT
 	/*
@@ -821,13 +897,28 @@ public:
 	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
 	*			lpszPemCertFile			-- 证书文件（客户端可选）
 	*			lpszPemKeyFile			-- 私钥文件（客户端可选）
-	*			lpszKeyPasswod			-- 私钥密码（没有密码则为空）
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
 	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	= 0;
+	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	= 0;
+
+	/*
+	* 名称：初始化通信组件 SSL 环境参数（通过内存加载证书）
+	* 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
+	*		
+	* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+	*			lpszPemCert				-- 证书内容
+	*			lpszPemKey				-- 私钥内容
+	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
+	*			lpszCAPemCert			-- CA 证书内容（单向验证或客户端可选）
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)					= 0;
 
 	/*
 	* 名称：清理通信组件 SSL 运行环境
@@ -839,7 +930,7 @@ public:
 	* 
 	* 返回值：无
 	*/
-	virtual void CleanupSSLContext	()																																													= 0;
+	virtual void CleanupSSLContext()	= 0;
 
 	/*
 	* 名称：启动 SSL 握手
@@ -848,7 +939,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL StartSSLHandShake()						= 0;
+	virtual BOOL StartSSLHandShake()	= 0;
 
 #endif
 
@@ -876,6 +967,15 @@ public:
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	= 0;
 	/* 获取通信组件握手方式 */
 	virtual BOOL IsSSLAutoHandShake()						= 0;
+
+	/*
+	* 名称：获取 SSL Session 信息
+	* 描述：获取指定类型的 SSL Session 信息（输出类型参考：EnSSLSessionInfo）
+	*		
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
+	*/
+	virtual BOOL GetSSLSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo)	= 0;
 #endif
 
 };
@@ -1561,27 +1661,6 @@ public:
 	/***************************** 组件操作方法 *****************************/
 
 	/*
-	* 名称：发送 WebSocket 消息
-	* 描述：向对端端发送 WebSocket 消息
-	*		
-	* 参数：		dwConnID		-- 连接 ID
-	*			bFinal			-- 是否结束帧
-	*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
-	*			iOperationCode	-- 操作码：0x0 - 0xF
-	*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
-	*			pData			-- 消息体数据缓冲区
-	*			iLength			-- 消息体数据长度
-	*			ullBodyLen		-- 消息总长度
-	* 								ullBodyLen = 0		 -> 消息总长度为 iLength
-	* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
-	* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
-	* 								ullBodyLen < iLength -> 错误参数，发送失败
-	* 返回值：	TRUE			-- 成功
-	*			FALSE			-- 失败
-	*/
-	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4] = nullptr, BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
-
-	/*
 	* 名称：启动 HTTP 通信
 	* 描述：当通信组件设置为非自动启动 HTTP 通信时，需要调用本方法启动 HTTP 通信
 	*		
@@ -1589,6 +1668,19 @@ public:
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
 	virtual BOOL StartHttp(CONNID dwConnID)												= 0;
+
+	/*
+	* 名称：发送 Chunked 数据分片
+	* 描述：向对端发送 Chunked 数据分片
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			pData			-- Chunked 数据分片
+	*			iLength			-- 数据分片长度（为 0 表示结束分片）
+	*			lpszExtensions	-- 扩展属性（默认：nullptr）
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendChunkData(CONNID dwConnID, const BYTE* pData = nullptr, int iLength = 0, LPCSTR lpszExtensions = nullptr)	= 0;
 
 public:
 
@@ -1666,6 +1758,27 @@ public:
 	/***************************** 组件操作方法 *****************************/
 
 	/*
+	* 名称：发送 WebSocket 消息
+	* 描述：向对端端发送 WebSocket 消息
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			bFinal			-- 是否结束帧
+	*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+	*			iOperationCode	-- 操作码：0x0 - 0xF
+	*			lpszMask		-- 掩码（nullptr 或 4 字节掩码，如果为 nullptr 则没有掩码）
+	*			pData			-- 消息体数据缓冲区
+	*			iLength			-- 消息体数据长度
+	*			ullBodyLen		-- 消息总长度
+	* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+	* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+	* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+	* 								ullBodyLen < iLength -> 错误参数，发送失败
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
+
+	/*
 	* 名称：发送请求
 	* 描述：向服务端发送 HTTP 请求
 	*		
@@ -1739,6 +1852,26 @@ public:
 
 	/***********************************************************************/
 	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：发送 WebSocket 消息
+	* 描述：向对端端发送 WebSocket 消息
+	*		
+	* 参数：		dwConnID		-- 连接 ID
+	*			bFinal			-- 是否结束帧
+	*			iReserved		-- RSV1/RSV2/RSV3 各 1 位
+	*			iOperationCode	-- 操作码：0x0 - 0xF
+	*			pData			-- 消息体数据缓冲区
+	*			iLength			-- 消息体数据长度
+	*			ullBodyLen		-- 消息总长度
+	* 								ullBodyLen = 0		 -> 消息总长度为 iLength
+	* 								ullBodyLen = iLength -> 消息总长度为 ullBodyLen
+	* 								ullBodyLen > iLength -> 消息总长度为 ullBodyLen，后续消息体长度为 ullBOdyLen - iLength，后续消息体通过底层方法 Send() / SendPackets() 发送
+	* 								ullBodyLen < iLength -> 错误参数，发送失败
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE* pData, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
 
 	/*
 	* 名称：回复请求
@@ -1831,7 +1964,7 @@ public:
 	* 返回值：	TRUE			-- 成功
 	*			FALSE			-- 失败
 	*/
-	virtual BOOL SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4] = nullptr, BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
+	virtual BOOL SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
 
 	/*
 	* 名称：启动 HTTP 通信
@@ -1841,6 +1974,18 @@ public:
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
 	virtual BOOL StartHttp()											= 0;
+
+	/*
+	* 名称：发送 Chunked 数据分片
+	* 描述：向对端发送 Chunked 数据分片
+	*		
+	* 参数：		pData			-- Chunked 数据分片
+	*			iLength			-- 数据分片长度（为 0 表示结束分片）
+	*			lpszExtensions	-- 扩展属性（默认：nullptr）
+	* 返回值：	TRUE			-- 成功
+	*			FALSE			-- 失败
+	*/
+	virtual BOOL SendChunkData(const BYTE* pData = nullptr, int iLength = 0, LPCSTR lpszExtensions = nullptr)	= 0;
 
 public:
 

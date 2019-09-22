@@ -85,7 +85,7 @@ BOOL CUdpCast::CheckParams()
 		((int)m_dwFreeBufferPoolHold >= 0)														&&
 		(m_enCastMode >= CM_MULTICAST && m_enCastMode <= CM_BROADCAST)							&&
 		(m_iMCTtl >= 0 && m_iMCTtl <= 255)														&&
-		(m_bMCLoop >= 0 && m_bMCLoop <= 1)														)
+		(m_bMCLoop == TRUE || m_bMCLoop == FALSE)												)
 		return TRUE;
 
 	SetLastError(SE_INVALID_PARAM, __FUNCTION__, ERROR_INVALID_PARAMETER);
@@ -99,7 +99,6 @@ void CUdpCast::PrepareStart()
 	m_itPool.SetPoolHold((int)m_dwFreeBufferPoolHold);
 
 	m_itPool.Prepare();
-
 }
 
 BOOL CUdpCast::CheckStarting()
@@ -155,7 +154,7 @@ BOOL CUdpCast::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCT
 		m_castAddr.SetPort(usPort);
 	}
 
-	if(!lpszBindAddress || lpszBindAddress[0] == 0)
+	if(::IsStrEmpty(lpszBindAddress))
 	{
 		bindAddr.family = m_castAddr.family;
 		bindAddr.SetPort(usPort);
@@ -199,9 +198,6 @@ BOOL CUdpCast::BindClientSocket(HP_SOCKADDR& bindAddr)
 	if(::bind(m_soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
 		return FALSE;
 
-	int addr_len = bindAddr.AddrSize();
-	ENSURE(::getsockname(m_soClient, bindAddr.Addr(), &addr_len) == NO_ERROR);
-
 	m_dwConnID = ::GenerateConnectionID();
 
 	return TRUE;
@@ -241,8 +237,8 @@ BOOL CUdpCast::SetMultiCastSocketOptions(const HP_SOCKADDR& bindAddr)
 {
 	if(m_castAddr.IsIPv4())
 	{
-		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_TTL, &m_iMCTtl, sizeof(int)) != SOCKET_ERROR);
-		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_LOOP, &m_bMCLoop, sizeof(BOOL)) != SOCKET_ERROR);
+		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_TTL, &m_iMCTtl, sizeof(m_iMCTtl)) != SOCKET_ERROR);
+		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_LOOP, &m_bMCLoop, sizeof(m_bMCLoop)) != SOCKET_ERROR);
 
 		ip_mreq mcast;
 		::ZeroMemory(&mcast, sizeof(mcast));
@@ -250,13 +246,13 @@ BOOL CUdpCast::SetMultiCastSocketOptions(const HP_SOCKADDR& bindAddr)
 		mcast.imr_multiaddr = m_castAddr.addr4.sin_addr;
 		mcast.imr_interface = bindAddr.addr4.sin_addr;
 
-		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(ip_mreq)) == SOCKET_ERROR)
+		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast)) == SOCKET_ERROR)
 			return FALSE;
 	}
 	else
 	{
-		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &m_iMCTtl, sizeof(int)) != SOCKET_ERROR);
-		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &m_bMCLoop, sizeof(BOOL)) != SOCKET_ERROR);
+		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &m_iMCTtl, sizeof(m_iMCTtl)) != SOCKET_ERROR);
+		ENSURE(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &m_bMCLoop, sizeof(m_bMCLoop)) != SOCKET_ERROR);
 
 		ipv6_mreq mcast;
 		::ZeroMemory(&mcast, sizeof(mcast));
@@ -264,7 +260,7 @@ BOOL CUdpCast::SetMultiCastSocketOptions(const HP_SOCKADDR& bindAddr)
 		mcast.ipv6mr_multiaddr = m_castAddr.addr6.sin6_addr;
 		mcast.ipv6mr_interface = bindAddr.addr6.sin6_scope_id;
 
-		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &mcast, sizeof(ipv6_mreq)) == SOCKET_ERROR)
+		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &mcast, sizeof(mcast)) == SOCKET_ERROR)
 			return FALSE;
 	}
 
@@ -727,7 +723,7 @@ BOOL CUdpCast::GetLocalAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& us
 
 void CUdpCast::SetRemoteHost(LPCTSTR lpszHost, USHORT usPort)
 {
-	m_strHost = lpszHost;
+	m_strHost = (m_enCastMode == CM_MULTICAST) ? lpszHost : IPV4_BROAD_CAST_ADDRESS;
 	m_usPort  = usPort;
 }
 
@@ -752,7 +748,6 @@ BOOL CUdpCast::GetRemoteHost(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
 
 	return isOK;
 }
-
 
 BOOL CUdpCast::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 {

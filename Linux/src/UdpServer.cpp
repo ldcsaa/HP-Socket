@@ -62,7 +62,7 @@ BOOL CUdpServer::CheckParams()
 {
 	if	((m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)								&&
 		(m_enOnSendSyncPolicy >= OSSP_NONE && m_enOnSendSyncPolicy <= OSSP_CLOSE)				&&
-		((int)m_dwMaxConnectionCount > 0)														&&
+		((int)m_dwMaxConnectionCount > 0 && m_dwMaxConnectionCount <= MAX_CONNECTION_COUNT)		&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
 		((int)m_dwFreeSocketObjLockTime >= 1000)												&&
 		((int)m_dwFreeSocketObjPool >= 0)														&&
@@ -178,6 +178,8 @@ BOOL CUdpServer::Stop()
 	if(!CheckStoping())
 		return FALSE;
 
+	SendCloseNotify();
+
 	CloseListenSocket();
 
 	DisconnectClientSocket();
@@ -196,15 +198,38 @@ BOOL CUdpServer::Stop()
 	return TRUE;
 }
 
+void CUdpServer::SendCloseNotify()
+{
+	if(m_soListen == INVALID_SOCKET)
+		return;
+
+	DWORD size				 = 0;
+	unique_ptr<CONNID[]> ids = m_bfActiveSockets.GetAllElementIndexes(size);
+
+	if(size == 0)
+		return;
+
+	for(DWORD i = 0; i < size; i++)
+	{
+		CONNID connID			  = ids[i];
+		TUdpSocketObj* pSocketObj = FindSocketObj(connID);
+
+		if(TUdpSocketObj::IsValid(pSocketObj))
+			::SendUdpCloseNotify(m_soListen, pSocketObj->remoteAddr);
+	}
+
+	::WaitFor(30);
+}
+
 void CUdpServer::CloseListenSocket()
 {
-	if(m_soListen != INVALID_SOCKET)
-	{
-		::ManualCloseSocket(m_soListen);
-		m_soListen = INVALID_SOCKET;
+	if(m_soListen == INVALID_SOCKET)
+		return;
 
-		::WaitFor(100);
-	}
+	::ManualCloseSocket(m_soListen);
+	m_soListen = INVALID_SOCKET;
+
+	::WaitFor(70);
 }
 
 void CUdpServer::DisconnectClientSocket()
@@ -285,12 +310,12 @@ void CUdpServer::DeleteSocketObj(TUdpSocketObj* pSocketObj)
 	TUdpSocketObj::Destruct(pSocketObj);
 }
 
-void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
+void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode, BOOL bNotify)
 {
 	if(!InvalidSocketObj(pSocketObj))
 		return;
 
-	CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
+	CloseClientSocketObj(pSocketObj, enFlag, enOperation, iErrorCode, bNotify);
 
 	{
 		m_bfActiveSockets.Remove(pSocketObj->connID);
@@ -361,9 +386,12 @@ CONNID CUdpServer::FindConnectionID(const HP_SOCKADDR* pAddr)
 	return dwConnID;
 }
 
-void CUdpServer::CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode)
+void CUdpServer::CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag, EnSocketOperation enOperation, int iErrorCode, BOOL bNotify)
 {
 	ASSERT(TUdpSocketObj::IsExist(pSocketObj));
+
+	if(bNotify && m_soListen != INVALID_SOCKET)
+		::SendUdpCloseNotify(m_soListen, pSocketObj->remoteAddr);
 
 	if(enFlag == SCF_CLOSE)
 		FireClose(pSocketObj, SO_CLOSE, SE_OK);
@@ -676,6 +704,9 @@ VOID CUdpServer::OnCommand(TDispCommand* pCmd)
 	case DISP_CMD_DISCONNECT:
 		HandleCmdDisconnect((CONNID)(pCmd->wParam), (BOOL)pCmd->lParam);
 		break;
+	case DISP_CMD_TIMEOUT:
+		HandleCmdTimeout((CONNID)(pCmd->wParam));
+		break;
 	}
 }
 
@@ -692,6 +723,11 @@ VOID CUdpServer::HandleCmdReceive(CONNID dwConnID, int flag)
 VOID CUdpServer::HandleCmdDisconnect(CONNID dwConnID, BOOL bForce)
 {
 	AddFreeSocketObj(FindSocketObj(dwConnID), SCF_CLOSE);
+}
+
+VOID CUdpServer::HandleCmdTimeout(CONNID dwConnID)
+{
+	AddFreeSocketObj(FindSocketObj(dwConnID), SCF_CLOSE, SO_UNKNOWN, 0, FALSE);
 }
 
 BOOL CUdpServer::OnReadyRead(PVOID pv, UINT events)
@@ -775,6 +811,12 @@ BOOL CUdpServer::HandleReceive(int flag)
 				continue;
 			}
 
+			if(::IsUdpCloseNotify(itPtr->Ptr(), rc))
+			{
+				AddFreeSocketObj(pSocketObj, SCF_CLOSE, SO_CLOSE, SE_OK, FALSE);
+				continue;
+			}
+
 			itPtr->Increase(rc);
 			
 			{
@@ -815,7 +857,10 @@ CONNID CUdpServer::HandleAccept(HP_SOCKADDR& addr)
 		else
 		{
 			if(!m_bfActiveSockets.AcquireLock(dwConnID))
+			{
+				::SendUdpCloseNotify(m_soListen, addr);
 				return 0;
+			}
 
 			pSocketObj = GetFreeSocketObj(dwConnID);
 			pSocketObj->lcIo.WaitToWrite();
@@ -1105,7 +1150,7 @@ void CUdpServer::DetectConnection(PVOID pv)
 		CUdpServer* pServer = (CUdpServer*)pSocketObj->pHolder;
 
 		if(pSocketObj->detectFails >= pServer->m_dwDetectAttempts)
-			VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_DISCONNECT, pSocketObj->connID, TRUE));
+			VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_TIMEOUT, pSocketObj->connID));
 		else
 			::InterlockedIncrement(&pSocketObj->detectFails);
 

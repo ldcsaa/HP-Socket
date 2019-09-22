@@ -162,10 +162,13 @@ void CClientDlg::OnBnClickedSend()
 
 void CClientDlg::OnBnClickedStart()
 {
+	USES_CONVERSION;
+
 	SetAppState(ST_STARTING);
 
 	m_Client.CleanupSSLContext();
-	if(!m_Client.SetupSSLContext(g_c_iVerifyMode, g_c_lpszPemCertFile, g_c_lpszPemKeyFile, g_c_lpszKeyPasswod, g_c_lpszCAPemCertFileOrPath))
+	//if(!m_Client.SetupSSLContext(g_c_iVerifyMode, g_c_lpszPemCertFile, g_c_lpszPemKeyFile, g_c_lpszKeyPasswod, g_c_lpszCAPemCertFileOrPath))
+	if(!m_Client.SetupSSLContextByMemory(g_c_iVerifyMode, g_c_lpszPemCert, g_c_lpszPemKey, T2A(g_c_lpszKeyPasswod), g_c_lpszCAPemCert))
 	{
 		::LogClientStartFail(::GetLastError(), _T("initialize SSL env fail"));
 		SetAppState(ST_STOPPED);

@@ -222,6 +222,17 @@ typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	
 /*****************************************************************************************************************************************************/
 
 /*
+* 名称：SNI 默认回调函数
+* 描述：SSL Server 的 SetupSSLContext 方法中如果不指定 SNI 回调函数则使用此 SNI 默认回调函数
+*		
+* 参数：		lpszServerName	-- 请求域名
+*			pContext		-- SSL Context 对象
+* 
+* 返回值：SNI 主机证书对应的索引
+*/
+HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext);
+
+/*
 * 名称：清理线程局部环境 SSL 资源
 * 描述：任何一个操作 SSL 的线程，通信结束时都需要清理线程局部环境 SSL 资源
 *		1、主线程和 HP-Socket 工作线程在通信结束时会自动清理线程局部环境 SSL 资源。因此，一般情况下不必手工调用本方法

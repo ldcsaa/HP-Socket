@@ -309,7 +309,7 @@
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
-      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
@@ -337,7 +337,7 @@
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
-      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -365,7 +365,7 @@
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
-      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
@@ -393,7 +393,7 @@
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
-      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -421,7 +421,7 @@
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
-      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
@@ -449,7 +449,7 @@
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
-      <CppAdditionalWarning>no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>

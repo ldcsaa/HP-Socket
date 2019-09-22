@@ -2414,9 +2414,14 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendLocalFile(HP_HttpServer pServer, H
 	return C_HP_Object::ToFirst<IHttpServer>(pServer)->SendLocalFile(dwConnID, lpszFileName, usStatusCode, lpszDesc, lpHeaders, iHeaderCount);
 }
 
-HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendWSMessage(HP_HttpServer pServer, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendChunkData(HP_HttpServer pServer, HP_CONNID dwConnID, const BYTE* pData, int iLength, LPCSTR lpszExtensions)
 {
-	return C_HP_Object::ToFirst<IHttpServer>(pServer)->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen);
+	return C_HP_Object::ToFirst<IHttpServer>(pServer)->SendChunkData(dwConnID, pData, iLength, lpszExtensions);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendWSMessage(HP_HttpServer pServer, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+{
+	return C_HP_Object::ToFirst<IHttpServer>(pServer)->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, pData, iLength, ullBodyLen);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_HttpServer_Release(HP_HttpServer pServer, HP_CONNID dwConnID)
@@ -2576,6 +2581,11 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendLocalFile(HP_HttpAgent pAgent, HP_C
 	return C_HP_Object::ToFirst<IHttpAgent>(pAgent)->SendLocalFile(dwConnID, lpszFileName, lpszMethod, lpszPath, lpHeaders, iHeaderCount);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendChunkData(HP_HttpAgent pAgent, HP_CONNID dwConnID, const BYTE* pData, int iLength, LPCSTR lpszExtensions)
+{
+	return C_HP_Object::ToFirst<IHttpAgent>(pAgent)->SendChunkData(dwConnID, pData, iLength, lpszExtensions);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendPost(HP_HttpAgent pAgent, HP_CONNID dwConnID, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)
 {
 	return C_HP_Object::ToFirst<IHttpAgent>(pAgent)->SendPost(dwConnID, lpszPath, lpHeaders, iHeaderCount, pBody, iLength);
@@ -2621,7 +2631,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendConnect(HP_HttpAgent pAgent, HP_CON
 	return C_HP_Object::ToFirst<IHttpAgent>(pAgent)->SendConnect(dwConnID, lpszHost, lpHeaders, iHeaderCount);
 }
 
-HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendWSMessage(HP_HttpAgent pAgent, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendWSMessage(HP_HttpAgent pAgent, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen)
 {
 	return C_HP_Object::ToFirst<IHttpAgent>(pAgent)->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen);
 }
@@ -2762,6 +2772,11 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendLocalFile(HP_HttpClient pClient, L
 	return C_HP_Object::ToFirst<IHttpClient>(pClient)->SendLocalFile(lpszFileName, lpszMethod, lpszPath, lpHeaders, iHeaderCount);
 }
 
+HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendChunkData(HP_HttpClient pClient, const BYTE* pData, int iLength, LPCSTR lpszExtensions)
+{
+	return C_HP_Object::ToFirst<IHttpClient>(pClient)->SendChunkData(pData, iLength, lpszExtensions);
+}
+
 HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendPost(HP_HttpClient pClient, LPCSTR lpszPath, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)
 {
 	return C_HP_Object::ToFirst<IHttpClient>(pClient)->SendPost(lpszPath, lpHeaders, iHeaderCount, pBody, iLength);
@@ -2807,7 +2822,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendConnect(HP_HttpClient pClient, LPC
 	return C_HP_Object::ToFirst<IHttpClient>(pClient)->SendConnect(lpszHost, lpHeaders, iHeaderCount);
 }
 
-HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendWSMessage(HP_HttpClient pClient, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen)
+HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendWSMessage(HP_HttpClient pClient, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData, int iLength, ULONGLONG ullBodyLen)
 {
 	return C_HP_Object::ToFirst<IHttpClient>(pClient)->SendWSMessage(bFinal, iReserved, iOperationCode, lpszMask, pData, iLength, ullBodyLen);
 }
@@ -2938,7 +2953,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_IsHttpAutoStart(HP_HttpClient pClient)
 /**************************************************************************/
 /************************ HTTP Sync Client ²Ù×÷·½·¨ ************************/
 
-HPSOCKET_API BOOL __HP_CALL HP_HttpSyncClient_OpenUrl(HP_HttpSyncClient pClient, LPCSTR lpszMethod, LPCSTR lpszUrl, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength, BOOL bForceReconnect)
+HPSOCKET_API BOOL __HP_CALL HP_HttpSyncClient_OpenUrl(HP_HttpSyncClient pClient, LPCSTR lpszMethod, LPCSTR lpszUrl, const HP_THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength, BOOL bForceReconnect)
 {
 	return C_HP_Object::ToFirst<IHttpSyncClient>(pClient)->OpenUrl(lpszMethod, lpszUrl, lpHeaders, iHeaderCount, pBody, iLength, bForceReconnect);
 }

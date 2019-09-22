@@ -1,4 +1,42 @@
 ==========================================================================================
+v5.6.1 更新：
+==========================================================================================
+
+> SSL 组件更新：
+-----------------
+1、所有 SSL 组件增加以下接口方法支持加载内存证书
+	1) Server：SetupSSLContextByMemory(), AddSSLContextByMemory()
+	2) Agent：SetupSSLContextByMemory()
+	3) Client：SetupSSLContextByMemory()
+2、所有 SSL 组件增加 GetSSLSessionInfo() 方法，用来获取 SSL 会话相关信息
+3、SSL Server 组件提供默认的 SNI 服务器域名绑定机制，大多数情形下应用程序不必自定义 SNI 回调函数
+	1) 当 SetupSSLContext() 的 'fnServerNameCallback' 参数值为 nullptr 则启用默认的服务器域名绑定机制
+	2) BindSSLServerName()：绑定服务器域名到指定证书
+	3) HP_SSL_DefaultServerNameCallback()：默认 SNI 回调函数
+
+> HTTP 组件更新：
+-----------------
+1、HTTP Server 组件的 SendWSMessage() 方法删除 lpszMask 参数
+2、所有 HTTP 组件的 SendWSMessage() 方法的 pData 参数类型改为 const BYTE*，因此可以传入常量
+3、所有 HTTP 组件添加 SendChunkData() 方法以方便地发送 Chunked 数据
+
+> UDP 组件更新：
+-----------------
+1、优化 Linux 平台的 UDP Cast 组件，使得其与 Windows 平台的 UDP Cast 组件保持行为一致
+2、提升所有 UDP 组件的 IPv6 兼容性
+3、UDP Client/Server 组件关闭时自动向对端发送“关闭通知”数据报
+
+> 其他更新：
+-----------------
+1、jemalloc 升级到 5.2.1 版本
+2、OpenSSL 升级到 1.1.1d 版本
+3、代码优化，提高稳定性
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.6.1 基本兼容 HP-Socket v5.5.3 版本（HTTP 组件的 SendWSMessage() 方法除外）
+
+==========================================================================================
 v5.5.3 更新：
 ==========================================================================================
 

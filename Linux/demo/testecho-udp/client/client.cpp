@@ -55,7 +55,7 @@ CUdpClient s_client(&s_listener);
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(s_client.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr))
+	if(s_client.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr, g_app_arg.local_port))
 		::LogClientStart(g_app_arg.remote_addr, g_app_arg.port);
 	else
 		::LogClientStartFail(s_client.GetLastError(), s_client.GetLastErrorDesc());

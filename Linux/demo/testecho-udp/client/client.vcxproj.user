@@ -4,7 +4,7 @@
     <RemoteTarget>460065450;192.168.56.12 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-n 0</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-n 0 -d 43054</RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <RemoteTarget>460065450;192.168.56.12 (username=bruce, port=22, authentication=Password)</RemoteTarget>

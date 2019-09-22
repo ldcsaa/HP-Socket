@@ -10,6 +10,9 @@ extern "C" {
 /* Defined if alloc_size attribute is supported. */
 #define JEMALLOC_HAVE_ATTR_ALLOC_SIZE
 
+/* Defined if format_arg(...) attribute is supported. */
+#define JEMALLOC_HAVE_ATTR_FORMAT_ARG
+
 /* Defined if format(gnu_printf, ...) attribute is supported. */
 #define JEMALLOC_HAVE_ATTR_FORMAT_GNU_PRINTF
 
@@ -69,7 +72,7 @@ extern "C" {
 #  define je_malloc_stats_print malloc_stats_print
 #  define je_malloc_usable_size malloc_usable_size
 #  define je_mallocx mallocx
-#  define je_smallocx_b0b3e49a54ec29e32636f4577d9d5a896d67fd20 smallocx_b0b3e49a54ec29e32636f4577d9d5a896d67fd20
+#  define je_smallocx_0000000000000000000000000000000000000000 smallocx_0000000000000000000000000000000000000000
 #  define je_nallocx nallocx
 #  define je_posix_memalign posix_memalign
 #  define je_rallocx rallocx
@@ -87,13 +90,13 @@ extern "C" {
 #include <limits.h>
 #include <strings.h>
 
-#define JEMALLOC_VERSION "5.2.0-0-gb0b3e49a54ec29e32636f4577d9d5a896d67fd20"
-#define JEMALLOC_VERSION_MAJOR 5
-#define JEMALLOC_VERSION_MINOR 2
+#define JEMALLOC_VERSION "0.0.0-0-g0000000000000000000000000000000000000000"
+#define JEMALLOC_VERSION_MAJOR 0
+#define JEMALLOC_VERSION_MINOR 0
 #define JEMALLOC_VERSION_BUGFIX 0
 #define JEMALLOC_VERSION_NREV 0
-#define JEMALLOC_VERSION_GID "b0b3e49a54ec29e32636f4577d9d5a896d67fd20"
-#define JEMALLOC_VERSION_GID_IDENT b0b3e49a54ec29e32636f4577d9d5a896d67fd20
+#define JEMALLOC_VERSION_GID "0000000000000000000000000000000000000000"
+#define JEMALLOC_VERSION_GID_IDENT 0000000000000000000000000000000000000000
 
 #define MALLOCX_LG_ALIGN(la)	((int)(la))
 #if LG_SIZEOF_PTR == 2
@@ -152,6 +155,7 @@ extern "C" {
 #      define JEMALLOC_EXPORT __declspec(dllimport)
 #    endif
 #  endif
+#  define JEMALLOC_FORMAT_ARG(i)
 #  define JEMALLOC_FORMAT_PRINTF(s, i)
 #  define JEMALLOC_NOINLINE __declspec(noinline)
 #  ifdef __cplusplus
@@ -178,6 +182,11 @@ extern "C" {
 #  endif
 #  ifndef JEMALLOC_EXPORT
 #    define JEMALLOC_EXPORT JEMALLOC_ATTR(visibility("default"))
+#  endif
+#  ifdef JEMALLOC_HAVE_ATTR_FORMAT_ARG
+#    define JEMALLOC_FORMAT_ARG(i) JEMALLOC_ATTR(__format_arg__(3))
+#  else
+#    define JEMALLOC_FORMAT_ARG(i)
 #  endif
 #  ifdef JEMALLOC_HAVE_ATTR_FORMAT_GNU_PRINTF
 #    define JEMALLOC_FORMAT_PRINTF(s, i) JEMALLOC_ATTR(format(gnu_printf, s, i))
@@ -374,7 +383,7 @@ struct extent_hooks_s {
 #  define malloc_stats_print je_malloc_stats_print
 #  define malloc_usable_size je_malloc_usable_size
 #  define mallocx je_mallocx
-#  define smallocx_b0b3e49a54ec29e32636f4577d9d5a896d67fd20 je_smallocx_b0b3e49a54ec29e32636f4577d9d5a896d67fd20
+#  define smallocx_0000000000000000000000000000000000000000 je_smallocx_0000000000000000000000000000000000000000
 #  define nallocx je_nallocx
 #  define posix_memalign je_posix_memalign
 #  define rallocx je_rallocx
@@ -407,7 +416,7 @@ struct extent_hooks_s {
 #  undef je_malloc_stats_print
 #  undef je_malloc_usable_size
 #  undef je_mallocx
-#  undef je_smallocx_b0b3e49a54ec29e32636f4577d9d5a896d67fd20
+#  undef je_smallocx_0000000000000000000000000000000000000000
 #  undef je_nallocx
 #  undef je_posix_memalign
 #  undef je_rallocx

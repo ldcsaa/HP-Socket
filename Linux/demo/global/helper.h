@@ -50,7 +50,8 @@
 #define IPV6_LOOPBACK_ADDRESS	_T("::1")
 #define IPV4_ANY_ADDRESS		_T("0.0.0.0")
 #define IPV6_ANY_ADDRESS		_T("::")
-#define DEF_BROAD_CAST_ADDRESS	_T("233.0.0.1")
+#define DEF_MULTI_CAST_ADDRESS	_T("233.0.0.1")
+#define BROAD_CAST_ADDRESS		_T("255.255.255.255")
 #define DEF_TCP_UDP_PORT		5555
 #define DEF_HTTP_PORT			8080
 #define DEF_HTTPS_PORT			8443
@@ -489,6 +490,12 @@ LPCTSTR GetDefaultCookieFile();
 
 extern int g_c_iVerifyMode;
 extern BOOL g_c_bNeedClientVerification;
+extern LPCSTR g_c_lpszPemCert;
+extern LPCSTR g_c_lpszPemKey;
+extern LPCSTR g_c_lpszCAPemCert;
+extern LPCSTR g_s_lpszPemCert;
+extern LPCSTR g_s_lpszPemKey;
+extern LPCSTR g_s_lpszCAPemCert;
 extern LPCTSTR g_c_lpszCAPemCertFileOrPath;
 extern LPCTSTR g_c_lpszPemCertFile;
 extern LPCTSTR g_c_lpszPemKeyFile;

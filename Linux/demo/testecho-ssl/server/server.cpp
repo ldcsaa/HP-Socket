@@ -147,7 +147,8 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.ParseArgs(argc, argv);
 
-	if(!s_server.SetupSSLContext(g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	//if(!s_server.SetupSSLContext(g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	if(!s_server.SetupSSLContextByMemory(g_s_iVerifyMode, g_s_lpszPemCert, g_s_lpszPemKey, g_s_lpszKeyPasswod, g_s_lpszCAPemCert))
 	{
 		::LogServerStartFail(::GetLastError(), _T("initialize SSL env fail"));
 		return EX_CONFIG;

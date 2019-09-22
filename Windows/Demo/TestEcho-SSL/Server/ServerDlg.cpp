@@ -132,13 +132,16 @@ void CServerDlg::SetAppState(EnAppState state)
 
 void CServerDlg::OnBnClickedStart()
 {
+	USES_CONVERSION;
+
 	m_Address.GetWindowText(m_strAddress);
 	m_strAddress.Trim();
 
 	SetAppState(ST_STARTING);
 
 	m_Server.CleanupSSLContext();
-	if(!m_Server.SetupSSLContext(g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	//if(!m_Server.SetupSSLContext(g_s_iVerifyMode, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	if(!m_Server.SetupSSLContextByMemory(g_s_iVerifyMode, g_s_lpszPemCert, g_s_lpszPemKey, T2A(g_s_lpszKeyPasswod), g_s_lpszCAPemCert))
 	{
 		::LogServerStartFail(::GetLastError(), _T("initialize SSL env fail"));
 		SetAppState(ST_STOPPED);

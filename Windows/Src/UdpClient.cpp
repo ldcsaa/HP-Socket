@@ -342,7 +342,7 @@ BOOL CUdpClient::CheckConnection()
 {
 	if(m_dwDetectFails++ >= m_dwDetectAttempts)
 	{
-		m_ccContext.Reset(TRUE, SO_CLOSE, WSAECONNRESET);
+		m_ccContext.Reset(TRUE, SO_CLOSE, NO_ERROR, FALSE);
 		return FALSE;
 	}
 
@@ -472,7 +472,7 @@ BOOL CUdpClient::HandleConnect(WSANETWORKEVENTS& events)
 		ENSURE(DetectConnection() == NO_ERROR);
 	else
 	{
-		m_ccContext.Reset(FALSE);
+		m_ccContext.Reset(FALSE, SO_CLOSE, ENSURE_ERROR_CANCELLED, FALSE);
 		return FALSE;
 	}
 
@@ -503,6 +503,12 @@ BOOL CUdpClient::ReadData()
 		if(rc > 0)
 		{
 			m_dwDetectFails = 0;
+
+			if(::IsUdpCloseNotify(m_rcBuffer, rc))
+			{
+				m_ccContext.Reset(TRUE, SO_CLOSE, NO_ERROR, FALSE);
+				return FALSE;
+			}
 
 			if(TRIGGER(FireReceive(m_rcBuffer, rc)) == HR_ERROR)
 			{
@@ -639,7 +645,7 @@ BOOL CUdpClient::Stop()
 
 	WaitForWorkerThreadEnd(dwCurrentThreadID);
 
-	SetConnected(FALSE);
+	CheckConnected();
 
 	if(m_ccContext.bFireOnClose)
 		FireClose(m_ccContext.enOperation, m_ccContext.iErrorCode);
@@ -697,6 +703,17 @@ void CUdpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
 		m_hWorker		= nullptr;
 		m_dwWorkerID	= 0;
 	}
+}
+
+void CUdpClient::CheckConnected()
+{
+	if(!IsConnected())
+		return;
+
+	if(m_ccContext.bNotify)
+		::SendUdpCloseNotify(m_soClient);
+
+	SetConnected(FALSE);
 }
 
 BOOL CUdpClient::DoSend(const BYTE* pBuffer, int iLength, int iOffset)
@@ -830,7 +847,6 @@ BOOL CUdpClient::GetRemoteHost(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
 
 	return isOK;
 }
-
 
 BOOL CUdpClient::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 {

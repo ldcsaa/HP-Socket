@@ -136,4 +136,15 @@ void CSSLClient::DoSSLHandShake()
 	ENSURE(::ProcessHandShake(this, this, &m_sslSession) == HR_OK);
 }
 
+BOOL CSSLClient::GetSSLSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo)
+{
+	if(!m_sslSession.IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	return m_sslSession.GetSessionInfo(enInfo, lppInfo);
+}
+
 #endif

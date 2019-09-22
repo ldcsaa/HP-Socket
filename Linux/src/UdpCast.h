@@ -136,10 +136,8 @@ public:
 	CUdpCast(IUdpCastListener* pListener)
 	: m_pListener			(pListener)
 	, m_lsSend				(m_itPool)
-	, m_soRecv				(INVALID_SOCKET)
-	, m_soSend				(INVALID_SOCKET)
-	, m_nRecvEvents			(0)
-	, m_nSendEvents			(0)
+	, m_soClient			(INVALID_SOCKET)
+	, m_nEvents				(0)
 	, m_dwConnID			(0)
 	, m_usPort				(0)
 	, m_bPaused				(FALSE)
@@ -170,10 +168,8 @@ private:
 	IUdpCastListener*	m_pListener;
 	TClientCloseContext m_ccContext;
 
-	SOCKET				m_soRecv;
-	SOCKET				m_soSend;
-	SHORT				m_nRecvEvents;
-	SHORT				m_nSendEvents;
+	SOCKET				m_soClient;
+	SHORT				m_nEvents;
 	CONNID				m_dwConnID;
 
 	BOOL				m_bReuseAddress;

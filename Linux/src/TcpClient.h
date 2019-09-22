@@ -48,12 +48,14 @@ public:
 	virtual BOOL IsConnected			()				{return m_bConnected;}
 
 #ifdef _SSL_SUPPORT
-	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPasswod = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	{return FALSE;}
+	virtual BOOL SetupSSLContext	(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	{return FALSE;}
+	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)						{return FALSE;}
 	virtual void CleanupSSLContext	()						{}
 
 	virtual BOOL StartSSLHandShake	()						{return FALSE;}
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	{}
 	virtual BOOL IsSSLAutoHandShake	()						{return FALSE;}
+	virtual BOOL GetSSLSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo)	{return FALSE;}
 
 protected:
 	virtual BOOL StartSSLHandShakeNoCheck()					{return FALSE;}

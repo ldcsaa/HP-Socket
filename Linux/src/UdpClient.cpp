@@ -226,7 +226,7 @@ BOOL CUdpClient::Stop()
 
 	WaitForWorkerThreadEnd();
 
-	SetConnected(FALSE);
+	CheckConnected();
 
 	if(m_ccContext.bFireOnClose)
 		FireClose(m_ccContext.enOperation, m_ccContext.iErrorCode);
@@ -277,6 +277,17 @@ void CUdpClient::WaitForWorkerThreadEnd()
 		m_evStop.Set();
 		m_thWorker.Join();
 	}
+}
+
+void CUdpClient::CheckConnected()
+{
+	if(!IsConnected())
+		return;
+
+	if(m_ccContext.bNotify)
+		::SendUdpCloseNotify(m_soClient);
+
+	SetConnected(FALSE);
 }
 
 BOOL CUdpClient::CreateWorkerThread()
@@ -414,7 +425,7 @@ BOOL CUdpClient::CheckConnection()
 {
 	if(m_dwDetectFails++ >= m_dwDetectAttempts)
 	{
-		m_ccContext.Reset(TRUE, SO_CLOSE, ERROR_CONNRESET);
+		m_ccContext.Reset(TRUE, SO_CLOSE, NO_ERROR, FALSE);
 		return FALSE;
 	}
 
@@ -476,7 +487,7 @@ BOOL CUdpClient::HandleConnect(SHORT events)
 		VERIFY(DetectConnection());
 	else
 	{
-		m_ccContext.Reset(FALSE);
+		m_ccContext.Reset(FALSE, SO_CLOSE, ENSURE_ERROR_CANCELLED, FALSE);
 		return FALSE;
 	}
 
@@ -521,6 +532,12 @@ BOOL CUdpClient::ReadData()
 		if(rc > 0)
 		{
 			m_dwDetectFails = 0;
+
+			if(::IsUdpCloseNotify(m_rcBuffer, rc))
+			{
+				m_ccContext.Reset(TRUE, SO_CLOSE, NO_ERROR, FALSE);
+				return FALSE;
+			}
 
 			if(rc > (int)m_dwMaxDatagramSize)
 			{

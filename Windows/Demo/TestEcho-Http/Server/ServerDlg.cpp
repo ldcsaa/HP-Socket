@@ -148,7 +148,7 @@ void CServerDlg::SetAppState(EnAppState state)
 	m_BindAddr.EnableWindow(m_enState == ST_STOPPED);
 }
 
-int CALLBACK CServerDlg::SIN_ServerNameCallback(LPCTSTR lpszServerName)
+int __HP_CALL CServerDlg::SIN_ServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
 {
 	if(::IsIPAddress(lpszServerName))
 		return 0;
@@ -170,8 +170,18 @@ void CServerDlg::OnBnClickedStart()
 	SetAppState(ST_STARTING);
 
 	m_HttpsServer.CleanupSSLContext();
+
+	/*
 	if(m_HttpsServer.SetupSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath, SIN_ServerNameCallback))
 		SPECIAL_SERVER_INDEX = m_HttpsServer.AddSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile2, g_s_lpszPemKeyFile2, g_s_lpszKeyPasswod2, g_s_lpszCAPemCertFileOrPath2);
+	*/
+	if(m_HttpsServer.SetupSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile, g_s_lpszPemKeyFile, g_s_lpszKeyPasswod, g_s_lpszCAPemCertFileOrPath))
+	{
+		int iIndex = m_HttpsServer.AddSSLContext(SSL_VM_NONE, g_s_lpszPemCertFile2, g_s_lpszPemKeyFile2, g_s_lpszKeyPasswod2, g_s_lpszCAPemCertFileOrPath2);
+		ASSERT(iIndex > 0);
+
+		m_HttpsServer.BindSSLServerName(SPECIAL_SERVER_NAME, iIndex);
+	}
 	else
 	{
 		::LogServerStartFail(::GetLastError(), _T("initialize SSL env fail"));
@@ -558,7 +568,7 @@ EnHandleResult CHttpServerListenerImpl::OnWSMessageComplete(IHttpServer* pSender
 
 	VERIFY(pSender->GetWSMessageState(dwConnID, &bFinal, &iReserved, &iOperationCode, nullptr, nullptr, nullptr));
 
-	pSender->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, nullptr, pBuffer->Ptr(), (int)pBuffer->Size());
+	pSender->SendWSMessage(dwConnID, bFinal, iReserved, iOperationCode, pBuffer->Ptr(), (int)pBuffer->Size());
 	pBuffer->Free();
 
 	if(iOperationCode == 0x8)

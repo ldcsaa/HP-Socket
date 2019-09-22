@@ -27,9 +27,9 @@
 
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR	5	// 主版本号
-#define HP_VERSION_MINOR	5	// 子版本号
-#define HP_VERSION_REVISE	3	// 修正版本号
-#define HP_VERSION_BUILD	2	// 构建编号
+#define HP_VERSION_MINOR	6	// 子版本号
+#define HP_VERSION_REVISE	1	// 修正版本号
+#define HP_VERSION_BUILD	4	// 构建编号
 
 //#define _UDP_DISABLED			// 禁用 UDP
 //#define _SSL_DISABLED			// 禁用 SSL
@@ -257,7 +257,7 @@ typedef enum EnTaskBufferType
 参数：pvArg -- 自定义参数
 返回值：（无）
 ************************************************************************/
-typedef VOID (CALLBACK *Fn_TaskProc)(PVOID pvArg);
+typedef VOID (__HP_CALL *Fn_TaskProc)(PVOID pvArg);
 typedef Fn_TaskProc	HP_Fn_TaskProc;
 
 struct TSocketTask;
@@ -268,7 +268,7 @@ struct TSocketTask;
 参数：pTask -- Socket 任务结构体指针
 返回值：（无）
 ************************************************************************/
-typedef VOID (CALLBACK *Fn_SocketTaskProc)(TSocketTask* pTask);
+typedef VOID (__HP_CALL *Fn_SocketTaskProc)(TSocketTask* pTask);
 typedef Fn_SocketTaskProc	HP_Fn_SocketTaskProc;
 
 /************************************************************************
@@ -325,18 +325,44 @@ typedef enum EnSSLVerifyMode
 } En_HP_SSLVerifyMode;
 
 /************************************************************************
+名称：SSL Session 信息类型
+描述：用于 GetSSLSessionInfo()，标识输出的 Session 信息类型
+************************************************************************/
+typedef enum EnSSLSessionInfo
+{
+	SSL_SSI_MIN					= 0,	// 
+	SSL_SSI_CTX					= 0,	// SSL CTX				（输出类型：SSL_CTX*）
+	SSL_SSI_CTX_METHOD			= 1,	// SSL CTX Mehtod		（输出类型：SSL_METHOD*）
+	SSL_SSI_CTX_CIPHERS			= 2,	// SSL CTX Ciphers		（输出类型：STACK_OF(SSL_CIPHER)*）
+	SSL_SSI_CTX_CERT_STORE		= 3,	// SSL CTX Cert Store	（输出类型：X509_STORE*）
+	SSL_SSI_SERVER_NAME_TYPE	= 4,	// Server Name Type		（输出类型：int）
+	SSL_SSI_SERVER_NAME			= 5,	// Server Name			（输出类型：LPCSTR）
+	SSL_SSI_VERSION				= 6,	// SSL Version			（输出类型：LPCSTR）
+	SSL_SSI_METHOD				= 7,	// SSL Method			（输出类型：SSL_METHOD*）
+	SSL_SSI_CERT				= 8,	// SSL Cert				（输出类型：X509*）
+	SSL_SSI_PKEY				= 9,	// SSL Private Key		（输出类型：EVP_PKEY*）
+	SSL_SSI_CURRENT_CIPHER		= 10,	// SSL Current Cipher	（输出类型：SSL_CIPHER*）
+	SSL_SSI_CIPHERS				= 11,	// SSL Available Ciphers（输出类型：STACK_OF(SSL_CIPHER)*）
+	SSL_SSI_CLIENT_CIPHERS		= 12,	// SSL Client Ciphers	（输出类型：STACK_OF(SSL_CIPHER)*）
+	SSL_SSI_PEER_CERT			= 13,	// SSL Peer Cert		（输出类型：X509*）
+	SSL_SSI_PEER_CERT_CHAIN		= 14,	// SSL Peer Cert Chain	（输出类型：STACK_OF(X509)*）
+	SSL_SSI_VERIFIED_CHAIN		= 15,	// SSL Verified Chain	（输出类型：STACK_OF(X509)*）
+	SSL_SSI_MAX					= 15,	// 
+} En_HP_SSLSessionInfo;
+
+/************************************************************************
 名称：SNI 服务名称回调函数
 描述：根据服务器名称选择 SSL 证书
 参数：	
-lpszServerName -- 服务器名称（域名）
+		lpszServerName -- 服务器名称（域名）
 
 返回值：
-0	 -- 成功，使用默认 SSL 证书
-正数	 -- 成功，使用返回值对应的 SNI 主机证书
-负数	 -- 失败，中断 SSL 握手
+		0	 -- 成功，使用默认 SSL 证书索引
+		正数	 -- 成功，使用返回值对应的 SNI 主机证书索引
+		负数	 -- 失败，中断 SSL 握手
 
 ************************************************************************/
-typedef int (CALLBACK *Fn_SNI_ServerNameCallback)(LPCTSTR lpszServerName);
+typedef int (__HP_CALL *Fn_SNI_ServerNameCallback)(LPCTSTR lpszServerName, PVOID pContext);
 typedef Fn_SNI_ServerNameCallback	HP_Fn_SNI_ServerNameCallback;
 
 #endif

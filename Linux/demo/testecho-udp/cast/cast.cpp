@@ -62,7 +62,7 @@ CUdpCast s_cast(&s_listener);
 
 void OnCmdStart(CCommandParser* pParser)
 {
-	if(s_cast.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr))
+	if(s_cast.Start(g_app_arg.remote_addr, g_app_arg.port, g_app_arg.async, g_app_arg.bind_addr, g_app_arg.local_port))
 		::LogClientStart(g_app_arg.remote_addr, g_app_arg.port);
 	else
 		::LogClientStartFail(s_cast.GetLastError(), s_cast.GetLastErrorDesc());
@@ -102,12 +102,17 @@ int main(int argc, char* const argv[])
 	CTermAttrInitializer term_attr;
 	CAppSignalHandler s_signal_handler({SIGTTOU, SIGINT});
 
+	g_app_arg.remote_addr = DEF_MULTI_CAST_ADDRESS;
+
 	g_app_arg.ParseArgs(argc, argv);
 
 	s_cast.SetCastMode(g_app_arg.cast_mode);
 	s_cast.SetReuseAddress(g_app_arg.reuse_addr);
 	s_cast.SetMultiCastLoop(g_app_arg.ip_loop);
 	s_cast.SetMultiCastTtl(g_app_arg.ttl);
+
+	if(g_app_arg.cast_mode == CM_BROADCAST)
+		g_app_arg.remote_addr = BROAD_CAST_ADDRESS;
 
 	CCommandParser::CMD_FUNC fnCmds[CCommandParser::CT_MAX] = {0};
 

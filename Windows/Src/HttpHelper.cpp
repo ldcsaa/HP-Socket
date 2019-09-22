@@ -238,6 +238,53 @@ void MakeHttpPacket(const CStringA& strHeader, const BYTE* pBody, int iLength, W
 	szBuffer[1].len = iLength;
 }
 
+int MakeChunkPackage(const BYTE* pData, int iLength, LPCSTR lpszExtensions, char szLen[12], WSABUF bufs[5])
+{
+	ASSERT(iLength == 0 || pData != nullptr);
+
+	int i = 0;
+
+	if(::IsStrEmptyA(lpszExtensions))
+	{
+		sprintf(szLen, "%x" HTTP_CRLF, iLength);
+
+		bufs[i].buf = szLen;
+		bufs[i].len = (int)strlen(szLen);
+		++i;
+	}
+	else
+	{
+		LPCSTR lpszSep = lpszExtensions[0] == ';' ? " " : " ;";
+
+		sprintf(szLen, "%x%s", iLength, lpszSep);
+
+		bufs[i].buf = szLen;
+		bufs[i].len = (int)strlen(szLen);
+		++i;
+
+		bufs[i].buf = (LPSTR)lpszExtensions;
+		bufs[i].len = (int)strlen(lpszExtensions);
+		++i;
+
+		bufs[i].buf = HTTP_CRLF;
+		bufs[i].len = 2;
+		++i;
+	}
+
+	if(iLength > 0)
+	{
+		bufs[i].buf = (LPSTR)(LPCSTR)pData;
+		bufs[i].len = iLength;
+		++i;
+	}
+
+	bufs[i].buf = HTTP_CRLF;
+	bufs[i].len = 2;
+	++i;
+
+	return i;
+}
+
 BOOL MakeWSPacket(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], BYTE* pData, int iLength, ULONGLONG ullBodyLen, BYTE szHeader[HTTP_MAX_WS_HEADER_LEN], WSABUF szBuffer[2])
 {
 	ULONGLONG ullLength = (ULONGLONG)iLength;

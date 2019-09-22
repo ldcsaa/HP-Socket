@@ -139,6 +139,11 @@ HPSOCKET_API void HP_Destroy_SSLPackClient(ITcpPackClient* pClient)
 /*************************************************************** Global Function Exports *************************************************************/
 /*****************************************************************************************************************************************************/
 
+HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
+{
+	return CSSLContext::DefaultServerNameCallback(lpszServerName, pContext);
+}
+
 HPSOCKET_API void HP_SSL_RemoveThreadLocalState(THR_ID dwThreadID)
 {
 	CSSLContext::RemoveThreadLocalState(dwThreadID);

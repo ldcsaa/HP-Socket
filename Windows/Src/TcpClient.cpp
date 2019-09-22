@@ -758,7 +758,6 @@ BOOL CTcpClient::GetRemoteHost(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
 	return isOK;
 }
 
-
 BOOL CTcpClient::GetRemoteHost(LPCSTR* lpszHost, USHORT* pusPort)
 {
 	*lpszHost = m_strHost;
