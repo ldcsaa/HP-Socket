@@ -138,17 +138,11 @@ BOOL CUdpCast::CheckStoping()
 
 BOOL CUdpCast::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszBindAddress, HP_SOCKADDR& bindAddr)
 {
-	if(m_enCastMode == CM_MULTICAST)
-	{
-		if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, m_castAddr))
-			return FALSE;
-	}
-	else
-	{
-		m_castAddr.family				 = AF_INET;
-		m_castAddr.addr4.sin_addr.s_addr = INADDR_BROADCAST;
-		m_castAddr.SetPort(usPort);
-	}
+	if(m_enCastMode == CM_BROADCAST && ::IsStrEmpty(lpszRemoteAddress))
+		lpszRemoteAddress = DEFAULT_IPV4_BROAD_CAST_ADDRESS;
+
+	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, m_castAddr))
+		return FALSE;
 
 	if(::IsStrEmpty(lpszBindAddress))
 	{
@@ -703,7 +697,7 @@ BOOL CUdpCast::GetLocalAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& us
 
 void CUdpCast::SetRemoteHost(LPCTSTR lpszHost, USHORT usPort)
 {
-	m_strHost = (m_enCastMode == CM_MULTICAST) ? lpszHost : IPV4_BROAD_CAST_ADDRESS;
+	m_strHost = lpszHost;
 	m_usPort  = usPort;
 }
 

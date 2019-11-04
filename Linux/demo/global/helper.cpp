@@ -442,7 +442,7 @@ void CCommandParser::Reset()
 
 void CCommandParser::PrintUsage()
 {
-	PRINTLN("------ ACTION -----+------------------------ USAGE ----------------------");
+	PRINTLN("------ ACTION -----+----------------------- USAGE -----------------------");
 
 	PrintCmdUsage();
 

@@ -31,8 +31,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnEnChangeContent();
-	afx_msg void OnBnClickedMultiMode();
-	afx_msg void OnBnClickedBroadMode();
 	afx_msg void OnBnClickedSend();
 	afx_msg void OnBnClickedStart();
 	afx_msg void OnBnClickedStop();

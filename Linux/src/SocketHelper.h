@@ -98,7 +98,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 /* IPv6 默认绑定地址 */
 #define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
 /* IPv4 广播地址 */
-#define IPV4_BROAD_CAST_ADDRESS					_T("255.255.255.255")
+#define DEFAULT_IPV4_BROAD_CAST_ADDRESS			_T("255.255.255.255")
 
 /* TCP 默认通信数据缓冲区大小 */
 #define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY

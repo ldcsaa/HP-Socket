@@ -213,7 +213,7 @@
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -237,7 +237,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -261,7 +261,7 @@
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -285,7 +285,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -313,7 +313,7 @@
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>jemalloc.lib;ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -341,7 +341,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalDependencies>jemalloc.lib;ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -369,7 +369,7 @@
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>jemalloc.lib;ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -397,7 +397,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalDependencies>jemalloc.lib;ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>

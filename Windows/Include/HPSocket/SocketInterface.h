@@ -241,7 +241,7 @@ public:
 	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)			= 0;
 	/* 设置 Socket 缓存池回收阀值（通常设置为 Socket 缓存池大小的 3 倍） */
 	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)			= 0;
-	/* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
+	/* 设置内存块缓存池回收阀值 */
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)			= 0;
 	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)			= 0;
@@ -489,7 +489,7 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)	= 0;
 	/* 获取数据报文最大长度 */
 	virtual DWORD GetMaxDatagramSize	()							= 0;
@@ -853,9 +853,9 @@ public:
 	/* 检测是否有效连接 */
 	virtual BOOL IsConnected			()														= 0;
 
-	/* 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ） */
+	/* 设置内存块缓存池大小 */
 	virtual void SetFreeBufferPoolSize		(DWORD dwFreeBufferPoolSize)						= 0;
-	/* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
+	/* 设置内存块缓存池回收阀值 */
 	virtual void SetFreeBufferPoolHold		(DWORD dwFreeBufferPoolHold)						= 0;
 
 	/* 获取内存块缓存池大小 */
@@ -999,7 +999,7 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	= 0;
 	/* 获取数据报文最大长度 */
 	virtual DWORD GetMaxDatagramSize()							= 0;
@@ -1030,7 +1030,7 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)		= 0;
 	/* 获取数据报文最大长度 */
 	virtual DWORD GetMaxDatagramSize()								= 0;
@@ -1347,7 +1347,7 @@ public:
 	* 描述：通信组件关闭时，Socket 监听器将收到该通知
 	*		
 	* 参数：		pSender		-- 事件源对象
-	* 返回值：忽略返回值
+	* 返回值：	忽略返回值
 	*/
 	virtual EnHandleResult OnShutdown(T* pSender)																= 0;
 
