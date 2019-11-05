@@ -30,6 +30,8 @@ Debug/
 debug/
 !Windows/Common/Src/Debug/
 !Windows/Common/Src/debug/
+!Windows/Other Languages/C#/HPSocketCS/bin/x86/Debug/
+!Windows/Other Languages/C#/HPSocketCS/bin/x64/Debug/
 Obj/
 obj/
 tlog/
