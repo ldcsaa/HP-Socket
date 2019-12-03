@@ -47,6 +47,7 @@ const IUINT32 IKCP_THRESH_INIT = 2;
 const IUINT32 IKCP_THRESH_MIN = 2;
 const IUINT32 IKCP_PROBE_INIT = 7000;		// 7 secs to probe window size
 const IUINT32 IKCP_PROBE_LIMIT = 120000;	// up to 120 secs to probe window
+const IUINT32 IKCP_FASTACK_LIMIT = 5;		// max times to trigger fastack
 
 
 //---------------------------------------------------------------------
@@ -70,7 +71,7 @@ static inline const char *ikcp_decode8u(const char *p, unsigned char *c)
 /* encode 16 bits unsigned int (lsb) */
 static inline char *ikcp_encode16u(char *p, unsigned short w)
 {
-#if IWORDS_BIG_ENDIAN
+#if IWORDS_BIG_ENDIAN || IWORDS_MUST_ALIGN
 	*(unsigned char*)(p + 0) = (w & 255);
 	*(unsigned char*)(p + 1) = (w >> 8);
 #else
@@ -83,7 +84,7 @@ static inline char *ikcp_encode16u(char *p, unsigned short w)
 /* decode 16 bits unsigned int (lsb) */
 static inline const char *ikcp_decode16u(const char *p, unsigned short *w)
 {
-#if IWORDS_BIG_ENDIAN
+#if IWORDS_BIG_ENDIAN || IWORDS_MUST_ALIGN
 	*w = *(const unsigned char*)(p + 1);
 	*w = *(const unsigned char*)(p + 0) + (*w << 8);
 #else
@@ -96,7 +97,7 @@ static inline const char *ikcp_decode16u(const char *p, unsigned short *w)
 /* encode 32 bits unsigned int (lsb) */
 static inline char *ikcp_encode32u(char *p, IUINT32 l)
 {
-#if IWORDS_BIG_ENDIAN
+#if IWORDS_BIG_ENDIAN || IWORDS_MUST_ALIGN
 	*(unsigned char*)(p + 0) = (unsigned char)((l >>  0) & 0xff);
 	*(unsigned char*)(p + 1) = (unsigned char)((l >>  8) & 0xff);
 	*(unsigned char*)(p + 2) = (unsigned char)((l >> 16) & 0xff);
@@ -111,7 +112,7 @@ static inline char *ikcp_encode32u(char *p, IUINT32 l)
 /* decode 32 bits unsigned int (lsb) */
 static inline const char *ikcp_decode32u(const char *p, IUINT32 *l)
 {
-#if IWORDS_BIG_ENDIAN
+#if IWORDS_BIG_ENDIAN || IWORDS_MUST_ALIGN
 	*l = *(const unsigned char*)(p + 3);
 	*l = *(const unsigned char*)(p + 2) + (*l << 8);
 	*l = *(const unsigned char*)(p + 1) + (*l << 8);
@@ -287,6 +288,7 @@ ikcpcb* ikcp_create(IUINT32 conv, void *user)
 	kcp->logmask = 0;
 	kcp->ssthresh = IKCP_THRESH_INIT;
 	kcp->fastresend = 0;
+	kcp->fastlimit = IKCP_FASTACK_LIMIT;
 	kcp->nocwnd = 0;
 	kcp->xmit = 0;
 	kcp->dead_link = IKCP_DEADLINK;
@@ -509,7 +511,7 @@ int ikcp_send(ikcpcb *kcp, const char *buffer, int len)
 	if (len <= (int)kcp->mss) count = 1;
 	else count = (len + kcp->mss - 1) / kcp->mss;
 
-	if (count >= IKCP_WND_RCV) return -2;
+	if (count >= (int)IKCP_WND_RCV) return -2;
 
 	if (count == 0) count = 1;
 
@@ -608,7 +610,7 @@ static void ikcp_parse_una(ikcpcb *kcp, IUINT32 una)
 	}
 }
 
-static void ikcp_parse_fastack(ikcpcb *kcp, IUINT32 sn)
+static void ikcp_parse_fastack(ikcpcb *kcp, IUINT32 sn, IUINT32 ts)
 {
 	struct IQUEUEHEAD *p, *next;
 
@@ -622,7 +624,12 @@ static void ikcp_parse_fastack(ikcpcb *kcp, IUINT32 sn)
 			break;
 		}
 		else if (sn != seg->sn) {
+		#ifndef IKCP_FASTACK_CONSERVE
 			seg->fastack++;
+		#else
+			if (_itimediff(ts, seg->ts) >= 0)
+				seg->fastack++;
+		#endif
 		}
 	}
 }
@@ -745,8 +752,8 @@ void ikcp_parse_data(ikcpcb *kcp, IKCPSEG *newseg)
 //---------------------------------------------------------------------
 int ikcp_input(ikcpcb *kcp, const char *data, long size)
 {
-	IUINT32 una = kcp->snd_una;
-	IUINT32 maxack = 0;
+	IUINT32 prev_una = kcp->snd_una;
+	IUINT32 maxack = 0, latest_ts = 0;
 	int flag = 0;
 
 	if (ikcp_canlog(kcp, IKCP_LOG_INPUT)) {
@@ -797,9 +804,18 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
 			if (flag == 0) {
 				flag = 1;
 				maxack = sn;
+				latest_ts = ts;
 			}	else {
 				if (_itimediff(sn, maxack) > 0) {
+				#ifndef IKCP_FASTACK_CONSERVE
 					maxack = sn;
+					latest_ts = ts;
+				#else
+					if (_itimediff(ts, latest_ts) > 0) {
+						maxack = sn;
+						latest_ts = ts;
+					}
+				#endif
 				}
 			}
 			if (ikcp_canlog(kcp, IKCP_LOG_IN_ACK)) {
@@ -859,10 +875,10 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
 	}
 
 	if (flag != 0) {
-		ikcp_parse_fastack(kcp, maxack);
+		ikcp_parse_fastack(kcp, maxack, latest_ts);
 	}
 
-	if (_itimediff(kcp->snd_una, una) > 0) {
+	if (_itimediff(kcp->snd_una, prev_una) > 0) {
 		if (kcp->cwnd < kcp->rmt_wnd) {
 			IUINT32 mss = kcp->mss;
 			if (kcp->cwnd < kcp->ssthresh) {
@@ -1054,11 +1070,14 @@ void ikcp_flush(ikcpcb *kcp)
 			lost = 1;
 		}
 		else if (segment->fastack >= resent) {
-			needsend = 1;
-			segment->xmit++;
-			segment->fastack = 0;
-			segment->resendts = current + segment->rto;
-			change++;
+			if ((int)segment->xmit <= kcp->fastlimit || 
+				kcp->fastlimit <= 0) {
+				needsend = 1;
+				segment->xmit++;
+				segment->fastack = 0;
+				segment->resendts = current + segment->rto;
+				change++;
+			}
 		}
 
 		if (needsend) {

@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,8 @@ public:
 	virtual BOOL HasStarted()						{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState GetState()				{return m_enState;}
 
-	virtual DWORD GetQueueSize()					{return (DWORD)m_dwQueueSize;}
+	virtual DWORD GetQueueSize()					{return m_dwQueueSize;}
+	virtual DWORD GetTaskCount()					{return m_dwTaskCount;}
 	virtual DWORD GetThreadCount()					{return (DWORD)m_thPool.GetNumThreads();}
 	virtual DWORD GetMaxQueueSize()					{return m_dwMaxQueueSize;}
 	virtual EnRejectedPolicy GetRejectedPolicy()	{return m_enRejectedPolicy;}
@@ -139,13 +140,19 @@ private:
 	void Reset();
 
 private:
-	DWORD				m_dwMaxQueueSize;
-	EnRejectedPolicy	m_enRejectedPolicy;
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
+	CCriSec					m_csQueue;
+	CConVar					m_cvQueue;
+#endif
+
+	DWORD					m_dwMaxQueueSize;
+	EnRejectedPolicy		m_enRejectedPolicy;
 
 	volatile DWORD			m_dwQueueSize;
+	volatile DWORD			m_dwTaskCount;
 	volatile EnServiceState	m_enState;
 
-	CInnerThreadPool	m_thPool;
+	CInnerThreadPool		m_thPool;
 
 	DECLARE_NO_COPY_CLASS(CHPThreadPool)
 };

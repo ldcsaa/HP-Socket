@@ -149,6 +149,7 @@ int main(int argc, char* const argv[])
 ## 第三方扩展项目
 
 - *[HP-Socket for macOS](https://gitee.com/xin_chong/HP-Socket-for-macOS)*
+- *[HP-Socket for .Net](https://gitee.com/int2e/HPSocket.Net)*
 
 ## 捐赠支持
 

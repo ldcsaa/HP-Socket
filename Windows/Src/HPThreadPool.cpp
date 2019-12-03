@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,14 @@ void CHPThreadPool::CWorker::Execute(TTask* pTask, PVOID pvWorkerParam, OVERLAPP
 
 	::InterlockedDecrement(&m_pthPool->m_dwQueueSize);
 
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
+	if(m_pthPool->m_enRejectedPolicy == TRP_WAIT_FOR && m_pthPool->m_dwMaxQueueSize != 0)
+		m_pthPool->m_cvQueue.WakeUp();
+#endif
+
+	::InterlockedIncrement(&m_pthPool->m_dwTaskCount);
 	pTask->fn(pTask->arg);
+	::InterlockedDecrement(&m_pthPool->m_dwTaskCount);
 
 	if(pTask->freeArg)
 		::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
@@ -110,9 +117,8 @@ BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedP
 
 	if(FAILED(hr))
 	{
-		Stop();
-
 		::SetLastError(HRESULT_CODE(hr));
+		EXECUTE_RESTORE_ERROR(Stop());
 
 		return FALSE;
 	}
@@ -128,6 +134,14 @@ BOOL CHPThreadPool::Stop(DWORD dwMaxWait)
 		return FALSE;
 
 	::WaitWithMessageLoop(15);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
+	if(m_enRejectedPolicy == TRP_WAIT_FOR && m_dwMaxQueueSize != 0)
+	{
+		CCriSecLock locallock(m_csQueue);
+		m_cvQueue.WakeUpAll();
+	}
+#endif
 
 	if(dwMaxWait == 0)
 		dwMaxWait = INFINITE;
@@ -170,7 +184,9 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 	else if(m_enRejectedPolicy == TRP_CALLER_RUN)
 	{
+		::InterlockedIncrement(&m_dwTaskCount);
 		fnTaskProc(pvArg);
+		::InterlockedDecrement(&m_dwTaskCount);
 	}
 	else
 	{
@@ -229,14 +245,46 @@ CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc
 
 BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait, BOOL bFreeArg)
 {
-	EnSubmitResult sr	= SUBMIT_FULL;
-	DWORD dwTime		= ::TimeGetTime();
+	ASSERT(m_dwMaxQueueSize != 0);
 
-	for(DWORD i = 0; dwMaxWait == INFINITE || dwMaxWait == 0 || ::GetTimeGap32(dwTime) <= dwMaxWait; i++)
+	DWORD dwTime	= ::TimeGetTime();
+	BOOL bInfinite	= (dwMaxWait == INFINITE || dwMaxWait == 0);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WS08
+
+	while(CheckStarted()) 
+	{
+		CCriSecLock locallock(m_csQueue);
+
+		EnSubmitResult sr = DirectSubmit(fnTaskProc, pvArg, bFreeArg);
+
+		if(sr == SUBMIT_OK)
+			return TRUE;
+		else if(sr == SUBMIT_ERROR)
+			return FALSE;
+		{
+			if(bInfinite)
+				m_cvQueue.Wait(m_csQueue.GetObject());
+			else
+			{
+				DWORD dwNow = ::GetTimeGap32(dwTime);
+
+				if(dwNow > dwMaxWait || !m_cvQueue.Wait(m_csQueue.GetObject(), dwMaxWait - dwNow))
+				{
+					::SetLastError(ERROR_TIMEOUT);
+					break;
+				}
+			}
+		}
+	}
+
+#else
+
+	for(DWORD i = 0; bInfinite || ::GetTimeGap32(dwTime) <= dwMaxWait; i++)
 	{
 		((i & 8191) == 8191) ? ::WaitFor(1) : ::SwitchToThread();
 
-		sr = DirectSubmit(fnTaskProc, pvArg, bFreeArg);
+		EnSubmitResult sr = DirectSubmit(fnTaskProc, pvArg, bFreeArg);
 
 		if(sr == SUBMIT_OK)
 			return TRUE;
@@ -244,7 +292,9 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 			return FALSE;
 	}
 
-	::SetLastError(ERROR_DESTINATION_ELEMENT_FULL);
+	::SetLastError(ERROR_TIMEOUT);
+
+#endif
 
 	return FALSE;
 }
@@ -308,6 +358,7 @@ BOOL CHPThreadPool::CheckStoping()
 void CHPThreadPool::Reset()
 {
 	m_dwQueueSize		= 0;
+	m_dwTaskCount		= 0;
 	m_dwMaxQueueSize	= 0;
 	m_enRejectedPolicy	= TRP_CALL_FAIL;
 	m_enState			= SS_STOPPED;

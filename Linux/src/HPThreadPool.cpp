@@ -2,11 +2,11 @@
 * Copyright: JessMA Open Source (ldcsaa@gmail.com)
 *
 * Author	: Bruce Liang
-* Website	: http://www.jessma.org
-* Project	: https://github.com/ldcsaa
+* Website	: https://github.com/ldcsaa
+* Project	: https://github.com/ldcsaa/HP-Socket
 * Blog		: http://www.cnblogs.com/ldcsaa
 * Wiki		: http://www.oschina.net/p/hp-socket
-* QQ Group	: 75375912, 44636872
+* QQ Group	: 44636872, 75375912
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -103,17 +103,25 @@ BOOL CHPThreadPool::Stop(DWORD dwMaxWait)
 
 BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 {
-	BOOL isOK = TRUE;
+	BOOL isOK		= TRUE;
+	BOOL bLimited	= (m_dwMaxQueueSize != 0);
+	BOOL bInfinite	= (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
+
+	if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited)
+	{
+		CMutexLock2 lock(m_mtx);
+		m_cvQueue.notify_all();
+	}
 
 	VERIFY(DoAdjustThreadCount(0));
 
-	if(dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0)
+	if(bInfinite)
 		m_sem.Wait(CShutdownPredicate(this));
 	else
-		m_sem.WaitFor(chrono::milliseconds(dwMaxWait), CShutdownPredicate(this));
+		m_sem.WaitFor(dwMaxWait, CShutdownPredicate(this));
 
-	ASSERT(m_lsTasks.size()		== 0);
-	ASSERT(m_stThreads.size()	== 0);
+	ASSERT(m_lsTasks.size()	  == 0);
+	ASSERT(m_stThreads.size() == 0);
 
 	if(!m_lsTasks.empty())
 	{
@@ -182,11 +190,13 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 	else if(m_enRejectedPolicy == TRP_CALLER_RUN)
 	{
+		::InterlockedIncrement(&m_dwTaskCount);
 		fnTaskProc(pvArg);
+		::InterlockedDecrement(&m_dwTaskCount);
 	}
 	else
 	{
-		VERIFY(FALSE);
+		ASSERT(FALSE);
 
 		::SetLastError(ERROR_INVALID_PARAMETER);
 		return FALSE;
@@ -197,24 +207,26 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 
 CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
 {
+	CMutexLock2 lock(m_mtx);
+
+	return DoDirectSubmit(fnTaskProc, pvArg, bFreeArg);
+}
+
+CHPThreadPool::EnSubmitResult CHPThreadPool::DoDirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
+{
 	BOOL bLimited = (m_dwMaxQueueSize != 0);
 
+	if(!CheckStarted())
+		return SUBMIT_ERROR;
+
+	if(bLimited && (DWORD)m_lsTasks.size() >= m_dwMaxQueueSize)
+		return SUBMIT_FULL;
+	else
 	{
-		CMutexLock2 lock(m_mtx);
+		TTask* pTask = TTask::Construct(fnTaskProc, pvArg, bFreeArg);
 
-		if(!CheckStarted())
-			return SUBMIT_ERROR;
-
-		if(bLimited && (DWORD)m_lsTasks.size() >= m_dwMaxQueueSize)
-			return SUBMIT_FULL;
-		else
-		{
-			TTask* pTask = TTask::Construct(fnTaskProc, pvArg, bFreeArg);
-
-			m_lsTasks.push(pTask);
-			m_cv.notify_one();
-		}
-
+		m_lsTasks.push(pTask);
+		m_cvTask.notify_one();
 	}
 
 	return SUBMIT_OK;
@@ -222,22 +234,36 @@ CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc
 
 BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait, BOOL bFreeArg)
 {
-	EnSubmitResult sr	= SUBMIT_FULL;
-	DWORD dwTime		= ::TimeGetTime();
+	ASSERT(m_dwMaxQueueSize != 0);
 
-	for(DWORD i = 0; dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0 || ::GetTimeGap32(dwTime) <= dwMaxWait; i++)
+	DWORD dwTime	= ::TimeGetTime();
+	BOOL bInfinite	= (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
+
+	while(CheckStarted()) 
 	{
-		((i & 8191) == 8191) ? ::WaitFor(1) : ::SwitchToThread();
+		CMutexLock2 lock(m_mtx);
 
-		sr = DirectSubmit(fnTaskProc, pvArg, bFreeArg);
+		EnSubmitResult sr = DoDirectSubmit(fnTaskProc, pvArg, bFreeArg);
 
 		if(sr == SUBMIT_OK)
 			return TRUE;
 		else if(sr == SUBMIT_ERROR)
 			return FALSE;
-	}
+		{
+			if(bInfinite)
+				m_cvQueue.wait(lock);
+			else
+			{
+				DWORD dwNow = ::GetTimeGap32(dwTime);
 
-	::SetLastError(ERROR_DESTINATION_ELEMENT_FULL);
+				if(dwNow > dwMaxWait || m_cvQueue.wait_for(lock, chrono::milliseconds(dwMaxWait - dwNow)) == cv_status::timeout)
+				{
+					::SetLastError(ERROR_TIMEOUT);
+					break;
+				}
+			}
+		}
+	}
 
 	return FALSE;
 }
@@ -290,7 +316,7 @@ BOOL CHPThreadPool::DoAdjustThreadCount(DWORD dwNewThreadCount)
 		CMutexLock2 lock(m_mtx);
 
 		for(DWORD i = 0; i < dwThreadCount; i++)
-			m_cv.notify_one();
+			m_cvTask.notify_one();
 	}
 
 	return TRUE;
@@ -348,6 +374,8 @@ PVOID CHPThreadPool::ThreadProc(LPVOID pv)
 
 int CHPThreadPool::WorkerProc()
 {
+	BOOL bLimited = (m_dwMaxQueueSize != 0);
+
 	while(TRUE)
 	{
 		BOOL bExit	 = FALSE;
@@ -362,18 +390,23 @@ int CHPThreadPool::WorkerProc()
 				{
 					pTask = m_lsTasks.front();
 					m_lsTasks.pop();
+
+					if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited && pTask != nullptr)
+						m_cvQueue.notify_one();
 				}
 				else if(m_dwThreadCount < m_stThreads.size())
 					bExit = TRUE;
 				else
-					m_cv.wait(lock);
+					m_cvTask.wait(lock);
 
 			} while(pTask == nullptr && !bExit);
 		}
 
 		if(pTask != nullptr)
 		{
+			::InterlockedIncrement(&m_dwTaskCount);
 			pTask->fn(pTask->arg);
+			::InterlockedDecrement(&m_dwTaskCount);
 
 			if(pTask->freeArg)
 				::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
@@ -459,6 +492,7 @@ BOOL CHPThreadPool::CheckStoping()
 void CHPThreadPool::Reset()
 {
 	m_dwStackSize		= 0;
+	m_dwTaskCount		= 0;
 	m_dwThreadCount		= 0;
 	m_dwMaxQueueSize	= 0;
 	m_enRejectedPolicy	= TRP_CALL_FAIL;

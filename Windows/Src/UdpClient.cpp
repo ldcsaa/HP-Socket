@@ -797,6 +797,7 @@ int CUdpClient::SendInternal(TItemPtr& itPtr)
 		return ERROR_INVALID_STATE;
 
 	BOOL isPending = !m_lsSend.IsEmpty();
+	m_iPending	  += itPtr->Size();
 
 	m_lsSend.PushBack(itPtr.Detach());
 

@@ -2,7 +2,7 @@
 HP-Socket v5.6.1 API Update List:
 # ======================================== #
 --------------------
-1、HTTP:
+1. HTTP:
 --------------------
 HP_HttpServer_SendWSMessage					(UPDATE: delete 'lpszMask' parameter, 'pData' parameter change type to 'const BYTE*')
 HP_HttpAgent_SendWSMessage					(UPDATE: 'pData' parameter change type to 'const BYTE*')
@@ -13,7 +13,7 @@ HP_HttpAgent_SendChunkData					(ADD)
 HP_HttpClient_SendChunkData					(ADD)
 
 --------------------
-2、SSL:
+2. SSL:
 --------------------
 enum En_HP_SSLSessionInfo					(ADD)
 typedef HP_Fn_SNI_ServerNameCallback		(UPDATE: add parameter 'PVOID pContext')

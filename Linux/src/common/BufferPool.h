@@ -2,11 +2,11 @@
 * Copyright: JessMA Open Source (ldcsaa@gmail.com)
 *
 * Author	: Bruce Liang
-* Website	: http://www.jessma.org
-* Project	: https://github.com/ldcsaa
+* Website	: https://github.com/ldcsaa
+* Project	: https://github.com/ldcsaa/HP-Socket
 * Blog		: http://www.cnblogs.com/ldcsaa
 * Wiki		: http://www.oschina.net/p/hp-socket
-* QQ Group	: 75375912, 44636872
+* QQ Group	: 44636872, 75375912
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -30,22 +30,43 @@
 #include "PrivateHeap.h"
 #include "CriSec.h"
 
+template<class T> T* ConstructItemT(T*, CPrivateHeap& heap, int capacity, BYTE* pData, int length)
+{
+	ASSERT(capacity > 0);
+
+	int item_size	= sizeof(T);
+	T* pItem		= (T*)heap.Alloc(item_size + capacity);
+	BYTE* pHead		= (BYTE*)pItem + item_size;
+
+	return ::ConstructObject(pItem, heap, pHead, capacity, pData, length);
+}
+
+template<class T> void DestructItemT(T* pItem)
+{
+	ASSERT(pItem != nullptr);
+
+	CPrivateHeap& heap = pItem->GetPrivateHeap();
+
+	::DestructObject(pItem);
+	heap.Free(pItem);
+}
+
 struct TItem
 {
 	template<typename T> friend struct	TSimpleList;
 	template<typename T> friend class	CNodePoolT;
+	template<typename T> friend struct	TItemListT;
 
-	friend struct	TItemList;
-	friend struct	TBuffer;
+	friend struct						TBuffer;
 
 public:
-	int		Cat		(const BYTE* pData, int length);
-	int		Cat		(const TItem& other);
-	int		Fetch	(BYTE* pData, int length);
-	int		Peek	(BYTE* pData, int length);
-	int		Increase(int length);
-	int		Reduce	(int length);
-	void	Reset	(int first = 0, int last = 0);
+	int Cat		(const BYTE* pData, int length);
+	int Cat		(const TItem& other);
+	int Fetch	(BYTE* pData, int length);
+	int Peek	(BYTE* pData, int length);
+	int Increase(int length);
+	int Reduce	(int length);
+	void Reset	(int first = 0, int last = 0);
 
 	BYTE*		Ptr		()			{return begin;}
 	const BYTE*	Ptr		()	const	{return begin;}
@@ -54,22 +75,24 @@ public:
 	int			Capacity()	const	{return capacity;}
 	bool		IsEmpty	()	const	{return Size()	 == 0;}
 	bool		IsFull	()	const	{return Remain() == 0;}
+	CPrivateHeap& GetPrivateHeap()	{return heap;}
 
-public:
-	operator		BYTE*	()			{return Ptr();}
-	operator const	BYTE*	() const	{return Ptr();}
+	operator		BYTE* ()		{return Ptr();}
+	operator const	BYTE* () const	{return Ptr();}
 
 public:
 	static TItem* Construct(CPrivateHeap& heap,
 							int		capacity	= DEFAULT_ITEM_CAPACITY,
 							BYTE*	pData		= nullptr,
-							int		length		= 0);
+							int		length		= 0)
+	{
+		return ::ConstructItemT((TItem*)(nullptr), heap, capacity, pData, length);
+	}
 
-	static void Destruct(TItem* pItem);
-
-private:
-	friend TItem* ConstructObject<>(TItem*, CPrivateHeap&, BYTE*&, int&, BYTE*&, int&);
-	friend void DestructObject<>(TItem*);
+	static void Destruct(TItem* pItem)
+	{
+		::DestructItemT(pItem);
+	}
 
 	TItem(CPrivateHeap& hp, BYTE* pHead, int cap = DEFAULT_ITEM_CAPACITY, BYTE* pData = nullptr, int length = 0)
 	: heap(hp), head(pHead), begin(pHead), end(pHead), capacity(cap), next(nullptr), last(nullptr)
@@ -147,7 +170,7 @@ public:
 
 		if(pFront != pBack)
 		{
-			pFront = pFront->next;
+			pFront = (T*)pFront->next;
 			pFront->last = nullptr;
 		}
 		else if(pFront != nullptr)
@@ -173,7 +196,7 @@ public:
 
 		if(pFront != pBack)
 		{
-			pBack = pBack->last;
+			pBack = (T*)pBack->last;
 			pBack->next	= nullptr;
 		}
 		else if(pBack != nullptr)
@@ -341,50 +364,170 @@ template<class T> const DWORD CNodePoolT<T>::DEFAULT_POOL_HOLD		= DEFAULT_BUFFER
 
 using CItemPool = CNodePoolT<TItem>;
 
-struct TItemList : public TSimpleList<TItem>
+template<class T> struct TItemListT : public TSimpleList<T>
 {
-	friend struct TItemPtr;
+	using __super = TSimpleList<T>;
 
 public:
-	int PushTail(const BYTE* pData, int length);
-	int Cat		(const BYTE* pData, int length);
-	int Cat		(const TItem* pItem);
-	int Cat		(const TItemList& other);
-	int Fetch	(BYTE* pData, int length);
-	int Peek	(BYTE* pData, int length);
-	int Reduce	(int length);
-	void Release();
+	int PushTail(const BYTE* pData, int length)
+	{
+		ASSERT(length <= (int)itPool.GetItemCapacity());
+
+		if(length > (int)itPool.GetItemCapacity())
+			return 0;
+
+		T* pItem = __super::PushBack(itPool.PickFreeItem());
+		return pItem->Cat(pData, length);
+	}
+
+	int Cat(const BYTE* pData, int length)
+	{
+		int remain = length;
+
+		while(remain > 0)
+		{
+			T* pItem = __super::Back();
+
+			if(pItem == nullptr || pItem->IsFull())
+				pItem = __super::PushBack(itPool.PickFreeItem());
+
+			int cat  = pItem->Cat(pData, remain);
+
+			pData	+= cat;
+			remain	-= cat;
+		}
+
+		return length;
+	}
+
+	int Cat(const T* pItem)
+	{
+		return Cat(pItem->Ptr(), pItem->Size());
+	}
+
+	int Cat(const TItemListT<T>& other)
+	{
+		ASSERT(this != &other);
+
+		int length = 0;
+
+		for(T* pItem = other.Front(); pItem != nullptr; pItem = pItem->next)
+			length += Cat(pItem);
+
+		return length;
+	}
+
+	int Fetch(BYTE* pData, int length)
+	{
+		int remain = length;
+
+		while(remain > 0 && __super::Size() > 0)
+		{
+			T* pItem  = __super::Front();
+			int fetch = pItem->Fetch(pData, remain);
+
+			pData	+= fetch;
+			remain	-= fetch;
+
+			if(pItem->IsEmpty())
+				itPool.PutFreeItem(__super::PopFront());
+		}
+
+		return length - remain;
+	}
+
+	int Peek(BYTE* pData, int length)
+	{
+		int remain	= length;
+		T* pItem	= __super::Front();
+
+		while(remain > 0 && pItem != nullptr)
+		{
+			int peek = pItem->Peek(pData, remain);
+
+			pData	+= peek;
+			remain	-= peek;
+			pItem	 = pItem->next;
+		}
+
+		return length - remain;
+	}
+
+	int Increase(int length)
+	{
+		int remain = length;
+
+		while(remain > 0)
+		{
+			T* pItem = __super::Back();
+
+			if(pItem == nullptr || pItem->IsFull())
+			{
+				pItem = itPool.PickFreeItem();
+				__super::PushBack(pItem);
+			}
+
+			remain -= pItem->Increase(remain);
+		}
+
+		return length - remain;
+	}
+
+	int Reduce(int length)
+	{
+		int remain = length;
+
+		while(remain > 0 && __super::Size() > 0)
+		{
+			T* pItem = __super::Front();
+			remain  -= pItem->Reduce(remain);
+
+			if(pItem->IsEmpty())
+				itPool.PutFreeItem(__super::PopFront());
+		}
+
+		return length - remain;
+	}
+
+	void Release()
+	{
+		itPool.PutFreeItem(*this);
+	}
+
+	CNodePoolT<T>& GetItemPool() {return itPool;}
 
 public:
-	TItemList(CItemPool& pool) : itPool(pool)
+	TItemListT(CNodePoolT<T>& pool) : itPool(pool)
 	{
 	}
 
 private:
-	CItemPool& itPool;
+	CNodePoolT<T>& itPool;
 };
 
-template<class length_t = int, typename = enable_if_t<is_integral<typename decay<length_t>::type>::value>>
-struct TItemListExT : public TItemList
+using TItemList = TItemListT<TItem>;
+
+template<class T, class length_t = int, typename = enable_if_t<is_integral<typename decay<length_t>::type>::value>>
+struct TItemListExT : public TItemListT<T>
 {
-	using __super = TItemList;
+	using __super = TItemListT<T>;
 
 public:
-	TItem* PushFront(TItem* pItem)
+	T* PushFront(T* pItem)
 	{
 		length += pItem->Size();
 		return __super::PushFront(pItem);
 	}
 
-	TItem* PushBack(TItem* pItem)
+	T* PushBack(T* pItem)
 	{
 		length += pItem->Size();
 		return __super::PushBack(pItem);
 	}
 
-	TItem* PopFront()
+	T* PopFront()
 	{
-		TItem* pItem = __super::PopFront();
+		T* pItem = __super::PopFront();
 
 		if(pItem != nullptr)
 			length -= pItem->Size();
@@ -392,9 +535,9 @@ public:
 		return pItem;
 	}
 
-	TItem* PopBack()
+	T* PopBack()
 	{
-		TItem* pItem = __super::PopBack();
+		T* pItem = __super::PopBack();
 
 		if(pItem != nullptr)
 			length -= pItem->Size();
@@ -402,7 +545,7 @@ public:
 		return pItem;
 	}
 
-	TItemListExT& Shift(TItemListExT& other)
+	TItemListExT& Shift(TItemListExT<T>& other)
 	{
 		if(&other != this && other.length > 0)
 		{
@@ -444,7 +587,7 @@ public:
 		return cat;
 	}
 
-	int Cat(const TItem* pItem)
+	int Cat(const T* pItem)
 	{
 		int cat = __super::Cat(pItem->Ptr(), pItem->Size());
 		this->length += cat;
@@ -452,7 +595,7 @@ public:
 		return cat;
 	}
 
-	int Cat(const TItemList& other)
+	int Cat(const TItemListT<T>& other)
 	{
 		int cat = __super::Cat(other);
 		this->length += cat;
@@ -468,18 +611,29 @@ public:
 		return fetch;
 	}
 
+	int Increase(int length)
+	{
+		int increase  = __super::Increase(length);
+		this->length += increase;
+
+		return increase;
+	}
+
 	int Reduce(int length)
 	{
-		int reduce	  = __super::Reduce(length);
+		int reduce = __super::Reduce(length);
 		this->length -= reduce;
 
 		return reduce;
 	}
-	
+
 	typename decay<length_t>::type Length() const {return length;}
 
+	int IncreaseLength	(int length) {return (this->length += length);}
+	int ReduceLength	(int length) {return (this->length -= length);}
+
 public:
-	TItemListExT(CItemPool& pool) : TItemList(pool), length(0)
+	TItemListExT(CNodePoolT<T>& pool) : TItemListT<T>(pool), length(0)
 	{
 	}
 
@@ -494,13 +648,13 @@ private:
 	length_t length;
 };
 
-using TItemListEx	= TItemListExT<>;
-using TItemListExV	= TItemListExT<volatile int>;
+using TItemListEx	= TItemListExT<TItem>;
+using TItemListExV	= TItemListExT<TItem, volatile int>;
 
-struct TItemPtr
+template<class T> struct TItemPtrT
 {
 public:
-	TItem* Reset(TItem* pItem = nullptr)
+	T* Reset(T* pItem = nullptr)
 	{
 		if(m_pItem != nullptr)
 			itPool.PutFreeItem(m_pItem);
@@ -510,57 +664,59 @@ public:
 		return m_pItem;
 	}
 
-	TItem* Attach(TItem* pItem)
+	T* Attach(T* pItem)
 	{
 		return Reset(pItem);
 	}
 
-	TItem* Detach()
+	T* Detach()
 	{
-		TItem* pItem = m_pItem;
-		m_pItem		 = nullptr;
+		T* pItem = m_pItem;
+		m_pItem	 = nullptr;
 
 		return pItem;
 	}
 
-	TItem* New()
+	T* New()
 	{
 		return Attach(itPool.PickFreeItem());
 	}
 
-	bool IsValid			()				{return m_pItem != nullptr;}
-	TItem* operator ->		()				{return m_pItem;}
-	TItem* operator =		(TItem* pItem)	{return Reset(pItem);}
-	operator TItem*			()				{return m_pItem;}
-	TItem*& PtrRef			()				{return m_pItem;}
-	TItem* Ptr				()				{return m_pItem;}
-	const TItem* Ptr		()	const		{return m_pItem;}
-	operator const TItem*	()	const		{return m_pItem;}
+	bool IsValid		()			{return m_pItem != nullptr;}
+	T* operator ->		()			{return m_pItem;}
+	T* operator =		(T* pItem)	{return Reset(pItem);}
+	operator T*			()			{return m_pItem;}
+	T*& PtrRef			()			{return m_pItem;}
+	T* Ptr				()			{return m_pItem;}
+	const T* Ptr		()	const	{return m_pItem;}
+	operator const T*	()	const	{return m_pItem;}
 
 public:
-	TItemPtr(CItemPool& pool, TItem* pItem = nullptr)
+	TItemPtrT(CNodePoolT<T>& pool, T* pItem = nullptr)
 	: itPool(pool), m_pItem(pItem)
 	{
 
 	}
 
-	TItemPtr(TItemList& ls, TItem* pItem = nullptr)
-	: itPool(ls.itPool), m_pItem(pItem)
+	TItemPtrT(TItemListT<T>& ls, T* pItem = nullptr)
+	: itPool(ls.GetItemPool()), m_pItem(pItem)
 	{
 
 	}
 
-	~TItemPtr()
+	~TItemPtrT()
 	{
 		Reset();
 	}
 
-	DECLARE_NO_COPY_CLASS(TItemPtr)
+	DECLARE_NO_COPY_CLASS(TItemPtrT)
 
 private:
-	CItemPool&	itPool;
-	TItem*		m_pItem;
+	CNodePoolT<T>&	itPool;
+	T*				m_pItem;
 };
+
+using TItemPtr = TItemPtrT<TItem>;
 
 class CBufferPool;
 

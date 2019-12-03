@@ -128,6 +128,7 @@ BOOL CUdpArqServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iC
 		return ERROR_INCORRECT_SIZE;
 
 	CBufferPtr sndBuffer(iLength);
+	sndBuffer.SetSize(0);
 
 	for(int i = 0; i < iCount; i++)
 	{
