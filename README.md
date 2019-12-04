@@ -128,15 +128,15 @@ int main(int argc, char* const argv[])
 ## Component List
 - ***Basic Components***
 
-![Basic Component](https://images.gitee.com/uploads/images/2019/0331/102422_3eecfdb7_81720.jpeg "Basic Component")
+![Basic Component](https://oscimg.oschina.net/oscnet/up-42bad6a83208cda6aaa264ed00e5c328326.JPEG "Basic Component")
 
 - ***SSL Components***
 
-![SSL Component](https://gitee.com/uploads/images/2017/1214/143622_d6c1f436_81720.jpeg "SSL Component")
+![SSL Component](https://oscimg.oschina.net/oscnet/up-481b7e4181c1e57dbe57cf0f4f328d7d227.JPEG "SSL Component")
 
 - ***HTTP Components***
 
-![HTTP COmponent](https://gitee.com/uploads/images/2017/1214/143640_0eb6f9e4_81720.jpeg "HTTP Component")
+![HTTP COmponent](https://oscimg.oschina.net/oscnet/up-83092ff97598f275e3ca6b7abed679d4f61.JPEG "HTTP Component")
 
 ## Reference Projects
 
