@@ -106,36 +106,42 @@ public:
 
 	int Format(const _CharT* format, ...)
 	{
-		_CharT* p = nullptr;
+		int rs;
+		va_list ap;
 
-		va_list arg_ptr;
-		va_start(arg_ptr, format);
-		int count = vasprintf(&p, format, arg_ptr);
-		va_end(arg_ptr);
+		va_start(ap, format);
+ 		rs = VASprintf(0, format, ap);
+		va_end(ap);
 
-		if(count >= 0)
-		{
-			this->assign(p, count);
-			free(p);
-		}
-
-		return count;
+		return rs;
 	}
 
 	int AppendFormat(const _CharT* format, ...)
 	{
-		_CharT* p = nullptr;
+		int rs;
+		va_list ap;
 
-		va_list arg_ptr;
-		va_start(arg_ptr, format);
-		int count = vasprintf(&p, format, arg_ptr);
-		va_end(arg_ptr);
+		va_start(ap, format);
+		rs = VASprintf(GetLength(), format, ap);
+		va_end(ap);
+
+		return rs;
+	}
+
+	int VASprintf(int offset, const _CharT* format, va_list ap)
+	{
+		va_list ap_cpy;
+		va_copy(ap_cpy, ap);
+
+		int count = vsnprintf(nullptr, 0, format, ap);
 
 		if(count >= 0)
 		{
-			this->append(p, count);
-			free(p);
+			_CharT* p = GetBuffer(count + offset);
+			vsnprintf(p + offset, count + 1, format, ap_cpy);
 		}
+
+		va_end(ap_cpy);
 
 		return count;
 	}
