@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,13 +89,12 @@ public:
 	virtual BOOL StartHttp(CONNID dwConnID);
 
 public:
-	virtual void SetHttpAutoStart(BOOL bAutoStart)				{m_bHttpAutoStart = bAutoStart;}
-	virtual BOOL IsHttpAutoStart()								{return m_bHttpAutoStart;}
+	virtual void SetUseCookie(BOOL bUseCookie)					{ENSURE_HAS_STOPPED(); m_pCookieMgr		= bUseCookie ? &g_CookieMgr : nullptr;}
+	virtual void SetHttpAutoStart(BOOL bAutoStart)				{ENSURE_HAS_STOPPED(); m_bHttpAutoStart	= bAutoStart;}
+	virtual void SetLocalVersion(EnHttpVersion enLocalVersion)	{ENSURE_HAS_STOPPED(); m_enLocalVersion	= enLocalVersion;}
 
-	virtual void SetUseCookie(BOOL bUseCookie)					{m_pCookieMgr = bUseCookie ? &g_CookieMgr : nullptr;}
 	virtual BOOL IsUseCookie()									{return m_pCookieMgr != nullptr;}
-
-	virtual void SetLocalVersion(EnHttpVersion enLocalVersion)	{m_enLocalVersion = enLocalVersion;}
+	virtual BOOL IsHttpAutoStart()								{return m_bHttpAutoStart;}
 	virtual EnHttpVersion GetLocalVersion()						{return m_enLocalVersion;}
 
 	virtual BOOL IsUpgrade(CONNID dwConnID);

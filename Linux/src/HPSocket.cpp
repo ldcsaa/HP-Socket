@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@
 #include "UdpServer.h"
 #include "UdpClient.h"
 #include "UdpCast.h"
+#include "UdpNode.h"
 #include "UdpArqServer.h"
 #include "UdpArqClient.h"
 #endif
@@ -158,6 +159,11 @@ HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener)
 	return new CUdpCast(pListener);
 }
 
+HPSOCKET_API IUdpNode* HP_Create_UdpNode(IUdpNodeListener* pListener)
+{
+	return new CUdpNode(pListener);
+}
+
 HPSOCKET_API IUdpArqServer* HP_Create_UdpArqServer(IUdpServerListener* pListener)
 {
 	return (IUdpArqServer*)(new CUdpArqServer(pListener));
@@ -181,6 +187,11 @@ HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient)
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast)
 {
 	delete pCast;
+}
+
+HPSOCKET_API void HP_Destroy_UdpNode(IUdpNode* pNode)
+{
+	delete pNode;
 }
 
 HPSOCKET_API void HP_Destroy_UdpArqServer(IUdpArqServer* pServer)
@@ -269,9 +280,19 @@ HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size)
 	return ::SSO_SendBuffSize(sock, size);
 }
 
-HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse)
+HPSOCKET_API int SYS_SSO_RecvTimeOut(SOCKET sock, int ms)
 {
-	return ::SSO_ReuseAddress(sock, bReuse);
+	return ::SSO_RecvTimeOut(sock, ms);
+}
+
+HPSOCKET_API int SYS_SSO_SendTimeOut(SOCKET sock, int ms)
+{
+	return ::SSO_SendTimeOut(sock, ms);
+}
+
+HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, EnReuseAddressPolicy opt)
+{
+	return ::SSO_ReuseAddress(sock, opt);
 }
 
 HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
@@ -312,6 +333,21 @@ HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value)
 HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value)
 {
 	return ::HToN64(value);
+}
+
+HPSOCKET_API USHORT SYS_SwapEndian16(USHORT value)
+{
+	return ENDIAN_SWAP_16(value);
+}
+
+HPSOCKET_API DWORD SYS_SwapEndian32(DWORD value)
+{
+	return ENDIAN_SWAP_32(value);
+}
+
+HPSOCKET_API BOOL SYS_IsLittleEndian()
+{
+	return ::IsLittleEndian();
 }
 
 HPSOCKET_API LPBYTE SYS_Malloc(int size)

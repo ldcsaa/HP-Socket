@@ -287,7 +287,7 @@ do_compile()
 parse_compile_args()
 {
 	_CL_OPTS=
-	_LN_OPTS="-lrt -ldl -lpthread"
+	_LN_OPTS="-lrt -ldl -pthread"
 	_AR_FLAG=
 	_CFG_OPTS=
 	_EXCLUDE_FILES=

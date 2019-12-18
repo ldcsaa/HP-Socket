@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 
 #include <process.h>
 
-const CInitSocket CTcpClient::sm_wsSocket;
+const CInitSocket& CTcpClient::sm_wsSocket = CInitSocket::Instance();
 
 BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
@@ -50,7 +50,10 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 				if(ConnectToServer(addrRemote, bAsyncConnect))
 				{
 					if(CreateWorkerThread())
+					{
 						isOK = TRUE;
+						m_evWait.Reset();
+					}
 					else
 						SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
 				}
@@ -123,12 +126,6 @@ BOOL CTcpClient::CheckStoping(DWORD dwCurrentThreadID)
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		if(dwCurrentThreadID != m_dwWorkerID)
-		{
-			while(m_enState != SS_STOPPED)
-				::WaitWithMessageLoop(10);
-		}
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -160,7 +157,7 @@ BOOL CTcpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 
 	BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 	ENSURE(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
-	ENSURE(::SSO_ReuseAddress(m_soClient, TRUE) == NO_ERROR);
+	ENSURE(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
 
 	m_evSocket = ::WSACreateEvent();
 	ASSERT(m_evSocket != WSA_INVALID_EVENT);
@@ -473,68 +470,60 @@ BOOL CTcpClient::PauseReceive(BOOL bPause)
 
 BOOL CTcpClient::SendData()
 {
-	BOOL isOK = TRUE;
+	BOOL bBlocked = FALSE;
 
 	while(TRUE)
 	{
 		TItemPtr itPtr(m_itPool, GetSendBuffer());
 
-		if(itPtr.IsValid())
+		if(!itPtr.IsValid())
+			break;
+
+		ASSERT(!itPtr->IsEmpty());
+
+		if(!DoSendData(itPtr, bBlocked))
+			return FALSE;
+
+		if(bBlocked)
 		{
 			ASSERT(!itPtr->IsEmpty());
 
-			isOK = DoSendData(itPtr);
+			CCriSecLock locallock(m_csSend);
+			m_lsSend.PushFront(itPtr.Detach());
 
-			if(isOK)
-			{
-				if(!itPtr->IsEmpty())
-				{
-					CCriSecLock locallock(m_csSend);
-					m_lsSend.PushFront(itPtr.Detach());
-					
-					break;
-				}
-			}
-			else
-				break;
-		}
-		else
 			break;
+		}
 	}
 
-	return isOK;
+	return TRUE;
 }
 
 TItem* CTcpClient::GetSendBuffer()
 {
 	TItem* pItem = nullptr;
 
-	if(m_lsSend.Size() > 0)
+	if(m_iPending > 0)
 	{
 		CCriSecLock locallock(m_csSend);
-
-		if(m_lsSend.Size() > 0)
-			pItem = m_lsSend.PopFront();
+		pItem = m_lsSend.PopFront();
 	}
 
 	return pItem;
 }
 
-BOOL CTcpClient::DoSendData(TItem* pItem)
+BOOL CTcpClient::DoSendData(TItem* pItem, BOOL& bBlocked)
 {
 	while(!pItem->IsEmpty())
 	{
-		int rc = 0;
-
-		{
-			CCriSecLock locallock(m_csSend);
-
-			rc = send(m_soClient, (char*)pItem->Ptr(), min(pItem->Size(), (int)m_dwSocketBufferSize), 0);
-			if(rc > 0) m_iPending -= rc;
-		}
+		int rc = send(m_soClient, (char*)pItem->Ptr(), min(pItem->Size(), (int)m_dwSocketBufferSize), 0);
 
 		if(rc > 0)
 		{
+			{
+				CCriSecLock locallock(m_csSend);
+				m_iPending -= rc;
+			}
+
 			if(TRIGGER(FireSend(pItem->Ptr(), rc)) == HR_ERROR)
 			{
 				TRACE("<C-CNNID: %Iu> OnSend() event should not return 'HR_ERROR' !!\n", m_dwConnID);
@@ -548,7 +537,10 @@ BOOL CTcpClient::DoSendData(TItem* pItem)
 			int code = ::WSAGetLastError();
 
 			if(code == WSAEWOULDBLOCK)
+			{
+				bBlocked = TRUE;
 				break;
+			}
 			else
 			{
 				m_ccContext.Reset(TRUE, SO_SEND, code);
@@ -611,6 +603,8 @@ void CTcpClient::Reset()
 	m_iPending	= 0;
 	m_bPaused	= FALSE;
 	m_enState	= SS_STOPPED;
+
+	m_evWait.Set();
 }
 
 void CTcpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
@@ -676,8 +670,7 @@ int CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount)
 {
 	ASSERT(m_iPending >= 0);
 
-	int iPending	= m_iPending;
-	BOOL isPending	= m_iPending > 0;
+	int iPending = m_iPending;
 
 	for(int i = 0; i < iCount; i++)
 	{
@@ -693,7 +686,7 @@ int CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount)
 		}
 	}
 
-	if(!isPending && m_iPending > iPending) m_evBuffer.Set();
+	if(iPending == 0 && m_iPending > 0) m_evBuffer.Set();
 
 	return NO_ERROR;
 }

@@ -74,13 +74,13 @@ using namespace std;
 #define PRINTLN(fmt, ...)				FPRINTLN(stdout, fmt, ##__VA_ARGS__)
 
 #if defined(DEBUG) && defined(DEBUG_TRACE)
-	#define TRACE(fmt, ...)				PRINTLN("> TRC (0x%8X, %d) " fmt, SELF_THREAD_ID, SELF_NATIVE_THREAD_ID, ##__VA_ARGS__)
+	#define TRACE(fmt, ...)				PRINTLN("> TRC (0x%zX, %d) " fmt, (SIZE_T)SELF_THREAD_ID, SELF_NATIVE_THREAD_ID, ##__VA_ARGS__)
 #else
 	#define TRACE(fmt, ...)
 #endif
 
-#define ASSERT							assert
-#define VERIFY(expr)					((expr) ? TRUE : (ERROR_EXIT2(EXIT_CODE_SOFTWARE, ERROR_VERIFY_CHECK), FALSE))
+#define ASSERT(expr)					((expr) ? TRUE : (::PrintStackTrace(), assert((FALSE)), FALSE))
+#define VERIFY(expr)					((expr) ? TRUE : (::PrintStackTrace(), ERROR_ABORT2(ERROR_VERIFY_CHECK), FALSE))
 #define ASSERT_IS_NO_ERROR(expr)		ASSERT(IS_NO_ERROR(expr))
 #define VERIFY_IS_NO_ERROR(expr)		VERIFY(IS_NO_ERROR(expr))
 #define	ENSURE(expr)					VERIFY(expr)
@@ -314,6 +314,7 @@ BOOL		ReadTimer(FD tmr, ULLONG* pVal = nullptr, BOOL* pRs = nullptr);
 
 BOOL fcntl_SETFL(FD fd, INT fl, BOOL bSet = TRUE);
 
+void PrintStackTrace();
 void EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void _EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void ABORT(int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);

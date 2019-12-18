@@ -1,4 +1,78 @@
 # ======================================== #
+HP-Socket v5.7.1 API 更新列表：
+# ======================================== #
+--------------------
+1、Global:
+--------------------
+SYS_SSO_ReuseAddress						(修改：参数类型改为 En_HP_ReuseAddressPolicy)
+SYS_SSO_RecvTimeOut							(增加)
+SYS_SSO_SendTimeOut							(增加)
+SYS_SwapEndian16							(增加)
+SYS_SwapEndian32							(增加)
+SYS_IsLittleEndian							(增加)
+
+--------------------
+2、UDP:
+--------------------
+enum En_HP_CastMode							(修改：增加枚举值 CM_UNICAST)
+Create_HP_UdpNode							(增加)
+Create_HP_UdpNodeListener					(增加)
+Destroy_HP_UdpNode							(增加)
+Destroy_HP_UdpNodeListener					(增加)
+HP_Set_FN_UdpNode_OnPrepareListen			(增加)
+HP_Set_FN_UdpNode_OnSend					(增加)
+HP_Set_FN_UdpNode_OnReceive					(增加)
+HP_Set_FN_UdpNode_OnError					(增加)
+HP_Set_FN_UdpNode_OnShutdown				(增加)
+HP_UdpNode_*								(增加)
+
+HP_UdpArqServer_SetFastLimit				(增加)
+HP_UdpArqServer_GetFastLimit				(增加)
+HP_UdpArqClient_SetFastLimit				(增加)
+HP_UdpArqClient_GetFastLimit				(增加)
+
+--------------------
+3、SSL:
+--------------------
+HP_SSLServer_SetSSLCipherList				(增加)
+HP_SSLServer_GetSSLCipherList				(增加)
+HP_SSLAgent_SetSSLCipherList				(增加)
+HP_SSLAgent_GetSSLCipherList				(增加)
+HP_SSLClient_SetSSLCipherList				(增加)
+HP_SSLClient_GetSSLCipherList				(增加)
+
+--------------------
+4、Thread:
+--------------------
+HP_ThreadPool_GetTaskCount					(增加)
+
+--------------------
+5、Others:
+--------------------
+enum En_HP_ReuseAddressPolicy				(增加)
+HP_Server_SetReuseAddressPolicy				(增加)
+HP_Server_GetReuseAddressPolicy				(增加)
+HP_Agent_SetReuseAddressPolicy				(增加)
+HP_Agent_GetReuseAddressPolicy				(增加)
+HP_Client_SetReuseAddressPolicy				(增加)
+HP_Client_GetReuseAddressPolicy				(增加)
+HP_UdpNode_SetReuseAddressPolicy			(增加)
+HP_UdpNode_GetReuseAddressPolicy			(增加)
+
+HP_Server_Wait								(增加)
+HP_Agent_Wait								(增加)
+HP_UdpNode_Wait								(增加)
+HP_Client_Wait								(增加)
+HP_ThreadPool_Wait							(增加)
+
+HP_TcpAgent_SetReuseAddress					(删除：由 HP_Agent_SetReuseAddressPolicy 取代)
+HP_TcpAgent_IsReuseAddress					(删除：由 HP_Agent_GetReuseAddressPolicy 取代)
+HP_UdpCast_SetReuseAddress					(删除：由 HP_Client_SetReuseAddressPolicy 取代)
+HP_UdpCast_IsReuseAddress					(删除：由 HP_Client_GetReuseAddressPolicy 取代)
+HP_UdpNode_SetReuseAddress					(删除：由 HP_UdpNode_SetReuseAddressPolicy 取代)
+HP_UdpNode_IsReuseAddress					(删除：由 HP_UdpNode_GetReuseAddressPolicy 取代)
+
+# ======================================== #
 HP-Socket v5.6.1 API 更新列表：
 # ======================================== #
 --------------------

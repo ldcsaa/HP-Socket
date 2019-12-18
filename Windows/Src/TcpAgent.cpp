@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 #include <malloc.h>
 #include <process.h>
 
-const CInitSocket CTcpAgent::sm_wsSocket;
+const CInitSocket& CTcpAgent::sm_wsSocket = CInitSocket::Instance();
 
 EnHandleResult CTcpAgent::TriggerFireConnect(TSocketObj* pSocketObj)
 {
@@ -118,6 +118,8 @@ BOOL CTcpAgent::Start(LPCTSTR lpszBindAddress, BOOL bAsyncConnect)
 				m_bAsyncConnect	= bAsyncConnect;
 				m_enState		= SS_STARTED;
 
+				m_evWait.Reset();
+
 				return TRUE;
 			}
 
@@ -184,9 +186,6 @@ BOOL CTcpAgent::CheckStoping()
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		while(m_enState != SS_STOPPED)
-			::WaitWithMessageLoop(10);
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -239,6 +238,7 @@ BOOL CTcpAgent::ParseBindAddress(LPCTSTR lpszBindAddress)
 BOOL CTcpAgent::CreateCompletePort()
 {
 	m_hCompletePort	= ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
+	
 	if(m_hCompletePort == nullptr)
 		SetLastError(SE_CP_CREATE, __FUNCTION__, ::GetLastError());
 
@@ -252,6 +252,7 @@ BOOL CTcpAgent::CreateWorkerThreads()
 	for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
 	{
 		HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, WorkerThreadProc, (LPVOID)this, 0, nullptr);
+		
 		if(hThread)
 			m_vtWorkerThreads.push_back(hThread);
 		else
@@ -296,6 +297,8 @@ void CTcpAgent::Reset()
 	m_pfnConnectEx		= nullptr;
 	m_pfnDisconnectEx	= nullptr;
 	m_enState			= SS_STOPPED;
+
+	m_evWait.Set();
 }
 
 void CTcpAgent::DisconnectClientSocket()
@@ -922,7 +925,9 @@ void CTcpAgent::HandleIo(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pB
 void CTcpAgent::HandleError(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwErrorCode)
 {
 	CheckError(pSocketObj, pBufferObj->operation, dwErrorCode);
-	AddFreeBufferObj(pBufferObj);
+
+	if(pBufferObj->operation != SO_SEND || pBufferObj->ReleaseSendCounter() == 0)
+		AddFreeBufferObj(pBufferObj);
 }
 
 void CTcpAgent::HandleConnect(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
@@ -942,7 +947,7 @@ void CTcpAgent::HandleConnect(CONNID dwConnID, TSocketObj* pSocketObj, TBufferOb
 
 void CTcpAgent::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
-	int iLength = -(long)(pBufferObj->buff.len);
+	long iLength = -(long)(pBufferObj->buff.len);
 
 	switch(m_enSendPolicy)
 	{
@@ -987,7 +992,7 @@ void CTcpAgent::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferOb
 
 	if(hr == HR_OK || hr == HR_IGNORE)
 	{
-		if(ContinueReceive(pSocketObj, pBufferObj, hr))
+		if(::ContinueReceive(this, pSocketObj, pBufferObj, hr))
 		{
 			{
 				CSpinLock locallock(pSocketObj->sgPause);
@@ -1010,48 +1015,6 @@ void CTcpAgent::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferOb
 		AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_RECEIVE, ENSURE_ERROR_CANCELLED);
 		AddFreeBufferObj(pBufferObj);
 	}
-}
-
-BOOL CTcpAgent::ContinueReceive(TSocketObj* pSocketObj, TBufferObj* pBufferObj, EnHandleResult& hr)
-{
-	int rs = NO_ERROR;
-
-	for(int i = 0; i < MAX_IOCP_CONTINUE_RECEIVE || MAX_IOCP_CONTINUE_RECEIVE < 0; i++)
-	{
-		if(pSocketObj->paused)
-			break;
-
-		if(hr != HR_OK && hr != HR_IGNORE)
-			break;
-
-		if(pBufferObj->buff.len != m_dwSocketBufferSize)
-			break;
-
-		pBufferObj->buff.len = m_dwSocketBufferSize;
-		rs = ::NoBlockReceiveNotCheck(pBufferObj);
-
-		if(rs != NO_ERROR)
-			break;
-
-		hr = TriggerFireReceive(pSocketObj, pBufferObj);
-	}
-
-	if(hr != HR_OK && hr != HR_IGNORE)
-		return FALSE;
-
-	if(rs != NO_ERROR && rs != WSAEWOULDBLOCK)
-	{
-		if(rs == WSAEDISCON)
-			AddFreeSocketObj(pSocketObj, SCF_CLOSE);
-		else
-			CheckError(pSocketObj, SO_RECEIVE, rs);
-		
-		AddFreeBufferObj(pBufferObj);
-
-		return FALSE;
-	}
-
-	return TRUE;
 }
 
 int CTcpAgent::DoUnpause(CONNID dwConnID)
@@ -1206,7 +1169,7 @@ DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LP
 	{
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 		ENSURE(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) != SOCKET_ERROR);
-		ENSURE(::SSO_ReuseAddress(soClient, m_bReuseAddress) != SOCKET_ERROR);
+		ENSURE(::SSO_ReuseAddress(soClient, m_enReusePolicy) != SOCKET_ERROR);
 
 		if(usLocalPort == 0)
 		{
@@ -1504,16 +1467,16 @@ int CTcpAgent::DoSendPack(TSocketObj* pSocketObj)
 
 int CTcpAgent::DoSendSafe(TSocketObj* pSocketObj)
 {
-	long lRecvBuffSize = pSocketObj->GetSendBufferSize();
+	long lSendBuffSize = pSocketObj->GetSendBufferSize();
 
-	if(pSocketObj->sndCount < lRecvBuffSize && !pSocketObj->IsSmooth())
+	if(pSocketObj->sndCount < lSendBuffSize && !pSocketObj->IsSmooth())
 	{
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TSocketObj::IsValid(pSocketObj))
 			return ERROR_OBJECT_NOT_FOUND;
 
-		if(pSocketObj->sndCount < lRecvBuffSize)
+		if(pSocketObj->sndCount < lSendBuffSize)
 			pSocketObj->smooth = TRUE;
 	}
 

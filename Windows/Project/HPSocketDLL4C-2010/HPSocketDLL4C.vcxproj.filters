@@ -237,6 +237,9 @@
     <ClInclude Include="..\..\Common\Src\kcp\ikcp.h">
       <Filter>Common\kcp</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\UdpNode.h">
+      <Filter>HPSocket\UDP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -397,6 +400,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Src\kcp\ikcp.c">
       <Filter>Common\kcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\UdpNode.cpp">
+      <Filter>HPSocket\UDP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

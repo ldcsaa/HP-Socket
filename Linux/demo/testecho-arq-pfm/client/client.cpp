@@ -11,6 +11,7 @@ class CListenerImpl : public CUdpClientListener
 public:
 	virtual EnHandleResult OnPrepareConnect(IUdpClient* pSender, CONNID dwConnID, SOCKET socket) override
 	{
+		VERIFY(::SYS_SSO_RecvBuffSize(socket, 256 * 1024) == NO_ERROR);
 		return HR_OK;
 	}
 

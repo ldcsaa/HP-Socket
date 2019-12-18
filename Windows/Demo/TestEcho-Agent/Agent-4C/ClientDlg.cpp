@@ -210,8 +210,6 @@ void CClientDlg::OnBnClickedStart()
 
 	::LogClientStarting(m_strAddress, m_usPort);
 
-	::HP_TcpAgent_SetReuseAddress(m_spAgent, TRUE);
-	
 	if(::HP_Agent_Start(m_spAgent, LOCAL_ADDRESS, FALSE))
 	{
 		SetAppState(ST_STARTED);

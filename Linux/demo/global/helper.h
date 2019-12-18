@@ -100,7 +100,7 @@ struct app_arg
 	// -o
 	EnCastMode cast_mode;
 	// -r
-	bool reuse_addr;
+	EnReuseAddressPolicy reuse_addr;
 	// -u
 	bool ip_loop;
 	// -k
@@ -195,8 +195,8 @@ class CCommandParser
 public:
 	using CMD_FUNC = void (*)(CCommandParser*);
 
-	enum EnAppType {AT_SERVER, AT_AGENT, AT_CLIENT};
-	enum EnCmdType {CT_START = 0, CT_STOP, CT_STATUS, CT_CONNECT, CT_SEND, CT_PAUSE, CT_KICK, CT_KICK_L, CT_KICK_S, CT_STAT, CT_MAX};
+	enum EnAppType {AT_SERVER, AT_AGENT, AT_CLIENT, AT_NODE};
+	enum EnCmdType {CT_START = 0, CT_STOP, CT_STATUS, CT_CONNECT, CT_SEND, CT_SENDC, CT_PAUSE, CT_KICK, CT_KICK_L, CT_KICK_S, CT_STAT, CT_MAX};
 
 protected:
 
@@ -210,15 +210,6 @@ public:
 	BOOL Run();
 	void PrintStatus(EnServiceState enStatus, LPCTSTR lpszName = nullptr);
 
-public:
-	CCommandParser(EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX]);
-	virtual ~CCommandParser() {}
-
-private:
-	BOOL WaitForExit();
-	void WorkerProc(PVOID pv);
-	void Parse(LPTSTR lpszLine, SSIZE_T nSize);
-
 protected:
 	virtual void ParseCmdArgs(EnCmdType type, LPTSTR lpszArg);
 	virtual void Reset();
@@ -227,6 +218,14 @@ protected:
 	virtual void PrintCmdUsage();
 	virtual CString GetCmdUsage(EnCmdType type);
 
+private:
+	BOOL WaitForExit();
+	void WorkerProc(PVOID pv);
+	void Parse(LPTSTR lpszLine, SSIZE_T nSize);
+
+public:
+	CCommandParser(EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX]);
+	virtual ~CCommandParser() {}
 
 public:
 	BOOL	m_bFlag;
@@ -249,12 +248,6 @@ class CHttpCommandParser : public CCommandParser
 {
 	using __super = CCommandParser;
 
-public:
-	CHttpCommandParser(EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX])
-	: __super(enAppType, fnCmds)
-	{
-	}
-
 protected:
 	virtual void ParseCmdArgs(EnCmdType type, LPTSTR lpszArg) override;
 	virtual void Reset() override;
@@ -264,6 +257,10 @@ protected:
 
 private:
 	BOOL ParseCmdOptions(LPCTSTR lpszArg, LPCTSTR lpszOptions);
+
+public:
+	CHttpCommandParser(EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX])
+	: __super(enAppType, fnCmds) {}
 
 public:
 	BOOL	m_bHttps;
@@ -416,8 +413,13 @@ void LogClientStopping(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void LogClientStop(LPCTSTR lpszName = nullptr);
 void LogClientStopFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
 void LogClientSendFail(int iSequence, int iSocketIndex, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
+void LogStart(LPCTSTR lpszAddress, USHORT port, LPCTSTR lpszName = nullptr);
+void LogStartFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
+void LogStop(LPCTSTR lpszName = nullptr);
+void LogSend(LPCTSTR lpszContent, LPCTSTR lpszName = nullptr);
 void LogSend(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName = nullptr);
 void LogSending(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName = nullptr);
+void LogSendFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
 void LogSendFail(CONNID dwConnID, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName = nullptr);
 void LogDisconnect(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void LogDisconnectFail(CONNID dwConnID, LPCTSTR lpszName = nullptr);
@@ -440,10 +442,13 @@ void LogOnHandShake2(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void LogOnClose(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 
 void PostOnSend(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszName = nullptr);
+void PostOnSendTo(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName = nullptr);
 void PostOnReceive(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszName = nullptr);
+void PostOnReceiveFrom(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName = nullptr);
 void PostOnReceiveCast(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName = nullptr);
 void PostOnClose(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void PostOnError(CONNID dwConnID, int enOperation, int iErrorCode, LPCTSTR lpszName = nullptr);
+void PostOnError2(CONNID dwConnID, int enOperation, int iErrorCode, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pBuffer, int iLength, LPCTSTR lpszName = nullptr);
 void PostOnAccept(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, BOOL bPass, LPCTSTR lpszName = nullptr);
 void PostOnAccept2(CONNID dwConnID, LPCTSTR lpszName = nullptr);
 void PostOnHandShake(CONNID dwConnID, LPCTSTR lpszName = nullptr);

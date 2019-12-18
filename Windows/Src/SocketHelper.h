@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,9 @@
 /* IPv4 广播地址 */
 #define DEFAULT_IPV4_BROAD_CAST_ADDRESS			_T("255.255.255.255")
 
+/* SOCKET 默认发送缓冲区大小 */
+#define DEFAULT_SOCKET_SNDBUFF_SIZE				(16 * 1024)
+
 /* TCP 默认通信数据缓冲区大小 */
 #define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
 /* TCP 默认心跳包间隔 */
@@ -122,6 +125,7 @@
 #define IPV6_ZONE_INDEX_CHAR					'%'
 
 #define ENSURE_STOP()							{if(GetState() != SS_STOPPED) Stop();}
+#define ENSURE_HAS_STOPPED()					{if(GetState() != SS_STOPPED) return;}
 
 /************************************************************************
 名称：Windows Socket 组件初始化类
@@ -130,6 +134,18 @@
 class CInitSocket
 {
 public:
+	static const CInitSocket& Instance()
+	{
+		static CInitSocket s_wsSocket;
+
+		return s_wsSocket;
+	}
+
+public:
+	int	 GetResult() const {return m_iResult;}
+	BOOL IsValid()	 const {return m_iResult == 0;}
+
+private:
 	CInitSocket(LPWSADATA lpWSAData = nullptr, BYTE minorVersion = 2, BYTE majorVersion = 2)
 	{
 		LPWSADATA lpTemp = lpWSAData;
@@ -144,9 +160,6 @@ public:
 		if(IsValid())
 			::WSACleanup();
 	}
-
-	int	 GetResult() const {return m_iResult;}
-	BOOL IsValid()	 const {return m_iResult == 0;}
 
 private:
 	int m_iResult;
@@ -324,9 +337,9 @@ typedef struct hp_sockaddr
 /* 关闭连接标识 */
 enum EnSocketCloseFlag
 {
-	SCF_NONE	= 0,	// 不触发事件
-	SCF_CLOSE	= 1,	// 触发 正常关闭 OnClose 事件
-	SCF_ERROR	= 2		// 触发 异常关闭 OnClose 事件
+	SCF_NONE		= 0,	// 不触发事件
+	SCF_CLOSE		= 1,	// 触发 正常关闭 OnClose 事件
+	SCF_ERROR		= 2		// 触发 异常关闭 OnClose 事件
 };
 
 /* 数据缓冲区基础结构 */
@@ -349,8 +362,6 @@ template<class T> struct TBufferObjBase
 		T* pBufferObj = (T*)heap.Alloc(sizeof(T) + dwCapacity);
 		ASSERT(pBufferObj);
 
-		ZeroMemory(pBufferObj, sizeof(T));
-		
 		pBufferObj->TBufferObjBase::TBufferObjBase(heap, dwCapacity);
 		pBufferObj->buff.buf = ((char*)pBufferObj) + sizeof(T);
 
@@ -382,7 +393,7 @@ template<class T> struct TBufferObjBase
 
 	int Cat(const BYTE* pData, int length)
 	{
-		ASSERT(pData != nullptr && length > 0);
+		ASSERT(pData != nullptr && length >= 0);
 
 		int cat = min(Remain(), length);
 
@@ -419,7 +430,7 @@ template<class T> struct TBufferObjListT : public TSimpleList<T>
 public:
 	int Cat(const BYTE* pData, int length)
 	{
-		ASSERT(pData != nullptr && length > 0);
+		ASSERT(pData != nullptr && length >= 0);
 
 		int remain = length;
 
@@ -441,7 +452,7 @@ public:
 
 	T* PushTail(const BYTE* pData, int length)
 	{
-		ASSERT(pData != nullptr && length > 0 && length <= (int)bfPool.GetItemCapacity());
+		ASSERT(pData != nullptr && length >= 0 && length <= (int)bfPool.GetItemCapacity());
 
 		T* pItem = PushBack(bfPool.PickFreeItem());
 		pItem->Cat(pData, length);
@@ -480,8 +491,6 @@ typedef TItemPtrT<TUdpBufferObj>		TUdpBufferObjPtr;
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase
 {
-	static const long DEF_SNDBUFF_SIZE = 16 * 1024;
-
 	CPrivateHeap& heap;
 
 	CONNID		connID;
@@ -573,7 +582,7 @@ struct TSocketObj : public TSocketObjBase
 		int rs	= getsockopt(socket, SOL_SOCKET, SO_SNDBUF, (CHAR*)&lSize, &len);
 
 		if(rs == SOCKET_ERROR || lSize <= 0)
-			lSize = DEF_SNDBUFF_SIZE;
+			lSize = DEFAULT_SOCKET_SNDBUFF_SIZE;
 
 		return lSize;
 	}
@@ -664,7 +673,7 @@ struct TUdpSocketObj : public TSocketObjBase
 	volatile DWORD		detectFails;
 
 	BOOL IsCanSend			() {return sndCount <= GetSendBufferSize();}
-	long GetSendBufferSize	() {return (4 * DEF_SNDBUFF_SIZE);}
+	long GetSendBufferSize	() {return (4 * DEFAULT_SOCKET_SNDBUFF_SIZE);}
 
 	static TUdpSocketObj* Construct(CPrivateHeap& hp, CUdpBufferObjPool& bfPool)
 	{
@@ -837,6 +846,25 @@ ULONGLONG NToH64(ULONGLONG value);
 /* 64 位主机字节序转网络字节序 */
 ULONGLONG HToN64(ULONGLONG value);
 
+/* 短整型高低字节交换 */
+#define ENDIAN_SWAP_16(A)	((USHORT)((((USHORT)(A) & 0xff00) >> 8) | (((USHORT)(A) & 0x00ff) << 8)))
+/* 长整型高低字节交换 */
+#define ENDIAN_SWAP_32(A)	((((DWORD)(A) & 0xff000000) >> 24) | \
+							(((DWORD)(A) & 0x00ff0000) >>  8)  | \
+							(((DWORD)(A) & 0x0000ff00) <<  8)  | \
+							(((DWORD)(A) & 0x000000ff) << 24)	 )
+
+/* 检查是否小端字节序 */
+BOOL IsLittleEndian();
+/* 短整型主机字节序转小端字节序 */
+USHORT HToLE16(USHORT value);
+/* 短整型主机字节序转大端字节序 */
+USHORT HToBE16(USHORT value);
+/* 长整型主机字节序转小端字节序 */
+DWORD HToLE32(DWORD value);
+/* 长整型主机字节序转大端字节序 */
+DWORD HToBE32(DWORD value);
+
 /* 获取 Socket 的某个扩展函数的指针 */
 PVOID GetExtensionFuncPtr					(SOCKET sock, GUID guid);
 /* 获取 AcceptEx 扩展函数指针 */
@@ -906,7 +934,9 @@ int SSO_KeepAlive			(SOCKET sock, BOOL bKeepAlive = TRUE);
 int SSO_KeepAliveVals		(SOCKET sock, u_long onoff, u_long time, u_long interval);
 int SSO_RecvBuffSize		(SOCKET sock, int size);
 int SSO_SendBuffSize		(SOCKET sock, int size);
-int SSO_ReuseAddress		(SOCKET sock, BOOL bReuse = TRUE);
+int SSO_RecvTimeOut			(SOCKET sock, int ms);
+int SSO_SendTimeOut			(SOCKET sock, int ms);
+int SSO_ReuseAddress		(SOCKET sock, EnReuseAddressPolicy opt);
 int SSO_ExclusiveAddressUse	(SOCKET sock, BOOL bExclusive = TRUE);
 int SSO_UDP_ConnReset		(SOCKET sock, BOOL bNewBehavior = TRUE);
 
@@ -960,6 +990,12 @@ int PostReceiveFromNotCheck	(SOCKET sock, TUdpBufferObj* pBufferObj);
 int NoBlockReceive(TBufferObj* pBufferObj);
 /* 执行非阻塞 WSARecv() */
 int NoBlockReceiveNotCheck(TBufferObj* pBufferObj);
+/* 执行非阻塞 WSARecvFrom()，并把 WSAEWOULDBLOCK 转换为 NO_ERROR */
+int NoBlockReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj);
+/* 执行非阻塞 WSARecvFrom() */
+int NoBlockReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj);
+/* 设置组播选项 */
+BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const HP_SOCKADDR& castAddr, int iMCTtl, BOOL bMCLoop);
 
 // CP_XXX -> UNICODE
 BOOL CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);

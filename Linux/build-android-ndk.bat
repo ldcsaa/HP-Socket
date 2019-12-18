@@ -24,5 +24,5 @@ cd %CURPATH%
 exit /b 0
 
 :cp_static_lib
-	xcopy /y /s /f %OBJ_OUT%\local\%1\*.a %LIBS_OUT%\%1
+	xcopy /y /s /f %OBJ_OUT%\local\%1\*.a %LIBS_OUT%\%1\
 goto:eof

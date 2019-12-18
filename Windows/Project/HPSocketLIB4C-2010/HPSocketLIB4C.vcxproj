@@ -457,6 +457,7 @@
     <ClInclude Include="..\..\Src\UdpArqServer.h" />
     <ClInclude Include="..\..\Src\UdpCast.h" />
     <ClInclude Include="..\..\Src\UdpClient.h" />
+    <ClInclude Include="..\..\Src\UdpNode.h" />
     <ClInclude Include="..\..\Src\UdpServer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -907,6 +908,7 @@
     <ClCompile Include="..\..\Src\UdpArqServer.cpp" />
     <ClCompile Include="..\..\Src\UdpCast.cpp" />
     <ClCompile Include="..\..\Src\UdpClient.cpp" />
+    <ClCompile Include="..\..\Src\UdpNode.cpp" />
     <ClCompile Include="..\..\Src\UdpServer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

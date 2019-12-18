@@ -101,6 +101,7 @@ private:
 public:
 	virtual BOOL Start(DWORD dwThreadCount = 0, DWORD dwMaxQueueSize = 0, EnRejectedPolicy enRejectedPolicy = TRP_CALL_FAIL, DWORD dwStackSize = 0);
 	virtual BOOL Stop(DWORD dwMaxWait = INFINITE);
+	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE) {return m_evWait.Wait(dwMilliseconds);}
 
 	virtual BOOL Submit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait = INFINITE);
 	virtual BOOL Submit(LPTSocketTask pTask, DWORD dwMaxWait = INFINITE);
@@ -127,8 +128,9 @@ private:
 
 public:
 	CHPThreadPool()
+	: m_evWait(TRUE, TRUE)
 	{
-		Reset();
+		Reset(FALSE);
 	}
 
 	virtual ~CHPThreadPool()
@@ -137,9 +139,11 @@ public:
 	}
 
 private:
-	void Reset();
+	void Reset(BOOL bSetWaitEvent = TRUE);
 
 private:
+	CEvt					m_evWait;
+
 #if _WIN32_WINNT >= _WIN32_WINNT_WS08
 	CCriSec					m_csQueue;
 	CConVar					m_cvQueue;

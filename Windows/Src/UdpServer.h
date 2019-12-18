@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  
 #pragma once
 
-#include "SocketHelper.h"
+#include "MiscHelper.h"
 #include "../Common/Src/Event.h"
 #include "../Common/Src/RWLock.h"
 #include "../Common/Src/STLHelper.h"
@@ -40,6 +40,7 @@ public:
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	virtual BOOL PauseReceive	(CONNID dwConnID, BOOL bPause = TRUE);
+	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.Wait(dwMilliseconds);}
 	virtual BOOL			HasStarted					()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState					()	{return m_enState;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);
@@ -65,23 +66,25 @@ public:
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
-	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{m_enSendPolicy			= enSendPolicy;}
-	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{m_enOnSendSyncPolicy	= enOnSendSyncPolicy;}
-	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{m_dwMaxConnectionCount		= dwMaxConnectionCount;}
-	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{m_dwWorkerThreadCount		= dwWorkerThreadCount;}
-	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
-	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		{m_dwFreeSocketObjPool		= dwFreeSocketObjPool;}
-	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)		{m_dwFreeBufferObjPool		= dwFreeBufferObjPool;}
-	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)		{m_dwFreeSocketObjHold		= dwFreeSocketObjHold;}
-	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		{m_dwFreeBufferObjHold		= dwFreeBufferObjHold;}
-	virtual void SetMaxDatagramSize			(DWORD dwMaxDatagramSize)		{m_dwMaxDatagramSize		= dwMaxDatagramSize;}
-	virtual void SetPostReceiveCount		(DWORD dwPostReceiveCount)		{m_dwPostReceiveCount		= dwPostReceiveCount;}
-	virtual void SetDetectAttempts			(DWORD dwDetectAttempts)		{m_dwDetectAttempts			= dwDetectAttempts;}
-	virtual void SetDetectInterval			(DWORD dwDetectInterval)		{m_dwDetectInterval			= dwDetectInterval;}
-	virtual void SetMarkSilence				(BOOL bMarkSilence)				{m_bMarkSilence				= bMarkSilence;}
+	virtual void SetReuseAddressPolicy		(EnReuseAddressPolicy enReusePolicy)	{ENSURE_HAS_STOPPED(); m_enReusePolicy		= enReusePolicy;}
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); m_enSendPolicy		= enSendPolicy;}
+	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); m_enOnSendSyncPolicy	= enOnSendSyncPolicy;}
+	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{ENSURE_HAS_STOPPED(); m_dwMaxConnectionCount		= dwMaxConnectionCount;}
+	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{ENSURE_HAS_STOPPED(); m_dwWorkerThreadCount		= dwWorkerThreadCount;}
+	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{ENSURE_HAS_STOPPED(); m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
+	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)		{ENSURE_HAS_STOPPED(); m_dwFreeSocketObjPool		= dwFreeSocketObjPool;}
+	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferObjPool		= dwFreeBufferObjPool;}
+	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)		{ENSURE_HAS_STOPPED(); m_dwFreeSocketObjHold		= dwFreeSocketObjHold;}
+	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferObjHold		= dwFreeBufferObjHold;}
+	virtual void SetMaxDatagramSize			(DWORD dwMaxDatagramSize)		{ENSURE_HAS_STOPPED(); m_dwMaxDatagramSize			= dwMaxDatagramSize;}
+	virtual void SetPostReceiveCount		(DWORD dwPostReceiveCount)		{ENSURE_HAS_STOPPED(); m_dwPostReceiveCount			= dwPostReceiveCount;}
+	virtual void SetDetectAttempts			(DWORD dwDetectAttempts)		{ENSURE_HAS_STOPPED(); m_dwDetectAttempts			= dwDetectAttempts;}
+	virtual void SetDetectInterval			(DWORD dwDetectInterval)		{ENSURE_HAS_STOPPED(); m_dwDetectInterval			= dwDetectInterval;}
+	virtual void SetMarkSilence				(BOOL bMarkSilence)				{ENSURE_HAS_STOPPED(); m_bMarkSilence				= bMarkSilence;}
 
-	virtual EnSendPolicy GetSendPolicy				()	{return m_enSendPolicy;}
-	virtual EnOnSendSyncPolicy GetOnSendSyncPolicy	()	{return m_enOnSendSyncPolicy;}
+	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
+	virtual EnSendPolicy GetSendPolicy					()	{return m_enSendPolicy;}
+	virtual EnOnSendSyncPolicy GetOnSendSyncPolicy		()	{return m_enOnSendSyncPolicy;}
 	virtual DWORD GetMaxConnectionCount		()	{return m_dwMaxConnectionCount;}
 	virtual DWORD GetWorkerThreadCount		()	{return m_dwWorkerThreadCount;}
 	virtual DWORD GetFreeSocketObjLockTime	()	{return m_dwFreeSocketObjLockTime;}
@@ -166,6 +169,8 @@ protected:
 	BOOL GetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID* ppReserved2);
 
 private:
+	friend void ContinueReceiveFrom<>(CUdpServer* pThis, TUdpBufferObj* pBufferObj);
+	
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 	static void WINAPI DetectConnectionProc(LPVOID pv, BOOLEAN bTimerFired);
 
@@ -213,6 +218,8 @@ private:
 	CONNID HandleAccept	(TUdpBufferObj* pBufferObj);
 	void HandleSend		(CONNID dwConnID, TUdpBufferObj* pBufferObj);
 	void HandleReceive	(CONNID dwConnID, TUdpBufferObj* pBufferObj);
+	void ProcessReceive	(CONNID dwConnID, TUdpBufferObj* pBufferObj);
+	void ProcessReceiveBufferObj(TUdpBufferObj* pBufferObj);
 
 	int SendPack	(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
 	int SendSafe	(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
@@ -228,7 +235,9 @@ private:
 	int SendItem	(TUdpSocketObj* pSocketObj);
 
 	BOOL SendDetectPackage		(CONNID dwConnID, TUdpSocketObj* pSocketObj);
-	BOOL IsNeedDetectConnection	() {return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
+	BOOL IsNeedDetectConnection	()	{return m_dwDetectAttempts > 0 && m_dwDetectInterval > 0;}
+
+	SOCKET GetListenSocket		()	{return m_soListen;}
 
 public:
 	CUdpServer(IUdpServerListener* pListener)
@@ -241,6 +250,7 @@ public:
 	, m_usFamily				(AF_UNSPEC)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_NONE)
+	, m_enReusePolicy			(RAP_ADDR_ONLY)
 	, m_dwMaxConnectionCount	(DEFAULT_CONNECTION_COUNT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwFreeSocketObjLockTime	(DEFAULT_FREE_SOCKETOBJ_LOCK_TIME)
@@ -253,6 +263,7 @@ public:
 	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
 	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
 	, m_bMarkSilence			(TRUE)
+	, m_evWait					(TRUE, TRUE)
 	{
 		ASSERT(sm_wsSocket.IsValid());
 		ASSERT(m_pListener);
@@ -264,6 +275,7 @@ public:
 	}
 
 private:
+	EnReuseAddressPolicy m_enReusePolicy;
 	EnSendPolicy m_enSendPolicy;
 	EnOnSendSyncPolicy m_enOnSendSyncPolicy;
 	DWORD m_dwMaxConnectionCount;
@@ -283,7 +295,9 @@ protected:
 	CUdpBufferObjPool		m_bfObjPool;
 
 private:
-	static const CInitSocket sm_wsSocket;
+	static const CInitSocket& sm_wsSocket;
+
+	CEvt					m_evWait;
 
 	ADDRESS_FAMILY			m_usFamily;
 

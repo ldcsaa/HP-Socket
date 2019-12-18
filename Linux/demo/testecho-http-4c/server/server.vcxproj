@@ -139,8 +139,8 @@
     <ClInclude Include="..\..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\..\src\common\Thread.h" />
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
-    <ClInclude Include="..\..\..\include\HPSocket4C-SSL.h" />
-    <ClInclude Include="..\..\..\include\HPSocket4C.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C-SSL.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h" />
     <ClInclude Include="..\..\Global\helper.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

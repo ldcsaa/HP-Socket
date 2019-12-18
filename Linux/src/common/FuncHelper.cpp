@@ -32,6 +32,10 @@
 
 #if !defined(__ANDROID__)
 	#include <sys/timeb.h>
+	#include <execinfo.h>
+	#ifdef __GNUC__
+		#include <cxxabi.h>
+	#endif
 #endif
 
 INT WaitFor(DWORD dwMillSecond, DWORD dwSecond, BOOL bExceptThreadInterrupted)
@@ -228,6 +232,78 @@ BOOL fcntl_SETFL(FD fd, INT fl, BOOL bSet)
 	return IS_NO_ERROR(fcntl(fd, F_SETFL , val));
 }
 
+void PrintStackTrace()
+{
+#if !defined(__ANDROID__)
+
+	const int MAX_SIZE = 51;
+	void* arr[MAX_SIZE];
+
+	int size		= backtrace(arr, MAX_SIZE);
+	char** messages	= backtrace_symbols(arr, size);
+
+	for(int i = 1; i < size && messages != nullptr; i++)
+	{
+		char* mangled_name		 = nullptr;
+		char* offset_end		 = nullptr;
+		const char* offset_begin = nullptr;
+
+		for(char* p = messages[i]; *p; ++p)
+		{
+			if(*p == '(')
+			{
+				mangled_name = p;
+			}
+			else if(*p == '+')
+			{
+				offset_begin = p;
+			}
+			else if(*p == ')')
+			{
+				offset_end = p;
+				break;
+			}
+		}
+
+		if(mangled_name && offset_end && mangled_name < offset_end)
+		{
+			*mangled_name++	= 0;
+			*offset_end++	= 0;
+
+			if(offset_begin == nullptr)
+				offset_begin = "";
+			else
+				*(char*)offset_begin++ = 0;
+
+			while(*offset_end == ' ')
+				++offset_end;
+
+#ifdef __GNUC__
+			int status;
+			char* real_name = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
+
+			if(status == 0)
+				FPRINTLN(stderr, "  -> [%02d] %s : (%s+%s) %s", i, messages[i], real_name, offset_begin, offset_end);
+			else
+				FPRINTLN(stderr, "  -> [%02d] %s : (%s+%s) %s", i, messages[i], mangled_name, offset_begin, offset_end);
+
+			if(real_name != nullptr)
+				free(real_name);
+#else
+			FPRINTLN(stderr, "  -> [%02d] %s : (%s+%s) %s", i, messages[i], mangled_name, offset_begin, offset_end);
+#endif
+		}
+		else
+		{
+			FPRINTLN(stderr, "  -> [%02d] %s", i, messages[i]);
+		}
+	}
+
+	free(messages);
+
+#endif
+}
+
 void __EXIT_FN_(void (*fn)(int), LPCSTR lpszFnName, int* lpiExitCode, int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszTitle)
 {
 	if(iErrno >= 0)
@@ -240,13 +316,13 @@ void __EXIT_FN_(void (*fn)(int), LPCSTR lpszFnName, int* lpiExitCode, int iErrno
 		lpszTitle = CreateLocalObjects(char, 50);
 
 		if(lpiExitCode)
-			sprintf((LPSTR)lpszTitle, "(#%ld, %ld) > %s(%d) [%d]", SELF_NATIVE_THREAD_ID, SELF_THREAD_ID, lpszFnName, *lpiExitCode, iErrno);
+			sprintf((LPSTR)lpszTitle, "(#%d, 0x%zX) > %s(%d) [%d]", SELF_PROCESS_ID, (SIZE_T)SELF_THREAD_ID, lpszFnName, *lpiExitCode, iErrno);
 		else
-			sprintf((LPSTR)lpszTitle, "(#%ld, %ld) > %s() [%d]", SELF_NATIVE_THREAD_ID, SELF_THREAD_ID, lpszFnName, iErrno);
+			sprintf((LPSTR)lpszTitle, "(#%d, 0x%zX) > %s() [%d]", SELF_PROCESS_ID, (SIZE_T)SELF_THREAD_ID, lpszFnName, iErrno);
 	}
 
 	if(lpszFile && iLine > 0)
-		FPRINTLN(stderr, "%s : %s\n    -> %s (%d) : %s", lpszTitle, strerror(iErrno), lpszFile, iLine, lpszFunc ? lpszFunc : "");
+		FPRINTLN(stderr, "%s : %s\n  => %s (%d) : %s", lpszTitle, strerror(iErrno), lpszFile, iLine, lpszFunc ? lpszFunc : "");
 	else
 		FPRINTLN(stderr, "%s : %s", lpszTitle, strerror(iErrno));
 

@@ -399,7 +399,7 @@ int ikcp_recv(ikcpcb *kcp, char *buffer, int len)
 		fragment = seg->frg;
 
 		if (ikcp_canlog(kcp, IKCP_LOG_RECV)) {
-			ikcp_log(kcp, IKCP_LOG_RECV, "recv sn=%lu", seg->sn);
+			ikcp_log(kcp, IKCP_LOG_RECV, "recv sn=%lu", (unsigned long)seg->sn);
 		}
 
 		if (ispeek == 0) {
@@ -416,7 +416,7 @@ int ikcp_recv(ikcpcb *kcp, char *buffer, int len)
 
 	// move available data from rcv_buf -> rcv_queue
 	while (! iqueue_is_empty(&kcp->rcv_buf)) {
-		IKCPSEG *seg = iqueue_entry(kcp->rcv_buf.next, IKCPSEG, node);
+		seg = iqueue_entry(kcp->rcv_buf.next, IKCPSEG, node);
 		if (seg->sn == kcp->rcv_nxt && kcp->nrcv_que < kcp->rcv_wnd) {
 			iqueue_del(&seg->node);
 			kcp->nrcv_buf--;
@@ -757,7 +757,7 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
 	int flag = 0;
 
 	if (ikcp_canlog(kcp, IKCP_LOG_INPUT)) {
-		ikcp_log(kcp, IKCP_LOG_INPUT, "[RI] %d bytes", size);
+		ikcp_log(kcp, IKCP_LOG_INPUT, "[RI] %d bytes", (int)size);
 	}
 
 	if (data == NULL || (int)size < (int)IKCP_OVERHEAD) return -1;
@@ -820,7 +820,7 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
 			}
 			if (ikcp_canlog(kcp, IKCP_LOG_IN_ACK)) {
 				ikcp_log(kcp, IKCP_LOG_IN_DATA, 
-					"input ack: sn=%lu rtt=%ld rto=%ld", sn, 
+					"input ack: sn=%lu rtt=%ld rto=%ld", (unsigned long)sn, 
 					(long)_itimediff(kcp->current, ts),
 					(long)kcp->rx_rto);
 			}
@@ -828,7 +828,7 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
 		else if (cmd == IKCP_CMD_PUSH) {
 			if (ikcp_canlog(kcp, IKCP_LOG_IN_DATA)) {
 				ikcp_log(kcp, IKCP_LOG_IN_DATA, 
-					"input psh: sn=%lu ts=%lu", sn, ts);
+					"input psh: sn=%lu ts=%lu", (unsigned long)sn, (unsigned long)ts);
 			}
 			if (_itimediff(sn, kcp->rcv_nxt + kcp->rcv_wnd) < 0) {
 				ikcp_ack_push(kcp, sn, ts);
@@ -863,7 +863,7 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
 			// do nothing
 			if (ikcp_canlog(kcp, IKCP_LOG_IN_WINS)) {
 				ikcp_log(kcp, IKCP_LOG_IN_WINS,
-					"input wins: %lu", (IUINT32)(wnd));
+					"input wins: %lu", (unsigned long)(wnd));
 			}
 		}
 		else {
@@ -1081,7 +1081,7 @@ void ikcp_flush(ikcpcb *kcp)
 		}
 
 		if (needsend) {
-			int size, need;
+			int need;
 			segment->ts = current;
 			segment->wnd = seg.wnd;
 			segment->una = kcp->rcv_nxt;
@@ -1102,7 +1102,7 @@ void ikcp_flush(ikcpcb *kcp)
 			}
 
 			if (segment->xmit >= kcp->dead_link) {
-				kcp->state = -1;
+				kcp->state = (IUINT32)-1;
 			}
 		}
 	}

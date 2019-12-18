@@ -1,4 +1,24 @@
 ﻿==========================================================================================
+v5.7.1 Update:
+==========================================================================================
+
+> UDP Update
+-----------------
+1. Add new component: UDP Nod:
+	1) UDP Node has no concept of "connection", and can send and receive data with any address.
+	2) UDP Node supports three execution modes: unicast, multicast, and broadcast.
+	3) Add UDP Node component example demo 'hp-testecho-udp-node'.
+
+> Other Update
+-----------------
+1. All communication components added the method 'SetReuseAddressPolicy()' to support setting the address reuse policy.
+2. Extensive API updates, code refactoring and optimization.
+
+> Update instructions
+-----------------
+1. HP-Socket v5.7.1 has changed or deleted some APIs, please refer to 'Chang-APIs.txt' when upgrading
+
+==========================================================================================
 v5.6.4 Update:
 ==========================================================================================
 

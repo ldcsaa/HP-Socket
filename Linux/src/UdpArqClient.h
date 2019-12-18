@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,16 +55,17 @@ protected:
 	virtual BOOL OnUserEvent();
 
 public:
-	virtual void SetNoDelay				(BOOL bNoDelay)				{m_arqAttr.bNoDelay				= bNoDelay;}
-	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				{m_arqAttr.bTurnoffNc			= bTurnOff;}
-	virtual void SetFlushInterval		(DWORD dwFlushInterval)		{m_arqAttr.dwFlushInterval		= dwFlushInterval;}
-	virtual void SetResendByAcks		(DWORD dwResendByAcks)		{m_arqAttr.dwResendByAcks		= dwResendByAcks;}
-	virtual void SetSendWndSize			(DWORD dwSendWndSize)		{m_arqAttr.dwSendWndSize		= dwSendWndSize;}
-	virtual void SetRecvWndSize			(DWORD dwRecvWndSize)		{m_arqAttr.dwRecvWndSize		= dwRecvWndSize;}
-	virtual void SetMinRto				(DWORD dwMinRto)			{m_arqAttr.dwMinRto				= dwMinRto;}
-	virtual void SetMaxTransUnit		(DWORD dwMaxTransUnit)		{m_dwMtu						= dwMaxTransUnit;}
-	virtual void SetMaxMessageSize		(DWORD dwMaxMessageSize)	{m_arqAttr.dwMaxMessageSize		= dwMaxMessageSize;}
-	virtual void SetHandShakeTimeout	(DWORD dwHandShakeTimeout)	{m_arqAttr.dwHandShakeTimeout	= dwHandShakeTimeout;}
+	virtual void SetNoDelay				(BOOL bNoDelay)				{ENSURE_HAS_STOPPED(); m_arqAttr.bNoDelay			= bNoDelay;}
+	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				{ENSURE_HAS_STOPPED(); m_arqAttr.bTurnoffNc			= bTurnOff;}
+	virtual void SetFlushInterval		(DWORD dwFlushInterval)		{ENSURE_HAS_STOPPED(); m_arqAttr.dwFlushInterval	= dwFlushInterval;}
+	virtual void SetResendByAcks		(DWORD dwResendByAcks)		{ENSURE_HAS_STOPPED(); m_arqAttr.dwResendByAcks		= dwResendByAcks;}
+	virtual void SetSendWndSize			(DWORD dwSendWndSize)		{ENSURE_HAS_STOPPED(); m_arqAttr.dwSendWndSize		= dwSendWndSize;}
+	virtual void SetRecvWndSize			(DWORD dwRecvWndSize)		{ENSURE_HAS_STOPPED(); m_arqAttr.dwRecvWndSize		= dwRecvWndSize;}
+	virtual void SetMinRto				(DWORD dwMinRto)			{ENSURE_HAS_STOPPED(); m_arqAttr.dwMinRto			= dwMinRto;}
+	virtual void SetFastLimit			(DWORD dwFastLimit)			{ENSURE_HAS_STOPPED(); m_arqAttr.dwFastLimit		= dwFastLimit;}
+	virtual void SetMaxTransUnit		(DWORD dwMaxTransUnit)		{ENSURE_HAS_STOPPED(); m_dwMtu						= dwMaxTransUnit;}
+	virtual void SetMaxMessageSize		(DWORD dwMaxMessageSize)	{ENSURE_HAS_STOPPED(); m_arqAttr.dwMaxMessageSize	= dwMaxMessageSize;}
+	virtual void SetHandShakeTimeout	(DWORD dwHandShakeTimeout)	{ENSURE_HAS_STOPPED(); m_arqAttr.dwHandShakeTimeout	= dwHandShakeTimeout;}
 
 	virtual BOOL IsNoDelay				()	{return m_arqAttr.bNoDelay;}
 	virtual BOOL IsTurnoffCongestCtrl	()	{return m_arqAttr.bTurnoffNc;}
@@ -73,6 +74,7 @@ public:
 	virtual DWORD GetSendWndSize		()	{return m_arqAttr.dwSendWndSize;}
 	virtual DWORD GetRecvWndSize		()	{return m_dwMtu;}
 	virtual DWORD GetMinRto				()	{return m_arqAttr.dwMinRto;}
+	virtual DWORD GetFastLimit			()	{return m_arqAttr.dwFastLimit;}
 	virtual DWORD GetMaxTransUnit		()	{return m_arqAttr.dwMtu;}
 	virtual DWORD GetMaxMessageSize		()	{return m_arqAttr.dwMaxMessageSize;}
 	virtual DWORD GetHandShakeTimeout	()	{return m_arqAttr.dwHandShakeTimeout;}

@@ -65,14 +65,14 @@
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\HPSocket4C-SSL.h">
-      <Filter>HPSocket</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\HPSocket4C.h">
-      <Filter>HPSocket</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\common\crypto\Crypto.h">
       <Filter>Common\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C-SSL.h">
+      <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h">
+      <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

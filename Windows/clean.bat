@@ -29,9 +29,6 @@ for /f "delims=" %%i in ('dir /ad /b /s "netstandard2.0"') do (
 
 rd /s /q "Demo\Debug"
 
-rd /s /q "Other Languages\C#\HPSocketCS\bin\Debug"
-rd /s /q "Other Languages\C#\HPSocketCS\bin\Release"
-
 set /a x=0
 
 if "%all%"=="/a" (

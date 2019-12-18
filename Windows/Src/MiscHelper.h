@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ template<typename B = void> struct TPackInfo
 
 typedef TPackInfo<TBuffer>	TBufferPackInfo;
 
-BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& buffers, DWORD dwMaxPackSize, USHORT usPackHeaderFlag, DWORD& header);
+BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& buffers, DWORD dwMaxPackSize, USHORT usPackHeaderFlag, DWORD& dwHeader);
 
 template<class B> EnFetchResult FetchBuffer(B* pBuffer, BYTE* pData, int iLength)
 {
@@ -109,7 +109,7 @@ template<class T, class B, class S> EnHandleResult ParsePack(T* pThis, TPackInfo
 
 		if(pInfo->header)
 		{
-			DWORD header = *((DWORD*)(byte*)buffer);
+			DWORD header = ::HToLE32(*((DWORD*)(byte*)buffer));
 
 			if(usPackHeaderFlag != 0)
 			{
@@ -154,4 +154,59 @@ template<class T, class B, class S> EnHandleResult ParsePack(T* pThis, TPackInfo
 	pBuffer->Cat(pData, iLength);
 
 	return ParsePack(pThis, pInfo, pBuffer, pSocket, dwMaxPackSize, usPackHeaderFlag);
+}
+
+template<class T> BOOL ContinueReceive(T* pThis, TSocketObj* pSocketObj, TBufferObj* pBufferObj, EnHandleResult& hr)
+{
+	int rs = NO_ERROR;
+
+	for(int i = 0; i < MAX_IOCP_CONTINUE_RECEIVE || MAX_IOCP_CONTINUE_RECEIVE < 0; i++)
+	{
+		if(pSocketObj->paused)
+			break;
+
+		if(hr != HR_OK && hr != HR_IGNORE)
+			break;
+
+		pBufferObj->buff.len = pThis->GetSocketBufferSize();
+		rs = ::NoBlockReceiveNotCheck(pBufferObj);
+
+		if(rs != NO_ERROR)
+			break;
+
+		hr = pThis->TriggerFireReceive(pSocketObj, pBufferObj);
+	}
+
+	if(hr != HR_OK && hr != HR_IGNORE)
+		return FALSE;
+
+	if(rs != NO_ERROR && rs != WSAEWOULDBLOCK)
+	{
+		if(rs == WSAEDISCON)
+			pThis->AddFreeSocketObj(pSocketObj, SCF_CLOSE);
+		else
+			pThis->CheckError(pSocketObj, SO_RECEIVE, rs);
+
+		pThis->AddFreeBufferObj(pBufferObj);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+template<class T> void ContinueReceiveFrom(T* pThis, TUdpBufferObj* pBufferObj)
+{
+	int rs;
+
+	while(TRUE)
+	{
+		pBufferObj->buff.len = pThis->GetMaxDatagramSize();
+		rs = ::NoBlockReceiveFromNotCheck(pThis->GetListenSocket(), pBufferObj);
+
+		if(rs != NO_ERROR)
+			break;
+
+		pThis->ProcessReceiveBufferObj(pBufferObj);
+	}
 }

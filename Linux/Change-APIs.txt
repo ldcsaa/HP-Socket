@@ -1,4 +1,76 @@
 ﻿# ======================================== #
+HP-Socket v5.7.1 API Update List:
+# ======================================== #
+--------------------
+1. Global:
+--------------------
+SYS_SSO_ReuseAddress						(UPDATE: parameter type change to 'En_HP_ReuseAddressPolicy')
+SYS_SSO_RecvTimeOut							(ADD)
+SYS_SSO_SendTimeOut							(ADD)
+SYS_SwapEndian16							(ADD)
+SYS_SwapEndian32							(ADD)
+SYS_IsLittleEndian							(ADD)
+
+--------------------
+2. UDP:
+--------------------
+enum En_HP_CastMode							(UPDATE: add enum value CM_UNICAST)
+Create_HP_UdpNode							(ADD)
+Create_HP_UdpNodeListener					(ADD)
+Destroy_HP_UdpNode							(ADD)
+Destroy_HP_UdpNodeListener					(ADD)
+HP_Set_FN_UdpNode_OnPrepareListen			(ADD)
+HP_Set_FN_UdpNode_OnSend					(ADD)
+HP_Set_FN_UdpNode_OnReceive					(ADD)
+HP_Set_FN_UdpNode_OnError					(ADD)
+HP_Set_FN_UdpNode_OnShutdown				(ADD)
+HP_UdpNode_*								(ADD)
+
+HP_UdpArqServer_SetFastLimit				(ADD)
+HP_UdpArqServer_GetFastLimit				(ADD)
+HP_UdpArqClient_SetFastLimit				(ADD)
+HP_UdpArqClient_GetFastLimit				(ADD)
+
+--------------------
+3. SSL:
+--------------------
+HP_SSLServer_SetSSLCipherList				(ADD)
+HP_SSLServer_GetSSLCipherList				(ADD)
+HP_SSLAgent_SetSSLCipherList				(ADD)
+HP_SSLAgent_GetSSLCipherList				(ADD)
+HP_SSLClient_SetSSLCipherList				(ADD)
+HP_SSLClient_GetSSLCipherList				(ADD)
+
+--------------------
+4. Thread:
+--------------------
+HP_ThreadPool_GetTaskCount					(ADD)
+
+--------------------
+5. Others:
+--------------------
+enum En_HP_ReuseAddressPolicy				(ADD)
+HP_Server_SetReuseAddressPolicy				(ADD)
+HP_Server_GetReuseAddressPolicy				(ADD)
+HP_Agent_SetReuseAddressPolicy				(ADD)
+HP_Agent_GetReuseAddressPolicy				(ADD)
+HP_Client_SetReuseAddressPolicy				(ADD)
+HP_Client_GetReuseAddressPolicy				(ADD)
+HP_UdpNode_SetReuseAddressPolicy			(ADD)
+HP_UdpNode_GetReuseAddressPolicy			(ADD)
+
+HP_Server_Wait								(ADD)
+HP_Agent_Wait								(ADD)
+HP_UdpNode_Wait								(ADD)
+HP_Client_Wait								(ADD)
+HP_ThreadPool_Wait							(ADD)
+
+HP_TcpAgent_SetReuseAddress					(DELETE: replaced by HP_Agent_SetReuseAddressPolicy)
+HP_TcpAgent_IsReuseAddress					(DELETE: replaced by HP_Agent_GetReuseAddressPolicy)
+HP_UdpCast_SetReuseAddress					(DELETE: replaced by HP_Client_SetReuseAddressPolicy)
+HP_UdpCast_IsReuseAddress					(DELETE: replaced by HP_Client_GetReuseAddressPolicy)
+
+# ======================================== #
 HP-Socket v5.6.1 API Update List:
 # ======================================== #
 --------------------

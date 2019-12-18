@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,6 +334,70 @@ public:
 	HP_FN_Client_OnClose			m_fnOnClose			;
 };
 
+#ifdef _UDP_SUPPORT
+
+template<class T, class L, size_t offset = 0> class C_HP_UdpNodeListenerT : public L
+{
+public:
+	virtual EnHandleResult OnPrepareListen(T* pSender, SOCKET soListen)
+	{
+		return	(m_fnOnPrepareListen)
+				? m_fnOnPrepareListen(C_HP_Object::FromSecond<offset>(pSender), soListen)
+				: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnSend(T* pSender, LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pData, int iLength)
+	{
+		return	(m_fnOnSend)
+				? m_fnOnSend(C_HP_Object::FromSecond<offset>(pSender), lpszRemoteAddress, usRemotePort, pData, iLength)
+				: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnReceive(T* pSender, LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pData, int iLength)
+	{
+		ASSERT(m_fnOnReceive);
+
+		return	(m_fnOnReceive)
+				? m_fnOnReceive(C_HP_Object::FromSecond<offset>(pSender), lpszRemoteAddress, usRemotePort, pData, iLength)
+				: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnError(T* pSender, EnSocketOperation enOperation, int iErrorCode, LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pData, int iLength)
+	{
+		ASSERT(m_fnOnError);
+
+		return	(m_fnOnError)
+				? m_fnOnError(C_HP_Object::FromSecond<offset>(pSender), enOperation, iErrorCode, lpszRemoteAddress, usRemotePort, pData, iLength)
+				: HR_IGNORE;
+	}
+
+	virtual EnHandleResult OnShutdown(T* pSender)
+	{
+		return	(m_fnOnShutdown)
+				? m_fnOnShutdown(C_HP_Object::FromSecond<offset>(pSender))
+				: HR_IGNORE;
+	}
+
+public:
+	C_HP_UdpNodeListenerT()
+	: m_fnOnPrepareListen	(nullptr)
+	, m_fnOnSend			(nullptr)
+	, m_fnOnReceive			(nullptr)
+	, m_fnOnError			(nullptr)
+	, m_fnOnShutdown		(nullptr)
+	{
+	}
+
+public:
+	HP_FN_UdpNode_OnPrepareListen	m_fnOnPrepareListen	;
+	HP_FN_UdpNode_OnSend			m_fnOnSend			;
+	HP_FN_UdpNode_OnReceive			m_fnOnReceive		;
+	HP_FN_UdpNode_OnError			m_fnOnError			;
+	HP_FN_UdpNode_OnShutdown		m_fnOnShutdown		;
+};
+
+#endif
+
 typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener>						C_HP_TcpServerListener;
 typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener, sizeof(IPullSocket)>	C_HP_TcpPullServerListener;
 typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener, sizeof(IPackSocket)>	C_HP_TcpPackServerListener;
@@ -351,6 +415,7 @@ typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPackClient)
 typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener>						C_HP_UdpServerListener;
 typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener>						C_HP_UdpClientListener;
 typedef C_HP_ClientListenerT<IUdpCast, IUdpCastListener>							C_HP_UdpCastListener;
+typedef C_HP_UdpNodeListenerT<IUdpNode, IUdpNodeListener>							C_HP_UdpNodeListener;
 
 typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener, sizeof(IArqSocket)>	C_HP_UdpArqServerListener;
 typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener, sizeof(IArqClient)>	C_HP_UdpArqClientListener;

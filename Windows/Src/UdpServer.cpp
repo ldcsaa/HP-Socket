@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 
 #include <malloc.h>
 
-const CInitSocket CUdpServer::sm_wsSocket;
+const CInitSocket& CUdpServer::sm_wsSocket = CInitSocket::Instance();
 
 EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 {
@@ -120,6 +120,9 @@ BOOL CUdpServer::Start(LPCTSTR lpszBindAddress, USHORT usPort)
 				if(StartAccept())
 				{
 					m_enState = SS_STARTED;
+
+					m_evWait.Reset();
+
 					return TRUE;
 				}
 
@@ -187,9 +190,6 @@ BOOL CUdpServer::CheckStoping()
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		while(m_enState != SS_STOPPED)
-			::WaitWithMessageLoop(10);
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -214,6 +214,8 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 		if(m_soListen != INVALID_SOCKET)
 		{
 			ENSURE(::SSO_UDP_ConnReset(m_soListen, FALSE) == NO_ERROR);
+			ENSURE(::SSO_ReuseAddress(m_soListen, m_enReusePolicy) == NO_ERROR);
+			ENSURE(::SSO_NoBlock(m_soListen) == NO_ERROR);
 
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
 			{
@@ -237,6 +239,7 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 BOOL CUdpServer::CreateCompletePort()
 {
 	m_hCompletePort	= ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
+	
 	if(m_hCompletePort == nullptr)
 		SetLastError(SE_CP_CREATE, __FUNCTION__, ::GetLastError());
 
@@ -250,6 +253,7 @@ BOOL CUdpServer::CreateWorkerThreads()
 	for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
 	{
 		HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, WorkerThreadProc, (LPVOID)this, 0, nullptr);
+		
 		if(hThread)
 			m_vtWorkerThreads.push_back(hThread);
 		else
@@ -320,6 +324,8 @@ void CUdpServer::Reset()
 	m_iRemainPostReceives	= 0;
 	m_enState				= SS_STOPPED;
 	m_usFamily				= AF_UNSPEC;
+
+	m_evWait.Set();
 }
 
 void CUdpServer::SendCloseNotify()
@@ -864,7 +870,7 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 	{
 		DWORD dwErrorCode = NO_ERROR;
 		DWORD dwBytes;
-		ULONG_PTR  ulCompKey;
+		ULONG_PTR ulCompKey;
 		OVERLAPPED* pOverlapped;
 		
 		BOOL result = ::GetQueuedCompletionStatus
@@ -983,7 +989,7 @@ void CUdpServer::HandleError(CONNID dwConnID, TUdpBufferObj* pBufferObj, DWORD d
 	
 	if(pBufferObj->operation == SO_RECEIVE)
 		DoReceive(pBufferObj);
-	else
+	else if(pBufferObj->operation != SO_SEND || pBufferObj->ReleaseSendCounter() == 0)
 		AddFreeBufferObj(pBufferObj);
 }
 
@@ -1064,7 +1070,7 @@ void CUdpServer::HandleSend(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 		return;
 	}
 
-	int iLength = -(long)(pBufferObj->buff.len);
+	long iLength = -(long)(pBufferObj->buff.len);
 
 	switch(m_enSendPolicy)
 	{
@@ -1103,6 +1109,14 @@ void CUdpServer::HandleSend(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 
 void CUdpServer::HandleReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 {
+	ProcessReceive(dwConnID, pBufferObj);
+	::ContinueReceiveFrom(this, pBufferObj);
+
+	DoReceive(pBufferObj);
+}
+
+void CUdpServer::ProcessReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
+{
 	if(dwConnID == 0)
 		dwConnID = HandleAccept(pBufferObj);
 
@@ -1126,8 +1140,12 @@ void CUdpServer::HandleReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 			}
 		}
 	}
+}
 
-	DoReceive(pBufferObj);
+void CUdpServer::ProcessReceiveBufferObj(TUdpBufferObj* pBufferObj)
+{
+	CONNID dwConnID = FindConnectionID(&pBufferObj->remoteAddr);
+	ProcessReceive(dwConnID, pBufferObj);
 }
 
 int CUdpServer::DoReceive(TUdpBufferObj* pBufferObj)
@@ -1371,16 +1389,16 @@ int CUdpServer::DoSendPack(TUdpSocketObj* pSocketObj)
 
 int CUdpServer::DoSendSafe(TUdpSocketObj* pSocketObj)
 {
-	long lRecvBuffSize = pSocketObj->GetSendBufferSize();
+	long lSendBuffSize = pSocketObj->GetSendBufferSize();
 
-	if(pSocketObj->sndCount < lRecvBuffSize && !pSocketObj->IsSmooth())
+	if(pSocketObj->sndCount < lSendBuffSize && !pSocketObj->IsSmooth())
 	{
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))
 			return ERROR_OBJECT_NOT_FOUND;
 
-		if(pSocketObj->sndCount < lRecvBuffSize)
+		if(pSocketObj->sndCount < lSendBuffSize)
 			pSocketObj->smooth = TRUE;
 	}
 

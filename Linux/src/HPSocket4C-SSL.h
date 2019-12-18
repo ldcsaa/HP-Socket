@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,11 @@ HPSOCKET_API void __HP_CALL HP_SSLServer_SetSSLAutoHandShake(HP_SSLServer pServe
 /* 获取通信组件握手方式 */
 HPSOCKET_API BOOL __HP_CALL HP_SSLServer_IsSSLAutoHandShake(HP_SSLServer pServer);
 
+/* 设置 SSL 加密算法列表 */
+HPSOCKET_API void __HP_CALL HP_SSLServer_SetSSLCipherList(HP_SSLServer pServer, LPCTSTR lpszCipherList);
+/* 获取 SSL 加密算法列表 */
+HPSOCKET_API LPCTSTR __HP_CALL HP_SSLServer_GetSSLCipherList(HP_SSLServer pServer);
+
 /*
 * 名称：获取 SSL Session 信息
 * 描述：获取指定类型的 SSL Session 信息（输出类型参考：En_HP_SSLSessionInfo）
@@ -332,6 +337,11 @@ HPSOCKET_API void __HP_CALL HP_SSLAgent_SetSSLAutoHandShake(HP_SSLAgent pAgent, 
 /* 获取通信组件握手方式 */
 HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_IsSSLAutoHandShake(HP_SSLAgent pAgent);
 
+/* 设置 SSL 加密算法列表 */
+HPSOCKET_API void __HP_CALL HP_SSLAgent_SetSSLCipherList(HP_SSLAgent pAgent, LPCTSTR lpszCipherList);
+/* 获取 SSL 加密算法列表 */
+HPSOCKET_API LPCTSTR __HP_CALL HP_SSLAgent_GetSSLCipherList(HP_SSLAgent pAgent);
+
 /*
 * 名称：获取 SSL Session 信息
 * 描述：获取指定类型的 SSL Session 信息（输出类型参考：En_HP_SSLSessionInfo）
@@ -354,6 +364,11 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLClient_StartSSLHandShake(HP_SSLClient pClient)
 HPSOCKET_API void __HP_CALL HP_SSLClient_SetSSLAutoHandShake(HP_SSLClient pClient, BOOL bAutoHandShake);
 /* 获取通信组件握手方式 */
 HPSOCKET_API BOOL __HP_CALL HP_SSLClient_IsSSLAutoHandShake(HP_SSLClient pClient);
+
+/* 设置 SSL 加密算法列表 */
+HPSOCKET_API void __HP_CALL HP_SSLClient_SetSSLCipherList(HP_SSLClient pClient, LPCTSTR lpszCipherList);
+/* 获取 SSL 加密算法列表 */
+HPSOCKET_API LPCTSTR __HP_CALL HP_SSLClient_GetSSLCipherList(HP_SSLClient pClient);
 
 /*
 * 名称：获取 SSL Session 信息

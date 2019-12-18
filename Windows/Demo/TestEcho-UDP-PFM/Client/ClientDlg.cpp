@@ -354,7 +354,7 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 
 EnHandleResult CClientDlg::OnPrepareConnect(IUdpClient* pSender, CONNID dwConnID, SOCKET socket)
 {
-	VERIFY(::SYS_SSO_RecvBuffSize(socket, 64 * 1024) == NO_ERROR);
+	VERIFY(::SYS_SSO_RecvBuffSize(socket, 256 * 1024) == NO_ERROR);
 
 	return HR_OK;
 }

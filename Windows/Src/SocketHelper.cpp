@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@
 	#endif
 #endif
 
-static const BYTE s_szUdpCloseNotify[]	= {0xBE, 0xB6, 0x1F, 0xEB, 0xDA, 0x52, 0x46, 0xBA, 0x92, 0x33, 0x59, 0xDB, 0xBF, 0xE6, 0xC8, 0xE4};
-static int s_iUdpCloseNotifySize		= ARRAY_SIZE(s_szUdpCloseNotify);
+static const BYTE s_szUdpCloseNotify[] = {0xBE, 0xB6, 0x1F, 0xEB, 0xDA, 0x52, 0x46, 0xBA, 0x92, 0x33, 0x59, 0xDB, 0xBF, 0xE6, 0xC8, 0xE4};
+static const int s_iUdpCloseNotifySize = ARRAY_SIZE(s_szUdpCloseNotify);
 
 const hp_addr hp_addr::ANY_ADDR4(AF_INET, TRUE);
 const hp_addr hp_addr::ANY_ADDR6(AF_INET6, TRUE);
@@ -409,6 +409,34 @@ ULONGLONG HToN64(ULONGLONG value)
 	return (((ULONGLONG)htonl((u_long)((value << 32) >> 32))) << 32) | htonl((u_long)(value >> 32));
 }
 
+BOOL IsLittleEndian()
+{
+	static const USHORT _s_endian_test_value = 0x0102;
+	static const BOOL _s_bLE = (*((BYTE*)&_s_endian_test_value) == 0x02);
+
+	return _s_bLE;
+}
+
+USHORT HToLE16(USHORT value)
+{
+	return IsLittleEndian() ? value : ENDIAN_SWAP_16(value);
+}
+
+USHORT HToBE16(USHORT value)
+{
+	return IsLittleEndian() ? ENDIAN_SWAP_16(value) : value;
+}
+
+DWORD HToLE32(DWORD value)
+{
+	return IsLittleEndian() ? value : ENDIAN_SWAP_32(value);
+}
+
+DWORD HToBE32(DWORD value)
+{
+	return IsLittleEndian() ? ENDIAN_SWAP_32(value) : value;
+}
+
 PVOID GetExtensionFuncPtr(SOCKET sock, GUID guid)
 {
 	DWORD dwBytes;
@@ -642,9 +670,44 @@ int SSO_SendBuffSize(SOCKET sock, int size)
 	return setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (CHAR*)&size, sizeof(int));
 }
 
-int SSO_ReuseAddress(SOCKET sock, BOOL bReuse)
+int SSO_RecvTimeOut(SOCKET sock, int ms)
 {
-	return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (CHAR*)&bReuse, sizeof(BOOL));
+	return setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (CHAR*)&ms, sizeof(int));
+}
+
+int SSO_SendTimeOut(SOCKET sock, int ms)
+{
+	return setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (CHAR*)&ms, sizeof(int));
+}
+
+int SSO_ReuseAddress(SOCKET sock, EnReuseAddressPolicy opt)
+{
+	BOOL bSet	= TRUE;
+	BOOL bUnSet	= FALSE;
+	int rs		= NO_ERROR;
+
+	if(opt == RAP_NONE)
+	{
+		rs  = setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (CHAR*)&bSet, sizeof(BOOL));
+		rs |= setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (CHAR*)&bUnSet, sizeof(BOOL));
+	}
+	else if(opt == RAP_ADDR_ONLY)
+	{
+		rs  = setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (CHAR*)&bUnSet, sizeof(BOOL));
+		rs |= setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (CHAR*)&bUnSet, sizeof(BOOL));
+	}
+	else if(opt == RAP_ADDR_AND_PORT)
+	{
+		rs  = setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (CHAR*)&bUnSet, sizeof(BOOL));
+		rs |= setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (CHAR*)&bSet, sizeof(BOOL));
+	}
+	else
+	{
+		::SetLastError(ERROR_INVALID_PARAMETER);
+		rs = -1;
+	}
+
+	return rs;
 }
 
 int SSO_ExclusiveAddressUse(SOCKET sock, BOOL bExclusive)
@@ -942,9 +1005,9 @@ int NoBlockReceive(TBufferObj* pBufferObj)
 
 int NoBlockReceiveNotCheck(TBufferObj* pBufferObj)
 {
-	int result				= NO_ERROR;
-	DWORD dwFlag			= 0;
-	DWORD dwBytes			= 0;
+	int result		= NO_ERROR;
+	DWORD dwFlag	= 0;
+	DWORD dwBytes	= 0;
 
 	if(::WSARecv(
 					pBufferObj->client,
@@ -969,6 +1032,81 @@ int NoBlockReceiveNotCheck(TBufferObj* pBufferObj)
 	return result;
 }
 
+int NoBlockReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
+{
+	int result = NoBlockReceiveFromNotCheck(sock, pBufferObj);
+
+	if(result == WSAEWOULDBLOCK)
+		result = NO_ERROR;
+
+	return result;
+}
+
+int NoBlockReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
+{
+	int result			= NO_ERROR;
+	DWORD dwFlag		= 0;
+	DWORD dwBytes		= 0;
+	pBufferObj->addrLen	= pBufferObj->remoteAddr.AddrSize();
+
+	if(::WSARecvFrom(
+						sock,
+						&pBufferObj->buff,
+						1,
+						&dwBytes,
+						&dwFlag,
+						pBufferObj->remoteAddr.Addr(),
+						&pBufferObj->addrLen,
+						nullptr,
+						nullptr
+					) == SOCKET_ERROR)
+	{
+		result = ::WSAGetLastError();
+	}
+	else
+	{
+		if(dwBytes > 0)
+			pBufferObj->buff.len = dwBytes;
+		else
+			result = WSAEDISCON;
+	}
+
+	return result;
+}
+
+BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const HP_SOCKADDR& castAddr, int iMCTtl, BOOL bMCLoop)
+{
+	if(castAddr.IsIPv4())
+	{
+		ENSURE(::SSO_SetSocketOption(sock, IPPROTO_IP, IP_MULTICAST_TTL, &iMCTtl, sizeof(iMCTtl)) != SOCKET_ERROR);
+		ENSURE(::SSO_SetSocketOption(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &bMCLoop, sizeof(bMCLoop)) != SOCKET_ERROR);
+
+		ip_mreq mcast;
+		::ZeroMemory(&mcast, sizeof(mcast));
+
+		mcast.imr_multiaddr = castAddr.addr4.sin_addr;
+		mcast.imr_interface = bindAddr.addr4.sin_addr;
+
+		if(::SSO_SetSocketOption(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast)) == SOCKET_ERROR)
+			return FALSE;
+	}
+	else
+	{
+		ENSURE(::SSO_SetSocketOption(sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &iMCTtl, sizeof(iMCTtl)) != SOCKET_ERROR);
+		ENSURE(::SSO_SetSocketOption(sock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &bMCLoop, sizeof(bMCLoop)) != SOCKET_ERROR);
+
+		ipv6_mreq mcast;
+		::ZeroMemory(&mcast, sizeof(mcast));
+
+		mcast.ipv6mr_multiaddr = castAddr.addr6.sin6_addr;
+		mcast.ipv6mr_interface = bindAddr.addr6.sin6_scope_id;
+
+		if(::SSO_SetSocketOption(sock, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &mcast, sizeof(mcast)) == SOCKET_ERROR)
+			return FALSE;
+	}
+
+	return TRUE;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 

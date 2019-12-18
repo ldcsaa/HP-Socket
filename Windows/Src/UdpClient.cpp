@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 
 #ifdef _UDP_SUPPORT
 
-const CInitSocket CUdpClient::sm_wsSocket;
+const CInitSocket& CUdpClient::sm_wsSocket = CInitSocket::Instance();
 
 BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
@@ -52,6 +52,7 @@ BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 					if(CreateWorkerThread())
 					{
 						isOK = TRUE;
+						m_evWait.Reset();
 					}
 					else
 						SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ERROR_CREATE_FAILED);
@@ -125,12 +126,6 @@ BOOL CUdpClient::CheckStoping(DWORD dwCurrentThreadID)
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		if(dwCurrentThreadID != m_dwWorkerID)
-		{
-			while(m_enState != SS_STOPPED)
-				::WaitWithMessageLoop(10);
-		}
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -143,7 +138,7 @@ BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addrRemote))
 		return FALSE;
 
-	if(lpszBindAddress && lpszBindAddress[0] != 0)
+	if(::IsStrNotEmpty(lpszBindAddress))
 	{
 		if(!::sockaddr_A_2_IN(lpszBindAddress, 0, addrBind))
 			return FALSE;
@@ -161,6 +156,7 @@ BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 		return FALSE;
 
 	ENSURE(::SSO_UDP_ConnReset(m_soClient, FALSE) == NO_ERROR);
+	ENSURE(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
 
 	m_evSocket = ::WSACreateEvent();
 	ASSERT(m_evSocket != WSA_INVALID_EVENT);
@@ -576,18 +572,16 @@ BOOL CUdpClient::SendData()
 		{
 			ASSERT(!itPtr->IsEmpty());
 
-			int rc = 0;
-
-			{
-				CCriSecLock locallock(m_csSend);
-
-				rc = send(m_soClient, (char*)itPtr->Ptr(), itPtr->Size(), 0);
-				if(rc > 0) m_iPending -= rc;
-			}
+			int rc = send(m_soClient, (char*)itPtr->Ptr(), itPtr->Size(), 0);
 
 			if(rc > 0)
 			{
 				ASSERT(rc == itPtr->Size());
+
+				{
+					CCriSecLock locallock(m_csSend);
+					m_iPending -= rc;
+				}
 
 				if(TRIGGER(FireSend(itPtr->Ptr(), rc)) == HR_ERROR)
 				{
@@ -625,12 +619,10 @@ TItem* CUdpClient::GetSendBuffer()
 {
 	TItem* pItem = nullptr;
 
-	if(m_lsSend.Size() > 0)
+	if(m_iPending > 0)
 	{
 		CCriSecLock locallock(m_csSend);
-
-		if(m_lsSend.Size() > 0)
-			pItem = m_lsSend.PopFront();
+		pItem = m_lsSend.PopFront();
 	}
 
 	return pItem;
@@ -686,6 +678,8 @@ void CUdpClient::Reset()
 	m_dwDetectFails	= 0;
 	m_bPaused		= FALSE;
 	m_enState		= SS_STOPPED;
+
+	m_evWait.Set();
 }
 
 void CUdpClient::WaitForWorkerThreadEnd(DWORD dwCurrentThreadID)
@@ -791,17 +785,21 @@ BOOL CUdpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 
 int CUdpClient::SendInternal(TItemPtr& itPtr)
 {
-	CCriSecLock locallock(m_csSend);
+	int iPending;
 
-	if(!IsConnected())
-		return ERROR_INVALID_STATE;
+	{
+		CCriSecLock locallock(m_csSend);
 
-	BOOL isPending = !m_lsSend.IsEmpty();
-	m_iPending	  += itPtr->Size();
+		if(!IsConnected())
+			return ERROR_INVALID_STATE;
 
-	m_lsSend.PushBack(itPtr.Detach());
+		iPending	= m_iPending;
+		m_iPending += itPtr->Size();
 
-	if(!isPending) m_evBuffer.Set();
+		m_lsSend.PushBack(itPtr.Detach());
+	}
+
+	if(iPending == 0 && m_iPending > 0) m_evBuffer.Set();
 
 	return NO_ERROR;
 }

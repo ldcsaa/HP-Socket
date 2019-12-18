@@ -140,7 +140,7 @@ void CClientDlg::SetAppState(EnAppState state)
 
 	m_Start.EnableWindow(m_enState == ST_STOPPED);
 	m_Stop.EnableWindow(m_enState == ST_STARTED);
-	m_Send.EnableWindow(m_enState == ST_STARTED && m_Content.GetWindowTextLength() > 0);
+	m_Send.EnableWindow(m_enState == ST_STARTED);
 	m_CastAddr.EnableWindow(m_enState == ST_STOPPED);
 	m_BindAddr.EnableWindow(m_enState == ST_STOPPED);
 	m_Port.EnableWindow(m_enState == ST_STOPPED);
@@ -153,7 +153,7 @@ void CClientDlg::SetAppState(EnAppState state)
 
 void CClientDlg::OnEnChangeContent()
 {
-	m_Send.EnableWindow(m_enState == ST_STARTED && m_Content.GetWindowTextLength() > 0);
+	m_Send.EnableWindow(m_enState == ST_STARTED);
 }
 
 void CClientDlg::OnBnClickedSend()
@@ -197,7 +197,7 @@ void CClientDlg::OnBnClickedStart()
 	// OPTIONS ...
 	m_Cast.SetCastMode(enMode);
 	m_Cast.SetMultiCastLoop(bIPLoop);
-	m_Cast.SetReuseAddress(bReuseAddr);
+	m_Cast.SetReuseAddressPolicy(bReuseAddr ? RAP_ADDR_AND_PORT : RAP_NONE);
 	m_Cast.SetMultiCastTtl(iTTL);
 
 	::LogClientStarting(strCastAddress, usPort);

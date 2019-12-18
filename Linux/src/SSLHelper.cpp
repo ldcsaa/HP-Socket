@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ BOOL CSSLContext::Initialize(EnSSLSessionMode enSessionMode, int iVerifyMode, BO
 		m_sslCtx = GetContext(0);
 	else
 	{
-		Cleanup();
+		EXECUTE_RESTORE_ERROR(Cleanup());
 		return FALSE;
 	}
 
@@ -229,7 +229,9 @@ BOOL CSSLContext::BindServerName(LPCTSTR lpszServerName, int iContextIndex)
 
 int CSSLContext::AddContext(int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPVOID lpPemKey, LPVOID lpKeyPasswod, LPVOID lpCAPemCert)
 {
-	int iIndex		= -1;
+	USES_CONVERSION;
+
+	int iIndex = -1;
 
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
 	SSL_CTX* sslCtx	= SSL_CTX_new(SSLv23_method());
@@ -239,23 +241,28 @@ int CSSLContext::AddContext(int iVerifyMode, BOOL bMemory, LPVOID lpPemCert, LPV
 
 	SSL_CTX_set_quiet_shutdown(sslCtx, 1);
 	SSL_CTX_set_verify(sslCtx, iVerifyMode, nullptr);
-	SSL_CTX_set_cipher_list(sslCtx, "ALL:!aNULL:!eNULL");
 
-	if(m_enSessionMode == SSL_SM_SERVER)
-	{
-		static volatile ULONG s_session_id_context = 0;
-		ULONG session_id_context = ::InterlockedIncrement(&s_session_id_context);
-
-		SSL_CTX_set_session_id_context(sslCtx, (BYTE*)&session_id_context, sizeof(session_id_context));
-	}
-
-	if(!LoadCertAndKey(sslCtx, iVerifyMode, bMemory, lpPemCert, lpPemKey, lpKeyPasswod, lpCAPemCert))
-		SSL_CTX_free(sslCtx);
+	if(!SSL_CTX_set_cipher_list(sslCtx, T2CA(m_strCipherList)))
+		::SetLastError(ERROR_EMPTY);
 	else
 	{
-		iIndex = (int)m_lsSslCtxs.size();
-		m_lsSslCtxs.push_back(sslCtx);
+		if(m_enSessionMode == SSL_SM_SERVER)
+		{
+			static volatile ULONG s_session_id_context = 0;
+			ULONG session_id_context = ::InterlockedIncrement(&s_session_id_context);
+
+			SSL_CTX_set_session_id_context(sslCtx, (BYTE*)&session_id_context, sizeof(session_id_context));
+		}
+
+		if(LoadCertAndKey(sslCtx, iVerifyMode, bMemory, lpPemCert, lpPemKey, lpKeyPasswod, lpCAPemCert))
+		{
+			iIndex = (int)m_lsSslCtxs.size();
+			m_lsSslCtxs.push_back(sslCtx);
+		}
 	}
+
+	if(iIndex < 0)
+		EXECUTE_RESTORE_ERROR(SSL_CTX_free(sslCtx));
 	
 	return iIndex;
 }

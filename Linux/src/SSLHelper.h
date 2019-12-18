@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,12 @@
 
 #define OPENSSL_VERSION_1_0_2	0x10002000L
 #define OPENSSL_VERSION_1_1_0	0x10100000L
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
+	#define DEFAULT_CIPHER_LIST	_T("DEFAULT:!aNULL:!eNULL:!SSLv2")
+#else
+	#define DEFAULT_CIPHER_LIST	_T("DEFAULT:!aNULL:!eNULL:!SSLv2:!SSLv3")
+#endif
 
  /************************************************************************
  名称：SSL 全局常量
@@ -167,6 +173,11 @@ public:
 	/* 检查 SSL 运行环境是否初始化完成 */
 	BOOL IsValid					()		const	{return m_sslCtx != nullptr;}
 
+	/* 设置 SSL 加密算法列表 */
+	void SetCipherList(LPCTSTR lpszCipherList)		{m_strCipherList = lpszCipherList;}
+	/* 获取 SSL 加密算法列表 */
+	LPCTSTR GetCipherList()							{return m_strCipherList;}
+
 public:
 	
 	/*
@@ -184,7 +195,8 @@ public:
 public:
 
 	CSSLContext()
-	: m_enSessionMode		(SSL_SM_SERVER)
+	: m_strCipherList		(DEFAULT_CIPHER_LIST)
+	, m_enSessionMode		(SSL_SM_SERVER)
 	, m_sslCtx				(nullptr)
 	, m_fnServerNameCallback(nullptr)
 	{
@@ -226,6 +238,7 @@ public:
 
 private:
 
+	CString				m_strCipherList;
 	EnSSLSessionMode	m_enSessionMode;
 	CServerNameMap		m_sslServerNames;
 	vector<SSL_CTX*>	m_lsSslCtxs;

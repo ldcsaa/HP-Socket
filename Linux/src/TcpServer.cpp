@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,9 +111,6 @@ BOOL CTcpServer::CheckStoping()
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		while(m_enState != SS_STOPPED)
-			::WaitFor(10);
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -140,7 +137,7 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 
 			BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 			VERIFY(IS_NO_ERROR(::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
-			VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen)));
+			VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
 
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
 			{
@@ -261,6 +258,8 @@ void CTcpServer::Reset()
 	::ClearPtrMap(m_rcBufferMap);
 
 	m_enState = SS_STOPPED;
+
+	m_evWait.SyncNotifyAll();
 }
 
 TSocketObj* CTcpServer::GetFreeSocketObj(CONNID dwConnID, SOCKET soClient)
@@ -869,7 +868,7 @@ BOOL CTcpServer::HandleReceive(TSocketObj* pSocketObj, int flag)
 		{
 			if(TRIGGER(FireReceive(pSocketObj, buffer.Ptr(), rc)) == HR_ERROR)
 			{
-				TRACE("<C-CNNID: %zu> OnReceive() event return 'HR_ERROR', connection will be closed !", pSocketObj->connID);
+				TRACE("<S-CNNID: %zu> OnReceive() event return 'HR_ERROR', connection will be closed !", pSocketObj->connID);
 
 				AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_RECEIVE, ENSURE_ERROR_CANCELLED);
 				return FALSE;
@@ -904,41 +903,42 @@ BOOL CTcpServer::HandleSend(TSocketObj* pSocketObj, int flag)
 	if(!pSocketObj->IsPending())
 		return TRUE;
 
-	CReentrantCriSecLock locallock(pSocketObj->csSend);
+	BOOL bBlocked	= FALSE;
+	int writes		= flag ? -1 : MAX_CONTINUE_WRITES;
 
-	if(!pSocketObj->IsPending())
-		return TRUE;
-
-	BOOL isOK = TRUE;
-
-	int writes = flag ? -1 : MAX_CONTINUE_WRITES;
 	TBufferObjList& sndBuff = pSocketObj->sndBuff;
+	TItemPtr itPtr(sndBuff);
 
 	for(int i = 0; i < writes || writes < 0; i++)
 	{
-		TItemPtr itPtr(sndBuff, sndBuff.PopFront());
+		{
+			CReentrantCriSecLock locallock(pSocketObj->csSend);
+			itPtr = sndBuff.PopFront();
+		}
 
 		if(!itPtr.IsValid())
 			break;
 
 		ASSERT(!itPtr->IsEmpty());
 
-		isOK = SendItem(pSocketObj, itPtr);
+		if(!SendItem(pSocketObj, itPtr, bBlocked))
+			return FALSE;
 
-		if(!isOK)
-			break;
-
-		if(!itPtr->IsEmpty())
+		if(bBlocked)
 		{
+			ASSERT(!itPtr->IsEmpty());
+
+			CReentrantCriSecLock locallock(pSocketObj->csSend);
 			sndBuff.PushFront(itPtr.Detach());
+
 			break;
 		}
 	}
 
-	return isOK;
+	return TRUE;
 }
 
-BOOL CTcpServer::SendItem(TSocketObj* pSocketObj, TItem* pItem)
+BOOL CTcpServer::SendItem(TSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocked)
 {
 	while(!pItem->IsEmpty())
 	{
@@ -948,7 +948,7 @@ BOOL CTcpServer::SendItem(TSocketObj* pSocketObj, TItem* pItem)
 		{
 			if(TRIGGER(FireSend(pSocketObj, pItem->Ptr(), rc)) == HR_ERROR)
 			{
-				TRACE("<C-CNNID: %zu> OnSend() event should not return 'HR_ERROR' !!", pSocketObj->connID);
+				TRACE("<S-CNNID: %zu> OnSend() event should not return 'HR_ERROR' !!", pSocketObj->connID);
 				ASSERT(FALSE);
 			}
 
@@ -959,10 +959,15 @@ BOOL CTcpServer::SendItem(TSocketObj* pSocketObj, TItem* pItem)
 			int code = ::WSAGetLastError();
 
 			if(code == ERROR_WOULDBLOCK)
+			{
+				bBlocked = TRUE;
 				break;
-
-			AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_SEND, code);
-			return FALSE;
+			}
+			else
+			{
+				AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_SEND, code);
+				return FALSE;
+			}
 		}
 		else
 			ASSERT(FALSE);

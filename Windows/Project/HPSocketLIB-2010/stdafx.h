@@ -1,13 +1,12 @@
 /*
- * Copyright Bruce Liang (ldcsaa@gmail.com)
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
- * Version	: 3.5.4
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Porject	: https://code.google.com/p/ldcsaa
- * Bolg		: http://www.cnblogs.com/ldcsaa
- * WeiBo	: http://weibo.com/u/1402935851
- * QQ Group	: 75375912
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
+ * Blog		: http://www.cnblogs.com/ldcsaa
+ * Wiki		: http://www.oschina.net/p/hp-socket
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

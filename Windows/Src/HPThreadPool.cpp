@@ -124,6 +124,7 @@ BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedP
 	}
 
 	m_enState = SS_STARTED;
+	m_evWait.Reset();
 
 	return TRUE;;
 }
@@ -355,11 +356,14 @@ BOOL CHPThreadPool::CheckStoping()
 	return TRUE;
 }
 
-void CHPThreadPool::Reset()
+void CHPThreadPool::Reset(BOOL bSetWaitEvent)
 {
 	m_dwQueueSize		= 0;
 	m_dwTaskCount		= 0;
 	m_dwMaxQueueSize	= 0;
 	m_enRejectedPolicy	= TRP_CALL_FAIL;
 	m_enState			= SS_STOPPED;
+
+	if(bSetWaitEvent)
+		m_evWait.Set();
 }

@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,12 +123,6 @@ BOOL CUdpCast::CheckStoping()
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		if(!m_thWorker.IsInMyThread())
-		{
-			while(m_enState != SS_STOPPED)
-				::WaitFor(10);
-		}
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -153,18 +147,18 @@ BOOL CUdpCast::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCT
 	{
 		if(!::sockaddr_A_2_IN(lpszBindAddress, usPort, bindAddr))
 			return FALSE;
+	}
 
-		if(m_enCastMode == CM_BROADCAST && bindAddr.IsIPv6())
-		{
-			::WSASetLastError(ERROR_PFNOSUPPORT);
-			return FALSE;
-		}
+	if(m_enCastMode == CM_BROADCAST && bindAddr.IsIPv6())
+	{
+		::WSASetLastError(ERROR_PFNOSUPPORT);
+		return FALSE;
+	}
 
-		if(m_castAddr.family != bindAddr.family)
-		{
-			::WSASetLastError(ERROR_AFNOSUPPORT);
-			return FALSE;
-		}
+	if(m_castAddr.family != bindAddr.family)
+	{
+		::WSASetLastError(ERROR_AFNOSUPPORT);
+		return FALSE;
 	}
 
 	m_soClient = socket(m_castAddr.family, SOCK_DGRAM, IPPROTO_UDP);
@@ -172,7 +166,8 @@ BOOL CUdpCast::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCT
 	if(m_soClient == INVALID_SOCKET)
 		return FALSE;
 
-	VERIFY(::SSO_ReuseAddress(m_soClient, m_bReuseAddress) != SOCKET_ERROR);
+	VERIFY(::fcntl_SETFL(m_soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
+	VERIFY(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
 
 	SetRemoteHost(lpszRemoteAddress, usPort);
 
@@ -196,7 +191,7 @@ BOOL CUdpCast::ConnectToGroup(const HP_SOCKADDR& bindAddr)
 {
 	if(m_enCastMode == CM_MULTICAST)
 	{
-		if(!SetMultiCastSocketOptions(bindAddr))
+		if(!::SetMultiCastSocketOptions(m_soClient, bindAddr, m_castAddr, m_iMCTtl, m_bMCLoop))
 			return FALSE;
 	}
 	else
@@ -207,8 +202,6 @@ BOOL CUdpCast::ConnectToGroup(const HP_SOCKADDR& bindAddr)
 		VERIFY(::SSO_SetSocketOption(m_soClient, SOL_SOCKET, SO_BROADCAST, &iSet, sizeof(UINT)) != SOCKET_ERROR);
 	}
 
-	VERIFY(::fcntl_SETFL(m_soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
-
 	SetConnected();
 
 	if(TRIGGER(FireConnect()) == HR_ERROR)
@@ -218,50 +211,6 @@ BOOL CUdpCast::ConnectToGroup(const HP_SOCKADDR& bindAddr)
 	}
 
 	m_nEvents = (SHORT)((m_lsSend.IsEmpty() ? 0 : POLLOUT) | (m_bPaused ? 0 : POLLIN) | POLLRDHUP);
-
-	return TRUE;
-}
-
-BOOL CUdpCast::SetMultiCastSocketOptions(const HP_SOCKADDR& bindAddr)
-{
-	if(m_castAddr.IsIPv4())
-	{
-		BYTE ttl  = (BYTE)m_iMCTtl;
-		BYTE loop = (BYTE)m_bMCLoop;
-
-		VERIFY(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl)) != SOCKET_ERROR);
-		VERIFY(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof(loop)) != SOCKET_ERROR);
-
-		ip_mreq mcast;
-		::ZeroMemory(&mcast, sizeof(mcast));
-
-		mcast.imr_multiaddr = m_castAddr.addr4.sin_addr;
-		mcast.imr_interface = bindAddr.addr4.sin_addr;
-
-		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast)) == SOCKET_ERROR)
-			return FALSE;
-		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IP, IP_MULTICAST_IF, bindAddr.SinAddr(), sizeof(IN_ADDR)) == SOCKET_ERROR)
-			return FALSE;
-	}
-	else
-	{
-		INT ttl	  = (INT)m_iMCTtl;
-		UINT loop = (UINT)m_bMCLoop;
-
-		VERIFY(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &ttl, sizeof(ttl)) != SOCKET_ERROR);
-		VERIFY(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &loop, sizeof(loop)) != SOCKET_ERROR);
-
-		ipv6_mreq mcast;
-		::ZeroMemory(&mcast, sizeof(mcast));
-
-		mcast.ipv6mr_multiaddr = m_castAddr.addr6.sin6_addr;
-		mcast.ipv6mr_interface = bindAddr.addr6.sin6_scope_id;
-
-		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &mcast, sizeof(mcast)) == SOCKET_ERROR)
-			return FALSE;
-		if(::SSO_SetSocketOption(m_soClient, IPPROTO_IPV6, IPV6_MULTICAST_IF, (PVOID)(&bindAddr.addr6.sin6_scope_id), sizeof(UINT)) == SOCKET_ERROR)
-			return FALSE;
-	}
 
 	return TRUE;
 }
@@ -312,6 +261,8 @@ void CUdpCast::Reset()
 	m_nEvents		= 0;
 	m_bPaused		= FALSE;
 	m_enState		= SS_STOPPED;
+
+	m_evWait.SyncNotifyAll();
 }
 
 void CUdpCast::WaitForWorkerThreadEnd()
@@ -525,61 +476,61 @@ BOOL CUdpCast::PauseReceive(BOOL bPause)
 
 BOOL CUdpCast::SendData()
 {
-	if(m_lsSend.IsEmpty())
-		return TRUE;
+	BOOL bBlocked = FALSE;
 
-	CCriSecLock locallock(m_csSend);
-
-	if(m_lsSend.IsEmpty())
-		return TRUE;
-
-	BOOL isOK = TRUE;
-
-	while(TRUE)
+	while(m_lsSend.Length() > 0)
 	{
-		TItemPtr itPtr(m_itPool, m_lsSend.PopFront());
+		TItemPtr itPtr(m_itPool);
+
+		{
+			CCriSecLock locallock(m_csSend);
+			itPtr = m_lsSend.PopFront();
+		}
 
 		if(!itPtr.IsValid())
 			break;
 
-		ASSERT(!itPtr->IsEmpty());
+		if(!DoSendData(itPtr, bBlocked))
+			return FALSE;
 
-		isOK = DoSendData(itPtr);
-
-		if(!isOK)
-			break;
-
-		if(!itPtr->IsEmpty())
+		if(bBlocked)
 		{
+			CCriSecLock locallock(m_csSend);
 			m_lsSend.PushFront(itPtr.Detach());
 			break;
 		}
 	}
 
-	return isOK;
+	return TRUE;
 }
 
-BOOL CUdpCast::DoSendData(TItem* pItem)
+BOOL CUdpCast::DoSendData(TItem* pItem, BOOL& bBlocked)
 {
 	int rc = (int)sendto(m_soClient, (char*)pItem->Ptr(), pItem->Size(), 0, m_castAddr.Addr(), m_castAddr.AddrSize());
 
-	if(rc > 0)
+	if(rc >= 0)
 	{
 		ASSERT(rc == pItem->Size());
+
+		if(rc == 0)
+		{
+			CCriSecLock locallock(m_csSend);
+			m_lsSend.ReduceLength(1);
+		}
 
 		if(TRIGGER(FireSend(pItem->Ptr(), rc)) == HR_ERROR)
 		{
 			TRACE("<C-CNNID: %zu> OnSend() event should not return 'HR_ERROR' !!", m_dwConnID);
 			ASSERT(FALSE);
 		}
-
-		pItem->Reduce(rc);
 	}
 	else if(rc == SOCKET_ERROR)
 	{
 		int code = ::WSAGetLastError();
 
-		if(code != ERROR_WOULDBLOCK)
+		if(code == ERROR_WOULDBLOCK)
+			bBlocked = TRUE;
+		else
 		{
 			m_ccContext.Reset(TRUE, SO_SEND, code);
 			return FALSE;
@@ -593,11 +544,11 @@ BOOL CUdpCast::DoSendData(TItem* pItem)
 
 BOOL CUdpCast::Send(const BYTE* pBuffer, int iLength, int iOffset)
 {
-	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize);
+	ASSERT(pBuffer && iLength >= 0 && iLength <= (int)m_dwMaxDatagramSize);
 
 	int result = NO_ERROR;
 
-	if(pBuffer && iLength > 0 && iLength <= (int)m_dwMaxDatagramSize)
+	if(pBuffer && iLength >= 0 && iLength <= (int)m_dwMaxDatagramSize)
 	{
 		if(IsConnected())
 		{
@@ -653,7 +604,7 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 		}
 	}
 
-	if(iLength > 0 && iLength <= iMaxLen)
+	if(iLength >= 0 && iLength <= iMaxLen)
 		result = SendInternal(itPtr);
 	else
 		result = ERROR_INCORRECT_SIZE;
@@ -666,16 +617,23 @@ BOOL CUdpCast::SendPackets(const WSABUF pBuffers[], int iCount)
 
 int CUdpCast::SendInternal(TItemPtr& itPtr)
 {
-	CCriSecLock locallock(m_csSend);
+	int iPending;
+	int iBufferSize;
 
-	if(!IsConnected())
-		return ERROR_INVALID_STATE;
+	{
+		CCriSecLock locallock(m_csSend);
 
-	BOOL isPending = !m_lsSend.IsEmpty();
+		if(!IsConnected())
+			return ERROR_INVALID_STATE;
 
-	m_lsSend.PushBack(itPtr.Detach());
+		iPending	= m_lsSend.Length();
+		iBufferSize	= itPtr->Size();
 
-	if(!isPending) m_evSend.Set();
+		m_lsSend.PushBack(itPtr.Detach());
+		if(iBufferSize == 0) m_lsSend.IncreaseLength(1);
+	}
+
+	if(iPending == 0 && m_lsSend.Length() > 0) m_evSend.Set();
 
 	return NO_ERROR;
 }

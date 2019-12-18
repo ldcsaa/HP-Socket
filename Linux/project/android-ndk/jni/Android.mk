@@ -73,6 +73,7 @@ MY_SRC_FILES := ../../../src/common/BufferPool.cpp \
                 ../../../src/UdpArqClient.cpp \
                 ../../../src/UdpArqServer.cpp \
                 ../../../src/UdpCast.cpp \
+                ../../../src/UdpNode.cpp \
                 ../../../src/UdpClient.cpp \
                 ../../../src/UdpServer.cpp
 MY_C_INCLUDES := ../../../src

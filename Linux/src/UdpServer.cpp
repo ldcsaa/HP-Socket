@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,9 +117,6 @@ BOOL CUdpServer::CheckStoping()
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		while(m_enState != SS_STOPPED)
-			::WaitFor(10);
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -143,6 +140,7 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 		if(m_soListen != INVALID_SOCKET)
 		{
 			::fcntl_SETFL(m_soListen, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
+			VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
 
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
 			{
@@ -276,6 +274,8 @@ void CUdpServer::Reset()
 	m_quSend.UnsafeClear();
 
 	m_enState = SS_STOPPED;
+
+	m_evWait.SyncNotifyAll();
 }
 
 TUdpSocketObj* CUdpServer::GetFreeSocketObj(CONNID dwConnID)
@@ -710,16 +710,6 @@ VOID CUdpServer::OnCommand(TDispCommand* pCmd)
 	}
 }
 
-VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
-{
-	DoSend(dwConnID, flag);
-}
-
-VOID CUdpServer::HandleCmdReceive(CONNID dwConnID, int flag)
-{
-	DoReceive(dwConnID, flag);
-}
-
 VOID CUdpServer::HandleCmdDisconnect(CONNID dwConnID, BOOL bForce)
 {
 	AddFreeSocketObj(FindSocketObj(dwConnID), SCF_CLOSE);
@@ -742,12 +732,12 @@ BOOL CUdpServer::OnReadyWrite(PVOID pv, UINT events)
 
 BOOL CUdpServer::OnHungUp(PVOID pv, UINT events)
 {
-	return HandleClose();
+	return HandleClose(nullptr, SO_CLOSE, 0);
 }
 
 BOOL CUdpServer::OnError(PVOID pv, UINT events)
 {
-	return HandleClose();
+	return HandleClose(nullptr, SO_CLOSE, -1);
 }
 
 VOID CUdpServer::OnDispatchThreadStart(THR_ID tid)
@@ -760,11 +750,22 @@ VOID CUdpServer::OnDispatchThreadEnd(THR_ID tid)
 	OnWorkerThreadEnd(tid);
 }
 
-BOOL CUdpServer::HandleClose()
+BOOL CUdpServer::HandleClose(TUdpSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
 {
-	VERIFY(!HasStarted());
+	if(!HasStarted())
+		return FALSE;
+	else if(pSocketObj == nullptr)
+	{
+		TRACE("HandleClose() -> OP: %d, EC: %d", enOperation, iErrorCode);
+		return TRUE;
+	}
 
-	m_ioDispatcher.DelFD(m_soListen);
+	if(iErrorCode == -1)
+		iErrorCode = ::SSO_GetError(m_soListen);
+
+	EnSocketCloseFlag enFlag = IS_NO_ERROR(iErrorCode) ? SCF_CLOSE : SCF_ERROR;
+
+	AddFreeSocketObj(pSocketObj, enFlag, enOperation, iErrorCode);
 
 	return FALSE;
 }
@@ -830,12 +831,18 @@ BOOL CUdpServer::HandleReceive(int flag)
 
 			VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_RECEIVE, dwConnID, flag));
 		}
+		else if(rc == SOCKET_ERROR)
+		{
+			int code = ::WSAGetLastError();
+
+			if(code == ERROR_WOULDBLOCK)
+				break;
+			else if(!HandleClose(nullptr, SO_RECEIVE, code))
+				return FALSE;
+		}
 		else
 		{
-			BREAK_WOULDBLOCK_ERROR();
-
-			HandleClose();
-			return FALSE;
+			ASSERT(FALSE);
 		}
 	}
 
@@ -894,12 +901,14 @@ void CUdpServer::HandleZeroBytes(TUdpSocketObj* pSocketObj)
 	TRACE("<S-CNNID: %zu> send 0 bytes (detect ack package - %s)", pSocketObj->connID, IS_HAS_ERROR(rc) ? "fail" : "succ");
 }
 
-BOOL CUdpServer::DoReceive(CONNID dwConnID, int flag)
+VOID CUdpServer::HandleCmdReceive(CONNID dwConnID, int flag)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
 	if(!TUdpSocketObj::IsValid(pSocketObj))
-		return FALSE;
+		return;
+	if(pSocketObj->recvQueue.IsEmpty())
+		return;
 
 	BOOL bCancel = FALSE;
 
@@ -907,7 +916,9 @@ BOOL CUdpServer::DoReceive(CONNID dwConnID, int flag)
 		CReentrantReadLock locallock(pSocketObj->lcIo);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))
-			return FALSE;
+			return;
+		if(pSocketObj->recvQueue.IsEmpty())
+			return;
 
 		pSocketObj->detectFails = 0;
 		if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
@@ -932,16 +943,14 @@ BOOL CUdpServer::DoReceive(CONNID dwConnID, int flag)
 	}
 
 	if(bCancel)
-	{
 		AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_RECEIVE, ENSURE_ERROR_CANCELLED);
-		return FALSE;
+	else
+	{
+		if(TUdpSocketObj::IsValid(pSocketObj) && pSocketObj->HasRecvData())
+			VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_RECEIVE, dwConnID, flag));
 	}
-
-	if(TUdpSocketObj::IsValid(pSocketObj) && pSocketObj->HasRecvData())
-		VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_RECEIVE, dwConnID, flag));
-
-	return TRUE;
 }
+
 
 BOOL CUdpServer::HandleSend(int flag)
 {
@@ -955,53 +964,58 @@ BOOL CUdpServer::HandleSend(int flag)
 	return TRUE;
 }
 
-BOOL CUdpServer::DoSend(CONNID dwConnID, int flag)
+VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
 	if(!TUdpSocketObj::IsValid(pSocketObj) || !pSocketObj->IsPending())
-		return FALSE;
+		return;
 
-	CReentrantCriSecLock locallock(pSocketObj->csSend);
+	BOOL bBlocked	= FALSE;
+	int writes		= flag ? -1 : MAX_CONTINUE_WRITES;
 
-	if(!TUdpSocketObj::IsValid(pSocketObj) || !pSocketObj->IsPending())
-		return FALSE;
-
-	int writes = flag ? -1 : MAX_CONTINUE_WRITES;
 	TBufferObjList& sndBuff = pSocketObj->sndBuff;
+	TItemPtr itPtr(sndBuff);
 
-	BOOL bBlocked = FALSE;
-
-	for(int i = 0; i < writes || writes < 0; i++)
 	{
-		TItemPtr itPtr(sndBuff, sndBuff.PopFront());
+		CReentrantReadLock locallock(pSocketObj->lcSend);
 
-		if(!itPtr.IsValid())
-			break;
+		if(!TUdpSocketObj::IsValid(pSocketObj) || !pSocketObj->IsPending())
+			return;
 
-		ASSERT(!itPtr->IsEmpty());
-
-		if(!SendItem(pSocketObj, itPtr, bBlocked))
+		for(int i = 0; i < writes || writes < 0; i++)
 		{
-			HandleClose();
-			return FALSE;
-		}
+			{
+				CCriSecLock locallock(pSocketObj->csSend);
+				itPtr = sndBuff.PopFront();
+			}
 
-		if(bBlocked)
-		{
-			sndBuff.PushFront(itPtr.Detach());
-			m_quSend.PushBack(dwConnID);
+			if(!itPtr.IsValid())
+				break;
 
-			m_ioDispatcher.ModFD(m_soListen, EPOLLOUT | _EPOLL_READ_EVENTS | EPOLLET, TO_PVOID(&m_soListen));
+			ASSERT(!itPtr->IsEmpty());
 
-			break;
+			if(!SendItem(pSocketObj, itPtr, bBlocked))
+				return;
+
+			if(bBlocked)
+			{
+				{
+					CCriSecLock locallock(pSocketObj->csSend);
+					sndBuff.PushFront(itPtr.Detach());
+				}
+
+				m_quSend.PushBack(dwConnID);
+
+				m_ioDispatcher.ModFD(m_soListen, EPOLLOUT | _EPOLL_READ_EVENTS | EPOLLET, TO_PVOID(&m_soListen));
+
+				break;
+			}
 		}
 	}
 
-	if(!bBlocked && !sndBuff.IsEmpty())
+	if(!bBlocked && pSocketObj->IsPending())
 		VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_SEND, dwConnID));
-
-	return TRUE;
 }
 
 BOOL CUdpServer::SendItem(TUdpSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocked)
@@ -1014,7 +1028,7 @@ BOOL CUdpServer::SendItem(TUdpSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocke
 
 		if(TRIGGER(FireSend(pSocketObj, pItem->Ptr(), rc)) == HR_ERROR)
 		{
-			TRACE("<C-CNNID: %zu> OnSend() event should not return 'HR_ERROR' !!", pSocketObj->connID);
+			TRACE("<S-CNNID: %zu> OnSend() event should not return 'HR_ERROR' !!", pSocketObj->connID);
 			ASSERT(FALSE);
 		}
 	}
@@ -1024,7 +1038,7 @@ BOOL CUdpServer::SendItem(TUdpSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocke
 
 		if(code == ERROR_WOULDBLOCK)
 			bBlocked = TRUE;
-		else
+		else if(!HandleClose(pSocketObj, SO_SEND, code))
 			return FALSE;
 	}
 	else
@@ -1122,10 +1136,10 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 
 int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr)
 {
-	BOOL bPending = TRUE;
+	BOOL bPending;
 
 	{
-		CReentrantCriSecLock locallock(pSocketObj->csSend);
+		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))
 			return ERROR_OBJECT_NOT_FOUND;

@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,10 @@ public:
 	virtual BOOL StartSSLHandShake(CONNID dwConnID);
 
 public:
-	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	{m_bSSLAutoHandShake = bAutoHandShake;}
+	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	{ENSURE_HAS_STOPPED(); m_bSSLAutoHandShake = bAutoHandShake;}
+	virtual void SetSSLCipherList	(LPCTSTR lpszCipherList){ENSURE_HAS_STOPPED(); m_sslCtx.SetCipherList(lpszCipherList);}
 	virtual BOOL IsSSLAutoHandShake	()						{return m_bSSLAutoHandShake;}
+	virtual LPCTSTR GetSSLCipherList()						{return m_sslCtx.GetCipherList();}
 
 	virtual BOOL GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo);
 

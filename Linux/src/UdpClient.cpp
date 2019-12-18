@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,12 +118,6 @@ BOOL CUdpClient::CheckStoping()
 			m_enState = SS_STOPPING;
 			return TRUE;
 		}
-
-		if(!m_thWorker.IsInMyThread())
-		{
-			while(m_enState != SS_STOPPED)
-				::WaitFor(10);
-		}
 	}
 
 	SetLastError(SE_ILLEGAL_STATE, __FUNCTION__, ERROR_INVALID_STATE);
@@ -136,7 +130,7 @@ BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addrRemote))
 		return FALSE;
 
-	if(!::IsStrEmpty(lpszBindAddress))
+	if(::IsStrNotEmpty(lpszBindAddress))
 	{
 		if(!::sockaddr_A_2_IN(lpszBindAddress, 0, addrBind))
 			return FALSE;
@@ -152,6 +146,8 @@ BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 
 	if(m_soClient == INVALID_SOCKET)
 		return FALSE;
+
+	VERIFY(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
 
 	SetRemoteHost(lpszRemoteAddress, usPort);
 
@@ -263,6 +259,8 @@ void CUdpClient::Reset()
 	m_dwDetectFails	= 0;
 	m_bPaused		= FALSE;
 	m_enState		= SS_STOPPED;
+
+	m_evWait.SyncNotifyAll();
 }
 
 void CUdpClient::WaitForWorkerThreadEnd()
@@ -598,41 +596,37 @@ BOOL CUdpClient::PauseReceive(BOOL bPause)
 
 BOOL CUdpClient::SendData()
 {
-	if(m_lsSend.IsEmpty())
-		return TRUE;
+	BOOL bBlocked = FALSE;
 
-	CCriSecLock locallock(m_csSend);
-
-	if(m_lsSend.IsEmpty())
-		return TRUE;
-
-	BOOL isOK = TRUE;
-
-	while(TRUE)
+	while(m_lsSend.Length() > 0)
 	{
-		TItemPtr itPtr(m_itPool, m_lsSend.PopFront());
+		TItemPtr itPtr(m_itPool);
+
+		{
+			CCriSecLock locallock(m_csSend);
+			itPtr = m_lsSend.PopFront();
+		}
 
 		if(!itPtr.IsValid())
 			break;
 
 		ASSERT(!itPtr->IsEmpty());
 
-		isOK = DoSendData(itPtr);
+		if(!DoSendData(itPtr, bBlocked))
+			return FALSE;
 
-		if(!isOK)
-			break;
-
-		if(!itPtr->IsEmpty())
+		if(bBlocked)
 		{
+			CCriSecLock locallock(m_csSend);
 			m_lsSend.PushFront(itPtr.Detach());
 			break;
 		}
 	}
 
-	return isOK;
+	return TRUE;
 }
 
-BOOL CUdpClient::DoSendData(TItem* pItem)
+BOOL CUdpClient::DoSendData(TItem* pItem, BOOL& bBlocked)
 {
 	int rc = (int)send(m_soClient, (char*)pItem->Ptr(), pItem->Size(), 0);
 
@@ -645,14 +639,14 @@ BOOL CUdpClient::DoSendData(TItem* pItem)
 			TRACE("<C-CNNID: %zu> OnSend() event should not return 'HR_ERROR' !!", m_dwConnID);
 			ASSERT(FALSE);
 		}
-
-		pItem->Reduce(rc);
 	}
 	else if(rc == SOCKET_ERROR)
 	{
 		int code = ::WSAGetLastError();
 
-		if(code != ERROR_WOULDBLOCK)
+		if(code == ERROR_WOULDBLOCK)
+			bBlocked = TRUE;
+		else
 		{
 			m_ccContext.Reset(TRUE, SO_SEND, code);
 			return FALSE;
@@ -739,16 +733,20 @@ BOOL CUdpClient::SendPackets(const WSABUF pBuffers[], int iCount)
 
 int CUdpClient::SendInternal(TItemPtr& itPtr)
 {
-	CCriSecLock locallock(m_csSend);
+	int iPending;
 
-	if(!IsConnected())
-		return ERROR_INVALID_STATE;
+	{
+		CCriSecLock locallock(m_csSend);
 
-	BOOL isPending = !m_lsSend.IsEmpty();
+		if(!IsConnected())
+			return ERROR_INVALID_STATE;
 
-	m_lsSend.PushBack(itPtr.Detach());
+		iPending = m_lsSend.Length();
 
-	if(!isPending) m_evSend.Set();
+		m_lsSend.PushBack(itPtr.Detach());
+	}
+
+	if(iPending == 0 && m_lsSend.Length() > 0) m_evSend.Set();
 
 	return NO_ERROR;
 }

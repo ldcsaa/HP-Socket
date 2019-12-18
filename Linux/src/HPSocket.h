@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,6 +196,8 @@ HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
 HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener);
 // 创建 IUdpCast 对象
 HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener);
+// 创建 IUdpNode 对象
+HPSOCKET_API IUdpNode* HP_Create_UdpNode(IUdpNodeListener* pListener);
 // 创建 IUdpArqServer 对象
 HPSOCKET_API IUdpArqServer* HP_Create_UdpArqServer(IUdpServerListener* pListener);
 // 创建 IUdpArqClient 对象
@@ -207,6 +209,8 @@ HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient);
 // 销毁 IUdpCast 对象
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast);
+// 销毁 IUdpNode 对象
+HPSOCKET_API void HP_Destroy_UdpNode(IUdpNode* pNode);
 // 销毁 IUdpArqServer 对象
 HPSOCKET_API void HP_Destroy_UdpArqServer(IUdpArqServer* pServer);
 // 销毁 IUdpArqClient 对象
@@ -389,7 +393,7 @@ struct UdpClient_Creator
 	}
 };
 
-// IUdpClient 对象创建器
+// IUdpCast 对象创建器
 struct UdpCast_Creator
 {
 	static IUdpCast* Create(IUdpCastListener* pListener)
@@ -400,6 +404,20 @@ struct UdpCast_Creator
 	static void Destroy(IUdpCast* pCast)
 	{
 		HP_Destroy_UdpCast(pCast);
+	}
+};
+
+// IUdpNode 对象创建器
+struct UdpNode_Creator
+{
+	static IUdpNode* Create(IUdpNodeListener* pListener)
+	{
+		return HP_Create_UdpNode(pListener);
+	}
+
+	static void Destroy(IUdpNode* pNode)
+	{
+		HP_Destroy_UdpNode(pNode);
 	}
 };
 
@@ -437,6 +455,8 @@ typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpSe
 typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
 // IUdpCast 对象智能指针
 typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
+// IUdpNode 对象智能指针
+typedef CHPSocketPtr<IUdpNode, IUdpNodeListener, UdpNode_Creator>				CUdpNodePtr;
 // IUdpArqServer 对象智能指针
 typedef CHPSocketPtr<IUdpArqServer, IUdpServerListener, UdpArqServer_Creator>	CUdpArqServerPtr;
 // IUdpArqClient 对象智能指针
@@ -479,8 +499,12 @@ HPSOCKET_API int SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger);
 HPSOCKET_API int SYS_SSO_RecvBuffSize(SOCKET sock, int size);
 // 设置 socket 选项：SOL_SOCKET -> SO_SNDBUF
 HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size);
-// 设置 socket 选项：SOL_SOCKET -> SO_REUSEADDR
-HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, BOOL bReuse = TRUE);
+// 设置 socket 选项：SOL_SOCKET -> SO_RCVTIMEO
+HPSOCKET_API int SYS_SSO_RecvTimeOut(SOCKET sock, int ms);
+// 设置 socket 选项：SOL_SOCKET -> SO_SNDTIMEO
+HPSOCKET_API int SYS_SSO_SendTimeOut(SOCKET sock, int ms);
+// 设置 socket 选项：SOL_SOCKET -> SO_REUSEADDR / SO_REUSEPORT
+HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, EnReuseAddressPolicy opt);
 
 // 获取 SOCKET 本地地址信息
 HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
@@ -500,6 +524,12 @@ HPSOCKET_API BOOL SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int& iIPLen
 HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value);
 /* 64 位主机字节序转网络字节序 */
 HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value);
+/* 短整型高低字节交换 */
+HPSOCKET_API USHORT SYS_SwapEndian16(USHORT value);
+/* 长整型高低字节交换 */
+HPSOCKET_API DWORD SYS_SwapEndian32(DWORD value);
+/* 检查是否小端字节序 */
+HPSOCKET_API BOOL SYS_IsLittleEndian();
 
 /* 分配内存 */
 HPSOCKET_API LPBYTE SYS_Malloc(int size);

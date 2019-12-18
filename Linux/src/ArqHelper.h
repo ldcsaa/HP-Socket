@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ using namespace std;
 #define DEFAULT_ARQ_SEND_WND_SIZE		128
 #define DEFAULT_ARQ_RECV_WND_SIZE		512
 #define DEFAULT_ARQ_MIN_RTO				30
+#define DEFAULT_ARQ_FAST_LIMIT			5
 #define DEFAULT_ARQ_MAX_TRANS_UNIT		DEFAULT_UDP_MAX_DATAGRAM_SIZE
 #define DEFAULT_ARQ_MAX_MSG_SIZE		DEFAULT_BUFFER_CACHE_CAPACITY
 #define DEFAULT_ARQ_HANND_SHAKE_TIMEOUT	5000
@@ -143,6 +144,7 @@ struct TArqAttr
 	DWORD	dwRecvWndSize;
 	DWORD	dwMinRto;
 	DWORD	dwMtu;
+	DWORD	dwFastLimit;
 	DWORD	dwMaxMessageSize;
 	DWORD	dwHandShakeTimeout;
 
@@ -155,6 +157,7 @@ public:
 			, DWORD recv_wnd_size		= DEFAULT_ARQ_RECV_WND_SIZE
 			, DWORD min_rto				= DEFAULT_ARQ_MIN_RTO
 			, DWORD mtu					= DEFAULT_ARQ_MAX_TRANS_UNIT
+			, DWORD fast_limit			= DEFAULT_ARQ_FAST_LIMIT
 			, DWORD max_msg_size		= DEFAULT_ARQ_MAX_MSG_SIZE
 			, DWORD hand_shake_timeout	= DEFAULT_ARQ_HANND_SHAKE_TIMEOUT
 			)
@@ -166,6 +169,7 @@ public:
 	, dwRecvWndSize		(recv_wnd_size)
 	, dwMinRto			(min_rto)
 	, dwMtu				(mtu)
+	, dwFastLimit		(fast_limit)
 	, dwMaxMessageSize	(max_msg_size)
 	, dwHandShakeTimeout(hand_shake_timeout)
 	{
@@ -179,6 +183,7 @@ public:
 				((int)dwSendWndSize > 0)																				&&
 				((int)dwRecvWndSize > 0)																				&&
 				((int)dwMinRto > 0)																						&&
+				((int)dwFastLimit >= 0)																					&&
 				((int)dwHandShakeTimeout > 2 * (int)dwMinRto)															&&
 				((int)dwMtu >= 3 * KCP_HEADER_SIZE && dwMtu <= MAXIMUM_UDP_MAX_DATAGRAM_SIZE)							&&
 				((int)dwMaxMessageSize > 0 && dwMaxMessageSize < ((KCP_MIN_RECV_WND - 1) * (dwMtu - KCP_HEADER_SIZE)))	;
@@ -517,6 +522,7 @@ private:
 		::ikcp_setmtu(m_kcp, attr.dwMtu);
 
 		m_kcp->rx_minrto	= (int)attr.dwMinRto;
+		m_kcp->fastlimit	= (int)attr.dwFastLimit;
 		m_kcp->output		= m_pContext->GetArqOutputProc();
 	}
 

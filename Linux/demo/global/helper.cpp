@@ -42,7 +42,7 @@ app_arg::app_arg()
 	// -o
 	cast_mode		= CM_MULTICAST;
 	// -r
-	reuse_addr		= true;
+	reuse_addr		= RAP_ADDR_ONLY;
 	// -u
 	ip_loop			= true;
 	// -k
@@ -78,28 +78,28 @@ void app_arg::ParseArgs(int argc, char* const argv[])
 
 		switch(c)
 		{
-		case 'a': remote_addr		= strOptArg;						break;
-		case 'p': port				= (USHORT)atoi(strOptArg);			break;
-		case 'b': bind_addr			= strOptArg;						break;
-		case 'd': local_port		= (USHORT)atoi(strOptArg);			break;
-		case 'j': reject_addr		= strOptArg;						break;
-		case 'n': async				= (bool)atoi(strOptArg);			break;
-		case 't': thread_count		= (DWORD)atoi(strOptArg);			break;
-		case 'e': test_times		= (DWORD)atoi(strOptArg);			break;
-		case 'i': test_interval		= (DWORD)atoi(strOptArg);			break;
-		case 'c': conn_count		= (DWORD)atoi(strOptArg);			break;
-		case 'l': data_length		= (DWORD)atoi(strOptArg);			break;
-		case 's': send_policy		= (EnSendPolicy)atoi(strOptArg);	break;
-		case 'm': max_conn			= (DWORD)atoi(strOptArg);			break;
-		case 'q': keep_alive		= (bool)atoi(strOptArg);			break;
-		case 'o': cast_mode			= (EnCastMode)atoi(strOptArg);		break;
-		case 'r': reuse_addr		= (bool)atoi(strOptArg);			break;
-		case 'u': ip_loop			= (bool)atoi(strOptArg);			break;
-		case 'k': ttl				= (int)atoi(strOptArg);				break;
-		case 'x': http_port			= (USHORT)atoi(strOptArg);			break;
-		case 'y': https_port		= (USHORT)atoi(strOptArg);			break;
-		case 'z': http_use_cookie	= (bool)atoi(strOptArg);			break;
-		case 'w': http_with_listener= (bool)atoi(strOptArg);			break;
+		case 'a': remote_addr		= strOptArg;							break;
+		case 'p': port				= (USHORT)atoi(strOptArg);				break;
+		case 'b': bind_addr			= strOptArg;							break;
+		case 'd': local_port		= (USHORT)atoi(strOptArg);				break;
+		case 'j': reject_addr		= strOptArg;							break;
+		case 'n': async				= (bool)atoi(strOptArg);				break;
+		case 't': thread_count		= (DWORD)atoi(strOptArg);				break;
+		case 'e': test_times		= (DWORD)atoi(strOptArg);				break;
+		case 'i': test_interval		= (DWORD)atoi(strOptArg);				break;
+		case 'c': conn_count		= (DWORD)atoi(strOptArg);				break;
+		case 'l': data_length		= (DWORD)atoi(strOptArg);				break;
+		case 's': send_policy		= (EnSendPolicy)atoi(strOptArg);		break;
+		case 'm': max_conn			= (DWORD)atoi(strOptArg);				break;
+		case 'q': keep_alive		= (bool)atoi(strOptArg);				break;
+		case 'o': cast_mode			= (EnCastMode)atoi(strOptArg);			break;
+		case 'r': reuse_addr		= (EnReuseAddressPolicy)atoi(strOptArg);break;
+		case 'u': ip_loop			= (bool)atoi(strOptArg);				break;
+		case 'k': ttl				= (int)atoi(strOptArg);					break;
+		case 'x': http_port			= (USHORT)atoi(strOptArg);				break;
+		case 'y': https_port		= (USHORT)atoi(strOptArg);				break;
+		case 'z': http_use_cookie	= (bool)atoi(strOptArg);				break;
+		case 'w': http_with_listener= (bool)atoi(strOptArg);				break;
 		case 'v':					PrintVersion();	exit(EXIT_CODE_OK);
 		case 'h':					PrintUsage();	exit(EXIT_CODE_OK);
 		case '?':					ERROR_EXIT2(EXIT_CODE_CONFIG, ERROR_INVALID_PARAMETER);
@@ -157,6 +157,7 @@ CCommandParser::CCommandParser(CCommandParser::EnAppType enAppType, CMD_FUNC fnC
 	m_szCmdNameFuncs[CT_STOP]	= {"stop"		, fnCmds[CT_STOP]};
 	m_szCmdNameFuncs[CT_STATUS]	= {"status"		, fnCmds[CT_STATUS]};
 	m_szCmdNameFuncs[CT_SEND]	= {"send"		, fnCmds[CT_SEND]};
+	m_szCmdNameFuncs[CT_SENDC]	= {"sendc"		, fnCmds[CT_SENDC]};
 	m_szCmdNameFuncs[CT_PAUSE]	= {"pause"		, fnCmds[CT_PAUSE]};
 	m_szCmdNameFuncs[CT_KICK]	= {"kick"		, fnCmds[CT_KICK]};
 	m_szCmdNameFuncs[CT_KICK_L]	= {"kickl"		, fnCmds[CT_KICK_L]};
@@ -275,9 +276,10 @@ void CCommandParser::Parse(LPTSTR lpszLine, SSIZE_T nLength)
 		return;
 	}
 
-	if( (m_enAppType == AT_CLIENT &&
+	if( ((m_enAppType == AT_CLIENT || m_enAppType == AT_NODE) &&
 			(type == CT_KICK || type == CT_KICK_L || type == CT_KICK_S))
-		|| (m_enAppType == AT_SERVER && type == CT_CONNECT)	)
+		|| (m_enAppType == AT_SERVER && type == CT_CONNECT	)
+		|| (m_enAppType != AT_NODE && type == CT_SENDC)		)
 	{
 		PRINTLN("%s: command not SUPPORTED ...", lpszCmd);
 		return;
@@ -298,7 +300,8 @@ void CCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 
 	LPTSTR lpszParam1 = lpszArg;
 
-	if(m_enAppType != AT_CLIENT || type != CT_SEND)
+	if(	(m_enAppType != AT_CLIENT || type != CT_SEND)	&&
+		(m_enAppType != AT_NODE || type != CT_SENDC)	)
 		lpszParam1 = ::StrSep2(&lpszArg, " \t");
 
 	if(type == CT_START || type == CT_STOP || type == CT_STATUS || type == CT_STAT)
@@ -312,6 +315,24 @@ void CCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 
 		if(m_enAppType == AT_CLIENT)
 			lpszMsg = lpszParam1;
+		else if(m_enAppType == AT_NODE)
+		{
+			LPTSTR lpszHost = lpszParam1;
+
+			if(::IsStrEmpty(lpszHost))
+				goto ERROR_USAGE;
+
+			m_strRemoteAddr = lpszHost;
+
+			LPTSTR lpszPort = ::StrSep2(&lpszArg, " \t");
+
+			if(::IsStrEmpty(lpszPort))
+				goto ERROR_USAGE;
+			if((m_usRemotePort = (USHORT)atoi(lpszPort)) <= 0)
+				goto ERROR_USAGE;
+
+			lpszMsg = lpszArg;
+		}
 		else
 		{
 			LPTSTR lpszConnID = lpszParam1;
@@ -332,8 +353,24 @@ void CCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 			++lpszMsg;
 		}
 
-		if(::IsStrEmpty(lpszMsg))
+		if(m_enAppType != AT_NODE && ::IsStrEmpty(lpszMsg))
 			goto ERROR_USAGE;
+
+		m_strMessage = lpszMsg;
+	}
+	else if(type == CT_SENDC)
+	{
+		ASSERT(m_enAppType == AT_NODE);
+
+		LPTSTR lpszMsg = lpszParam1;
+
+		while(!::IsStrEmpty(lpszMsg))
+		{
+			if(lpszMsg[0] != ' ' && lpszMsg[0] != '\t')
+				break;
+
+			++lpszMsg;
+		}
 
 		m_strMessage = lpszMsg;
 	}
@@ -464,6 +501,8 @@ void CCommandParser::PrintCmdUsage()
 	PRINTLN("%-18s : %s%s", "Connect To", "", (LPCTSTR)GetCmdUsage(CT_CONNECT));
 	if(m_szCmdNameFuncs[CT_SEND].func)
 	PRINTLN("%-18s : %3s%s", "Send Message", "", (LPCTSTR)GetCmdUsage(CT_SEND));
+	if(m_szCmdNameFuncs[CT_SENDC].func)
+	PRINTLN("%-18s : %2s%s", "Send Cast Message", "", (LPCTSTR)GetCmdUsage(CT_SENDC));
 	if(m_szCmdNameFuncs[CT_PAUSE].func)
 	PRINTLN("%-18s : %2s%s", "Pause/Unpause Recv", "", (LPCTSTR)GetCmdUsage(CT_PAUSE));
 	if(m_enAppType != AT_CLIENT) {
@@ -485,9 +524,17 @@ CString CCommandParser::GetCmdUsage(CCommandParser::EnCmdType type)
 	switch(type)
 	{
 	case CT_SEND:
-		if(m_enAppType != AT_CLIENT)
-			strUsage += " {ConnID}";
-		strUsage += " {Message}";
+		if(m_enAppType == AT_NODE)
+			strUsage += " {Host} {Port} [{Message}]";
+		else
+		{
+			if(m_enAppType != AT_CLIENT)
+				strUsage += " {ConnID}";
+			strUsage += " {Message}";
+		}
+		break;
+	case CT_SENDC:
+		strUsage += " [{Message}]";
 		break;
 	case CT_PAUSE:
 		if(m_enAppType != AT_CLIENT)
@@ -530,6 +577,8 @@ void CCommandParser::PrintStatus(EnServiceState enStatus, LPCTSTR lpszName)
 		strStatus += "Agent";
 	else if(m_enAppType == AT_CLIENT)
 		strStatus += "Client";
+	else if(m_enAppType == AT_NODE)
+		strStatus += "Node";
 	else
 		ASSERT(FALSE);
 
@@ -1331,10 +1380,39 @@ void LogClientSendFail(int iSequence, int iSocketIndex, DWORD code, LPCTSTR lpsz
 	LogMsg(msg);
 }
 
+void LogStart(LPCTSTR lpszAddress, USHORT port, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sStart OK --> (%s#%d)"), (LPCTSTR)SafeString(lpszName), lpszAddress, port);
+	LogMsg(msg);
+}
+
+void LogStartFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sStart Fail --> %s (%d) [%d]"), (LPCTSTR)SafeString(lpszName), lpszDesc, code, ::GetLastError());
+	LogMsg(msg);
+}
+
+void LogStop(LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sStop"), (LPCTSTR)SafeString(lpszName));
+
+	LogMsg(msg);
+}
+
 void LogSend(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName)
 {
 	CString msg;
 	msg.Format(_T("# %s%zu Send OK --> %s"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszContent);
+	LogMsg(msg);
+}
+
+void LogSend(LPCTSTR lpszContent, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sSend OK --> %s"), (LPCTSTR)SafeString(lpszName), lpszContent);
 	LogMsg(msg);
 }
 
@@ -1349,6 +1427,13 @@ void LogSendFail(CONNID dwConnID, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName
 {
 	CString msg;
 	msg.Format(_T("# %s%zu Send Fail --> %s (%d)"), (LPCTSTR)SafeString2(lpszName), dwConnID, lpszDesc, code);
+	LogMsg(msg);
+}
+
+void LogSendFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("# %sSend Fail --> %s (%d)"), (LPCTSTR)SafeString(lpszName), lpszDesc, code);
 	LogMsg(msg);
 }
 
@@ -1501,10 +1586,30 @@ void PostOnSend(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszNam
 	PostInfoMsg(msg);
 }
 
+void PostOnSendTo(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName)
+{
+	LPTSTR lpszContent = new TCHAR[100];
+	wsprintf(lpszContent, _T("<%s#%d> (%d bytes)"), lpszAddress, usPort, iLength);
+	int content_len = lstrlen(lpszContent);
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_SEND, content_len, lpszContent, lpszName);
+
+	PostInfoMsg(msg);
+}
+
 void PostOnReceive(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszName)
 {
 	LPTSTR lpszContent = new TCHAR[20];
 	wsprintf(lpszContent, _T("(%d bytes)"), iLength);
+	int content_len = lstrlen(lpszContent);
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_RECEIVE, content_len, lpszContent, lpszName);
+
+	PostInfoMsg(msg);
+}
+
+void PostOnReceiveFrom(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName)
+{
+	LPTSTR lpszContent = new TCHAR[100];
+	wsprintf(lpszContent, _T("<%s#%d> (%d bytes)"), lpszAddress, usPort, iLength);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_RECEIVE, content_len, lpszContent, lpszName);
 
@@ -1532,6 +1637,16 @@ void PostOnError(CONNID dwConnID, int enOperation, int iErrorCode, LPCTSTR lpszN
 {
 	LPTSTR lpszContent = new TCHAR[100];
 	wsprintf(lpszContent, _T("OP: %d, CODE: %d"), enOperation, iErrorCode);
+	int content_len = lstrlen(lpszContent);
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_ERROR, content_len, lpszContent, lpszName);
+
+	PostInfoMsg(msg);
+}
+
+void PostOnError2(CONNID dwConnID, int enOperation, int iErrorCode, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pBuffer, int iLength, LPCTSTR lpszName)
+{
+	LPTSTR lpszContent = new TCHAR[150];
+	wsprintf(lpszContent, _T("<%s#%d> OP: %d, CODE: %d (DATA: 0x%X, LEN: %d>"), lpszAddress, usPort, enOperation, iErrorCode, pBuffer, iLength);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_ERROR, content_len, lpszContent, lpszName);
 

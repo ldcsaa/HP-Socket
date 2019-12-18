@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,12 +238,22 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLServer_StartSSLHandShake(HP_SSLServer pServer,
 
 HPSOCKET_API void __HP_CALL HP_SSLServer_SetSSLAutoHandShake(HP_SSLServer pServer, BOOL bAutoHandShake)
 {
-	return C_HP_Object::ToSecond<ITcpServer>(pServer)->SetSSLAutoHandShake(bAutoHandShake);
+	C_HP_Object::ToSecond<ITcpServer>(pServer)->SetSSLAutoHandShake(bAutoHandShake);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLServer_IsSSLAutoHandShake(HP_SSLServer pServer)
 {
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->IsSSLAutoHandShake();
+}
+
+HPSOCKET_API void __HP_CALL HP_SSLServer_SetSSLCipherList(HP_SSLServer pServer, LPCTSTR lpszCipherList)
+{
+	C_HP_Object::ToSecond<ITcpServer>(pServer)->SetSSLCipherList(lpszCipherList);
+}
+
+HPSOCKET_API LPCTSTR __HP_CALL HP_SSLServer_GetSSLCipherList(HP_SSLServer pServer)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetSSLCipherList();
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLServer_GetSSLSessionInfo(HP_SSLServer pServer, HP_CONNID dwConnID, En_HP_SSLSessionInfo enInfo, LPVOID* lppInfo)
@@ -258,12 +268,22 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_StartSSLHandShake(HP_SSLAgent pAgent, HP
 
 HPSOCKET_API void __HP_CALL HP_SSLAgent_SetSSLAutoHandShake(HP_SSLAgent pAgent, BOOL bAutoHandShake)
 {
-	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSSLAutoHandShake(bAutoHandShake);
+	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSSLAutoHandShake(bAutoHandShake);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_IsSSLAutoHandShake(HP_SSLAgent pAgent)
 {
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->IsSSLAutoHandShake();
+}
+
+HPSOCKET_API void __HP_CALL HP_SSLAgent_SetSSLCipherList(HP_SSLAgent pAgent, LPCTSTR lpszCipherList)
+{
+	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSSLCipherList(lpszCipherList);
+}
+
+HPSOCKET_API LPCTSTR __HP_CALL HP_SSLAgent_GetSSLCipherList(HP_SSLAgent pAgent)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetSSLCipherList();
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_GetSSLSessionInfo(HP_SSLAgent pAgent, HP_CONNID dwConnID, En_HP_SSLSessionInfo enInfo, LPVOID* lppInfo)
@@ -278,12 +298,22 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLClient_StartSSLHandShake(HP_SSLClient pClient)
 
 HPSOCKET_API void __HP_CALL HP_SSLClient_SetSSLAutoHandShake(HP_SSLClient pClient, BOOL bAutoHandShake)
 {
-	return C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSSLAutoHandShake(bAutoHandShake);
+	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSSLAutoHandShake(bAutoHandShake);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLClient_IsSSLAutoHandShake(HP_SSLClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->IsSSLAutoHandShake();
+}
+
+HPSOCKET_API void __HP_CALL HP_SSLClient_SetSSLCipherList(HP_SSLClient pClient, LPCTSTR lpszCipherList)
+{
+	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSSLCipherList(lpszCipherList);
+}
+
+HPSOCKET_API LPCTSTR __HP_CALL HP_SSLClient_GetSSLCipherList(HP_SSLClient pClient)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetSSLCipherList();
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLClient_GetSSLSessionInfo(HP_SSLClient pClient, En_HP_SSLSessionInfo enInfo, LPVOID* lppInfo)

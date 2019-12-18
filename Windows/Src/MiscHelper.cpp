@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "MiscHelper.h"
 
-BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& buffers, DWORD dwMaxPackSize, USHORT usPackHeaderFlag, DWORD& header)
+BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& buffers, DWORD dwMaxPackSize, USHORT usPackHeaderFlag, DWORD& dwHeader)
 {
 	ASSERT(pBuffers && iCount > 0);
 
@@ -43,10 +43,10 @@ BOOL AddPackHeader(const WSABUF * pBuffers, int iCount, unique_ptr<WSABUF[]>& bu
 		return FALSE;
 	}
 
-	header = (usPackHeaderFlag << TCP_PACK_LENGTH_BITS) | iLength;
+	dwHeader = ::HToLE32((usPackHeaderFlag << TCP_PACK_LENGTH_BITS) | iLength);
 
-	buffers[0].len = sizeof(header);
-	buffers[0].buf = (char*)&header;
+	buffers[0].len = sizeof(dwHeader);
+	buffers[0].buf = (char*)&dwHeader;
 
 	return TRUE;
 }

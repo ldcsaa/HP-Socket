@@ -113,6 +113,13 @@ void LogClientStart(LPCTSTR lpszAddress, USHORT port, LPCTSTR lpszName)
 	LogMsg(msg);
 }
 
+void LogStarting(LPCTSTR lpszAddress, USHORT port, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("$ %sStarting ... --> (%s#%d)"), SafeString(lpszName), lpszAddress, port);
+	LogMsg(msg);
+}
+
 void LogClientStarting(LPCTSTR lpszAddress, USHORT port, LPCTSTR lpszName)
 {
 	CString msg;
@@ -127,10 +134,24 @@ void LogClientStartFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
 	LogMsg(msg);
 }
 
+void LogStartFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("$ %sStart Fail --> %s (%d) [%d]"), SafeString(lpszName), lpszDesc, code, ::GetLastError());
+	LogMsg(msg);
+}
+
 void LogClientStopping(CONNID dwConnID, LPCTSTR lpszName)
 {
 	CString msg;
 	msg.Format(_T("$ %sClient Stopping ... --> (%Iu)"), SafeString(lpszName), dwConnID);
+	LogMsg(msg);
+}
+
+void LogStopping(LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("$ %sStopping ..."), SafeString(lpszName));
 	LogMsg(msg);
 }
 
@@ -155,10 +176,24 @@ void LogSend(CONNID dwConnID, LPCTSTR lpszContent, LPCTSTR lpszName)
 	LogMsg(msg);
 }
 
+void LogSend(LPCTSTR lpszContent, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("$ %sSend OK --> %s"), SafeString(lpszName), lpszContent);
+	LogMsg(msg);
+}
+
 void LogSendFail(CONNID dwConnID, DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
 {
 	CString msg;
 	msg.Format(_T("$ %s(%Iu) Send Fail --> %s (%d)"), SafeString2(lpszName), dwConnID, lpszDesc, code, lpszName);
+	LogMsg(msg);
+}
+
+void LogSendFail(DWORD code, LPCTSTR lpszDesc, LPCTSTR lpszName)
+{
+	CString msg;
+	msg.Format(_T("$ %sSend Fail --> %s (%d)"), SafeString(lpszName), lpszDesc, code, lpszName);
 	LogMsg(msg);
 }
 
@@ -255,10 +290,30 @@ void PostOnSend(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszNam
 	PostInfoMsg(msg);
 }
 
+void PostOnSendTo(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName)
+{
+	LPTSTR lpszContent = new TCHAR[100];
+	wsprintf(lpszContent, _T("<%s#%d> (%d bytes)"), lpszAddress, usPort, iLength);
+	int content_len = lstrlen(lpszContent);
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_SEND, content_len, lpszContent, lpszName);
+
+	PostInfoMsg(msg);
+}
+
 void PostOnReceive(CONNID dwConnID, const BYTE* pData, int iLength, LPCTSTR lpszName)
 {
 	LPTSTR lpszContent = new TCHAR[20];
 	wsprintf(lpszContent, _T("(%d bytes)"), iLength);
+	int content_len = lstrlen(lpszContent);
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_RECEIVE, content_len, lpszContent, lpszName);
+
+	PostInfoMsg(msg);
+}
+
+void PostOnReceiveFrom(CONNID dwConnID, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pData, int iLength, LPCTSTR lpszName)
+{
+	LPTSTR lpszContent = new TCHAR[100];
+	wsprintf(lpszContent, _T("<%s#%d> (%d bytes)"), lpszAddress, usPort, iLength);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_RECEIVE, content_len, lpszContent, lpszName);
 
@@ -286,6 +341,16 @@ void PostOnError(CONNID dwConnID, int enOperation, int iErrorCode, LPCTSTR lpszN
 {
 	LPTSTR lpszContent = new TCHAR[100];
 	wsprintf(lpszContent, _T("OP: %d, CODE: %d"), enOperation, iErrorCode);
+	int content_len = lstrlen(lpszContent);
+	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_ERROR, content_len, lpszContent, lpszName);
+
+	PostInfoMsg(msg);
+}
+
+void PostOnError2(CONNID dwConnID, int enOperation, int iErrorCode, LPCTSTR lpszAddress, USHORT usPort, const BYTE* pBuffer, int iLength, LPCTSTR lpszName)
+{
+	LPTSTR lpszContent = new TCHAR[150];
+	wsprintf(lpszContent, _T("<%s#%d> OP: %d, CODE: %d (DATA: 0x%X, LEN: %d>"), lpszAddress, usPort, enOperation, iErrorCode, pBuffer, iLength);
 	int content_len = lstrlen(lpszContent);
 	info_msg* msg = info_msg::Construct(dwConnID, EVT_ON_ERROR, content_len, lpszContent, lpszName);
 

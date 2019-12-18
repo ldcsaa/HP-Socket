@@ -2,11 +2,11 @@
 * Copyright: JessMA Open Source (ldcsaa@gmail.com)
 *
 * Author	: Bruce Liang
-* Website	: http://www.jessma.org
-* Project	: https://github.com/ldcsaa
+* Website	: https://github.com/ldcsaa
+* Project	: https://github.com/ldcsaa/HP-Socket
 * Blog		: http://www.cnblogs.com/ldcsaa
 * Wiki		: http://www.oschina.net/p/hp-socket
-* QQ Group	: 75375912, 44636872
+* QQ Group	: 44636872, 75375912
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@
 
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR	5	// 主版本号
-#define HP_VERSION_MINOR	6	// 子版本号
-#define HP_VERSION_REVISE	4	// 修正版本号
-#define HP_VERSION_BUILD	1	// 构建编号
+#define HP_VERSION_MINOR	7	// 子版本号
+#define HP_VERSION_REVISE	1	// 修正版本号
+#define HP_VERSION_BUILD	7	// 构建编号
 
 //#define _UDP_DISABLED			// 禁用 UDP
 //#define _SSL_DISABLED			// 禁用 SSL
@@ -163,6 +163,17 @@ typedef enum EnOnSendSyncPolicy
 } En_HP_OnSendSyncPolicy;
 
 /************************************************************************
+名称：地址重用选项
+描述：通信组件底层 socket 的地址重用选项
+************************************************************************/
+typedef enum EnReuseAddressPolicy
+{
+	RAP_NONE			= 0,	// 不重用
+	RAP_ADDR_ONLY		= 1,	// 仅重用地址
+	RAP_ADDR_AND_PORT	= 2,	// 重用地址和端口
+} En_HP_ReuseAddressPolicy;
+
+/************************************************************************
 名称：操作结果代码
 描述：组件 Start() / Stop() 方法执行失败时，可通过 GetLastError() 获取错误代码
 ************************************************************************/
@@ -194,6 +205,7 @@ typedef enum EnSocketError
 ************************************************************************/
 typedef enum EnCastMode
 {
+	CM_UNICAST		= -1,	// 单播
 	CM_MULTICAST	= 0,	// 组播
 	CM_BROADCAST	= 1,	// 广播
 } En_HP_CastMode;

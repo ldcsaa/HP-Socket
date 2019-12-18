@@ -81,6 +81,7 @@
     <ClInclude Include="..\..\src\UdpArqServer.h" />
     <ClInclude Include="..\..\src\UdpCast.h" />
     <ClInclude Include="..\..\src\UdpClient.h" />
+    <ClInclude Include="..\..\src\UdpNode.h" />
     <ClInclude Include="..\..\src\UdpServer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +175,7 @@
     <ClCompile Include="..\..\src\UdpArqServer.cpp" />
     <ClCompile Include="..\..\src\UdpCast.cpp" />
     <ClCompile Include="..\..\src\UdpClient.cpp" />
+    <ClCompile Include="..\..\src\UdpNode.cpp" />
     <ClCompile Include="..\..\src\UdpServer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

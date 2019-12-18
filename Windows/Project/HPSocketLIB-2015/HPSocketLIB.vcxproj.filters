@@ -234,6 +234,9 @@
     <ClInclude Include="..\..\Src\UdpArqServer.h">
       <Filter>HPSocket\UDP</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Src\UdpNode.h">
+      <Filter>HPSocket\UDP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -372,6 +375,9 @@
       <Filter>HPSocket\UDP</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\UdpArqServer.cpp">
+      <Filter>HPSocket\UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\UdpNode.cpp">
       <Filter>HPSocket\UDP</Filter>
     </ClCompile>
   </ItemGroup>

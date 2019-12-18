@@ -107,7 +107,7 @@ int main(int argc, char* const argv[])
 	g_app_arg.ParseArgs(argc, argv);
 
 	s_cast.SetCastMode(g_app_arg.cast_mode);
-	s_cast.SetReuseAddress(g_app_arg.reuse_addr);
+	s_cast.SetReuseAddressPolicy(g_app_arg.reuse_addr);
 	s_cast.SetMultiCastLoop(g_app_arg.ip_loop);
 	s_cast.SetMultiCastTtl(g_app_arg.ttl);
 

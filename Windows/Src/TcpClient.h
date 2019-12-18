@@ -2,11 +2,11 @@
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
- * Project	: https://github.com/ldcsaa
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
- * QQ Group	: 75375912, 44636872
+ * QQ Group	: 44636872, 75375912
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@
 #pragma once
 
 #include "SocketHelper.h"
-#include "../Common/Src/Event.h"
-#include "../Common/Src/BufferPtr.h"
-#include "../Common/Src/BufferPool.h"
-#include "../Common/Src/CriticalSection.h"
 
 class CTcpClient : public ITcpClient
 {
@@ -38,6 +34,7 @@ public:
 	virtual BOOL SendSmallFile	(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount)	{return DoSendPackets(pBuffers, iCount);}
 	virtual BOOL PauseReceive	(BOOL bPause = TRUE);
+	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.Wait(dwMilliseconds);}
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
 	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
@@ -59,6 +56,8 @@ public:
 	virtual BOOL StartSSLHandShake	()						{return FALSE;}
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	{}
 	virtual BOOL IsSSLAutoHandShake	()						{return FALSE;}
+	virtual void SetSSLCipherList	(LPCTSTR lpszCipherList){}
+	virtual LPCTSTR GetSSLCipherList()						{return nullptr;}
 	virtual BOOL GetSSLSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo)	{return FALSE;}
 
 protected:
@@ -68,13 +67,15 @@ protected:
 public:
 	virtual BOOL IsSecure				() {return FALSE;}
 
-	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		{m_dwSocketBufferSize	= dwSocketBufferSize;}
-	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			{m_dwKeepAliveTime		= dwKeepAliveTime;}
-	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		{m_dwKeepAliveInterval	= dwKeepAliveInterval;}
-	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)	{m_dwFreeBufferPoolSize = dwFreeBufferPoolSize;}
-	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)	{m_dwFreeBufferPoolHold = dwFreeBufferPoolHold;}
-	virtual void SetExtra				(PVOID pExtra)					{m_pExtra				= pExtra;}						
+	virtual void SetReuseAddressPolicy	(EnReuseAddressPolicy enReusePolicy){ENSURE_HAS_STOPPED(); m_enReusePolicy			= enReusePolicy;}
+	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)			{ENSURE_HAS_STOPPED(); m_dwSocketBufferSize		= dwSocketBufferSize;}
+	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)				{ENSURE_HAS_STOPPED(); m_dwKeepAliveTime		= dwKeepAliveTime;}
+	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)			{ENSURE_HAS_STOPPED(); m_dwKeepAliveInterval	= dwKeepAliveInterval;}
+	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferPoolSize	= dwFreeBufferPoolSize;}
+	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferPoolHold	= dwFreeBufferPoolHold;}
+	virtual void SetExtra				(PVOID pExtra)						{m_pExtra										= pExtra;}						
 
+	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
 	virtual DWORD GetSocketBufferSize	()	{return m_dwSocketBufferSize;}
 	virtual DWORD GetKeepAliveTime		()	{return m_dwKeepAliveTime;}
 	virtual DWORD GetKeepAliveInterval	()	{return m_dwKeepAliveInterval;}
@@ -151,7 +152,7 @@ private:
 	BOOL ProcessNetworkEvent();
 	BOOL ReadData();
 	BOOL SendData();
-	BOOL DoSendData(TItem* pItem);
+	BOOL DoSendData(TItem* pItem, BOOL& bBlocked);
 	TItem* GetSendBuffer();
 	int SendInternal(const WSABUF pBuffers[], int iCount);
 	void WaitForWorkerThreadEnd(DWORD dwCurrentThreadID);
@@ -181,11 +182,13 @@ public:
 	, m_enState				(SS_STOPPED)
 	, m_pExtra				(nullptr)
 	, m_pReserved			(nullptr)
+	, m_enReusePolicy		(RAP_ADDR_ONLY)
 	, m_dwSocketBufferSize	(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
 	, m_dwFreeBufferPoolSize(DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE)
 	, m_dwFreeBufferPoolHold(DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD)
 	, m_dwKeepAliveTime		(DEFALUT_TCP_KEEPALIVE_TIME)
 	, m_dwKeepAliveInterval	(DEFALUT_TCP_KEEPALIVE_INTERVAL)
+	, m_evWait				(TRUE, TRUE)
 	{
 		ASSERT(sm_wsSocket.IsValid());
 		ASSERT(m_pListener);
@@ -197,9 +200,11 @@ public:
 	}
 
 private:
-	static const CInitSocket sm_wsSocket;
+	static const CInitSocket& sm_wsSocket;
 
 private:
+	CEvt				m_evWait;
+
 	ITcpClientListener*	m_pListener;
 	TClientCloseContext m_ccContext;
 
@@ -208,6 +213,7 @@ private:
 	CONNID				m_dwConnID;
 
 
+	EnReuseAddressPolicy m_enReusePolicy;
 	DWORD				m_dwSocketBufferSize;
 	DWORD				m_dwFreeBufferPoolSize;
 	DWORD				m_dwFreeBufferPoolHold;

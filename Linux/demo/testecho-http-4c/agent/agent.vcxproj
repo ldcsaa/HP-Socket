@@ -131,8 +131,8 @@
     <ClCompile Include="agent.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\HPSocket4C-SSL.h" />
-    <ClInclude Include="..\..\..\include\HPSocket4C.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C-SSL.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h" />
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
     <ClInclude Include="..\..\..\src\common\crypto\Crypto.h" />
     <ClInclude Include="..\..\..\src\common\FileHelper.h" />

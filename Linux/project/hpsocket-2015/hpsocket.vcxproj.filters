@@ -201,6 +201,9 @@
     <ClInclude Include="..\..\src\UdpArqServer.h">
       <Filter>UDP</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\UdpNode.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp">
@@ -325,6 +328,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\http\http_parser.c">
       <Filter>Common\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UdpNode.cpp">
+      <Filter>UDP</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

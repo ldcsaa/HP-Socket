@@ -299,11 +299,12 @@ public:
 	{
 		T* pItem = nullptr;
 
-		if(m_lsFreeItem.TryGet(&pItem))
-			pItem->Reset();
-		else
+		if(!m_lsFreeItem.TryGet(&pItem))
 			pItem = T::Construct(m_heap, m_dwItemCapacity);
 
+		ASSERT(pItem);
+		pItem->Reset();
+		
 		return pItem;
 	}
 

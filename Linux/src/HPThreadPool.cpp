@@ -489,7 +489,7 @@ BOOL CHPThreadPool::CheckStoping()
 	return TRUE;
 }
 
-void CHPThreadPool::Reset()
+void CHPThreadPool::Reset(BOOL bSetWaitEvent)
 {
 	m_dwStackSize		= 0;
 	m_dwTaskCount		= 0;
@@ -497,4 +497,7 @@ void CHPThreadPool::Reset()
 	m_dwMaxQueueSize	= 0;
 	m_enRejectedPolicy	= TRP_CALL_FAIL;
 	m_enState			= SS_STOPPED;
+
+	if(bSetWaitEvent)
+		m_evWait.SyncNotifyAll();
 }
