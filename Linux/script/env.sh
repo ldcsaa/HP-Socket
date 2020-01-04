@@ -63,9 +63,9 @@ check_platform()
 	
 	if [ "$1" == "x86_64" ]; then
 		PLATFORM="x64"
-	elif [[ "$1" == "i686" || "$1" == "i386" ]]; then
+	elif [[ "$1" == "x86" || "$1" == "i686" || "$1" == "i586" || "$1" == "i386" ]]; then
 		PLATFORM="x86"
-	elif [[ "$1" =~ "arm" ]]; then
+	elif [[ "$1" =~ "arm" || "$1" =~ "aarch" ]]; then
 		PLATFORM="ARM"
 	fi
 }

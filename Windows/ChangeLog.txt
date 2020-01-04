@@ -7,16 +7,18 @@ v5.7.1 更新：
 1、增加新组件：UDP Node
 	1) UDP Node 没有“连接”的概念，可以与任意地址相互收发数据
 	2) UDP Node 支持三种运行模式：单播、组播和广播
-	3) 增加 UDP Node 组件示例 Demo - TestUDPNode
+	3) 增加 UDP Node 组件示例 Demo ‘TestUDPNode’
 
 > 其它更新：
 -----------------
-1、所有通信组件都增加方法 SetReuseAddressPolicy() 支持设置地址重用策略
-2、大量 API 更新，代码重构、优化
+1、所有组件增加 Wait() 方法，用于等待组件关闭
+2、所有通信组件增加 SetReuseAddressPolicy() 方法，支持设置地址重用策略
+3、所有 SSL 通信组件增加 SetSSLCipherList() 方法，支持设置 SSL 加密套件
+4、大量 API 更新，代码重构、优化
 
 > 升级说明：
 -----------------
-1、HP-Socket v5.7.1 改动或删除了小部分 API，升级时请参考 Chang-APIs.txt
+1、HP-Socket v5.7.1 改动或删除了一些旧版本的 API，升级时请参考 Chang-APIs.txt
 
 ==========================================================================================
 v5.6.4 更新：
