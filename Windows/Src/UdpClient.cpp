@@ -27,7 +27,7 @@
 
 #ifdef _UDP_SUPPORT
 
-const CInitSocket& CUdpClient::sm_wsSocket = CInitSocket::Instance();
+const CInitSocket CUdpClient::sm_wsSocket;
 
 BOOL CUdpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {

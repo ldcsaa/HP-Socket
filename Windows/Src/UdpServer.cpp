@@ -29,7 +29,7 @@
 
 #include <malloc.h>
 
-const CInitSocket& CUdpServer::sm_wsSocket = CInitSocket::Instance();
+const CInitSocket CUdpServer::sm_wsSocket;
 
 EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 {

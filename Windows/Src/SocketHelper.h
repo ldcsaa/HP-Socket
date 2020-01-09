@@ -134,21 +134,10 @@
 class CInitSocket
 {
 public:
-	static const CInitSocket& Instance()
-	{
-		static CInitSocket s_wsSocket;
-
-		return s_wsSocket;
-	}
-
-public:
-	int	 GetResult() const {return m_iResult;}
-	BOOL IsValid()	 const {return m_iResult == 0;}
-
-private:
 	CInitSocket(LPWSADATA lpWSAData = nullptr, BYTE minorVersion = 2, BYTE majorVersion = 2)
 	{
 		LPWSADATA lpTemp = lpWSAData;
+
 		if(!lpTemp)
 			lpTemp	= CreateLocalObject(WSADATA);
 
@@ -160,6 +149,9 @@ private:
 		if(IsValid())
 			::WSACleanup();
 	}
+
+	int	 GetResult() const {return m_iResult;}
+	BOOL IsValid()	 const {return m_iResult == 0;}
 
 private:
 	int m_iResult;

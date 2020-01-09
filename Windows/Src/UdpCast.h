@@ -171,7 +171,7 @@ public:
 	}
 
 private:
-	static const CInitSocket& sm_wsSocket;
+	static const CInitSocket sm_wsSocket;
 
 private:
 	CEvt				m_evWait;

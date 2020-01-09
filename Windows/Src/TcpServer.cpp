@@ -28,7 +28,7 @@
 #include <malloc.h>
 #include <process.h>
 
-const CInitSocket& CTcpServer::sm_wsSocket = CInitSocket::Instance();
+const CInitSocket CTcpServer::sm_wsSocket;
 
 EnHandleResult CTcpServer::TriggerFireAccept(TSocketObj* pSocketObj)
 {

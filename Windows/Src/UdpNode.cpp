@@ -29,7 +29,7 @@
 
 #include <malloc.h>
 
-const CInitSocket& CUdpNode::sm_wsSocket = CInitSocket::Instance();
+const CInitSocket CUdpNode::sm_wsSocket;
 
 BOOL CUdpNode::Start(LPCTSTR lpszBindAddress, USHORT usPort, EnCastMode enCastMode, LPCTSTR lpszCastAddress)
 {

@@ -27,7 +27,7 @@
 
 #include <process.h>
 
-const CInitSocket& CTcpClient::sm_wsSocket = CInitSocket::Instance();
+const CInitSocket CTcpClient::sm_wsSocket;
 
 BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect, LPCTSTR lpszBindAddress, USHORT usLocalPort)
 {
