@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{24310DC2-78F4-47FD-9168-36CEC00B133B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TcpServer.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TcpClient.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TcpPackServer.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TcpPackAgent.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TcpServer">
+        <MSBuild Projects="TcpServer.dproj"/>
+    </Target>
+    <Target Name="TcpServer:Clean">
+        <MSBuild Projects="TcpServer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TcpServer:Make">
+        <MSBuild Projects="TcpServer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TcpClient">
+        <MSBuild Projects="TcpClient.dproj"/>
+    </Target>
+    <Target Name="TcpClient:Clean">
+        <MSBuild Projects="TcpClient.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TcpClient:Make">
+        <MSBuild Projects="TcpClient.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TcpPackServer">
+        <MSBuild Projects="TcpPackServer.dproj"/>
+    </Target>
+    <Target Name="TcpPackServer:Clean">
+        <MSBuild Projects="TcpPackServer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TcpPackServer:Make">
+        <MSBuild Projects="TcpPackServer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TcpPackAgent">
+        <MSBuild Projects="TcpPackAgent.dproj"/>
+    </Target>
+    <Target Name="TcpPackAgent:Clean">
+        <MSBuild Projects="TcpPackAgent.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TcpPackAgent:Make">
+        <MSBuild Projects="TcpPackAgent.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TcpServer;TcpClient;TcpPackServer;TcpPackAgent"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TcpServer:Clean;TcpClient:Clean;TcpPackServer:Clean;TcpPackAgent:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TcpServer:Make;TcpClient:Make;TcpPackServer:Make;TcpPackAgent:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

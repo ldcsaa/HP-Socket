@@ -1,9 +1,0 @@
-Hp_Socket.fne 放入易语言Lib目录
-Hp_Socket_static.lib、HPSocket_4C.lib 放入static_Lib目录
-
-本支持库需要易语言vs2010链接器(链接: http://pan.baidu.com/s/1i3ydamT 密码: baka)
-
-点击链接加入群【怪兽乐园】：http://jq.qq.com/?_wv=1027&k=2Ia8fHv
-
-3.5.1 相对于其他版本变动
-1.删除AddressInfo 数据类型

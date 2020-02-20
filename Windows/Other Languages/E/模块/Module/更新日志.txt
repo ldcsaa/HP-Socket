@@ -1,0 +1,649 @@
+历史版本下载地址: https://pan.baidu.com/s/1nUXAJRK5fWZcNUwrylvOHw
+
+不再更新中文版模块，有四方面原因
+1、主要更新英文模块是因为出问题了好查资料，而且各个组件的方法和参数都有详细的中文注释
+2、精力有限，近来工作越发的紧凑，没有时间更新。
+3、英文模块框架更新，增强稳定性，如果要适配到中文模块，相当于重写了。
+4、小卓的中文支持库已经很稳定了，可以完全代替中文模块(中文模块因为框架更新已经出现了很多BUG)。
+
+[15:45 2019/12/03]
+==========================================================================================
+v5.7.1 更新：
+==========================================================================================
+
+> UDP 组件更新：
+-----------------
+1、增加新组件：UDP Node
+	1) UDP Node 没有“连接”的概念，可以与任意地址相互收发数据
+	2) UDP Node 支持三种运行模式：单播、组播和广播
+	3) 增加 UDP Node 组件示例 Demo - TestUDPNode
+
+> 其它更新：
+-----------------
+1、所有通信组件都增加方法 SetReuseAddressPolicy() 支持设置地址重用策略
+2、大量 API 更新，代码重构、优化
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.7.1 改动或删除了小部分 API，升级时请参考 Chang-APIs.txt
+2、UdpNode 的例程本来写好的，结果上次忘记保存了，等正式版发上来，最近生病，家人也不好。
+
+
+[00:00 2019/11/16]
+> UDP 组件更新：
+-----------------
+1、增加 UDP Node 组件
+	1) UDP Node 没有“连接”的概念，可以与任意地址相互收发数据
+	2) UDP Node 支持三种运行模式：单播、组播和广播
+
+> TCP 组件更新：
+-----------------
+1、TCP PACK 系列组件（Client/Agent/Server）改用固定字节序传输内部包头，兼容大端与小端字节序平台
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.7.1 完全兼容 HP-Socket v5.6.x 版本，可以直接替换升级
+
+
+[11:12 2019/09/02]
+
+> SSL 组件更新：
+-----------------
+1、所有 SSL 组件增加以下接口方法支持加载内存证书
+	1) Server：SetupSSLContextByMemory(), AddSSLContextByMemory()
+	2) Agent：SetupSSLContextByMemory()
+	3) Client：SetupSSLContextByMemory()
+2、所有 SSL 组件增加 GetSSLSessionInfo() 方法，用来获取 SSL 会话相关信息
+3、SSL Server 组件提供默认的 SNI 服务器域名绑定机制，大多数情形下应用程序不必自定义 SNI 回调函数
+	1) 当 SetupSSLContext() 的 'fnServerNameCallback' 参数值为 nullptr 则启用默认的服务器域名绑定机制
+	2) BindSSLServerName()：绑定服务器域名到指定证书
+	3) HP_SSL_DefaultServerNameCallback()：默认 SNI 回调函数
+
+> HTTP 组件更新：
+-----------------
+1、HTTP Server 组件的 SendWSMessage() 方法删除 lpszMask 参数
+2、所有 HTTP 组件的 SendWSMessage() 方法的 pData 参数类型改为 const BYTE*，因此可以传入常量
+
+> UDP 组件更新：
+-----------------
+1、优化 Linux 平台的 UDP Cast 组件，使得其与 Windows 平台的 UDP Cast 组件保持行为一致
+2、提升所有 UDP 组件（Server/Client/Cast）的 IPv6 兼容性
+
+> 其他更新：
+-----------------
+1、jemalloc 升级到 5.2.1 版本
+2、代码优化，提高稳定性
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.6.1 基本兼容 HP-Socket v5.5.3 版本（HTTP 组件的 SendWSMessage() 方法除外）
+
+
+
+
+
+[15:12 2019/08/01]
+一、更新为HPSocket 5.5.3 版本，完全兼容5.X.X版本
+
+二、修复模块部分接口注释
+
+[13:4 2019/04/22]
+一、UDP 组件更新
+	增加可靠 UDP 组件：IUdpArqServer、IUdpArqClient
+	可靠 UDP 组件详细说明请参考开发文档 《HP-Socket Development Guide》
+	优化 IUdpServer 组件，修复潜在缺陷
+	
+二、模块部分代码优化
+
+三、更新为HPSocket 5.5.1 rc2版本，完全兼容5.4.4版本
+
+
+[23:40 2019/03/14]
+一、新增Arq组件，arq组件为可靠连接的udp，具体介绍请百度arq
+	1、UdpArqServer组件
+	2、UdpArqClient组件
+	
+二、接口修改
+	1、修改agent的start接口和client的connect接口，把多个类型的start和connect整合会一个，简化操作
+	
+三、不再更新中文版模块
+	1、关于中文模块，请不要再来问我中文模块更不更新。如果需要请自行修改以前的中文模块，或者翻译当前英文模块。
+	2、关于模块例程，我是能有事件挤出来就写。
+	3、关于视频教程，以前在群里问过，都只需要源码就好了，所以不出。
+	4、关于解答问题，因为我现在工作量比较大，我有时间看到就回答一下，没有就自己问下群里。并不是高傲不给你们解答。
+	
+
+[09:25 2019/03/12]
+一、更新为HPSocket 5.4.4版本
+二、不再更新中文版模块
+	1、精力有限，确实没时间更新
+	2、英文框架变更太大，不好复制到中文模块
+ 
+
+[09:25 2018/11/21]
+
+ 
+> HTTP 新增API：
+-----------------
+HP_HttpServer_StartHttp				(增加)
+HP_HttpServer_SetHttpAutoStart		(增加)
+HP_HttpServer_IsHttpAutoStart		(增加)
+HP_HttpAgent_StartHttp				(增加)
+HP_HttpAgent_SetHttpAutoStart		(增加)
+HP_HttpAgent_IsHttpAutoStart		(增加)
+HP_HttpClient_StartHttp				(增加)
+HP_HttpClient_SetHttpAutoStart		(增加)
+HP_HttpClient_IsHttpAutoStart		(增加)
+
+
+> HTTP 组件更新：
+-----------------
+1、HTTP 组件可以手工启动 HTTP 通信，从而可以对 HTTP 通信执行 SOCKS 代理服务器设置等前置操作
+2、HTTP 组件（Server/Agent/Client）增加以下接口方法支持手工启动 HTTP 通信
+	1) StartHttp()：手工启动 HTTP 通信，当通信组件设置为非自动启动时，需要调用本方法启动 HTTP 通信
+	2) SetHttpAutoStart()：设置 HTTP 通信启动方式（默认：TRUE，自动启动）
+	3) IsHttpAutoStart()：获取 HTTP 通信启动方式
+
+> 其他更新：
+-----------------
+1、Bug 修复：UDP Server 在高并发场景下可能重复触发 OnAccept 事件
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.4.3 完全兼容 HP-Socket v5.4.2 版本，可以直接替换升级
+
+> 模块更新：
+-----------------
+1、修改取IP地址在各个系统下的兼容问题
+2、优化部分代码
+3、新增N个API和终结N个"特性"。
+
+
+[15:47 2018/11/05]
+同步更新到5.4.2正式版
+
+
+[10:37 2018/10/23]
+1、英文模块IHttpSyncClient组件大改
+2、IWinHttp组件添加若干命令(PS：忘记是哪些了。。。)
+3、升级到5.4.2 rc3 版本
+4、增加client同步例子
+
+
+
+[10:30 2018/9/25]
+==========================================================================================
+v5.4.2 更新：
+==========================================================================================
+
+> SSL 组件更新：
+-----------------
+1、SSL 组件可以手工启动 SSL 握手，从而可以对 SSL/Https 通信执行代理服务器设置等前置操作
+2、SSL 组件（Server/Agent/Client）增加以下接口方法支持手工启动 SSL 握手
+	1) StartSSLHandShake()：手工启动 SSL 握手，当通信组件设置为非自动握手时，需要调用本方法启动 SSL 握手
+	2) SetSSLAutoHandShake()：设置通信组件握手方式（默认：TRUE，自动握手）
+	3) IsSSLAutoHandShake()：获取通信组件握手方式
+
+> 其他功能更新：
+-----------------
+1、所有可能导致 Socket 关闭的组件接口方法都在 Socket 通信线程中异步触发 OnClose 事件
+2、Server 与 Agent 组件的 DIRECT 发送策略也支持通过 GetPendingDataLength() 方法实现流控
+3、Server 与 Agent 组件的 Disconnect() 方法不再支持‘非强制断开’（仍然保留bForce 参数），调用时都会强制断开 
+4、OnSend 事件支持 三种同步策略
+	1) OSSP_NONE：不同步（默认）
+	1) OSSP_CLOSE：同步 OnClose
+	1) OSSP_RECEIVE：同步 OnClose 和 OnReceive（只用于 TCP 组件）
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.4.2 完全兼容 HP-Socket v5.4.1 版本，可以直接替换升级
+
+[18:41 2018/8/27]
+1、修复英文模块submit_task最后一个参数错误问题，莫名其妙变成了字节集
+
+[11:04 2018/8/27]
+1、更新hpsocket为 beta11
+2、submit_task 提交的任务不用去管回调里面的ptask参数。内部自动处理。
+
+
+[16:57 2018/8/24]
+1、修复中文模块部分命令错误问题
+2、修复英文模块几处命令错误问题
+3、增加websocket例程，本来httpclient里面人，有些人就是装看不见。
+4、更新hpsocket为 beta9
+
+
+[12:57 2018/8/15]
+1、修复模块汇编的bug，原因是取消了ww汇编库
+
+[11:55 2018/8/15]
+1、模块更新为beta8
+2、新增api：
+	HP_Agent_IsConnected  -->  Agent.IsConnected()  					
+	HP_Client_IsConnected  -->  Client.IsConnected()				
+	HP_Server_IsConnected  -->  Server.IsConnected()						
+
+[9:18 2018/8/6]
+1、性能优化
+2、由于某些人吐槽中文版模块吐槽的厉害，遂决定不再更新中文版。
+3、\demo\old 目录下放的是以前旧的例程源码，并不再更新
+
+[12:57 2018/8/1]
+修改模块IBufferPtr类，具体调用方式查看
+TestEcho-New-Agent.e
+TestEcho-New-Server.e
+TestEcho-Http-Serve.e 
+TestEcho-Http-Serve-bigfile.e  改名为 TestEcho-Http-Serve.e 
+
+[9:35 2018/8/1]
+==========================================================================================
+v5.4.1 bate5 更新：
+==========================================================================================
+1、模块新增IBufferPtr类，方便管理数据叠加，
+TestEcho-New-Agent.e和TestEcho-New-Server.e已经改为IBufferPtr接收数据
+
+2、新增Agent例程，全新四个例程
+TestEcho-New-Server.e
+TestEcho-New-Agent.e
+TestEcho-New-Client.e
+TestEcho-ThreadPool.e   线程池普通例程，
+TestEcho-Http-Serve.e  修改为线程池高级例程，在线程池中 m_Server.SendLocalFileEx() 在发送大数据时可判断连接是否当断，以前版本不支持
+
+3、新增多个汇编函数，请查看 asmfun 程序集
+
+4、优化部分汇编代码，修复中文版模块几个BUG。
+
+
+[12:08 2018/7/30]
+==========================================================================================
+v5.4.1 bate4 更新：
+==========================================================================================
+1、新增API
+SYS_Malloc						
+SYS_Realloc						
+SYS_Free						
+HP_Agent_ConnectWithLocalPort			
+HP_Agent_ConnectWithExtraAndLocalPort	
+HP_Client_StartWithBindAddressAndLocalPort	
+
+2、中文版模块优化部分参数显示
+3、两个模块优化部分代码
+
+
+[09:25 2018/7/26]
+==========================================================================================
+v5.4.1 更新：
+==========================================================================================
+
+> 加入线程池公共组件：
+-----------------
+1、加入 IHPThreadPool 线程池公共组件
+2、IHPThreadPool 主要方法：
+	1) Start：启动线程池
+	2) Stop：关闭线程池
+	3) Submit：提交任务
+	4) AdjustThreadCount：调整线程池大小
+
+> 其他更新：
+-----------------
+1、代码优化
+2、增加HPThreadPool例程
+3、httpserver发送大文件增加和HPThreadPool结合，能判断断开。可以自行添加其它扩展协议(如：断点续传)。
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.4.1 完全兼容 HP-Socket v5.3.2 版本，可以直接替换升级
+
+
+[09:53 2018/6/9]
+1、更新版本号，保持与 Linux 版的版本号同步
+2、HP-Socket v5.3.2 完全兼容 HP-Socket v5.3.1 版本，可以直接替换升级
+3、修复模块普通解压时有可以返回空字节集的问题
+
+[11:05 2018/4/21]
+
+> 模块修复：
+-----------------
+1、修复winhttp demo错误问题
+2、注明:winhttp自动初始化ssl，如果自己需要设置证书，则参考winhttp demo注释部分
+
+
+[10:30 2018/4/21]
+==========================================================================================
+v5.3.1 更新：
+==========================================================================================
+
+> 常规更新：
+-----------------
+1、修复 C# SDK 关于 SSL 初始化失败 Bug
+2、http-parser 解析器升级到 2.8.1 版本
+3、OpenSSL 版本升级到 1.1.0h
+4、提供 _ZLIB_DISABLED 预编译宏选项用于禁用/启用 zlib 功能
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.3.1 完全兼容 HP-Socket v5.2.1 版本，可以直接替换升级
+
+> 模块修复：
+-----------------
+1、修改httpserver发送视频文件因发送缓存问题引起的卡死问题
+2、修复几个demo的错误
+3、httpserver，区分SendLocalFile原api接口，和SendLocalFileEx大文件发送接口，具体请查看源码使用。
+
+
+
+
+[18:10 2018/1/2]
+> 模块修复：
+-----------------
+1、修复几个注释错误问题
+2、修复httpclient有个事件绑定出错问题
+
+
+[9:56 2017/12/26]
+==========================================================================================
+v5.2.1 更新：
+==========================================================================================
+
+> 发布文件调整：
+-----------------
+1、发布文件不再区分非 SSL DLL 和 SSL DLL，统一为 HPSocket DLL 和 HPSocket4C DLL
+2、发布文件默认包含 SSL 和 HTTP 组件
+3、如果想去除 SSL 或 HTTP 组件，可以分别定义 _SSL_DISABLED 或 _HTTP_DISABLED 宏重新编译
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.2.1 完全兼容 HP-Socket v5.1.1 版本，可以直接替换升级
+
+> 模块说明：
+-----------------
+1、修改调用DLL名称
+2、重新编译demo
+无其它修改
+
+
+[16:50 2017/11/20]
+> 模块修复：
+-----------------
+1、修改模块部分参数为可选。
+2、升级iwinhttp demo 为最新模块
+3、修复模块iwinhttp组件参数无返回问题
+4、升级dll为beta4
+
+
+
+[9:51 2017/11/13]
+==========================================================================================
+v5.1.1 更新：
+==========================================================================================
+
+> 增加暂停接收功能：
+-----------------
+1、所有 Server/Agent/Client 组件增加‘暂停接收数据’功能（UDP Server 组件除外）
+2、API 更新：
+	1） HP_Server_PauseReceive			(增加)
+	2） HP_Server_IsPauseReceive		(增加)
+	3） HP_Agent_PauseReceive			(增加)
+	4） HP_Agent_IsPauseReceive			(增加)
+	5） HP_Client_PauseReceive			(增加)
+	6） HP_Client_IsPauseReceive		(增加)
+
+> 其它更新：
+-----------------
+1、TCP Agent 增加方法 HP_Agent_ConnectWithExtra()，支持在连接完成前绑定附加数据
+2、公共代码包 vc-common-src 版本升级到 v2.3.22
+3、OpenSSL 版本升级到 1.1.0g
+
+> 模块修复：
+-----------------
+1、修复模块在2003下取IP地址为空的问题。
+
+
+[15:03 2017/9/27]
+> Bug 修复：
+-----------------
+1、修复 server 组件 SetupSSLContext 方法最后一个参数可选的问题
+2、IServer、IClient、IAgent组件下的SetupSSLContext函数修改部分参数为可空
+
+
+
+
+[17:34 2017/9/26]
+==========================================================================================
+v5.0.2 更新：
+==========================================================================================
+
+> Bug 修复：
+-----------------
+1、修复 PULL/PACK 组件可能会意外崩溃 Bug
+2、受影响组件：Pull Server、Pull Agent、Pack Server、Pack Agent
+
+> 升级说明：
+-----------------
+1、HP-Socket v5.0.2 完全兼容 HP-Socket v5.0.1 版本，可以直接替换升级
+
+
+
+
+
+[11:07 2017/7/17]
+==========================================================================================
+v5.0.1 更新：
+==========================================================================================
+
+> IPv6 支持：
+-----------------
+1、所有通信组件支持 IPv6
+2、组件接口没有变化，组件内部通过传入的地址参数自动识别 IPv4 / IPv6
+3、API 更新：
+	1） enum En_HP_IPAddrType			(增加)
+	2） struct HP_TIPAddr				(增加)
+	3） SYS_GetIPv4InAddr				(删除)
+	4） SYS_GetOptimalIPByHostName		(删除)
+	5） SYS_IsIPAddress					(修改)
+	6） SYS_GetIPAddress					(修改)
+	7） SYS_EnumHostIPAddresses			(增加)
+	8） SYS_FreeHostIPAddresses			(增加)
+
+> SSL 通信组件：
+-----------------
+1、多 SSL 证书支持，每个通信组件对象可以使用不同的 SSL 证书
+2、通信组件对象绑定独立的 SSL Context，取代旧版本的全局唯一 SSL Context
+3、API 更新：
+	1） HP_SSL_Initialize				(删除)
+	2） HP_SSL_Cleanup					(删除)
+	3） HP_SSL_IsValid					(删除)
+	4） HP_SSLAgent_SetupSSLContext		(增加)
+	5） HP_SSLClient_SetupSSLContext		(增加)
+	6） HP_SSLServer_SetupSSLContext		(增加)
+	7） HP_SSLServer_AddSSLContext		(增加)
+	8） HP_SSLAgent_CleanupSSLContext	(增加)
+	9） HP_SSLClient_CleanupSSLContext	(增加)
+	10） HP_SSLServer_CleanupSSLContext	(增加)
+
+> 其它更新：
+-----------------
+1、Demo 更新：所有 Demo 支持 IPv6；所有 SSL Demo 支持新的证书机制
+
+> 升级说明：
+-----------------
+1、SSL 组件：需要调整 SSL Context 初始化方式
+2、其他组件：HP-Socket v5.0.1 完全兼容 HP-Socket v4.x.x 版本，可以直接替换升级
+
+> 模块更新：
+-----------------
+1、增加函数：
+	_HP_EnumHostIPAddresse()           /* 枚举主机 IP 地址 */
+	_HP_IsIPAddress(）                 /* 检查字符串是否符合 IP 地址格式 */
+	_HP_SSL_RemoveThreadLocalState()   名称：清理线程局部环境 SSL 资源 
+
+2、Server类组件增加函数：
+	SetupSSLContext()    初始化通信组件 SSL 环境参数
+	AddSSLContext()      增加 SNI 主机证书
+	CleanupSSLContext()  清理通信组件 SSL 运行环境
+
+3、Agent类组件增加函数：
+	SetupSSLContext()    初始化通信组件 SSL 环境参数
+	CleanupSSLContext()  清理通信组件 SSL 运行环境
+
+3、Client类组件增加函数：
+	SetupSSLContext()    初始化通信组件 SSL 环境参数
+	CleanupSSLContext()  清理通信组件 SSL 运行环境
+
+
+
+
+
+[17:40 2017/4/12]
+常规更新
+
+
+[13:43 2017/4/7]
+
+> HTTP Cookie 管理：
+-----------------
+1、新增 Cookie 管理器，可在不同连接、不同组件对象间共享 Cookie
+2、Cookie 管理器实现了标准 HTTP Cookie 功能，支持 Max-Age、expires、httpOnly、secure
+3、Cookie 管理器支持 Cookie 序列化与反序列化
+4、IHttpClient 和 IHttpAgent 组件可通过 SetUseCookie() 方法设置是否开启 Cookie 功能
+
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.2.1 完全兼容 HP-Socket v4.1.4 版本，可以直接替换升级
+
+
+# ======================================== #
+HP-Socket v4.2.1 API 更新列表：
+# ======================================== #
+--------------------
+1、TCP:
+--------------------
+HP_Server_IsSecure		(增加)
+HP_Agent_IsSecure		(增加)
+HP_Client_IsSecure		(增加)
+
+--------------------
+2、HTTP Sync Client:
+--------------------
+Create_HP_HttpSyncClient		(修改：增加可选参数 pListener，如果 pListener 非空则可以监听 HttpSyncClient 的通信事件)
+Create_HP_HttpsSyncClient		(修改：增加可选参数 pListener，如果 pListener 非空则可以监听 HttpSyncClient 的通信事件)
+
+--------------------
+3、HTTP Client:
+--------------------
+HP_HttpClient_SetUseCookie		(增加)
+HP_HttpClient_IsUseCookie		(增加)
+HP_HttpClient_AddCookie			(删除)
+HP_HttpClient_DeleteCookie		(删除)
+HP_HttpClient_DeleteAllCookies	(删除)
+
+--------------------
+4、HTTP Agent:
+--------------------
+HP_HttpAgent_SetUseCookie		(增加)
+HP_HttpAgent_IsUseCookie		(增加)
+HP_HttpAgent_AddCookie			(删除)
+HP_HttpAgent_DeleteCookie		(删除)
+HP_HttpAgent_DeleteAllCookies	(删除)
+
+--------------------
+5、Cookie Management:
+--------------------
+HP_HttpCookie_MGR_LoadFromFile				(增加)
+HP_HttpCookie_MGR_SaveToFile				(增加)
+HP_HttpCookie_MGR_ClearCookies				(增加)
+HP_HttpCookie_MGR_RemoveExpiredCookies		(增加)
+HP_HttpCookie_MGR_SetCookie					(增加)
+HP_HttpCookie_MGR_DeleteCookie				(增加)
+HP_HttpCookie_MGR_SetEnableThirdPartyCookie	(增加)
+HP_HttpCookie_MGR_IsEnableThirdPartyCookie	(增加)
+HP_HttpCookie_HLP_ParseExpires				(增加)
+HP_HttpCookie_HLP_MakeExpiresStr			(增加)
+HP_HttpCookie_HLP_ToString					(增加)
+HP_HttpCookie_HLP_CurrentUTCTime			(增加)
+HP_HttpCookie_HLP_MaxAgeToExpires			(增加)
+HP_HttpCookie_HLP_ExpiresToMaxAge			(增加)
+
+增加httpCookie DEMO
+由于httpCookie在httpclient和httpagent中使用，然而我并没有写这两个组件的demo，所以就先将就着httpCookie的用吧
+
+
+
+
+[13:19 2017/3/22]
+
+> HTTP Sync Client 通信组件：
+-----------------
+1、Create_HP_HttpSyncClient 和 Create_HP_HttpsSyncClient 方法增加可选参数 pListener
+2、如果 pListener 非空则可以通过 pListener 监听 HttpSyncClient 的所有通信事件
+
+> 其它更新：
+-----------------
+1、Demo 更新：HttpProxy，TestEcho-Http (SyncClient)，TestEcho-Http-4C (SyncClient)
+2、OpenSSL 版本升级到 1.1.0e
+3、IWinHttp 增加httpclient的所有事件回调接口，可以实现上传和下载的进度显示。
+
+> 升级说明：
+-----------------
+1、HTTP Sync Client 组件：需要调整 Create_HP_HttpSyncClient 和 Create_HP_HttpsSyncClient 的调用参数
+2、其他组件：HP-Socket v4.1.4 完全兼容 HP-Socket v4.1.3 版本，可以直接替换升级
+
+
+
+
+
+
+
+[16:26 2017/1/20]
+1、IWinhttp增加 ResponseText 方法，参数为是否utf8解码
+
+
+
+[11:39 2017/1/19]
+1、模块更新，修复取连接IP地址和端口时，IP地址取不出来的问题。
+2、增加了udp的demo
+3、http大文件发送效率更高，本机测试最高能到110M/s，实际因为检测缓冲区大小造成性能损失可能只有95-100m/s。
+4、更新为最新版4.1.3 dll
+
+
+
+[11:15 2017/1/16]
+1、模块更新，修复server和agent 调用 GetAllConnectionIDs 错误问题，删除最后一个参数
+
+可直接替换更新现有4.1.2及以上版本
+
+
+
+[16:29 2017/1/12]
+1、更新为最新版4.1.3
+2、修正IWinHttp为调用open的时候创建对象
+==========================================================================================
+v4.1.3 更新：
+==========================================================================================
+
+> 代码调整：
+-----------------
+1、ITcpServer 和 ITcpAgent 组件在 SP_DIRECT 发送模式下，监听器的 OnReceive 事件内部可能触发 Onclose 事件，改为顺序触发
+2、IClient 组件优化，提高稳定性
+
+> 升级说明：
+-----------------
+1、HP-Socket v4.1.3 完全兼容 HP-Socket v4.1.2 版本，可以直接替换升级
+
+
+
+
+[16:57 2016/12/28]
+1、解决URL编码错误问题
+2、增加几个API封装命令：
+   _HP_Compress: 普通压缩
+   _HP_Uncompress: 普通解压
+   _HP_CompressEx: 高级压缩
+   _HP_UncompressEx: 高级解压
+   _HP_GZipCompress: Gzip 压缩
+   _HP_GZipUncompress: Gzip 解压
+   GetHttpDefaultStatusCodeDesc: 获取HTTP状态码文本描述
+
+3、各个组件的send方法改为指针+长度方式，新曾SendBytes来发送字节集数据
+4、dll更换为4.1.2-rc2，直接替换，完美兼容
