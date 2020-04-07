@@ -170,7 +170,7 @@ using(IHttpEasyClient httpClient = new HttpEasyClient())
 
 完整示例在`demo/TcpServer-TestEcho-Adapter`
 
-该系列组件是`HPSocket.Net`的`数据接收适配器`扩展组件，用户通过`自定义数据接收适配器`处理TCP通信中可能出现的`粘包`、`半包`等情况。`数据接收适配器`组件看起来这与HP-Socket的`Pack`组件有些相似，但它更加灵活，适配也非常简单方便。
+该系列组件是`HPSocket.Net`的`数据接收适配器`扩展组件，用户通过`自定义数据接收适配器`处理TCP通信中可能出现的应用层所谓的`“粘包”`、`“半包”`等情况。`数据接收适配器`组件看起来这与HP-Socket的`Pack`组件有些相似，但它更加灵活，适配也非常简单方便。
 
 
 + `ITcpServer<TRequestBodyType>`/`ITcpClient<TRequestBodyType>`/`ITcpAgent<TRequestBodyType>`
