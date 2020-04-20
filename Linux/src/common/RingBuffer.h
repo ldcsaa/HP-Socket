@@ -34,7 +34,7 @@ using namespace std;
 #define CACHE_LINE		64
 #define PACK_SIZE_OF(T)	(CACHE_LINE - sizeof(T) % CACHE_LINE)
 
-#if !defined (__x86_64__) && !defined(__arm64__)
+#if __WORDSIZE == 32
 	#pragma pack(push, 4)
 #endif
 
@@ -738,7 +738,7 @@ template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, 
 template <class T, class index_type, bool adjust_index> T* const CRingCache2<T, index_type, adjust_index>::E_MAX_STATUS	= (T*)0x0F;
 
 template <class T, class index_type, bool adjust_index> DWORD const CRingCache2<T, index_type, adjust_index>::MAX_SIZE	= 
-#if !defined(__x86_64__) && !defined(__arm64__)
+#if __WORDSIZE == 32
 																														  0x00FFFFFF
 #else
 																														  0xFFFFFFFF
@@ -1742,6 +1742,6 @@ void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 	}
 }
 
-#if !defined(__x86_64__) && !defined(__arm64__)
+#if __WORDSIZE == 32
 	#pragma pack(pop)
 #endif

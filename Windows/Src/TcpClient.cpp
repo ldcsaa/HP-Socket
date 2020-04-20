@@ -571,14 +571,14 @@ BOOL CTcpClient::Stop()
 	if(m_evSocket != nullptr)
 	{
 		::WSACloseEvent(m_evSocket);
-		m_evSocket	= nullptr;
+		m_evSocket = nullptr;
 	}
 
 	if(m_soClient != INVALID_SOCKET)
 	{
 		shutdown(m_soClient, SD_SEND);
 		closesocket(m_soClient);
-		m_soClient	= INVALID_SOCKET;
+		m_soClient = INVALID_SOCKET;
 	}
 
 	Reset();

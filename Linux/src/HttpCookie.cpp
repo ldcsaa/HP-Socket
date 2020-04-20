@@ -50,9 +50,6 @@ CCookie* CCookie::FromString(const CStringA& strCookie, LPCSTR lpszDefaultDomain
 		CStringA strField = strCookie.Tokenize(COOKIE_FIELD_SEP, iStart);
 		strField.Trim();
 
-		if(strField.IsEmpty())
-			break;
-
 		if(i == 0)
 		{
 			ParseFieldKV(strField, strName, strValue, COOKIE_KV_SEP_CHAR);
@@ -62,6 +59,9 @@ CCookie* CCookie::FromString(const CStringA& strCookie, LPCSTR lpszDefaultDomain
 		}
 		else
 		{
+			if(strField.IsEmpty())
+				break;
+
 			CStringA strKey;
 			CStringA strVal;
 

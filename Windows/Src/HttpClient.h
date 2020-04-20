@@ -323,7 +323,7 @@ public:
 
 	virtual ~CHttpSyncClientT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

@@ -968,27 +968,35 @@ int PostReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
 int PostReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result				= NO_ERROR;
-	DWORD dwFlag			= 0;
-	DWORD dwBytes			= 0;
 	pBufferObj->operation	= SO_RECEIVE;
 	pBufferObj->addrLen		= pBufferObj->remoteAddr.AddrSize();
 
-	pBufferObj->remoteAddr.ZeroAddr();
-
-	if(::WSARecvFrom(
-						sock,
-						&pBufferObj->buff,
-						1,
-						&dwBytes,
-						&dwFlag,
-						pBufferObj->remoteAddr.Addr(),
-						&pBufferObj->addrLen,
-						&pBufferObj->ov,
-						nullptr
-					) == SOCKET_ERROR)
+	do 
 	{
-		result = ::WSAGetLastError();
-	}
+		DWORD dwFlag	= 0;
+		DWORD dwBytes	= 0;
+
+		if(::WSARecvFrom(
+							sock,
+							&pBufferObj->buff,
+							1,
+							&dwBytes,
+							&dwFlag,
+							pBufferObj->remoteAddr.Addr(),
+							&pBufferObj->addrLen,
+							&pBufferObj->ov,
+							nullptr
+						) == SOCKET_ERROR)
+		{
+			result = ::WSAGetLastError();
+		}
+
+		if(!IS_UDP_RESET_ERROR(result))
+			break;
+
+		pBufferObj->ResetOV();
+
+	} while(TRUE);
 
 	return result;
 }
@@ -1045,31 +1053,37 @@ int NoBlockReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj)
 int NoBlockReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj)
 {
 	int result			= NO_ERROR;
-	DWORD dwFlag		= 0;
-	DWORD dwBytes		= 0;
 	pBufferObj->addrLen	= pBufferObj->remoteAddr.AddrSize();
 
-	if(::WSARecvFrom(
-						sock,
-						&pBufferObj->buff,
-						1,
-						&dwBytes,
-						&dwFlag,
-						pBufferObj->remoteAddr.Addr(),
-						&pBufferObj->addrLen,
-						nullptr,
-						nullptr
-					) == SOCKET_ERROR)
+	do 
 	{
-		result = ::WSAGetLastError();
-	}
-	else
-	{
-		if(dwBytes > 0)
-			pBufferObj->buff.len = dwBytes;
+		DWORD dwFlag	= 0;
+		DWORD dwBytes	= 0;
+
+		if(::WSARecvFrom(
+							sock,
+							&pBufferObj->buff,
+							1,
+							&dwBytes,
+							&dwFlag,
+							pBufferObj->remoteAddr.Addr(),
+							&pBufferObj->addrLen,
+							nullptr,
+							nullptr
+						) == SOCKET_ERROR)
+		{
+			result = ::WSAGetLastError();
+		}
 		else
-			result = WSAEDISCON;
-	}
+		{
+			if(dwBytes > 0)
+				pBufferObj->buff.len = dwBytes;
+			else
+				result = WSAEDISCON;
+		}
+
+	} while(IS_UDP_RESET_ERROR(result));
+
 
 	return result;
 }

@@ -520,6 +520,8 @@ BOOL CUdpClient::ReadData()
 
 			if(code == WSAEWOULDBLOCK)
 				break;
+			else if(IS_UDP_RESET_ERROR(code))
+				continue;
 			else
 			{
 				m_ccContext.Reset(TRUE, SO_RECEIVE, code);

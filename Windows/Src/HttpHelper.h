@@ -485,7 +485,7 @@ public:
 		pSelf->m_headers.emplace(move(THeaderMap::value_type(pSelf->m_strCurHeader, pSelf->GetBuffer())));
 		hpr = pSelf->m_pContext->FireHeader(pSelf->m_pSocket, pSelf->m_strCurHeader, pSelf->GetBuffer());
 
-		if(hpr != HPR_ERROR)
+		if(hpr != HPR_ERROR && !pSelf->GetBufferRef().Trim().IsEmpty())
 		{
 			if(pSelf->m_bRequest && pSelf->m_strCurHeader == HTTP_HEADER_COOKIE)
 				hpr = pSelf->ParseCookie();
@@ -1173,6 +1173,7 @@ private:
 	void AppendBuffer(const char* at, size_t length)	{m_strBuffer.Append(at, (int)length);}
 	void ResetBuffer()									{m_strBuffer.Empty();}
 	LPCSTR GetBuffer()									{return m_strBuffer;}
+	CStringA& GetBufferRef()							{return m_strBuffer;}
 
 	static THttpObjT* Self(http_parser* p)				{return (THttpObjT*)(p->data);}
 	static T* SelfContext(http_parser* p)				{return Self(p)->m_pContext;}
