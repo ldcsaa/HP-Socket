@@ -121,7 +121,7 @@ public:
 
 private:
 	BOOL StartHttp(TAgentSocketObj* pSocketObj);
-	void DoStartHttp(TAgentSocketObj* pSocketObj);
+	THttpObj* DoStartHttp(TAgentSocketObj* pSocketObj);
 
 private:
 	virtual BOOL CheckParams();

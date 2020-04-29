@@ -223,10 +223,14 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 
 template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_port>::DoFireAccept(TSocketObj* pSocketObj)
 {
+	THttpObj* pHttpObj	  = DoStartHttp(pSocketObj);
 	EnHandleResult result = __super::DoFireAccept(pSocketObj);
 
-	if(result != HR_ERROR)
-		DoStartHttp(pSocketObj);
+	if(result == HR_ERROR)
+	{
+		m_objPool.PutFreeHttpObj(pHttpObj);
+		SetConnectionReserved(pSocketObj, nullptr);
+	}
 
 	return result;
 }
@@ -271,7 +275,10 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	THttpObj* pHttpObj = FindHttpObj(pSocketObj);
 
 	if(pHttpObj != nullptr)
+	{
 		m_objPool.PutFreeHttpObj(pHttpObj);
+		SetConnectionReserved(pSocketObj, nullptr);
+	}
 
 	return result;
 }
@@ -576,11 +583,14 @@ template<class T, USHORT default_port> BOOL CHttpServerT<T, default_port>::Start
 	return TRUE;
 }
 
-template<class T, USHORT default_port> void CHttpServerT<T, default_port>::DoStartHttp(TSocketObj* pSocketObj)
+template<class T, USHORT default_port> typename CHttpServerT<T, default_port>::THttpObj* CHttpServerT<T, default_port>::DoStartHttp(TSocketObj* pSocketObj)
 {
 	THttpObj* pHttpObj = m_objPool.PickFreeHttpObj(this, pSocketObj);
 	VERIFY(SetConnectionReserved(pSocketObj, pHttpObj));
+
+	return pHttpObj;
 }
+
 // ------------------------------------------------------------------------------------------------------------- //
 
 template class CHttpServerT<CTcpServer, HTTP_DEFAULT_PORT>;

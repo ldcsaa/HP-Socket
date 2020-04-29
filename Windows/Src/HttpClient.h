@@ -123,10 +123,12 @@ private:
 	{
 		ASSERT(pSender == this);
 
+		DoStartHttp();
+
 		EnHandleResult result = __super::DoFireConnect(this);
 
-		if(result != HR_ERROR)
-			DoStartHttp();
+		if(result == HR_ERROR)
+			m_objHttp.SetValid(FALSE);
 
 		return result;
 	}

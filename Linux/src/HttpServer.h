@@ -115,7 +115,7 @@ public:
 
 private:
 	BOOL StartHttp(TSocketObj* pSocketObj);
-	void DoStartHttp(TSocketObj* pSocketObj);
+	THttpObj* DoStartHttp(TSocketObj* pSocketObj);
 
 private:
 	virtual BOOL CheckParams();
