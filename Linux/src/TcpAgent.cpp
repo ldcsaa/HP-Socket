@@ -455,6 +455,7 @@ void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TAgentSocketObj* pSocketObj,
 	pSocketObj->host		= lpszRemoteAddress;
 	pSocketObj->extra		= pExtra;
 
+	pSocketObj->SetConnected(CST_CONNECTING);
 	remoteAddr.Copy(pSocketObj->remoteAddr);
 
 	VERIFY(m_bfActiveSockets.ReleaseLock(dwConnID, pSocketObj));
@@ -838,7 +839,7 @@ BOOL CTcpAgent::OnBeforeProcessIo(PVOID pv, UINT events)
 		return FALSE;
 	}
 
-	if(!pSocketObj->HasConnected())
+	if(pSocketObj->IsConnecting())
 	{
 		HandleConnect(pSocketObj, events);
 
@@ -970,13 +971,11 @@ BOOL CTcpAgent::HandleConnect(TAgentSocketObj* pSocketObj, UINT events)
 		return FALSE;
 	}
 
-	if(events & _EPOLL_HUNGUP_EVENTS)
+	if((events & (_EPOLL_HUNGUP_EVENTS | _EPOLL_READ_EVENTS)) || !(events & EPOLLOUT))
 	{
 		AddFreeSocketObj(pSocketObj, SCF_CLOSE, SO_CONNECT, SE_OK);
 		return FALSE;
 	}
-
-	ASSERT(events & EPOLLOUT);
 
 	pSocketObj->SetConnected();
 

@@ -140,6 +140,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 #define IPV6_ADDR_SEPARATOR_CHAR				':'
 #define IPV6_ZONE_INDEX_CHAR					'%'
 
+#define CST_CONNECTING							(-1)
 #define INVALID_SOCKET							INVALID_FD
 #define SOCKET_ERROR							HAS_ERROR
 #define WSASetLastError							SetLastError
@@ -440,7 +441,8 @@ struct TSocketObjBase
 	DWORD GetActiveTime	()	const	{return activeTime;}
 	BOOL IsPaused		()	const	{return paused;}
 
-	BOOL HasConnected()							{return connected;}
+	BOOL HasConnected()							{return connected == TRUE;}
+	BOOL IsConnecting()							{return connected == CST_CONNECTING;}
 	void SetConnected(BOOL bConnected = TRUE)	{connected = bConnected;}
 
 	void Reset(CONNID dwConnID)
