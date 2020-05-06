@@ -795,7 +795,7 @@ BOOL CTcpServer::HandleAccept(UINT events)
 {
 	if(events & _EPOLL_ALL_ERROR_EVENTS)
 	{
-		VERIFY(!HasStarted());
+		ASSERT(!HasStarted());
 		return FALSE;
 	}
 
