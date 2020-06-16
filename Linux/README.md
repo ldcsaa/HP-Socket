@@ -1,4 +1,4 @@
-# HP-Socket for Linx
+# HP-Socket for Linux
 &nbsp;&nbsp;&nbsp;&nbsp;The exported API of HP-Socket for Linux is consistent with HP-Socket for Windows, but the implementation code is completely separated. HP-Socket for Linux uses the features of the *C++14* standard, and thus need to be compiled by a compiler which version is *GCC 5.x* and above, and the compilation and execution environments of HP-Socket requires Linux kernel version *2.6.32* and above.   
 ## Compilation
 &nbsp;&nbsp;&nbsp;&nbsp;Binary library files and sample executable files are available in the HP-Socket distribution. These files were compiled with GCC 6.3.1 under Linux kernel version 2.6.32. Alternatively, you can compile these files using the following two options:
