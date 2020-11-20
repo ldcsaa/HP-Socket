@@ -101,14 +101,14 @@ ifneq ($(TARGET_ARCH_ABI),mips)
   ifneq ($(TARGET_ARCH_ABI),mips64)
 
     MY_CFLAGS += -mfloat-abi=softfp
-	
-	ifeq ($(MY_SSL_DISABLED),true)
+  
+  ifeq ($(MY_SSL_DISABLED),true)
       MY_CFLAGS += -D_SSL_DISABLED
     else
       MY_WHOLE_STATIC_LIBRARIES += ssl crypto
     endif
-	
-	ifeq ($(MY_ICONV_DISABLED),true)
+  
+  ifeq ($(MY_ICONV_DISABLED),true)
       MY_CFLAGS += -D_ICONV_DISABLED
     else
       MY_WHOLE_STATIC_LIBRARIES += iconv
@@ -130,27 +130,30 @@ endif
 #LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
 #include $(PREBUILT_STATIC_LIBRARY)
 
-# local lib : iconv
-include $(CLEAR_VARS)
-LOCAL_MODULE    := iconv
-LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libiconv.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-include $(PREBUILT_STATIC_LIBRARY)
+ifeq ($(MY_ICONV_DISABLED),true)
+  # local lib : iconv
+  include $(CLEAR_VARS)
+  LOCAL_MODULE    := iconv
+  LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libiconv.a
+  LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+  include $(PREBUILT_STATIC_LIBRARY)
+endif
 
-# local lib : crypto
-include $(CLEAR_VARS)
-LOCAL_MODULE    := crypto
-LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libcrypto.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-include $(PREBUILT_STATIC_LIBRARY)
+ifeq ($(MY_SSL_DISABLED),true)
+  # local lib : crypto
+  include $(CLEAR_VARS)
+  LOCAL_MODULE    := crypto
+  LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libcrypto.a
+  LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+  include $(PREBUILT_STATIC_LIBRARY)
 
-# local lib : ssl
-include $(CLEAR_VARS)
-LOCAL_MODULE    := ssl
-LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libssl.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-include $(PREBUILT_STATIC_LIBRARY)
-
+  # local lib : ssl
+  include $(CLEAR_VARS)
+  LOCAL_MODULE    := ssl
+  LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libssl.a
+  LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+  include $(PREBUILT_STATIC_LIBRARY)
+endif
 
 # target lib : hpsocket.a
 include $(CLEAR_VARS)
@@ -176,7 +179,6 @@ LOCAL_CPPFLAGS   := $(MY_CPPFLAGS)
 LOCAL_LDFLAGS    := $(MY_LDFLAGS)
 LOCAL_LDLIBS     := $(MY_LDLIBS)
 include $(BUILD_SHARED_LIBRARY)
-
 
 # target lib : hpsocket4c.a
 include $(CLEAR_VARS)
