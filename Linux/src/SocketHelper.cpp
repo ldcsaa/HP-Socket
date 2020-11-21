@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright: JessMA Open Source (ldcsaa@gmail.com)
 *
 * Author	: Bruce Liang
@@ -707,195 +707,6 @@ int ManualCloseSocket(SOCKET sock, int iShutdownFlag, BOOL bGraceful)
 	return closesocket(sock);
 }
 
-#ifdef _ICONV_SUPPORT
-
-BOOL CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen)
-{
-	ASSERT(lpszInBuf != nullptr);
-
-	SIZE_T nInBufLeft	= iInBufLen;
-	SIZE_T nOutBufLeft	= iOutBufLen;
-	int iOutBufSize		= iOutBufLen;
-	iOutBufLen			= 0;
-
-	if(lpszInBuf == nullptr)
-	{
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return FALSE;
-	}
-
-	iconv_t ic = iconv_open(lpszToCharset, lpszFromCharset);
-
-	if(IS_INVALID_PVOID(ic))
-		return FALSE;
-
-	SIZE_T rs	= iconv(ic, (LPSTR*)&lpszInBuf, &nInBufLeft, &lpszOutBuf, &nOutBufLeft);
-	iOutBufLen	= iOutBufSize - (int)nOutBufLeft;
-
-	EXECUTE_RESTORE_ERROR(iconv_close(ic));
-
-	return !IS_HAS_ERROR(rs);
-}
-
-BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
-{
-	int iInBufLen	= (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
-	int iOutBufLen	= (int)(iDestLength * sizeof(wchar_t));
-
-	BOOL isOK	= CharsetConvert(CHARSET_GBK, CHARSET_UTF_32LE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
-	iDestLength	= (int)(iOutBufLen / sizeof(wchar_t));
-
-	return isOK;
-}
-
-BOOL UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
-{
-	int iInBufLen = (szSrc != nullptr) ? (int)((wcslen(szSrc) + 1) * sizeof(wchar_t)) : 0;
-
-	return CharsetConvert(CHARSET_UTF_32LE, CHARSET_GBK, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
-}
-
-BOOL Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
-{
-	int iInBufLen	= (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
-	int iOutBufLen	= (int)(iDestLength * sizeof(wchar_t));
-
-	BOOL isOK	= CharsetConvert(CHARSET_UTF_8, CHARSET_UTF_32LE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
-	iDestLength	= (int)(iOutBufLen / sizeof(wchar_t));
-
-	return isOK;
-}
-
-BOOL UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
-{
-	int iInBufLen = (szSrc != nullptr) ? (int)((wcslen(szSrc) + 1) * sizeof(wchar_t)) : 0;
-
-	return CharsetConvert(CHARSET_UTF_32LE, CHARSET_UTF_8, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
-}
-
-BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
-{
-	int iInBufLen = (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
-
-	return CharsetConvert(CHARSET_GBK, CHARSET_UTF_8, szSrc, iInBufLen, szDest, iDestLength);
-}
-
-BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
-{
-	int iInBufLen = (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
-
-	return CharsetConvert(CHARSET_UTF_8, CHARSET_GBK, szSrc, iInBufLen, szDest, iDestLength);
-}
-
-#endif
-
-#ifdef _ZLIB_SUPPORT
-
-int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-int CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel, int iMethod, int iWindowBits, int iMemLevel, int iStrategy)
-{
-	z_stream stream;
-
-	stream.next_in	 = (z_const Bytef*)lpszSrc;
-	stream.avail_in	 = dwSrcLen;
-	stream.next_out	 = lpszDest;
-	stream.avail_out = dwDestLen;
-	stream.zalloc	 = nullptr;
-	stream.zfree	 = nullptr;
-	stream.opaque	 = nullptr;
-
-	int err = ::deflateInit2(&stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy);
-
-	if(err != Z_OK) return err;
-
-	err = ::deflate(&stream, Z_FINISH);
-
-	if(err != Z_STREAM_END)
-	{
-		::deflateEnd(&stream);
-		return err == Z_OK ? Z_BUF_ERROR : err;
-	}
-
-	if(dwDestLen > stream.total_out)
-	{
-		lpszDest[stream.total_out]	= 0;
-		dwDestLen					= (DWORD)stream.total_out;
-	}
-
-	return ::deflateEnd(&stream);
-}
-
-int Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-int UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits)
-{
-	z_stream stream;
-
-	stream.next_in	 = (z_const Bytef*)lpszSrc;
-	stream.avail_in	 = (uInt)dwSrcLen;
-	stream.next_out	 = lpszDest;
-	stream.avail_out = dwDestLen;
-	stream.zalloc	 = nullptr;
-	stream.zfree	 = nullptr;
-
-	int err = ::inflateInit2(&stream, iWindowBits);
-
-	if(err != Z_OK) return err;
-
-	err = ::inflate(&stream, Z_FINISH);
-
-	if(err != Z_STREAM_END)
-	{
-		::inflateEnd(&stream);
-		return (err == Z_NEED_DICT || (err == Z_BUF_ERROR && stream.avail_in == 0)) ? Z_DATA_ERROR : err;
-	}
-
-	if(dwDestLen > stream.total_out)
-	{
-		lpszDest[stream.total_out]	= 0;
-		dwDestLen					= (DWORD)stream.total_out;
-	}
-
-	return inflateEnd(&stream);
-}
-
-DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
-{
-	DWORD dwBound = (DWORD)::compressBound(dwSrcLen);
-	
-	if(bGZip) dwBound += 11;
-
-	return dwBound;
-}
-
-int GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16);
-}
-
-int GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, MAX_WBITS + 32);
-}
-
-DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	if(dwSrcLen < 20 || *(USHORT*)lpszSrc != 0x8B1F)
-		return 0;
-
-	return *(DWORD*)(lpszSrc + dwSrcLen - 4);
-}
-
-#endif
-
-
 DWORD GuessBase64EncodeBound(DWORD dwSrcLen)
 {
 	return 4 * ((dwSrcLen + 2) / 3);
@@ -1166,3 +977,223 @@ ERROR_DEST_LEN:
 	dwDestLen = GuessUrlDecodeBound(lpszSrc, dwSrcLen);
 	return -5;
 }
+
+#ifdef _ZLIB_SUPPORT
+
+int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+int CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel, int iMethod, int iWindowBits, int iMemLevel, int iStrategy)
+{
+	z_stream stream;
+
+	stream.next_in	 = (z_const Bytef*)lpszSrc;
+	stream.avail_in	 = dwSrcLen;
+	stream.next_out	 = lpszDest;
+	stream.avail_out = dwDestLen;
+	stream.zalloc	 = nullptr;
+	stream.zfree	 = nullptr;
+	stream.opaque	 = nullptr;
+
+	int err = ::deflateInit2(&stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy);
+
+	if(err != Z_OK) return err;
+
+	err = ::deflate(&stream, Z_FINISH);
+
+	if(err != Z_STREAM_END)
+	{
+		::deflateEnd(&stream);
+		return err == Z_OK ? Z_BUF_ERROR : err;
+	}
+
+	if(dwDestLen > stream.total_out)
+	{
+		lpszDest[stream.total_out]	= 0;
+		dwDestLen					= (DWORD)stream.total_out;
+	}
+
+	return ::deflateEnd(&stream);
+}
+
+int Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+int UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits)
+{
+	z_stream stream;
+
+	stream.next_in	 = (z_const Bytef*)lpszSrc;
+	stream.avail_in	 = (uInt)dwSrcLen;
+	stream.next_out	 = lpszDest;
+	stream.avail_out = dwDestLen;
+	stream.zalloc	 = nullptr;
+	stream.zfree	 = nullptr;
+
+	int err = ::inflateInit2(&stream, iWindowBits);
+
+	if(err != Z_OK) return err;
+
+	err = ::inflate(&stream, Z_FINISH);
+
+	if(err != Z_STREAM_END)
+	{
+		::inflateEnd(&stream);
+		return (err == Z_NEED_DICT || (err == Z_BUF_ERROR && stream.avail_in == 0)) ? Z_DATA_ERROR : err;
+	}
+
+	if(dwDestLen > stream.total_out)
+	{
+		lpszDest[stream.total_out]	= 0;
+		dwDestLen					= (DWORD)stream.total_out;
+	}
+
+	return inflateEnd(&stream);
+}
+
+DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
+{
+	DWORD dwBound = (DWORD)::compressBound(dwSrcLen);
+	
+	if(bGZip) dwBound += 11;
+
+	return dwBound;
+}
+
+int GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16);
+}
+
+int GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, MAX_WBITS + 32);
+}
+
+DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	if(dwSrcLen < 20 || *(USHORT*)lpszSrc != 0x8B1F)
+		return 0;
+
+	return *(DWORD*)(lpszSrc + dwSrcLen - 4);
+}
+
+#endif
+
+#ifdef _BROTLI_SUPPORT
+
+int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, BROTLI_DEFAULT_QUALITY, BROTLI_DEFAULT_WINDOW, BROTLI_DEFAULT_MODE);
+}
+
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, BrotliEncoderMode enMode)
+{
+	size_t stDestLen = (size_t)dwDestLen;
+	int rs = ::BrotliEncoderCompress(iQuality, iWindow, enMode, (size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
+	dwDestLen = (DWORD)stDestLen;
+
+	return (rs == 1) ? 0 : ((rs == 3) ? 5 : 3);
+}
+
+int BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	size_t stDestLen = (size_t)dwDestLen;
+	BrotliDecoderResult rs = ::BrotliDecoderDecompress((size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
+	dwDestLen = (DWORD)stDestLen;
+
+	return (rs == BROTLI_DECODER_RESULT_SUCCESS) ? 0 : ((rs == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) ? 5 : 3);
+}
+
+DWORD BrotliGuessCompressBound(DWORD dwSrcLen)
+{
+	return (DWORD)::BrotliEncoderMaxCompressedSize((size_t)dwSrcLen);
+}
+
+#endif
+
+#ifdef _ICONV_SUPPORT
+
+BOOL CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen)
+{
+	ASSERT(lpszInBuf != nullptr);
+
+	SIZE_T nInBufLeft	= iInBufLen;
+	SIZE_T nOutBufLeft	= iOutBufLen;
+	int iOutBufSize		= iOutBufLen;
+	iOutBufLen			= 0;
+
+	if(lpszInBuf == nullptr)
+	{
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+
+	iconv_t ic = iconv_open(lpszToCharset, lpszFromCharset);
+
+	if(IS_INVALID_PVOID(ic))
+		return FALSE;
+
+	SIZE_T rs	= iconv(ic, (LPSTR*)&lpszInBuf, &nInBufLeft, &lpszOutBuf, &nOutBufLeft);
+	iOutBufLen	= iOutBufSize - (int)nOutBufLeft;
+
+	EXECUTE_RESTORE_ERROR(iconv_close(ic));
+
+	return !IS_HAS_ERROR(rs);
+}
+
+BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	int iInBufLen	= (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
+	int iOutBufLen	= (int)(iDestLength * sizeof(wchar_t));
+
+	BOOL isOK	= CharsetConvert(CHARSET_GBK, CHARSET_UTF_32LE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
+	iDestLength	= (int)(iOutBufLen / sizeof(wchar_t));
+
+	return isOK;
+}
+
+BOOL UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	int iInBufLen = (szSrc != nullptr) ? (int)((wcslen(szSrc) + 1) * sizeof(wchar_t)) : 0;
+
+	return CharsetConvert(CHARSET_UTF_32LE, CHARSET_GBK, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
+}
+
+BOOL Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	int iInBufLen	= (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
+	int iOutBufLen	= (int)(iDestLength * sizeof(wchar_t));
+
+	BOOL isOK	= CharsetConvert(CHARSET_UTF_8, CHARSET_UTF_32LE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
+	iDestLength	= (int)(iOutBufLen / sizeof(wchar_t));
+
+	return isOK;
+}
+
+BOOL UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	int iInBufLen = (szSrc != nullptr) ? (int)((wcslen(szSrc) + 1) * sizeof(wchar_t)) : 0;
+
+	return CharsetConvert(CHARSET_UTF_32LE, CHARSET_UTF_8, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
+}
+
+BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+{
+	int iInBufLen = (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
+
+	return CharsetConvert(CHARSET_GBK, CHARSET_UTF_8, szSrc, iInBufLen, szDest, iDestLength);
+}
+
+BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+{
+	int iInBufLen = (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
+
+	return CharsetConvert(CHARSET_UTF_8, CHARSET_GBK, szSrc, iInBufLen, szDest, iDestLength);
+}
+
+#endif

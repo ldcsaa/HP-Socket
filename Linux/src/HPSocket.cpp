@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
@@ -365,44 +365,45 @@ HPSOCKET_API VOID SYS_Free(LPBYTE p)
 	FREE(p);
 }
 
-#ifdef _ICONV_SUPPORT
-
-HPSOCKET_API BOOL SYS_CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen)
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
 {
-	return ::CharsetConvert(lpszFromCharset, lpszToCharset, lpszInBuf, iInBufLen, lpszOutBuf, iOutBufLen);
+	return ::GuessBase64EncodeBound(dwSrcLen);
 }
 
-HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
 {
-	return ::GbkToUnicode(szSrc, szDest, iDestLength);
+	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
 }
 
-HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::UnicodeToGbk(szSrc, szDest, iDestLength);
+	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::Utf8ToUnicode(szSrc, szDest, iDestLength);
+	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
 {
-	return ::UnicodeToUtf8(szSrc, szDest, iDestLength);
+	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
 }
 
-HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
 {
-	return ::GbkToUtf8(szSrc, szDest, iDestLength);
+	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
 }
 
-HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
+	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-#endif
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
 
 #ifdef _ZLIB_SUPPORT
 
@@ -448,45 +449,68 @@ HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrc
 
 #endif
 
-HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
+#ifdef _BROTLI_SUPPORT
+
+HPSOCKET_API int SYS_BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::GuessBase64EncodeBound(dwSrcLen);
+	return ::BrotliCompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+HPSOCKET_API int SYS_BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, int iMode)
 {
-	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
+	return ::BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, iQuality, iWindow, (BrotliEncoderMode)iMode);
 }
 
-HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+HPSOCKET_API int SYS_BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+	return ::BrotliUncompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+HPSOCKET_API DWORD SYS_BrotliGuessCompressBound(DWORD dwSrcLen)
 {
-	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+	return ::BrotliGuessCompressBound(dwSrcLen);
 }
 
-HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+#endif
+
+#ifdef _ICONV_SUPPORT
+
+HPSOCKET_API BOOL SYS_CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen)
 {
-	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
+	return ::CharsetConvert(lpszFromCharset, lpszToCharset, lpszInBuf, iInBufLen, lpszOutBuf, iOutBufLen);
 }
 
-HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
 {
-	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
+	return ::GbkToUnicode(szSrc, szDest, iDestLength);
 }
 
-HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+HPSOCKET_API BOOL SYS_UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
 {
-	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+	return ::UnicodeToGbk(szSrc, szDest, iDestLength);
 }
 
-HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+HPSOCKET_API BOOL SYS_Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
 {
-	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+	return ::Utf8ToUnicode(szSrc, szDest, iDestLength);
 }
+
+HPSOCKET_API BOOL SYS_UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return ::UnicodeToUtf8(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return ::GbkToUtf8(szSrc, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
+}
+
+#endif
 
 /*****************************************************************************************************************************************************/
 /******************************************************************** HTTP Exports *******************************************************************/

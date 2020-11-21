@@ -90,9 +90,9 @@ int main(int argc, char* const argv[])
 	HP_TcpPullAgent s_agent;
 
 	// 1. Create listener object
-	s_listener	= ::Create_HP_TcpPullAgentListener();
+	s_listener = ::Create_HP_TcpPullAgentListener();
 	// 2. Create component object (and binding with listener object)
-	s_agent		= ::Create_HP_TcpPullAgent(s_listener);
+	s_agent    = ::Create_HP_TcpPullAgent(s_listener);
 	
 	/* Set listener callbacks */
 	::HP_Set_FN_Agent_OnConnect(s_listener, OnConnect);
@@ -144,12 +144,18 @@ int main(int argc, char* const argv[])
 - *[openssl](https://github.com/openssl/openssl)*
 - *[http-parser](https://github.com/nodejs/http-parser)*
 - *[zlib](https://github.com/madler/zlib)*
+- *[brotli](https://github.com/google/brotli)*
 - *[kcp](https://github.com/skywind3000/kcp)*
 
 ## Third-party Extension Projects
 
 - *[HP-Socket for MacOS](https://gitee.com/xin_chong/HP-Socket-for-macOS)*
 - *[HP-Socket for .Net](https://gitee.com/int2e/HPSocket.Net)*
+
+## Technical Exchange Group
+
+- *[QQ Group - 1](https://shang.qq.com/wpa/qunwpa?idkey=2b69b6331192137e82cf87fc501345f491f53997cd052405cc2f1183c1039b46)*
+- *[QQ Group - 2](https://shang.qq.com/wpa/qunwpa?idkey=3de8949938b69e213ffc42a18f066abd935f9dd4dc67e6230e7e75450b9a7dee)*
 
 ## Donation
 

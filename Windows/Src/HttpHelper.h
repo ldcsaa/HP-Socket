@@ -1,9 +1,9 @@
-/*
+ï»¿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
  * Website	: https://github.com/ldcsaa
- * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 44636872, 75375912
@@ -33,8 +33,8 @@
 #include "../Common/Src/http/http_parser.h"
 
 /************************************************************************
-Ãû³Æ£ºHTTP È«¾Ö³£Á¿
-ÃèÊö£ºÉùÃ÷ HTTP ×é¼şµÄ¹«¹²È«¾Ö³£Á¿
+åç§°ï¼šHTTP å…¨å±€å¸¸é‡
+æè¿°ï¼šå£°æ˜ HTTP ç»„ä»¶çš„å…¬å…±å…¨å±€å¸¸é‡
 ************************************************************************/
 
 #define HTTP_DEFAULT_PORT					80
@@ -373,7 +373,7 @@ private:
 
 // ------------------------------------------------------------------------------------------------------------- //
 
-/* Http ÉÏÏÂÎÄ½á¹¹ */
+/* Http ä¸Šä¸‹æ–‡ç»“æ„ */
 template<class T, class S> struct THttpObjT
 {
 public:

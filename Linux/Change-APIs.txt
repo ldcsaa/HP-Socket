@@ -1,4 +1,15 @@
 ﻿# ======================================== #
+HP-Socket v5.7.3 API Update List:
+# ======================================== #
+--------------------
+1. Global:
+--------------------
+SYS_BrotliCompress							(ADD)
+SYS_BrotliCompressEx						(ADD)
+SYS_BrotliUncompress						(ADD)
+SYS_BrotliGuessCompressBound				(ADD)
+
+# ======================================== #
 HP-Socket v5.7.1 API Update List:
 # ======================================== #
 --------------------

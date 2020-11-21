@@ -1,9 +1,9 @@
-/*
+ï»¿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
  * Website	: https://github.com/ldcsaa
- * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 44636872, 75375912
@@ -32,44 +32,44 @@
 /*****************************************************************************************************************************************************/
 
 /************************************************************************
-Ãû³Æ£ºË«½Ó¿ÚÄ£°æÀà
-ÃèÊö£º¶¨ÒåË«½Ó¿Ú×ª»»·½·¨
+åç§°ï¼šåŒæŽ¥å£æ¨¡ç‰ˆç±»
+æè¿°ï¼šå®šä¹‰åŒæŽ¥å£è½¬æ¢æ–¹æ³•
 ************************************************************************/
 template<class F, class S> class DualInterface : public F, public S
 {
 public:
 
-	/* this ×ª»»Îª F* */
+	/* this è½¬æ¢ä¸º F* */
 	inline static F* ToF(DualInterface* pThis)
 	{
 		return (F*)(pThis);
 	}
 
-	/* F* ×ª»»Îª this */
+	/* F* è½¬æ¢ä¸º this */
 	inline static DualInterface* FromF(F* pF)
 	{
 		return (DualInterface*)(pF);
 	}
 
-	/* this ×ª»»Îª S* */
+	/* this è½¬æ¢ä¸º S* */
 	inline static S* ToS(DualInterface* pThis)
 	{
 		return (S*)(F2S(ToF(pThis)));
 	}
 
-	/* S* ×ª»»Îª this */
+	/* S* è½¬æ¢ä¸º this */
 	inline static DualInterface* FromS(S* pS)
 	{
 		return FromF(S2F(pS));
 	}
 
-	/* S* ×ª»»Îª F* */
+	/* S* è½¬æ¢ä¸º F* */
 	inline static F* S2F(S* pS)
 	{
 		return (F*)((char*)pS - sizeof(F));
 	}
 
-	/* F* ×ª»»Îª S* */
+	/* F* è½¬æ¢ä¸º S* */
 	inline static S* F2S(F* pF)
 	{
 		return (S*)((char*)pF + sizeof(F));
@@ -80,207 +80,207 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£º¸´ºÏ Socket ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå¸´ºÏ Socket ×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨£¬¸´ºÏ Socket ×é¼þÍ¬Ê±¹ÜÀí¶à¸ö Socket Á¬½Ó
+åç§°ï¼šå¤åˆ Socket ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰å¤åˆ Socket ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•ï¼Œå¤åˆ Socket ç»„ä»¶åŒæ—¶ç®¡ç†å¤šä¸ª Socket è¿žæŽ¥
 ************************************************************************/
 class IComplexSocket
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º¹Ø±ÕÍ¨ÐÅ×é¼þ
-	* ÃèÊö£º¹Ø±ÕÍ¨ÐÅ×é¼þ£¬¹Ø±ÕÍê³Éºó¶Ï¿ªËùÓÐÁ¬½Ó²¢ÊÍ·ÅËùÓÐ×ÊÔ´
+	* åç§°ï¼šå…³é—­é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå…³é—­é€šä¿¡ç»„ä»¶ï¼Œå…³é—­å®ŒæˆåŽæ–­å¼€æ‰€æœ‰è¿žæŽ¥å¹¶é‡Šæ”¾æ‰€æœ‰èµ„æº
 	*		
-	* ²ÎÊý£º	
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š	
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Stop	()																		= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍÊý¾Ý
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍÊý¾Ý
+	* åç§°ï¼šå‘é€æ•°æ®
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€æ•°æ®
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			pBuffer		-- ·¢ËÍ»º³åÇø
-	*			iLength		-- ·¢ËÍ»º³åÇø³¤¶È
-	*			iOffset		-- ·¢ËÍ»º³åÇøÖ¸ÕëÆ«ÒÆÁ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			pBuffer		-- å‘é€ç¼“å†²åŒº
+	*			iLength		-- å‘é€ç¼“å†²åŒºé•¿åº¦
+	*			iOffset		-- å‘é€ç¼“å†²åŒºæŒ‡é’ˆåç§»é‡
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ¶à×éÊý¾Ý
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍ¶à×éÊý¾Ý
-	*		TCP - Ë³Ðò·¢ËÍËùÓÐÊý¾Ý°ü 
-	*		UDP - °ÑËùÓÐÊý¾Ý°ü×éºÏ³ÉÒ»¸öÊý¾Ý°ü·¢ËÍ£¨Êý¾Ý°üµÄ×Ü³¤¶È²»ÄÜ´óÓÚÉèÖÃµÄ UDP °ü×î´ó³¤¶È£© 
+	* åç§°ï¼šå‘é€å¤šç»„æ•°æ®
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€å¤šç»„æ•°æ®
+	*		TCP - é¡ºåºå‘é€æ‰€æœ‰æ•°æ®åŒ… 
+	*		UDP - æŠŠæ‰€æœ‰æ•°æ®åŒ…ç»„åˆæˆä¸€ä¸ªæ•°æ®åŒ…å‘é€ï¼ˆæ•°æ®åŒ…çš„æ€»é•¿åº¦ä¸èƒ½å¤§äºŽè®¾ç½®çš„ UDP åŒ…æœ€å¤§é•¿åº¦ï¼‰ 
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			pBuffers	-- ·¢ËÍ»º³åÇøÊý×é
-	*			iCount		-- ·¢ËÍ»º³åÇøÊýÄ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			pBuffers	-- å‘é€ç¼“å†²åŒºæ•°ç»„
+	*			iCount		-- å‘é€ç¼“å†²åŒºæ•°ç›®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)	= 0;
 
 	/*
-	* Ãû³Æ£ºÔÝÍ£/»Ö¸´½ÓÊÕ
-	* ÃèÊö£ºÔÝÍ£/»Ö¸´Ä³¸öÁ¬½ÓµÄÊý¾Ý½ÓÊÕ¹¤×÷
+	* åç§°ï¼šæš‚åœ/æ¢å¤æŽ¥æ”¶
+	* æè¿°ï¼šæš‚åœ/æ¢å¤æŸä¸ªè¿žæŽ¥çš„æ•°æ®æŽ¥æ”¶å·¥ä½œ
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			bPause		-- TRUE - ÔÝÍ£, FALSE - »Ö¸´
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			bPause		-- TRUE - æš‚åœ, FALSE - æ¢å¤
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥
 	*/
 	virtual BOOL PauseReceive(CONNID dwConnID, BOOL bPause = TRUE)					= 0;
 
 	/*
-	* Ãû³Æ£º¶Ï¿ªÁ¬½Ó
-	* ÃèÊö£º¶Ï¿ªÄ³¸öÁ¬½Ó
+	* åç§°ï¼šæ–­å¼€è¿žæŽ¥
+	* æè¿°ï¼šæ–­å¼€æŸä¸ªè¿žæŽ¥
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			bForce		-- ÊÇ·ñÇ¿ÖÆ¶Ï¿ªÁ¬½Ó
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			bForce		-- æ˜¯å¦å¼ºåˆ¶æ–­å¼€è¿žæŽ¥
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥
 	*/
 	virtual BOOL Disconnect(CONNID dwConnID, BOOL bForce = TRUE)					= 0;
 
 	/*
-	* Ãû³Æ£º¶Ï¿ª³¬Ê±Á¬½Ó
-	* ÃèÊö£º¶Ï¿ª³¬¹ýÖ¸¶¨Ê±³¤µÄÁ¬½Ó
+	* åç§°ï¼šæ–­å¼€è¶…æ—¶è¿žæŽ¥
+	* æè¿°ï¼šæ–­å¼€è¶…è¿‡æŒ‡å®šæ—¶é•¿çš„è¿žæŽ¥
 	*		
-	* ²ÎÊý£º		dwPeriod	-- Ê±³¤£¨ºÁÃë£©
-	*			bForce		-- ÊÇ·ñÇ¿ÖÆ¶Ï¿ªÁ¬½Ó
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü
+	* å‚æ•°ï¼š		dwPeriod	-- æ—¶é•¿ï¼ˆæ¯«ç§’ï¼‰
+	*			bForce		-- æ˜¯å¦å¼ºåˆ¶æ–­å¼€è¿žæŽ¥
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥
 	*/
 	virtual BOOL DisconnectLongConnections(DWORD dwPeriod, BOOL bForce = TRUE)		= 0;
 
 	/*
-	* Ãû³Æ£º¶Ï¿ª¾²Ä¬Á¬½Ó
-	* ÃèÊö£º¶Ï¿ª³¬¹ýÖ¸¶¨Ê±³¤µÄ¾²Ä¬Á¬½Ó
+	* åç§°ï¼šæ–­å¼€é™é»˜è¿žæŽ¥
+	* æè¿°ï¼šæ–­å¼€è¶…è¿‡æŒ‡å®šæ—¶é•¿çš„é™é»˜è¿žæŽ¥
 	*		
-	* ²ÎÊý£º		dwPeriod	-- Ê±³¤£¨ºÁÃë£©
-	*			bForce		-- ÊÇ·ñÇ¿ÖÆ¶Ï¿ªÁ¬½Ó
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü
+	* å‚æ•°ï¼š		dwPeriod	-- æ—¶é•¿ï¼ˆæ¯«ç§’ï¼‰
+	*			bForce		-- æ˜¯å¦å¼ºåˆ¶æ–­å¼€è¿žæŽ¥
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥
 	*/
 	virtual BOOL DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce = TRUE)	= 0;
 
 	/*
-	* Ãû³Æ£ºµÈ´ý
-	* ÃèÊö£ºµÈ´ýÍ¨ÐÅ×é¼þÍ£Ö¹ÔËÐÐ
+	* åç§°ï¼šç­‰å¾…
+	* æè¿°ï¼šç­‰å¾…é€šä¿¡ç»„ä»¶åœæ­¢è¿è¡Œ
 	*		
-	* ²ÎÊý£º		dwMilliseconds	-- ³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º-1£¬ÓÀ²»³¬Ê±£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwMilliseconds	-- è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š-1ï¼Œæ°¸ä¸è¶…æ—¶ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE)								= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÉèÖÃÁ¬½ÓµÄ¸½¼ÓÊý¾Ý
-	* ÃèÊö£ºÊÇ·ñÎªÁ¬½Ó°ó¶¨¸½¼ÓÊý¾Ý»òÕß°ó¶¨Ê²Ã´ÑùµÄÊý¾Ý£¬¾ùÓÉÓ¦ÓÃ³ÌÐò×ÔÉí¾ö¶¨
+	* åç§°ï¼šè®¾ç½®è¿žæŽ¥çš„é™„åŠ æ•°æ®
+	* æè¿°ï¼šæ˜¯å¦ä¸ºè¿žæŽ¥ç»‘å®šé™„åŠ æ•°æ®æˆ–è€…ç»‘å®šä»€ä¹ˆæ ·çš„æ•°æ®ï¼Œå‡ç”±åº”ç”¨ç¨‹åºè‡ªèº«å†³å®š
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			pv			-- Êý¾Ý
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¨ÎÞÐ§µÄÁ¬½Ó ID£©
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			pv			-- æ•°æ®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼ˆæ— æ•ˆçš„è¿žæŽ¥ IDï¼‰
 	*/
 	virtual BOOL SetConnectionExtra		(CONNID dwConnID, PVOID pExtra)			= 0;
 
 	/*
-	* Ãû³Æ£º»ñÈ¡Á¬½ÓµÄ¸½¼ÓÊý¾Ý
-	* ÃèÊö£ºÊÇ·ñÎªÁ¬½Ó°ó¶¨¸½¼ÓÊý¾Ý»òÕß°ó¶¨Ê²Ã´ÑùµÄÊý¾Ý£¬¾ùÓÉÓ¦ÓÃ³ÌÐò×ÔÉí¾ö¶¨
+	* åç§°ï¼šèŽ·å–è¿žæŽ¥çš„é™„åŠ æ•°æ®
+	* æè¿°ï¼šæ˜¯å¦ä¸ºè¿žæŽ¥ç»‘å®šé™„åŠ æ•°æ®æˆ–è€…ç»‘å®šä»€ä¹ˆæ ·çš„æ•°æ®ï¼Œå‡ç”±åº”ç”¨ç¨‹åºè‡ªèº«å†³å®š
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			ppv			-- Êý¾ÝÖ¸Õë
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¨ÎÞÐ§µÄÁ¬½Ó ID£©
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			ppv			-- æ•°æ®æŒ‡é’ˆ
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼ˆæ— æ•ˆçš„è¿žæŽ¥ IDï¼‰
 	*/
 	virtual BOOL GetConnectionExtra		(CONNID dwConnID, PVOID* ppExtra)		= 0;
 
-	/* ¼ì²âÊÇ·ñÎª°²È«Á¬½Ó£¨SSL/HTTPS£© */
+	/* æ£€æµ‹æ˜¯å¦ä¸ºå®‰å…¨è¿žæŽ¥ï¼ˆSSL/HTTPSï¼‰ */
 	virtual BOOL IsSecure				()										= 0;
-	/* ¼ì²éÍ¨ÐÅ×é¼þÊÇ·ñÒÑÆô¶¯ */
+	/* æ£€æŸ¥é€šä¿¡ç»„ä»¶æ˜¯å¦å·²å¯åŠ¨ */
 	virtual BOOL HasStarted				()										= 0;
-	/* ²é¿´Í¨ÐÅ×é¼þµ±Ç°×´Ì¬ */
+	/* æŸ¥çœ‹é€šä¿¡ç»„ä»¶å½“å‰çŠ¶æ€ */
 	virtual EnServiceState GetState		()										= 0;
-	/* »ñÈ¡Á¬½ÓÊý */
+	/* èŽ·å–è¿žæŽ¥æ•° */
 	virtual DWORD GetConnectionCount	()										= 0;
-	/* »ñÈ¡ËùÓÐÁ¬½ÓµÄ CONNID */
+	/* èŽ·å–æ‰€æœ‰è¿žæŽ¥çš„ CONNID */
 	virtual BOOL GetAllConnectionIDs	(CONNID pIDs[], DWORD& dwCount)			= 0;
-	/* »ñÈ¡Ä³¸öÁ¬½ÓÊ±³¤£¨ºÁÃë£© */
+	/* èŽ·å–æŸä¸ªè¿žæŽ¥æ—¶é•¿ï¼ˆæ¯«ç§’ï¼‰ */
 	virtual BOOL GetConnectPeriod		(CONNID dwConnID, DWORD& dwPeriod)		= 0;
-	/* »ñÈ¡Ä³¸öÁ¬½Ó¾²Ä¬Ê±¼ä£¨ºÁÃë£© */
+	/* èŽ·å–æŸä¸ªè¿žæŽ¥é™é»˜æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰ */
 	virtual BOOL GetSilencePeriod		(CONNID dwConnID, DWORD& dwPeriod)		= 0;
-	/* »ñÈ¡Ä³¸öÁ¬½ÓµÄ±¾µØµØÖ·ÐÅÏ¢ */
+	/* èŽ·å–æŸä¸ªè¿žæŽ¥çš„æœ¬åœ°åœ°å€ä¿¡æ¯ */
 	virtual BOOL GetLocalAddress		(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
-	/* »ñÈ¡Ä³¸öÁ¬½ÓµÄÔ¶³ÌµØÖ·ÐÅÏ¢ */
+	/* èŽ·å–æŸä¸ªè¿žæŽ¥çš„è¿œç¨‹åœ°å€ä¿¡æ¯ */
 	virtual BOOL GetRemoteAddress		(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
-	/* »ñÈ¡×î½üÒ»´ÎÊ§°Ü²Ù×÷µÄ´íÎó´úÂë */
+	/* èŽ·å–æœ€è¿‘ä¸€æ¬¡å¤±è´¥æ“ä½œçš„é”™è¯¯ä»£ç  */
 	virtual EnSocketError GetLastError	()										= 0;
-	/* »ñÈ¡×î½üÒ»´ÎÊ§°Ü²Ù×÷µÄ´íÎóÃèÊö */
+	/* èŽ·å–æœ€è¿‘ä¸€æ¬¡å¤±è´¥æ“ä½œçš„é”™è¯¯æè¿° */
 	virtual LPCTSTR GetLastErrorDesc	()										= 0;
-	/* »ñÈ¡Á¬½ÓÖÐÎ´·¢³öÊý¾ÝµÄ³¤¶È */
+	/* èŽ·å–è¿žæŽ¥ä¸­æœªå‘å‡ºæ•°æ®çš„é•¿åº¦ */
 	virtual BOOL GetPendingDataLength	(CONNID dwConnID, int& iPending)		= 0;
-	/* »ñÈ¡Á¬½ÓµÄÊý¾Ý½ÓÊÕ×´Ì¬ */
+	/* èŽ·å–è¿žæŽ¥çš„æ•°æ®æŽ¥æ”¶çŠ¶æ€ */
 	virtual BOOL IsPauseReceive			(CONNID dwConnID, BOOL& bPaused)		= 0;
-	/* ¼ì²âÊÇ·ñÓÐÐ§Á¬½Ó */
+	/* æ£€æµ‹æ˜¯å¦æœ‰æ•ˆè¿žæŽ¥ */
 	virtual BOOL IsConnected			(CONNID dwConnID)						= 0;
 
-	/* ÉèÖÃµØÖ·ÖØÓÃÑ¡Ïî */
+	/* è®¾ç½®åœ°å€é‡ç”¨é€‰é¡¹ */
 	virtual void SetReuseAddressPolicy(EnReuseAddressPolicy enReusePolicy)		= 0;
-	/* ÉèÖÃÊý¾Ý·¢ËÍ²ßÂÔ */
+	/* è®¾ç½®æ•°æ®å‘é€ç­–ç•¥ */
 	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)			= 0;
-	/* ÉèÖÃ OnSend ÊÂ¼þÍ¬²½²ßÂÔ£¨Ä¬ÈÏ£ºOSSP_NONE£¬²»Í¬²½£© */
+	/* è®¾ç½® OnSend äº‹ä»¶åŒæ­¥ç­–ç•¥ï¼ˆé»˜è®¤ï¼šOSSP_NONEï¼Œä¸åŒæ­¥ï¼‰ */
 	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enSyncPolicy)	= 0;
-	/* ÉèÖÃ×î´óÁ¬½ÓÊý£¨×é¼þ»á¸ù¾ÝÉèÖÃÖµÔ¤·ÖÅäÄÚ´æ£¬Òò´ËÐèÒª¸ù¾ÝÊµ¼ÊÇé¿öÉèÖÃ£¬²»ÒË¹ý´ó£©*/
+	/* è®¾ç½®æœ€å¤§è¿žæŽ¥æ•°ï¼ˆç»„ä»¶ä¼šæ ¹æ®è®¾ç½®å€¼é¢„åˆ†é…å†…å­˜ï¼Œå› æ­¤éœ€è¦æ ¹æ®å®žé™…æƒ…å†µè®¾ç½®ï¼Œä¸å®œè¿‡å¤§ï¼‰*/
 	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)		= 0;
-	/* ÉèÖÃ Socket »º´æ¶ÔÏóËø¶¨Ê±¼ä£¨ºÁÃë£¬ÔÚËø¶¨ÆÚ¼ä¸Ã Socket »º´æ¶ÔÏó²»ÄÜ±»»ñÈ¡Ê¹ÓÃ£© */
+	/* è®¾ç½® Socket ç¼“å­˜å¯¹è±¡é”å®šæ—¶é—´ï¼ˆæ¯«ç§’ï¼Œåœ¨é”å®šæœŸé—´è¯¥ Socket ç¼“å­˜å¯¹è±¡ä¸èƒ½è¢«èŽ·å–ä½¿ç”¨ï¼‰ */
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)		= 0;
-	/* ÉèÖÃ Socket »º´æ³Ø´óÐ¡£¨Í¨³£ÉèÖÃÎªÆ½¾ù²¢·¢Á¬½ÓÊýµÄ 1/3 - 1/2£© */
+	/* è®¾ç½® Socket ç¼“å­˜æ± å¤§å°ï¼ˆé€šå¸¸è®¾ç½®ä¸ºå¹³å‡å¹¶å‘è¿žæŽ¥æ•°çš„ 1/3 - 1/2ï¼‰ */
 	virtual void SetFreeSocketObjPool		(DWORD dwFreeSocketObjPool)			= 0;
-	/* ÉèÖÃÄÚ´æ¿é»º´æ³Ø´óÐ¡£¨Í¨³£ÉèÖÃÎª Socket »º´æ³Ø´óÐ¡µÄ 2 - 3 ±¶£© */
+	/* è®¾ç½®å†…å­˜å—ç¼“å­˜æ± å¤§å°ï¼ˆé€šå¸¸è®¾ç½®ä¸º Socket ç¼“å­˜æ± å¤§å°çš„ 2 - 3 å€ï¼‰ */
 	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)			= 0;
-	/* ÉèÖÃ Socket »º´æ³Ø»ØÊÕ·§Öµ£¨Í¨³£ÉèÖÃÎª Socket »º´æ³Ø´óÐ¡µÄ 3 ±¶£© */
+	/* è®¾ç½® Socket ç¼“å­˜æ± å›žæ”¶é˜€å€¼ï¼ˆé€šå¸¸è®¾ç½®ä¸º Socket ç¼“å­˜æ± å¤§å°çš„ 3 å€ï¼‰ */
 	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)			= 0;
-	/* ÉèÖÃÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+	/* è®¾ç½®å†…å­˜å—ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)			= 0;
-	/* ÉèÖÃ¹¤×÷Ïß³ÌÊýÁ¿£¨Í¨³£ÉèÖÃÎª 2 * CPU + 2£© */
+	/* è®¾ç½®å·¥ä½œçº¿ç¨‹æ•°é‡ï¼ˆé€šå¸¸è®¾ç½®ä¸º 2 * CPU + 2ï¼‰ */
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)			= 0;
-	/* ÉèÖÃÊÇ·ñ±ê¼Ç¾²Ä¬Ê±¼ä£¨ÉèÖÃÎª TRUE Ê± DisconnectSilenceConnections() ºÍ GetSilencePeriod() ²ÅÓÐÐ§£¬Ä¬ÈÏ£ºTRUE£© */
+	/* è®¾ç½®æ˜¯å¦æ ‡è®°é™é»˜æ—¶é—´ï¼ˆè®¾ç½®ä¸º TRUE æ—¶ DisconnectSilenceConnections() å’Œ GetSilencePeriod() æ‰æœ‰æ•ˆï¼Œé»˜è®¤ï¼šTRUEï¼‰ */
 	virtual void SetMarkSilence				(BOOL bMarkSilence)					= 0;
 
-	/* »ñÈ¡µØÖ·ÖØÓÃÑ¡Ïî */
+	/* èŽ·å–åœ°å€é‡ç”¨é€‰é¡¹ */
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	= 0;
-	/* »ñÈ¡Êý¾Ý·¢ËÍ²ßÂÔ */
+	/* èŽ·å–æ•°æ®å‘é€ç­–ç•¥ */
 	virtual EnSendPolicy GetSendPolicy					()	= 0;
-	/* »ñÈ¡ OnSend ÊÂ¼þÍ¬²½²ßÂÔ */
+	/* èŽ·å– OnSend äº‹ä»¶åŒæ­¥ç­–ç•¥ */
 	virtual EnOnSendSyncPolicy GetOnSendSyncPolicy		()	= 0;
-	/* »ñÈ¡×î´óÁ¬½ÓÊý */
+	/* èŽ·å–æœ€å¤§è¿žæŽ¥æ•° */
 	virtual DWORD GetMaxConnectionCount					()	= 0;
-	/* »ñÈ¡ Socket »º´æ¶ÔÏóËø¶¨Ê±¼ä */
+	/* èŽ·å– Socket ç¼“å­˜å¯¹è±¡é”å®šæ—¶é—´ */
 	virtual DWORD GetFreeSocketObjLockTime				()	= 0;
-	/* »ñÈ¡ Socket »º´æ³Ø´óÐ¡ */
+	/* èŽ·å– Socket ç¼“å­˜æ± å¤§å° */
 	virtual DWORD GetFreeSocketObjPool					()	= 0;
-	/* »ñÈ¡ÄÚ´æ¿é»º´æ³Ø´óÐ¡ */
+	/* èŽ·å–å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 	virtual DWORD GetFreeBufferObjPool					()	= 0;
-	/* »ñÈ¡ Socket »º´æ³Ø»ØÊÕ·§Öµ */
+	/* èŽ·å– Socket ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual DWORD GetFreeSocketObjHold					()	= 0;
-	/* »ñÈ¡ÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+	/* èŽ·å–å†…å­˜å—ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual DWORD GetFreeBufferObjHold					()	= 0;
-	/* »ñÈ¡¹¤×÷Ïß³ÌÊýÁ¿ */
+	/* èŽ·å–å·¥ä½œçº¿ç¨‹æ•°é‡ */
 	virtual DWORD GetWorkerThreadCount					()	= 0;
-	/* ¼ì²âÊÇ·ñ±ê¼Ç¾²Ä¬Ê±¼ä */
+	/* æ£€æµ‹æ˜¯å¦æ ‡è®°é™é»˜æ—¶é—´ */
 	virtual BOOL IsMarkSilence							()	= 0;
 
 public:
@@ -288,153 +288,153 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºÍ¨ÐÅ·þÎñ¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨ÒåÍ¨ÐÅ·þÎñ¶Ë×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šé€šä¿¡æœåŠ¡ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰é€šä¿¡æœåŠ¡ç«¯ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IServer : public IComplexSocket
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÆô¶¯Í¨ÐÅ×é¼þ
-	* ÃèÊö£ºÆô¶¯·þÎñ¶ËÍ¨ÐÅ×é¼þ£¬Æô¶¯Íê³Éºó¿É¿ªÊ¼½ÓÊÕ¿Í»§¶ËÁ¬½Ó²¢ÊÕ·¢Êý¾Ý
+	* åç§°ï¼šå¯åŠ¨é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå¯åŠ¨æœåŠ¡ç«¯é€šä¿¡ç»„ä»¶ï¼Œå¯åŠ¨å®ŒæˆåŽå¯å¼€å§‹æŽ¥æ”¶å®¢æˆ·ç«¯è¿žæŽ¥å¹¶æ”¶å‘æ•°æ®
 	*		
-	* ²ÎÊý£º		lpszBindAddress	-- ¼àÌýµØÖ·
-	*			usPort			-- ¼àÌý¶Ë¿Ú
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszBindAddress	-- ç›‘å¬åœ°å€
+	*			usPort			-- ç›‘å¬ç«¯å£
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort)							= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* »ñÈ¡¼àÌý Socket µÄµØÖ·ÐÅÏ¢ */
+	/* èŽ·å–ç›‘å¬ Socket çš„åœ°å€ä¿¡æ¯ */
 	virtual BOOL GetListenAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP Í¨ÐÅ·þÎñ¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå TCP Í¨ÐÅ·þÎñ¶Ë×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šTCP é€šä¿¡æœåŠ¡ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ TCP é€šä¿¡æœåŠ¡ç«¯ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class ITcpServer : public IServer
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍÐ¡ÎÄ¼þ
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍ 4096 KB ÒÔÏÂµÄÐ¡ÎÄ¼þ
+	* åç§°ï¼šå‘é€å°æ–‡ä»¶
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€ 4096 KB ä»¥ä¸‹çš„å°æ–‡ä»¶
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			lpszFileName	-- ÎÄ¼þÂ·¾¶
-	*			pHead			-- Í·²¿¸½¼ÓÊý¾Ý
-	*			pTail			-- Î²²¿¸½¼ÓÊý¾Ý
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			lpszFileName	-- æ–‡ä»¶è·¯å¾„
+	*			pHead			-- å¤´éƒ¨é™„åŠ æ•°æ®
+	*			pTail			-- å°¾éƒ¨é™„åŠ æ•°æ®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 #ifdef _SSL_SUPPORT
 	/*
-	* Ãû³Æ£º³õÊ¼»¯Í¨ÐÅ×é¼þ SSL »·¾³²ÎÊý
-	* ÃèÊö£ºSSL »·¾³²ÎÊý±ØÐëÔÚ SSL Í¨ÐÅ×é¼þÆô¶¯Ç°Íê³É³õÊ¼»¯£¬·ñÔòÆô¶¯Ê§°Ü
+	* åç§°ï¼šåˆå§‹åŒ–é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°
+	* æè¿°ï¼šSSL çŽ¯å¢ƒå‚æ•°å¿…é¡»åœ¨ SSL é€šä¿¡ç»„ä»¶å¯åŠ¨å‰å®Œæˆåˆå§‹åŒ–ï¼Œå¦åˆ™å¯åŠ¨å¤±è´¥
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCertFile			-- Ö¤ÊéÎÄ¼þ
-	*			lpszPemKeyFile			-- Ë½Ô¿ÎÄ¼þ
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCertFileOrPath	-- CA Ö¤ÊéÎÄ¼þ»òÄ¿Â¼£¨µ¥ÏòÑéÖ¤»ò¿Í»§¶Ë¿ÉÑ¡£©
-	*			fnServerNameCallback	-- SNI »Øµ÷º¯ÊýÖ¸Õë£¨¿ÉÑ¡£¬Èç¹ûÎª nullptr ÔòÊ¹ÓÃ SNI Ä¬ÈÏ»Øµ÷º¯Êý£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCertFile			-- è¯ä¹¦æ–‡ä»¶
+	*			lpszPemKeyFile			-- ç§é’¥æ–‡ä»¶
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCertFileOrPath	-- CA è¯ä¹¦æ–‡ä»¶æˆ–ç›®å½•ï¼ˆå•å‘éªŒè¯æˆ–å®¢æˆ·ç«¯å¯é€‰ï¼‰
+	*			fnServerNameCallback	-- SNI å›žè°ƒå‡½æ•°æŒ‡é’ˆï¼ˆå¯é€‰ï¼Œå¦‚æžœä¸º nullptr åˆ™ä½¿ç”¨ SNI é»˜è®¤å›žè°ƒå‡½æ•°ï¼‰
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)	= 0;
 
 	/*
-	* Ãû³Æ£º³õÊ¼»¯Í¨ÐÅ×é¼þ SSL »·¾³²ÎÊý£¨Í¨¹ýÄÚ´æ¼ÓÔØÖ¤Êé£©
-	* ÃèÊö£ºSSL »·¾³²ÎÊý±ØÐëÔÚ SSL Í¨ÐÅ×é¼þÆô¶¯Ç°Íê³É³õÊ¼»¯£¬·ñÔòÆô¶¯Ê§°Ü
+	* åç§°ï¼šåˆå§‹åŒ–é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°ï¼ˆé€šè¿‡å†…å­˜åŠ è½½è¯ä¹¦ï¼‰
+	* æè¿°ï¼šSSL çŽ¯å¢ƒå‚æ•°å¿…é¡»åœ¨ SSL é€šä¿¡ç»„ä»¶å¯åŠ¨å‰å®Œæˆåˆå§‹åŒ–ï¼Œå¦åˆ™å¯åŠ¨å¤±è´¥
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCert				-- Ö¤ÊéÄÚÈÝ
-	*			lpszPemKey				-- Ë½Ô¿ÄÚÈÝ
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCert			-- CA Ö¤ÊéÄÚÈÝ£¨µ¥ÏòÑéÖ¤»ò¿Í»§¶Ë¿ÉÑ¡£©
-	*			fnServerNameCallback	-- SNI »Øµ÷º¯ÊýÖ¸Õë£¨¿ÉÑ¡£¬Èç¹ûÎª nullptr ÔòÊ¹ÓÃ SNI Ä¬ÈÏ»Øµ÷º¯Êý£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCert				-- è¯ä¹¦å†…å®¹
+	*			lpszPemKey				-- ç§é’¥å†…å®¹
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCert			-- CA è¯ä¹¦å†…å®¹ï¼ˆå•å‘éªŒè¯æˆ–å®¢æˆ·ç«¯å¯é€‰ï¼‰
+	*			fnServerNameCallback	-- SNI å›žè°ƒå‡½æ•°æŒ‡é’ˆï¼ˆå¯é€‰ï¼Œå¦‚æžœä¸º nullptr åˆ™ä½¿ç”¨ SNI é»˜è®¤å›žè°ƒå‡½æ•°ï¼‰
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr, Fn_SNI_ServerNameCallback fnServerNameCallback = nullptr)				= 0;
 
 	/*
-	* Ãû³Æ£ºÔö¼Ó SNI Ö÷»úÖ¤Êé
-	* ÃèÊö£ºSSL ·þÎñ¶ËÔÚ SetupSSLContext() ³É¹¦ºó¿ÉÒÔµ÷ÓÃ±¾·½·¨Ôö¼Ó¶à¸ö SNI Ö÷»úÖ¤Êé
+	* åç§°ï¼šå¢žåŠ  SNI ä¸»æœºè¯ä¹¦
+	* æè¿°ï¼šSSL æœåŠ¡ç«¯åœ¨ SetupSSLContext() æˆåŠŸåŽå¯ä»¥è°ƒç”¨æœ¬æ–¹æ³•å¢žåŠ å¤šä¸ª SNI ä¸»æœºè¯ä¹¦
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCertFile			-- Ö¤ÊéÎÄ¼þ
-	*			lpszPemKeyFile			-- Ë½Ô¿ÎÄ¼þ
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCertFileOrPath	-- CA Ö¤ÊéÎÄ¼þ»òÄ¿Â¼£¨µ¥ÏòÑéÖ¤¿ÉÑ¡£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCertFile			-- è¯ä¹¦æ–‡ä»¶
+	*			lpszPemKeyFile			-- ç§é’¥æ–‡ä»¶
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCertFileOrPath	-- CA è¯ä¹¦æ–‡ä»¶æˆ–ç›®å½•ï¼ˆå•å‘éªŒè¯å¯é€‰ï¼‰
 	*
-	* ·µ»ØÖµ£º	ÕýÊý		-- ³É¹¦£¬²¢·µ»Ø SNI Ö÷»úÖ¤Êé¶ÔÓ¦µÄË÷Òý£¬¸ÃË÷ÒýÓÃÓÚÔÚ SNI »Øµ÷º¯ÊýÖÐ¶¨Î» SNI Ö÷»ú
-	*			¸ºÊý		-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	æ­£æ•°		-- æˆåŠŸï¼Œå¹¶è¿”å›ž SNI ä¸»æœºè¯ä¹¦å¯¹åº”çš„ç´¢å¼•ï¼Œè¯¥ç´¢å¼•ç”¨äºŽåœ¨ SNI å›žè°ƒå‡½æ•°ä¸­å®šä½ SNI ä¸»æœº
+	*			è´Ÿæ•°		-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual int AddSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)																= 0;
 
 	/*
-	* Ãû³Æ£ºÔö¼Ó SNI Ö÷»úÖ¤Êé£¨Í¨¹ýÄÚ´æ¼ÓÔØÖ¤Êé£©
-	* ÃèÊö£ºSSL ·þÎñ¶ËÔÚ SetupSSLContext() ³É¹¦ºó¿ÉÒÔµ÷ÓÃ±¾·½·¨Ôö¼Ó¶à¸ö SNI Ö÷»úÖ¤Êé
+	* åç§°ï¼šå¢žåŠ  SNI ä¸»æœºè¯ä¹¦ï¼ˆé€šè¿‡å†…å­˜åŠ è½½è¯ä¹¦ï¼‰
+	* æè¿°ï¼šSSL æœåŠ¡ç«¯åœ¨ SetupSSLContext() æˆåŠŸåŽå¯ä»¥è°ƒç”¨æœ¬æ–¹æ³•å¢žåŠ å¤šä¸ª SNI ä¸»æœºè¯ä¹¦
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCert				-- Ö¤ÊéÄÚÈÝ
-	*			lpszPemKey				-- Ë½Ô¿ÄÚÈÝ
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCert			-- CA Ö¤ÊéÄÚÈÝ£¨µ¥ÏòÑéÖ¤¿ÉÑ¡£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCert				-- è¯ä¹¦å†…å®¹
+	*			lpszPemKey				-- ç§é’¥å†…å®¹
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCert			-- CA è¯ä¹¦å†…å®¹ï¼ˆå•å‘éªŒè¯å¯é€‰ï¼‰
 	*
-	* ·µ»ØÖµ£º	ÕýÊý		-- ³É¹¦£¬²¢·µ»Ø SNI Ö÷»úÖ¤Êé¶ÔÓ¦µÄË÷Òý£¬¸ÃË÷ÒýÓÃÓÚÔÚ SNI »Øµ÷º¯ÊýÖÐ¶¨Î» SNI Ö÷»ú
-	*			¸ºÊý		-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	æ­£æ•°		-- æˆåŠŸï¼Œå¹¶è¿”å›ž SNI ä¸»æœºè¯ä¹¦å¯¹åº”çš„ç´¢å¼•ï¼Œè¯¥ç´¢å¼•ç”¨äºŽåœ¨ SNI å›žè°ƒå‡½æ•°ä¸­å®šä½ SNI ä¸»æœº
+	*			è´Ÿæ•°		-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual int AddSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)																			= 0;
 
 	/*
-	* Ãû³Æ£º°ó¶¨ SNI Ö÷»úÓòÃû
-	* ÃèÊö£ºSSL ·þÎñ¶ËÔÚ AddSSLContext() ³É¹¦ºó¿ÉÒÔµ÷ÓÃ±¾·½·¨°ó¶¨Ö÷»úÓòÃûµ½ SNI Ö÷»úÖ¤Êé
+	* åç§°ï¼šç»‘å®š SNI ä¸»æœºåŸŸå
+	* æè¿°ï¼šSSL æœåŠ¡ç«¯åœ¨ AddSSLContext() æˆåŠŸåŽå¯ä»¥è°ƒç”¨æœ¬æ–¹æ³•ç»‘å®šä¸»æœºåŸŸååˆ° SNI ä¸»æœºè¯ä¹¦
 	*		
-	* ²ÎÊý£º		lpszServerName		-- Ö÷»úÓòÃû
-	*			iContextIndex		-- SNI Ö÷»úÖ¤Êé¶ÔÓ¦µÄË÷Òý
+	* å‚æ•°ï¼š		lpszServerName		-- ä¸»æœºåŸŸå
+	*			iContextIndex		-- SNI ä¸»æœºè¯ä¹¦å¯¹åº”çš„ç´¢å¼•
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL BindSSLServerName(LPCTSTR lpszServerName, int iContextIndex)	= 0;
 
 	/*
-	* Ãû³Æ£ºÇåÀíÍ¨ÐÅ×é¼þ SSL ÔËÐÐ»·¾³
-	* ÃèÊö£ºÇåÀíÍ¨ÐÅ×é¼þ SSL ÔËÐÐ»·¾³£¬»ØÊÕ SSL Ïà¹ØÄÚ´æ
-	*		1¡¢Í¨ÐÅ×é¼þÎö¹¹Ê±»á×Ô¶¯µ÷ÓÃ±¾·½·¨
-	*		2¡¢µ±ÒªÖØÐÂÉèÖÃÍ¨ÐÅ×é¼þ SSL »·¾³²ÎÊýÊ±£¬ÐèÒªÏÈµ÷ÓÃ±¾·½·¨ÇåÀíÔ­ÏÈµÄ»·¾³²ÎÊý
+	* åç§°ï¼šæ¸…ç†é€šä¿¡ç»„ä»¶ SSL è¿è¡ŒçŽ¯å¢ƒ
+	* æè¿°ï¼šæ¸…ç†é€šä¿¡ç»„ä»¶ SSL è¿è¡ŒçŽ¯å¢ƒï¼Œå›žæ”¶ SSL ç›¸å…³å†…å­˜
+	*		1ã€é€šä¿¡ç»„ä»¶æžæž„æ—¶ä¼šè‡ªåŠ¨è°ƒç”¨æœ¬æ–¹æ³•
+	*		2ã€å½“è¦é‡æ–°è®¾ç½®é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°æ—¶ï¼Œéœ€è¦å…ˆè°ƒç”¨æœ¬æ–¹æ³•æ¸…ç†åŽŸå…ˆçš„çŽ¯å¢ƒå‚æ•°
 	*		
-	* ²ÎÊý£º	ÎÞ
+	* å‚æ•°ï¼š	æ— 
 	* 
-	* ·µ»ØÖµ£ºÎÞ
+	* è¿”å›žå€¼ï¼šæ— 
 	*/
 	virtual void CleanupSSLContext()											= 0;
 
 	/*
-	* Ãû³Æ£ºÆô¶¯ SSL ÎÕÊÖ
-	* ÃèÊö£ºµ±Í¨ÐÅ×é¼þÉèÖÃÎª·Ç×Ô¶¯ÎÕÊÖÊ±£¬ÐèÒªµ÷ÓÃ±¾·½·¨Æô¶¯ SSL ÎÕÊÖ
+	* åç§°ï¼šå¯åŠ¨ SSL æ¡æ‰‹
+	* æè¿°ï¼šå½“é€šä¿¡ç»„ä»¶è®¾ç½®ä¸ºéžè‡ªåŠ¨æ¡æ‰‹æ—¶ï¼Œéœ€è¦è°ƒç”¨æœ¬æ–¹æ³•å¯åŠ¨ SSL æ¡æ‰‹
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL StartSSLHandShake(CONNID dwConnID)						= 0;
 
@@ -443,47 +443,47 @@ public:
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃ Accept Ô¤Í¶µÝÊýÁ¿£¨¸ù¾Ý¸ºÔØµ÷ÕûÉèÖÃ£¬Accept Ô¤Í¶µÝÊýÁ¿Ô½´óÔòÖ§³ÖµÄ²¢·¢Á¬½ÓÇëÇóÔ½¶à£© */
+	/* è®¾ç½® Accept é¢„æŠ•é€’æ•°é‡ï¼ˆæ ¹æ®è´Ÿè½½è°ƒæ•´è®¾ç½®ï¼ŒAccept é¢„æŠ•é€’æ•°é‡è¶Šå¤§åˆ™æ”¯æŒçš„å¹¶å‘è¿žæŽ¥è¯·æ±‚è¶Šå¤šï¼‰ */
 	virtual void SetAcceptSocketCount	(DWORD dwAcceptSocketCount)		= 0;
-	/* ÉèÖÃÍ¨ÐÅÊý¾Ý»º³åÇø´óÐ¡£¨¸ù¾ÝÆ½¾ùÍ¨ÐÅÊý¾Ý°ü´óÐ¡µ÷ÕûÉèÖÃ£¬Í¨³£ÉèÖÃÎª 1024 µÄ±¶Êý£© */
+	/* è®¾ç½®é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å°ï¼ˆæ ¹æ®å¹³å‡é€šä¿¡æ•°æ®åŒ…å¤§å°è°ƒæ•´è®¾ç½®ï¼Œé€šå¸¸è®¾ç½®ä¸º 1024 çš„å€æ•°ï¼‰ */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
-	/* ÉèÖÃ¼àÌý Socket µÄµÈºò¶ÓÁÐ´óÐ¡£¨¸ù¾Ý²¢·¢Á¬½ÓÊýÁ¿µ÷ÕûÉèÖÃ£© */
+	/* è®¾ç½®ç›‘å¬ Socket çš„ç­‰å€™é˜Ÿåˆ—å¤§å°ï¼ˆæ ¹æ®å¹¶å‘è¿žæŽ¥æ•°é‡è°ƒæ•´è®¾ç½®ï¼‰ */
 	virtual void SetSocketListenQueue	(DWORD dwSocketListenQueue)		= 0;
-	/* ÉèÖÃÕý³£ÐÄÌø°ü¼ä¸ô£¨ºÁÃë£¬0 Ôò²»·¢ËÍÐÄÌø°ü£¬Ä¬ÈÏ£º60 * 1000£© */
+	/* è®¾ç½®æ­£å¸¸å¿ƒè·³åŒ…é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 åˆ™ä¸å‘é€å¿ƒè·³åŒ…ï¼Œé»˜è®¤ï¼š60 * 1000ï¼‰ */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
-	/* ÉèÖÃÒì³£ÐÄÌø°ü¼ä¸ô£¨ºÁÃë£¬0 ²»·¢ËÍÐÄÌø°ü£¬£¬Ä¬ÈÏ£º20 * 1000£¬Èç¹û³¬¹ýÈô¸É´Î [Ä¬ÈÏ£ºWinXP 5 ´Î, Win7 10 ´Î] ¼ì²â²»µ½ÐÄÌøÈ·ÈÏ°üÔòÈÏÎªÒÑ¶ÏÏß£© */
+	/* è®¾ç½®å¼‚å¸¸å¿ƒè·³åŒ…é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 ä¸å‘é€å¿ƒè·³åŒ…ï¼Œï¼Œé»˜è®¤ï¼š20 * 1000ï¼Œå¦‚æžœè¶…è¿‡è‹¥å¹²æ¬¡ [é»˜è®¤ï¼šWinXP 5 æ¬¡, Win7 10 æ¬¡] æ£€æµ‹ä¸åˆ°å¿ƒè·³ç¡®è®¤åŒ…åˆ™è®¤ä¸ºå·²æ–­çº¿ï¼‰ */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
 
-	/* »ñÈ¡ Accept Ô¤Í¶µÝÊýÁ¿ */
+	/* èŽ·å– Accept é¢„æŠ•é€’æ•°é‡ */
 	virtual DWORD GetAcceptSocketCount	()	= 0;
-	/* »ñÈ¡Í¨ÐÅÊý¾Ý»º³åÇø´óÐ¡ */
+	/* èŽ·å–é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å° */
 	virtual DWORD GetSocketBufferSize	()	= 0;
-	/* »ñÈ¡¼àÌý Socket µÄµÈºò¶ÓÁÐ´óÐ¡ */
+	/* èŽ·å–ç›‘å¬ Socket çš„ç­‰å€™é˜Ÿåˆ—å¤§å° */
 	virtual DWORD GetSocketListenQueue	()	= 0;
-	/* »ñÈ¡Õý³£ÐÄÌø°ü¼ä¸ô */
+	/* èŽ·å–æ­£å¸¸å¿ƒè·³åŒ…é—´éš” */
 	virtual DWORD GetKeepAliveTime		()	= 0;
-	/* »ñÈ¡Òì³£ÐÄÌø°ü¼ä¸ô */
+	/* èŽ·å–å¼‚å¸¸å¿ƒè·³åŒ…é—´éš” */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
 	
 #ifdef _SSL_SUPPORT
-	/* ÉèÖÃÍ¨ÐÅ×é¼þÎÕÊÖ·½Ê½£¨Ä¬ÈÏ£ºTRUE£¬×Ô¶¯ÎÕÊÖ£© */
+	/* è®¾ç½®é€šä¿¡ç»„ä»¶æ¡æ‰‹æ–¹å¼ï¼ˆé»˜è®¤ï¼šTRUEï¼Œè‡ªåŠ¨æ¡æ‰‹ï¼‰ */
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)				= 0;
-	/* »ñÈ¡Í¨ÐÅ×é¼þÎÕÊÖ·½Ê½ */
+	/* èŽ·å–é€šä¿¡ç»„ä»¶æ¡æ‰‹æ–¹å¼ */
 	virtual BOOL IsSSLAutoHandShake()									= 0;
 
-	/* ÉèÖÃ SSL ¼ÓÃÜËã·¨ÁÐ±í */
+	/* è®¾ç½® SSL åŠ å¯†ç®—æ³•åˆ—è¡¨ */
 	virtual void SetSSLCipherList(LPCTSTR lpszCipherList)				= 0;
-	/* »ñÈ¡ SSL ¼ÓÃÜËã·¨ÁÐ±í */
+	/* èŽ·å– SSL åŠ å¯†ç®—æ³•åˆ—è¡¨ */
 	virtual LPCTSTR GetSSLCipherList()									= 0;
 
 	/*
-	* Ãû³Æ£º»ñÈ¡ SSL Session ÐÅÏ¢
-	* ÃèÊö£º»ñÈ¡Ö¸¶¨ÀàÐÍµÄ SSL Session ÐÅÏ¢£¨Êä³öÀàÐÍ²Î¿¼£ºEnSSLSessionInfo£©
+	* åç§°ï¼šèŽ·å– SSL Session ä¿¡æ¯
+	* æè¿°ï¼šèŽ·å–æŒ‡å®šç±»åž‹çš„ SSL Session ä¿¡æ¯ï¼ˆè¾“å‡ºç±»åž‹å‚è€ƒï¼šEnSSLSessionInfoï¼‰
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo)	= 0;
 #endif
@@ -493,104 +493,104 @@ public:
 #ifdef _UDP_SUPPORT
 
 /************************************************************************
-Ãû³Æ£ºUDP Í¨ÐÅ·þÎñ¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP Í¨ÐÅ·þÎñ¶Ë×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šUDP é€šä¿¡æœåŠ¡ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP é€šä¿¡æœåŠ¡ç«¯ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IUdpServer : public IServer
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊý¾Ý±¨ÎÄ×î´ó³¤¶È£¨½¨ÒéÔÚ¾ÖÓòÍø»·¾³ÏÂ²»³¬¹ý 1432 ×Ö½Ú£¬ÔÚ¹ãÓòÍø»·¾³ÏÂ²»³¬¹ý 548 ×Ö½Ú£© */
+	/* è®¾ç½®æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ï¼ˆå»ºè®®åœ¨å±€åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 1432 å­—èŠ‚ï¼Œåœ¨å¹¿åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 548 å­—èŠ‚ï¼‰ */
 	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)	= 0;
-	/* »ñÈ¡Êý¾Ý±¨ÎÄ×î´ó³¤¶È */
+	/* èŽ·å–æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ */
 	virtual DWORD GetMaxDatagramSize	()							= 0;
 
-	/* ÉèÖÃ Receive Ô¤Í¶µÝÊýÁ¿£¨¸ù¾Ý¸ºÔØµ÷ÕûÉèÖÃ£¬Receive Ô¤Í¶µÝÊýÁ¿Ô½´óÔò¶ª°ü¸ÅÂÊÔ½Ð¡£© */
+	/* è®¾ç½® Receive é¢„æŠ•é€’æ•°é‡ï¼ˆæ ¹æ®è´Ÿè½½è°ƒæ•´è®¾ç½®ï¼ŒReceive é¢„æŠ•é€’æ•°é‡è¶Šå¤§åˆ™ä¸¢åŒ…æ¦‚çŽ‡è¶Šå°ï¼‰ */
 	virtual void SetPostReceiveCount	(DWORD dwPostReceiveCount)	= 0;
-	/* »ñÈ¡ Receive Ô¤Í¶µÝÊýÁ¿ */
+	/* èŽ·å– Receive é¢„æŠ•é€’æ•°é‡ */
 	virtual DWORD GetPostReceiveCount	()							= 0;
 
-	/* ÉèÖÃ¼à²â°ü³¢ÊÔ´ÎÊý£¨0 Ôò²»·¢ËÍ¼à²âÌø°ü£¬Èç¹û³¬¹ý×î´ó³¢ÊÔ´ÎÊýÔòÈÏÎªÒÑ¶ÏÏß£© */
+	/* è®¾ç½®ç›‘æµ‹åŒ…å°è¯•æ¬¡æ•°ï¼ˆ0 åˆ™ä¸å‘é€ç›‘æµ‹è·³åŒ…ï¼Œå¦‚æžœè¶…è¿‡æœ€å¤§å°è¯•æ¬¡æ•°åˆ™è®¤ä¸ºå·²æ–­çº¿ï¼‰ */
 	virtual void SetDetectAttempts		(DWORD dwDetectAttempts)	= 0;
-	/* ÉèÖÃ¼à²â°ü·¢ËÍ¼ä¸ô£¨ºÁÃë£¬0 ²»·¢ËÍ¼à²â°ü£© */
+	/* è®¾ç½®ç›‘æµ‹åŒ…å‘é€é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 ä¸å‘é€ç›‘æµ‹åŒ…ï¼‰ */
 	virtual void SetDetectInterval		(DWORD dwDetectInterval)	= 0;
-	/* »ñÈ¡ÐÄÌø¼ì²é´ÎÊý */
+	/* èŽ·å–å¿ƒè·³æ£€æŸ¥æ¬¡æ•° */
 	virtual DWORD GetDetectAttempts		()							= 0;
-	/* »ñÈ¡ÐÄÌø¼ì²é¼ä¸ô */
+	/* èŽ·å–å¿ƒè·³æ£€æŸ¥é—´éš” */
 	virtual DWORD GetDetectInterval		()							= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºServer/Agent ARQ Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå Server/Agent ×é¼þµÄ ARQ Ä£ÐÍ×é¼þµÄËùÓÐ²Ù×÷·½·¨
+åç§°ï¼šServer/Agent ARQ æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ Server/Agent ç»„ä»¶çš„ ARQ æ¨¡åž‹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•
 ************************************************************************/
 class IArqSocket
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊÇ·ñ¿ªÆô nodelay Ä£Ê½£¨Ä¬ÈÏ£ºFALSE£¬²»¿ªÆô£© */
+	/* è®¾ç½®æ˜¯å¦å¼€å¯ nodelay æ¨¡å¼ï¼ˆé»˜è®¤ï¼šFALSEï¼Œä¸å¼€å¯ï¼‰ */
 	virtual void SetNoDelay				(BOOL bNoDelay)				= 0;
-	/* ÉèÖÃÊÇ·ñ¹Ø±ÕÓµÈû¿ØÖÆ£¨Ä¬ÈÏ£ºFALSE£¬²»¹Ø±Õ£© */
+	/* è®¾ç½®æ˜¯å¦å…³é—­æ‹¥å¡žæŽ§åˆ¶ï¼ˆé»˜è®¤ï¼šFALSEï¼Œä¸å…³é—­ï¼‰ */
 	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				= 0;
-	/* ÉèÖÃÊý¾ÝË¢ÐÂ¼ä¸ô£¨ºÁÃë£¬Ä¬ÈÏ£º60£© */
+	/* è®¾ç½®æ•°æ®åˆ·æ–°é—´éš”ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š60ï¼‰ */
 	virtual void SetFlushInterval		(DWORD dwFlushInterval)		= 0;
-	/* ÉèÖÃ¿ìËÙÖØ´« ACK ¿çÔ½´ÎÊý£¨Ä¬ÈÏ£º0£¬¹Ø±Õ¿ìËÙÖØ´«£© */
+	/* è®¾ç½®å¿«é€Ÿé‡ä¼  ACK è·¨è¶Šæ¬¡æ•°ï¼ˆé»˜è®¤ï¼š0ï¼Œå…³é—­å¿«é€Ÿé‡ä¼ ï¼‰ */
 	virtual void SetResendByAcks		(DWORD dwResendByAcks)		= 0;
-	/* ÉèÖÃ·¢ËÍ´°¿Ú´óÐ¡£¨Êý¾Ý°üÊýÁ¿£¬Ä¬ÈÏ£º128£© */
+	/* è®¾ç½®å‘é€çª—å£å¤§å°ï¼ˆæ•°æ®åŒ…æ•°é‡ï¼Œé»˜è®¤ï¼š128ï¼‰ */
 	virtual void SetSendWndSize			(DWORD dwSendWndSize)		= 0;
-	/* ÉèÖÃ½ÓÊÕ´°¿Ú´óÐ¡£¨Êý¾Ý°üÊýÁ¿£¬Ä¬ÈÏ£º512£© */
+	/* è®¾ç½®æŽ¥æ”¶çª—å£å¤§å°ï¼ˆæ•°æ®åŒ…æ•°é‡ï¼Œé»˜è®¤ï¼š512ï¼‰ */
 	virtual void SetRecvWndSize			(DWORD dwRecvWndSize)		= 0;
-	/* ÉèÖÃ×îÐ¡ÖØ´«³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º30£© */
+	/* è®¾ç½®æœ€å°é‡ä¼ è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š30ï¼‰ */
 	virtual void SetMinRto				(DWORD dwMinRto)			= 0;
-	/* ÉèÖÃ¿ìËÙÎÕÊÖ´ÎÊýÏÞÖÆ£¨Ä¬ÈÏ£º5£¬Èç¹ûÎª 0 Ôò²»ÏÞÖÆ£© */
+	/* è®¾ç½®å¿«é€Ÿæ¡æ‰‹æ¬¡æ•°é™åˆ¶ï¼ˆé»˜è®¤ï¼š5ï¼Œå¦‚æžœä¸º 0 åˆ™ä¸é™åˆ¶ï¼‰ */
 	virtual void SetFastLimit			(DWORD dwFastLimit)			= 0;
-	/* ÉèÖÃ×î´ó´«Êäµ¥Ôª£¨Ä¬ÈÏ£º0£¬Óë SetMaxDatagramSize() Ò»ÖÂ£© */
+	/* è®¾ç½®æœ€å¤§ä¼ è¾“å•å…ƒï¼ˆé»˜è®¤ï¼š0ï¼Œä¸Ž SetMaxDatagramSize() ä¸€è‡´ï¼‰ */
 	virtual void SetMaxTransUnit		(DWORD dwMaxTransUnit)		= 0;
-	/* ÉèÖÃ×î´óÊý¾Ý°ü´óÐ¡£¨Ä¬ÈÏ£º4096£© */
+	/* è®¾ç½®æœ€å¤§æ•°æ®åŒ…å¤§å°ï¼ˆé»˜è®¤ï¼š4096ï¼‰ */
 	virtual void SetMaxMessageSize		(DWORD dwMaxMessageSize)	= 0;
-	/* ÉèÖÃÎÕÊÖ³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º5000£© */
+	/* è®¾ç½®æ¡æ‰‹è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š5000ï¼‰ */
 	virtual void SetHandShakeTimeout	(DWORD dwHandShakeTimeout)	= 0;
 
-	/* ¼ì²âÊÇ·ñ¿ªÆô nodelay Ä£Ê½ */
+	/* æ£€æµ‹æ˜¯å¦å¼€å¯ nodelay æ¨¡å¼ */
 	virtual BOOL IsNoDelay				()							= 0;
-	/* ¼ì²âÊÇ·ñ¹Ø±ÕÓµÈû¿ØÖÆ */
+	/* æ£€æµ‹æ˜¯å¦å…³é—­æ‹¥å¡žæŽ§åˆ¶ */
 	virtual BOOL IsTurnoffCongestCtrl	()							= 0;
-	/* »ñÈ¡Êý¾ÝË¢ÐÂ¼ä¸ô */
+	/* èŽ·å–æ•°æ®åˆ·æ–°é—´éš” */
 	virtual DWORD GetFlushInterval		()							= 0;
-	/* »ñÈ¡¿ìËÙÖØ´« ACK ¿çÔ½´ÎÊý */
+	/* èŽ·å–å¿«é€Ÿé‡ä¼  ACK è·¨è¶Šæ¬¡æ•° */
 	virtual DWORD GetResendByAcks		()							= 0;
-	/* »ñÈ¡·¢ËÍ´°¿Ú´óÐ¡ */
+	/* èŽ·å–å‘é€çª—å£å¤§å° */
 	virtual DWORD GetSendWndSize		()							= 0;
-	/* »ñÈ¡½ÓÊÕ´°¿Ú´óÐ¡ */
+	/* èŽ·å–æŽ¥æ”¶çª—å£å¤§å° */
 	virtual DWORD GetRecvWndSize		()							= 0;
-	/* »ñÈ¡×îÐ¡ÖØ´«³¬Ê±Ê±¼ä */
+	/* èŽ·å–æœ€å°é‡ä¼ è¶…æ—¶æ—¶é—´ */
 	virtual DWORD GetMinRto				()							= 0;
-	/* »ñÈ¡¿ìËÙÎÕÊÖ´ÎÊýÏÞÖÆ */
+	/* èŽ·å–å¿«é€Ÿæ¡æ‰‹æ¬¡æ•°é™åˆ¶ */
 	virtual DWORD GetFastLimit			()							= 0;
-	/* »ñÈ¡×î´ó´«Êäµ¥Ôª */
+	/* èŽ·å–æœ€å¤§ä¼ è¾“å•å…ƒ */
 	virtual DWORD GetMaxTransUnit		()							= 0;
-	/* »ñÈ¡×î´óÊý¾Ý°ü´óÐ¡ */
+	/* èŽ·å–æœ€å¤§æ•°æ®åŒ…å¤§å° */
 	virtual DWORD GetMaxMessageSize		()							= 0;
-	/* »ñÈ¡ÎÕÊÖ³¬Ê±Ê±¼ä */
+	/* èŽ·å–æ¡æ‰‹è¶…æ—¶æ—¶é—´ */
 	virtual DWORD GetHandShakeTimeout	()							= 0;
 
-	/* »ñÈ¡µÈ´ý·¢ËÍ°üÊýÁ¿ */
+	/* èŽ·å–ç­‰å¾…å‘é€åŒ…æ•°é‡ */
 	virtual BOOL GetWaitingSendMessageCount	(CONNID dwConnID, int& iCount)	= 0;
 
 public:
@@ -598,133 +598,133 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ARQ Í¨ÐÅ·þÎñ¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¼Ì³ÐÁË ARQ ºÍ Server ½Ó¿Ú
+åç§°ï¼šUDP ARQ é€šä¿¡æœåŠ¡ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šç»§æ‰¿äº† ARQ å’Œ Server æŽ¥å£
 ************************************************************************/
 typedef	DualInterface<IArqSocket, IUdpServer>	IUdpArqServer;
 
 #endif
 
 /************************************************************************
-Ãû³Æ£ºÍ¨ÐÅ´úÀí×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨ÒåÍ¨ÐÅ´úÀí×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨£¬´úÀí×é¼þ±¾ÖÊÊÇÒ»¸öÍ¬Ê±Á¬½Ó¶à¸ö·þÎñÆ÷µÄ¿Í»§¶Ë×é¼þ
+åç§°ï¼šé€šä¿¡ä»£ç†ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰é€šä¿¡ä»£ç†ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•ï¼Œä»£ç†ç»„ä»¶æœ¬è´¨æ˜¯ä¸€ä¸ªåŒæ—¶è¿žæŽ¥å¤šä¸ªæœåŠ¡å™¨çš„å®¢æˆ·ç«¯ç»„ä»¶
 ************************************************************************/
 class IAgent : public IComplexSocket
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÆô¶¯Í¨ÐÅ×é¼þ
-	* ÃèÊö£ºÆô¶¯Í¨ÐÅ´úÀí×é¼þ£¬Æô¶¯Íê³Éºó¿É¿ªÊ¼Á¬½ÓÔ¶³Ì·þÎñÆ÷
+	* åç§°ï¼šå¯åŠ¨é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå¯åŠ¨é€šä¿¡ä»£ç†ç»„ä»¶ï¼Œå¯åŠ¨å®ŒæˆåŽå¯å¼€å§‹è¿žæŽ¥è¿œç¨‹æœåŠ¡å™¨
 	*		
-	* ²ÎÊý£º		lpszBindAddress	-- °ó¶¨µØÖ·£¨Ä¬ÈÏ£ºnullptr£¬°ó¶¨ÈÎÒâµØÖ·£©
-	*			bAsyncConnect	-- ÊÇ·ñ²ÉÓÃÒì²½ Connect
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszBindAddress	-- ç»‘å®šåœ°å€ï¼ˆé»˜è®¤ï¼šnullptrï¼Œç»‘å®šä»»æ„åœ°å€ï¼‰
+	*			bAsyncConnect	-- æ˜¯å¦é‡‡ç”¨å¼‚æ­¥ Connect
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE)				= 0;
 
 	/*
-	* Ãû³Æ£ºÁ¬½Ó·þÎñÆ÷
-	* ÃèÊö£ºÁ¬½Ó·þÎñÆ÷£¬Á¬½Ó³É¹¦ºó IAgentListener »á½ÓÊÕµ½ OnConnect() / OnHandShake() ÊÂ¼þ
+	* åç§°ï¼šè¿žæŽ¥æœåŠ¡å™¨
+	* æè¿°ï¼šè¿žæŽ¥æœåŠ¡å™¨ï¼Œè¿žæŽ¥æˆåŠŸåŽ IAgentListener ä¼šæŽ¥æ”¶åˆ° OnConnect() / OnHandShake() äº‹ä»¶
 	*		
-	* ²ÎÊý£º		lpszRemoteAddress	-- ·þÎñ¶ËµØÖ·
-	*			usPort				-- ·þÎñ¶Ë¶Ë¿Ú
-	*			pdwConnID			-- Á¬½Ó ID£¨Ä¬ÈÏ£ºnullptr£¬²»»ñÈ¡Á¬½Ó ID£©
-	*			pExtra				-- Á¬½Ó¸½¼ÓÊý¾Ý£¨Ä¬ÈÏ£ºnullptr£©
-	*			usLocalPort			-- ±¾µØ¶Ë¿Ú£¨Ä¬ÈÏ£º0£©
-	*			lpszLocalAddress	-- ±¾µØµØÖ·£¨Ä¬ÈÏ£ºnullptr£¬Ê¹ÓÃ Start() ·½·¨ÖÐ°ó¶¨µÄµØÖ·£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszRemoteAddress	-- æœåŠ¡ç«¯åœ°å€
+	*			usPort				-- æœåŠ¡ç«¯ç«¯å£
+	*			pdwConnID			-- è¿žæŽ¥ IDï¼ˆé»˜è®¤ï¼šnullptrï¼Œä¸èŽ·å–è¿žæŽ¥ IDï¼‰
+	*			pExtra				-- è¿žæŽ¥é™„åŠ æ•°æ®ï¼ˆé»˜è®¤ï¼šnullptrï¼‰
+	*			usLocalPort			-- æœ¬åœ°ç«¯å£ï¼ˆé»˜è®¤ï¼š0ï¼‰
+	*			lpszLocalAddress	-- æœ¬åœ°åœ°å€ï¼ˆé»˜è®¤ï¼šnullptrï¼Œä½¿ç”¨ Start() æ–¹æ³•ä¸­ç»‘å®šçš„åœ°å€ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwConnID = nullptr, PVOID pExtra = nullptr, USHORT usLocalPort = 0, LPCTSTR lpszLocalAddress = nullptr)	= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* »ñÈ¡Ä³¸öÁ¬½ÓµÄÔ¶³ÌÖ÷»úÐÅÏ¢ */
+	/* èŽ·å–æŸä¸ªè¿žæŽ¥çš„è¿œç¨‹ä¸»æœºä¿¡æ¯ */
 	virtual BOOL GetRemoteHost	(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort)	= 0;
 
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP Í¨ÐÅ´úÀí×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå TCP Í¨ÐÅ´úÀí×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šTCP é€šä¿¡ä»£ç†ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ TCP é€šä¿¡ä»£ç†ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class ITcpAgent : public IAgent
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍÐ¡ÎÄ¼þ
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍ 4096 KB ÒÔÏÂµÄÐ¡ÎÄ¼þ
+	* åç§°ï¼šå‘é€å°æ–‡ä»¶
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€ 4096 KB ä»¥ä¸‹çš„å°æ–‡ä»¶
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			lpszFileName	-- ÎÄ¼þÂ·¾¶
-	*			pHead			-- Í·²¿¸½¼ÓÊý¾Ý
-	*			pTail			-- Î²²¿¸½¼ÓÊý¾Ý
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			lpszFileName	-- æ–‡ä»¶è·¯å¾„
+	*			pHead			-- å¤´éƒ¨é™„åŠ æ•°æ®
+	*			pTail			-- å°¾éƒ¨é™„åŠ æ•°æ®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendSmallFile(CONNID dwConnID, LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 #ifdef _SSL_SUPPORT
 	/*
-	* Ãû³Æ£º³õÊ¼»¯Í¨ÐÅ×é¼þ SSL »·¾³²ÎÊý
-	* ÃèÊö£ºSSL »·¾³²ÎÊý±ØÐëÔÚ SSL Í¨ÐÅ×é¼þÆô¶¯Ç°Íê³É³õÊ¼»¯£¬·ñÔòÆô¶¯Ê§°Ü
+	* åç§°ï¼šåˆå§‹åŒ–é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°
+	* æè¿°ï¼šSSL çŽ¯å¢ƒå‚æ•°å¿…é¡»åœ¨ SSL é€šä¿¡ç»„ä»¶å¯åŠ¨å‰å®Œæˆåˆå§‹åŒ–ï¼Œå¦åˆ™å¯åŠ¨å¤±è´¥
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCertFile			-- Ö¤ÊéÎÄ¼þ£¨¿Í»§¶Ë¿ÉÑ¡£©
-	*			lpszPemKeyFile			-- Ë½Ô¿ÎÄ¼þ£¨¿Í»§¶Ë¿ÉÑ¡£©
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCertFileOrPath	-- CA Ö¤ÊéÎÄ¼þ»òÄ¿Â¼£¨µ¥ÏòÑéÖ¤»ò¿Í»§¶Ë¿ÉÑ¡£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCertFile			-- è¯ä¹¦æ–‡ä»¶ï¼ˆå®¢æˆ·ç«¯å¯é€‰ï¼‰
+	*			lpszPemKeyFile			-- ç§é’¥æ–‡ä»¶ï¼ˆå®¢æˆ·ç«¯å¯é€‰ï¼‰
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCertFileOrPath	-- CA è¯ä¹¦æ–‡ä»¶æˆ–ç›®å½•ï¼ˆå•å‘éªŒè¯æˆ–å®¢æˆ·ç«¯å¯é€‰ï¼‰
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	= 0;
 
 	/*
-	* Ãû³Æ£º³õÊ¼»¯Í¨ÐÅ×é¼þ SSL »·¾³²ÎÊý£¨Í¨¹ýÄÚ´æ¼ÓÔØÖ¤Êé£©
-	* ÃèÊö£ºSSL »·¾³²ÎÊý±ØÐëÔÚ SSL Í¨ÐÅ×é¼þÆô¶¯Ç°Íê³É³õÊ¼»¯£¬·ñÔòÆô¶¯Ê§°Ü
+	* åç§°ï¼šåˆå§‹åŒ–é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°ï¼ˆé€šè¿‡å†…å­˜åŠ è½½è¯ä¹¦ï¼‰
+	* æè¿°ï¼šSSL çŽ¯å¢ƒå‚æ•°å¿…é¡»åœ¨ SSL é€šä¿¡ç»„ä»¶å¯åŠ¨å‰å®Œæˆåˆå§‹åŒ–ï¼Œå¦åˆ™å¯åŠ¨å¤±è´¥
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCert				-- Ö¤ÊéÄÚÈÝ
-	*			lpszPemKey				-- Ë½Ô¿ÄÚÈÝ
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCert			-- CA Ö¤ÊéÄÚÈÝ£¨µ¥ÏòÑéÖ¤»ò¿Í»§¶Ë¿ÉÑ¡£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCert				-- è¯ä¹¦å†…å®¹
+	*			lpszPemKey				-- ç§é’¥å†…å®¹
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCert			-- CA è¯ä¹¦å†…å®¹ï¼ˆå•å‘éªŒè¯æˆ–å®¢æˆ·ç«¯å¯é€‰ï¼‰
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)					= 0;
 
 	/*
-	* Ãû³Æ£ºÇåÀíÍ¨ÐÅ×é¼þ SSL ÔËÐÐ»·¾³
-	* ÃèÊö£ºÇåÀíÍ¨ÐÅ×é¼þ SSL ÔËÐÐ»·¾³£¬»ØÊÕ SSL Ïà¹ØÄÚ´æ
-	*		1¡¢Í¨ÐÅ×é¼þÎö¹¹Ê±»á×Ô¶¯µ÷ÓÃ±¾·½·¨
-	*		2¡¢µ±ÒªÖØÐÂÉèÖÃÍ¨ÐÅ×é¼þ SSL »·¾³²ÎÊýÊ±£¬ÐèÒªÏÈµ÷ÓÃ±¾·½·¨ÇåÀíÔ­ÏÈµÄ»·¾³²ÎÊý
+	* åç§°ï¼šæ¸…ç†é€šä¿¡ç»„ä»¶ SSL è¿è¡ŒçŽ¯å¢ƒ
+	* æè¿°ï¼šæ¸…ç†é€šä¿¡ç»„ä»¶ SSL è¿è¡ŒçŽ¯å¢ƒï¼Œå›žæ”¶ SSL ç›¸å…³å†…å­˜
+	*		1ã€é€šä¿¡ç»„ä»¶æžæž„æ—¶ä¼šè‡ªåŠ¨è°ƒç”¨æœ¬æ–¹æ³•
+	*		2ã€å½“è¦é‡æ–°è®¾ç½®é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°æ—¶ï¼Œéœ€è¦å…ˆè°ƒç”¨æœ¬æ–¹æ³•æ¸…ç†åŽŸå…ˆçš„çŽ¯å¢ƒå‚æ•°
 	*		
-	* ²ÎÊý£º	ÎÞ
+	* å‚æ•°ï¼š	æ— 
 	* 
-	* ·µ»ØÖµ£ºÎÞ
+	* è¿”å›žå€¼ï¼šæ— 
 	*/
 	virtual void CleanupSSLContext()									= 0;
 
 	/*
-	* Ãû³Æ£ºÆô¶¯ SSL ÎÕÊÖ
-	* ÃèÊö£ºµ±Í¨ÐÅ×é¼þÉèÖÃÎª·Ç×Ô¶¯ÎÕÊÖÊ±£¬ÐèÒªµ÷ÓÃ±¾·½·¨Æô¶¯ SSL ÎÕÊÖ
+	* åç§°ï¼šå¯åŠ¨ SSL æ¡æ‰‹
+	* æè¿°ï¼šå½“é€šä¿¡ç»„ä»¶è®¾ç½®ä¸ºéžè‡ªåŠ¨æ¡æ‰‹æ—¶ï¼Œéœ€è¦è°ƒç”¨æœ¬æ–¹æ³•å¯åŠ¨ SSL æ¡æ‰‹
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL StartSSLHandShake(CONNID dwConnID)						= 0;
 
@@ -733,39 +733,39 @@ public:
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÍ¨ÐÅÊý¾Ý»º³åÇø´óÐ¡£¨¸ù¾ÝÆ½¾ùÍ¨ÐÅÊý¾Ý°ü´óÐ¡µ÷ÕûÉèÖÃ£¬Í¨³£ÉèÖÃÎª 1024 µÄ±¶Êý£© */
+	/* è®¾ç½®é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å°ï¼ˆæ ¹æ®å¹³å‡é€šä¿¡æ•°æ®åŒ…å¤§å°è°ƒæ•´è®¾ç½®ï¼Œé€šå¸¸è®¾ç½®ä¸º 1024 çš„å€æ•°ï¼‰ */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)		= 0;
-	/* ÉèÖÃÕý³£ÐÄÌø°ü¼ä¸ô£¨ºÁÃë£¬0 Ôò²»·¢ËÍÐÄÌø°ü£¬Ä¬ÈÏ£º60 * 1000£© */
+	/* è®¾ç½®æ­£å¸¸å¿ƒè·³åŒ…é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 åˆ™ä¸å‘é€å¿ƒè·³åŒ…ï¼Œé»˜è®¤ï¼š60 * 1000ï¼‰ */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
-	/* ÉèÖÃÒì³£ÐÄÌø°ü¼ä¸ô£¨ºÁÃë£¬0 ²»·¢ËÍÐÄÌø°ü£¬£¬Ä¬ÈÏ£º20 * 1000£¬Èç¹û³¬¹ýÈô¸É´Î [Ä¬ÈÏ£ºWinXP 5 ´Î, Win7 10 ´Î] ¼ì²â²»µ½ÐÄÌøÈ·ÈÏ°üÔòÈÏÎªÒÑ¶ÏÏß£© */
+	/* è®¾ç½®å¼‚å¸¸å¿ƒè·³åŒ…é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 ä¸å‘é€å¿ƒè·³åŒ…ï¼Œï¼Œé»˜è®¤ï¼š20 * 1000ï¼Œå¦‚æžœè¶…è¿‡è‹¥å¹²æ¬¡ [é»˜è®¤ï¼šWinXP 5 æ¬¡, Win7 10 æ¬¡] æ£€æµ‹ä¸åˆ°å¿ƒè·³ç¡®è®¤åŒ…åˆ™è®¤ä¸ºå·²æ–­çº¿ï¼‰ */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
 
-	/* »ñÈ¡Í¨ÐÅÊý¾Ý»º³åÇø´óÐ¡ */
+	/* èŽ·å–é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å° */
 	virtual DWORD GetSocketBufferSize	()	= 0;
-	/* »ñÈ¡Õý³£ÐÄÌø°ü¼ä¸ô */
+	/* èŽ·å–æ­£å¸¸å¿ƒè·³åŒ…é—´éš” */
 	virtual DWORD GetKeepAliveTime		()	= 0;
-	/* »ñÈ¡Òì³£ÐÄÌø°ü¼ä¸ô */
+	/* èŽ·å–å¼‚å¸¸å¿ƒè·³åŒ…é—´éš” */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
 
 #ifdef _SSL_SUPPORT
-	/* ÉèÖÃÍ¨ÐÅ×é¼þÎÕÊÖ·½Ê½£¨Ä¬ÈÏ£ºTRUE£¬×Ô¶¯ÎÕÊÖ£© */
+	/* è®¾ç½®é€šä¿¡ç»„ä»¶æ¡æ‰‹æ–¹å¼ï¼ˆé»˜è®¤ï¼šTRUEï¼Œè‡ªåŠ¨æ¡æ‰‹ï¼‰ */
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)				= 0;
-	/* »ñÈ¡Í¨ÐÅ×é¼þÎÕÊÖ·½Ê½ */
+	/* èŽ·å–é€šä¿¡ç»„ä»¶æ¡æ‰‹æ–¹å¼ */
 	virtual BOOL IsSSLAutoHandShake()									= 0;
 
-	/* ÉèÖÃ SSL ¼ÓÃÜËã·¨ÁÐ±í */
+	/* è®¾ç½® SSL åŠ å¯†ç®—æ³•åˆ—è¡¨ */
 	virtual void SetSSLCipherList(LPCTSTR lpszCipherList)				= 0;
-	/* »ñÈ¡ SSL ¼ÓÃÜËã·¨ÁÐ±í */
+	/* èŽ·å– SSL åŠ å¯†ç®—æ³•åˆ—è¡¨ */
 	virtual LPCTSTR GetSSLCipherList()									= 0;
 
 	/*
-	* Ãû³Æ£º»ñÈ¡ SSL Session ÐÅÏ¢
-	* ÃèÊö£º»ñÈ¡Ö¸¶¨ÀàÐÍµÄ SSL Session ÐÅÏ¢£¨Êä³öÀàÐÍ²Î¿¼£ºEnSSLSessionInfo£©
+	* åç§°ï¼šèŽ·å– SSL Session ä¿¡æ¯
+	* æè¿°ï¼šèŽ·å–æŒ‡å®šç±»åž‹çš„ SSL Session ä¿¡æ¯ï¼ˆè¾“å‡ºç±»åž‹å‚è€ƒï¼šEnSSLSessionInfoï¼‰
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL GetSSLSessionInfo(CONNID dwConnID, EnSSLSessionInfo enInfo, LPVOID* lppInfo)	= 0;
 #endif
@@ -773,131 +773,131 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºÍ¨ÐÅ¿Í»§¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨ÒåÍ¨ÐÅ¿Í»§¶Ë×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šé€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IClient
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÆô¶¯Í¨ÐÅ×é¼þ
-	* ÃèÊö£ºÆô¶¯¿Í»§¶ËÍ¨ÐÅ×é¼þ²¢Á¬½Ó·þÎñ¶Ë£¬Æô¶¯Íê³Éºó¿É¿ªÊ¼ÊÕ·¢Êý¾Ý
+	* åç§°ï¼šå¯åŠ¨é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå¯åŠ¨å®¢æˆ·ç«¯é€šä¿¡ç»„ä»¶å¹¶è¿žæŽ¥æœåŠ¡ç«¯ï¼Œå¯åŠ¨å®ŒæˆåŽå¯å¼€å§‹æ”¶å‘æ•°æ®
 	*		
-	* ²ÎÊý£º		lpszRemoteAddress	-- ·þÎñ¶ËµØÖ·
-	*			usPort				-- ·þÎñ¶Ë¶Ë¿Ú
-	*			bAsyncConnect		-- ÊÇ·ñ²ÉÓÃÒì²½ Connect
-	*			lpszBindAddress		-- °ó¶¨µØÖ·£¨Ä¬ÈÏ£ºnullptr£¬TcpClient/UdpClient -> ²»Ö´ÐÐ°ó¶¨²Ù×÷£¬UdpCast °ó¶¨ -> ÈÎÒâµØÖ·£©
-	*			usLocalPort			-- ±¾µØ¶Ë¿Ú£¨Ä¬ÈÏ£º0£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszRemoteAddress	-- æœåŠ¡ç«¯åœ°å€
+	*			usPort				-- æœåŠ¡ç«¯ç«¯å£
+	*			bAsyncConnect		-- æ˜¯å¦é‡‡ç”¨å¼‚æ­¥ Connect
+	*			lpszBindAddress		-- ç»‘å®šåœ°å€ï¼ˆé»˜è®¤ï¼šnullptrï¼ŒTcpClient/UdpClient -> ä¸æ‰§è¡Œç»‘å®šæ“ä½œï¼ŒUdpCast ç»‘å®š -> ä»»æ„åœ°å€ï¼‰
+	*			usLocalPort			-- æœ¬åœ°ç«¯å£ï¼ˆé»˜è®¤ï¼š0ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Start	(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usLocalPort = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º¹Ø±ÕÍ¨ÐÅ×é¼þ
-	* ÃèÊö£º¹Ø±Õ¿Í»§¶ËÍ¨ÐÅ×é¼þ£¬¹Ø±ÕÍê³Éºó¶Ï¿ªÓë·þÎñ¶ËµÄÁ¬½Ó²¢ÊÍ·ÅËùÓÐ×ÊÔ´
+	* åç§°ï¼šå…³é—­é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå…³é—­å®¢æˆ·ç«¯é€šä¿¡ç»„ä»¶ï¼Œå…³é—­å®ŒæˆåŽæ–­å¼€ä¸ŽæœåŠ¡ç«¯çš„è¿žæŽ¥å¹¶é‡Šæ”¾æ‰€æœ‰èµ„æº
 	*		
-	* ²ÎÊý£º	
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š	
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Stop	()																		= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍÊý¾Ý
-	* ÃèÊö£ºÏò·þÎñ¶Ë·¢ËÍÊý¾Ý
+	* åç§°ï¼šå‘é€æ•°æ®
+	* æè¿°ï¼šå‘æœåŠ¡ç«¯å‘é€æ•°æ®
 	*		
-	* ²ÎÊý£º		pBuffer		-- ·¢ËÍ»º³åÇø
-	*			iLength		-- ·¢ËÍ»º³åÇø³¤¶È
-	*			iOffset		-- ·¢ËÍ»º³åÇøÖ¸ÕëÆ«ÒÆÁ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		pBuffer		-- å‘é€ç¼“å†²åŒº
+	*			iLength		-- å‘é€ç¼“å†²åŒºé•¿åº¦
+	*			iOffset		-- å‘é€ç¼“å†²åŒºæŒ‡é’ˆåç§»é‡
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0)						= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ¶à×éÊý¾Ý
-	* ÃèÊö£ºÏò·þÎñ¶Ë·¢ËÍ¶à×éÊý¾Ý
-	*		TCP - Ë³Ðò·¢ËÍËùÓÐÊý¾Ý°ü 
-	*		UDP - °ÑËùÓÐÊý¾Ý°ü×éºÏ³ÉÒ»¸öÊý¾Ý°ü·¢ËÍ£¨Êý¾Ý°üµÄ×Ü³¤¶È²»ÄÜ´óÓÚÉèÖÃµÄ UDP °ü×î´ó³¤¶È£© 
+	* åç§°ï¼šå‘é€å¤šç»„æ•°æ®
+	* æè¿°ï¼šå‘æœåŠ¡ç«¯å‘é€å¤šç»„æ•°æ®
+	*		TCP - é¡ºåºå‘é€æ‰€æœ‰æ•°æ®åŒ… 
+	*		UDP - æŠŠæ‰€æœ‰æ•°æ®åŒ…ç»„åˆæˆä¸€ä¸ªæ•°æ®åŒ…å‘é€ï¼ˆæ•°æ®åŒ…çš„æ€»é•¿åº¦ä¸èƒ½å¤§äºŽè®¾ç½®çš„ UDP åŒ…æœ€å¤§é•¿åº¦ï¼‰ 
 	*		
-	* ²ÎÊý£º		pBuffers	-- ·¢ËÍ»º³åÇøÊý×é
-	*			iCount		-- ·¢ËÍ»º³åÇøÊýÄ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		pBuffers	-- å‘é€ç¼“å†²åŒºæ•°ç»„
+	*			iCount		-- å‘é€ç¼“å†²åŒºæ•°ç›®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendPackets(const WSABUF pBuffers[], int iCount)								= 0;
 
 	/*
-	* Ãû³Æ£ºÔÝÍ£/»Ö¸´½ÓÊÕ
-	* ÃèÊö£ºÔÝÍ£/»Ö¸´Ä³¸öÁ¬½ÓµÄÊý¾Ý½ÓÊÕ¹¤×÷
+	* åç§°ï¼šæš‚åœ/æ¢å¤æŽ¥æ”¶
+	* æè¿°ï¼šæš‚åœ/æ¢å¤æŸä¸ªè¿žæŽ¥çš„æ•°æ®æŽ¥æ”¶å·¥ä½œ
 	*		
-	*			bPause	-- TRUE - ÔÝÍ£, FALSE - »Ö¸´
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü
+	*			bPause	-- TRUE - æš‚åœ, FALSE - æ¢å¤
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥
 	*/
 	virtual BOOL PauseReceive(BOOL bPause = TRUE)												= 0;
 
 	/*
-	* Ãû³Æ£ºµÈ´ý
-	* ÃèÊö£ºµÈ´ýÍ¨ÐÅ×é¼þÍ£Ö¹ÔËÐÐ
+	* åç§°ï¼šç­‰å¾…
+	* æè¿°ï¼šç­‰å¾…é€šä¿¡ç»„ä»¶åœæ­¢è¿è¡Œ
 	*		
-	* ²ÎÊý£º		dwMilliseconds	-- ³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º-1£¬ÓÀ²»³¬Ê±£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwMilliseconds	-- è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š-1ï¼Œæ°¸ä¸è¶…æ—¶ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE)											= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÁ¬½ÓµÄ¸½¼ÓÊý¾Ý */
+	/* è®¾ç½®è¿žæŽ¥çš„é™„åŠ æ•°æ® */
 	virtual void SetExtra					(PVOID pExtra)										= 0;
 
-	/* »ñÈ¡Á¬½ÓµÄ¸½¼ÓÊý¾Ý */
+	/* èŽ·å–è¿žæŽ¥çš„é™„åŠ æ•°æ® */
 	virtual PVOID GetExtra					()													= 0;
 
-	/* ¼ì²âÊÇ·ñÎª°²È«Á¬½Ó£¨SSL/HTTPS£© */
+	/* æ£€æµ‹æ˜¯å¦ä¸ºå®‰å…¨è¿žæŽ¥ï¼ˆSSL/HTTPSï¼‰ */
 	virtual BOOL IsSecure					()													= 0;
-	/* ¼ì²éÍ¨ÐÅ×é¼þÊÇ·ñÒÑÆô¶¯ */
+	/* æ£€æŸ¥é€šä¿¡ç»„ä»¶æ˜¯å¦å·²å¯åŠ¨ */
 	virtual BOOL HasStarted					()													= 0;
-	/* ²é¿´Í¨ÐÅ×é¼þµ±Ç°×´Ì¬ */
+	/* æŸ¥çœ‹é€šä¿¡ç»„ä»¶å½“å‰çŠ¶æ€ */
 	virtual EnServiceState	GetState		()													= 0;
-	/* »ñÈ¡×î½üÒ»´ÎÊ§°Ü²Ù×÷µÄ´íÎó´úÂë */
+	/* èŽ·å–æœ€è¿‘ä¸€æ¬¡å¤±è´¥æ“ä½œçš„é”™è¯¯ä»£ç  */
 	virtual EnSocketError	GetLastError	()													= 0;
-	/* »ñÈ¡×î½üÒ»´ÎÊ§°Ü²Ù×÷µÄ´íÎóÃèÊö */
+	/* èŽ·å–æœ€è¿‘ä¸€æ¬¡å¤±è´¥æ“ä½œçš„é”™è¯¯æè¿° */
 	virtual LPCTSTR			GetLastErrorDesc()													= 0;
-	/* »ñÈ¡¸Ã×é¼þ¶ÔÏóµÄÁ¬½Ó ID */
+	/* èŽ·å–è¯¥ç»„ä»¶å¯¹è±¡çš„è¿žæŽ¥ ID */
 	virtual CONNID			GetConnectionID	()													= 0;
-	/* »ñÈ¡ Client Socket µÄµØÖ·ÐÅÏ¢ */
+	/* èŽ·å– Client Socket çš„åœ°å€ä¿¡æ¯ */
 	virtual BOOL GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
-	/* »ñÈ¡Á¬½ÓµÄÔ¶³ÌÖ÷»úÐÅÏ¢ */
+	/* èŽ·å–è¿žæŽ¥çš„è¿œç¨‹ä¸»æœºä¿¡æ¯ */
 	virtual BOOL GetRemoteHost			(TCHAR lpszHost[], int& iHostLen, USHORT& usPort)		= 0;
-	/* »ñÈ¡Á¬½ÓÖÐÎ´·¢³öÊý¾ÝµÄ³¤¶È */
+	/* èŽ·å–è¿žæŽ¥ä¸­æœªå‘å‡ºæ•°æ®çš„é•¿åº¦ */
 	virtual BOOL GetPendingDataLength	(int& iPending)											= 0;
-	/* »ñÈ¡Á¬½ÓµÄÊý¾Ý½ÓÊÕ×´Ì¬ */
+	/* èŽ·å–è¿žæŽ¥çš„æ•°æ®æŽ¥æ”¶çŠ¶æ€ */
 	virtual BOOL IsPauseReceive			(BOOL& bPaused)											= 0;
-	/* ¼ì²âÊÇ·ñÓÐÐ§Á¬½Ó */
+	/* æ£€æµ‹æ˜¯å¦æœ‰æ•ˆè¿žæŽ¥ */
 	virtual BOOL IsConnected			()														= 0;
 
-	/* ÉèÖÃµØÖ·ÖØÓÃÑ¡Ïî */
+	/* è®¾ç½®åœ°å€é‡ç”¨é€‰é¡¹ */
 	virtual void SetReuseAddressPolicy(EnReuseAddressPolicy enReusePolicy)						= 0;
-	/* ÉèÖÃÄÚ´æ¿é»º´æ³Ø´óÐ¡ */
+	/* è®¾ç½®å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 	virtual void SetFreeBufferPoolSize		(DWORD dwFreeBufferPoolSize)						= 0;
-	/* ÉèÖÃÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+	/* è®¾ç½®å†…å­˜å—ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual void SetFreeBufferPoolHold		(DWORD dwFreeBufferPoolHold)						= 0;
 
-	/* »ñÈ¡µØÖ·ÖØÓÃÑ¡Ïî */
+	/* èŽ·å–åœ°å€é‡ç”¨é€‰é¡¹ */
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy()										= 0;
-	/* »ñÈ¡ÄÚ´æ¿é»º´æ³Ø´óÐ¡ */
+	/* èŽ·å–å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 	virtual DWORD GetFreeBufferPoolSize		()													= 0;
-	/* »ñÈ¡ÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+	/* èŽ·å–å†…å­˜å—ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual DWORD GetFreeBufferPoolHold		()													= 0;
 
 public:
@@ -905,77 +905,77 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP Í¨ÐÅ¿Í»§¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå TCP Í¨ÐÅ¿Í»§¶Ë×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šTCP é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ TCP é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class ITcpClient : public IClient
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍÐ¡ÎÄ¼þ
-	* ÃèÊö£ºÏò·þÎñ¶Ë·¢ËÍ 4096 KB ÒÔÏÂµÄÐ¡ÎÄ¼þ
+	* åç§°ï¼šå‘é€å°æ–‡ä»¶
+	* æè¿°ï¼šå‘æœåŠ¡ç«¯å‘é€ 4096 KB ä»¥ä¸‹çš„å°æ–‡ä»¶
 	*		
-	* ²ÎÊý£º		lpszFileName	-- ÎÄ¼þÂ·¾¶
-	*			pHead			-- Í·²¿¸½¼ÓÊý¾Ý
-	*			pTail			-- Î²²¿¸½¼ÓÊý¾Ý
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszFileName	-- æ–‡ä»¶è·¯å¾„
+	*			pHead			-- å¤´éƒ¨é™„åŠ æ•°æ®
+	*			pTail			-- å°¾éƒ¨é™„åŠ æ•°æ®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendSmallFile(LPCTSTR lpszFileName, const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr)	= 0;
 
 #ifdef _SSL_SUPPORT
 	/*
-	* Ãû³Æ£º³õÊ¼»¯Í¨ÐÅ×é¼þ SSL »·¾³²ÎÊý
-	* ÃèÊö£ºSSL »·¾³²ÎÊý±ØÐëÔÚ SSL Í¨ÐÅ×é¼þÆô¶¯Ç°Íê³É³õÊ¼»¯£¬·ñÔòÆô¶¯Ê§°Ü
+	* åç§°ï¼šåˆå§‹åŒ–é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°
+	* æè¿°ï¼šSSL çŽ¯å¢ƒå‚æ•°å¿…é¡»åœ¨ SSL é€šä¿¡ç»„ä»¶å¯åŠ¨å‰å®Œæˆåˆå§‹åŒ–ï¼Œå¦åˆ™å¯åŠ¨å¤±è´¥
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCertFile			-- Ö¤ÊéÎÄ¼þ£¨¿Í»§¶Ë¿ÉÑ¡£©
-	*			lpszPemKeyFile			-- Ë½Ô¿ÎÄ¼þ£¨¿Í»§¶Ë¿ÉÑ¡£©
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCertFileOrPath	-- CA Ö¤ÊéÎÄ¼þ»òÄ¿Â¼£¨µ¥ÏòÑéÖ¤»ò¿Í»§¶Ë¿ÉÑ¡£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCertFile			-- è¯ä¹¦æ–‡ä»¶ï¼ˆå®¢æˆ·ç«¯å¯é€‰ï¼‰
+	*			lpszPemKeyFile			-- ç§é’¥æ–‡ä»¶ï¼ˆå®¢æˆ·ç«¯å¯é€‰ï¼‰
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCertFileOrPath	-- CA è¯ä¹¦æ–‡ä»¶æˆ–ç›®å½•ï¼ˆå•å‘éªŒè¯æˆ–å®¢æˆ·ç«¯å¯é€‰ï¼‰
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL SetupSSLContext(int iVerifyMode = SSL_VM_NONE, LPCTSTR lpszPemCertFile = nullptr, LPCTSTR lpszPemKeyFile = nullptr, LPCTSTR lpszKeyPassword = nullptr, LPCTSTR lpszCAPemCertFileOrPath = nullptr)	= 0;
 
 	/*
-	* Ãû³Æ£º³õÊ¼»¯Í¨ÐÅ×é¼þ SSL »·¾³²ÎÊý£¨Í¨¹ýÄÚ´æ¼ÓÔØÖ¤Êé£©
-	* ÃèÊö£ºSSL »·¾³²ÎÊý±ØÐëÔÚ SSL Í¨ÐÅ×é¼þÆô¶¯Ç°Íê³É³õÊ¼»¯£¬·ñÔòÆô¶¯Ê§°Ü
+	* åç§°ï¼šåˆå§‹åŒ–é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°ï¼ˆé€šè¿‡å†…å­˜åŠ è½½è¯ä¹¦ï¼‰
+	* æè¿°ï¼šSSL çŽ¯å¢ƒå‚æ•°å¿…é¡»åœ¨ SSL é€šä¿¡ç»„ä»¶å¯åŠ¨å‰å®Œæˆåˆå§‹åŒ–ï¼Œå¦åˆ™å¯åŠ¨å¤±è´¥
 	*		
-	* ²ÎÊý£º		iVerifyMode				-- SSL ÑéÖ¤Ä£Ê½£¨²Î¿¼ EnSSLVerifyMode£©
-	*			lpszPemCert				-- Ö¤ÊéÄÚÈÝ
-	*			lpszPemKey				-- Ë½Ô¿ÄÚÈÝ
-	*			lpszKeyPassword			-- Ë½Ô¿ÃÜÂë£¨Ã»ÓÐÃÜÂëÔòÎª¿Õ£©
-	*			lpszCAPemCert			-- CA Ö¤ÊéÄÚÈÝ£¨µ¥ÏòÑéÖ¤»ò¿Í»§¶Ë¿ÉÑ¡£©
+	* å‚æ•°ï¼š		iVerifyMode				-- SSL éªŒè¯æ¨¡å¼ï¼ˆå‚è€ƒ EnSSLVerifyModeï¼‰
+	*			lpszPemCert				-- è¯ä¹¦å†…å®¹
+	*			lpszPemKey				-- ç§é’¥å†…å®¹
+	*			lpszKeyPassword			-- ç§é’¥å¯†ç ï¼ˆæ²¡æœ‰å¯†ç åˆ™ä¸ºç©ºï¼‰
+	*			lpszCAPemCert			-- CA è¯ä¹¦å†…å®¹ï¼ˆå•å‘éªŒè¯æˆ–å®¢æˆ·ç«¯å¯é€‰ï¼‰
 	*
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL SetupSSLContextByMemory(int iVerifyMode = SSL_VM_NONE, LPCSTR lpszPemCert = nullptr, LPCSTR lpszPemKey = nullptr, LPCSTR lpszKeyPassword = nullptr, LPCSTR lpszCAPemCert = nullptr)					= 0;
 
 	/*
-	* Ãû³Æ£ºÇåÀíÍ¨ÐÅ×é¼þ SSL ÔËÐÐ»·¾³
-	* ÃèÊö£ºÇåÀíÍ¨ÐÅ×é¼þ SSL ÔËÐÐ»·¾³£¬»ØÊÕ SSL Ïà¹ØÄÚ´æ
-	*		1¡¢Í¨ÐÅ×é¼þÎö¹¹Ê±»á×Ô¶¯µ÷ÓÃ±¾·½·¨
-	*		2¡¢µ±ÒªÖØÐÂÉèÖÃÍ¨ÐÅ×é¼þ SSL »·¾³²ÎÊýÊ±£¬ÐèÒªÏÈµ÷ÓÃ±¾·½·¨ÇåÀíÔ­ÏÈµÄ»·¾³²ÎÊý
+	* åç§°ï¼šæ¸…ç†é€šä¿¡ç»„ä»¶ SSL è¿è¡ŒçŽ¯å¢ƒ
+	* æè¿°ï¼šæ¸…ç†é€šä¿¡ç»„ä»¶ SSL è¿è¡ŒçŽ¯å¢ƒï¼Œå›žæ”¶ SSL ç›¸å…³å†…å­˜
+	*		1ã€é€šä¿¡ç»„ä»¶æžæž„æ—¶ä¼šè‡ªåŠ¨è°ƒç”¨æœ¬æ–¹æ³•
+	*		2ã€å½“è¦é‡æ–°è®¾ç½®é€šä¿¡ç»„ä»¶ SSL çŽ¯å¢ƒå‚æ•°æ—¶ï¼Œéœ€è¦å…ˆè°ƒç”¨æœ¬æ–¹æ³•æ¸…ç†åŽŸå…ˆçš„çŽ¯å¢ƒå‚æ•°
 	*		
-	* ²ÎÊý£º	ÎÞ
+	* å‚æ•°ï¼š	æ— 
 	* 
-	* ·µ»ØÖµ£ºÎÞ
+	* è¿”å›žå€¼ï¼šæ— 
 	*/
 	virtual void CleanupSSLContext()					= 0;
 
 	/*
-	* Ãû³Æ£ºÆô¶¯ SSL ÎÕÊÖ
-	* ÃèÊö£ºµ±Í¨ÐÅ×é¼þÉèÖÃÎª·Ç×Ô¶¯ÎÕÊÖÊ±£¬ÐèÒªµ÷ÓÃ±¾·½·¨Æô¶¯ SSL ÎÕÊÖ
+	* åç§°ï¼šå¯åŠ¨ SSL æ¡æ‰‹
+	* æè¿°ï¼šå½“é€šä¿¡ç»„ä»¶è®¾ç½®ä¸ºéžè‡ªåŠ¨æ¡æ‰‹æ—¶ï¼Œéœ€è¦è°ƒç”¨æœ¬æ–¹æ³•å¯åŠ¨ SSL æ¡æ‰‹
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL StartSSLHandShake()					= 0;
 
@@ -984,39 +984,39 @@ public:
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÍ¨ÐÅÊý¾Ý»º³åÇø´óÐ¡£¨¸ù¾ÝÆ½¾ùÍ¨ÐÅÊý¾Ý°ü´óÐ¡µ÷ÕûÉèÖÃ£¬Í¨³£ÉèÖÃÎª£º(N * 1024) - sizeof(TBufferObj)£© */
+	/* è®¾ç½®é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å°ï¼ˆæ ¹æ®å¹³å‡é€šä¿¡æ•°æ®åŒ…å¤§å°è°ƒæ•´è®¾ç½®ï¼Œé€šå¸¸è®¾ç½®ä¸ºï¼š(N * 1024) - sizeof(TBufferObj)ï¼‰ */
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)	= 0;
-	/* ÉèÖÃÕý³£ÐÄÌø°ü¼ä¸ô£¨ºÁÃë£¬0 Ôò²»·¢ËÍÐÄÌø°ü£¬Ä¬ÈÏ£º60 * 1000£© */
+	/* è®¾ç½®æ­£å¸¸å¿ƒè·³åŒ…é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 åˆ™ä¸å‘é€å¿ƒè·³åŒ…ï¼Œé»˜è®¤ï¼š60 * 1000ï¼‰ */
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)		= 0;
-	/* ÉèÖÃÒì³£ÐÄÌø°ü¼ä¸ô£¨ºÁÃë£¬0 ²»·¢ËÍÐÄÌø°ü£¬£¬Ä¬ÈÏ£º20 * 1000£¬Èç¹û³¬¹ýÈô¸É´Î [Ä¬ÈÏ£ºWinXP 5 ´Î, Win7 10 ´Î] ¼ì²â²»µ½ÐÄÌøÈ·ÈÏ°üÔòÈÏÎªÒÑ¶ÏÏß£© */
+	/* è®¾ç½®å¼‚å¸¸å¿ƒè·³åŒ…é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 ä¸å‘é€å¿ƒè·³åŒ…ï¼Œï¼Œé»˜è®¤ï¼š20 * 1000ï¼Œå¦‚æžœè¶…è¿‡è‹¥å¹²æ¬¡ [é»˜è®¤ï¼šWinXP 5 æ¬¡, Win7 10 æ¬¡] æ£€æµ‹ä¸åˆ°å¿ƒè·³ç¡®è®¤åŒ…åˆ™è®¤ä¸ºå·²æ–­çº¿ï¼‰ */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)	= 0;
 
-	/* »ñÈ¡Í¨ÐÅÊý¾Ý»º³åÇø´óÐ¡ */
+	/* èŽ·å–é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å° */
 	virtual DWORD GetSocketBufferSize	()	= 0;
-	/* »ñÈ¡Õý³£ÐÄÌø°ü¼ä¸ô */
+	/* èŽ·å–æ­£å¸¸å¿ƒè·³åŒ…é—´éš” */
 	virtual DWORD GetKeepAliveTime		()	= 0;
-	/* »ñÈ¡Òì³£ÐÄÌø°ü¼ä¸ô */
+	/* èŽ·å–å¼‚å¸¸å¿ƒè·³åŒ…é—´éš” */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
 
 #ifdef _SSL_SUPPORT
-	/* ÉèÖÃÍ¨ÐÅ×é¼þÎÕÊÖ·½Ê½£¨Ä¬ÈÏ£ºTRUE£¬×Ô¶¯ÎÕÊÖ£© */
+	/* è®¾ç½®é€šä¿¡ç»„ä»¶æ¡æ‰‹æ–¹å¼ï¼ˆé»˜è®¤ï¼šTRUEï¼Œè‡ªåŠ¨æ¡æ‰‹ï¼‰ */
 	virtual void SetSSLAutoHandShake(BOOL bAutoHandShake)	= 0;
-	/* »ñÈ¡Í¨ÐÅ×é¼þÎÕÊÖ·½Ê½ */
+	/* èŽ·å–é€šä¿¡ç»„ä»¶æ¡æ‰‹æ–¹å¼ */
 	virtual BOOL IsSSLAutoHandShake()						= 0;
 
-	/* ÉèÖÃ SSL ¼ÓÃÜËã·¨ÁÐ±í */
+	/* è®¾ç½® SSL åŠ å¯†ç®—æ³•åˆ—è¡¨ */
 	virtual void SetSSLCipherList(LPCTSTR lpszCipherList)	= 0;
-	/* »ñÈ¡ SSL ¼ÓÃÜËã·¨ÁÐ±í */
+	/* èŽ·å– SSL åŠ å¯†ç®—æ³•åˆ—è¡¨ */
 	virtual LPCTSTR GetSSLCipherList()						= 0;
 
 	/*
-	* Ãû³Æ£º»ñÈ¡ SSL Session ÐÅÏ¢
-	* ÃèÊö£º»ñÈ¡Ö¸¶¨ÀàÐÍµÄ SSL Session ÐÅÏ¢£¨Êä³öÀàÐÍ²Î¿¼£ºEnSSLSessionInfo£©
+	* åç§°ï¼šèŽ·å– SSL Session ä¿¡æ¯
+	* æè¿°ï¼šèŽ·å–æŒ‡å®šç±»åž‹çš„ SSL Session ä¿¡æ¯ï¼ˆè¾“å‡ºç±»åž‹å‚è€ƒï¼šEnSSLSessionInfoï¼‰
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL GetSSLSessionInfo(EnSSLSessionInfo enInfo, LPVOID* lppInfo)	= 0;
 #endif
@@ -1026,233 +1026,233 @@ public:
 #ifdef _UDP_SUPPORT
 
 /************************************************************************
-Ãû³Æ£ºUDP Í¨ÐÅ¿Í»§¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP Í¨ÐÅ¿Í»§¶Ë×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šUDP é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IUdpClient : public IClient
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊý¾Ý±¨ÎÄ×î´ó³¤¶È£¨½¨ÒéÔÚ¾ÖÓòÍø»·¾³ÏÂ²»³¬¹ý 1432 ×Ö½Ú£¬ÔÚ¹ãÓòÍø»·¾³ÏÂ²»³¬¹ý 548 ×Ö½Ú£© */
+	/* è®¾ç½®æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ï¼ˆå»ºè®®åœ¨å±€åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 1432 å­—èŠ‚ï¼Œåœ¨å¹¿åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 548 å­—èŠ‚ï¼‰ */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	= 0;
-	/* »ñÈ¡Êý¾Ý±¨ÎÄ×î´ó³¤¶È */
+	/* èŽ·å–æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ */
 	virtual DWORD GetMaxDatagramSize()							= 0;
 
-	/* ÉèÖÃ¼à²â°ü³¢ÊÔ´ÎÊý£¨0 Ôò²»·¢ËÍ¼à²âÌø°ü£¬Èç¹û³¬¹ý×î´ó³¢ÊÔ´ÎÊýÔòÈÏÎªÒÑ¶ÏÏß£© */
+	/* è®¾ç½®ç›‘æµ‹åŒ…å°è¯•æ¬¡æ•°ï¼ˆ0 åˆ™ä¸å‘é€ç›‘æµ‹è·³åŒ…ï¼Œå¦‚æžœè¶…è¿‡æœ€å¤§å°è¯•æ¬¡æ•°åˆ™è®¤ä¸ºå·²æ–­çº¿ï¼‰ */
 	virtual void SetDetectAttempts	(DWORD dwDetectAttempts)	= 0;
-	/* ÉèÖÃ¼à²â°ü·¢ËÍ¼ä¸ô£¨ºÁÃë£¬0 ²»·¢ËÍ¼à²â°ü£© */
+	/* è®¾ç½®ç›‘æµ‹åŒ…å‘é€é—´éš”ï¼ˆæ¯«ç§’ï¼Œ0 ä¸å‘é€ç›‘æµ‹åŒ…ï¼‰ */
 	virtual void SetDetectInterval	(DWORD dwDetectInterval)	= 0;
-	/* »ñÈ¡ÐÄÌø¼ì²é´ÎÊý */
+	/* èŽ·å–å¿ƒè·³æ£€æŸ¥æ¬¡æ•° */
 	virtual DWORD GetDetectAttempts	()							= 0;
-	/* »ñÈ¡ÐÄÌø¼ì²é¼ä¸ô */
+	/* èŽ·å–å¿ƒè·³æ£€æŸ¥é—´éš” */
 	virtual DWORD GetDetectInterval	()							= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ´«²¥×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP ´«²¥£¨×é²¥»ò¹ã²¥£©×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šUDP ä¼ æ’­ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP ä¼ æ’­ï¼ˆç»„æ’­æˆ–å¹¿æ’­ï¼‰ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IUdpCast : public IClient
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊý¾Ý±¨ÎÄ×î´ó³¤¶È£¨½¨ÒéÔÚ¾ÖÓòÍø»·¾³ÏÂ²»³¬¹ý 1432 ×Ö½Ú£¬ÔÚ¹ãÓòÍø»·¾³ÏÂ²»³¬¹ý 548 ×Ö½Ú£© */
+	/* è®¾ç½®æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ï¼ˆå»ºè®®åœ¨å±€åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 1432 å­—èŠ‚ï¼Œåœ¨å¹¿åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 548 å­—èŠ‚ï¼‰ */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)		= 0;
-	/* »ñÈ¡Êý¾Ý±¨ÎÄ×î´ó³¤¶È */
+	/* èŽ·å–æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ */
 	virtual DWORD GetMaxDatagramSize()								= 0;
 
-	/* ÉèÖÃ´«²¥Ä£Ê½£¨×é²¥»ò¹ã²¥£© */
+	/* è®¾ç½®ä¼ æ’­æ¨¡å¼ï¼ˆç»„æ’­æˆ–å¹¿æ’­ï¼‰ */
 	virtual void SetCastMode		(EnCastMode enCastMode)			= 0;
-	/* »ñÈ¡´«²¥Ä£Ê½ */
+	/* èŽ·å–ä¼ æ’­æ¨¡å¼ */
 	virtual EnCastMode GetCastMode	()								= 0;
 
-	/* ÉèÖÃ×é²¥±¨ÎÄµÄ TTL£¨0 - 255£© */
+	/* è®¾ç½®ç»„æ’­æŠ¥æ–‡çš„ TTLï¼ˆ0 - 255ï¼‰ */
 	virtual void SetMultiCastTtl	(int iMCTtl)					= 0;
-	/* »ñÈ¡×é²¥±¨ÎÄµÄ TTL */
+	/* èŽ·å–ç»„æ’­æŠ¥æ–‡çš„ TTL */
 	virtual int GetMultiCastTtl		()								= 0;
 
-	/* ÉèÖÃÊÇ·ñÆôÓÃ×é²¥»·Â·£¨TRUE or FALSE£© */
+	/* è®¾ç½®æ˜¯å¦å¯ç”¨ç»„æ’­çŽ¯è·¯ï¼ˆTRUE or FALSEï¼‰ */
 	virtual void SetMultiCastLoop	(BOOL bMCLoop)					= 0;
-	/* ¼ì²âÊÇ·ñÆôÓÃ×é²¥»·Â· */
+	/* æ£€æµ‹æ˜¯å¦å¯ç”¨ç»„æ’­çŽ¯è·¯ */
 	virtual BOOL IsMultiCastLoop	()								= 0;
 
-	/* »ñÈ¡µ±Ç°Êý¾Ý±¨µÄÔ¶³ÌµØÖ·ÐÅÏ¢£¨Í¨³£ÔÚ OnReceive ÊÂ¼þÖÐµ÷ÓÃ£© */
+	/* èŽ·å–å½“å‰æ•°æ®æŠ¥çš„è¿œç¨‹åœ°å€ä¿¡æ¯ï¼ˆé€šå¸¸åœ¨ OnReceive äº‹ä»¶ä¸­è°ƒç”¨ï¼‰ */
 	virtual BOOL GetRemoteAddress	(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ½Úµã×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP ½Úµã×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šUDP èŠ‚ç‚¹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP èŠ‚ç‚¹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IUdpNode
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÆô¶¯Í¨ÐÅ×é¼þ
-	* ÃèÊö£ºÆô¶¯ UDP ½ÚµãÍ¨ÐÅ×é¼þ£¬Æô¶¯Íê³Éºó¿É¿ªÊ¼ÊÕ·¢Êý¾Ý
+	* åç§°ï¼šå¯åŠ¨é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå¯åŠ¨ UDP èŠ‚ç‚¹é€šä¿¡ç»„ä»¶ï¼Œå¯åŠ¨å®ŒæˆåŽå¯å¼€å§‹æ”¶å‘æ•°æ®
 	*		
-	* ²ÎÊý£º		lpszBindAddress		-- °ó¶¨µØÖ·£¨Ä¬ÈÏ£ºnullptr£¬°ó¶¨ÈÎÒâµØÖ·£©
-	*			usPort				-- ±¾µØ¶Ë¿Ú£¨Ä¬ÈÏ£º0£©
-	*			enCastMode			-- ´«²¥Ä£Ê½£¨Ä¬ÈÏ£ºCM_UNICAST£©
-	*			lpszCastAddress		-- ´«²¥µØÖ·£¨Ä¬ÈÏ£ºnullptr£¬µ± enCaseMode Îª CM_MULTICAST »ò CM_BROADCAST Ê±ÓÐÐ§£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszBindAddress		-- ç»‘å®šåœ°å€ï¼ˆé»˜è®¤ï¼šnullptrï¼Œç»‘å®šä»»æ„åœ°å€ï¼‰
+	*			usPort				-- æœ¬åœ°ç«¯å£ï¼ˆé»˜è®¤ï¼š0ï¼‰
+	*			enCastMode			-- ä¼ æ’­æ¨¡å¼ï¼ˆé»˜è®¤ï¼šCM_UNICASTï¼‰
+	*			lpszCastAddress		-- ä¼ æ’­åœ°å€ï¼ˆé»˜è®¤ï¼šnullptrï¼Œå½“ enCaseMode ä¸º CM_MULTICAST æˆ– CM_BROADCAST æ—¶æœ‰æ•ˆï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Start(LPCTSTR lpszBindAddress = nullptr, USHORT usPort = 0, EnCastMode enCastMode = CM_UNICAST, LPCTSTR lpszCastAddress = nullptr)	= 0;
 
 	/*
-	* Ãû³Æ£º¹Ø±ÕÍ¨ÐÅ×é¼þ
-	* ÃèÊö£º¹Ø±Õ UDP ½ÚµãÍ¨ÐÅ×é¼þ£¬¹Ø±ÕÍê³ÉºóÊÍ·ÅËùÓÐ×ÊÔ´
+	* åç§°ï¼šå…³é—­é€šä¿¡ç»„ä»¶
+	* æè¿°ï¼šå…³é—­ UDP èŠ‚ç‚¹é€šä¿¡ç»„ä»¶ï¼Œå…³é—­å®ŒæˆåŽé‡Šæ”¾æ‰€æœ‰èµ„æº
 	*		
-	* ²ÎÊý£º	
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š	
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Stop()																										= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍÊý¾Ý
-	* ÃèÊö£ºÏòÖ¸¶¨µØÖ··¢ËÍÊý¾Ý
+	* åç§°ï¼šå‘é€æ•°æ®
+	* æè¿°ï¼šå‘æŒ‡å®šåœ°å€å‘é€æ•°æ®
 	*		
-	* ²ÎÊý£º		lpszRemoteAddress	-- Ô¶³ÌµØÖ·
-	*			usRemotePort		-- Ô¶³Ì¶Ë¿Ú
-	*			pBuffer				-- ·¢ËÍ»º³åÇø
-	*			iLength				-- ·¢ËÍ»º³åÇø³¤¶È
-	*			iOffset				-- ·¢ËÍ»º³åÇøÖ¸ÕëÆ«ÒÆÁ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszRemoteAddress	-- è¿œç¨‹åœ°å€
+	*			usRemotePort		-- è¿œç¨‹ç«¯å£
+	*			pBuffer				-- å‘é€ç¼“å†²åŒº
+	*			iLength				-- å‘é€ç¼“å†²åŒºé•¿åº¦
+	*			iOffset				-- å‘é€ç¼“å†²åŒºæŒ‡é’ˆåç§»é‡
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Send(LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pBuffer, int iLength, int iOffset = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ¶à×éÊý¾Ý
-	* ÃèÊö£ºÏòÖ¸¶¨µØÖ··¢ËÍ¶à×éÊý¾Ý£¬°ÑËùÓÐÊý¾Ý°ü×éºÏ³ÉÒ»¸öÊý¾Ý°ü·¢ËÍ£¨Êý¾Ý°üµÄ×Ü³¤¶È²»ÄÜ´óÓÚÉèÖÃµÄ UDP °ü×î´ó³¤¶È£© 
+	* åç§°ï¼šå‘é€å¤šç»„æ•°æ®
+	* æè¿°ï¼šå‘æŒ‡å®šåœ°å€å‘é€å¤šç»„æ•°æ®ï¼ŒæŠŠæ‰€æœ‰æ•°æ®åŒ…ç»„åˆæˆä¸€ä¸ªæ•°æ®åŒ…å‘é€ï¼ˆæ•°æ®åŒ…çš„æ€»é•¿åº¦ä¸èƒ½å¤§äºŽè®¾ç½®çš„ UDP åŒ…æœ€å¤§é•¿åº¦ï¼‰ 
 	*		
-	* ²ÎÊý£º		lpszRemoteAddress	-- Ô¶³ÌµØÖ·
-	*			usRemotePort		-- Ô¶³Ì¶Ë¿Ú
-	*			pBuffers			-- ·¢ËÍ»º³åÇøÊý×é
-	*			iCount				-- ·¢ËÍ»º³åÇøÊýÄ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		lpszRemoteAddress	-- è¿œç¨‹åœ°å€
+	*			usRemotePort		-- è¿œç¨‹ç«¯å£
+	*			pBuffers			-- å‘é€ç¼“å†²åŒºæ•°ç»„
+	*			iCount				-- å‘é€ç¼“å†²åŒºæ•°ç›®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendPackets(LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const WSABUF pBuffers[], int iCount)			= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍÊý¾Ý
-	* ÃèÊö£ºÏò´«²¥µØÖ··¢ËÍÊý¾Ý
+	* åç§°ï¼šå‘é€æ•°æ®
+	* æè¿°ï¼šå‘ä¼ æ’­åœ°å€å‘é€æ•°æ®
 	*		
-	* ²ÎÊý£º		pBuffer		-- ·¢ËÍ»º³åÇø
-	*			iLength		-- ·¢ËÍ»º³åÇø³¤¶È
-	*			iOffset		-- ·¢ËÍ»º³åÇøÖ¸ÕëÆ«ÒÆÁ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		pBuffer		-- å‘é€ç¼“å†²åŒº
+	*			iLength		-- å‘é€ç¼“å†²åŒºé•¿åº¦
+	*			iOffset		-- å‘é€ç¼“å†²åŒºæŒ‡é’ˆåç§»é‡
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendCast(const BYTE* pBuffer, int iLength, int iOffset = 0)												= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ¶à×éÊý¾Ý
-	* ÃèÊö£ºÏò´«²¥µØÖ··¢ËÍ¶à×éÊý¾Ý£¬°ÑËùÓÐÊý¾Ý°ü×éºÏ³ÉÒ»¸öÊý¾Ý°ü·¢ËÍ£¨Êý¾Ý°üµÄ×Ü³¤¶È²»ÄÜ´óÓÚÉèÖÃµÄ UDP °ü×î´ó³¤¶È£© 
+	* åç§°ï¼šå‘é€å¤šç»„æ•°æ®
+	* æè¿°ï¼šå‘ä¼ æ’­åœ°å€å‘é€å¤šç»„æ•°æ®ï¼ŒæŠŠæ‰€æœ‰æ•°æ®åŒ…ç»„åˆæˆä¸€ä¸ªæ•°æ®åŒ…å‘é€ï¼ˆæ•°æ®åŒ…çš„æ€»é•¿åº¦ä¸èƒ½å¤§äºŽè®¾ç½®çš„ UDP åŒ…æœ€å¤§é•¿åº¦ï¼‰ 
 	*		
-	* ²ÎÊý£º		pBuffers	-- ·¢ËÍ»º³åÇøÊý×é
-	*			iCount		-- ·¢ËÍ»º³åÇøÊýÄ¿
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		pBuffers	-- å‘é€ç¼“å†²åŒºæ•°ç»„
+	*			iCount		-- å‘é€ç¼“å†²åŒºæ•°ç›®
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL SendCastPackets(const WSABUF pBuffers[], int iCount)														= 0;
 
 	/*
-	* Ãû³Æ£ºµÈ´ý
-	* ÃèÊö£ºµÈ´ýÍ¨ÐÅ×é¼þÍ£Ö¹ÔËÐÐ
+	* åç§°ï¼šç­‰å¾…
+	* æè¿°ï¼šç­‰å¾…é€šä¿¡ç»„ä»¶åœæ­¢è¿è¡Œ
 	*		
-	* ²ÎÊý£º		dwMilliseconds	-- ³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º-1£¬ÓÀ²»³¬Ê±£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwMilliseconds	-- è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š-1ï¼Œæ°¸ä¸è¶…æ—¶ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE)																		= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃ¸½¼ÓÊý¾Ý */
+	/* è®¾ç½®é™„åŠ æ•°æ® */
 	virtual void SetExtra					(PVOID pExtra)										= 0;
 
-	/* »ñÈ¡¸½¼ÓÊý¾Ý */
+	/* èŽ·å–é™„åŠ æ•°æ® */
 	virtual PVOID GetExtra					()													= 0;
 
-	/* ¼ì²éÍ¨ÐÅ×é¼þÊÇ·ñÒÑÆô¶¯ */
+	/* æ£€æŸ¥é€šä¿¡ç»„ä»¶æ˜¯å¦å·²å¯åŠ¨ */
 	virtual BOOL HasStarted					()													= 0;
-	/* ²é¿´Í¨ÐÅ×é¼þµ±Ç°×´Ì¬ */
+	/* æŸ¥çœ‹é€šä¿¡ç»„ä»¶å½“å‰çŠ¶æ€ */
 	virtual EnServiceState GetState			()													= 0;
-	/* »ñÈ¡×î½üÒ»´ÎÊ§°Ü²Ù×÷µÄ´íÎó´úÂë */
+	/* èŽ·å–æœ€è¿‘ä¸€æ¬¡å¤±è´¥æ“ä½œçš„é”™è¯¯ä»£ç  */
 	virtual EnSocketError GetLastError		()													= 0;
-	/* »ñÈ¡×î½üÒ»´ÎÊ§°Ü²Ù×÷µÄ´íÎóÃèÊö */
+	/* èŽ·å–æœ€è¿‘ä¸€æ¬¡å¤±è´¥æ“ä½œçš„é”™è¯¯æè¿° */
 	virtual LPCTSTR GetLastErrorDesc		()													= 0;
-	/* »ñÈ¡±¾½ÚµãµØÖ· */
+	/* èŽ·å–æœ¬èŠ‚ç‚¹åœ°å€ */
 	virtual BOOL GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
-	/* »ñÈ¡±¾½Úµã´«²¥µØÖ· */
+	/* èŽ·å–æœ¬èŠ‚ç‚¹ä¼ æ’­åœ°å€ */
 	virtual BOOL GetCastAddress			(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
-	/* »ñÈ¡´«²¥Ä£Ê½ */
+	/* èŽ·å–ä¼ æ’­æ¨¡å¼ */
 	virtual EnCastMode GetCastMode		()														= 0;
-	/* »ñÈ¡Î´·¢³öÊý¾ÝµÄ³¤¶È */
+	/* èŽ·å–æœªå‘å‡ºæ•°æ®çš„é•¿åº¦ */
 	virtual BOOL GetPendingDataLength	(int& iPending)											= 0;
 
-	/* ÉèÖÃÊý¾Ý±¨ÎÄ×î´ó³¤¶È£¨½¨ÒéÔÚ¾ÖÓòÍø»·¾³ÏÂ²»³¬¹ý 1432 ×Ö½Ú£¬ÔÚ¹ãÓòÍø»·¾³ÏÂ²»³¬¹ý 548 ×Ö½Ú£© */
+	/* è®¾ç½®æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ï¼ˆå»ºè®®åœ¨å±€åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 1432 å­—èŠ‚ï¼Œåœ¨å¹¿åŸŸç½‘çŽ¯å¢ƒä¸‹ä¸è¶…è¿‡ 548 å­—èŠ‚ï¼‰ */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	= 0;
-	/* »ñÈ¡Êý¾Ý±¨ÎÄ×î´ó³¤¶È */
+	/* èŽ·å–æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ */
 	virtual DWORD GetMaxDatagramSize()							= 0;
 
-	/* ÉèÖÃ×é²¥±¨ÎÄµÄ TTL£¨0 - 255£© */
+	/* è®¾ç½®ç»„æ’­æŠ¥æ–‡çš„ TTLï¼ˆ0 - 255ï¼‰ */
 	virtual void SetMultiCastTtl	(int iMCTtl)				= 0;
-	/* »ñÈ¡×é²¥±¨ÎÄµÄ TTL */
+	/* èŽ·å–ç»„æ’­æŠ¥æ–‡çš„ TTL */
 	virtual int GetMultiCastTtl		()							= 0;
 
-	/* ÉèÖÃÊÇ·ñÆôÓÃ×é²¥»·Â·£¨TRUE or FALSE£© */
+	/* è®¾ç½®æ˜¯å¦å¯ç”¨ç»„æ’­çŽ¯è·¯ï¼ˆTRUE or FALSEï¼‰ */
 	virtual void SetMultiCastLoop	(BOOL bMCLoop)				= 0;
-	/* ¼ì²âÊÇ·ñÆôÓÃ×é²¥»·Â· */
+	/* æ£€æµ‹æ˜¯å¦å¯ç”¨ç»„æ’­çŽ¯è·¯ */
 	virtual BOOL IsMultiCastLoop	()							= 0;
 
-	/* ÉèÖÃµØÖ·ÖØÓÃÑ¡Ïî */
+	/* è®¾ç½®åœ°å€é‡ç”¨é€‰é¡¹ */
 	virtual void SetReuseAddressPolicy(EnReuseAddressPolicy enReusePolicy)	= 0;
-	/* ÉèÖÃ¹¤×÷Ïß³ÌÊýÁ¿£¨Í¨³£ÉèÖÃÎª 2 * CPU + 2£© */
+	/* è®¾ç½®å·¥ä½œçº¿ç¨‹æ•°é‡ï¼ˆé€šå¸¸è®¾ç½®ä¸º 2 * CPU + 2ï¼‰ */
 	virtual void SetWorkerThreadCount	(DWORD dwWorkerThreadCount)			= 0;
-	/* ÉèÖÃ Receive Ô¤Í¶µÝÊýÁ¿£¨¸ù¾Ý¸ºÔØµ÷ÕûÉèÖÃ£¬Receive Ô¤Í¶µÝÊýÁ¿Ô½´óÔò¶ª°ü¸ÅÂÊÔ½Ð¡£© */
+	/* è®¾ç½® Receive é¢„æŠ•é€’æ•°é‡ï¼ˆæ ¹æ®è´Ÿè½½è°ƒæ•´è®¾ç½®ï¼ŒReceive é¢„æŠ•é€’æ•°é‡è¶Šå¤§åˆ™ä¸¢åŒ…æ¦‚çŽ‡è¶Šå°ï¼‰ */
 	virtual void SetPostReceiveCount	(DWORD dwPostReceiveCount)			= 0;
-	/* ÉèÖÃÄÚ´æ¿é»º´æ³Ø´óÐ¡ */
+	/* è®¾ç½®å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)		= 0;
-	/* ÉèÖÃÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+	/* è®¾ç½®å†…å­˜å—ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)		= 0;
 
-	/* »ñÈ¡µØÖ·ÖØÓÃÑ¡Ïî */
+	/* èŽ·å–åœ°å€é‡ç”¨é€‰é¡¹ */
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy()					= 0;
-	/* »ñÈ¡¹¤×÷Ïß³ÌÊýÁ¿ */
+	/* èŽ·å–å·¥ä½œçº¿ç¨‹æ•°é‡ */
 	virtual DWORD GetWorkerThreadCount	()									= 0;
-	/* »ñÈ¡ Receive Ô¤Í¶µÝÊýÁ¿ */
+	/* èŽ·å– Receive é¢„æŠ•é€’æ•°é‡ */
 	virtual DWORD GetPostReceiveCount	()									= 0;
-	/* »ñÈ¡ÄÚ´æ¿é»º´æ³Ø´óÐ¡ */
+	/* èŽ·å–å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 	virtual DWORD GetFreeBufferPoolSize	()									= 0;
-	/* »ñÈ¡ÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+	/* èŽ·å–å†…å­˜å—ç¼“å­˜æ± å›žæ”¶é˜€å€¼ */
 	virtual DWORD GetFreeBufferPoolHold	()									= 0;
 
 public:
@@ -1260,68 +1260,68 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºClient ARQ Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå Client ×é¼þµÄ ARQ Ä£ÐÍ×é¼þµÄËùÓÐ²Ù×÷·½·¨
+åç§°ï¼šClient ARQ æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ Client ç»„ä»¶çš„ ARQ æ¨¡åž‹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•
 ************************************************************************/
 class IArqClient
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊÇ·ñ¿ªÆô nodelay Ä£Ê½£¨Ä¬ÈÏ£ºFALSE£¬²»¿ªÆô£© */
+	/* è®¾ç½®æ˜¯å¦å¼€å¯ nodelay æ¨¡å¼ï¼ˆé»˜è®¤ï¼šFALSEï¼Œä¸å¼€å¯ï¼‰ */
 	virtual void SetNoDelay				(BOOL bNoDelay)				= 0;
-	/* ÉèÖÃÊÇ·ñ¹Ø±ÕÓµÈû¿ØÖÆ£¨Ä¬ÈÏ£ºFALSE£¬²»¹Ø±Õ£© */
+	/* è®¾ç½®æ˜¯å¦å…³é—­æ‹¥å¡žæŽ§åˆ¶ï¼ˆé»˜è®¤ï¼šFALSEï¼Œä¸å…³é—­ï¼‰ */
 	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				= 0;
-	/* ÉèÖÃÊý¾ÝË¢ÐÂ¼ä¸ô£¨ºÁÃë£¬Ä¬ÈÏ£º60£© */
+	/* è®¾ç½®æ•°æ®åˆ·æ–°é—´éš”ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š60ï¼‰ */
 	virtual void SetFlushInterval		(DWORD dwFlushInterval)		= 0;
-	/* ÉèÖÃ¿ìËÙÖØ´« ACK ¿çÔ½´ÎÊý£¨Ä¬ÈÏ£º0£¬¹Ø±Õ¿ìËÙÖØ´«£© */
+	/* è®¾ç½®å¿«é€Ÿé‡ä¼  ACK è·¨è¶Šæ¬¡æ•°ï¼ˆé»˜è®¤ï¼š0ï¼Œå…³é—­å¿«é€Ÿé‡ä¼ ï¼‰ */
 	virtual void SetResendByAcks		(DWORD dwResendByAcks)		= 0;
-	/* ÉèÖÃ·¢ËÍ´°¿Ú´óÐ¡£¨Êý¾Ý°üÊýÁ¿£¬Ä¬ÈÏ£º128£© */
+	/* è®¾ç½®å‘é€çª—å£å¤§å°ï¼ˆæ•°æ®åŒ…æ•°é‡ï¼Œé»˜è®¤ï¼š128ï¼‰ */
 	virtual void SetSendWndSize			(DWORD dwSendWndSize)		= 0;
-	/* ÉèÖÃ½ÓÊÕ´°¿Ú´óÐ¡£¨Êý¾Ý°üÊýÁ¿£¬Ä¬ÈÏ£º512£© */
+	/* è®¾ç½®æŽ¥æ”¶çª—å£å¤§å°ï¼ˆæ•°æ®åŒ…æ•°é‡ï¼Œé»˜è®¤ï¼š512ï¼‰ */
 	virtual void SetRecvWndSize			(DWORD dwRecvWndSize)		= 0;
-	/* ÉèÖÃ×îÐ¡ÖØ´«³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º30£© */
+	/* è®¾ç½®æœ€å°é‡ä¼ è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š30ï¼‰ */
 	virtual void SetMinRto				(DWORD dwMinRto)			= 0;
-	/* ÉèÖÃ¿ìËÙÎÕÊÖ´ÎÊýÏÞÖÆ£¨Ä¬ÈÏ£º5£¬Èç¹ûÎª 0 Ôò²»ÏÞÖÆ£© */
+	/* è®¾ç½®å¿«é€Ÿæ¡æ‰‹æ¬¡æ•°é™åˆ¶ï¼ˆé»˜è®¤ï¼š5ï¼Œå¦‚æžœä¸º 0 åˆ™ä¸é™åˆ¶ï¼‰ */
 	virtual void SetFastLimit			(DWORD dwFastLimit)			= 0;
-	/* ÉèÖÃ×î´ó´«Êäµ¥Ôª£¨Ä¬ÈÏ£º0£¬Óë SetMaxDatagramSize() Ò»ÖÂ£© */
+	/* è®¾ç½®æœ€å¤§ä¼ è¾“å•å…ƒï¼ˆé»˜è®¤ï¼š0ï¼Œä¸Ž SetMaxDatagramSize() ä¸€è‡´ï¼‰ */
 	virtual void SetMaxTransUnit		(DWORD dwMaxTransUnit)		= 0;
-	/* ÉèÖÃ×î´óÊý¾Ý°ü´óÐ¡£¨Ä¬ÈÏ£º4096£© */
+	/* è®¾ç½®æœ€å¤§æ•°æ®åŒ…å¤§å°ï¼ˆé»˜è®¤ï¼š4096ï¼‰ */
 	virtual void SetMaxMessageSize		(DWORD dwMaxMessageSize)	= 0;
-	/* ÉèÖÃÎÕÊÖ³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º5000£© */
+	/* è®¾ç½®æ¡æ‰‹è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š5000ï¼‰ */
 	virtual void SetHandShakeTimeout	(DWORD dwHandShakeTimeout)	= 0;
 
-	/* ¼ì²âÊÇ·ñ¿ªÆô nodelay Ä£Ê½ */
+	/* æ£€æµ‹æ˜¯å¦å¼€å¯ nodelay æ¨¡å¼ */
 	virtual BOOL IsNoDelay				()							= 0;
-	/* ¼ì²âÊÇ·ñ¹Ø±ÕÓµÈû¿ØÖÆ */
+	/* æ£€æµ‹æ˜¯å¦å…³é—­æ‹¥å¡žæŽ§åˆ¶ */
 	virtual BOOL IsTurnoffCongestCtrl	()							= 0;
-	/* »ñÈ¡Êý¾ÝË¢ÐÂ¼ä¸ô */
+	/* èŽ·å–æ•°æ®åˆ·æ–°é—´éš” */
 	virtual DWORD GetFlushInterval		()							= 0;
-	/* »ñÈ¡¿ìËÙÖØ´« ACK ¿çÔ½´ÎÊý */
+	/* èŽ·å–å¿«é€Ÿé‡ä¼  ACK è·¨è¶Šæ¬¡æ•° */
 	virtual DWORD GetResendByAcks		()							= 0;
-	/* »ñÈ¡·¢ËÍ´°¿Ú´óÐ¡ */
+	/* èŽ·å–å‘é€çª—å£å¤§å° */
 	virtual DWORD GetSendWndSize		()							= 0;
-	/* »ñÈ¡½ÓÊÕ´°¿Ú´óÐ¡ */
+	/* èŽ·å–æŽ¥æ”¶çª—å£å¤§å° */
 	virtual DWORD GetRecvWndSize		()							= 0;
-	/* »ñÈ¡×îÐ¡ÖØ´«³¬Ê±Ê±¼ä */
+	/* èŽ·å–æœ€å°é‡ä¼ è¶…æ—¶æ—¶é—´ */
 	virtual DWORD GetMinRto				()							= 0;
-	/* »ñÈ¡¿ìËÙÎÕÊÖ´ÎÊýÏÞÖÆ */
+	/* èŽ·å–å¿«é€Ÿæ¡æ‰‹æ¬¡æ•°é™åˆ¶ */
 	virtual DWORD GetFastLimit			()							= 0;
-	/* »ñÈ¡×î´ó´«Êäµ¥Ôª */
+	/* èŽ·å–æœ€å¤§ä¼ è¾“å•å…ƒ */
 	virtual DWORD GetMaxTransUnit		()							= 0;
-	/* »ñÈ¡×î´óÊý¾Ý°ü´óÐ¡ */
+	/* èŽ·å–æœ€å¤§æ•°æ®åŒ…å¤§å° */
 	virtual DWORD GetMaxMessageSize		()							= 0;
-	/* »ñÈ¡ÎÕÊÖ³¬Ê±Ê±¼ä */
+	/* èŽ·å–æ¡æ‰‹è¶…æ—¶æ—¶é—´ */
 	virtual DWORD GetHandShakeTimeout	()							= 0;
 
-	/* »ñÈ¡µÈ´ý·¢ËÍ°üÊýÁ¿ */
+	/* èŽ·å–ç­‰å¾…å‘é€åŒ…æ•°é‡ */
 	virtual BOOL GetWaitingSendMessageCount	(int& iCount)			= 0;
 
 public:
@@ -1329,40 +1329,40 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ARQ Í¨ÐÅ¿Í»§¶Ë×é¼þ½Ó¿Ú
-ÃèÊö£º¼Ì³ÐÁË ARQ ºÍ Client ½Ó¿Ú
+åç§°ï¼šUDP ARQ é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶æŽ¥å£
+æè¿°ï¼šç»§æ‰¿äº† ARQ å’Œ Client æŽ¥å£
 ************************************************************************/
 typedef	DualInterface<IArqClient, IUdpClient>	IUdpArqClient;
 
 #endif
 
 /************************************************************************
-Ãû³Æ£ºServer/Agent PULL Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå Server/Agent ×é¼þµÄ PULL Ä£ÐÍ×é¼þµÄËùÓÐ²Ù×÷·½·¨
+åç§°ï¼šServer/Agent PULL æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ Server/Agent ç»„ä»¶çš„ PULL æ¨¡åž‹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•
 ************************************************************************/
 class IPullSocket
 {
 public:
 
 	/*
-	* Ãû³Æ£º×¥È¡Êý¾Ý
-	* ÃèÊö£ºÓÃ»§Í¨¹ý¸Ã·½·¨´Ó Socket ×é¼þÖÐ×¥È¡Êý¾Ý
+	* åç§°ï¼šæŠ“å–æ•°æ®
+	* æè¿°ï¼šç”¨æˆ·é€šè¿‡è¯¥æ–¹æ³•ä»Ž Socket ç»„ä»¶ä¸­æŠ“å–æ•°æ®
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			pData		-- ×¥È¡»º³åÇø
-	*			iLength		-- ×¥È¡Êý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	EnFetchResult
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			pData		-- æŠ“å–ç¼“å†²åŒº
+	*			iLength		-- æŠ“å–æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	EnFetchResult
 	*/
 	virtual EnFetchResult Fetch	(CONNID dwConnID, BYTE* pData, int iLength)	= 0;
 
 	/*
-	* Ãû³Æ£º¿úÌ½Êý¾Ý£¨²»»áÒÆ³ý»º³åÇøÊý¾Ý£©
-	* ÃèÊö£ºÓÃ»§Í¨¹ý¸Ã·½·¨´Ó Socket ×é¼þÖÐ¿úÌ½Êý¾Ý
+	* åç§°ï¼šçª¥æŽ¢æ•°æ®ï¼ˆä¸ä¼šç§»é™¤ç¼“å†²åŒºæ•°æ®ï¼‰
+	* æè¿°ï¼šç”¨æˆ·é€šè¿‡è¯¥æ–¹æ³•ä»Ž Socket ç»„ä»¶ä¸­çª¥æŽ¢æ•°æ®
 	*		
-	* ²ÎÊý£º		dwConnID	-- Á¬½Ó ID
-	*			pData		-- ¿úÌ½»º³åÇø
-	*			iLength		-- ¿úÌ½Êý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	EnFetchResult
+	* å‚æ•°ï¼š		dwConnID	-- è¿žæŽ¥ ID
+	*			pData		-- çª¥æŽ¢ç¼“å†²åŒº
+	*			iLength		-- çª¥æŽ¢æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	EnFetchResult
 	*/
 	virtual EnFetchResult Peek	(CONNID dwConnID, BYTE* pData, int iLength)	= 0;
 
@@ -1371,30 +1371,30 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºClient PULL Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå Client ×é¼þµÄ PULL Ä£ÐÍ×é¼þµÄËùÓÐ²Ù×÷·½·¨
+åç§°ï¼šClient PULL æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ Client ç»„ä»¶çš„ PULL æ¨¡åž‹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•
 ************************************************************************/
 class IPullClient
 {
 public:
 
 	/*
-	* Ãû³Æ£º×¥È¡Êý¾Ý
-	* ÃèÊö£ºÓÃ»§Í¨¹ý¸Ã·½·¨´Ó Socket ×é¼þÖÐ×¥È¡Êý¾Ý
+	* åç§°ï¼šæŠ“å–æ•°æ®
+	* æè¿°ï¼šç”¨æˆ·é€šè¿‡è¯¥æ–¹æ³•ä»Ž Socket ç»„ä»¶ä¸­æŠ“å–æ•°æ®
 	*		
-	* ²ÎÊý£º		pData		-- ×¥È¡»º³åÇø
-	*			iLength		-- ×¥È¡Êý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	EnFetchResult
+	* å‚æ•°ï¼š		pData		-- æŠ“å–ç¼“å†²åŒº
+	*			iLength		-- æŠ“å–æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	EnFetchResult
 	*/
 	virtual EnFetchResult Fetch	(BYTE* pData, int iLength)	= 0;
 
 	/*
-	* Ãû³Æ£º¿úÌ½Êý¾Ý£¨²»»áÒÆ³ý»º³åÇøÊý¾Ý£©
-	* ÃèÊö£ºÓÃ»§Í¨¹ý¸Ã·½·¨´Ó Socket ×é¼þÖÐ¿úÌ½Êý¾Ý
+	* åç§°ï¼šçª¥æŽ¢æ•°æ®ï¼ˆä¸ä¼šç§»é™¤ç¼“å†²åŒºæ•°æ®ï¼‰
+	* æè¿°ï¼šç”¨æˆ·é€šè¿‡è¯¥æ–¹æ³•ä»Ž Socket ç»„ä»¶ä¸­çª¥æŽ¢æ•°æ®
 	*		
-	* ²ÎÊý£º		pData		-- ¿úÌ½»º³åÇø
-	*			iLength		-- ¿úÌ½Êý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	EnFetchResult
+	* å‚æ•°ï¼š		pData		-- çª¥æŽ¢ç¼“å†²åŒº
+	*			iLength		-- çª¥æŽ¢æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	EnFetchResult
 	*/
 	virtual EnFetchResult Peek	(BYTE* pData, int iLength)	= 0;
 
@@ -1403,32 +1403,32 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP PULL Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¼Ì³ÐÁË PULL ºÍ Socket ½Ó¿Ú
+åç§°ï¼šTCP PULL æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šç»§æ‰¿äº† PULL å’Œ Socket æŽ¥å£
 ************************************************************************/
 typedef	DualInterface<IPullSocket, ITcpServer>	ITcpPullServer;
 typedef	DualInterface<IPullSocket, ITcpAgent>	ITcpPullAgent;
 typedef	DualInterface<IPullClient, ITcpClient>	ITcpPullClient;
 
 /************************************************************************
-Ãû³Æ£ºServer/Agent PACK Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå Server/Agent ×é¼þµÄ PACK Ä£ÐÍ×é¼þµÄËùÓÐ²Ù×÷·½·¨
+åç§°ï¼šServer/Agent PACK æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ Server/Agent ç»„ä»¶çš„ PACK æ¨¡åž‹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•
 ************************************************************************/
 class IPackSocket
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊý¾Ý°ü×î´ó³¤¶È£¨ÓÐÐ§Êý¾Ý°ü×î´ó³¤¶È²»ÄÜ³¬¹ý 4194303/0x3FFFFF ×Ö½Ú£¬Ä¬ÈÏ£º262144/0x40000£© */
+	/* è®¾ç½®æ•°æ®åŒ…æœ€å¤§é•¿åº¦ï¼ˆæœ‰æ•ˆæ•°æ®åŒ…æœ€å¤§é•¿åº¦ä¸èƒ½è¶…è¿‡ 4194303/0x3FFFFF å­—èŠ‚ï¼Œé»˜è®¤ï¼š262144/0x40000ï¼‰ */
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)			= 0;
-	/* ÉèÖÃ°üÍ·±êÊ¶£¨ÓÐÐ§°üÍ·±êÊ¶È¡Öµ·¶Î§ 0 ~ 1023/0x3FF£¬µ±°üÍ·±êÊ¶Îª 0 Ê±²»Ð£Ñé°üÍ·£¬Ä¬ÈÏ£º0£© */
+	/* è®¾ç½®åŒ…å¤´æ ‡è¯†ï¼ˆæœ‰æ•ˆåŒ…å¤´æ ‡è¯†å–å€¼èŒƒå›´ 0 ~ 1023/0x3FFï¼Œå½“åŒ…å¤´æ ‡è¯†ä¸º 0 æ—¶ä¸æ ¡éªŒåŒ…å¤´ï¼Œé»˜è®¤ï¼š0ï¼‰ */
 	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)		= 0;
 
-	/* »ñÈ¡Êý¾Ý°ü×î´ó³¤¶È */
+	/* èŽ·å–æ•°æ®åŒ…æœ€å¤§é•¿åº¦ */
 	virtual DWORD GetMaxPackSize	()								= 0;
-	/* »ñÈ¡°üÍ·±êÊ¶ */
+	/* èŽ·å–åŒ…å¤´æ ‡è¯† */
 	virtual USHORT GetPackHeaderFlag()								= 0;
 
 public:
@@ -1436,24 +1436,24 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºClient PACK Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå Client ×é¼þµÄ PACK Ä£ÐÍ×é¼þµÄËùÓÐ²Ù×÷·½·¨
+åç§°ï¼šClient PACK æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ Client ç»„ä»¶çš„ PACK æ¨¡åž‹ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•
 ************************************************************************/
 class IPackClient
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊý¾Ý°ü×î´ó³¤¶È£¨ÓÐÐ§Êý¾Ý°ü×î´ó³¤¶È²»ÄÜ³¬¹ý 4194303/0x3FFFFF ×Ö½Ú£¬Ä¬ÈÏ£º262144/0x40000£© */
+	/* è®¾ç½®æ•°æ®åŒ…æœ€å¤§é•¿åº¦ï¼ˆæœ‰æ•ˆæ•°æ®åŒ…æœ€å¤§é•¿åº¦ä¸èƒ½è¶…è¿‡ 4194303/0x3FFFFF å­—èŠ‚ï¼Œé»˜è®¤ï¼š262144/0x40000ï¼‰ */
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)			= 0;
-	/* ÉèÖÃ°üÍ·±êÊ¶£¨ÓÐÐ§°üÍ·±êÊ¶È¡Öµ·¶Î§ 0 ~ 1023/0x3FF£¬µ±°üÍ·±êÊ¶Îª 0 Ê±²»Ð£Ñé°üÍ·£¬Ä¬ÈÏ£º0£© */
+	/* è®¾ç½®åŒ…å¤´æ ‡è¯†ï¼ˆæœ‰æ•ˆåŒ…å¤´æ ‡è¯†å–å€¼èŒƒå›´ 0 ~ 1023/0x3FFï¼Œå½“åŒ…å¤´æ ‡è¯†ä¸º 0 æ—¶ä¸æ ¡éªŒåŒ…å¤´ï¼Œé»˜è®¤ï¼š0ï¼‰ */
 	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)		= 0;
 
-	/* »ñÈ¡Êý¾Ý°ü×î´ó³¤¶È */
+	/* èŽ·å–æ•°æ®åŒ…æœ€å¤§é•¿åº¦ */
 	virtual DWORD GetMaxPackSize	()								= 0;
-	/* »ñÈ¡°üÍ·±êÊ¶ */
+	/* èŽ·å–åŒ…å¤´æ ‡è¯† */
 	virtual USHORT GetPackHeaderFlag()								= 0;
 
 public:
@@ -1461,80 +1461,80 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP PACK Ä£ÐÍ×é¼þ½Ó¿Ú
-ÃèÊö£º¼Ì³ÐÁË PACK ºÍ Socket ½Ó¿Ú
+åç§°ï¼šTCP PACK æ¨¡åž‹ç»„ä»¶æŽ¥å£
+æè¿°ï¼šç»§æ‰¿äº† PACK å’Œ Socket æŽ¥å£
 ************************************************************************/
 typedef	DualInterface<IPackSocket, ITcpServer>	ITcpPackServer;
 typedef	DualInterface<IPackSocket, ITcpAgent>	ITcpPackAgent;
 typedef	DualInterface<IPackClient, ITcpClient>	ITcpPackClient;
 
 /************************************************************************
-Ãû³Æ£ºSocket ¼àÌýÆ÷»ù½Ó¿Ú
-ÃèÊö£º¶¨Òå×é¼þ¼àÌýÆ÷µÄ¹«¹²·½·¨
+åç§°ï¼šSocket ç›‘å¬å™¨åŸºæŽ¥å£
+æè¿°ï¼šå®šä¹‰ç»„ä»¶ç›‘å¬å™¨çš„å…¬å…±æ–¹æ³•
 ************************************************************************/
 template<class T> class ISocketListenerT
 {
 public:
 
 	/*
-	* Ãû³Æ£ºÎÕÊÖÍê³ÉÍ¨Öª
-	* ÃèÊö£ºÁ¬½ÓÍê³ÉÎÕÊÖÊ±£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª£¬¼àÌýÆ÷½ÓÊÕµ½¸ÃÍ¨Öªºó²ÅÄÜ¿ªÊ¼
-	*		Êý¾ÝÊÕ·¢²Ù×÷
+	* åç§°ï¼šæ¡æ‰‹å®Œæˆé€šçŸ¥
+	* æè¿°ï¼šè¿žæŽ¥å®Œæˆæ¡æ‰‹æ—¶ï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œç›‘å¬å™¨æŽ¥æ”¶åˆ°è¯¥é€šçŸ¥åŽæ‰èƒ½å¼€å§‹
+	*		æ•°æ®æ”¶å‘æ“ä½œ
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnHandShake(T* pSender, CONNID dwConnID)												= 0;
 
 	/*
-	* Ãû³Æ£ºÒÑ·¢ËÍÊý¾ÝÍ¨Öª
-	* ÃèÊö£º³É¹¦·¢ËÍÊý¾Ýºó£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šå·²å‘é€æ•°æ®é€šçŸ¥
+	* æè¿°ï¼šæˆåŠŸå‘é€æ•°æ®åŽï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			pData		-- ÒÑ·¢ËÍÊý¾Ý»º³åÇø
-	*			iLength		-- ÒÑ·¢ËÍÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- ¸ÃÍ¨Öª²»ÔÊÐí·µ»Ø HR_ERROR£¨µ÷ÊÔÄ£Ê½ÏÂÒý·¢¶ÏÑÔ´íÎó£©
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			pData		-- å·²å‘é€æ•°æ®ç¼“å†²åŒº
+	*			iLength		-- å·²å‘é€æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- è¯¥é€šçŸ¥ä¸å…è®¸è¿”å›ž HR_ERRORï¼ˆè°ƒè¯•æ¨¡å¼ä¸‹å¼•å‘æ–­è¨€é”™è¯¯ï¼‰
 	*/
 	virtual EnHandleResult OnSend(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)					= 0;
 
 	/*
-	* Ãû³Æ£ºÊý¾Ýµ½´ïÍ¨Öª£¨PUSH Ä£ÐÍ£©
-	* ÃèÊö£º¶ÔÓÚ PUSH Ä£ÐÍµÄ Socket Í¨ÐÅ×é¼þ£¬³É¹¦½ÓÊÕÊý¾Ýºó½«Ïò Socket ¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šæ•°æ®åˆ°è¾¾é€šçŸ¥ï¼ˆPUSH æ¨¡åž‹ï¼‰
+	* æè¿°ï¼šå¯¹äºŽ PUSH æ¨¡åž‹çš„ Socket é€šä¿¡ç»„ä»¶ï¼ŒæˆåŠŸæŽ¥æ”¶æ•°æ®åŽå°†å‘ Socket ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			pData		-- ÒÑ½ÓÊÕÊý¾Ý»º³åÇø
-	*			iLength		-- ÒÑ½ÓÊÕÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			pData		-- å·²æŽ¥æ”¶æ•°æ®ç¼“å†²åŒº
+	*			iLength		-- å·²æŽ¥æ”¶æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnReceive(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
 
 	/*
-	* Ãû³Æ£ºÊý¾Ýµ½´ïÍ¨Öª£¨PULL Ä£ÐÍ£©
-	* ÃèÊö£º¶ÔÓÚ PULL Ä£ÐÍµÄ Socket Í¨ÐÅ×é¼þ£¬³É¹¦½ÓÊÕÊý¾Ýºó½«Ïò Socket ¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šæ•°æ®åˆ°è¾¾é€šçŸ¥ï¼ˆPULL æ¨¡åž‹ï¼‰
+	* æè¿°ï¼šå¯¹äºŽ PULL æ¨¡åž‹çš„ Socket é€šä¿¡ç»„ä»¶ï¼ŒæˆåŠŸæŽ¥æ”¶æ•°æ®åŽå°†å‘ Socket ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			iLength		-- ÒÑ½ÓÊÕÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			iLength		-- å·²æŽ¥æ”¶æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnReceive(T* pSender, CONNID dwConnID, int iLength)									= 0;
 
 	/*
-	* Ãû³Æ£ºÍ¨ÐÅ´íÎóÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ·¢Éú´íÎóºó£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª£¬²¢¹Ø±ÕÁ¬½Ó
+	* åç§°ï¼šé€šä¿¡é”™è¯¯é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡å‘ç”Ÿé”™è¯¯åŽï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œå¹¶å…³é—­è¿žæŽ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			enOperation	-- Socket ²Ù×÷ÀàÐÍ
-	*			iErrorCode	-- ´íÎó´úÂë
-	* ·µ»ØÖµ£º	ºöÂÔ·µ»ØÖµ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			enOperation	-- Socket æ“ä½œç±»åž‹
+	*			iErrorCode	-- é”™è¯¯ä»£ç 
+	* è¿”å›žå€¼ï¼š	å¿½ç•¥è¿”å›žå€¼
 	*/
 	virtual EnHandleResult OnClose(T* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)	= 0;
 
@@ -1547,53 +1547,53 @@ template<class T> class IComplexSocketListenerT : public ISocketListenerT<T>
 public:
 
 	/*
-	* Ãû³Æ£º¹Ø±ÕÍ¨ÐÅ×é¼þÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ×é¼þ¹Ø±ÕÊ±£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šå…³é—­é€šä¿¡ç»„ä»¶é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡ç»„ä»¶å…³é—­æ—¶ï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	* ·µ»ØÖµ£º	ºöÂÔ·µ»ØÖµ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	* è¿”å›žå€¼ï¼š	å¿½ç•¥è¿”å›žå€¼
 	*/
 	virtual EnHandleResult OnShutdown(T* pSender)																= 0;
 
 };
 
 /************************************************************************
-Ãû³Æ£º·þÎñ¶Ë Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå·þÎñ¶Ë Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šæœåŠ¡ç«¯ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰æœåŠ¡ç«¯ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 template<class T> class IServerListenerT : public IComplexSocketListenerT<T>
 {
 public:
 
 	/*
-	* Ãû³Æ£º×¼±¸¼àÌýÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ·þÎñ¶Ë×é¼þÆô¶¯Ê±£¬ÔÚ¼àÌý Socket ´´½¨Íê³É²¢¿ªÊ¼Ö´ÐÐ¼àÌýÇ°£¬Socket ¼àÌý
-	*		Æ÷½«ÊÕµ½¸ÃÍ¨Öª£¬¼àÌýÆ÷¿ÉÒÔÔÚÍ¨Öª´¦Àí·½·¨ÖÐÖ´ÐÐ Socket Ñ¡ÏîÉèÖÃµÈ¶îÍâ¹¤×÷
+	* åç§°ï¼šå‡†å¤‡ç›‘å¬é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡æœåŠ¡ç«¯ç»„ä»¶å¯åŠ¨æ—¶ï¼Œåœ¨ç›‘å¬ Socket åˆ›å»ºå®Œæˆå¹¶å¼€å§‹æ‰§è¡Œç›‘å¬å‰ï¼ŒSocket ç›‘å¬
+	*		å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œç›‘å¬å™¨å¯ä»¥åœ¨é€šçŸ¥å¤„ç†æ–¹æ³•ä¸­æ‰§è¡Œ Socket é€‰é¡¹è®¾ç½®ç­‰é¢å¤–å·¥ä½œ
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			soListen	-- ¼àÌý Socket
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- ÖÕÖ¹Æô¶¯Í¨ÐÅ·þÎñ×é¼þ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			soListen	-- ç›‘å¬ Socket
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- ç»ˆæ­¢å¯åŠ¨é€šä¿¡æœåŠ¡ç»„ä»¶
 	*/
 	virtual EnHandleResult OnPrepareListen(T* pSender, SOCKET soListen)						= 0;
 
 	/*
-	* Ãû³Æ£º½ÓÊÕÁ¬½ÓÍ¨Öª
-	* ÃèÊö£º½ÓÊÕµ½¿Í»§¶ËÁ¬½ÓÇëÇóÊ±£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª£¬¼àÌýÆ÷¿ÉÒÔÔÚÍ¨Öª´¦Àí·½
-	*		·¨ÖÐÖ´ÐÐ Socket Ñ¡ÏîÉèÖÃ»ò¾Ü¾ø¿Í»§¶ËÁ¬½ÓµÈ¶îÍâ¹¤×÷
+	* åç§°ï¼šæŽ¥æ”¶è¿žæŽ¥é€šçŸ¥
+	* æè¿°ï¼šæŽ¥æ”¶åˆ°å®¢æˆ·ç«¯è¿žæŽ¥è¯·æ±‚æ—¶ï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œç›‘å¬å™¨å¯ä»¥åœ¨é€šçŸ¥å¤„ç†æ–¹
+	*		æ³•ä¸­æ‰§è¡Œ Socket é€‰é¡¹è®¾ç½®æˆ–æ‹’ç»å®¢æˆ·ç«¯è¿žæŽ¥ç­‰é¢å¤–å·¥ä½œ
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			soClient	-- TCP: ¿Í»§¶Ë Socket ¾ä±ú£¬UDP: ¿Í»§¶Ë Socket SOCKADDR Ö¸Õë
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ½ÓÊÜÁ¬½Ó
-	*			HR_ERROR			-- ¾Ü¾øÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			soClient	-- TCP: å®¢æˆ·ç«¯ Socket å¥æŸ„ï¼ŒUDP: å®¢æˆ·ç«¯ Socket SOCKADDR æŒ‡é’ˆ
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- æŽ¥å—è¿žæŽ¥
+	*			HR_ERROR			-- æ‹’ç»è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnAccept(T* pSender, CONNID dwConnID, UINT_PTR soClient)			= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP ·þÎñ¶Ë Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå TCP ·þÎñ¶Ë Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šTCP æœåŠ¡ç«¯ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ TCP æœåŠ¡ç«¯ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class ITcpServerListener : public IServerListenerT<ITcpServer>
 {
@@ -1602,8 +1602,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºPUSH Ä£ÐÍ·þÎñ¶Ë Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šPUSH æ¨¡åž‹æœåŠ¡ç«¯ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CTcpServerListener : public ITcpServerListener
 {
@@ -1617,8 +1617,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºPULL Ä£ÐÍ·þÎñ¶Ë Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šPULL æ¨¡åž‹æœåŠ¡ç«¯ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CTcpPullServerListener : public CTcpServerListener
 {
@@ -1630,8 +1630,8 @@ public:
 #ifdef _UDP_SUPPORT
 
 /************************************************************************
-Ãû³Æ£ºUDP ·þÎñ¶Ë Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP ·þÎñ¶Ë Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šUDP æœåŠ¡ç«¯ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP æœåŠ¡ç«¯ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IUdpServerListener : public IServerListenerT<IUdpServer>
 {
@@ -1640,8 +1640,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ·þÎñ¶Ë Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šUDP æœåŠ¡ç«¯ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CUdpServerListener : public IUdpServerListener
 {
@@ -1657,42 +1657,42 @@ public:
 #endif
 
 /************************************************************************
-Ãû³Æ£ºÍ¨ÐÅ´úÀí Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå Í¨ÐÅ´úÀí Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šé€šä¿¡ä»£ç† Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ é€šä¿¡ä»£ç† Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 template<class T> class IAgentListenerT : public IComplexSocketListenerT<T>
 {
 public:
 
 	/*
-	* Ãû³Æ£º×¼±¸Á¬½ÓÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ¿Í»§¶Ë×é¼þÆô¶¯Ê±£¬ÔÚ¿Í»§¶Ë Socket ´´½¨Íê³É²¢¿ªÊ¼Ö´ÐÐÁ¬½ÓÇ°£¬Socket ¼àÌý
-	*		Æ÷½«ÊÕµ½¸ÃÍ¨Öª£¬¼àÌýÆ÷¿ÉÒÔÔÚÍ¨Öª´¦Àí·½·¨ÖÐÖ´ÐÐ Socket Ñ¡ÏîÉèÖÃµÈ¶îÍâ¹¤×÷
+	* åç§°ï¼šå‡†å¤‡è¿žæŽ¥é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶å¯åŠ¨æ—¶ï¼Œåœ¨å®¢æˆ·ç«¯ Socket åˆ›å»ºå®Œæˆå¹¶å¼€å§‹æ‰§è¡Œè¿žæŽ¥å‰ï¼ŒSocket ç›‘å¬
+	*		å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œç›‘å¬å™¨å¯ä»¥åœ¨é€šçŸ¥å¤„ç†æ–¹æ³•ä¸­æ‰§è¡Œ Socket é€‰é¡¹è®¾ç½®ç­‰é¢å¤–å·¥ä½œ
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			socket		-- ¿Í»§¶Ë Socket
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- ÖÕÖ¹Æô¶¯Í¨ÐÅ¿Í»§¶Ë×é¼þ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			socket		-- å®¢æˆ·ç«¯ Socket
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- ç»ˆæ­¢å¯åŠ¨é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶
 	*/
 	virtual EnHandleResult OnPrepareConnect(T* pSender, CONNID dwConnID, SOCKET socket)		= 0;
 
 	/*
-	* Ãû³Æ£ºÁ¬½ÓÍê³ÉÍ¨Öª
-	* ÃèÊö£ºÓë·þÎñ¶Ë³É¹¦½¨Á¢Á¬½ÓÊ±£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šè¿žæŽ¥å®Œæˆé€šçŸ¥
+	* æè¿°ï¼šä¸ŽæœåŠ¡ç«¯æˆåŠŸå»ºç«‹è¿žæŽ¥æ—¶ï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Í¬²½Á¬½Ó£ºÖÕÖ¹Æô¶¯Í¨ÐÅ¿Í»§¶Ë×é¼þ
-	*								   Òì²½Á¬½Ó£º¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- åŒæ­¥è¿žæŽ¥ï¼šç»ˆæ­¢å¯åŠ¨é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶
+	*								   å¼‚æ­¥è¿žæŽ¥ï¼šå…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnConnect(T* pSender, CONNID dwConnID)							= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP Í¨ÐÅ´úÀí Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå TCP Í¨ÐÅ´úÀí Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šTCP é€šä¿¡ä»£ç† Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ TCP é€šä¿¡ä»£ç† Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class ITcpAgentListener : public IAgentListenerT<ITcpAgent>
 {
@@ -1701,8 +1701,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºPUSH Ä£ÐÍÍ¨ÐÅ´úÀí Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šPUSH æ¨¡åž‹é€šä¿¡ä»£ç† Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CTcpAgentListener : public ITcpAgentListener
 {
@@ -1716,8 +1716,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºPULL Í¨ÐÅ´úÀí Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šPULL é€šä¿¡ä»£ç† Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CTcpPullAgentListener : public CTcpAgentListener
 {
@@ -1727,8 +1727,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£º¿Í»§¶Ë Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå¿Í»§¶Ë Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šå®¢æˆ·ç«¯ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 
 template<class T> class IClientListenerT : public ISocketListenerT<T>
@@ -1736,34 +1736,34 @@ template<class T> class IClientListenerT : public ISocketListenerT<T>
 public:
 	
 	/*
-	* Ãû³Æ£º×¼±¸Á¬½ÓÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ¿Í»§¶Ë×é¼þÆô¶¯Ê±£¬ÔÚ¿Í»§¶Ë Socket ´´½¨Íê³É²¢¿ªÊ¼Ö´ÐÐÁ¬½ÓÇ°£¬Socket ¼àÌý
-	*		Æ÷½«ÊÕµ½¸ÃÍ¨Öª£¬¼àÌýÆ÷¿ÉÒÔÔÚÍ¨Öª´¦Àí·½·¨ÖÐÖ´ÐÐ Socket Ñ¡ÏîÉèÖÃµÈ¶îÍâ¹¤×÷
+	* åç§°ï¼šå‡†å¤‡è¿žæŽ¥é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶å¯åŠ¨æ—¶ï¼Œåœ¨å®¢æˆ·ç«¯ Socket åˆ›å»ºå®Œæˆå¹¶å¼€å§‹æ‰§è¡Œè¿žæŽ¥å‰ï¼ŒSocket ç›‘å¬
+	*		å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œç›‘å¬å™¨å¯ä»¥åœ¨é€šçŸ¥å¤„ç†æ–¹æ³•ä¸­æ‰§è¡Œ Socket é€‰é¡¹è®¾ç½®ç­‰é¢å¤–å·¥ä½œ
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			socket		-- ¿Í»§¶Ë Socket
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- ÖÕÖ¹Æô¶¯Í¨ÐÅ¿Í»§¶Ë×é¼þ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			socket		-- å®¢æˆ·ç«¯ Socket
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- ç»ˆæ­¢å¯åŠ¨é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶
 	*/
 	virtual EnHandleResult OnPrepareConnect(T* pSender, CONNID dwConnID, SOCKET socket)						= 0;
 
 	/*
-	* Ãû³Æ£ºÁ¬½ÓÍê³ÉÍ¨Öª
-	* ÃèÊö£ºÓë·þÎñ¶Ë³É¹¦½¨Á¢Á¬½ÓÊ±£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šè¿žæŽ¥å®Œæˆé€šçŸ¥
+	* æè¿°ï¼šä¸ŽæœåŠ¡ç«¯æˆåŠŸå»ºç«‹è¿žæŽ¥æ—¶ï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Í¬²½Á¬½Ó£ºÖÕÖ¹Æô¶¯Í¨ÐÅ¿Í»§¶Ë×é¼þ
-	*								   Òì²½Á¬½Ó£º¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- åŒæ­¥è¿žæŽ¥ï¼šç»ˆæ­¢å¯åŠ¨é€šä¿¡å®¢æˆ·ç«¯ç»„ä»¶
+	*								   å¼‚æ­¥è¿žæŽ¥ï¼šå…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnConnect(T* pSender, CONNID dwConnID)											= 0;
 };
 
 /************************************************************************
-Ãû³Æ£ºTCP ¿Í»§¶Ë Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå TCP ¿Í»§¶Ë Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šTCP å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ TCP å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class ITcpClientListener : public IClientListenerT<ITcpClient>
 {
@@ -1772,8 +1772,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºPUSH Ä£ÐÍ¿Í»§¶Ë Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šPUSH æ¨¡åž‹å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CTcpClientListener : public ITcpClientListener
 {
@@ -1786,8 +1786,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºPULL ¿Í»§¶Ë Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šPULL å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CTcpPullClientListener : public CTcpClientListener
 {
@@ -1799,8 +1799,8 @@ public:
 #ifdef _UDP_SUPPORT
 
 /************************************************************************
-Ãû³Æ£ºUDP ¿Í»§¶Ë Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP ¿Í»§¶Ë Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šUDP å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP å®¢æˆ·ç«¯ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IUdpClientListener : public IClientListenerT<IUdpClient>
 {
@@ -1809,8 +1809,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP »§¶Ë Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šUDP æˆ·ç«¯ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CUdpClientListener : public IUdpClientListener
 {
@@ -1823,8 +1823,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ´«²¥ Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP ´«²¥ Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šUDP ä¼ æ’­ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP ä¼ æ’­ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IUdpCastListener : public IClientListenerT<IUdpCast>
 {
@@ -1833,8 +1833,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ´«²¥ Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šUDP ä¼ æ’­ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CUdpCastListener : public IUdpCastListener
 {
@@ -1847,72 +1847,72 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ½Úµã Socket ¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå UDP ½Úµã Socket ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šUDP èŠ‚ç‚¹ Socket ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ UDP èŠ‚ç‚¹ Socket ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IUdpNodeListener
 {
 public:
 
 	/*
-	* Ãû³Æ£º×¼±¸¼àÌýÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ×é¼þÆô¶¯Ê±£¬ÔÚ¼àÌý Socket ´´½¨Íê³É²¢¿ªÊ¼Ö´ÐÐ¼àÌýÇ°£¬Socket ¼àÌýÆ÷
-	*		½«ÊÕµ½¸ÃÍ¨Öª£¬¼àÌýÆ÷¿ÉÒÔÔÚÍ¨Öª´¦Àí·½·¨ÖÐÖ´ÐÐ Socket Ñ¡ÏîÉèÖÃµÈ¶îÍâ¹¤×÷
+	* åç§°ï¼šå‡†å¤‡ç›‘å¬é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡ç»„ä»¶å¯åŠ¨æ—¶ï¼Œåœ¨ç›‘å¬ Socket åˆ›å»ºå®Œæˆå¹¶å¼€å§‹æ‰§è¡Œç›‘å¬å‰ï¼ŒSocket ç›‘å¬å™¨
+	*		å°†æ”¶åˆ°è¯¥é€šçŸ¥ï¼Œç›‘å¬å™¨å¯ä»¥åœ¨é€šçŸ¥å¤„ç†æ–¹æ³•ä¸­æ‰§è¡Œ Socket é€‰é¡¹è®¾ç½®ç­‰é¢å¤–å·¥ä½œ
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			soListen	-- ¼àÌý Socket
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- ÖÕÖ¹Æô¶¯Í¨ÐÅ·þÎñ×é¼þ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			soListen	-- ç›‘å¬ Socket
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- ç»ˆæ­¢å¯åŠ¨é€šä¿¡æœåŠ¡ç»„ä»¶
 	*/
 	virtual EnHandleResult OnPrepareListen(IUdpNode* pSender, SOCKET soListen)															= 0;
 
 	/*
-	* Ãû³Æ£ºÒÑ·¢ËÍÊý¾ÝÍ¨Öª
-	* ÃèÊö£º³É¹¦·¢ËÍÊý¾Ýºó£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šå·²å‘é€æ•°æ®é€šçŸ¥
+	* æè¿°ï¼šæˆåŠŸå‘é€æ•°æ®åŽï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender				-- ÊÂ¼þÔ´¶ÔÏó
-	*			lpszRemoteAddress	-- Ô¶³ÌµØÖ·
-	*			usRemotePort		-- Ô¶³Ì¶Ë¿Ú
-	*			pData				-- ÒÑ·¢ËÍÊý¾Ý»º³åÇø
-	*			iLength				-- ÒÑ·¢ËÍÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	ºöÂÔ·µ»ØÖµ
+	* å‚æ•°ï¼š		pSender				-- äº‹ä»¶æºå¯¹è±¡
+	*			lpszRemoteAddress	-- è¿œç¨‹åœ°å€
+	*			usRemotePort		-- è¿œç¨‹ç«¯å£
+	*			pData				-- å·²å‘é€æ•°æ®ç¼“å†²åŒº
+	*			iLength				-- å·²å‘é€æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	å¿½ç•¥è¿”å›žå€¼
 	*/
 	virtual EnHandleResult OnSend(IUdpNode* pSender, LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pData, int iLength)	= 0;
 
 	/*
-	* Ãû³Æ£ºÊý¾Ýµ½´ïÍ¨Öª£¨PUSH Ä£ÐÍ£©
-	* ÃèÊö£º³É¹¦½ÓÊÕÊý¾Ýºó£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šæ•°æ®åˆ°è¾¾é€šçŸ¥ï¼ˆPUSH æ¨¡åž‹ï¼‰
+	* æè¿°ï¼šæˆåŠŸæŽ¥æ”¶æ•°æ®åŽï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender				-- ÊÂ¼þÔ´¶ÔÏó
-	*			lpszRemoteAddress	-- Ô¶³ÌµØÖ·
-	*			usRemotePort		-- Ô¶³Ì¶Ë¿Ú
-	*			pData				-- ÒÑ·¢ËÍÊý¾Ý»º³åÇø
-	*			iLength				-- ÒÑ·¢ËÍÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	ºöÂÔ·µ»ØÖµ
+	* å‚æ•°ï¼š		pSender				-- äº‹ä»¶æºå¯¹è±¡
+	*			lpszRemoteAddress	-- è¿œç¨‹åœ°å€
+	*			usRemotePort		-- è¿œç¨‹ç«¯å£
+	*			pData				-- å·²å‘é€æ•°æ®ç¼“å†²åŒº
+	*			iLength				-- å·²å‘é€æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	å¿½ç•¥è¿”å›žå€¼
 	*/
 	virtual EnHandleResult OnReceive(IUdpNode* pSender, LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pData, int iLength)	= 0;
 
 	/*
-	* Ãû³Æ£ºÍ¨ÐÅ´íÎóÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ·¢Éú´íÎóºó£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šé€šä¿¡é”™è¯¯é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡å‘ç”Ÿé”™è¯¯åŽï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender				-- ÊÂ¼þÔ´¶ÔÏó
-	*			lpszRemoteAddress	-- Ô¶³ÌµØÖ·
-	*			usRemotePort		-- Ô¶³Ì¶Ë¿Ú
-	*			enOperation			-- Socket ²Ù×÷ÀàÐÍ
-	*			iErrorCode			-- ´íÎó´úÂë
-	*			pData				-- ±¾´ÎÊÂ¼þ¹ØÁªµÄÊý¾Ý»º³åÇø
-	*			iLength				-- ±¾´ÎÊÂ¼þ¹ØÁªµÄÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	ºöÂÔ·µ»ØÖµ
+	* å‚æ•°ï¼š		pSender				-- äº‹ä»¶æºå¯¹è±¡
+	*			lpszRemoteAddress	-- è¿œç¨‹åœ°å€
+	*			usRemotePort		-- è¿œç¨‹ç«¯å£
+	*			enOperation			-- Socket æ“ä½œç±»åž‹
+	*			iErrorCode			-- é”™è¯¯ä»£ç 
+	*			pData				-- æœ¬æ¬¡äº‹ä»¶å…³è”çš„æ•°æ®ç¼“å†²åŒº
+	*			iLength				-- æœ¬æ¬¡äº‹ä»¶å…³è”çš„æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	å¿½ç•¥è¿”å›žå€¼
 	*/
 	virtual EnHandleResult OnError(IUdpNode* pSender, EnSocketOperation enOperation, int iErrorCode, LPCTSTR lpszRemoteAddress, USHORT usRemotePort, const BYTE* pData, int iLength)	= 0;
 
 	/*
-	* Ãû³Æ£º¹Ø±ÕÍ¨ÐÅ×é¼þÍ¨Öª
-	* ÃèÊö£ºÍ¨ÐÅ×é¼þ¹Ø±ÕÊ±£¬Socket ¼àÌýÆ÷½«ÊÕµ½¸ÃÍ¨Öª
+	* åç§°ï¼šå…³é—­é€šä¿¡ç»„ä»¶é€šçŸ¥
+	* æè¿°ï¼šé€šä¿¡ç»„ä»¶å…³é—­æ—¶ï¼ŒSocket ç›‘å¬å™¨å°†æ”¶åˆ°è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	* ·µ»ØÖµ£º	ºöÂÔ·µ»ØÖµ
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	* è¿”å›žå€¼ï¼š	å¿½ç•¥è¿”å›žå€¼
 	*/
 	virtual EnHandleResult OnShutdown(IUdpNode* pSender)																				= 0;
 
@@ -1921,8 +1921,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºUDP ½Úµã Socket ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šUDP èŠ‚ç‚¹ Socket ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CUdpNodeListener : public IUdpNodeListener
 {
@@ -1941,79 +1941,79 @@ public:
 #ifdef _HTTP_SUPPORT
 
 /************************************************************************
-Ãû³Æ£º¸´ºÏ Http ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå¸´ºÏ Http ×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨£¬¸´ºÏ Http ×é¼þÍ¬Ê±¹ÜÀí¶à¸ö Http Á¬½Ó
+åç§°ï¼šå¤åˆ Http ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰å¤åˆ Http ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•ï¼Œå¤åˆ Http ç»„ä»¶åŒæ—¶ç®¡ç†å¤šä¸ª Http è¿žæŽ¥
 ************************************************************************/
 class IComplexHttp
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÆô¶¯ HTTP Í¨ÐÅ
-	* ÃèÊö£ºµ±Í¨ÐÅ×é¼þÉèÖÃÎª·Ç×Ô¶¯Æô¶¯ HTTP Í¨ÐÅÊ±£¬ÐèÒªµ÷ÓÃ±¾·½·¨Æô¶¯ HTTP Í¨ÐÅ
+	* åç§°ï¼šå¯åŠ¨ HTTP é€šä¿¡
+	* æè¿°ï¼šå½“é€šä¿¡ç»„ä»¶è®¾ç½®ä¸ºéžè‡ªåŠ¨å¯åŠ¨ HTTP é€šä¿¡æ—¶ï¼Œéœ€è¦è°ƒç”¨æœ¬æ–¹æ³•å¯åŠ¨ HTTP é€šä¿¡
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL StartHttp(CONNID dwConnID)												= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ Chunked Êý¾Ý·ÖÆ¬
-	* ÃèÊö£ºÏò¶Ô¶Ë·¢ËÍ Chunked Êý¾Ý·ÖÆ¬
+	* åç§°ï¼šå‘é€ Chunked æ•°æ®åˆ†ç‰‡
+	* æè¿°ï¼šå‘å¯¹ç«¯å‘é€ Chunked æ•°æ®åˆ†ç‰‡
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			pData			-- Chunked Êý¾Ý·ÖÆ¬
-	*			iLength			-- Êý¾Ý·ÖÆ¬³¤¶È£¨Îª 0 ±íÊ¾½áÊø·ÖÆ¬£©
-	*			lpszExtensions	-- À©Õ¹ÊôÐÔ£¨Ä¬ÈÏ£ºnullptr£©
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			pData			-- Chunked æ•°æ®åˆ†ç‰‡
+	*			iLength			-- æ•°æ®åˆ†ç‰‡é•¿åº¦ï¼ˆä¸º 0 è¡¨ç¤ºç»“æŸåˆ†ç‰‡ï¼‰
+	*			lpszExtensions	-- æ‰©å±•å±žæ€§ï¼ˆé»˜è®¤ï¼šnullptrï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendChunkData(CONNID dwConnID, const BYTE* pData = nullptr, int iLength = 0, LPCSTR lpszExtensions = nullptr)	= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃ±¾µØÐ­Òé°æ±¾ */
+	/* è®¾ç½®æœ¬åœ°åè®®ç‰ˆæœ¬ */
 	virtual void SetLocalVersion(EnHttpVersion usVersion)								= 0;
-	/* »ñÈ¡±¾µØÐ­Òé°æ±¾ */
+	/* èŽ·å–æœ¬åœ°åè®®ç‰ˆæœ¬ */
 	virtual EnHttpVersion GetLocalVersion()												= 0;
 
-	/* ¼ì²éÊÇ·ñÉý¼¶Ð­Òé */
+	/* æ£€æŸ¥æ˜¯å¦å‡çº§åè®® */
 	virtual BOOL IsUpgrade(CONNID dwConnID)												= 0;
-	/* ¼ì²éÊÇ·ñÓÐ Keep-Alive ±êÊ¶ */
+	/* æ£€æŸ¥æ˜¯å¦æœ‰ Keep-Alive æ ‡è¯† */
 	virtual BOOL IsKeepAlive(CONNID dwConnID)											= 0;
-	/* »ñÈ¡Ð­Òé°æ±¾ */
+	/* èŽ·å–åè®®ç‰ˆæœ¬ */
 	virtual USHORT GetVersion(CONNID dwConnID)											= 0;
-	/* »ñÈ¡ÄÚÈÝ³¤¶È */
+	/* èŽ·å–å†…å®¹é•¿åº¦ */
 	virtual ULONGLONG GetContentLength(CONNID dwConnID)									= 0;
-	/* »ñÈ¡ÄÚÈÝÀàÐÍ */
+	/* èŽ·å–å†…å®¹ç±»åž‹ */
 	virtual LPCSTR GetContentType(CONNID dwConnID)										= 0;
-	/* »ñÈ¡ÄÚÈÝ±àÂë */
+	/* èŽ·å–å†…å®¹ç¼–ç  */
 	virtual LPCSTR GetContentEncoding(CONNID dwConnID)									= 0;
-	/* »ñÈ¡´«Êä±àÂë */
+	/* èŽ·å–ä¼ è¾“ç¼–ç  */
 	virtual LPCSTR GetTransferEncoding(CONNID dwConnID)									= 0;
-	/* »ñÈ¡Ð­ÒéÉý¼¶ÀàÐÍ */
+	/* èŽ·å–åè®®å‡çº§ç±»åž‹ */
 	virtual EnHttpUpgradeType GetUpgradeType(CONNID dwConnID)							= 0;
-	/* »ñÈ¡½âÎö´íÎó´úÂë */
+	/* èŽ·å–è§£æžé”™è¯¯ä»£ç  */
 	virtual USHORT GetParseErrorCode(CONNID dwConnID, LPCSTR* lpszErrorDesc = nullptr)	= 0;
 
-	/* »ñÈ¡Ä³¸öÇëÇóÍ·£¨µ¥Öµ£© */
+	/* èŽ·å–æŸä¸ªè¯·æ±‚å¤´ï¼ˆå•å€¼ï¼‰ */
 	virtual BOOL GetHeader(CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
-	/* »ñÈ¡Ä³¸öÇëÇóÍ·£¨¶àÖµ£© */
+	/* èŽ·å–æŸä¸ªè¯·æ±‚å¤´ï¼ˆå¤šå€¼ï¼‰ */
 	virtual BOOL GetHeaders(CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue[], DWORD& dwCount)	= 0;
-	/* »ñÈ¡ËùÓÐÇëÇóÍ· */
+	/* èŽ·å–æ‰€æœ‰è¯·æ±‚å¤´ */
 	virtual BOOL GetAllHeaders(CONNID dwConnID, THeader lpHeaders[], DWORD& dwCount)				= 0;
-	/* »ñÈ¡ËùÓÐÇëÇóÍ·Ãû³Æ */
+	/* èŽ·å–æ‰€æœ‰è¯·æ±‚å¤´åç§° */
 	virtual BOOL GetAllHeaderNames(CONNID dwConnID, LPCSTR lpszName[], DWORD& dwCount)				= 0;
 
-	/* »ñÈ¡ Cookie */
+	/* èŽ·å– Cookie */
 	virtual BOOL GetCookie(CONNID dwConnID, LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
-	/* »ñÈ¡ËùÓÐ Cookie */
+	/* èŽ·å–æ‰€æœ‰ Cookie */
 	virtual BOOL GetAllCookies(CONNID dwConnID, TCookie lpCookies[], DWORD& dwCount)				= 0;
 
 	/*
@@ -2025,12 +2025,12 @@ public:
 	virtual BOOL GetAllParamNames(CONNID dwConnID, LPCSTR lpszName[], DWORD& dwCount)				= 0;
 	*/
 
-	/* »ñÈ¡µ±Ç° WebSocket ÏûÏ¢×´Ì¬£¬´«Èë nullptr Ôò²»»ñÈ¡ÏàÓ¦×Ö¶Î */
+	/* èŽ·å–å½“å‰ WebSocket æ¶ˆæ¯çŠ¶æ€ï¼Œä¼ å…¥ nullptr åˆ™ä¸èŽ·å–ç›¸åº”å­—æ®µ */
 	virtual BOOL GetWSMessageState(CONNID dwConnID, BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain)	= 0;
 
-	/* ÉèÖÃ HTTP Æô¶¯·½Ê½£¨Ä¬ÈÏ£ºTRUE£¬×Ô¶¯Æô¶¯£© */
+	/* è®¾ç½® HTTP å¯åŠ¨æ–¹å¼ï¼ˆé»˜è®¤ï¼šTRUEï¼Œè‡ªåŠ¨å¯åŠ¨ï¼‰ */
 	virtual void SetHttpAutoStart(BOOL bAutoStart)													= 0;
-	/* »ñÈ¡ HTTP Æô¶¯·½Ê½ */
+	/* èŽ·å– HTTP å¯åŠ¨æ–¹å¼ */
 	virtual BOOL IsHttpAutoStart()																	= 0;
 
 public:
@@ -2038,290 +2038,290 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£º¸´ºÏ Http ÇëÇóÕß×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå¸´ºÏ Http ÇëÇóÕß×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šå¤åˆ Http è¯·æ±‚è€…ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰å¤åˆ Http è¯·æ±‚è€…ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IComplexHttpRequester : public IComplexHttp
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍ WebSocket ÏûÏ¢
-	* ÃèÊö£ºÏò¶Ô¶Ë¶Ë·¢ËÍ WebSocket ÏûÏ¢
+	* åç§°ï¼šå‘é€ WebSocket æ¶ˆæ¯
+	* æè¿°ï¼šå‘å¯¹ç«¯ç«¯å‘é€ WebSocket æ¶ˆæ¯
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			bFinal			-- ÊÇ·ñ½áÊøÖ¡
-	*			iReserved		-- RSV1/RSV2/RSV3 ¸÷ 1 Î»
-	*			iOperationCode	-- ²Ù×÷Âë£º0x0 - 0xF
-	*			lpszMask		-- ÑÚÂë£¨nullptr »ò 4 ×Ö½ÚÑÚÂë£¬Èç¹ûÎª nullptr ÔòÃ»ÓÐÑÚÂë£©
-	*			pData			-- ÏûÏ¢ÌåÊý¾Ý»º³åÇø
-	*			iLength			-- ÏûÏ¢ÌåÊý¾Ý³¤¶È
-	*			ullBodyLen		-- ÏûÏ¢×Ü³¤¶È
-	* 								ullBodyLen = 0		 -> ÏûÏ¢×Ü³¤¶ÈÎª iLength
-	* 								ullBodyLen = iLength -> ÏûÏ¢×Ü³¤¶ÈÎª ullBodyLen
-	* 								ullBodyLen > iLength -> ÏûÏ¢×Ü³¤¶ÈÎª ullBodyLen£¬ºóÐøÏûÏ¢Ìå³¤¶ÈÎª ullBOdyLen - iLength£¬ºóÐøÏûÏ¢ÌåÍ¨¹ýµ×²ã·½·¨ Send() / SendPackets() ·¢ËÍ
-	* 								ullBodyLen < iLength -> ´íÎó²ÎÊý£¬·¢ËÍÊ§°Ü
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			bFinal			-- æ˜¯å¦ç»“æŸå¸§
+	*			iReserved		-- RSV1/RSV2/RSV3 å„ 1 ä½
+	*			iOperationCode	-- æ“ä½œç ï¼š0x0 - 0xF
+	*			lpszMask		-- æŽ©ç ï¼ˆnullptr æˆ– 4 å­—èŠ‚æŽ©ç ï¼Œå¦‚æžœä¸º nullptr åˆ™æ²¡æœ‰æŽ©ç ï¼‰
+	*			pData			-- æ¶ˆæ¯ä½“æ•°æ®ç¼“å†²åŒº
+	*			iLength			-- æ¶ˆæ¯ä½“æ•°æ®é•¿åº¦
+	*			ullBodyLen		-- æ¶ˆæ¯æ€»é•¿åº¦
+	* 								ullBodyLen = 0		 -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º iLength
+	* 								ullBodyLen = iLength -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º ullBodyLen
+	* 								ullBodyLen > iLength -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º ullBodyLenï¼ŒåŽç»­æ¶ˆæ¯ä½“é•¿åº¦ä¸º ullBOdyLen - iLengthï¼ŒåŽç»­æ¶ˆæ¯ä½“é€šè¿‡åº•å±‚æ–¹æ³• Send() / SendPackets() å‘é€
+	* 								ullBodyLen < iLength -> é”™è¯¯å‚æ•°ï¼Œå‘é€å¤±è´¥
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍÇëÇó
-	* ÃèÊö£ºÏò·þÎñ¶Ë·¢ËÍ HTTP ÇëÇó
+	* åç§°ï¼šå‘é€è¯·æ±‚
+	* æè¿°ï¼šå‘æœåŠ¡ç«¯å‘é€ HTTP è¯·æ±‚
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			lpszMethod		-- ÇëÇó·½·¨
-	*			lpszPath		-- ÇëÇóÂ·¾¶
-	*			lpHeaders		-- ÇëÇóÍ·
-	*			iHeaderCount	-- ÇëÇóÍ·ÊýÁ¿
-	*			pBody			-- ÇëÇóÌå
-	*			iLength			-- ÇëÇóÌå³¤¶È
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			lpszMethod		-- è¯·æ±‚æ–¹æ³•
+	*			lpszPath		-- è¯·æ±‚è·¯å¾„
+	*			lpHeaders		-- è¯·æ±‚å¤´
+	*			iHeaderCount	-- è¯·æ±‚å¤´æ•°é‡
+	*			pBody			-- è¯·æ±‚ä½“
+	*			iLength			-- è¯·æ±‚ä½“é•¿åº¦
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendRequest(CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0)				= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ±¾µØÎÄ¼þ
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍ 4096 KB ÒÔÏÂµÄÐ¡ÎÄ¼þ
+	* åç§°ï¼šå‘é€æœ¬åœ°æ–‡ä»¶
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€ 4096 KB ä»¥ä¸‹çš„å°æ–‡ä»¶
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			lpszFileName	-- ÎÄ¼þÂ·¾¶
-	*			lpszMethod		-- ÇëÇó·½·¨
-	*			lpszPath		-- ÇëÇóÂ·¾¶
-	*			lpHeaders		-- ÇëÇóÍ·
-	*			iHeaderCount	-- ÇëÇóÍ·ÊýÁ¿
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			lpszFileName	-- æ–‡ä»¶è·¯å¾„
+	*			lpszMethod		-- è¯·æ±‚æ–¹æ³•
+	*			lpszPath		-- è¯·æ±‚è·¯å¾„
+	*			lpHeaders		-- è¯·æ±‚å¤´
+	*			iHeaderCount	-- è¯·æ±‚å¤´æ•°é‡
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendLocalFile(CONNID dwConnID, LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)							= 0;
 
-	/* ·¢ËÍ POST ÇëÇó */
+	/* å‘é€ POST è¯·æ±‚ */
 	virtual BOOL SendPost(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)													= 0;
-	/* ·¢ËÍ PUT ÇëÇó */
+	/* å‘é€ PUT è¯·æ±‚ */
 	virtual BOOL SendPut(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)														= 0;
-	/* ·¢ËÍ PATCH ÇëÇó */
+	/* å‘é€ PATCH è¯·æ±‚ */
 	virtual BOOL SendPatch(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)													= 0;
-	/* ·¢ËÍ GET ÇëÇó */
+	/* å‘é€ GET è¯·æ±‚ */
 	virtual BOOL SendGet(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ DELETE ÇëÇó */
+	/* å‘é€ DELETE è¯·æ±‚ */
 	virtual BOOL SendDelete(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
-	/* ·¢ËÍ HEAD ÇëÇó */
+	/* å‘é€ HEAD è¯·æ±‚ */
 	virtual BOOL SendHead(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ TRACE ÇëÇó */
+	/* å‘é€ TRACE è¯·æ±‚ */
 	virtual BOOL SendTrace(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ OPTIONS ÇëÇó */
+	/* å‘é€ OPTIONS è¯·æ±‚ */
 	virtual BOOL SendOptions(CONNID dwConnID, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
-	/* ·¢ËÍ CONNECT ÇëÇó */
+	/* å‘é€ CONNECT è¯·æ±‚ */
 	virtual BOOL SendConnect(CONNID dwConnID, LPCSTR lpszHost, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* »ñÈ¡ HTTP ×´Ì¬Âë */
+	/* èŽ·å– HTTP çŠ¶æ€ç  */
 	virtual USHORT GetStatusCode(CONNID dwConnID)						= 0;
 
-	/* ÉèÖÃÊÇ·ñÊ¹ÓÃ Cookie£¨Ä¬ÈÏ£ºTRUE£© */
+	/* è®¾ç½®æ˜¯å¦ä½¿ç”¨ Cookieï¼ˆé»˜è®¤ï¼šTRUEï¼‰ */
 	virtual void SetUseCookie(BOOL bUseCookie)							= 0;
-	/* ¼ì²éÊÇ·ñÊ¹ÓÃ Cookie */
+	/* æ£€æŸ¥æ˜¯å¦ä½¿ç”¨ Cookie */
 	virtual BOOL IsUseCookie()											= 0;
 };
 
 /************************************************************************
-Ãû³Æ£º¸´ºÏ Http ÏìÓ¦Õß×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå¸´ºÏ Http ÏìÓ¦Õß×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šå¤åˆ Http å“åº”è€…ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰å¤åˆ Http å“åº”è€…ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IComplexHttpResponder : public IComplexHttp
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍ WebSocket ÏûÏ¢
-	* ÃèÊö£ºÏò¶Ô¶Ë¶Ë·¢ËÍ WebSocket ÏûÏ¢
+	* åç§°ï¼šå‘é€ WebSocket æ¶ˆæ¯
+	* æè¿°ï¼šå‘å¯¹ç«¯ç«¯å‘é€ WebSocket æ¶ˆæ¯
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			bFinal			-- ÊÇ·ñ½áÊøÖ¡
-	*			iReserved		-- RSV1/RSV2/RSV3 ¸÷ 1 Î»
-	*			iOperationCode	-- ²Ù×÷Âë£º0x0 - 0xF
-	*			pData			-- ÏûÏ¢ÌåÊý¾Ý»º³åÇø
-	*			iLength			-- ÏûÏ¢ÌåÊý¾Ý³¤¶È
-	*			ullBodyLen		-- ÏûÏ¢×Ü³¤¶È
-	* 								ullBodyLen = 0		 -> ÏûÏ¢×Ü³¤¶ÈÎª iLength
-	* 								ullBodyLen = iLength -> ÏûÏ¢×Ü³¤¶ÈÎª ullBodyLen
-	* 								ullBodyLen > iLength -> ÏûÏ¢×Ü³¤¶ÈÎª ullBodyLen£¬ºóÐøÏûÏ¢Ìå³¤¶ÈÎª ullBOdyLen - iLength£¬ºóÐøÏûÏ¢ÌåÍ¨¹ýµ×²ã·½·¨ Send() / SendPackets() ·¢ËÍ
-	* 								ullBodyLen < iLength -> ´íÎó²ÎÊý£¬·¢ËÍÊ§°Ü
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			bFinal			-- æ˜¯å¦ç»“æŸå¸§
+	*			iReserved		-- RSV1/RSV2/RSV3 å„ 1 ä½
+	*			iOperationCode	-- æ“ä½œç ï¼š0x0 - 0xF
+	*			pData			-- æ¶ˆæ¯ä½“æ•°æ®ç¼“å†²åŒº
+	*			iLength			-- æ¶ˆæ¯ä½“æ•°æ®é•¿åº¦
+	*			ullBodyLen		-- æ¶ˆæ¯æ€»é•¿åº¦
+	* 								ullBodyLen = 0		 -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º iLength
+	* 								ullBodyLen = iLength -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º ullBodyLen
+	* 								ullBodyLen > iLength -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º ullBodyLenï¼ŒåŽç»­æ¶ˆæ¯ä½“é•¿åº¦ä¸º ullBOdyLen - iLengthï¼ŒåŽç»­æ¶ˆæ¯ä½“é€šè¿‡åº•å±‚æ–¹æ³• Send() / SendPackets() å‘é€
+	* 								ullBodyLen < iLength -> é”™è¯¯å‚æ•°ï¼Œå‘é€å¤±è´¥
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º»Ø¸´ÇëÇó
-	* ÃèÊö£ºÏò¿Í»§¶Ë»Ø¸´ HTTP ÇëÇó
+	* åç§°ï¼šå›žå¤è¯·æ±‚
+	* æè¿°ï¼šå‘å®¢æˆ·ç«¯å›žå¤ HTTP è¯·æ±‚
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			usStatusCode	-- HTTP ×´Ì¬Âë
-	*			lpszDesc		-- HTTP ×´Ì¬ÃèÊö
-	*			lpHeaders		-- »Ø¸´ÇëÇóÍ·
-	*			iHeaderCount	-- »Ø¸´ÇëÇóÍ·ÊýÁ¿
-	*			pData			-- »Ø¸´ÇëÇóÌå
-	*			iLength			-- »Ø¸´ÇëÇóÌå³¤¶È
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			usStatusCode	-- HTTP çŠ¶æ€ç 
+	*			lpszDesc		-- HTTP çŠ¶æ€æè¿°
+	*			lpHeaders		-- å›žå¤è¯·æ±‚å¤´
+	*			iHeaderCount	-- å›žå¤è¯·æ±‚å¤´æ•°é‡
+	*			pData			-- å›žå¤è¯·æ±‚ä½“
+	*			iLength			-- å›žå¤è¯·æ±‚ä½“é•¿åº¦
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendResponse(CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc = nullptr, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pData = nullptr, int iLength = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ±¾µØÎÄ¼þ
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍ 4096 KB ÒÔÏÂµÄÐ¡ÎÄ¼þ
+	* åç§°ï¼šå‘é€æœ¬åœ°æ–‡ä»¶
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€ 4096 KB ä»¥ä¸‹çš„å°æ–‡ä»¶
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			lpszFileName	-- ÎÄ¼þÂ·¾¶
-	*			usStatusCode	-- HTTP ×´Ì¬Âë
-	*			lpszDesc		-- HTTP ×´Ì¬ÃèÊö
-	*			lpHeaders		-- »Ø¸´ÇëÇóÍ·
-	*			iHeaderCount	-- »Ø¸´ÇëÇóÍ·ÊýÁ¿
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			lpszFileName	-- æ–‡ä»¶è·¯å¾„
+	*			usStatusCode	-- HTTP çŠ¶æ€ç 
+	*			lpszDesc		-- HTTP çŠ¶æ€æè¿°
+	*			lpHeaders		-- å›žå¤è¯·æ±‚å¤´
+	*			iHeaderCount	-- å›žå¤è¯·æ±‚å¤´æ•°é‡
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendLocalFile(CONNID dwConnID, LPCSTR lpszFileName, USHORT usStatusCode = HSC_OK, LPCSTR lpszDesc = nullptr, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)				= 0;
 
 	/*
-	* Ãû³Æ£ºÊÍ·ÅÁ¬½Ó
-	* ÃèÊö£º°ÑÁ¬½Ó·ÅÈëÊÍ·Å¶ÓÁÐ£¬µÈ´ýÄ³¸öÊ±¼ä£¨Í¨¹ý SetReleaseDelay() ÉèÖÃ£©¹Ø±ÕÁ¬½Ó
+	* åç§°ï¼šé‡Šæ”¾è¿žæŽ¥
+	* æè¿°ï¼šæŠŠè¿žæŽ¥æ”¾å…¥é‡Šæ”¾é˜Ÿåˆ—ï¼Œç­‰å¾…æŸä¸ªæ—¶é—´ï¼ˆé€šè¿‡ SetReleaseDelay() è®¾ç½®ï¼‰å…³é—­è¿žæŽ¥
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL Release(CONNID dwConnID)								= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* »ñÈ¡Ö÷»ú */
+	/* èŽ·å–ä¸»æœº */
 	virtual LPCSTR GetHost(CONNID dwConnID)								= 0;
 
-	/* ÉèÖÃÁ¬½ÓÊÍ·ÅÑÓÊ±£¨Ä¬ÈÏ£º3000 ºÁÃë£© */
+	/* è®¾ç½®è¿žæŽ¥é‡Šæ”¾å»¶æ—¶ï¼ˆé»˜è®¤ï¼š3000 æ¯«ç§’ï¼‰ */
 	virtual void SetReleaseDelay(DWORD dwReleaseDelay)					= 0;
-	/* »ñÈ¡Á¬½ÓÊÍ·ÅÑÓÊ± */
+	/* èŽ·å–è¿žæŽ¥é‡Šæ”¾å»¶æ—¶ */
 	virtual DWORD GetReleaseDelay()										= 0;
 
-	/* »ñÈ¡ÇëÇóÐÐ URL ÓòÑÚÂë£¨URL Óò²Î¿¼£ºEnHttpUrlField£© */
+	/* èŽ·å–è¯·æ±‚è¡Œ URL åŸŸæŽ©ç ï¼ˆURL åŸŸå‚è€ƒï¼šEnHttpUrlFieldï¼‰ */
 	virtual USHORT GetUrlFieldSet(CONNID dwConnID)						= 0;
-	/* »ñÈ¡Ä³¸ö URL ÓòÖµ */
+	/* èŽ·å–æŸä¸ª URL åŸŸå€¼ */
 	virtual LPCSTR GetUrlField(CONNID dwConnID, EnHttpUrlField enField)	= 0;
-	/* »ñÈ¡ÇëÇó·½·¨ */
+	/* èŽ·å–è¯·æ±‚æ–¹æ³• */
 	virtual LPCSTR GetMethod(CONNID dwConnID)							= 0;
 };
 
 /************************************************************************
-Ãû³Æ£º¼òµ¥ HTTP ×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå ¼òµ¥ HTTP ×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šç®€å• HTTP ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ ç®€å• HTTP ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IHttp
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍ WebSocket ÏûÏ¢
-	* ÃèÊö£ºÏò¶Ô¶Ë¶Ë·¢ËÍ WebSocket ÏûÏ¢
+	* åç§°ï¼šå‘é€ WebSocket æ¶ˆæ¯
+	* æè¿°ï¼šå‘å¯¹ç«¯ç«¯å‘é€ WebSocket æ¶ˆæ¯
 	*		
-	* ²ÎÊý£º		bFinal			-- ÊÇ·ñ½áÊøÖ¡
-	*			iReserved		-- RSV1/RSV2/RSV3 ¸÷ 1 Î»
-	*			iOperationCode	-- ²Ù×÷Âë£º0x0 - 0xF
-	*			lpszMask		-- ÑÚÂë£¨nullptr »ò 4 ×Ö½ÚÑÚÂë£¬Èç¹ûÎª nullptr ÔòÃ»ÓÐÑÚÂë£©
-	*			pData			-- ÏûÏ¢ÌåÊý¾Ý»º³åÇø
-	*			iLength			-- ÏûÏ¢ÌåÊý¾Ý³¤¶È
-	*			ullBodyLen		-- ÏûÏ¢×Ü³¤¶È
-	* 								ullBodyLen = 0		 -> ÏûÏ¢×Ü³¤¶ÈÎª iLength
-	* 								ullBodyLen = iLength -> ÏûÏ¢×Ü³¤¶ÈÎª ullBodyLen
-	* 								ullBodyLen > iLength -> ÏûÏ¢×Ü³¤¶ÈÎª ullBodyLen£¬ºóÐøÏûÏ¢Ìå³¤¶ÈÎª ullBOdyLen - iLength£¬ºóÐøÏûÏ¢ÌåÍ¨¹ýµ×²ã·½·¨ Send() / SendPackets() ·¢ËÍ
-	* 								ullBodyLen < iLength -> ´íÎó²ÎÊý£¬·¢ËÍÊ§°Ü
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		bFinal			-- æ˜¯å¦ç»“æŸå¸§
+	*			iReserved		-- RSV1/RSV2/RSV3 å„ 1 ä½
+	*			iOperationCode	-- æ“ä½œç ï¼š0x0 - 0xF
+	*			lpszMask		-- æŽ©ç ï¼ˆnullptr æˆ– 4 å­—èŠ‚æŽ©ç ï¼Œå¦‚æžœä¸º nullptr åˆ™æ²¡æœ‰æŽ©ç ï¼‰
+	*			pData			-- æ¶ˆæ¯ä½“æ•°æ®ç¼“å†²åŒº
+	*			iLength			-- æ¶ˆæ¯ä½“æ•°æ®é•¿åº¦
+	*			ullBodyLen		-- æ¶ˆæ¯æ€»é•¿åº¦
+	* 								ullBodyLen = 0		 -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º iLength
+	* 								ullBodyLen = iLength -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º ullBodyLen
+	* 								ullBodyLen > iLength -> æ¶ˆæ¯æ€»é•¿åº¦ä¸º ullBodyLenï¼ŒåŽç»­æ¶ˆæ¯ä½“é•¿åº¦ä¸º ullBOdyLen - iLengthï¼ŒåŽç»­æ¶ˆæ¯ä½“é€šè¿‡åº•å±‚æ–¹æ³• Send() / SendPackets() å‘é€
+	* 								ullBodyLen < iLength -> é”™è¯¯å‚æ•°ï¼Œå‘é€å¤±è´¥
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendWSMessage(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], const BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
 
 	/*
-	* Ãû³Æ£ºÆô¶¯ HTTP Í¨ÐÅ
-	* ÃèÊö£ºµ±Í¨ÐÅ×é¼þÉèÖÃÎª·Ç×Ô¶¯Æô¶¯ HTTP Í¨ÐÅÊ±£¬ÐèÒªµ÷ÓÃ±¾·½·¨Æô¶¯ HTTP Í¨ÐÅ
+	* åç§°ï¼šå¯åŠ¨ HTTP é€šä¿¡
+	* æè¿°ï¼šå½“é€šä¿¡ç»„ä»¶è®¾ç½®ä¸ºéžè‡ªåŠ¨å¯åŠ¨ HTTP é€šä¿¡æ—¶ï¼Œéœ€è¦è°ƒç”¨æœ¬æ–¹æ³•å¯åŠ¨ HTTP é€šä¿¡
 	*		
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡Ê§°ÜÔ­Òò
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–å¤±è´¥åŽŸå› 
 	*/
 	virtual BOOL StartHttp()											= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ Chunked Êý¾Ý·ÖÆ¬
-	* ÃèÊö£ºÏò¶Ô¶Ë·¢ËÍ Chunked Êý¾Ý·ÖÆ¬
+	* åç§°ï¼šå‘é€ Chunked æ•°æ®åˆ†ç‰‡
+	* æè¿°ï¼šå‘å¯¹ç«¯å‘é€ Chunked æ•°æ®åˆ†ç‰‡
 	*		
-	* ²ÎÊý£º		pData			-- Chunked Êý¾Ý·ÖÆ¬
-	*			iLength			-- Êý¾Ý·ÖÆ¬³¤¶È£¨Îª 0 ±íÊ¾½áÊø·ÖÆ¬£©
-	*			lpszExtensions	-- À©Õ¹ÊôÐÔ£¨Ä¬ÈÏ£ºnullptr£©
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		pData			-- Chunked æ•°æ®åˆ†ç‰‡
+	*			iLength			-- æ•°æ®åˆ†ç‰‡é•¿åº¦ï¼ˆä¸º 0 è¡¨ç¤ºç»“æŸåˆ†ç‰‡ï¼‰
+	*			lpszExtensions	-- æ‰©å±•å±žæ€§ï¼ˆé»˜è®¤ï¼šnullptrï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendChunkData(const BYTE* pData = nullptr, int iLength = 0, LPCSTR lpszExtensions = nullptr)	= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃ±¾µØÐ­Òé°æ±¾ */
+	/* è®¾ç½®æœ¬åœ°åè®®ç‰ˆæœ¬ */
 	virtual void SetLocalVersion(EnHttpVersion usVersion)				= 0;
-	/* »ñÈ¡±¾µØÐ­Òé°æ±¾ */
+	/* èŽ·å–æœ¬åœ°åè®®ç‰ˆæœ¬ */
 	virtual EnHttpVersion GetLocalVersion()								= 0;
 
-	/* ¼ì²éÊÇ·ñÉý¼¶Ð­Òé */
+	/* æ£€æŸ¥æ˜¯å¦å‡çº§åè®® */
 	virtual BOOL IsUpgrade()											= 0;
-	/* ¼ì²éÊÇ·ñÓÐ Keep-Alive ±êÊ¶ */
+	/* æ£€æŸ¥æ˜¯å¦æœ‰ Keep-Alive æ ‡è¯† */
 	virtual BOOL IsKeepAlive()											= 0;
-	/* »ñÈ¡Ð­Òé°æ±¾ */
+	/* èŽ·å–åè®®ç‰ˆæœ¬ */
 	virtual USHORT GetVersion()											= 0;
-	/* »ñÈ¡ÄÚÈÝ³¤¶È */
+	/* èŽ·å–å†…å®¹é•¿åº¦ */
 	virtual ULONGLONG GetContentLength()								= 0;
-	/* »ñÈ¡ÄÚÈÝÀàÐÍ */
+	/* èŽ·å–å†…å®¹ç±»åž‹ */
 	virtual LPCSTR GetContentType()										= 0;
-	/* »ñÈ¡ÄÚÈÝ±àÂë */
+	/* èŽ·å–å†…å®¹ç¼–ç  */
 	virtual LPCSTR GetContentEncoding()									= 0;
-	/* »ñÈ¡´«Êä±àÂë */
+	/* èŽ·å–ä¼ è¾“ç¼–ç  */
 	virtual LPCSTR GetTransferEncoding()								= 0;
-	/* »ñÈ¡Ð­ÒéÉý¼¶ÀàÐÍ */
+	/* èŽ·å–åè®®å‡çº§ç±»åž‹ */
 	virtual EnHttpUpgradeType GetUpgradeType()							= 0;
-	/* »ñÈ¡½âÎö´íÎó´úÂë */
+	/* èŽ·å–è§£æžé”™è¯¯ä»£ç  */
 	virtual USHORT GetParseErrorCode(LPCSTR* lpszErrorDesc = nullptr)	= 0;
 
-	/* »ñÈ¡ HTTP ×´Ì¬Âë */
+	/* èŽ·å– HTTP çŠ¶æ€ç  */
 	virtual USHORT GetStatusCode()										= 0;
 
-	/* »ñÈ¡Ä³¸öÇëÇóÍ·£¨µ¥Öµ£© */
+	/* èŽ·å–æŸä¸ªè¯·æ±‚å¤´ï¼ˆå•å€¼ï¼‰ */
 	virtual BOOL GetHeader(LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
-	/* »ñÈ¡Ä³¸öÇëÇóÍ·£¨¶àÖµ£© */
+	/* èŽ·å–æŸä¸ªè¯·æ±‚å¤´ï¼ˆå¤šå€¼ï¼‰ */
 	virtual BOOL GetHeaders(LPCSTR lpszName, LPCSTR lpszValue[], DWORD& dwCount)	= 0;
-	/* »ñÈ¡ËùÓÐÇëÇóÍ· */
+	/* èŽ·å–æ‰€æœ‰è¯·æ±‚å¤´ */
 	virtual BOOL GetAllHeaders(THeader lpHeaders[], DWORD& dwCount)					= 0;
-	/* »ñÈ¡ËùÓÐÇëÇóÍ·Ãû³Æ */
+	/* èŽ·å–æ‰€æœ‰è¯·æ±‚å¤´åç§° */
 	virtual BOOL GetAllHeaderNames(LPCSTR lpszName[], DWORD& dwCount)				= 0;
 
-	/* »ñÈ¡ Cookie */
+	/* èŽ·å– Cookie */
 	virtual BOOL GetCookie(LPCSTR lpszName, LPCSTR* lpszValue)						= 0;
-	/* »ñÈ¡ËùÓÐ Cookie */
+	/* èŽ·å–æ‰€æœ‰ Cookie */
 	virtual BOOL GetAllCookies(TCookie lpCookies[], DWORD& dwCount)					= 0;
 
 	/*
@@ -2333,12 +2333,12 @@ public:
 	virtual BOOL GetAllParamNames(LPCSTR lpszName[], DWORD& dwCount)				= 0;
 	*/
 
-	/* »ñÈ¡µ±Ç° WebSocket ÏûÏ¢×´Ì¬£¬´«Èë nullptr Ôò²»»ñÈ¡ÏàÓ¦×Ö¶Î */
+	/* èŽ·å–å½“å‰ WebSocket æ¶ˆæ¯çŠ¶æ€ï¼Œä¼ å…¥ nullptr åˆ™ä¸èŽ·å–ç›¸åº”å­—æ®µ */
 	virtual BOOL GetWSMessageState(BOOL* lpbFinal, BYTE* lpiReserved, BYTE* lpiOperationCode, LPCBYTE* lpszMask, ULONGLONG* lpullBodyLen, ULONGLONG* lpullBodyRemain)	= 0;
 
-	/* ÉèÖÃ HTTP Æô¶¯·½Ê½£¨Ä¬ÈÏ£ºTRUE£¬×Ô¶¯Æô¶¯£© */
+	/* è®¾ç½® HTTP å¯åŠ¨æ–¹å¼ï¼ˆé»˜è®¤ï¼šTRUEï¼Œè‡ªåŠ¨å¯åŠ¨ï¼‰ */
 	virtual void SetHttpAutoStart(BOOL bAutoStart)									= 0;
-	/* »ñÈ¡ HTTP Æô¶¯·½Ê½ */
+	/* èŽ·å– HTTP å¯åŠ¨æ–¹å¼ */
 	virtual BOOL IsHttpAutoStart()													= 0;
 
 public:
@@ -2346,136 +2346,136 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£º¼òµ¥ Http ÇëÇóÕß×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå¼òµ¥ Http ÇëÇóÕß×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šç®€å• Http è¯·æ±‚è€…ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ç®€å• Http è¯·æ±‚è€…ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IHttpRequester : public IHttp
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£º·¢ËÍÇëÇó
-	* ÃèÊö£ºÏò·þÎñ¶Ë·¢ËÍ HTTP ÇëÇó
+	* åç§°ï¼šå‘é€è¯·æ±‚
+	* æè¿°ï¼šå‘æœåŠ¡ç«¯å‘é€ HTTP è¯·æ±‚
 	*		
-	* ²ÎÊý£º		lpszMethod		-- ÇëÇó·½·¨
-	*			lpszPath		-- ÇëÇóÂ·¾¶
-	*			lpHeaders		-- ÇëÇóÍ·
-	*			iHeaderCount	-- ÇëÇóÍ·ÊýÁ¿
-	*			pBody			-- ÇëÇóÌå
-	*			iLength			-- ÇëÇóÌå³¤¶È
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		lpszMethod		-- è¯·æ±‚æ–¹æ³•
+	*			lpszPath		-- è¯·æ±‚è·¯å¾„
+	*			lpHeaders		-- è¯·æ±‚å¤´
+	*			iHeaderCount	-- è¯·æ±‚å¤´æ•°é‡
+	*			pBody			-- è¯·æ±‚ä½“
+	*			iLength			-- è¯·æ±‚ä½“é•¿åº¦
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendRequest(LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º·¢ËÍ±¾µØÎÄ¼þ
-	* ÃèÊö£ºÏòÖ¸¶¨Á¬½Ó·¢ËÍ 4096 KB ÒÔÏÂµÄÐ¡ÎÄ¼þ
+	* åç§°ï¼šå‘é€æœ¬åœ°æ–‡ä»¶
+	* æè¿°ï¼šå‘æŒ‡å®šè¿žæŽ¥å‘é€ 4096 KB ä»¥ä¸‹çš„å°æ–‡ä»¶
 	*		
-	* ²ÎÊý£º		dwConnID		-- Á¬½Ó ID
-	*			lpszFileName	-- ÎÄ¼þÂ·¾¶
-	*			lpszMethod		-- ÇëÇó·½·¨
-	*			lpszPath		-- ÇëÇóÂ·¾¶
-	*			lpHeaders		-- ÇëÇóÍ·
-	*			iHeaderCount	-- ÇëÇóÍ·ÊýÁ¿
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		dwConnID		-- è¿žæŽ¥ ID
+	*			lpszFileName	-- æ–‡ä»¶è·¯å¾„
+	*			lpszMethod		-- è¯·æ±‚æ–¹æ³•
+	*			lpszPath		-- è¯·æ±‚è·¯å¾„
+	*			lpHeaders		-- è¯·æ±‚å¤´
+	*			iHeaderCount	-- è¯·æ±‚å¤´æ•°é‡
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL SendLocalFile(LPCSTR lpszFileName, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)							= 0;
 
-	/* ·¢ËÍ POST ÇëÇó */
+	/* å‘é€ POST è¯·æ±‚ */
 	virtual BOOL SendPost(LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)														= 0;
-	/* ·¢ËÍ PUT ÇëÇó */
+	/* å‘é€ PUT è¯·æ±‚ */
 	virtual BOOL SendPut(LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)														= 0;
-	/* ·¢ËÍ PATCH ÇëÇó */
+	/* å‘é€ PATCH è¯·æ±‚ */
 	virtual BOOL SendPatch(LPCSTR lpszPath, const THeader lpHeaders[], int iHeaderCount, const BYTE* pBody, int iLength)													= 0;
-	/* ·¢ËÍ GET ÇëÇó */
+	/* å‘é€ GET è¯·æ±‚ */
 	virtual BOOL SendGet(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ DELETE ÇëÇó */
+	/* å‘é€ DELETE è¯·æ±‚ */
 	virtual BOOL SendDelete(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ HEAD ÇëÇó */
+	/* å‘é€ HEAD è¯·æ±‚ */
 	virtual BOOL SendHead(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ TRACE ÇëÇó */
+	/* å‘é€ TRACE è¯·æ±‚ */
 	virtual BOOL SendTrace(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																		= 0;
-	/* ·¢ËÍ OPTIONS ÇëÇó */
+	/* å‘é€ OPTIONS è¯·æ±‚ */
 	virtual BOOL SendOptions(LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
-	/* ·¢ËÍ CONNECT ÇëÇó */
+	/* å‘é€ CONNECT è¯·æ±‚ */
 	virtual BOOL SendConnect(LPCSTR lpszHost, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0)																	= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÊÇ·ñÊ¹ÓÃ Cookie£¨Ä¬ÈÏ£ºTRUE£© */
+	/* è®¾ç½®æ˜¯å¦ä½¿ç”¨ Cookieï¼ˆé»˜è®¤ï¼šTRUEï¼‰ */
 	virtual void SetUseCookie(BOOL bUseCookie)								= 0;
-	/* ¼ì²éÊÇ·ñÊ¹ÓÃ Cookie */
+	/* æ£€æŸ¥æ˜¯å¦ä½¿ç”¨ Cookie */
 	virtual BOOL IsUseCookie()												= 0;
 };
 
 /************************************************************************
-Ãû³Æ£º¼òµ¥ Http Í¬²½ÇëÇóÕß×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨Òå¼òµ¥ Http Í¬²½ÇëÇóÕß×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šç®€å• Http åŒæ­¥è¯·æ±‚è€…ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰ç®€å• Http åŒæ­¥è¯·æ±‚è€…ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IHttpSyncRequester : public IHttpRequester
 {
 public:
 
 	/*
-	* Ãû³Æ£º·¢ËÍ URL ÇëÇó
-	* ÃèÊö£ºÏò·þÎñ¶Ë·¢ËÍ HTTP URL ÇëÇó
+	* åç§°ï¼šå‘é€ URL è¯·æ±‚
+	* æè¿°ï¼šå‘æœåŠ¡ç«¯å‘é€ HTTP URL è¯·æ±‚
 	*		
-	* ²ÎÊý£º		lpszMethod		-- ÇëÇó·½·¨
-	*			lpszUrl			-- ÇëÇó URL
-	*			lpHeaders		-- ÇëÇóÍ·
-	*			iHeaderCount	-- ÇëÇóÍ·ÊýÁ¿
-	*			pBody			-- ÇëÇóÌå
-	*			iLength			-- ÇëÇóÌå³¤¶È
-	*			bForceReconnect	-- Ç¿ÖÆÖØÐÂÁ¬½Ó£¨Ä¬ÈÏ£ºFALSE£¬µ±ÇëÇó URL µÄÖ÷»úºÍ¶Ë¿ÚÓëÏÖÓÐÁ¬½ÓÒ»ÖÂÊ±£¬ÖØÓÃÏÖÓÐÁ¬½Ó£©
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		lpszMethod		-- è¯·æ±‚æ–¹æ³•
+	*			lpszUrl			-- è¯·æ±‚ URL
+	*			lpHeaders		-- è¯·æ±‚å¤´
+	*			iHeaderCount	-- è¯·æ±‚å¤´æ•°é‡
+	*			pBody			-- è¯·æ±‚ä½“
+	*			iLength			-- è¯·æ±‚ä½“é•¿åº¦
+	*			bForceReconnect	-- å¼ºåˆ¶é‡æ–°è¿žæŽ¥ï¼ˆé»˜è®¤ï¼šFALSEï¼Œå½“è¯·æ±‚ URL çš„ä¸»æœºå’Œç«¯å£ä¸ŽçŽ°æœ‰è¿žæŽ¥ä¸€è‡´æ—¶ï¼Œé‡ç”¨çŽ°æœ‰è¿žæŽ¥ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL OpenUrl(LPCSTR lpszMethod, LPCSTR lpszUrl, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0, BOOL bForceReconnect = FALSE)	= 0;
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÇå³ýÇëÇó½á¹û
-	* ÃèÊö£ºÇå³ýÉÏÒ»´ÎÇëÇóµÄÏìÓ¦Í·ºÍÏìÓ¦ÌåµÈ½á¹ûÐÅÏ¢£¨¸Ã·½·¨»áÔÚÃ¿´Î·¢ËÍÇëÇóÇ°×Ô¶¯µ÷ÓÃ£©
+	* åç§°ï¼šæ¸…é™¤è¯·æ±‚ç»“æžœ
+	* æè¿°ï¼šæ¸…é™¤ä¸Šä¸€æ¬¡è¯·æ±‚çš„å“åº”å¤´å’Œå“åº”ä½“ç­‰ç»“æžœä¿¡æ¯ï¼ˆè¯¥æ–¹æ³•ä¼šåœ¨æ¯æ¬¡å‘é€è¯·æ±‚å‰è‡ªåŠ¨è°ƒç”¨ï¼‰
 	*
-	* ²ÎÊý£º		
-	* ·µ»ØÖµ£º	TRUE			-- ³É¹¦
-	*			FALSE			-- Ê§°Ü
+	* å‚æ•°ï¼š		
+	* è¿”å›žå€¼ï¼š	TRUE			-- æˆåŠŸ
+	*			FALSE			-- å¤±è´¥
 	*/
 	virtual BOOL CleanupRequestResult	()									= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ÉèÖÃÁ¬½Ó³¬Ê±£¨ºÁÃë£¬0£ºÏµÍ³Ä¬ÈÏ³¬Ê±£¬Ä¬ÈÏ£º5000£© */
+	/* è®¾ç½®è¿žæŽ¥è¶…æ—¶ï¼ˆæ¯«ç§’ï¼Œ0ï¼šç³»ç»Ÿé»˜è®¤è¶…æ—¶ï¼Œé»˜è®¤ï¼š5000ï¼‰ */
 	virtual void SetConnectTimeout		(DWORD dwConnectTimeout)			= 0;
-	/* ÉèÖÃÇëÇó³¬Ê±£¨ºÁÃë£¬0£ºÎÞÏÞµÈ´ý£¬Ä¬ÈÏ£º10000£© */
+	/* è®¾ç½®è¯·æ±‚è¶…æ—¶ï¼ˆæ¯«ç§’ï¼Œ0ï¼šæ— é™ç­‰å¾…ï¼Œé»˜è®¤ï¼š10000ï¼‰ */
 	virtual void SetRequestTimeout		(DWORD dwRequestTimeout)			= 0;
 
-	/* »ñÈ¡Á¬½Ó³¬Ê± */
+	/* èŽ·å–è¿žæŽ¥è¶…æ—¶ */
 	virtual DWORD GetConnectTimeout		()									= 0;
-	/* »ñÈ¡ÇëÇó³¬Ê± */
+	/* èŽ·å–è¯·æ±‚è¶…æ—¶ */
 	virtual DWORD GetRequestTimeout		()									= 0;
 
-	/* »ñÈ¡ÏìÓ¦Ìå */
+	/* èŽ·å–å“åº”ä½“ */
 	virtual BOOL GetResponseBody		(LPCBYTE* lpszBody, int* iLength)	= 0;
 };
 
 
 /************************************************************************
-Ãû³Æ£ºHTTP ×é¼þ½Ó¿Ú
-ÃèÊö£º¼Ì³ÐÁË HTTP ºÍ Socket ½Ó¿Ú
+åç§°ï¼šHTTP ç»„ä»¶æŽ¥å£
+æè¿°ï¼šç»§æ‰¿äº† HTTP å’Œ Socket æŽ¥å£
 ************************************************************************/
 typedef DualInterface<IComplexHttpResponder, ITcpServer>	IHttpServer;
 typedef DualInterface<IComplexHttpRequester, ITcpAgent>		IHttpAgent;
@@ -2483,185 +2483,185 @@ typedef DualInterface<IHttpRequester, ITcpClient>			IHttpClient;
 typedef DualInterface<IHttpSyncRequester, ITcpClient>		IHttpSyncClient;
 
 /************************************************************************
-Ãû³Æ£ºIComplexHttp ×é¼þ¼àÌýÆ÷»ù½Ó¿Ú
-ÃèÊö£º¶¨Òå IComplexHttp ×é¼þ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šIComplexHttp ç»„ä»¶ç›‘å¬å™¨åŸºæŽ¥å£
+æè¿°ï¼šå®šä¹‰ IComplexHttp ç»„ä»¶ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 template<class T> class IHttpListenerT
 {
 public:
 
 	/*
-	* Ãû³Æ£º¿ªÊ¼½âÎöÍ¨Öª
-	* ÃèÊö£º¿ªÊ¼½âÎö HTTP ±¨ÎÄÊ±£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šå¼€å§‹è§£æžé€šçŸ¥
+	* æè¿°ï¼šå¼€å§‹è§£æž HTTP æŠ¥æ–‡æ—¶ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnMessageBegin(T* pSender, CONNID dwConnID)										= 0;
 
 	/*
-	* Ãû³Æ£ºÇëÇóÐÐ½âÎöÍê³ÉÍ¨Öª£¨½öÓÃÓÚ HTTP ·þÎñ¶Ë£©
-	* ÃèÊö£ºÇëÇóÐÐ½âÎöÍê³Éºó£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šè¯·æ±‚è¡Œè§£æžå®Œæˆé€šçŸ¥ï¼ˆä»…ç”¨äºŽ HTTP æœåŠ¡ç«¯ï¼‰
+	* æè¿°ï¼šè¯·æ±‚è¡Œè§£æžå®ŒæˆåŽï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			lpszMethod	-- ÇëÇó·½·¨Ãû
-	*			lpszUrl		-- ÇëÇóÐÐÖÐµÄ URL Óò
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			lpszMethod	-- è¯·æ±‚æ–¹æ³•å
+	*			lpszUrl		-- è¯·æ±‚è¡Œä¸­çš„ URL åŸŸ
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnRequestLine(T* pSender, CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)		= 0;
 
 	/*
-	* Ãû³Æ£º×´Ì¬ÐÐ½âÎöÍê³ÉÍ¨Öª£¨½öÓÃÓÚ HTTP ¿Í»§¶Ë£©
-	* ÃèÊö£º×´Ì¬ÐÐ½âÎöÍê³Éºó£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šçŠ¶æ€è¡Œè§£æžå®Œæˆé€šçŸ¥ï¼ˆä»…ç”¨äºŽ HTTP å®¢æˆ·ç«¯ï¼‰
+	* æè¿°ï¼šçŠ¶æ€è¡Œè§£æžå®ŒæˆåŽï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender			-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID		-- Á¬½Ó ID
-	*			usStatusCode	-- HTTP ×´Ì¬Âë
-	*			lpszDesc		-- ×´Ì¬ÃèÊö
-	* ·µ»ØÖµ£º	HPR_OK			-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR		-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender			-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID		-- è¿žæŽ¥ ID
+	*			usStatusCode	-- HTTP çŠ¶æ€ç 
+	*			lpszDesc		-- çŠ¶æ€æè¿°
+	* è¿”å›žå€¼ï¼š	HPR_OK			-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR		-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnStatusLine(T* pSender, CONNID dwConnID, USHORT usStatusCode, LPCSTR lpszDesc)	= 0;
 
 	/*
-	* Ãû³Æ£ºÇëÇóÍ·Í¨Öª
-	* ÃèÊö£ºÃ¿µ±½âÎöÍê³ÉÒ»¸öÇëÇóÍ·ºó£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šè¯·æ±‚å¤´é€šçŸ¥
+	* æè¿°ï¼šæ¯å½“è§£æžå®Œæˆä¸€ä¸ªè¯·æ±‚å¤´åŽï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			lpszName	-- ÇëÇóÍ·Ãû³Æ
-	*			lpszValue	-- ÇëÇóÍ·Öµ
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			lpszName	-- è¯·æ±‚å¤´åç§°
+	*			lpszValue	-- è¯·æ±‚å¤´å€¼
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnHeader(T* pSender, CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)			= 0;
 
 	/*
-	* Ãû³Æ£ºÇëÇóÍ·Íê³ÉÍ¨Öª
-	* ÃèÊö£º½âÎöÍê³ÉËùÓÐÇëÇóÍ·ºó£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šè¯·æ±‚å¤´å®Œæˆé€šçŸ¥
+	* æè¿°ï¼šè§£æžå®Œæˆæ‰€æœ‰è¯·æ±‚å¤´åŽï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender			-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID		-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HPR_OK			-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_SKIP_BODY	-- Ìø¹ýµ±Ç°ÇëÇóµÄ HTTP BODY
-	*			HPR_UPGRADE		-- Éý¼¶Ð­Òé
-	*			HPR_ERROR		-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender			-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID		-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HPR_OK			-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_SKIP_BODY	-- è·³è¿‡å½“å‰è¯·æ±‚çš„ HTTP BODY
+	*			HPR_UPGRADE		-- å‡çº§åè®®
+	*			HPR_ERROR		-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnHeadersComplete(T* pSender, CONNID dwConnID)									= 0;
 
 	/*
-	* Ãû³Æ£ºBODY ±¨ÎÄÍ¨Öª
-	* ÃèÊö£ºÃ¿µ±½ÓÊÕµ½ HTTP BODY ±¨ÎÄ£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šBODY æŠ¥æ–‡é€šçŸ¥
+	* æè¿°ï¼šæ¯å½“æŽ¥æ”¶åˆ° HTTP BODY æŠ¥æ–‡ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			pData		-- Êý¾Ý»º³åÇø
-	*			iLength		-- Êý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			pData		-- æ•°æ®ç¼“å†²åŒº
+	*			iLength		-- æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnBody(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)				= 0;
 
 	/*
-	* Ãû³Æ£ºChunked ±¨ÎÄÍ·Í¨Öª
-	* ÃèÊö£ºÃ¿µ±½âÎö³öÒ»¸ö Chunked ±¨ÎÄÍ·£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šChunked æŠ¥æ–‡å¤´é€šçŸ¥
+	* æè¿°ï¼šæ¯å½“è§£æžå‡ºä¸€ä¸ª Chunked æŠ¥æ–‡å¤´ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			iLength		-- Chunked ±¨ÎÄÌåÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			iLength		-- Chunked æŠ¥æ–‡ä½“æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnChunkHeader(T* pSender, CONNID dwConnID, int iLength)							= 0;
 
 	/*
-	* Ãû³Æ£ºChunked ±¨ÎÄ½áÊøÍ¨Öª
-	* ÃèÊö£ºÃ¿µ±½âÎöÍêÒ»¸ö Chunked ±¨ÎÄ£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šChunked æŠ¥æ–‡ç»“æŸé€šçŸ¥
+	* æè¿°ï¼šæ¯å½“è§£æžå®Œä¸€ä¸ª Chunked æŠ¥æ–‡ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnChunkComplete(T* pSender, CONNID dwConnID)										= 0;
 
 	/*
-	* Ãû³Æ£ºÍê³É½âÎöÍ¨Öª
-	* ÃèÊö£ºÃ¿µ±½âÎöÍê³ÉÒ»¸öÍêÕû HTTP ±¨ÎÄ£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šå®Œæˆè§£æžé€šçŸ¥
+	* æè¿°ï¼šæ¯å½“è§£æžå®Œæˆä¸€ä¸ªå®Œæ•´ HTTP æŠ¥æ–‡ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HPR_OK		-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR	-- Òý·¢ OnParserError() ºÍ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HPR_OK		-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR	-- å¼•å‘ OnParserError() å’Œ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnMessageComplete(T* pSender, CONNID dwConnID)									= 0;
 
 	/*
-	* Ãû³Æ£ºÉý¼¶Ð­ÒéÍ¨Öª
-	* ÃèÊö£ºµ±ÐèÒªÉý¼¶Ð­ÒéÊ±£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šå‡çº§åè®®é€šçŸ¥
+	* æè¿°ï¼šå½“éœ€è¦å‡çº§åè®®æ—¶ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender			-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID		-- Á¬½Ó ID
-	*			enUpgradeType	-- Ð­ÒéÀàÐÍ
-	* ·µ»ØÖµ£º	HPR_OK			-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR		-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender			-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID		-- è¿žæŽ¥ ID
+	*			enUpgradeType	-- åè®®ç±»åž‹
+	* è¿”å›žå€¼ï¼š	HPR_OK			-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR		-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnUpgrade(T* pSender, CONNID dwConnID, EnHttpUpgradeType enUpgradeType)			= 0;
 
 	/*
-	* Ãû³Æ£º½âÎö´íÎóÍ¨Öª
-	* ÃèÊö£ºµ±½âÎö HTTP ±¨ÎÄ´íÎóÊ±£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šè§£æžé”™è¯¯é€šçŸ¥
+	* æè¿°ï¼šå½“è§£æž HTTP æŠ¥æ–‡é”™è¯¯æ—¶ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender			-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID		-- Á¬½Ó ID
-	*			iErrorCode		-- ´íÎó´úÂë
-	*			lpszErrorDesc	-- ´íÎóÃèÊö
-	* ·µ»ØÖµ£º	HPR_OK			-- ¼ÌÐøÖ´ÐÐ
-	*			HPR_ERROR		-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender			-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID		-- è¿žæŽ¥ ID
+	*			iErrorCode		-- é”™è¯¯ä»£ç 
+	*			lpszErrorDesc	-- é”™è¯¯æè¿°
+	* è¿”å›žå€¼ï¼š	HPR_OK			-- ç»§ç»­æ‰§è¡Œ
+	*			HPR_ERROR		-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHttpParseResult OnParseError(T* pSender, CONNID dwConnID, int iErrorCode, LPCSTR lpszErrorDesc)	= 0;
 
 	/*
-	* Ãû³Æ£ºWebSocket Êý¾Ý°üÍ·Í¨Öª
-	* ÃèÊö£ºµ±½âÎö WebSocket Êý¾Ý°üÍ·Ê±£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šWebSocket æ•°æ®åŒ…å¤´é€šçŸ¥
+	* æè¿°ï¼šå½“è§£æž WebSocket æ•°æ®åŒ…å¤´æ—¶ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender			-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID		-- Á¬½Ó ID
-	*			bFinal			-- ÊÇ·ñ½áÊøÖ¡
-	*			iReserved		-- RSV1/RSV2/RSV3 ¸÷ 1 Î»
-	*			iOperationCode	-- ²Ù×÷Âë£º0x0 - 0xF
-	*			lpszMask		-- ÑÚÂë£¨nullptr »ò 4 ×Ö½ÚÑÚÂë£¬Èç¹ûÎª nullptr ÔòÃ»ÓÐÑÚÂë£©
-	*			ullBodyLen		-- ÏûÏ¢Ìå³¤¶È
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender			-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID		-- è¿žæŽ¥ ID
+	*			bFinal			-- æ˜¯å¦ç»“æŸå¸§
+	*			iReserved		-- RSV1/RSV2/RSV3 å„ 1 ä½
+	*			iOperationCode	-- æ“ä½œç ï¼š0x0 - 0xF
+	*			lpszMask		-- æŽ©ç ï¼ˆnullptr æˆ– 4 å­—èŠ‚æŽ©ç ï¼Œå¦‚æžœä¸º nullptr åˆ™æ²¡æœ‰æŽ©ç ï¼‰
+	*			ullBodyLen		-- æ¶ˆæ¯ä½“é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnWSMessageHeader(T* pSender, CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)	= 0;
 
 	/*
-	* Ãû³Æ£ºWebSocket Êý¾Ý°üÌåÍ¨Öª
-	* ÃèÊö£ºµ±½ÓÊÕµ½ WebSocket Êý¾Ý°üÌåÊ±£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šWebSocket æ•°æ®åŒ…ä½“é€šçŸ¥
+	* æè¿°ï¼šå½“æŽ¥æ”¶åˆ° WebSocket æ•°æ®åŒ…ä½“æ—¶ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	*			pData		-- ÏûÏ¢ÌåÊý¾Ý»º³åÇø
-	*			iLength		-- ÏûÏ¢ÌåÊý¾Ý³¤¶È
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	*			pData		-- æ¶ˆæ¯ä½“æ•°æ®ç¼“å†²åŒº
+	*			iLength		-- æ¶ˆæ¯ä½“æ•°æ®é•¿åº¦
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnWSMessageBody(T* pSender, CONNID dwConnID, const BYTE* pData, int iLength)			= 0;
 
 	/*
-	* Ãû³Æ£ºWebSocket Êý¾Ý°üÍê³ÉÍ¨Öª
-	* ÃèÊö£ºµ±ÍêÕû½ÓÊÕÒ»¸ö WebSocket Êý¾Ý°üÊ±£¬Ïò¼àÌýÆ÷·¢ËÍ¸ÃÍ¨Öª
+	* åç§°ï¼šWebSocket æ•°æ®åŒ…å®Œæˆé€šçŸ¥
+	* æè¿°ï¼šå½“å®Œæ•´æŽ¥æ”¶ä¸€ä¸ª WebSocket æ•°æ®åŒ…æ—¶ï¼Œå‘ç›‘å¬å™¨å‘é€è¯¥é€šçŸ¥
 	*		
-	* ²ÎÊý£º		pSender		-- ÊÂ¼þÔ´¶ÔÏó
-	*			dwConnID	-- Á¬½Ó ID
-	* ·µ»ØÖµ£º	HR_OK / HR_IGNORE	-- ¼ÌÐøÖ´ÐÐ
-	*			HR_ERROR			-- Òý·¢ OnClose() ÊÂ¼þ²¢¹Ø±ÕÁ¬½Ó
+	* å‚æ•°ï¼š		pSender		-- äº‹ä»¶æºå¯¹è±¡
+	*			dwConnID	-- è¿žæŽ¥ ID
+	* è¿”å›žå€¼ï¼š	HR_OK / HR_IGNORE	-- ç»§ç»­æ‰§è¡Œ
+	*			HR_ERROR			-- å¼•å‘ OnClose() äº‹ä»¶å¹¶å…³é—­è¿žæŽ¥
 	*/
 	virtual EnHandleResult OnWSMessageComplete(T* pSender, CONNID dwConnID)										= 0;
 
@@ -2670,8 +2670,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpServer ×é¼þ¶Ë¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå IHttpServer ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šIHttpServer ç»„ä»¶ç«¯ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ IHttpServer ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IHttpServerListener : public IHttpListenerT<IHttpServer>, public ITcpServerListener
 {
@@ -2680,8 +2680,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpAgent ×é¼þ¶Ë¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå IHttpAgent ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šIHttpAgent ç»„ä»¶ç«¯ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ IHttpAgent ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IHttpAgentListener : public IHttpListenerT<IHttpAgent>, public ITcpAgentListener
 {
@@ -2690,8 +2690,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpClient ×é¼þ¶Ë¼àÌýÆ÷½Ó¿Ú
-ÃèÊö£º¶¨Òå IHttpClient ¼àÌýÆ÷µÄËùÓÐÊÂ¼þ
+åç§°ï¼šIHttpClient ç»„ä»¶ç«¯ç›‘å¬å™¨æŽ¥å£
+æè¿°ï¼šå®šä¹‰ IHttpClient ç›‘å¬å™¨çš„æ‰€æœ‰äº‹ä»¶
 ************************************************************************/
 class IHttpClientListener : public IHttpListenerT<IHttpClient>, public ITcpClientListener
 {
@@ -2700,8 +2700,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpServerListener ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šIHttpServerListener ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CHttpServerListener : public IHttpServerListener
 {
@@ -2728,8 +2728,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpAgentListener ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šIHttpAgentListener ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 class CHttpAgentListener : public IHttpAgentListener
 {
@@ -2756,8 +2756,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpClientListener ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šIHttpClientListener ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 
 class CHttpClientListener : public IHttpClientListener
@@ -2784,8 +2784,8 @@ public:
 };
 
 /************************************************************************
-Ãû³Æ£ºIHttpClientListener ¼àÌýÆ÷³éÏó»ùÀà
-ÃèÊö£º¶¨ÒåÄ³Ð©ÊÂ¼þµÄÄ¬ÈÏ´¦Àí·½·¨£¨ºöÂÔÊÂ¼þ£©
+åç§°ï¼šIHttpClientListener ç›‘å¬å™¨æŠ½è±¡åŸºç±»
+æè¿°ï¼šå®šä¹‰æŸäº›äº‹ä»¶çš„é»˜è®¤å¤„ç†æ–¹æ³•ï¼ˆå¿½ç•¥äº‹ä»¶ï¼‰
 ************************************************************************/
 
 class CHttpSyncClientListener : public CHttpClientListener
@@ -2807,112 +2807,112 @@ public:
 /*****************************************************************************************************************************************************/
 
 /************************************************************************
-Ãû³Æ£ºÏß³Ì³Ø×é¼þ½Ó¿Ú
-ÃèÊö£º¶¨ÒåÏß³Ì³Ø×é¼þµÄËùÓÐ²Ù×÷·½·¨ºÍÊôÐÔ·ÃÎÊ·½·¨
+åç§°ï¼šçº¿ç¨‹æ± ç»„ä»¶æŽ¥å£
+æè¿°ï¼šå®šä¹‰çº¿ç¨‹æ± ç»„ä»¶çš„æ‰€æœ‰æ“ä½œæ–¹æ³•å’Œå±žæ€§è®¿é—®æ–¹æ³•
 ************************************************************************/
 class IHPThreadPool
 {
 public:
 
 	/***********************************************************************/
-	/***************************** ×é¼þ²Ù×÷·½·¨ *****************************/
+	/***************************** ç»„ä»¶æ“ä½œæ–¹æ³• *****************************/
 
 	/*
-	* Ãû³Æ£ºÆô¶¯Ïß³Ì³Ø×é¼þ
-	* ÃèÊö£º
+	* åç§°ï¼šå¯åŠ¨çº¿ç¨‹æ± ç»„ä»¶
+	* æè¿°ï¼š
 	*		
-	* ²ÎÊý£º		dwThreadCount		-- Ïß³ÌÊýÁ¿£¬£¨Ä¬ÈÏ£º0£©
+	* å‚æ•°ï¼š		dwThreadCount		-- çº¿ç¨‹æ•°é‡ï¼Œï¼ˆé»˜è®¤ï¼š0ï¼‰
 	*									>0 -> dwThreadCount
-	*									=0 -> (CPUºËÊý * 2 + 2)
-	*									<0 -> (CPUºËÊý * (-dwThreadCount))
-	*			dwMaxQueueSize		-- ÈÎÎñ¶ÓÁÐ×î´óÈÝÁ¿£¨Ä¬ÈÏ£º0£¬²»ÏÞÖÆ£©
-	*			enRejectedPolicy	-- ÈÎÎñ¾Ü¾ø´¦Àí²ßÂÔ
-	*									TRP_CALL_FAIL£¨Ä¬ÈÏ£©	£ºÁ¢¿Ì·µ»ØÊ§°Ü
-	*									TRP_WAIT_FOR			£ºµÈ´ý£¨Ö±µ½³É¹¦¡¢³¬Ê±»òÏß³Ì³Ø¹Ø±ÕµÈÔ­Òòµ¼ÖÂÊ§°Ü£©
-	*									TRP_CALLER_RUN			£ºµ÷ÓÃÕßÏß³ÌÖ±½ÓÖ´ÐÐ
-	*			dwStackSize			-- Ïß³Ì¶ÑÕ»¿Õ¼ä´óÐ¡£¨Ä¬ÈÏ£º0 -> ²Ù×÷ÏµÍ³Ä¬ÈÏ£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	*									=0 -> (CPUæ ¸æ•° * 2 + 2)
+	*									<0 -> (CPUæ ¸æ•° * (-dwThreadCount))
+	*			dwMaxQueueSize		-- ä»»åŠ¡é˜Ÿåˆ—æœ€å¤§å®¹é‡ï¼ˆé»˜è®¤ï¼š0ï¼Œä¸é™åˆ¶ï¼‰
+	*			enRejectedPolicy	-- ä»»åŠ¡æ‹’ç»å¤„ç†ç­–ç•¥
+	*									TRP_CALL_FAILï¼ˆé»˜è®¤ï¼‰	ï¼šç«‹åˆ»è¿”å›žå¤±è´¥
+	*									TRP_WAIT_FOR			ï¼šç­‰å¾…ï¼ˆç›´åˆ°æˆåŠŸã€è¶…æ—¶æˆ–çº¿ç¨‹æ± å…³é—­ç­‰åŽŸå› å¯¼è‡´å¤±è´¥ï¼‰
+	*									TRP_CALLER_RUN			ï¼šè°ƒç”¨è€…çº¿ç¨‹ç›´æŽ¥æ‰§è¡Œ
+	*			dwStackSize			-- çº¿ç¨‹å †æ ˆç©ºé—´å¤§å°ï¼ˆé»˜è®¤ï¼š0 -> æ“ä½œç³»ç»Ÿé»˜è®¤ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Start	(DWORD dwThreadCount = 0, DWORD dwMaxQueueSize = 0, EnRejectedPolicy enRejectedPolicy = TRP_CALL_FAIL, DWORD dwStackSize = 0)	= 0;
 
 	/*
-	* Ãû³Æ£º¹Ø±ÕÏß³Ì³Ø×é¼þ
-	* ÃèÊö£ºÔÚ¹æ¶¨Ê±¼äÄÚ¹Ø±ÕÏß³Ì³Ø×é¼þ£¬Èç¹û¹¤×÷Ïß³ÌÔÚ×î´óµÈ´ýÊ±¼äÄÚÎ´ÄÜÕý³£¹Ø±Õ£¬»á³¢ÊÔÇ¿ÖÆ¹Ø±Õ£¬ÕâÖÖÇé¿öÏÂºÜ¿ÉÄÜ»áÔì³ÉÏµÍ³×ÊÔ´Ð¹Â©
+	* åç§°ï¼šå…³é—­çº¿ç¨‹æ± ç»„ä»¶
+	* æè¿°ï¼šåœ¨è§„å®šæ—¶é—´å†…å…³é—­çº¿ç¨‹æ± ç»„ä»¶ï¼Œå¦‚æžœå·¥ä½œçº¿ç¨‹åœ¨æœ€å¤§ç­‰å¾…æ—¶é—´å†…æœªèƒ½æ­£å¸¸å…³é—­ï¼Œä¼šå°è¯•å¼ºåˆ¶å…³é—­ï¼Œè¿™ç§æƒ…å†µä¸‹å¾ˆå¯èƒ½ä¼šé€ æˆç³»ç»Ÿèµ„æºæ³„æ¼
 	*		
-	* ²ÎÊý£º		dwMaxWait	-- ×î´óµÈ´ýÊ±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£ºINFINITE£¬Ò»Ö±µÈ´ý£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwMaxWait	-- æœ€å¤§ç­‰å¾…æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼šINFINITEï¼Œä¸€ç›´ç­‰å¾…ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Stop	(DWORD dwMaxWait = INFINITE)										= 0;
 
 	/*
-	* Ãû³Æ£ºÌá½»ÈÎÎñ
-	* ÃèÊö£ºÏòÏß³Ì³ØÌá½»Òì²½ÈÎÎñ
+	* åç§°ï¼šæäº¤ä»»åŠ¡
+	* æè¿°ï¼šå‘çº¿ç¨‹æ± æäº¤å¼‚æ­¥ä»»åŠ¡
 	*		
-	* ²ÎÊý£º		fnTaskProc	-- ÈÎÎñ´¦Àíº¯Êý
-	*			pvArg		-- ÈÎÎñ²ÎÊý
-	*			dwMaxWait	-- ÈÎÎñÌá½»×î´óµÈ´ýÊ±¼ä£¨½ö¶Ô TRP_WAIT_FOR ÀàÐÍÏß³Ì³ØÉúÐ§£¬Ä¬ÈÏ£ºINFINITE£¬Ò»Ö±µÈ´ý£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
-	*							ÆäÖÐ£¬´íÎóÂë ERROR_DESTINATION_ELEMENT_FULL ±íÊ¾ÈÎÎñ¶ÓÁÐÒÑÂú
+	* å‚æ•°ï¼š		fnTaskProc	-- ä»»åŠ¡å¤„ç†å‡½æ•°
+	*			pvArg		-- ä»»åŠ¡å‚æ•°
+	*			dwMaxWait	-- ä»»åŠ¡æäº¤æœ€å¤§ç­‰å¾…æ—¶é—´ï¼ˆä»…å¯¹ TRP_WAIT_FOR ç±»åž‹çº¿ç¨‹æ± ç”Ÿæ•ˆï¼Œé»˜è®¤ï¼šINFINITEï¼Œä¸€ç›´ç­‰å¾…ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
+	*							å…¶ä¸­ï¼Œé”™è¯¯ç  ERROR_DESTINATION_ELEMENT_FULL è¡¨ç¤ºä»»åŠ¡é˜Ÿåˆ—å·²æ»¡
 	*/
 	virtual BOOL Submit	(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait = INFINITE)	= 0;
 
 	/*
-	* Ãû³Æ£ºÌá½» Socket ÈÎÎñ
-	* ÃèÊö£ºÏòÏß³Ì³ØÌá½»Òì²½ Socket ÈÎÎñ
+	* åç§°ï¼šæäº¤ Socket ä»»åŠ¡
+	* æè¿°ï¼šå‘çº¿ç¨‹æ± æäº¤å¼‚æ­¥ Socket ä»»åŠ¡
 	*		
-	* ²ÎÊý£º		pTask		-- ÈÎÎñ²ÎÊý
-	*			dwMaxWait	-- ÈÎÎñÌá½»×î´óµÈ´ýÊ±¼ä£¨½ö¶Ô TRP_WAIT_FOR ÀàÐÍÏß³Ì³ØÉúÐ§£¬Ä¬ÈÏ£ºINFINITE£¬Ò»Ö±µÈ´ý£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
-	*							ÆäÖÐ£¬´íÎóÂë ERROR_DESTINATION_ELEMENT_FULL ±íÊ¾ÈÎÎñ¶ÓÁÐÒÑÂú
-	*							×¢Òâ£ºÈç¹ûÌá½»Ê§°Ü£¬ÐèÒªÊÖ¹¤µ÷ÓÃ Destroy_HP_SocketTaskObj() Ïú»Ù TSocketTask ¶ÔÏó
+	* å‚æ•°ï¼š		pTask		-- ä»»åŠ¡å‚æ•°
+	*			dwMaxWait	-- ä»»åŠ¡æäº¤æœ€å¤§ç­‰å¾…æ—¶é—´ï¼ˆä»…å¯¹ TRP_WAIT_FOR ç±»åž‹çº¿ç¨‹æ± ç”Ÿæ•ˆï¼Œé»˜è®¤ï¼šINFINITEï¼Œä¸€ç›´ç­‰å¾…ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
+	*							å…¶ä¸­ï¼Œé”™è¯¯ç  ERROR_DESTINATION_ELEMENT_FULL è¡¨ç¤ºä»»åŠ¡é˜Ÿåˆ—å·²æ»¡
+	*							æ³¨æ„ï¼šå¦‚æžœæäº¤å¤±è´¥ï¼Œéœ€è¦æ‰‹å·¥è°ƒç”¨ Destroy_HP_SocketTaskObj() é”€æ¯ TSocketTask å¯¹è±¡
 	*/
 	virtual BOOL Submit	(LPTSocketTask pTask, DWORD dwMaxWait = INFINITE)					= 0;
 
 	/*
-	* Ãû³Æ£ºµ÷ÕûÏß³Ì³Ø´óÐ¡
-	* ÃèÊö£ºÔö¼Ó»ò¼õÉÙÏß³Ì³ØµÄ¹¤×÷Ïß³ÌÊýÁ¿
+	* åç§°ï¼šè°ƒæ•´çº¿ç¨‹æ± å¤§å°
+	* æè¿°ï¼šå¢žåŠ æˆ–å‡å°‘çº¿ç¨‹æ± çš„å·¥ä½œçº¿ç¨‹æ•°é‡
 	*		
-	* ²ÎÊý£º		dwNewThreadCount	-- Ïß³ÌÊýÁ¿
+	* å‚æ•°ï¼š		dwNewThreadCount	-- çº¿ç¨‹æ•°é‡
 	*									>0 -> dwNewThreadCount
-	*									=0 -> (CPUºËÊý * 2 + 2)
-	*									<0 -> (CPUºËÊý * (-dwNewThreadCount))
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	*									=0 -> (CPUæ ¸æ•° * 2 + 2)
+	*									<0 -> (CPUæ ¸æ•° * (-dwNewThreadCount))
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL AdjustThreadCount(DWORD dwNewThreadCount)									= 0;
 
 	/*
-	* Ãû³Æ£ºµÈ´ý
-	* ÃèÊö£ºµÈ´ýÏß³Ì³Ø×é¼þÍ£Ö¹ÔËÐÐ
+	* åç§°ï¼šç­‰å¾…
+	* æè¿°ï¼šç­‰å¾…çº¿ç¨‹æ± ç»„ä»¶åœæ­¢è¿è¡Œ
 	*		
-	* ²ÎÊý£º		dwMilliseconds	-- ³¬Ê±Ê±¼ä£¨ºÁÃë£¬Ä¬ÈÏ£º-1£¬ÓÀ²»³¬Ê±£©
-	* ·µ»ØÖµ£º	TRUE	-- ³É¹¦
-	*			FALSE	-- Ê§°Ü£¬¿ÉÍ¨¹ý SYS_GetLastError() »ñÈ¡´íÎó´úÂë
+	* å‚æ•°ï¼š		dwMilliseconds	-- è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼Œé»˜è®¤ï¼š-1ï¼Œæ°¸ä¸è¶…æ—¶ï¼‰
+	* è¿”å›žå€¼ï¼š	TRUE	-- æˆåŠŸ
+	*			FALSE	-- å¤±è´¥ï¼Œå¯é€šè¿‡ SYS_GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 	*/
 	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE)										= 0;
 
 public:
 
 	/***********************************************************************/
-	/***************************** ÊôÐÔ·ÃÎÊ·½·¨ *****************************/
+	/***************************** å±žæ€§è®¿é—®æ–¹æ³• *****************************/
 
-	/* ¼ì²éÏß³Ì³Ø×é¼þÊÇ·ñÒÑÆô¶¯ */
+	/* æ£€æŸ¥çº¿ç¨‹æ± ç»„ä»¶æ˜¯å¦å·²å¯åŠ¨ */
 	virtual BOOL HasStarted						()	= 0;
-	/* ²é¿´Ïß³Ì³Ø×é¼þµ±Ç°×´Ì¬ */
+	/* æŸ¥çœ‹çº¿ç¨‹æ± ç»„ä»¶å½“å‰çŠ¶æ€ */
 	virtual EnServiceState	GetState			()	= 0;
-	/* »ñÈ¡µ±Ç°ÈÎÎñµÈ´ý¶ÓÁÐ´óÐ¡ */
+	/* èŽ·å–å½“å‰ä»»åŠ¡ç­‰å¾…é˜Ÿåˆ—å¤§å° */
 	virtual DWORD GetQueueSize					()	= 0;
-	/* »ñÈ¡µ±Ç°ÕýÔÚÖ´ÐÐµÄÈÎÎñÊýÁ¿ */
+	/* èŽ·å–å½“å‰æ­£åœ¨æ‰§è¡Œçš„ä»»åŠ¡æ•°é‡ */
 	virtual DWORD GetTaskCount					()	= 0;
-	/* »ñÈ¡¹¤×÷Ïß³ÌÊýÁ¿ */
+	/* èŽ·å–å·¥ä½œçº¿ç¨‹æ•°é‡ */
 	virtual DWORD GetThreadCount				()	= 0;
-	/* »ñÈ¡ÈÎÎñ¶ÓÁÐ×î´óÈÝÁ¿ */
+	/* èŽ·å–ä»»åŠ¡é˜Ÿåˆ—æœ€å¤§å®¹é‡ */
 	virtual DWORD GetMaxQueueSize				()	= 0;
-	/* »ñÈ¡ÈÎÎñ¾Ü¾ø´¦Àí²ßÂÔ */
+	/* èŽ·å–ä»»åŠ¡æ‹’ç»å¤„ç†ç­–ç•¥ */
 	virtual EnRejectedPolicy GetRejectedPolicy	()	= 0;
 
 public:

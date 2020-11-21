@@ -60,14 +60,14 @@ using Fn_ArqOutputProc = int (*)(const char* pBuffer, int iLength, IKCPCB* kcp, 
 DWORD GenerateConversationID();
 
 /************************************************************************
-Ãû³Æ£ºARQ ÎÕÊÖ×´Ì¬
-ÃèÊö£º±êÊ¶µ±Ç°Á¬½ÓµÄ ARQ ÎÕÊÖ×´Ì¬
+åç§°ï¼šARQ æ¡æ‰‹çŠ¶æ€
+æè¿°ï¼šæ ‡è¯†å½“å‰è¿æ¥çš„ ARQ æ¡æ‰‹çŠ¶æ€
 ************************************************************************/
 enum EnArqHandShakeStatus
 {
-	ARQ_HSS_INIT	= 0,	// ³õÊ¼×´Ì¬
-	ARQ_HSS_PROC	= 1,	// ÕıÔÚÎÕÊÖ
-	ARQ_HSS_SUCC	= 2,	// ÎÕÊÖ³É¹¦
+	ARQ_HSS_INIT	= 0,	// åˆå§‹çŠ¶æ€
+	ARQ_HSS_PROC	= 1,	// æ­£åœ¨æ¡æ‰‹
+	ARQ_HSS_SUCC	= 2,	// æ¡æ‰‹æˆåŠŸ
 };
 
 struct TArqCmd

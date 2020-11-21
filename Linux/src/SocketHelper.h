@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright: JessMA Open Source (ldcsaa@gmail.com)
 *
 * Author	: Bruce Liang
@@ -38,15 +38,12 @@
 #include <arpa/inet.h>
 
 #ifdef _ZLIB_SUPPORT
-
-#if defined(ZLIB_CONST) && !defined(z_const)
-	#define z_const const
-#else
-	#define z_const
+#include <zlib.h>
 #endif
 
-#include <zlib.h>
-
+#ifdef _BROTLI_SUPPORT
+#include <brotli/decode.h>
+#include <brotli/encode.h>
 #endif
 
 using ADDRESS_FAMILY	= sa_family_t;
@@ -896,6 +893,24 @@ BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
 
 #endif
 
+// 计算 Base64 编码后长度
+DWORD GuessBase64EncodeBound(DWORD dwSrcLen);
+// 计算 Base64 解码后长度
+DWORD GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+// 计算 URL 编码后长度
+DWORD GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// 计算 URL 解码后长度
+DWORD GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
 #ifdef _ZLIB_SUPPORT
 
 // 普通压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
@@ -918,20 +933,15 @@ DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
 
 #endif
 
-// 计算 Base64 编码后长度
-DWORD GuessBase64EncodeBound(DWORD dwSrcLen);
-// 计算 Base64 解码后长度
-DWORD GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// Base64 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Base64 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+#ifdef _BROTLI_SUPPORT
 
-// 计算 URL 编码后长度
-DWORD GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// 计算 URL 解码后长度
-DWORD GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// URL 编码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli 压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli 高级压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, BrotliEncoderMode enMode = BROTLI_DEFAULT_MODE);
+// Brotli 解压（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
+int BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli 推测压缩结果长度
+DWORD BrotliGuessCompressBound(DWORD dwSrcLen);
+
+#endif

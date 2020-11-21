@@ -28,9 +28,6 @@
     <Filter Include="Common\crypto">
       <UniqueIdentifier>{769652b3-15d8-4f11-8806-f35c44fff35f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\zlib">
-      <UniqueIdentifier>{d249dee9-52b3-4cfd-860a-83fd8ee7ce91}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -129,39 +126,6 @@
     <ClInclude Include="..\..\..\Common\Src\crypto\crypto.h">
       <Filter>Common\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\crc32.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\deflate.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\gzguts.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\inffast.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\inffixed.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\inflate.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\inftrees.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\trees.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\zconf.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\zlib.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\zlib\zutil.h">
-      <Filter>Common\zlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Src\HttpCookie.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
@@ -217,51 +181,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Common\Src\crypto\crypto.cpp">
       <Filter>Common\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\adler32.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\compress.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\crc32.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\deflate.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\gzclose.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\gzlib.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\gzread.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\gzwrite.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\infback.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\inffast.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\inflate.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\inftrees.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\trees.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\uncompr.c">
-      <Filter>Common\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\zlib\zutil.c">
-      <Filter>Common\zlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Src\HttpCookie.cpp">
       <Filter>HPSocket</Filter>

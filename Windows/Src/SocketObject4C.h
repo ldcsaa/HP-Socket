@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang

@@ -12,7 +12,11 @@
 #define _DETECT_MEMORY_LEAK
 
 #define _NEED_SSL
-#define _ZLIB_DISABLED
+
+#define _UDP_DISABLED			// 禁用 UDP
+#define _HTTP_DISABLED			// 禁用 HTTP
+#define _ZLIB_DISABLED			// 禁用 ZLIB
+#define _BROTLI_DISABLED		// 禁用 BROTLI
 
 #include "../../../Common/Src/GeneralHelper.h"
 

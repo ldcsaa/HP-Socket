@@ -267,7 +267,7 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -276,7 +276,7 @@
       </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -295,7 +295,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>jemalloc_pic;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -304,7 +304,7 @@
       </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 15 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -323,7 +323,7 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -332,7 +332,7 @@
       </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -351,7 +351,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>jemalloc_pic;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -360,7 +360,7 @@
       </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 15 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -379,7 +379,7 @@
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -388,7 +388,7 @@
       </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 3 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -407,7 +407,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>jemalloc_pic;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -416,7 +416,7 @@
       </Command>
     </RemotePreLinkEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/../script/post-link.sh 15 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <CustomBuildStep />
   </ItemDefinitionGroup>

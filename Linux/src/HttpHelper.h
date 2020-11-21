@@ -31,8 +31,8 @@
 #include "common/http/http_parser.h"
 
 /************************************************************************
-Ãû³Æ£ºHTTP È«¾Ö³£Á¿
-ÃèÊö£ºÉùÃ÷ HTTP ×é¼þµÄ¹«¹²È«¾Ö³£Á¿
+åç§°ï¼šHTTP å…¨å±€å¸¸é‡
+æè¿°ï¼šå£°æ˜Ž HTTP ç»„ä»¶çš„å…¬å…±å…¨å±€å¸¸é‡
 ************************************************************************/
 
 #define HTTP_DEFAULT_PORT					80
@@ -277,7 +277,7 @@ public:
 
 				m_ullBodyRemain	-= iMin;
 
-				EnHandleResult hr = m_pHttpObj->on_ws_message_body(pTemp, iMin);
+				hr = m_pHttpObj->on_ws_message_body(pTemp, iMin);
 
 				if(hr == HR_ERROR)
 					break;
@@ -371,7 +371,7 @@ private:
 
 // ------------------------------------------------------------------------------------------------------------- //
 
-/* Http ÉÏÏÂÎÄ½á¹¹ */
+/* Http ä¸Šä¸‹æ–‡ç»“æž„ */
 template<class T, class S> struct THttpObjT
 {
 public:

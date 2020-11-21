@@ -10,6 +10,7 @@ OBJ_OUT=./lib/android-ndk/obj
 
 function cp_static_lib
 {
+	mkdir -p $LIBS_OUT/$1
 	cp -f $OBJ_OUT/local/$1/*.a $LIBS_OUT/$1
 }
 

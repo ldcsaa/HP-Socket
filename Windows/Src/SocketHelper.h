@@ -1,9 +1,9 @@
-/*
+ï»¿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
  * Website	: https://github.com/ldcsaa
- * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 44636872, 75375912
@@ -37,84 +37,92 @@
 #include "../Common/Src/RingBuffer.h"
 
 #ifdef _ZLIB_SUPPORT
-#include "../Common/Src/zlib/zutil.h"
+#include <zutil.h>
+#endif
+
+#ifdef _BROTLI_SUPPORT
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#include <brotli/decode.h>
+#include <brotli/encode.h>
+#pragma warning(pop)
 #endif
 
 /************************************************************************
-Ãû³Æ£ºÈ«¾Ö³£Á¿
-ÃèÊö£ºÉùÃ÷×é¼şµÄ¹«¹²È«¾Ö³£Á¿
+åç§°ï¼šå…¨å±€å¸¸é‡
+æè¿°ï¼šå£°æ˜ç»„ä»¶çš„å…¬å…±å…¨å±€å¸¸é‡
 ************************************************************************/
 
-/* IOCP Socket »º³åÇø×îĞ¡Öµ */
+/* IOCP Socket ç¼“å†²åŒºæœ€å°å€¼ */
 #define MIN_SOCKET_BUFFER_SIZE					88
-/* Ğ¡ÎÄ¼ş×î´ó×Ö½ÚÊı */
+/* å°æ–‡ä»¶æœ€å¤§å­—èŠ‚æ•° */
 #define MAX_SMALL_FILE_SIZE						0x3FFFFF
-/* ×î´óÁ¬½ÓÊ±³¤ */
+/* æœ€å¤§è¿æ¥æ—¶é•¿ */
 #define MAX_CONNECTION_PERIOD					(MAXLONG / 2)
-/* IOCP ´¦Àí½ÓÊÕÊÂ¼şÊ±×î´ó¶îÍâ¶ÁÈ¡´ÎÊı */
+/* IOCP å¤„ç†æ¥æ”¶äº‹ä»¶æ—¶æœ€å¤§é¢å¤–è¯»å–æ¬¡æ•° */
 #define MAX_IOCP_CONTINUE_RECEIVE				30
 
-/* Server/Agent ×î´óÁ¬½ÓÊı */
+/* Server/Agent æœ€å¤§è¿æ¥æ•° */
 #define MAX_CONNECTION_COUNT					(5 * 1000 * 1000)
-/* Server/Agent Ä¬ÈÏ×î´óÁ¬½ÓÊı */
+/* Server/Agent é»˜è®¤æœ€å¤§è¿æ¥æ•° */
 #define DEFAULT_CONNECTION_COUNT				10000
-/* Server/Agent Ä¬ÈÏ Socket »º´æ¶ÔÏóËø¶¨Ê±¼ä */
+/* Server/Agent é»˜è®¤ Socket ç¼“å­˜å¯¹è±¡é”å®šæ—¶é—´ */
 #define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		DEFAULT_OBJECT_CACHE_LOCK_TIME
-/* Server/Agent Ä¬ÈÏ Socket »º´æ³Ø´óĞ¡ */
+/* Server/Agent é»˜è®¤ Socket ç¼“å­˜æ± å¤§å° */
 #define DEFAULT_FREE_SOCKETOBJ_POOL				DEFAULT_OBJECT_CACHE_POOL_SIZE
-/* Server/Agent Ä¬ÈÏ Socket »º´æ³Ø»ØÊÕ·§Öµ */
+/* Server/Agent é»˜è®¤ Socket ç¼“å­˜æ± å›æ”¶é˜€å€¼ */
 #define DEFAULT_FREE_SOCKETOBJ_HOLD				DEFAULT_OBJECT_CACHE_POOL_HOLD
-/* Server/Agent Ä¬ÈÏÄÚ´æ¿é»º´æ³Ø´óĞ¡ */
+/* Server/Agent é»˜è®¤å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 #define DEFAULT_FREE_BUFFEROBJ_POOL				DEFAULT_BUFFER_CACHE_POOL_SIZE
-/* Server/Agent Ä¬ÈÏÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+/* Server/Agent é»˜è®¤å†…å­˜å—ç¼“å­˜æ± å›æ”¶é˜€å€¼ */
 #define DEFAULT_FREE_BUFFEROBJ_HOLD				DEFAULT_BUFFER_CACHE_POOL_HOLD
-/* Client Ä¬ÈÏÄÚ´æ¿é»º´æ³Ø´óĞ¡ */
+/* Client é»˜è®¤å†…å­˜å—ç¼“å­˜æ± å¤§å° */
 #define DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE	60
-/* Client Ä¬ÈÏÄÚ´æ¿é»º´æ³Ø»ØÊÕ·§Öµ */
+/* Client é»˜è®¤å†…å­˜å—ç¼“å­˜æ± å›æ”¶é˜€å€¼ */
 #define DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD	60
-/* IPv4 Ä¬ÈÏ°ó¶¨µØÖ· */
+/* IPv4 é»˜è®¤ç»‘å®šåœ°å€ */
 #define  DEFAULT_IPV4_BIND_ADDRESS				_T("0.0.0.0")
-/* IPv6 Ä¬ÈÏ°ó¶¨µØÖ· */
+/* IPv6 é»˜è®¤ç»‘å®šåœ°å€ */
 #define  DEFAULT_IPV6_BIND_ADDRESS				_T("::")
-/* IPv4 ¹ã²¥µØÖ· */
+/* IPv4 å¹¿æ’­åœ°å€ */
 #define DEFAULT_IPV4_BROAD_CAST_ADDRESS			_T("255.255.255.255")
 
-/* SOCKET Ä¬ÈÏ·¢ËÍ»º³åÇø´óĞ¡ */
+/* SOCKET é»˜è®¤å‘é€ç¼“å†²åŒºå¤§å° */
 #define DEFAULT_SOCKET_SNDBUFF_SIZE				(16 * 1024)
 
-/* TCP Ä¬ÈÏÍ¨ĞÅÊı¾İ»º³åÇø´óĞ¡ */
+/* TCP é»˜è®¤é€šä¿¡æ•°æ®ç¼“å†²åŒºå¤§å° */
 #define DEFAULT_TCP_SOCKET_BUFFER_SIZE			DEFAULT_BUFFER_CACHE_CAPACITY
-/* TCP Ä¬ÈÏĞÄÌø°ü¼ä¸ô */
+/* TCP é»˜è®¤å¿ƒè·³åŒ…é—´éš” */
 #define DEFALUT_TCP_KEEPALIVE_TIME				(60 * 1000)
-/* TCP Ä¬ÈÏĞÄÌøÈ·ÈÏ°ü¼ì²â¼ä¸ô */
+/* TCP é»˜è®¤å¿ƒè·³ç¡®è®¤åŒ…æ£€æµ‹é—´éš” */
 #define DEFALUT_TCP_KEEPALIVE_INTERVAL			(20 * 1000)
-/* TCP Server Ä¬ÈÏ Listen ¶ÓÁĞ´óĞ¡ */
+/* TCP Server é»˜è®¤ Listen é˜Ÿåˆ—å¤§å° */
 #define DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE	SOMAXCONN
-/* TCP Server Ä¬ÈÏÔ¤Í¶µİ Accept ÊıÁ¿ */
+/* TCP Server é»˜è®¤é¢„æŠ•é€’ Accept æ•°é‡ */
 #define DEFAULT_TCP_SERVER_ACCEPT_SOCKET_COUNT	300
 
-/* UDP ×î´óÊı¾İ±¨ÎÄ×î´ó³¤¶È */
+/* UDP æœ€å¤§æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ */
 #define MAXIMUM_UDP_MAX_DATAGRAM_SIZE			(16 * DEFAULT_BUFFER_CACHE_CAPACITY)
-/* UDP Ä¬ÈÏÊı¾İ±¨ÎÄ×î´ó³¤¶È */
+/* UDP é»˜è®¤æ•°æ®æŠ¥æ–‡æœ€å¤§é•¿åº¦ */
 #define DEFAULT_UDP_MAX_DATAGRAM_SIZE			1432
-/* UDP Ä¬ÈÏ Receive Ô¤Í¶µİÊıÁ¿ */
+/* UDP é»˜è®¤ Receive é¢„æŠ•é€’æ•°é‡ */
 #define DEFAULT_UDP_POST_RECEIVE_COUNT			300
-/* UDP Ä¬ÈÏ¼à²â°ü³¢ÊÔ´ÎÊı */
+/* UDP é»˜è®¤ç›‘æµ‹åŒ…å°è¯•æ¬¡æ•° */
 #define DEFAULT_UDP_DETECT_ATTEMPTS				3
-/* UDP Ä¬ÈÏ¼à²â°ü·¢ËÍ¼ä¸ô */
+/* UDP é»˜è®¤ç›‘æµ‹åŒ…å‘é€é—´éš” */
 #define DEFAULT_UDP_DETECT_INTERVAL				(60 * 1000)
 
-/* TCP Pack °ü³¤¶ÈÎ»Êı */
+/* TCP Pack åŒ…é•¿åº¦ä½æ•° */
 #define TCP_PACK_LENGTH_BITS					22
-/* TCP Pack °ü³¤¶ÈÑÚÂë */
+/* TCP Pack åŒ…é•¿åº¦æ©ç  */
 #define TCP_PACK_LENGTH_MASK					0x3FFFFF
-/* TCP Pack °ü×î´ó³¤¶ÈÓ²ÏŞÖÆ */
+/* TCP Pack åŒ…æœ€å¤§é•¿åº¦ç¡¬é™åˆ¶ */
 #define TCP_PACK_MAX_SIZE_LIMIT					0x3FFFFF
-/* TCP Pack °üÄ¬ÈÏ×î´ó³¤¶È */
+/* TCP Pack åŒ…é»˜è®¤æœ€å¤§é•¿åº¦ */
 #define TCP_PACK_DEFAULT_MAX_SIZE				0x040000
-/* TCP Pack °üÍ·±êÊ¶ÖµÓ²ÏŞÖÆ */
+/* TCP Pack åŒ…å¤´æ ‡è¯†å€¼ç¡¬é™åˆ¶ */
 #define TCP_PACK_HEADER_FLAG_LIMIT				0x0003FF
-/* TCP Pack °üÍ·Ä¬ÈÏ±êÊ¶Öµ */
+/* TCP Pack åŒ…å¤´é»˜è®¤æ ‡è¯†å€¼ */
 #define TCP_PACK_DEFAULT_HEADER_FLAG			0x000000
 
 #define PORT_SEPARATOR_CHAR						':'
@@ -128,8 +136,8 @@
 #define ENSURE_HAS_STOPPED()					{if(GetState() != SS_STOPPED) return;}
 
 /************************************************************************
-Ãû³Æ£ºWindows Socket ×é¼ş³õÊ¼»¯Àà
-ÃèÊö£º×Ô¶¯¼ÓÔØºÍĞ¶ÔØ Windows Socket ×é¼ş
+åç§°ï¼šWindows Socket ç»„ä»¶åˆå§‹åŒ–ç±»
+æè¿°ï¼šè‡ªåŠ¨åŠ è½½å’Œå¸è½½ Windows Socket ç»„ä»¶
 ************************************************************************/
 class CInitSocket
 {
@@ -321,20 +329,20 @@ typedef struct hp_sockaddr
 
 } HP_SOCKADDR, *HP_PSOCKADDR;
 
-/* Server ×é¼şºÍ Agent ×é¼şÄÚ²¿Ê¹ÓÃµÄÊÂ¼ş´¦Àí½á¹û³£Á¿ */
+/* Server ç»„ä»¶å’Œ Agent ç»„ä»¶å†…éƒ¨ä½¿ç”¨çš„äº‹ä»¶å¤„ç†ç»“æœå¸¸é‡ */
 
-// Á¬½ÓÒÑ¹Ø±Õ
+// è¿æ¥å·²å…³é—­
 #define HR_CLOSED	0xFF
 
-/* ¹Ø±ÕÁ¬½Ó±êÊ¶ */
+/* å…³é—­è¿æ¥æ ‡è¯† */
 enum EnSocketCloseFlag
 {
-	SCF_NONE		= 0,	// ²»´¥·¢ÊÂ¼ş
-	SCF_CLOSE		= 1,	// ´¥·¢ Õı³£¹Ø±Õ OnClose ÊÂ¼ş
-	SCF_ERROR		= 2		// ´¥·¢ Òì³£¹Ø±Õ OnClose ÊÂ¼ş
+	SCF_NONE		= 0,	// ä¸è§¦å‘äº‹ä»¶
+	SCF_CLOSE		= 1,	// è§¦å‘ æ­£å¸¸å…³é—­ OnClose äº‹ä»¶
+	SCF_ERROR		= 2		// è§¦å‘ å¼‚å¸¸å…³é—­ OnClose äº‹ä»¶
 };
 
-/* Êı¾İ»º³åÇø»ù´¡½á¹¹ */
+/* æ•°æ®ç¼“å†²åŒºåŸºç¡€ç»“æ„ */
 template<class T> struct TBufferObjBase
 {
 	WSAOVERLAPPED		ov;
@@ -404,20 +412,20 @@ template<class T> struct TBufferObjBase
 	BOOL IsFull()	{return Remain() == 0;}
 };
 
-/* Êı¾İ»º³åÇø½á¹¹ */
+/* æ•°æ®ç¼“å†²åŒºç»“æ„ */
 struct TBufferObj : public TBufferObjBase<TBufferObj>
 {
 	SOCKET client;
 };
 
-/* UDP Êı¾İ»º³åÇø½á¹¹ */
+/* UDP æ•°æ®ç¼“å†²åŒºç»“æ„ */
 struct TUdpBufferObj : public TBufferObjBase<TUdpBufferObj>
 {
 	HP_SOCKADDR	remoteAddr;
 	int			addrLen;
 };
 
-/* Êı¾İ»º³åÇøÁ´±íÄ£°å */
+/* æ•°æ®ç¼“å†²åŒºé“¾è¡¨æ¨¡æ¿ */
 template<class T> struct TBufferObjListT : public TSimpleList<T>
 {
 public:
@@ -467,21 +475,21 @@ private:
 	CNodePoolT<T>& bfPool;
 };
 
-/* Êı¾İ»º³åÇø¶ÔÏó³Ø */
+/* æ•°æ®ç¼“å†²åŒºå¯¹è±¡æ±  */
 typedef CNodePoolT<TBufferObj>			CBufferObjPool;
-/* UDP Êı¾İ»º³åÇø¶ÔÏó³Ø */
+/* UDP æ•°æ®ç¼“å†²åŒºå¯¹è±¡æ±  */
 typedef CNodePoolT<TUdpBufferObj>		CUdpBufferObjPool;
-/* Êı¾İ»º³åÇøÁ´±íÄ£°å */
+/* æ•°æ®ç¼“å†²åŒºé“¾è¡¨æ¨¡æ¿ */
 typedef TBufferObjListT<TBufferObj>		TBufferObjList;
-/* UDP Êı¾İ»º³åÇøÁ´±íÄ£°å */
+/* UDP æ•°æ®ç¼“å†²åŒºé“¾è¡¨æ¨¡æ¿ */
 typedef TBufferObjListT<TUdpBufferObj>	TUdpBufferObjList;
 
-/* TBufferObj ÖÇÄÜÖ¸Õë */
+/* TBufferObj æ™ºèƒ½æŒ‡é’ˆ */
 typedef TItemPtrT<TBufferObj>			TBufferObjPtr;
-/* TUdpBufferObj ÖÇÄÜÖ¸Õë */
+/* TUdpBufferObj æ™ºèƒ½æŒ‡é’ˆ */
 typedef TItemPtrT<TUdpBufferObj>		TUdpBufferObjPtr;
 
-/* Socket »º³åÇø»ù´¡½á¹¹ */
+/* Socket ç¼“å†²åŒºåŸºç¡€ç»“æ„ */
 struct TSocketObjBase
 {
 	CPrivateHeap& heap;
@@ -555,7 +563,7 @@ struct TSocketObjBase
 	}
 };
 
-/* Êı¾İ»º³åÇø½á¹¹ */
+/* æ•°æ®ç¼“å†²åŒºç»“æ„ */
 struct TSocketObj : public TSocketObjBase
 {
 	CCriSec			csRecv;
@@ -653,7 +661,7 @@ struct TSocketObj : public TSocketObjBase
 	}
 };
 
-/* UDP Êı¾İ»º³åÇø½á¹¹ */
+/* UDP æ•°æ®ç¼“å†²åŒºç»“æ„ */
 struct TUdpSocketObj : public TSocketObjBase
 {
 	PVOID				pHolder;
@@ -731,21 +739,21 @@ struct TUdpSocketObj : public TSocketObjBase
 	}
 };
 
-/* ÓĞĞ§ TSocketObj »º´æ */
+/* æœ‰æ•ˆ TSocketObj ç¼“å­˜ */
 typedef CRingCache2<TSocketObj, CONNID, true>		TSocketObjPtrPool;
-/* Ê§Ğ§ TSocketObj »º´æ */
+/* å¤±æ•ˆ TSocketObj ç¼“å­˜ */
 typedef CRingPool<TSocketObj>						TSocketObjPtrList;
-/* Ê§Ğ§ TSocketObj À¬»ø»ØÊÕ½á¹¹Á´±í */
+/* å¤±æ•ˆ TSocketObj åƒåœ¾å›æ”¶ç»“æ„é“¾è¡¨ */
 typedef CCASQueue<TSocketObj>						TSocketObjPtrQueue;
 
-/* ÓĞĞ§ TUdpSocketObj »º´æ */
+/* æœ‰æ•ˆ TUdpSocketObj ç¼“å­˜ */
 typedef CRingCache2<TUdpSocketObj, CONNID, true>	TUdpSocketObjPtrPool;
-/* Ê§Ğ§ TUdpSocketObj »º´æ */
+/* å¤±æ•ˆ TUdpSocketObj ç¼“å­˜ */
 typedef CRingPool<TUdpSocketObj>					TUdpSocketObjPtrList;
-/* Ê§Ğ§ TUdpSocketObj À¬»ø»ØÊÕ½á¹¹Á´±í */
+/* å¤±æ•ˆ TUdpSocketObj åƒåœ¾å›æ”¶ç»“æ„é“¾è¡¨ */
 typedef CCASQueue<TUdpSocketObj>					TUdpSocketObjPtrQueue;
 
-/* HP_SOCKADDR ±È½ÏÆ÷ */
+/* HP_SOCKADDR æ¯”è¾ƒå™¨ */
 struct hp_sockaddr_func
 {
 	struct hash
@@ -766,15 +774,15 @@ struct hp_sockaddr_func
 
 };
 
-/* µØÖ·-Á¬½Ó ID ¹şÏ£±í */
+/* åœ°å€-è¿æ¥ ID å“ˆå¸Œè¡¨ */
 typedef unordered_map<const HP_SOCKADDR*, CONNID, hp_sockaddr_func::hash, hp_sockaddr_func::equal_to>
 										TSockAddrMap;
-/* µØÖ·-Á¬½Ó ID ¹şÏ£±íµü´úÆ÷ */
+/* åœ°å€-è¿æ¥ ID å“ˆå¸Œè¡¨è¿­ä»£å™¨ */
 typedef TSockAddrMap::iterator			TSockAddrMapI;
-/* µØÖ·-Á¬½Ó ID ¹şÏ£±í const µü´úÆ÷ */
+/* åœ°å€-è¿æ¥ ID å“ˆå¸Œè¡¨ const è¿­ä»£å™¨ */
 typedef TSockAddrMap::const_iterator	TSockAddrMapCI;
 
-/* IClient ×é¼ş¹Ø±ÕÉÏÏÂÎÄ */
+/* IClient ç»„ä»¶å…³é—­ä¸Šä¸‹æ–‡ */
 struct TClientCloseContext
 {
 	BOOL bFireOnClose;
@@ -798,104 +806,104 @@ struct TClientCloseContext
 };
 
 /*****************************************************************************************************/
-/******************************************** ¹«¹²°ïÖú·½·¨ ********************************************/
+/******************************************** å…¬å…±å¸®åŠ©æ–¹æ³• ********************************************/
 /*****************************************************************************************************/
 
-/* »ñÈ¡´íÎóÃèÊöÎÄ±¾ */
+/* è·å–é”™è¯¯æè¿°æ–‡æœ¬ */
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode);
-/* È·¶¨µØÖ·´Ø */
+/* ç¡®å®šåœ°å€ç°‡ */
 ADDRESS_FAMILY DetermineAddrFamily(LPCTSTR lpszAddress);
-/* µØÖ·×Ö·û´®µØÖ·×ª»»Îª HP_ADDR */
+/* åœ°å€å­—ç¬¦ä¸²åœ°å€è½¬æ¢ä¸º HP_ADDR */
 BOOL GetInAddr(LPCTSTR lpszAddress, __out HP_ADDR& addr);
-/* µØÖ·×Ö·û´®µØÖ·×ª»»Îª HP_SOCKADDR */
+/* åœ°å€å­—ç¬¦ä¸²åœ°å€è½¬æ¢ä¸º HP_SOCKADDR */
 BOOL GetSockAddr(LPCTSTR lpszAddress, USHORT usPort, __inout HP_SOCKADDR& addr);
-/* ¼ì²é×Ö·û´®ÊÇ·ñ·ûºÏ IP µØÖ·¸ñÊ½ */
+/* æ£€æŸ¥å­—ç¬¦ä¸²æ˜¯å¦ç¬¦åˆ IP åœ°å€æ ¼å¼ */
 BOOL IsIPAddress(LPCTSTR lpszAddress, __out EnIPAddrType* penType = nullptr);
-/* Í¨¹ıÖ÷»úÃû»ñÈ¡ IP µØÖ· */
+/* é€šè¿‡ä¸»æœºåè·å– IP åœ°å€ */
 BOOL GetIPAddress(LPCTSTR lpszHost, __out LPTSTR lpszIP, __inout int& iIPLenth, __out EnIPAddrType& enType);
-/* Í¨¹ıÖ÷»úÃû»ñÈ¡ HP_SOCKADDR */
+/* é€šè¿‡ä¸»æœºåè·å– HP_SOCKADDR */
 BOOL GetSockAddrByHostName(LPCTSTR lpszHost, USHORT usPort, __out HP_SOCKADDR& addr);
-/* Í¨¹ıÖ÷»úÃû»ñÈ¡ HP_SOCKADDR */
+/* é€šè¿‡ä¸»æœºåè·å– HP_SOCKADDR */
 BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR &addr);
-/* Ã¶¾ÙÖ÷»ú IP µØÖ· */
+/* æšä¸¾ä¸»æœº IP åœ°å€ */
 BOOL EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, __out LPTIPAddr** lpppIPAddr, __out int& iIPAddrCount);
-/* Ìî³ä LPTIPAddr* */
+/* å¡«å…… LPTIPAddr* */
 BOOL RetrieveSockAddrIPAddresses(const vector<HP_PSOCKADDR>& vt, __out LPTIPAddr** lpppIPAddr, __out int& iIPAddrCount);
-/* ÊÍ·Å LPTIPAddr* */
+/* é‡Šæ”¾ LPTIPAddr* */
 BOOL FreeHostIPAddresses(LPTIPAddr* lppIPAddr);
-/* °Ñ HP_SOCKADDR ½á¹¹×ª»»ÎªµØÖ·×Ö·û´® */
+/* æŠŠ HP_SOCKADDR ç»“æ„è½¬æ¢ä¸ºåœ°å€å­—ç¬¦ä¸² */
 BOOL sockaddr_IN_2_A(const HP_SOCKADDR& addr, __out ADDRESS_FAMILY& usFamily, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
-/* °ÑµØÖ·×Ö·û´®×ª»»Îª HP_SOCKADDR ½á¹¹ */
+/* æŠŠåœ°å€å­—ç¬¦ä¸²è½¬æ¢ä¸º HP_SOCKADDR ç»“æ„ */
 BOOL sockaddr_A_2_IN(LPCTSTR lpszAddress, USHORT usPort, __out HP_SOCKADDR& addr);
-/* »ñÈ¡ Socket µÄ±¾µØ»òÔ¶³ÌµØÖ·ĞÅÏ¢ */
+/* è·å– Socket çš„æœ¬åœ°æˆ–è¿œç¨‹åœ°å€ä¿¡æ¯ */
 BOOL GetSocketAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort, BOOL bLocal = TRUE);
-/* »ñÈ¡ Socket µÄ±¾µØµØÖ·ĞÅÏ¢ */
+/* è·å– Socket çš„æœ¬åœ°åœ°å€ä¿¡æ¯ */
 BOOL GetSocketLocalAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
-/* »ñÈ¡ Socket µÄÔ¶³ÌµØÖ·ĞÅÏ¢ */
+/* è·å– Socket çš„è¿œç¨‹åœ°å€ä¿¡æ¯ */
 BOOL GetSocketRemoteAddress(SOCKET socket, __out LPTSTR lpszAddress, __inout int& iAddressLen, __out USHORT& usPort);
 
-/* 64 Î»ÍøÂç×Ö½ÚĞò×ªÖ÷»ú×Ö½ÚĞò */
+/* 64 ä½ç½‘ç»œå­—èŠ‚åºè½¬ä¸»æœºå­—èŠ‚åº */
 ULONGLONG NToH64(ULONGLONG value);
-/* 64 Î»Ö÷»ú×Ö½ÚĞò×ªÍøÂç×Ö½ÚĞò */
+/* 64 ä½ä¸»æœºå­—èŠ‚åºè½¬ç½‘ç»œå­—èŠ‚åº */
 ULONGLONG HToN64(ULONGLONG value);
 
-/* ¶ÌÕûĞÍ¸ßµÍ×Ö½Ú½»»» */
+/* çŸ­æ•´å‹é«˜ä½å­—èŠ‚äº¤æ¢ */
 #define ENDIAN_SWAP_16(A)	((USHORT)((((USHORT)(A) & 0xff00) >> 8) | (((USHORT)(A) & 0x00ff) << 8)))
-/* ³¤ÕûĞÍ¸ßµÍ×Ö½Ú½»»» */
+/* é•¿æ•´å‹é«˜ä½å­—èŠ‚äº¤æ¢ */
 #define ENDIAN_SWAP_32(A)	((((DWORD)(A) & 0xff000000) >> 24) | \
 							(((DWORD)(A) & 0x00ff0000) >>  8)  | \
 							(((DWORD)(A) & 0x0000ff00) <<  8)  | \
 							(((DWORD)(A) & 0x000000ff) << 24)	 )
 
-/* ¼ì²éÊÇ·ñĞ¡¶Ë×Ö½ÚĞò */
+/* æ£€æŸ¥æ˜¯å¦å°ç«¯å­—èŠ‚åº */
 BOOL IsLittleEndian();
-/* ¶ÌÕûĞÍÖ÷»ú×Ö½ÚĞò×ªĞ¡¶Ë×Ö½ÚĞò */
+/* çŸ­æ•´å‹ä¸»æœºå­—èŠ‚åºè½¬å°ç«¯å­—èŠ‚åº */
 USHORT HToLE16(USHORT value);
-/* ¶ÌÕûĞÍÖ÷»ú×Ö½ÚĞò×ª´ó¶Ë×Ö½ÚĞò */
+/* çŸ­æ•´å‹ä¸»æœºå­—èŠ‚åºè½¬å¤§ç«¯å­—èŠ‚åº */
 USHORT HToBE16(USHORT value);
-/* ³¤ÕûĞÍÖ÷»ú×Ö½ÚĞò×ªĞ¡¶Ë×Ö½ÚĞò */
+/* é•¿æ•´å‹ä¸»æœºå­—èŠ‚åºè½¬å°ç«¯å­—èŠ‚åº */
 DWORD HToLE32(DWORD value);
-/* ³¤ÕûĞÍÖ÷»ú×Ö½ÚĞò×ª´ó¶Ë×Ö½ÚĞò */
+/* é•¿æ•´å‹ä¸»æœºå­—èŠ‚åºè½¬å¤§ç«¯å­—èŠ‚åº */
 DWORD HToBE32(DWORD value);
 
-/* »ñÈ¡ Socket µÄÄ³¸öÀ©Õ¹º¯ÊıµÄÖ¸Õë */
+/* è·å– Socket çš„æŸä¸ªæ‰©å±•å‡½æ•°çš„æŒ‡é’ˆ */
 PVOID GetExtensionFuncPtr					(SOCKET sock, GUID guid);
-/* »ñÈ¡ AcceptEx À©Õ¹º¯ÊıÖ¸Õë */
+/* è·å– AcceptEx æ‰©å±•å‡½æ•°æŒ‡é’ˆ */
 LPFN_ACCEPTEX Get_AcceptEx_FuncPtr			(SOCKET sock);
-/* »ñÈ¡ GetAcceptExSockaddrs À©Õ¹º¯ÊıÖ¸Õë */
+/* è·å– GetAcceptExSockaddrs æ‰©å±•å‡½æ•°æŒ‡é’ˆ */
 LPFN_GETACCEPTEXSOCKADDRS Get_GetAcceptExSockaddrs_FuncPtr(SOCKET sock);
-/* »ñÈ¡ ConnectEx À©Õ¹º¯ÊıÖ¸Õë */
+/* è·å– ConnectEx æ‰©å±•å‡½æ•°æŒ‡é’ˆ */
 LPFN_CONNECTEX Get_ConnectEx_FuncPtr		(SOCKET sock);
-/* »ñÈ¡ TransmitFile À©Õ¹º¯ÊıÖ¸Õë */
+/* è·å– TransmitFile æ‰©å±•å‡½æ•°æŒ‡é’ˆ */
 LPFN_TRANSMITFILE Get_TransmitFile_FuncPtr	(SOCKET sock);
-/* »ñÈ¡ DisconnectEx À©Õ¹º¯ÊıÖ¸Õë */
+/* è·å– DisconnectEx æ‰©å±•å‡½æ•°æŒ‡é’ˆ */
 LPFN_DISCONNECTEX Get_DisconnectEx_FuncPtr	(SOCKET sock);
 
 HRESULT ReadSmallFile(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, DWORD dwMaxFileSize = MAX_SMALL_FILE_SIZE);
 HRESULT MakeSmallFilePackage(LPCTSTR lpszFileName, CAtlFile& file, CAtlFileMapping<>& fmap, WSABUF szBuf[3], const LPWSABUF pHead = nullptr, const LPWSABUF pTail = nullptr);
 
 /************************************************************************
-Ãû³Æ£ºIOCP Ö¸ÁîÍ¶µİ°ïÖú·½·¨
-ÃèÊö£º¼ò»¯ IOCP Ö¸ÁîÍ¶µİ
+åç§°ï¼šIOCP æŒ‡ä»¤æŠ•é€’å¸®åŠ©æ–¹æ³•
+æè¿°ï¼šç®€åŒ– IOCP æŒ‡ä»¤æŠ•é€’
 ************************************************************************/
 
-/* IOCP ÃüÁî */
+/* IOCP å‘½ä»¤ */
 enum EnIocpCommand
 {
-	IOCP_CMD_EXIT		= 0x00000000,	// ÍË³ö³ÌĞò
-	IOCP_CMD_ACCEPT		= 0xFFFFFFF1,	// ½ÓÊÜÁ¬½Ó
-	IOCP_CMD_DISCONNECT	= 0xFFFFFFF2,	// ¶Ï¿ªÁ¬½Ó
-	IOCP_CMD_SEND		= 0xFFFFFFF3,	// ·¢ËÍÊı¾İ
-	IOCP_CMD_UNPAUSE	= 0xFFFFFFF4,	// È¡ÏûÔİÍ£
-	IOCP_CMD_TIMEOUT	= 0xFFFFFFF5	// ±£»î³¬Ê±
+	IOCP_CMD_EXIT		= 0x00000000,	// é€€å‡ºç¨‹åº
+	IOCP_CMD_ACCEPT		= 0xFFFFFFF1,	// æ¥å—è¿æ¥
+	IOCP_CMD_DISCONNECT	= 0xFFFFFFF2,	// æ–­å¼€è¿æ¥
+	IOCP_CMD_SEND		= 0xFFFFFFF3,	// å‘é€æ•°æ®
+	IOCP_CMD_UNPAUSE	= 0xFFFFFFF4,	// å–æ¶ˆæš‚åœ
+	IOCP_CMD_TIMEOUT	= 0xFFFFFFF5	// ä¿æ´»è¶…æ—¶
 };
 
-/* IOCP ÃüÁî´¦Àí¶¯×÷ */
+/* IOCP å‘½ä»¤å¤„ç†åŠ¨ä½œ */
 enum EnIocpAction
 {
-	IOCP_ACT_GOON		= 0,	// ¼ÌĞøÖ´ĞĞ
-	IOCP_ACT_CONTINUE	= 1,	// ÖØĞÂÖ´ĞĞ
-	IOCP_ACT_BREAK		= 2		// ÖĞ¶ÏÖ´ĞĞ
+	IOCP_ACT_GOON		= 0,	// ç»§ç»­æ‰§è¡Œ
+	IOCP_ACT_CONTINUE	= 1,	// é‡æ–°æ‰§è¡Œ
+	IOCP_ACT_BREAK		= 2		// ä¸­æ–­æ‰§è¡Œ
 };
 
 BOOL PostIocpCommand(HANDLE hIOCP, EnIocpCommand enCmd, ULONG_PTR ulParam);
@@ -908,8 +916,8 @@ BOOL PostIocpTimeout(HANDLE hIOCP, CONNID dwConnID);
 BOOL PostIocpClose(HANDLE hIOCP, CONNID dwConnID, int iErrorCode);
 
 /************************************************************************
-Ãû³Æ£ºsetsockopt() °ïÖú·½·¨
-ÃèÊö£º¼ò»¯³£ÓÃµÄ setsockopt() µ÷ÓÃ
+åç§°ï¼šsetsockopt() å¸®åŠ©æ–¹æ³•
+æè¿°ï¼šç®€åŒ–å¸¸ç”¨çš„ setsockopt() è°ƒç”¨
 ************************************************************************/
 
 int SSO_SetSocketOption		(SOCKET sock, int level, int name, LPVOID val, int len);
@@ -934,63 +942,63 @@ int SSO_ExclusiveAddressUse	(SOCKET sock, BOOL bExclusive = TRUE);
 int SSO_UDP_ConnReset		(SOCKET sock, BOOL bNewBehavior = TRUE);
 
 /************************************************************************
-Ãû³Æ£ºSocket ²Ù×÷·½·¨
-ÃèÊö£ºSocket ²Ù×÷°ü×°·½·¨
+åç§°ï¼šSocket æ“ä½œæ–¹æ³•
+æè¿°ï¼šSocket æ“ä½œåŒ…è£…æ–¹æ³•
 ************************************************************************/
 
-/* ¼ì²â IOCP ²Ù×÷·µ»ØÖµ£ºNO_ERROR Ôò·µ»Ø TRUE */
+/* æ£€æµ‹ IOCP æ“ä½œè¿”å›å€¼ï¼šNO_ERROR åˆ™è¿”å› TRUE */
 #define IOCP_NO_ERROR(rs)		((rs) == NO_ERROR)
-/* ¼ì²â IOCP ²Ù×÷·µ»ØÖµ£ºWSA_IO_PENDING Ôò·µ»Ø TRUE */
+/* æ£€æµ‹ IOCP æ“ä½œè¿”å›å€¼ï¼šWSA_IO_PENDING åˆ™è¿”å› TRUE */
 #define IOCP_PENDING(rs)		((rs) == WSA_IO_PENDING)
-/* ¼ì²â IOCP ²Ù×÷·µ»ØÖµ£ºNO_ERROR »ò WSA_IO_PENDING Ôò·µ»Ø TRUE */
+/* æ£€æµ‹ IOCP æ“ä½œè¿”å›å€¼ï¼šNO_ERROR æˆ– WSA_IO_PENDING åˆ™è¿”å› TRUE */
 #define IOCP_SUCCESS(rs)		(IOCP_NO_ERROR(rs) || IOCP_PENDING(rs))
 
-/* ¼ì²éÊÇ·ñ UDP RESET ´íÎó */
+/* æ£€æŸ¥æ˜¯å¦ UDP RESET é”™è¯¯ */
 #define IS_UDP_RESET_ERROR(rs)	((rs) == WSAENETRESET || (rs) == WSAECONNRESET)
 
-/* Éú³É Connection ID */
+/* ç”Ÿæˆ Connection ID */
 CONNID GenerateConnectionID	();
-/* ¼ì²â UDP Á¬½Ó¹Ø±ÕÍ¨Öª */
+/* æ£€æµ‹ UDP è¿æ¥å…³é—­é€šçŸ¥ */
 int IsUdpCloseNotify		(const BYTE* pData, int iLength);
-/* ·¢ËÍ UDP Á¬½Ó¹Ø±ÕÍ¨Öª */
+/* å‘é€ UDP è¿æ¥å…³é—­é€šçŸ¥ */
 int SendUdpCloseNotify		(SOCKET sock);
-/* ·¢ËÍ UDP Á¬½Ó¹Ø±ÕÍ¨Öª */
+/* å‘é€ UDP è¿æ¥å…³é—­é€šçŸ¥ */
 int SendUdpCloseNotify		(SOCKET sock, const HP_SOCKADDR& remoteAddr);
-/* ¹Ø±Õ Socket */
+/* å…³é—­ Socket */
 int ManualCloseSocket		(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TRUE);
-/* Í¶µİ AccceptEx()£¬²¢°Ñ WSA_IO_PENDING ×ª»»Îª NO_ERROR */
+/* æŠ•é€’ AccceptEx()ï¼Œå¹¶æŠŠ WSA_IO_PENDING è½¬æ¢ä¸º NO_ERROR */
 int PostAccept				(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj, ADDRESS_FAMILY usFamily);
-/* Í¶µİ AccceptEx() */
+/* æŠ•é€’ AccceptEx() */
 int PostAcceptNotCheck		(LPFN_ACCEPTEX pfnAcceptEx, SOCKET soListen, SOCKET soClient, TBufferObj* pBufferObj, ADDRESS_FAMILY usFamily);
-/* Í¶µİ ConnectEx()£¬²¢°Ñ WSA_IO_PENDING ×ª»»Îª NO_ERROR */
+/* æŠ•é€’ ConnectEx()ï¼Œå¹¶æŠŠ WSA_IO_PENDING è½¬æ¢ä¸º NO_ERROR */
 int PostConnect				(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, const HP_SOCKADDR& sockAddr, TBufferObj* pBufferObj);
-/* Í¶µİ ConnectEx() */
+/* æŠ•é€’ ConnectEx() */
 int PostConnectNotCheck		(LPFN_CONNECTEX pfnConnectEx, SOCKET soClient, const HP_SOCKADDR& sockAddr, TBufferObj* pBufferObj);
-/* Í¶µİ WSASend()£¬²¢°Ñ WSA_IO_PENDING ×ª»»Îª NO_ERROR */
+/* æŠ•é€’ WSASend()ï¼Œå¹¶æŠŠ WSA_IO_PENDING è½¬æ¢ä¸º NO_ERROR */
 int PostSend				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* Í¶µİ WSASend() */
+/* æŠ•é€’ WSASend() */
 int PostSendNotCheck		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* Í¶µİ WSARecv()£¬²¢°Ñ WSA_IO_PENDING ×ª»»Îª NO_ERROR */
+/* æŠ•é€’ WSARecv()ï¼Œå¹¶æŠŠ WSA_IO_PENDING è½¬æ¢ä¸º NO_ERROR */
 int PostReceive				(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* Í¶µİ WSARecv() */
+/* æŠ•é€’ WSARecv() */
 int PostReceiveNotCheck		(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
-/* Í¶µİ WSASendTo()£¬²¢°Ñ WSA_IO_PENDING ×ª»»Îª NO_ERROR */
+/* æŠ•é€’ WSASendTo()ï¼Œå¹¶æŠŠ WSA_IO_PENDING è½¬æ¢ä¸º NO_ERROR */
 int PostSendTo				(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* Í¶µİ WSASendTo() */
+/* æŠ•é€’ WSASendTo() */
 int PostSendToNotCheck		(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* Í¶µİ WSARecvFrom()£¬²¢°Ñ WSA_IO_PENDING ×ª»»Îª NO_ERROR */
+/* æŠ•é€’ WSARecvFrom()ï¼Œå¹¶æŠŠ WSA_IO_PENDING è½¬æ¢ä¸º NO_ERROR */
 int PostReceiveFrom			(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* Í¶µİ WSARecvFrom() */
+/* æŠ•é€’ WSARecvFrom() */
 int PostReceiveFromNotCheck	(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* Ö´ĞĞ·Ç×èÈû WSARecv()£¬²¢°Ñ WSAEWOULDBLOCK ×ª»»Îª NO_ERROR */
+/* æ‰§è¡Œéé˜»å¡ WSARecv()ï¼Œå¹¶æŠŠ WSAEWOULDBLOCK è½¬æ¢ä¸º NO_ERROR */
 int NoBlockReceive(TBufferObj* pBufferObj);
-/* Ö´ĞĞ·Ç×èÈû WSARecv() */
+/* æ‰§è¡Œéé˜»å¡ WSARecv() */
 int NoBlockReceiveNotCheck(TBufferObj* pBufferObj);
-/* Ö´ĞĞ·Ç×èÈû WSARecvFrom()£¬²¢°Ñ WSAEWOULDBLOCK ×ª»»Îª NO_ERROR */
+/* æ‰§è¡Œéé˜»å¡ WSARecvFrom()ï¼Œå¹¶æŠŠ WSAEWOULDBLOCK è½¬æ¢ä¸º NO_ERROR */
 int NoBlockReceiveFrom(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* Ö´ĞĞ·Ç×èÈû WSARecvFrom() */
+/* æ‰§è¡Œéé˜»å¡ WSARecvFrom() */
 int NoBlockReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj);
-/* ÉèÖÃ×é²¥Ñ¡Ïî */
+/* è®¾ç½®ç»„æ’­é€‰é¡¹ */
 BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const HP_SOCKADDR& castAddr, int iMCTtl, BOOL bMCLoop);
 
 // CP_XXX -> UNICODE
@@ -1010,42 +1018,55 @@ BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength);
 // UTF8 -> GBK
 BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
 
+// è®¡ç®— Base64 ç¼–ç åé•¿åº¦
+DWORD GuessBase64EncodeBound(DWORD dwSrcLen);
+// è®¡ç®— Base64 è§£ç åé•¿åº¦
+DWORD GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 ç¼–ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Base64 è§£ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+// è®¡ç®— URL ç¼–ç åé•¿åº¦
+DWORD GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// è®¡ç®— URL è§£ç åé•¿åº¦
+DWORD GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL ç¼–ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// URL è§£ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
 #ifdef _ZLIB_SUPPORT
 
-// ÆÕÍ¨Ñ¹Ëõ£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// æ™®é€šå‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// ¸ß¼¶Ñ¹Ëõ£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// é«˜çº§å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 int CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iWindowBits = DEF_WBITS, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
-// ÆÕÍ¨½âÑ¹£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// æ™®é€šè§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 int Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// ¸ß¼¶½âÑ¹£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// é«˜çº§è§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 int UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits = DEF_WBITS);
-// ÍÆ²âÑ¹Ëõ½á¹û³¤¶È
+// æ¨æµ‹å‹ç¼©ç»“æœé•¿åº¦
 DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip = FALSE);
 
-// Gzip Ñ¹Ëõ£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// Gzip å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 int GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Gzip ½âÑ¹£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// Gzip è§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 int GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// ÍÆ²â Gzip ½âÑ¹½á¹û³¤¶È£¨Èç¹û·µ»Ø 0 »ò²»ºÏÀíÖµÔòËµÃ÷ÊäÈëÄÚÈİ²¢·ÇÓĞĞ§µÄ Gzip ¸ñÊ½£©
+// æ¨æµ‹ Gzip è§£å‹ç»“æœé•¿åº¦ï¼ˆå¦‚æœè¿”å› 0 æˆ–ä¸åˆç†å€¼åˆ™è¯´æ˜è¾“å…¥å†…å®¹å¹¶éæœ‰æ•ˆçš„ Gzip æ ¼å¼ï¼‰
 DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
 
 #endif
 
-// ¼ÆËã Base64 ±àÂëºó³¤¶È
-DWORD GuessBase64EncodeBound(DWORD dwSrcLen);
-// ¼ÆËã Base64 ½âÂëºó³¤¶È
-DWORD GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// Base64 ±àÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-int Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Base64 ½âÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-int Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+#ifdef _BROTLI_SUPPORT
 
-// ¼ÆËã URL ±àÂëºó³¤¶È
-DWORD GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// ¼ÆËã URL ½âÂëºó³¤¶È
-DWORD GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// URL ±àÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// URL ½âÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli é«˜çº§å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, BrotliEncoderMode enMode = BROTLI_DEFAULT_MODE);
+// Brotli è§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+int BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli æ¨æµ‹å‹ç¼©ç»“æœé•¿åº¦
+DWORD BrotliGuessCompressBound(DWORD dwSrcLen);
+
+#endif

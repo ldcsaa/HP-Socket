@@ -13,13 +13,13 @@
     <RemoteDebuggerCommandArguments>-b -</RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <RemoteTarget>970599627;192.168.56.11 (username=bruce, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>78784327;192.168.56.101 (username=, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
     <RemoteDebuggerCommandArguments>-a 192.168.56.12 -i 0 -c 300 -l 1000</RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <RemoteTarget>970599627;192.168.56.11 (username=bruce, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>78784327;192.168.56.101 (username=, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
     <RemoteDebuggerCommandArguments>-a 192.168.56.12 -i 0 -c 300 -l 1000</RemoteDebuggerCommandArguments>

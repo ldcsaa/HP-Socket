@@ -12,6 +12,7 @@ UDP_ENABLED=1
 HTTP_ENABLED=1
 SSL_ENABLED=1
 ZLIB_ENABLED=1
+BROTLI_ENABLED=
 ICONV_ENABLED=1
 CC=g++
 
@@ -22,11 +23,13 @@ LIB_NAME_JEMALLOC=jemalloc_pic
 LIB_NAME_SSL_1=ssl
 LIB_NAME_SSL_2=crypto
 LIB_NAME_ZLIB=z
+LIB_NAME_BROTLI=brotli
 
 LIB_FILE_JEMALLOC=lib$LIB_NAME_JEMALLOC.a
 LIB_FILE_SSL_1=lib$LIB_NAME_SSL_1.a
 LIB_FILE_SSL_2=lib$LIB_NAME_SSL_2.a
 LIB_FILE_ZLIB=lib$LIB_NAME_ZLIB.a
+LIB_FILE_BROTLI=lib$LIB_NAME_BROTLI.a
 
 CFG_RELEASE=Release
 CFG_DEBUG=Debug
@@ -47,6 +50,8 @@ print_usage()
 	printf "  %-19s : %s\n" "-t|--http-enabled"		"enable HTTP components (default: true)"
 	printf "  %-19s : %s\n" "-s|--ssl-enabled"		"enable SSL components (default: true)"
 	printf "  %-19s : %s\n" "-z|--zlib-enabled"		"enable ZLIB related functions (default: true)"
+	printf "  %-19s : %s\n" "-b|--brotli-enabled"	"enable BROTLI related functions"
+	printf "  %-19s : %s\n" ""						"(x86/x64 default: true, ARM default: false)"
 	printf "  %-19s : %s\n" "-i|--iconv-enabled"	"enable ICONV related functions (default: true)"
 	printf "  %-19s : %s\n" "-c|--compiler"			"compiler (default: g++)"
 	printf "  %-19s : %s\n" "-p|--platform"			"platform: x86 / x64 / ARM"
@@ -74,6 +79,7 @@ print_config()
 		printf "%17s : %s\n" "--http-enabled"	"$(int_to_bool "$HTTP_ENABLED")"
 		printf "%17s : %s\n" "--ssl-enabled"	"$(int_to_bool "$SSL_ENABLED")"
 		printf "%17s : %s\n" "--zlib-enabled"	"$(int_to_bool "$ZLIB_ENABLED")"
+		printf "%17s : %s\n" "--brotli-enabled"	"$(int_to_bool "$BROTLI_ENABLED")"
 		printf "%17s : %s\n" "--iconv-enabled"	"$(int_to_bool "$ICONV_ENABLED")"
 	else
 		printf "%17s : %s\n" "$ACTION_NAME path" "$PACKAGE_PATH/$LIB_DIR"
@@ -86,7 +92,7 @@ print_config()
 
 parse_args()
 {
-	ARGS=$(getopt -o d:j:u:t:s:z:i:c:p:ervh -l with-debug-lib:,use-jemalloc:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,iconv-enabled:,compiler:platform:,clean,remove,version,help -n "$SH_NAME" -- "$@")
+	ARGS=$(getopt -o d:j:u:t:s:z:b:i:c:p:ervh -l with-debug-lib:,use-jemalloc:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,brotli-enabled:,iconv-enabled:,compiler:,platform:,clean,remove,version,help -n "$SH_NAME" -- "$@")
 	RS=$?
 	
 	if [ $RS -ne 0 ]; then
@@ -97,6 +103,7 @@ parse_args()
 	eval set -- "${ARGS}"
 	
 	local _SET_JEMALLOC="false"
+	local _SET_BROTLI="false"
 	
 	while true; do
 		case "$1" in
@@ -160,6 +167,18 @@ parse_args()
 				ZLIB_ENABLED=$(bool_to_int "$2")
 				
 				if [[ -z "$ZLIB_ENABLED" ]]; then
+					printf "Invalid arg value: %s %s\n" "$1" "$2"
+					print_usage
+					exit 2
+				fi
+
+				shift 2
+				;;
+			-b|--brotli-enabled)
+				BROTLI_ENABLED=$(bool_to_int "$2")
+				_SET_BROTLI="true"
+				
+				if [[ -z "$BROTLI_ENABLED" ]]; then
 					printf "Invalid arg value: %s %s\n" "$1" "$2"
 					print_usage
 					exit 2
@@ -242,6 +261,10 @@ parse_args()
 	
 	if [ $_SET_JEMALLOC != "true" ]; then
 		USE_JEMALLOC=$([[ $PLATFORM == "ARM" ]] && echo 0 || echo 1)
+	fi
+	
+	if [ $_SET_BROTLI != "true" ]; then
+		BROTLI_ENABLED=$([[ $PLATFORM == "ARM" ]] && echo 0 || echo 1)
 	fi
 }
 
@@ -330,10 +353,19 @@ parse_compile_args()
 		_CL_OPTS="-D_ZLIB_DISABLED $_CL_OPTS"
 	fi
 	
+	if [ $BROTLI_ENABLED -eq 1 ]; then
+		_LN_OPTS="-l$LIB_NAME_BROTLI $_LN_OPTS"
+		if [ -f $DEPT_LIB_DIR/$LIB_FILE_BROTLI ]; then
+			_AR_FLAG=$(($_AR_FLAG+4))
+		fi
+	else
+		_CL_OPTS="-D_BROTLI_DISABLED $_CL_OPTS"
+	fi
+	
 	if [[ $USE_JEMALLOC -eq 1 && $_CFG_NAME == $CFG_RELEASE ]]; then
 		_LN_OPTS="-l$LIB_NAME_JEMALLOC $_LN_OPTS"
 		if [ -f $DEPT_LIB_DIR/$LIB_FILE_JEMALLOC ]; then
-			_AR_FLAG=$(($_AR_FLAG+4))
+			_AR_FLAG=$(($_AR_FLAG+8))
 		fi
 	fi
 	
@@ -465,6 +497,7 @@ update_hp_def()
 	do_update_hp_def $SSL_ENABLED "_SSL_DISABLED"
 	do_update_hp_def $HTTP_ENABLED "_HTTP_DISABLED"
 	do_update_hp_def $ZLIB_ENABLED "_ZLIB_DISABLED"
+	do_update_hp_def $BROTLI_ENABLED "_BROTLI_DISABLED"
 	do_update_hp_def $ICONV_ENABLED "_ICONV_DISABLED"
 }
 

@@ -25,10 +25,6 @@
 
 #ifdef _HTTP_SUPPORT
 
-#if !defined(z_const)
-	#define z_const
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CStringA& GetHttpVersionStr(EnHttpVersion enVersion, CStringA& strResult)

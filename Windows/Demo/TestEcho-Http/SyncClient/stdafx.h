@@ -11,6 +11,8 @@
 #define _USE_MFC
 #define _DETECT_MEMORY_LEAK
 
+#define _UDP_DISABLED			// ½ûÓÃ UDP
+
 #define _NEED_SSL
 #define _NEED_HTTP
 

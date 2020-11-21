@@ -8,7 +8,9 @@ set OBJ_OUT=.\lib\android-ndk\obj
 
 cd %~dp0
 
-rd /s /q %LIBS_OUT%
+if exist %LIBS_OUT% (
+	rd /s /q %LIBS_OUT%
+)
 
 call ndk-build NDK_PROJECT_PATH=%PROJECT_PATH% NDK_LIBS_OUT=%LIBS_OUT% NDK_OUT=%OBJ_OUT% %*
 

@@ -1,8 +1,8 @@
-/*
+ï»¿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
+ * Website	: https://github.com/ldcsaa
  * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
@@ -25,38 +25,38 @@
 Module:  HPSocket
 
 Usage:
-		·½·¨Ò»£º
+		æ–¹æ³•ä¸€ï¼š
 		--------------------------------------------------------------------------------------
-		0. Ó¦ÓÃ³ÌĞò°üº¬ HPTypeDef.h / SocketInterface.h / HPSocket.h Í·ÎÄ¼ş
-		1. µ÷ÓÃ HP_Create_Xxx() º¯Êı´´½¨ HPSocket ¶ÔÏó
-		2. Ê¹ÓÃÍê±Ïºóµ÷ÓÃ HP_Destroy_Xxx() º¯ÊıÏú»Ù HPSocket ¶ÔÏó
+		0. åº”ç”¨ç¨‹åºåŒ…å« HPTypeDef.h / SocketInterface.h / HPSocket.h å¤´æ–‡ä»¶
+		1. è°ƒç”¨ HP_Create_Xxx() å‡½æ•°åˆ›å»º HPSocket å¯¹è±¡
+		2. ä½¿ç”¨å®Œæ¯•åè°ƒç”¨ HP_Destroy_Xxx() å‡½æ•°é”€æ¯ HPSocket å¯¹è±¡
 
-		·½·¨¶ş£º
+		æ–¹æ³•äºŒï¼š
 		--------------------------------------------------------------------------------------
-		0. Ó¦ÓÃ³ÌĞò°üº¬ SocketInterface.h ºÍ HPSocket.h Í·ÎÄ¼ş
-		1. ´´½¨ CXxxPtr ÖÇÄÜÖ¸Õë£¬Í¨¹ıÖÇÄÜÖ¸ÕëÊ¹ÓÃ HPSocket ¶ÔÏó
+		0. åº”ç”¨ç¨‹åºåŒ…å« SocketInterface.h å’Œ HPSocket.h å¤´æ–‡ä»¶
+		1. åˆ›å»º CXxxPtr æ™ºèƒ½æŒ‡é’ˆï¼Œé€šè¿‡æ™ºèƒ½æŒ‡é’ˆä½¿ç”¨ HPSocket å¯¹è±¡
 
 Release:
-		<-- ¶¯Ì¬Á´½Ó¿â -->
-		1. x86/HPSocket.dll				- (32Î»/MBCS/Release)
-		2. x86/HPSocket_D.dll			- (32Î»/MBCS/DeBug)
-		3. x86/HPSocket_U.dll			- (32Î»/UNICODE/Release)
-		4. x86/HPSocket_UD.dll			- (32Î»/UNICODE/DeBug)
-		5. x64/HPSocket.dll				- (64Î»/MBCS/Release)
-		6. x64/HPSocket_D.dll			- (64Î»/MBCS/DeBug)
-		7. x64/HPSocket_U.dll			- (64Î»/UNICODE/Release)
-		8. x64/HPSocket_UD.dll			- (64Î»/UNICODE/DeBug)
+		<-- åŠ¨æ€é“¾æ¥åº“ -->
+		1. x86/HPSocket.dll				- (32ä½/MBCS/Release)
+		2. x86/HPSocket_D.dll			- (32ä½/MBCS/DeBug)
+		3. x86/HPSocket_U.dll			- (32ä½/UNICODE/Release)
+		4. x86/HPSocket_UD.dll			- (32ä½/UNICODE/DeBug)
+		5. x64/HPSocket.dll				- (64ä½/MBCS/Release)
+		6. x64/HPSocket_D.dll			- (64ä½/MBCS/DeBug)
+		7. x64/HPSocket_U.dll			- (64ä½/UNICODE/Release)
+		8. x64/HPSocket_UD.dll			- (64ä½/UNICODE/DeBug)
 
-		<-- ¾²Ì¬Á´½Ó¿â -->
-		!!×¢Òâ!!£ºÊ¹ÓÃ HPSocket ¾²Ì¬¿âÊ±£¬ĞèÒªÔÚ¹¤³ÌÊôĞÔÖĞ¶¨ÒåÔ¤´¦Àíºê -> HPSOCKET_STATIC_LIB
-		1. x86/static/HPSocket.lib		- (32Î»/MBCS/Release)
-		2. x86/static/HPSocket_D.lib	- (32Î»/MBCS/DeBug)
-		3. x86/static/HPSocket_U.lib	- (32Î»/UNICODE/Release)
-		4. x86/static/HPSocket_UD.lib	- (32Î»/UNICODE/DeBug)
-		5. x64/static/HPSocket.lib		- (64Î»/MBCS/Release)
-		6. x64/static/HPSocket_D.lib	- (64Î»/MBCS/DeBug)
-		7. x64/static/HPSocket_U.lib	- (64Î»/UNICODE/Release)
-		8. x64/static/HPSocket_UD.lib	- (64Î»/UNICODE/DeBug)
+		<-- é™æ€é“¾æ¥åº“ -->
+		!!æ³¨æ„!!ï¼šä½¿ç”¨ HPSocket é™æ€åº“æ—¶ï¼Œéœ€è¦åœ¨å·¥ç¨‹å±æ€§ä¸­å®šä¹‰é¢„å¤„ç†å® -> HPSOCKET_STATIC_LIB
+		1. x86/static/HPSocket.lib		- (32ä½/MBCS/Release)
+		2. x86/static/HPSocket_D.lib	- (32ä½/MBCS/DeBug)
+		3. x86/static/HPSocket_U.lib	- (32ä½/UNICODE/Release)
+		4. x86/static/HPSocket_UD.lib	- (32ä½/UNICODE/DeBug)
+		5. x64/static/HPSocket.lib		- (64ä½/MBCS/Release)
+		6. x64/static/HPSocket_D.lib	- (64ä½/MBCS/DeBug)
+		7. x64/static/HPSocket_U.lib	- (64ä½/UNICODE/Release)
+		8. x64/static/HPSocket_UD.lib	- (64ä½/UNICODE/DeBug)
 
 ******************************************************************************/
 
@@ -69,7 +69,7 @@ Release:
 /*****************************************************************************************************************************************************/
 
 /**************************************************/
-/************** HPSocket ¶ÔÏóÖÇÄÜÖ¸Õë **************/
+/************** HPSocket å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ **************/
 
 template<class T, class _Creator> class CHPBasePtr
 {
@@ -153,77 +153,77 @@ public:
 };
 
 /**************************************************/
-/**************** HPSocket µ¼³öº¯Êı ****************/
+/**************** HPSocket å¯¼å‡ºå‡½æ•° ****************/
 
-// ´´½¨ ITcpServer ¶ÔÏó
+// åˆ›å»º ITcpServer å¯¹è±¡
 HPSOCKET_API ITcpServer* HP_Create_TcpServer(ITcpServerListener* pListener);
-// ´´½¨ ITcpAgent ¶ÔÏó
+// åˆ›å»º ITcpAgent å¯¹è±¡
 HPSOCKET_API ITcpAgent* HP_Create_TcpAgent(ITcpAgentListener* pListener);
-// ´´½¨ ITcpClient ¶ÔÏó
+// åˆ›å»º ITcpClient å¯¹è±¡
 HPSOCKET_API ITcpClient* HP_Create_TcpClient(ITcpClientListener* pListener);
-// ´´½¨ ITcpPullServer ¶ÔÏó
+// åˆ›å»º ITcpPullServer å¯¹è±¡
 HPSOCKET_API ITcpPullServer* HP_Create_TcpPullServer(ITcpServerListener* pListener);
-// ´´½¨ ITcpPullAgent ¶ÔÏó
+// åˆ›å»º ITcpPullAgent å¯¹è±¡
 HPSOCKET_API ITcpPullAgent* HP_Create_TcpPullAgent(ITcpAgentListener* pListener);
-// ´´½¨ ITcpPullClient ¶ÔÏó
+// åˆ›å»º ITcpPullClient å¯¹è±¡
 HPSOCKET_API ITcpPullClient* HP_Create_TcpPullClient(ITcpClientListener* pListener);
-// ´´½¨ ITcpPackServer ¶ÔÏó
+// åˆ›å»º ITcpPackServer å¯¹è±¡
 HPSOCKET_API ITcpPackServer* HP_Create_TcpPackServer(ITcpServerListener* pListener);
-// ´´½¨ ITcpPackAgent ¶ÔÏó
+// åˆ›å»º ITcpPackAgent å¯¹è±¡
 HPSOCKET_API ITcpPackAgent* HP_Create_TcpPackAgent(ITcpAgentListener* pListener);
-// ´´½¨ ITcpPackClient ¶ÔÏó
+// åˆ›å»º ITcpPackClient å¯¹è±¡
 HPSOCKET_API ITcpPackClient* HP_Create_TcpPackClient(ITcpClientListener* pListener);
 
-// Ïú»Ù ITcpServer ¶ÔÏó
+// é”€æ¯ ITcpServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpServer(ITcpServer* pServer);
-// Ïú»Ù ITcpAgent ¶ÔÏó
+// é”€æ¯ ITcpAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpAgent(ITcpAgent* pAgent);
-// Ïú»Ù ITcpClient ¶ÔÏó
+// é”€æ¯ ITcpClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpClient(ITcpClient* pClient);
-// Ïú»Ù ITcpPullServer ¶ÔÏó
+// é”€æ¯ ITcpPullServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpPullServer(ITcpPullServer* pServer);
-// Ïú»Ù ITcpPullAgent ¶ÔÏó
+// é”€æ¯ ITcpPullAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpPullAgent(ITcpPullAgent* pAgent);
-// Ïú»Ù ITcpPullClient ¶ÔÏó
+// é”€æ¯ ITcpPullClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpPullClient(ITcpPullClient* pClient);
-// Ïú»Ù ITcpPackServer ¶ÔÏó
+// é”€æ¯ ITcpPackServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpPackServer(ITcpPackServer* pServer);
-// Ïú»Ù ITcpPackAgent ¶ÔÏó
+// é”€æ¯ ITcpPackAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpPackAgent(ITcpPackAgent* pAgent);
-// Ïú»Ù ITcpPackClient ¶ÔÏó
+// é”€æ¯ ITcpPackClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_TcpPackClient(ITcpPackClient* pClient);
 
 #ifdef _UDP_SUPPORT
 
-// ´´½¨ IUdpServer ¶ÔÏó
+// åˆ›å»º IUdpServer å¯¹è±¡
 HPSOCKET_API IUdpServer* HP_Create_UdpServer(IUdpServerListener* pListener);
-// ´´½¨ IUdpClient ¶ÔÏó
+// åˆ›å»º IUdpClient å¯¹è±¡
 HPSOCKET_API IUdpClient* HP_Create_UdpClient(IUdpClientListener* pListener);
-// ´´½¨ IUdpCast ¶ÔÏó
+// åˆ›å»º IUdpCast å¯¹è±¡
 HPSOCKET_API IUdpCast* HP_Create_UdpCast(IUdpCastListener* pListener);
-// ´´½¨ IUdpNode ¶ÔÏó
+// åˆ›å»º IUdpNode å¯¹è±¡
 HPSOCKET_API IUdpNode* HP_Create_UdpNode(IUdpNodeListener* pListener);
-// ´´½¨ IUdpArqServer ¶ÔÏó
+// åˆ›å»º IUdpArqServer å¯¹è±¡
 HPSOCKET_API IUdpArqServer* HP_Create_UdpArqServer(IUdpServerListener* pListener);
-// ´´½¨ IUdpArqClient ¶ÔÏó
+// åˆ›å»º IUdpArqClient å¯¹è±¡
 HPSOCKET_API IUdpArqClient* HP_Create_UdpArqClient(IUdpClientListener* pListener);
 
-// Ïú»Ù IUdpServer ¶ÔÏó
+// é”€æ¯ IUdpServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_UdpServer(IUdpServer* pServer);
-// Ïú»Ù IUdpClient ¶ÔÏó
+// é”€æ¯ IUdpClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_UdpClient(IUdpClient* pClient);
-// Ïú»Ù IUdpCast ¶ÔÏó
+// é”€æ¯ IUdpCast å¯¹è±¡
 HPSOCKET_API void HP_Destroy_UdpCast(IUdpCast* pCast);
-// Ïú»Ù IUdpNode ¶ÔÏó
+// é”€æ¯ IUdpNode å¯¹è±¡
 HPSOCKET_API void HP_Destroy_UdpNode(IUdpNode* pNode);
-// Ïú»Ù IUdpArqServer ¶ÔÏó
+// é”€æ¯ IUdpArqServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_UdpArqServer(IUdpArqServer* pServer);
-// Ïú»Ù IUdpArqClient ¶ÔÏó
+// é”€æ¯ IUdpArqClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_UdpArqClient(IUdpArqClient* pClient);
 
 #endif
 
-// ITcpServer ¶ÔÏó´´½¨Æ÷
+// ITcpServer å¯¹è±¡åˆ›å»ºå™¨
 struct TcpServer_Creator
 {
 	static ITcpServer* Create(ITcpServerListener* pListener)
@@ -237,7 +237,7 @@ struct TcpServer_Creator
 	}
 };
 
-// ITcpAgent ¶ÔÏó´´½¨Æ÷
+// ITcpAgent å¯¹è±¡åˆ›å»ºå™¨
 struct TcpAgent_Creator
 {
 	static ITcpAgent* Create(ITcpAgentListener* pListener)
@@ -251,7 +251,7 @@ struct TcpAgent_Creator
 	}
 };
 
-// ITcpClient ¶ÔÏó´´½¨Æ÷
+// ITcpClient å¯¹è±¡åˆ›å»ºå™¨
 struct TcpClient_Creator
 {
 	static ITcpClient* Create(ITcpClientListener* pListener)
@@ -265,7 +265,7 @@ struct TcpClient_Creator
 	}
 };
 
-// ITcpPullServer ¶ÔÏó´´½¨Æ÷
+// ITcpPullServer å¯¹è±¡åˆ›å»ºå™¨
 struct TcpPullServer_Creator
 {
 	static ITcpPullServer* Create(ITcpServerListener* pListener)
@@ -279,7 +279,7 @@ struct TcpPullServer_Creator
 	}
 };
 
-// ITcpPullAgent ¶ÔÏó´´½¨Æ÷
+// ITcpPullAgent å¯¹è±¡åˆ›å»ºå™¨
 struct TcpPullAgent_Creator
 {
 	static ITcpPullAgent* Create(ITcpAgentListener* pListener)
@@ -293,7 +293,7 @@ struct TcpPullAgent_Creator
 	}
 };
 
-// ITcpPullClient ¶ÔÏó´´½¨Æ÷
+// ITcpPullClient å¯¹è±¡åˆ›å»ºå™¨
 struct TcpPullClient_Creator
 {
 	static ITcpPullClient* Create(ITcpClientListener* pListener)
@@ -307,7 +307,7 @@ struct TcpPullClient_Creator
 	}
 };
 
-// ITcpPackServer ¶ÔÏó´´½¨Æ÷
+// ITcpPackServer å¯¹è±¡åˆ›å»ºå™¨
 struct TcpPackServer_Creator
 {
 	static ITcpPackServer* Create(ITcpServerListener* pListener)
@@ -321,7 +321,7 @@ struct TcpPackServer_Creator
 	}
 };
 
-// ITcpPackAgent ¶ÔÏó´´½¨Æ÷
+// ITcpPackAgent å¯¹è±¡åˆ›å»ºå™¨
 struct TcpPackAgent_Creator
 {
 	static ITcpPackAgent* Create(ITcpAgentListener* pListener)
@@ -335,7 +335,7 @@ struct TcpPackAgent_Creator
 	}
 };
 
-// ITcpPackClient ¶ÔÏó´´½¨Æ÷
+// ITcpPackClient å¯¹è±¡åˆ›å»ºå™¨
 struct TcpPackClient_Creator
 {
 	static ITcpPackClient* Create(ITcpClientListener* pListener)
@@ -349,28 +349,28 @@ struct TcpPackClient_Creator
 	}
 };
 
-// ITcpServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
-// ITcpAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
-// ITcpClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
-// ITcpPullServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpPullServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
-// ITcpPullAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpPullAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
-// ITcpPullClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpPullClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
-// ITcpPackServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpPackServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, TcpPackServer_Creator>	CTcpPackServerPtr;
-// ITcpPackAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpPackAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, TcpPackAgent_Creator>	CTcpPackAgentPtr;
-// ITcpPackClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// ITcpPackClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, TcpPackClient_Creator>	CTcpPackClientPtr;
 
 #ifdef _UDP_SUPPORT
 
-// IUdpServer ¶ÔÏó´´½¨Æ÷
+// IUdpServer å¯¹è±¡åˆ›å»ºå™¨
 struct UdpServer_Creator
 {
 	static IUdpServer* Create(IUdpServerListener* pListener)
@@ -384,7 +384,7 @@ struct UdpServer_Creator
 	}
 };
 
-// IUdpClient ¶ÔÏó´´½¨Æ÷
+// IUdpClient å¯¹è±¡åˆ›å»ºå™¨
 struct UdpClient_Creator
 {
 	static IUdpClient* Create(IUdpClientListener* pListener)
@@ -398,7 +398,7 @@ struct UdpClient_Creator
 	}
 };
 
-// IUdpCast ¶ÔÏó´´½¨Æ÷
+// IUdpCast å¯¹è±¡åˆ›å»ºå™¨
 struct UdpCast_Creator
 {
 	static IUdpCast* Create(IUdpCastListener* pListener)
@@ -412,7 +412,7 @@ struct UdpCast_Creator
 	}
 };
 
-// IUdpNode ¶ÔÏó´´½¨Æ÷
+// IUdpNode å¯¹è±¡åˆ›å»ºå™¨
 struct UdpNode_Creator
 {
 	static IUdpNode* Create(IUdpNodeListener* pListener)
@@ -426,7 +426,7 @@ struct UdpNode_Creator
 	}
 };
 
-// IUdpArqServer ¶ÔÏó´´½¨Æ÷
+// IUdpArqServer å¯¹è±¡åˆ›å»ºå™¨
 struct UdpArqServer_Creator
 {
 	static IUdpArqServer* Create(IUdpServerListener* pListener)
@@ -440,7 +440,7 @@ struct UdpArqServer_Creator
 	}
 };
 
-// IUdpArqClient ¶ÔÏó´´½¨Æ÷
+// IUdpArqClient å¯¹è±¡åˆ›å»ºå™¨
 struct UdpArqClient_Creator
 {
 	static IUdpArqClient* Create(IUdpClientListener* pListener)
@@ -454,17 +454,17 @@ struct UdpArqClient_Creator
 	}
 };
 
-// IUdpServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// IUdpServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
-// IUdpClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// IUdpClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
-// IUdpCast ¶ÔÏóÖÇÄÜÖ¸Õë
+// IUdpCast å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
-// IUdpNode ¶ÔÏóÖÇÄÜÖ¸Õë
+// IUdpNode å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IUdpNode, IUdpNodeListener, UdpNode_Creator>				CUdpNodePtr;
-// IUdpArqServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// IUdpArqServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IUdpArqServer, IUdpServerListener, UdpArqServer_Creator>	CUdpArqServerPtr;
-// IUdpArqClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// IUdpArqClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IUdpArqClient, IUdpClientListener, UdpArqClient_Creator>	CUdpArqClientPtr;
 
 #endif
@@ -473,73 +473,73 @@ typedef CHPSocketPtr<IUdpArqClient, IUdpClientListener, UdpArqClient_Creator>	CU
 /*************************************************************** Global Function Exports *************************************************************/
 /*****************************************************************************************************************************************************/
 
-// »ñÈ¡ HPSocket °æ±¾ºÅ£¨4 ¸ö×Ö½Ú·Ö±ğÎª£ºÖ÷°æ±¾ºÅ£¬×Ó°æ±¾ºÅ£¬ĞŞÕı°æ±¾ºÅ£¬¹¹½¨±àºÅ£©
+// è·å– HPSocket ç‰ˆæœ¬å·ï¼ˆ4 ä¸ªå­—èŠ‚åˆ†åˆ«ä¸ºï¼šä¸»ç‰ˆæœ¬å·ï¼Œå­ç‰ˆæœ¬å·ï¼Œä¿®æ­£ç‰ˆæœ¬å·ï¼Œæ„å»ºç¼–å·ï¼‰
 HPSOCKET_API DWORD HP_GetHPSocketVersion();
 
-// »ñÈ¡´íÎóÃèÊöÎÄ±¾
+// è·å–é”™è¯¯æè¿°æ–‡æœ¬
 HPSOCKET_API LPCTSTR HP_GetSocketErrorDesc(EnSocketError enCode);
-// µ÷ÓÃÏµÍ³µÄ GetLastError() ·½·¨»ñÈ¡ÏµÍ³´íÎó´úÂë
+// è°ƒç”¨ç³»ç»Ÿçš„ GetLastError() æ–¹æ³•è·å–ç³»ç»Ÿé”™è¯¯ä»£ç 
 HPSOCKET_API DWORD SYS_GetLastError	();
-// µ÷ÓÃÏµÍ³µÄ WSAGetLastError() ·½·¨»ñÈ¡ÏµÍ³´íÎó´úÂë
+// è°ƒç”¨ç³»ç»Ÿçš„ WSAGetLastError() æ–¹æ³•è·å–ç³»ç»Ÿé”™è¯¯ä»£ç 
 HPSOCKET_API int SYS_WSAGetLastError();
-// µ÷ÓÃÏµÍ³µÄ setsockopt()
+// è°ƒç”¨ç³»ç»Ÿçš„ setsockopt()
 HPSOCKET_API int SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID val, int len);
-// µ÷ÓÃÏµÍ³µÄ getsockopt()
+// è°ƒç”¨ç³»ç»Ÿçš„ getsockopt()
 HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
-// µ÷ÓÃÏµÍ³µÄ ioctlsocket()
+// è°ƒç”¨ç³»ç»Ÿçš„ ioctlsocket()
 HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
-// µ÷ÓÃÏµÍ³µÄ WSAIoctl()
+// è°ƒç”¨ç³»ç»Ÿçš„ WSAIoctl()
 HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
 
-// ÉèÖÃ socket Ñ¡Ïî£ºIPPROTO_TCP -> TCP_NODELAY
+// è®¾ç½® socket é€‰é¡¹ï¼šIPPROTO_TCP -> TCP_NODELAY
 HPSOCKET_API int SYS_SSO_NoDelay(SOCKET sock, BOOL bNoDelay);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_DONTLINGER
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_DONTLINGER
 HPSOCKET_API int SYS_SSO_DontLinger(SOCKET sock, BOOL bDont);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_LINGER
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_LINGER
 HPSOCKET_API int SYS_SSO_Linger(SOCKET sock, USHORT l_onoff, USHORT l_linger);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_RCVBUF
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_RCVBUF
 HPSOCKET_API int SYS_SSO_RecvBuffSize(SOCKET sock, int size);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_SNDBUF
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_SNDBUF
 HPSOCKET_API int SYS_SSO_SendBuffSize(SOCKET sock, int size);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_RCVTIMEO
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_RCVTIMEO
 HPSOCKET_API int SYS_SSO_RecvTimeOut(SOCKET sock, int ms);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_SNDTIMEO
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_SNDTIMEO
 HPSOCKET_API int SYS_SSO_SendTimeOut(SOCKET sock, int ms);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_EXCLUSIVEADDRUSE / SO_REUSEADDR
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_EXCLUSIVEADDRUSE / SO_REUSEADDR
 HPSOCKET_API int SYS_SSO_ReuseAddress(SOCKET sock, EnReuseAddressPolicy opt);
-// ÉèÖÃ socket Ñ¡Ïî£ºSOL_SOCKET -> SO_EXCLUSIVEADDRUSE
+// è®¾ç½® socket é€‰é¡¹ï¼šSOL_SOCKET -> SO_EXCLUSIVEADDRUSE
 HPSOCKET_API int SYS_SSO_ExclusiveAddressUse(SOCKET sock, BOOL bExclusive);
 
-// »ñÈ¡ SOCKET ±¾µØµØÖ·ĞÅÏ¢
+// è·å– SOCKET æœ¬åœ°åœ°å€ä¿¡æ¯
 HPSOCKET_API BOOL SYS_GetSocketLocalAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
-// »ñÈ¡ SOCKET Ô¶³ÌµØÖ·ĞÅÏ¢
+// è·å– SOCKET è¿œç¨‹åœ°å€ä¿¡æ¯
 HPSOCKET_API BOOL SYS_GetSocketRemoteAddress(SOCKET socket, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 
-/* Ã¶¾ÙÖ÷»ú IP µØÖ· */
+/* æšä¸¾ä¸»æœº IP åœ°å€ */
 HPSOCKET_API BOOL SYS_EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, LPTIPAddr** lpppIPAddr, int& iIPAddrCount);
-/* ÊÍ·Å LPTIPAddr* */
+/* é‡Šæ”¾ LPTIPAddr* */
 HPSOCKET_API BOOL SYS_FreeHostIPAddresses(LPTIPAddr* lppIPAddr);
-/* ¼ì²é×Ö·û´®ÊÇ·ñ·ûºÏ IP µØÖ·¸ñÊ½ */
+/* æ£€æŸ¥å­—ç¬¦ä¸²æ˜¯å¦ç¬¦åˆ IP åœ°å€æ ¼å¼ */
 HPSOCKET_API BOOL SYS_IsIPAddress(LPCTSTR lpszAddress, EnIPAddrType* penType = nullptr);
-/* Í¨¹ıÖ÷»úÃû»ñÈ¡ IP µØÖ· */
+/* é€šè¿‡ä¸»æœºåè·å– IP åœ°å€ */
 HPSOCKET_API BOOL SYS_GetIPAddress(LPCTSTR lpszHost, TCHAR lpszIP[], int& iIPLenth, EnIPAddrType& enType);
 
-/* 64 Î»ÍøÂç×Ö½ÚĞò×ªÖ÷»ú×Ö½ÚĞò */
+/* 64 ä½ç½‘ç»œå­—èŠ‚åºè½¬ä¸»æœºå­—èŠ‚åº */
 HPSOCKET_API ULONGLONG SYS_NToH64(ULONGLONG value);
-/* 64 Î»Ö÷»ú×Ö½ÚĞò×ªÍøÂç×Ö½ÚĞò */
+/* 64 ä½ä¸»æœºå­—èŠ‚åºè½¬ç½‘ç»œå­—èŠ‚åº */
 HPSOCKET_API ULONGLONG SYS_HToN64(ULONGLONG value);
-/* ¶ÌÕûĞÍ¸ßµÍ×Ö½Ú½»»» */
+/* çŸ­æ•´å‹é«˜ä½å­—èŠ‚äº¤æ¢ */
 HPSOCKET_API USHORT SYS_SwapEndian16(USHORT value);
-/* ³¤ÕûĞÍ¸ßµÍ×Ö½Ú½»»» */
+/* é•¿æ•´å‹é«˜ä½å­—èŠ‚äº¤æ¢ */
 HPSOCKET_API DWORD SYS_SwapEndian32(DWORD value);
-/* ¼ì²éÊÇ·ñĞ¡¶Ë×Ö½ÚĞò */
+/* æ£€æŸ¥æ˜¯å¦å°ç«¯å­—èŠ‚åº */
 HPSOCKET_API BOOL SYS_IsLittleEndian();
 
-/* ·ÖÅäÄÚ´æ */
+/* åˆ†é…å†…å­˜ */
 HPSOCKET_API LPBYTE SYS_Malloc(int size);
-/* ÖØĞÂ·ÖÅäÄÚ´æ */
+/* é‡æ–°åˆ†é…å†…å­˜ */
 HPSOCKET_API LPBYTE SYS_Realloc(LPBYTE p, int size);
-/* ÊÍ·ÅÄÚ´æ */
+/* é‡Šæ”¾å†…å­˜ */
 HPSOCKET_API VOID SYS_Free(LPBYTE p);
 
 // CP_XXX -> UNICODE
@@ -559,47 +559,61 @@ HPSOCKET_API BOOL SYS_GbkToUtf8(const char szSrc[], char szDest[], int& iDestLen
 // UTF8 -> GBK
 HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength);
 
+// è®¡ç®— Base64 ç¼–ç åé•¿åº¦
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
+// è®¡ç®— Base64 è§£ç åé•¿åº¦
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// Base64 ç¼–ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Base64 è§£ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
+// è®¡ç®— URL ç¼–ç åé•¿åº¦
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// è®¡ç®— URL è§£ç åé•¿åº¦
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
+// URL ç¼–ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// URL è§£ç ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+
 #ifdef _ZLIB_SUPPORT
 
-// ÆÕÍ¨Ñ¹Ëõ£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// æ™®é€šå‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// ¸ß¼¶Ñ¹Ëõ£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-//£¨Ä¬ÈÏ²ÎÊı£ºiLevel -> -1£¬iMethod -> 8£¬iWindowBits -> 15£¬iMemLevel -> 8£¬iStrategy -> 0£©
+// é«˜çº§å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+//ï¼ˆé»˜è®¤å‚æ•°ï¼šiLevel -> -1ï¼ŒiMethod -> 8ï¼ŒiWindowBits -> 15ï¼ŒiMemLevel -> 8ï¼ŒiStrategy -> 0ï¼‰
 HPSOCKET_API int SYS_CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel = -1, int iMethod = 8, int iWindowBits = 15, int iMemLevel = 8, int iStrategy = 0);
-// ÆÕÍ¨½âÑ¹£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// æ™®é€šè§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 HPSOCKET_API int SYS_Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// ¸ß¼¶½âÑ¹£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-//£¨Ä¬ÈÏ²ÎÊı£ºiWindowBits -> 15£©
+// é«˜çº§è§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+//ï¼ˆé»˜è®¤å‚æ•°ï¼šiWindowBits -> 15ï¼‰
 HPSOCKET_API int SYS_UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits = 15);
-// ÍÆ²âÑ¹Ëõ½á¹û³¤¶È
+// æ¨æµ‹å‹ç¼©ç»“æœé•¿åº¦
 HPSOCKET_API DWORD SYS_GuessCompressBound(DWORD dwSrcLen, BOOL bGZip = FALSE);
 
-// Gzip Ñ¹Ëõ£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// Gzip å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 HPSOCKET_API int SYS_GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Gzip ½âÑ¹£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
+// Gzip è§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
 HPSOCKET_API int SYS_GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// ÍÆ²â Gzip ½âÑ¹½á¹û³¤¶È£¨Èç¹û·µ»Ø 0 »ò²»ºÏÀíÖµÔòËµÃ÷ÊäÈëÄÚÈİ²¢·ÇÓĞĞ§µÄ Gzip ¸ñÊ½£©
+// æ¨æµ‹ Gzip è§£å‹ç»“æœé•¿åº¦ï¼ˆå¦‚æœè¿”å› 0 æˆ–ä¸åˆç†å€¼åˆ™è¯´æ˜è¾“å…¥å†…å®¹å¹¶éæœ‰æ•ˆçš„ Gzip æ ¼å¼ï¼‰
 HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
 
 #endif
 
-// ¼ÆËã Base64 ±àÂëºó³¤¶È
-HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
-// ¼ÆËã Base64 ½âÂëºó³¤¶È
-HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// Base64 ±àÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// Base64 ½âÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+#ifdef _BROTLI_SUPPORT
 
-// ¼ÆËã URL ±àÂëºó³¤¶È
-HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// ¼ÆËã URL ½âÂëºó³¤¶È
-HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen);
-// URL ±àÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
-// URL ½âÂë£¨·µ»ØÖµ£º0 -> ³É¹¦£¬-3 -> ÊäÈëÊı¾İ²»ÕıÈ·£¬-5 -> Êä³ö»º³åÇø²»×ã£©
-HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+HPSOCKET_API int SYS_BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli é«˜çº§å‹ç¼©ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+//ï¼ˆé»˜è®¤å‚æ•°ï¼šiQuality -> 11ï¼ŒiWindow -> 22ï¼ŒiMode -> 0ï¼‰
+HPSOCKET_API int SYS_BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality = 11, int iWindow = 22, int iMode = 0);
+// Brotli è§£å‹ï¼ˆè¿”å›å€¼ï¼š0 -> æˆåŠŸï¼Œ-3 -> è¾“å…¥æ•°æ®ä¸æ­£ç¡®ï¼Œ-5 -> è¾“å‡ºç¼“å†²åŒºä¸è¶³ï¼‰
+HPSOCKET_API int SYS_BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
+// Brotli æ¨æµ‹å‹ç¼©ç»“æœé•¿åº¦
+HPSOCKET_API DWORD SYS_BrotliGuessCompressBound(DWORD dwSrcLen);
+
+#endif
 
 /*****************************************************************************************************************************************************/
 /******************************************************************** HTTP Exports *******************************************************************/
@@ -607,25 +621,25 @@ HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DW
 
 #ifdef _HTTP_SUPPORT
 
-// ´´½¨ IHttpServer ¶ÔÏó
+// åˆ›å»º IHttpServer å¯¹è±¡
 HPSOCKET_API IHttpServer* HP_Create_HttpServer(IHttpServerListener* pListener);
-// ´´½¨ IHttpAgent ¶ÔÏó
+// åˆ›å»º IHttpAgent å¯¹è±¡
 HPSOCKET_API IHttpAgent* HP_Create_HttpAgent(IHttpAgentListener* pListener);
-// ´´½¨ IHttpClient ¶ÔÏó
+// åˆ›å»º IHttpClient å¯¹è±¡
 HPSOCKET_API IHttpClient* HP_Create_HttpClient(IHttpClientListener* pListener);
-// ´´½¨ IHttpSyncClient ¶ÔÏó
+// åˆ›å»º IHttpSyncClient å¯¹è±¡
 HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient(IHttpClientListener* pListener);
 
-// Ïú»Ù IHttpServer ¶ÔÏó
+// é”€æ¯ IHttpServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpServer(IHttpServer* pServer);
-// Ïú»Ù IHttpAgent ¶ÔÏó
+// é”€æ¯ IHttpAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpAgent(IHttpAgent* pAgent);
-// Ïú»Ù IHttpClient ¶ÔÏó
+// é”€æ¯ IHttpClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpClient(IHttpClient* pClient);
-// Ïú»Ù IHttpSyncClient ¶ÔÏó
+// é”€æ¯ IHttpSyncClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpSyncClient(IHttpSyncClient* pClient);
 
-// IHttpServer ¶ÔÏó´´½¨Æ÷
+// IHttpServer å¯¹è±¡åˆ›å»ºå™¨
 struct HttpServer_Creator
 {
 	static IHttpServer* Create(IHttpServerListener* pListener)
@@ -639,7 +653,7 @@ struct HttpServer_Creator
 	}
 };
 
-// IHttpAgent ¶ÔÏó´´½¨Æ÷
+// IHttpAgent å¯¹è±¡åˆ›å»ºå™¨
 struct HttpAgent_Creator
 {
 	static IHttpAgent* Create(IHttpAgentListener* pListener)
@@ -653,7 +667,7 @@ struct HttpAgent_Creator
 	}
 };
 
-// IHttpClient ¶ÔÏó´´½¨Æ÷
+// IHttpClient å¯¹è±¡åˆ›å»ºå™¨
 struct HttpClient_Creator
 {
 	static IHttpClient* Create(IHttpClientListener* pListener)
@@ -667,7 +681,7 @@ struct HttpClient_Creator
 	}
 };
 
-// IHttpSyncClient ¶ÔÏó´´½¨Æ÷
+// IHttpSyncClient å¯¹è±¡åˆ›å»ºå™¨
 struct HttpSyncClient_Creator
 {
 	static IHttpSyncClient* Create(IHttpClientListener* pListener)
@@ -681,42 +695,42 @@ struct HttpSyncClient_Creator
 	}
 };
 
-// IHttpServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpServer, IHttpServerListener, HttpServer_Creator>			CHttpServerPtr;
-// IHttpAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpAgent, IHttpAgentListener, HttpAgent_Creator>				CHttpAgentPtr;
-// IHttpClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpClient, IHttpClientListener, HttpClient_Creator>			CHttpClientPtr;
-// IHttpSyncClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpSyncClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpSyncClient, IHttpClientListener, HttpSyncClient_Creator>	CHttpSyncClientPtr;
 
 /**************************************************************************/
-/*************************** HTTP Cookie ¹ÜÀí·½·¨ **************************/
+/*************************** HTTP Cookie ç®¡ç†æ–¹æ³• **************************/
 
-/* ´ÓÎÄ¼ş¼ÓÔØ Cookie */
+/* ä»æ–‡ä»¶åŠ è½½ Cookie */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_LoadFromFile(LPCSTR lpszFile, BOOL bKeepExists = TRUE);
-/* ±£´æ Cookie µ½ÎÄ¼ş */
+/* ä¿å­˜ Cookie åˆ°æ–‡ä»¶ */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_SaveToFile(LPCSTR lpszFile, BOOL bKeepExists = TRUE);
-/* ÇåÀí Cookie */
+/* æ¸…ç† Cookie */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_ClearCookies(LPCSTR lpszDomain = nullptr, LPCSTR lpszPath = nullptr);
-/* ÇåÀí¹ıÆÚ Cookie */
+/* æ¸…ç†è¿‡æœŸ Cookie */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_RemoveExpiredCookies(LPCSTR lpszDomain = nullptr, LPCSTR lpszPath = nullptr);
-/* ÉèÖÃ Cookie */
+/* è®¾ç½® Cookie */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_SetCookie(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, int enSameSite = 0, BOOL bOnlyUpdateValueIfExists = TRUE);
-/* É¾³ı Cookie */
+/* åˆ é™¤ Cookie */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_DeleteCookie(LPCSTR lpszDomain, LPCSTR lpszPath, LPCSTR lpszName);
-/* ÉèÖÃÊÇ·ñÔÊĞíµÚÈı·½ Cookie */
+/* è®¾ç½®æ˜¯å¦å…è®¸ç¬¬ä¸‰æ–¹ Cookie */
 HPSOCKET_API void HP_HttpCookie_MGR_SetEnableThirdPartyCookie(BOOL bEnableThirdPartyCookie = TRUE);
-/* ¼ì²éÊÇ·ñÔÊĞíµÚÈı·½ Cookie */
+/* æ£€æŸ¥æ˜¯å¦å…è®¸ç¬¬ä¸‰æ–¹ Cookie */
 HPSOCKET_API BOOL HP_HttpCookie_MGR_IsEnableThirdPartyCookie();
 
-/* Cookie expires ×Ö·û´®×ª»»ÎªÕûÊı */
+/* Cookie expires å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•° */
 HPSOCKET_API BOOL HP_HttpCookie_HLP_ParseExpires(LPCSTR lpszExpires, __time64_t& tmExpires);
-/* ÕûÊı×ª»»Îª Cookie expires ×Ö·û´® */
+/* æ•´æ•°è½¬æ¢ä¸º Cookie expires å­—ç¬¦ä¸² */
 HPSOCKET_API BOOL HP_HttpCookie_HLP_MakeExpiresStr(char lpszBuff[], int& iBuffLen, __time64_t tmExpires);
-/* Éú³É Cookie ×Ö·û´® */
+/* ç”Ÿæˆ Cookie å­—ç¬¦ä¸² */
 HPSOCKET_API BOOL HP_HttpCookie_HLP_ToString(char lpszBuff[], int& iBuffLen, LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge /*= -1*/, BOOL bHttpOnly /*= FALSE*/, BOOL bSecure /*= FALSE*/, int enSameSite /*= 0*/);
-/* »ñÈ¡µ±Ç° UTC Ê±¼ä */
+/* è·å–å½“å‰ UTC æ—¶é—´ */
 HPSOCKET_API __time64_t HP_HttpCookie_HLP_CurrentUTCTime();
 /* Max-Age -> expires */
 HPSOCKET_API __time64_t HP_HttpCookie_HLP_MaxAgeToExpires(int iMaxAge);
@@ -733,37 +747,37 @@ HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires);
 /**************************************************************** Thread Pool Exports ****************************************************************/
 /*****************************************************************************************************************************************************/
 
-// ´´½¨ IHPThreadPool ¶ÔÏó
+// åˆ›å»º IHPThreadPool å¯¹è±¡
 HPSOCKET_API IHPThreadPool* HP_Create_ThreadPool();
-// Ïú»Ù IHPThreadPool ¶ÔÏó
+// é”€æ¯ IHPThreadPool å¯¹è±¡
 HPSOCKET_API void HP_Destroy_ThreadPool(IHPThreadPool* pThreadPool);
 
 /*
-* Ãû³Æ£º´´½¨ TSocketTask ¶ÔÏó
-* ÃèÊö£º´´½¨ÈÎÎñ¶ÔÏó£¬¸Ã¶ÔÏó×îÖÕĞèÓÉ HP_Destroy_SocketTaskObj() Ïú»Ù
+* åç§°ï¼šåˆ›å»º TSocketTask å¯¹è±¡
+* æè¿°ï¼šåˆ›å»ºä»»åŠ¡å¯¹è±¡ï¼Œè¯¥å¯¹è±¡æœ€ç»ˆéœ€ç”± HP_Destroy_SocketTaskObj() é”€æ¯
 *		
-* ²ÎÊı£º		fnTaskProc	-- ÈÎÎñ´¦Àíº¯Êı
-*			pSender		-- ·¢Æğ¶ÔÏó
-*			dwConnID	-- Á¬½Ó ID
-*			pBuffer		-- Êı¾İ»º³åÇø
-*			iBuffLen	-- Êı¾İ»º³åÇø³¤¶È
-*			enBuffType	-- Êı¾İ»º³åÇøÀàĞÍ£¨Ä¬ÈÏ£ºTBT_COPY£©
-*							TBT_COPY	£º£¨Éî¿½±´£©pBuffer ¸´ÖÆµ½ TSocketTask ¶ÔÏó¡£´Ëºó TSocketTask ¶ÔÏóÓë pBuffer ²»ÔÙÓĞÈÎºÎ¹ØÁª
-*											-> ÊÊÓÃÓÚ pBuffer ²»´ó»ò pBuffer ÉúÃüÖÜÆÚ²»ÊÜ¿ØµÄ³¡¾°
-*							TBT_REFER	£º£¨Ç³¿½±´£©pBuffer ²»¸´ÖÆµ½ TSocketTask ¶ÔÏó£¬ĞèÈ·±£ TSocketTask ¶ÔÏóÉúÃüÖÜÆÚÄÚ pBuffer ±ØĞëÓĞĞ§
-*											-> ÊÊÓÃÓÚ pBuffer ½Ï´ó»ò pBuffer ¿ÉÖØÓÃ£¬²¢ÇÒ pBuffer ÉúÃüÖÜÆÚÊÜ¿ØµÄ³¡¾°
-*							TBT_ATTACH	£º£¨¸½Êô£©Ö´ĞĞÇ³¿½±´£¬µ« TSocketTask ¶ÔÏó»á»ñµÃ pBuffer µÄËùÓĞÈ¨£¬²¢¸ºÔğÊÍ·Å pBuffer£¬±ÜÃâ¶à´Î»º³åÇø¿½±´
-*											-> ×¢Òâ£ºpBuffer ±ØĞëÓÉ SYS_Malloc() º¯Êı·ÖÅä²ÅÄÜÊ¹ÓÃ±¾ÀàĞÍ£¬·ñÔò¿ÉÄÜ»á·¢ÉúÄÚ´æ·ÃÎÊ´íÎó
-*			wParam		-- ×Ô¶¨Òå²ÎÊı
-*			lParam		-- ×Ô¶¨Òå²ÎÊı
-* ·µ»ØÖµ£º	LPTSocketTask
+* å‚æ•°ï¼š		fnTaskProc	-- ä»»åŠ¡å¤„ç†å‡½æ•°
+*			pSender		-- å‘èµ·å¯¹è±¡
+*			dwConnID	-- è¿æ¥ ID
+*			pBuffer		-- æ•°æ®ç¼“å†²åŒº
+*			iBuffLen	-- æ•°æ®ç¼“å†²åŒºé•¿åº¦
+*			enBuffType	-- æ•°æ®ç¼“å†²åŒºç±»å‹ï¼ˆé»˜è®¤ï¼šTBT_COPYï¼‰
+*							TBT_COPY	ï¼šï¼ˆæ·±æ‹·è´ï¼‰pBuffer å¤åˆ¶åˆ° TSocketTask å¯¹è±¡ã€‚æ­¤å TSocketTask å¯¹è±¡ä¸ pBuffer ä¸å†æœ‰ä»»ä½•å…³è”
+*											-> é€‚ç”¨äº pBuffer ä¸å¤§æˆ– pBuffer ç”Ÿå‘½å‘¨æœŸä¸å—æ§çš„åœºæ™¯
+*							TBT_REFER	ï¼šï¼ˆæµ…æ‹·è´ï¼‰pBuffer ä¸å¤åˆ¶åˆ° TSocketTask å¯¹è±¡ï¼Œéœ€ç¡®ä¿ TSocketTask å¯¹è±¡ç”Ÿå‘½å‘¨æœŸå†… pBuffer å¿…é¡»æœ‰æ•ˆ
+*											-> é€‚ç”¨äº pBuffer è¾ƒå¤§æˆ– pBuffer å¯é‡ç”¨ï¼Œå¹¶ä¸” pBuffer ç”Ÿå‘½å‘¨æœŸå—æ§çš„åœºæ™¯
+*							TBT_ATTACH	ï¼šï¼ˆé™„å±ï¼‰æ‰§è¡Œæµ…æ‹·è´ï¼Œä½† TSocketTask å¯¹è±¡ä¼šè·å¾— pBuffer çš„æ‰€æœ‰æƒï¼Œå¹¶è´Ÿè´£é‡Šæ”¾ pBufferï¼Œé¿å…å¤šæ¬¡ç¼“å†²åŒºæ‹·è´
+*											-> æ³¨æ„ï¼špBuffer å¿…é¡»ç”± SYS_Malloc() å‡½æ•°åˆ†é…æ‰èƒ½ä½¿ç”¨æœ¬ç±»å‹ï¼Œå¦åˆ™å¯èƒ½ä¼šå‘ç”Ÿå†…å­˜è®¿é—®é”™è¯¯
+*			wParam		-- è‡ªå®šä¹‰å‚æ•°
+*			lParam		-- è‡ªå®šä¹‰å‚æ•°
+* è¿”å›å€¼ï¼š	LPTSocketTask
 */
 HPSOCKET_API LPTSocketTask HP_Create_SocketTaskObj(Fn_SocketTaskProc fnTaskProc, PVOID pSender, CONNID dwConnID, LPCBYTE pBuffer, INT iBuffLen, EnTaskBufferType enBuffType = TBT_COPY, WPARAM wParam = 0, LPARAM lParam = 0);
 
-// Ïú»Ù TSocketTask ¶ÔÏó
+// é”€æ¯ TSocketTask å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SocketTaskObj(LPTSocketTask pTask);
 
-// IHPThreadPool ¶ÔÏó´´½¨Æ÷
+// IHPThreadPool å¯¹è±¡åˆ›å»ºå™¨
 struct HPThreadPool_Creator
 {
 	static IHPThreadPool* Create()
@@ -777,5 +791,5 @@ struct HPThreadPool_Creator
 	}
 };
 
-// IHPThreadPool ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHPThreadPool å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPObjectPtr<IHPThreadPool, HPThreadPool_Creator>	CHPThreadPoolPtr;

@@ -122,8 +122,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -131,8 +131,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -140,8 +140,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -149,8 +149,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -158,8 +158,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -167,8 +167,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -176,8 +176,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x86\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -185,8 +185,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <IncludePath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\include;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>..\..\Common\Lib\brotli\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\zlib\$(VisualStudioVersion)\x64\lib;..\..\Common\Lib\openssl\$(VisualStudioVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -207,7 +207,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotlid.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -231,7 +231,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotlid.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -255,7 +255,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotlid.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -279,7 +279,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotlid.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -307,7 +307,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -335,7 +335,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -363,7 +363,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -391,7 +391,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -414,17 +414,6 @@
     <ClInclude Include="..\..\Common\Src\SysHelper.h" />
     <ClInclude Include="..\..\Common\Src\WaitFor.h" />
     <ClInclude Include="..\..\Common\Src\Win32Helper.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\crc32.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\deflate.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\gzguts.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\inffast.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\inffixed.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\inflate.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\inftrees.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\trees.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\zconf.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\zlib.h" />
-    <ClInclude Include="..\..\Common\Src\zlib\zutil.h" />
     <ClInclude Include="..\..\Src\ArqHelper.h" />
     <ClInclude Include="..\..\Src\HPSocket.h" />
     <ClInclude Include="..\..\Src\HPThreadPool.h" />
@@ -494,396 +483,6 @@
     <ClCompile Include="..\..\Common\Src\RWLock.cpp" />
     <ClCompile Include="..\..\Common\Src\SysHelper.cpp" />
     <ClCompile Include="..\..\Common\Src\WaitFor.cpp" />
-    <ClCompile Include="..\..\Common\Src\zlib\adler32.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\compress.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\crc32.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\deflate.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\gzclose.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\gzlib.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\gzread.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\gzwrite.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\infback.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\inffast.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\inflate.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\inftrees.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\trees.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\uncompr.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\zlib\zutil.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">/D"_CRT_SECURE_NO_DEPRECATE" /D"_CRT_SECURE_NO_WARNINGS" /D"_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">4100;4127;4510;4610;4131;4389;4244;4245;4267</DisableSpecificWarnings>
-    </ClCompile>
     <ClCompile Include="..\..\Src\ArqHelper.cpp" />
     <ClCompile Include="..\..\Src\HPSocket.cpp" />
     <ClCompile Include="..\..\Src\HPThreadPool.cpp" />

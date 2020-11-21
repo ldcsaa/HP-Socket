@@ -1,9 +1,9 @@
-/*
+﻿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
  * Website	: https://github.com/ldcsaa
- * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 44636872, 75375912
@@ -1244,112 +1244,6 @@ BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
 	return UnicodeToGbk(p.get(), szDest, iDestLength);
 }
 
-#ifdef _ZLIB_SUPPORT
-
-int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-int CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel, int iMethod, int iWindowBits, int iMemLevel, int iStrategy)
-{
-	z_stream stream;
-
-	stream.next_in	 = (z_const Bytef*)lpszSrc;
-	stream.avail_in	 = dwSrcLen;
-	stream.next_out	 = lpszDest;
-	stream.avail_out = dwDestLen;
-	stream.zalloc	 = nullptr;
-	stream.zfree	 = nullptr;
-	stream.opaque	 = nullptr;
-
-	int err = ::deflateInit2(&stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy);
-
-	if(err != Z_OK) return err;
-
-	err = ::deflate(&stream, Z_FINISH);
-
-	if(err != Z_STREAM_END)
-	{
-		::deflateEnd(&stream);
-		return err == Z_OK ? Z_BUF_ERROR : err;
-	}
-
-	if(dwDestLen > stream.total_out)
-	{
-		lpszDest[stream.total_out]	= 0;
-		dwDestLen					= stream.total_out;
-	}
-
-	return ::deflateEnd(&stream);
-}
-
-int Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-int UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits)
-{
-	z_stream stream;
-
-	stream.next_in	 = (z_const Bytef*)lpszSrc;
-	stream.avail_in	 = (uInt)dwSrcLen;
-	stream.next_out	 = lpszDest;
-	stream.avail_out = dwDestLen;
-	stream.zalloc	 = nullptr;
-	stream.zfree	 = nullptr;
-
-	int err = ::inflateInit2(&stream, iWindowBits);
-
-	if(err != Z_OK) return err;
-
-	err = ::inflate(&stream, Z_FINISH);
-
-	if(err != Z_STREAM_END)
-	{
-		::inflateEnd(&stream);
-		return (err == Z_NEED_DICT || (err == Z_BUF_ERROR && stream.avail_in == 0)) ? Z_DATA_ERROR : err;
-	}
-
-	if(dwDestLen > stream.total_out)
-	{
-		lpszDest[stream.total_out]	= 0;
-		dwDestLen					= stream.total_out;
-	}
-
-	return inflateEnd(&stream);
-}
-
-DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
-{
-	DWORD dwBound = ::compressBound(dwSrcLen);
-	
-	if(bGZip) dwBound += 11;
-
-	return dwBound;
-}
-
-int GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16);
-}
-
-int GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, MAX_WBITS + 32);
-}
-
-DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	if(dwSrcLen < 20 || *(USHORT*)lpszSrc != 0x8B1F)
-		return 0;
-
-	return *(DWORD*)(lpszSrc + dwSrcLen - 4);
-}
-
-#endif
-
 DWORD GuessBase64EncodeBound(DWORD dwSrcLen)
 {
 	return 4 * ((dwSrcLen + 2) / 3);
@@ -1620,3 +1514,141 @@ ERROR_DEST_LEN:
 	dwDestLen = GuessUrlDecodeBound(lpszSrc, dwSrcLen);
 	return -5;
 }
+
+#ifdef _ZLIB_SUPPORT
+
+int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+int CompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iLevel, int iMethod, int iWindowBits, int iMemLevel, int iStrategy)
+{
+	z_stream stream;
+
+	stream.next_in	 = (z_const Bytef*)lpszSrc;
+	stream.avail_in	 = dwSrcLen;
+	stream.next_out	 = lpszDest;
+	stream.avail_out = dwDestLen;
+	stream.zalloc	 = nullptr;
+	stream.zfree	 = nullptr;
+	stream.opaque	 = nullptr;
+
+	int err = ::deflateInit2(&stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy);
+
+	if(err != Z_OK) return err;
+
+	err = ::deflate(&stream, Z_FINISH);
+
+	if(err != Z_STREAM_END)
+	{
+		::deflateEnd(&stream);
+		return err == Z_OK ? Z_BUF_ERROR : err;
+	}
+
+	if(dwDestLen > stream.total_out)
+	{
+		lpszDest[stream.total_out]	= 0;
+		dwDestLen					= stream.total_out;
+	}
+
+	return ::deflateEnd(&stream);
+}
+
+int Uncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+int UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iWindowBits)
+{
+	z_stream stream;
+
+	stream.next_in	 = (z_const Bytef*)lpszSrc;
+	stream.avail_in	 = (uInt)dwSrcLen;
+	stream.next_out	 = lpszDest;
+	stream.avail_out = dwDestLen;
+	stream.zalloc	 = nullptr;
+	stream.zfree	 = nullptr;
+
+	int err = ::inflateInit2(&stream, iWindowBits);
+
+	if(err != Z_OK) return err;
+
+	err = ::inflate(&stream, Z_FINISH);
+
+	if(err != Z_STREAM_END)
+	{
+		::inflateEnd(&stream);
+		return (err == Z_NEED_DICT || (err == Z_BUF_ERROR && stream.avail_in == 0)) ? Z_DATA_ERROR : err;
+	}
+
+	if(dwDestLen > stream.total_out)
+	{
+		lpszDest[stream.total_out]	= 0;
+		dwDestLen					= stream.total_out;
+	}
+
+	return inflateEnd(&stream);
+}
+
+DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
+{
+	DWORD dwBound = ::compressBound(dwSrcLen);
+
+	if(bGZip) dwBound += 11;
+
+	return dwBound;
+}
+
+int GZipCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return CompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16);
+}
+
+int GZipUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return UncompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, MAX_WBITS + 32);
+}
+
+DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	if(dwSrcLen < 20 || *(USHORT*)lpszSrc != 0x8B1F)
+		return 0;
+
+	return *(DWORD*)(lpszSrc + dwSrcLen - 4);
+}
+
+#endif
+
+#ifdef _BROTLI_SUPPORT
+
+int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, BROTLI_DEFAULT_QUALITY, BROTLI_DEFAULT_WINDOW, BROTLI_DEFAULT_MODE);
+}
+
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, BrotliEncoderMode enMode)
+{
+	size_t stDestLen = (size_t)dwDestLen;
+	int rs = ::BrotliEncoderCompress(iQuality, iWindow, enMode, (size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
+	dwDestLen = (DWORD)stDestLen;
+
+	return (rs == 1) ? 0 : ((rs == 3) ? 5 : 3);
+}
+
+int BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	size_t stDestLen = (size_t)dwDestLen;
+	BrotliDecoderResult rs = ::BrotliDecoderDecompress((size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
+	dwDestLen = (DWORD)stDestLen;
+
+	return (rs == BROTLI_DECODER_RESULT_SUCCESS) ? 0 : ((rs == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) ? 5 : 3);
+}
+
+DWORD BrotliGuessCompressBound(DWORD dwSrcLen)
+{
+	return (DWORD)::BrotliEncoderMaxCompressedSize((size_t)dwSrcLen);
+}
+
+#endif

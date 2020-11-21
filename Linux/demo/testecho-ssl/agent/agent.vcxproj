@@ -174,7 +174,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;_NEED_SSL;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UDP_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;_NEED_SSL;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>ssl;crypto;rt;dl;pthread</LibraryDependencies>
@@ -189,7 +189,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;_NEED_SSL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UDP_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;_NEED_SSL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;rt;dl;pthread</LibraryDependencies>
@@ -203,7 +203,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;_NEED_SSL;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UDP_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;_NEED_SSL;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>ssl;crypto;rt;dl;pthread</LibraryDependencies>
@@ -218,7 +218,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;_NEED_SSL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UDP_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;_NEED_SSL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;rt;dl;pthread</LibraryDependencies>
@@ -232,7 +232,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;_NEED_SSL;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UDP_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;_NEED_SSL;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>ssl;crypto;rt;dl;pthread</LibraryDependencies>
@@ -247,7 +247,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ZLIB_DISABLED;_NEED_SSL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UDP_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;_NEED_SSL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>jemalloc_pic;ssl;crypto;rt;dl;pthread</LibraryDependencies>

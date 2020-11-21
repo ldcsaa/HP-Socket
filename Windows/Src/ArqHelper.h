@@ -1,9 +1,9 @@
-/*
+ï»¿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
  * Website	: https://github.com/ldcsaa
- * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 44636872, 75375912
@@ -55,14 +55,14 @@ typedef int (*Fn_ArqOutputProc)(const char* pBuffer, int iLength, IKCPCB* kcp, L
 DWORD GenerateConversationID();
 
 /************************************************************************
-Ãû³Æ£ºARQ ÎÕÊÖ×´Ì¬
-ÃèÊö£º±êÊ¶µ±Ç°Á¬½ÓµÄ ARQ ÎÕÊÖ×´Ì¬
+åç§°ï¼šARQ æ¡æ‰‹çŠ¶æ€
+æè¿°ï¼šæ ‡è¯†å½“å‰è¿æ¥çš„ ARQ æ¡æ‰‹çŠ¶æ€
 ************************************************************************/
 enum EnArqHandShakeStatus
 {
-	ARQ_HSS_INIT	= 0,	// ³õÊ¼×´Ì¬
-	ARQ_HSS_PROC	= 1,	// ÕıÔÚÎÕÊÖ
-	ARQ_HSS_SUCC	= 2,	// ÎÕÊÖ³É¹¦
+	ARQ_HSS_INIT	= 0,	// åˆå§‹çŠ¶æ€
+	ARQ_HSS_PROC	= 1,	// æ­£åœ¨æ¡æ‰‹
+	ARQ_HSS_SUCC	= 2,	// æ¡æ‰‹æˆåŠŸ
 };
 
 struct TArqCmd

@@ -1,9 +1,9 @@
-/*
+ï»¿/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
  * Website	: https://github.com/ldcsaa
- * Project	: https://github.com/ldcsaa/HP-Socket/HP-Socket
+ * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
  * QQ Group	: 44636872, 75375912
@@ -23,42 +23,50 @@
  
 #pragma once
 
-/* HP-Socket °æ±¾ºÅ */
-#define HP_VERSION_MAJOR		5	// Ö÷°æ±¾ºÅ
-#define HP_VERSION_MINOR		7	// ×Ó°æ±¾ºÅ
-#define HP_VERSION_REVISE		2	// ÐÞÕý°æ±¾ºÅ
-#define HP_VERSION_BUILD		1	// ¹¹½¨±àºÅ
+/* HP-Socket ç‰ˆæœ¬å· */
+#define HP_VERSION_MAJOR		5	// ä¸»ç‰ˆæœ¬å·
+#define HP_VERSION_MINOR		7	// å­ç‰ˆæœ¬å·
+#define HP_VERSION_REVISE		3	// ä¿®æ­£ç‰ˆæœ¬å·
+#define HP_VERSION_BUILD		2	// æž„å»ºç¼–å·
 
-//#define _UDP_DISABLED				// ½ûÓÃ UDP
-//#define _SSL_DISABLED				// ½ûÓÃ SSL
-//#define _HTTP_DISABLED			// ½ûÓÃ HTTP
-//#define _ZLIB_DISABLED			// ½ûÓÃ ZLIB
+//#define _UDP_DISABLED				// ç¦ç”¨ UDP
+//#define _SSL_DISABLED				// ç¦ç”¨ SSL
+//#define _HTTP_DISABLED			// ç¦ç”¨ HTTP
+//#define _ZLIB_DISABLED			// ç¦ç”¨ ZLIB
+//#define _BROTLI_DISABLED			// ç¦ç”¨ BROTLI
 
-/* ÊÇ·ñÆôÓÃ UDP£¬Èç¹û¶¨ÒåÁË _UDP_DISABLED Ôò½ûÓÃ£¨Ä¬ÈÏ£ºÆôÓÃ£© */
+/* æ˜¯å¦å¯ç”¨ UDPï¼Œå¦‚æžœå®šä¹‰äº† _UDP_DISABLED åˆ™ç¦ç”¨ï¼ˆé»˜è®¤ï¼šå¯ç”¨ï¼‰ */
 #if !defined(_UDP_DISABLED)
 	#ifndef _UDP_SUPPORT
 		#define _UDP_SUPPORT
 	#endif
 #endif
 
-/* ÊÇ·ñÆôÓÃ SSL£¬Èç¹û¶¨ÒåÁË _SSL_DISABLED Ôò½ûÓÃ£¨Ä¬ÈÏ£ºÆôÓÃ£© */
+/* æ˜¯å¦å¯ç”¨ SSLï¼Œå¦‚æžœå®šä¹‰äº† _SSL_DISABLED åˆ™ç¦ç”¨ï¼ˆé»˜è®¤ï¼šå¯ç”¨ï¼‰ */
 #if !defined(_SSL_DISABLED)
 	#ifndef _SSL_SUPPORT
 		#define _SSL_SUPPORT
 	#endif
 #endif
 
-/* ÊÇ·ñÆôÓÃ HTTP£¬Èç¹û¶¨ÒåÁË _HTTP_DISABLED Ôò½ûÓÃ£¨Ä¬ÈÏ£ºÆôÓÃ£© */
+/* æ˜¯å¦å¯ç”¨ HTTPï¼Œå¦‚æžœå®šä¹‰äº† _HTTP_DISABLED åˆ™ç¦ç”¨ï¼ˆé»˜è®¤ï¼šå¯ç”¨ï¼‰ */
 #if !defined(_HTTP_DISABLED)
 	#ifndef _HTTP_SUPPORT
 		#define _HTTP_SUPPORT
 	#endif
 #endif
 
-/* ÊÇ·ñÆôÓÃ ZLIB£¬Èç¹û¶¨ÒåÁË _ZLIB_DISABLED Ôò½ûÓÃ£¨Ä¬ÈÏ£ºÆôÓÃ£© */
+/* æ˜¯å¦å¯ç”¨ ZLIBï¼Œå¦‚æžœå®šä¹‰äº† _ZLIB_DISABLED åˆ™ç¦ç”¨ï¼ˆé»˜è®¤ï¼šå¯ç”¨ï¼‰ */
 #if !defined(_ZLIB_DISABLED)
 	#ifndef _ZLIB_SUPPORT
 		#define _ZLIB_SUPPORT
+	#endif
+#endif
+
+/* æ˜¯å¦å¯ç”¨ BROTLIï¼Œå¦‚æžœå®šä¹‰äº† _BROTLI_DISABLED åˆ™ç¦ç”¨ï¼ˆé»˜è®¤ï¼šå¯ç”¨ï¼‰ */
+#if !defined(_BROTLI_DISABLED)
+	#ifndef _BROTLI_SUPPORT
+		#define _BROTLI_SUPPORT
 	#endif
 #endif
 
@@ -84,26 +92,26 @@
 typedef const BYTE*	LPCBYTE, PCBYTE;
 
 /************************************************************************
-Ãû³Æ£ºÁ¬½Ó ID Êý¾ÝÀàÐÍ
-ÃèÊö£ºÓ¦ÓÃ³ÌÐò¿ÉÒÔ°Ñ CONNID ¶¨ÒåÎª×ÔÉíÐèÒªµÄÀàÐÍ£¨Èç£ºULONG / ULONGLONG£©
+åç§°ï¼šè¿žæŽ¥ ID æ•°æ®ç±»åž‹
+æè¿°ï¼šåº”ç”¨ç¨‹åºå¯ä»¥æŠŠ CONNID å®šä¹‰ä¸ºè‡ªèº«éœ€è¦çš„ç±»åž‹ï¼ˆå¦‚ï¼šULONG / ULONGLONGï¼‰
 ************************************************************************/
 typedef ULONG_PTR	CONNID, HP_CONNID;
 
 /************************************************************************
-Ãû³Æ£ºÍ¨ÐÅ×é¼þ·þÎñ×´Ì¬
-ÃèÊö£ºÓ¦ÓÃ³ÌÐò¿ÉÒÔÍ¨¹ýÍ¨ÐÅ×é¼þµÄ GetState() ·½·¨»ñÈ¡×é¼þµ±Ç°·þÎñ×´Ì¬
+åç§°ï¼šé€šä¿¡ç»„ä»¶æœåŠ¡çŠ¶æ€
+æè¿°ï¼šåº”ç”¨ç¨‹åºå¯ä»¥é€šè¿‡é€šä¿¡ç»„ä»¶çš„ GetState() æ–¹æ³•èŽ·å–ç»„ä»¶å½“å‰æœåŠ¡çŠ¶æ€
 ************************************************************************/
 typedef enum EnServiceState
 {
-	SS_STARTING	= 0,	// ÕýÔÚÆô¶¯
-	SS_STARTED	= 1,	// ÒÑ¾­Æô¶¯
-	SS_STOPPING	= 2,	// ÕýÔÚÍ£Ö¹
-	SS_STOPPED	= 3,	// ÒÑ¾­Í£Ö¹
+	SS_STARTING	= 0,	// æ­£åœ¨å¯åŠ¨
+	SS_STARTED	= 1,	// å·²ç»å¯åŠ¨
+	SS_STOPPING	= 2,	// æ­£åœ¨åœæ­¢
+	SS_STOPPED	= 3,	// å·²ç»åœæ­¢
 } En_HP_ServiceState;
 
 /************************************************************************
-Ãû³Æ£ºSocket ²Ù×÷ÀàÐÍ
-ÃèÊö£ºÓ¦ÓÃ³ÌÐòµÄ OnClose() ÊÂ¼þÖÐÍ¨¹ý¸Ã²ÎÊý±êÊ¶ÊÇÄÄÖÖ²Ù×÷µ¼ÖÂµÄ´íÎó
+åç§°ï¼šSocket æ“ä½œç±»åž‹
+æè¿°ï¼šåº”ç”¨ç¨‹åºçš„ OnClose() äº‹ä»¶ä¸­é€šè¿‡è¯¥å‚æ•°æ ‡è¯†æ˜¯å“ªç§æ“ä½œå¯¼è‡´çš„é”™è¯¯
 ************************************************************************/
 typedef enum EnSocketOperation
 {
@@ -116,119 +124,119 @@ typedef enum EnSocketOperation
 } En_HP_SocketOperation;
 
 /************************************************************************
-Ãû³Æ£ºÊÂ¼þ´¦Àí½á¹û
-ÃèÊö£ºÊÂ¼þµÄ·µ»ØÖµ£¬²»Í¬µÄ·µ»ØÖµ»áÓ°ÏìÍ¨ÐÅ×é¼þµÄºóÐøÐÐÎª
+åç§°ï¼šäº‹ä»¶å¤„ç†ç»“æžœ
+æè¿°ï¼šäº‹ä»¶çš„è¿”å›žå€¼ï¼Œä¸åŒçš„è¿”å›žå€¼ä¼šå½±å“é€šä¿¡ç»„ä»¶çš„åŽç»­è¡Œä¸º
 ************************************************************************/
 typedef enum EnHandleResult
 {
-	HR_OK		= 0,	// ³É¹¦
-	HR_IGNORE	= 1,	// ºöÂÔ
-	HR_ERROR	= 2,	// ´íÎó
+	HR_OK		= 0,	// æˆåŠŸ
+	HR_IGNORE	= 1,	// å¿½ç•¥
+	HR_ERROR	= 2,	// é”™è¯¯
 } En_HP_HandleResult;
 
 /************************************************************************
-Ãû³Æ£ºÊý¾Ý×¥È¡½á¹û
-ÃèÊö£ºÊý¾Ý×¥È¡²Ù×÷µÄ·µ»ØÖµ
+åç§°ï¼šæ•°æ®æŠ“å–ç»“æžœ
+æè¿°ï¼šæ•°æ®æŠ“å–æ“ä½œçš„è¿”å›žå€¼
 ************************************************************************/
 typedef enum EnFetchResult
 {
-	FR_OK				= 0,	// ³É¹¦
-	FR_LENGTH_TOO_LONG	= 1,	// ×¥È¡³¤¶È¹ý´ó
-	FR_DATA_NOT_FOUND	= 2,	// ÕÒ²»µ½ ConnID ¶ÔÓ¦µÄÊý¾Ý
+	FR_OK				= 0,	// æˆåŠŸ
+	FR_LENGTH_TOO_LONG	= 1,	// æŠ“å–é•¿åº¦è¿‡å¤§
+	FR_DATA_NOT_FOUND	= 2,	// æ‰¾ä¸åˆ° ConnID å¯¹åº”çš„æ•°æ®
 } En_HP_FetchResult;
 
 /************************************************************************
-Ãû³Æ£ºÊý¾Ý·¢ËÍ²ßÂÔ
-ÃèÊö£ºServer ×é¼þºÍ Agent ×é¼þµÄÊý¾Ý·¢ËÍ²ßÂÔ
+åç§°ï¼šæ•°æ®å‘é€ç­–ç•¥
+æè¿°ï¼šServer ç»„ä»¶å’Œ Agent ç»„ä»¶çš„æ•°æ®å‘é€ç­–ç•¥
 
-* ´ò°ü·¢ËÍ²ßÂÔ£¨Ä¬ÈÏ£©	£º¾¡Á¿°Ñ¶à¸ö·¢ËÍ²Ù×÷µÄÊý¾Ý×éºÏÔÚÒ»Æð·¢ËÍ£¬Ôö¼Ó´«ÊäÐ§ÂÊ
-* °²È«·¢ËÍ²ßÂÔ			£º¾¡Á¿°Ñ¶à¸ö·¢ËÍ²Ù×÷µÄÊý¾Ý×éºÏÔÚÒ»Æð·¢ËÍ£¬²¢¿ØÖÆ´«ÊäËÙ¶È£¬±ÜÃâ»º³åÇøÒç³ö
-* Ö±½Ó·¢ËÍ²ßÂÔ			£º¶ÔÃ¿Ò»¸ö·¢ËÍ²Ù×÷¶¼Ö±½ÓÍ¶µÝ£¬ÊÊÓÃÓÚ¸ºÔØ²»¸ßµ«ÒªÇóÊµÊ±ÐÔ½Ï¸ßµÄ³¡ºÏ
+* æ‰“åŒ…å‘é€ç­–ç•¥ï¼ˆé»˜è®¤ï¼‰	ï¼šå°½é‡æŠŠå¤šä¸ªå‘é€æ“ä½œçš„æ•°æ®ç»„åˆåœ¨ä¸€èµ·å‘é€ï¼Œå¢žåŠ ä¼ è¾“æ•ˆçŽ‡
+* å®‰å…¨å‘é€ç­–ç•¥			ï¼šå°½é‡æŠŠå¤šä¸ªå‘é€æ“ä½œçš„æ•°æ®ç»„åˆåœ¨ä¸€èµ·å‘é€ï¼Œå¹¶æŽ§åˆ¶ä¼ è¾“é€Ÿåº¦ï¼Œé¿å…ç¼“å†²åŒºæº¢å‡º
+* ç›´æŽ¥å‘é€ç­–ç•¥			ï¼šå¯¹æ¯ä¸€ä¸ªå‘é€æ“ä½œéƒ½ç›´æŽ¥æŠ•é€’ï¼Œé€‚ç”¨äºŽè´Ÿè½½ä¸é«˜ä½†è¦æ±‚å®žæ—¶æ€§è¾ƒé«˜çš„åœºåˆ
 ************************************************************************/
 typedef enum EnSendPolicy
 {
-	SP_PACK				= 0,	// ´ò°üÄ£Ê½£¨Ä¬ÈÏ£©
-	SP_SAFE				= 1,	// °²È«Ä£Ê½
-	SP_DIRECT			= 2,	// Ö±½ÓÄ£Ê½
+	SP_PACK				= 0,	// æ‰“åŒ…æ¨¡å¼ï¼ˆé»˜è®¤ï¼‰
+	SP_SAFE				= 1,	// å®‰å…¨æ¨¡å¼
+	SP_DIRECT			= 2,	// ç›´æŽ¥æ¨¡å¼
 } En_HP_SendPolicy;
 
 /************************************************************************
-Ãû³Æ£ºOnSend ÊÂ¼þÍ¬²½²ßÂÔ
-ÃèÊö£ºServer ×é¼þºÍ Agent ×é¼þµÄ OnSend ÊÂ¼þÍ¬²½²ßÂÔ
+åç§°ï¼šOnSend äº‹ä»¶åŒæ­¥ç­–ç•¥
+æè¿°ï¼šServer ç»„ä»¶å’Œ Agent ç»„ä»¶çš„ OnSend äº‹ä»¶åŒæ­¥ç­–ç•¥
 
-* ²»Í¬²½£¨Ä¬ÈÏ£©	£º²»Í¬²½ OnSend ÊÂ¼þ£¬¿ÉÄÜÍ¬Ê±´¥·¢ OnReceive ºÍ OnClose ÊÂ¼þ
-* Í¬²½ OnClose	£ºÖ»Í¬²½ OnClose ÊÂ¼þ£¬¿ÉÄÜÍ¬Ê±´¥·¢ OnReceive ÊÂ¼þ
-* Í¬²½ OnReceive	£º£¨Ö»ÓÃÓÚ TCP ×é¼þ£©Í¬²½ OnReceive ºÍ OnClose ÊÂ¼þ£¬²»¿ÉÄÜÍ¬Ê±´¥·¢ OnReceive »ò OnClose ÊÂ¼þ
+* ä¸åŒæ­¥ï¼ˆé»˜è®¤ï¼‰	ï¼šä¸åŒæ­¥ OnSend äº‹ä»¶ï¼Œå¯èƒ½åŒæ—¶è§¦å‘ OnReceive å’Œ OnClose äº‹ä»¶
+* åŒæ­¥ OnClose	ï¼šåªåŒæ­¥ OnClose äº‹ä»¶ï¼Œå¯èƒ½åŒæ—¶è§¦å‘ OnReceive äº‹ä»¶
+* åŒæ­¥ OnReceive	ï¼šï¼ˆåªç”¨äºŽ TCP ç»„ä»¶ï¼‰åŒæ­¥ OnReceive å’Œ OnClose äº‹ä»¶ï¼Œä¸å¯èƒ½åŒæ—¶è§¦å‘ OnReceive æˆ– OnClose äº‹ä»¶
 ************************************************************************/
 typedef enum EnOnSendSyncPolicy
 {
-	OSSP_NONE			= 0,	// ²»Í¬²½£¨Ä¬ÈÏ£©
-	OSSP_CLOSE			= 1,	// Í¬²½ OnClose
-	OSSP_RECEIVE		= 2,	// Í¬²½ OnReceive£¨Ö»ÓÃÓÚ TCP ×é¼þ£©	
+	OSSP_NONE			= 0,	// ä¸åŒæ­¥ï¼ˆé»˜è®¤ï¼‰
+	OSSP_CLOSE			= 1,	// åŒæ­¥ OnClose
+	OSSP_RECEIVE		= 2,	// åŒæ­¥ OnReceiveï¼ˆåªç”¨äºŽ TCP ç»„ä»¶ï¼‰	
 } En_HP_OnSendSyncPolicy;
 
 /************************************************************************
-Ãû³Æ£ºµØÖ·ÖØÓÃÑ¡Ïî
-ÃèÊö£ºÍ¨ÐÅ×é¼þµ×²ã socket µÄµØÖ·ÖØÓÃÑ¡Ïî
+åç§°ï¼šåœ°å€é‡ç”¨é€‰é¡¹
+æè¿°ï¼šé€šä¿¡ç»„ä»¶åº•å±‚ socket çš„åœ°å€é‡ç”¨é€‰é¡¹
 ************************************************************************/
 typedef enum EnReuseAddressPolicy
 {
-	RAP_NONE			= 0,	// ²»ÖØÓÃ
-	RAP_ADDR_ONLY		= 1,	// ½öÖØÓÃµØÖ·
-	RAP_ADDR_AND_PORT	= 2,	// ÖØÓÃµØÖ·ºÍ¶Ë¿Ú
+	RAP_NONE			= 0,	// ä¸é‡ç”¨
+	RAP_ADDR_ONLY		= 1,	// ä»…é‡ç”¨åœ°å€
+	RAP_ADDR_AND_PORT	= 2,	// é‡ç”¨åœ°å€å’Œç«¯å£
 } En_HP_ReuseAddressPolicy;
 
 /************************************************************************
-Ãû³Æ£º²Ù×÷½á¹û´úÂë
-ÃèÊö£º×é¼þ Start() / Stop() ·½·¨Ö´ÐÐÊ§°ÜÊ±£¬¿ÉÍ¨¹ý GetLastError() »ñÈ¡´íÎó´úÂë
+åç§°ï¼šæ“ä½œç»“æžœä»£ç 
+æè¿°ï¼šç»„ä»¶ Start() / Stop() æ–¹æ³•æ‰§è¡Œå¤±è´¥æ—¶ï¼Œå¯é€šè¿‡ GetLastError() èŽ·å–é”™è¯¯ä»£ç 
 ************************************************************************/
 typedef enum EnSocketError
 {
-	SE_OK						= NO_ERROR,	// ³É¹¦
-	SE_ILLEGAL_STATE			= 1,		// µ±Ç°×´Ì¬²»ÔÊÐí²Ù×÷
-	SE_INVALID_PARAM			= 2,		// ·Ç·¨²ÎÊý
-	SE_SOCKET_CREATE			= 3,		// ´´½¨ SOCKET Ê§°Ü
-	SE_SOCKET_BIND				= 4,		// °ó¶¨ SOCKET Ê§°Ü
-	SE_SOCKET_PREPARE			= 5,		// ÉèÖÃ SOCKET Ê§°Ü
-	SE_SOCKET_LISTEN			= 6,		// ¼àÌý SOCKET Ê§°Ü
-	SE_CP_CREATE				= 7,		// ´´½¨Íê³É¶Ë¿ÚÊ§°Ü
-	SE_WORKER_THREAD_CREATE		= 8,		// ´´½¨¹¤×÷Ïß³ÌÊ§°Ü
-	SE_DETECT_THREAD_CREATE		= 9,		// ´´½¨¼à²âÏß³ÌÊ§°Ü
-	SE_SOCKE_ATTACH_TO_CP		= 10,		// °ó¶¨Íê³É¶Ë¿ÚÊ§°Ü
-	SE_CONNECT_SERVER			= 11,		// Á¬½Ó·þÎñÆ÷Ê§°Ü
-	SE_NETWORK					= 12,		// ÍøÂç´íÎó
-	SE_DATA_PROC				= 13,		// Êý¾Ý´¦Àí´íÎó
-	SE_DATA_SEND				= 14,		// Êý¾Ý·¢ËÍÊ§°Ü
+	SE_OK						= NO_ERROR,	// æˆåŠŸ
+	SE_ILLEGAL_STATE			= 1,		// å½“å‰çŠ¶æ€ä¸å…è®¸æ“ä½œ
+	SE_INVALID_PARAM			= 2,		// éžæ³•å‚æ•°
+	SE_SOCKET_CREATE			= 3,		// åˆ›å»º SOCKET å¤±è´¥
+	SE_SOCKET_BIND				= 4,		// ç»‘å®š SOCKET å¤±è´¥
+	SE_SOCKET_PREPARE			= 5,		// è®¾ç½® SOCKET å¤±è´¥
+	SE_SOCKET_LISTEN			= 6,		// ç›‘å¬ SOCKET å¤±è´¥
+	SE_CP_CREATE				= 7,		// åˆ›å»ºå®Œæˆç«¯å£å¤±è´¥
+	SE_WORKER_THREAD_CREATE		= 8,		// åˆ›å»ºå·¥ä½œçº¿ç¨‹å¤±è´¥
+	SE_DETECT_THREAD_CREATE		= 9,		// åˆ›å»ºç›‘æµ‹çº¿ç¨‹å¤±è´¥
+	SE_SOCKE_ATTACH_TO_CP		= 10,		// ç»‘å®šå®Œæˆç«¯å£å¤±è´¥
+	SE_CONNECT_SERVER			= 11,		// è¿žæŽ¥æœåŠ¡å™¨å¤±è´¥
+	SE_NETWORK					= 12,		// ç½‘ç»œé”™è¯¯
+	SE_DATA_PROC				= 13,		// æ•°æ®å¤„ç†é”™è¯¯
+	SE_DATA_SEND				= 14,		// æ•°æ®å‘é€å¤±è´¥
 
-	/***** SSL Socket À©Õ¹²Ù×÷½á¹û´úÂë *****/
-	SE_SSL_ENV_NOT_READY		= 101,		// SSL »·¾³Î´¾ÍÐ÷
+	/***** SSL Socket æ‰©å±•æ“ä½œç»“æžœä»£ç  *****/
+	SE_SSL_ENV_NOT_READY		= 101,		// SSL çŽ¯å¢ƒæœªå°±ç»ª
 } En_HP_SocketError;
 
 /************************************************************************
-Ãû³Æ£º²¥ËÍÄ£Ê½
-ÃèÊö£ºUDP ×é¼þµÄ²¥ËÍÄ£Ê½£¨×é²¥»ò¹ã²¥£©
+åç§°ï¼šæ’­é€æ¨¡å¼
+æè¿°ï¼šUDP ç»„ä»¶çš„æ’­é€æ¨¡å¼ï¼ˆç»„æ’­æˆ–å¹¿æ’­ï¼‰
 ************************************************************************/
 typedef enum EnCastMode
 {
-	CM_UNICAST		= -1,	// µ¥²¥
-	CM_MULTICAST	= 0,	// ×é²¥
-	CM_BROADCAST	= 1,	// ¹ã²¥
+	CM_UNICAST		= -1,	// å•æ’­
+	CM_MULTICAST	= 0,	// ç»„æ’­
+	CM_BROADCAST	= 1,	// å¹¿æ’­
 } En_HP_CastMode;
 
 /************************************************************************
-Ãû³Æ£ºIP µØÖ·ÀàÐÍ
-ÃèÊö£ºIP µØÖ·ÀàÐÍÃ¶¾ÙÖµ
+åç§°ï¼šIP åœ°å€ç±»åž‹
+æè¿°ï¼šIP åœ°å€ç±»åž‹æžšä¸¾å€¼
 ************************************************************************/
 typedef enum EnIPAddrType
 {
-	IPT_ALL		= 0,		// ËùÓÐ
+	IPT_ALL		= 0,		// æ‰€æœ‰
 	IPT_IPV4	= 1,		// IPv4
 	IPT_IPV6	= 2,		// IPv6
 } En_HP_IPAddrType;
 
 /************************************************************************
-Ãû³Æ£ºIP µØÖ·ÌõÄ¿½á¹¹Ìå
-ÃèÊö£ºIP µØÖ·µÄµØÖ·´Ø/µØÖ·Öµ½á¹¹Ìå
+åç§°ï¼šIP åœ°å€æ¡ç›®ç»“æž„ä½“
+æè¿°ï¼šIP åœ°å€çš„åœ°å€ç°‡/åœ°å€å€¼ç»“æž„ä½“
 ************************************************************************/
 typedef struct TIPAddr
 {
@@ -237,32 +245,32 @@ typedef struct TIPAddr
 } *LPTIPAddr, HP_TIPAddr, *HP_LPTIPAddr;
 
 /************************************************************************
-Ãû³Æ£º¾Ü¾ø²ßÂÔ
-ÃèÊö£ºµ÷ÓÃ±»¾Ü¾øºóµÄ´¦Àí²ßÂÔ
+åç§°ï¼šæ‹’ç»ç­–ç•¥
+æè¿°ï¼šè°ƒç”¨è¢«æ‹’ç»åŽçš„å¤„ç†ç­–ç•¥
 ************************************************************************/
 typedef enum EnRejectedPolicy
 {
-	TRP_CALL_FAIL	= 0,	// Á¢¿Ì·µ»ØÊ§°Ü
-	TRP_WAIT_FOR	= 1,	// µÈ´ý£¨Ö±µ½³É¹¦¡¢³¬Ê±»òÏß³Ì³Ø¹Ø±ÕµÈÔ­Òòµ¼ÖÂÊ§°Ü£©
-	TRP_CALLER_RUN	= 2,	// µ÷ÓÃÕßÏß³ÌÖ±½ÓÖ´ÐÐ
+	TRP_CALL_FAIL	= 0,	// ç«‹åˆ»è¿”å›žå¤±è´¥
+	TRP_WAIT_FOR	= 1,	// ç­‰å¾…ï¼ˆç›´åˆ°æˆåŠŸã€è¶…æ—¶æˆ–çº¿ç¨‹æ± å…³é—­ç­‰åŽŸå› å¯¼è‡´å¤±è´¥ï¼‰
+	TRP_CALLER_RUN	= 2,	// è°ƒç”¨è€…çº¿ç¨‹ç›´æŽ¥æ‰§è¡Œ
 } En_HP_RejectedPolicy;
 
 /************************************************************************
-Ãû³Æ£ºÈÎÎñ»º³åÇøÀàÐÍ
-ÃèÊö£ºTSockeTask ¶ÔÏó´´½¨ºÍÏú»ÙÊ±£¬¸ù¾Ý²»Í¬ÀàÐÍµÄ»º³åÇøÀàÐÍ×÷²»Í¬µÄ´¦Àí
+åç§°ï¼šä»»åŠ¡ç¼“å†²åŒºç±»åž‹
+æè¿°ï¼šTSockeTask å¯¹è±¡åˆ›å»ºå’Œé”€æ¯æ—¶ï¼Œæ ¹æ®ä¸åŒç±»åž‹çš„ç¼“å†²åŒºç±»åž‹ä½œä¸åŒçš„å¤„ç†
 ************************************************************************/
 typedef enum EnTaskBufferType
 {
-	TBT_COPY	= 0,	// Éî¿½±´
-	TBT_REFER	= 1,	// Ç³¿½±´
-	TBT_ATTACH	= 2,	// ¸½Êô£¨²»¸ºÔð´´½¨£¬µ«¸ºÔðÏú»Ù£©
+	TBT_COPY	= 0,	// æ·±æ‹·è´
+	TBT_REFER	= 1,	// æµ…æ‹·è´
+	TBT_ATTACH	= 2,	// é™„å±žï¼ˆä¸è´Ÿè´£åˆ›å»ºï¼Œä½†è´Ÿè´£é”€æ¯ï¼‰
 } En_HP_TaskBufferType;
 
 /************************************************************************
-Ãû³Æ£ºÈÎÎñ´¦Àíº¯Êý
-ÃèÊö£ºÈÎÎñ´¦ÀíÈë¿Úº¯Êý
-²ÎÊý£ºpvArg -- ×Ô¶¨Òå²ÎÊý
-·µ»ØÖµ£º£¨ÎÞ£©
+åç§°ï¼šä»»åŠ¡å¤„ç†å‡½æ•°
+æè¿°ï¼šä»»åŠ¡å¤„ç†å…¥å£å‡½æ•°
+å‚æ•°ï¼špvArg -- è‡ªå®šä¹‰å‚æ•°
+è¿”å›žå€¼ï¼šï¼ˆæ— ï¼‰
 ************************************************************************/
 typedef VOID (__HP_CALL *Fn_TaskProc)(PVOID pvArg);
 typedef Fn_TaskProc	HP_Fn_TaskProc;
@@ -270,33 +278,33 @@ typedef Fn_TaskProc	HP_Fn_TaskProc;
 struct TSocketTask;
 
 /************************************************************************
-Ãû³Æ£ºSocket ÈÎÎñ´¦Àíº¯Êý
-ÃèÊö£ºSocket ÈÎÎñ´¦ÀíÈë¿Úº¯Êý
-²ÎÊý£ºpTask -- Socket ÈÎÎñ½á¹¹ÌåÖ¸Õë
-·µ»ØÖµ£º£¨ÎÞ£©
+åç§°ï¼šSocket ä»»åŠ¡å¤„ç†å‡½æ•°
+æè¿°ï¼šSocket ä»»åŠ¡å¤„ç†å…¥å£å‡½æ•°
+å‚æ•°ï¼špTask -- Socket ä»»åŠ¡ç»“æž„ä½“æŒ‡é’ˆ
+è¿”å›žå€¼ï¼šï¼ˆæ— ï¼‰
 ************************************************************************/
 typedef VOID (__HP_CALL *Fn_SocketTaskProc)(TSocketTask* pTask);
 typedef Fn_SocketTaskProc	HP_Fn_SocketTaskProc;
 
 /************************************************************************
-Ãû³Æ£ºSocket ÈÎÎñ½á¹¹Ìå
-ÃèÊö£º·â×° Socket ÈÎÎñÏà¹ØÊý¾Ý½á¹¹
+åç§°ï¼šSocket ä»»åŠ¡ç»“æž„ä½“
+æè¿°ï¼šå°è£… Socket ä»»åŠ¡ç›¸å…³æ•°æ®ç»“æž„
 ************************************************************************/
 typedef struct TSocketTask
 {
-	Fn_SocketTaskProc	fn;			// ÈÎÎñ´¦Àíº¯Êý
-	PVOID				sender;		// ·¢Æð¶ÔÏó
-	CONNID				connID;		// Á¬½Ó ID
-	LPCBYTE				buf;		// Êý¾Ý»º³åÇø
-	INT					bufLen;		// Êý¾Ý»º³åÇø³¤¶È
-	EnTaskBufferType	bufType;	// »º³åÇøÀàÐÍ
-	WPARAM				wparam;		// ×Ô¶¨Òå²ÎÊý
-	LPARAM				lparam;		// ×Ô¶¨Òå²ÎÊý
+	Fn_SocketTaskProc	fn;			// ä»»åŠ¡å¤„ç†å‡½æ•°
+	PVOID				sender;		// å‘èµ·å¯¹è±¡
+	CONNID				connID;		// è¿žæŽ¥ ID
+	LPCBYTE				buf;		// æ•°æ®ç¼“å†²åŒº
+	INT					bufLen;		// æ•°æ®ç¼“å†²åŒºé•¿åº¦
+	EnTaskBufferType	bufType;	// ç¼“å†²åŒºç±»åž‹
+	WPARAM				wparam;		// è‡ªå®šä¹‰å‚æ•°
+	LPARAM				lparam;		// è‡ªå®šä¹‰å‚æ•°
 } *LPTSocketTask, HP_TSocketTask, *HP_LPTSocketTask;
 
 /************************************************************************
-Ãû³Æ£º»ñÈ¡ HPSocket °æ±¾ºÅ
-ÃèÊö£º°æ±¾ºÅ£¨4 ¸ö×Ö½Ú·Ö±ðÎª£ºÖ÷°æ±¾ºÅ£¬×Ó°æ±¾ºÅ£¬ÐÞÕý°æ±¾ºÅ£¬¹¹½¨±àºÅ£©
+åç§°ï¼šèŽ·å– HPSocket ç‰ˆæœ¬å·
+æè¿°ï¼šç‰ˆæœ¬å·ï¼ˆ4 ä¸ªå­—èŠ‚åˆ†åˆ«ä¸ºï¼šä¸»ç‰ˆæœ¬å·ï¼Œå­ç‰ˆæœ¬å·ï¼Œä¿®æ­£ç‰ˆæœ¬å·ï¼Œæž„å»ºç¼–å·ï¼‰
 ************************************************************************/
 inline DWORD GetHPSocketVersion()
 {
@@ -310,18 +318,18 @@ inline DWORD GetHPSocketVersion()
 #ifdef _SSL_SUPPORT
 
 /************************************************************************
-Ãû³Æ£ºSSL ¹¤×÷Ä£Ê½
-ÃèÊö£º±êÊ¶ SSL µÄ¹¤×÷Ä£Ê½£¬¿Í»§¶ËÄ£Ê½»ò·þÎñ¶ËÄ£Ê½
+åç§°ï¼šSSL å·¥ä½œæ¨¡å¼
+æè¿°ï¼šæ ‡è¯† SSL çš„å·¥ä½œæ¨¡å¼ï¼Œå®¢æˆ·ç«¯æ¨¡å¼æˆ–æœåŠ¡ç«¯æ¨¡å¼
 ************************************************************************/
 typedef enum EnSSLSessionMode
 {
-	SSL_SM_CLIENT	= 0,	// ¿Í»§¶ËÄ£Ê½
-	SSL_SM_SERVER	= 1,	// ·þÎñ¶ËÄ£Ê½
+	SSL_SM_CLIENT	= 0,	// å®¢æˆ·ç«¯æ¨¡å¼
+	SSL_SM_SERVER	= 1,	// æœåŠ¡ç«¯æ¨¡å¼
 } En_HP_SSLSessionMode;
 
 /************************************************************************
-Ãû³Æ£ºSSL ÑéÖ¤Ä£Ê½
-ÃèÊö£ºSSL ÑéÖ¤Ä£Ê½Ñ¡Ïî£¬SSL_VM_PEER ¿ÉÒÔºÍºóÃæÁ½¸öÑ¡Ïî×éºÏÒ»Æð
+åç§°ï¼šSSL éªŒè¯æ¨¡å¼
+æè¿°ï¼šSSL éªŒè¯æ¨¡å¼é€‰é¡¹ï¼ŒSSL_VM_PEER å¯ä»¥å’ŒåŽé¢ä¸¤ä¸ªé€‰é¡¹ç»„åˆä¸€èµ·
 ************************************************************************/
 typedef enum EnSSLVerifyMode
 {
@@ -332,41 +340,41 @@ typedef enum EnSSLVerifyMode
 } En_HP_SSLVerifyMode;
 
 /************************************************************************
-Ãû³Æ£ºSSL Session ÐÅÏ¢ÀàÐÍ
-ÃèÊö£ºÓÃÓÚ GetSSLSessionInfo()£¬±êÊ¶Êä³öµÄ Session ÐÅÏ¢ÀàÐÍ
+åç§°ï¼šSSL Session ä¿¡æ¯ç±»åž‹
+æè¿°ï¼šç”¨äºŽ GetSSLSessionInfo()ï¼Œæ ‡è¯†è¾“å‡ºçš„ Session ä¿¡æ¯ç±»åž‹
 ************************************************************************/
 typedef enum EnSSLSessionInfo
 {
 	SSL_SSI_MIN					= 0,	// 
-	SSL_SSI_CTX					= 0,	// SSL CTX				£¨Êä³öÀàÐÍ£ºSSL_CTX*£©
-	SSL_SSI_CTX_METHOD			= 1,	// SSL CTX Mehtod		£¨Êä³öÀàÐÍ£ºSSL_METHOD*£©
-	SSL_SSI_CTX_CIPHERS			= 2,	// SSL CTX Ciphers		£¨Êä³öÀàÐÍ£ºSTACK_OF(SSL_CIPHER)*£©
-	SSL_SSI_CTX_CERT_STORE		= 3,	// SSL CTX Cert Store	£¨Êä³öÀàÐÍ£ºX509_STORE*£©
-	SSL_SSI_SERVER_NAME_TYPE	= 4,	// Server Name Type		£¨Êä³öÀàÐÍ£ºint£©
-	SSL_SSI_SERVER_NAME			= 5,	// Server Name			£¨Êä³öÀàÐÍ£ºLPCSTR£©
-	SSL_SSI_VERSION				= 6,	// SSL Version			£¨Êä³öÀàÐÍ£ºLPCSTR£©
-	SSL_SSI_METHOD				= 7,	// SSL Method			£¨Êä³öÀàÐÍ£ºSSL_METHOD*£©
-	SSL_SSI_CERT				= 8,	// SSL Cert				£¨Êä³öÀàÐÍ£ºX509*£©
-	SSL_SSI_PKEY				= 9,	// SSL Private Key		£¨Êä³öÀàÐÍ£ºEVP_PKEY*£©
-	SSL_SSI_CURRENT_CIPHER		= 10,	// SSL Current Cipher	£¨Êä³öÀàÐÍ£ºSSL_CIPHER*£©
-	SSL_SSI_CIPHERS				= 11,	// SSL Available Ciphers£¨Êä³öÀàÐÍ£ºSTACK_OF(SSL_CIPHER)*£©
-	SSL_SSI_CLIENT_CIPHERS		= 12,	// SSL Client Ciphers	£¨Êä³öÀàÐÍ£ºSTACK_OF(SSL_CIPHER)*£©
-	SSL_SSI_PEER_CERT			= 13,	// SSL Peer Cert		£¨Êä³öÀàÐÍ£ºX509*£©
-	SSL_SSI_PEER_CERT_CHAIN		= 14,	// SSL Peer Cert Chain	£¨Êä³öÀàÐÍ£ºSTACK_OF(X509)*£©
-	SSL_SSI_VERIFIED_CHAIN		= 15,	// SSL Verified Chain	£¨Êä³öÀàÐÍ£ºSTACK_OF(X509)*£©
+	SSL_SSI_CTX					= 0,	// SSL CTX				ï¼ˆè¾“å‡ºç±»åž‹ï¼šSSL_CTX*ï¼‰
+	SSL_SSI_CTX_METHOD			= 1,	// SSL CTX Mehtod		ï¼ˆè¾“å‡ºç±»åž‹ï¼šSSL_METHOD*ï¼‰
+	SSL_SSI_CTX_CIPHERS			= 2,	// SSL CTX Ciphers		ï¼ˆè¾“å‡ºç±»åž‹ï¼šSTACK_OF(SSL_CIPHER)*ï¼‰
+	SSL_SSI_CTX_CERT_STORE		= 3,	// SSL CTX Cert Store	ï¼ˆè¾“å‡ºç±»åž‹ï¼šX509_STORE*ï¼‰
+	SSL_SSI_SERVER_NAME_TYPE	= 4,	// Server Name Type		ï¼ˆè¾“å‡ºç±»åž‹ï¼šintï¼‰
+	SSL_SSI_SERVER_NAME			= 5,	// Server Name			ï¼ˆè¾“å‡ºç±»åž‹ï¼šLPCSTRï¼‰
+	SSL_SSI_VERSION				= 6,	// SSL Version			ï¼ˆè¾“å‡ºç±»åž‹ï¼šLPCSTRï¼‰
+	SSL_SSI_METHOD				= 7,	// SSL Method			ï¼ˆè¾“å‡ºç±»åž‹ï¼šSSL_METHOD*ï¼‰
+	SSL_SSI_CERT				= 8,	// SSL Cert				ï¼ˆè¾“å‡ºç±»åž‹ï¼šX509*ï¼‰
+	SSL_SSI_PKEY				= 9,	// SSL Private Key		ï¼ˆè¾“å‡ºç±»åž‹ï¼šEVP_PKEY*ï¼‰
+	SSL_SSI_CURRENT_CIPHER		= 10,	// SSL Current Cipher	ï¼ˆè¾“å‡ºç±»åž‹ï¼šSSL_CIPHER*ï¼‰
+	SSL_SSI_CIPHERS				= 11,	// SSL Available Ciphersï¼ˆè¾“å‡ºç±»åž‹ï¼šSTACK_OF(SSL_CIPHER)*ï¼‰
+	SSL_SSI_CLIENT_CIPHERS		= 12,	// SSL Client Ciphers	ï¼ˆè¾“å‡ºç±»åž‹ï¼šSTACK_OF(SSL_CIPHER)*ï¼‰
+	SSL_SSI_PEER_CERT			= 13,	// SSL Peer Cert		ï¼ˆè¾“å‡ºç±»åž‹ï¼šX509*ï¼‰
+	SSL_SSI_PEER_CERT_CHAIN		= 14,	// SSL Peer Cert Chain	ï¼ˆè¾“å‡ºç±»åž‹ï¼šSTACK_OF(X509)*ï¼‰
+	SSL_SSI_VERIFIED_CHAIN		= 15,	// SSL Verified Chain	ï¼ˆè¾“å‡ºç±»åž‹ï¼šSTACK_OF(X509)*ï¼‰
 	SSL_SSI_MAX					= 15,	// 
 } En_HP_SSLSessionInfo;
 
 /************************************************************************
-Ãû³Æ£ºSNI ·þÎñÃû³Æ»Øµ÷º¯Êý
-ÃèÊö£º¸ù¾Ý·þÎñÆ÷Ãû³ÆÑ¡Ôñ SSL Ö¤Êé
-²ÎÊý£º	
-		lpszServerName -- ·þÎñÆ÷Ãû³Æ£¨ÓòÃû£©
+åç§°ï¼šSNI æœåŠ¡åç§°å›žè°ƒå‡½æ•°
+æè¿°ï¼šæ ¹æ®æœåŠ¡å™¨åç§°é€‰æ‹© SSL è¯ä¹¦
+å‚æ•°ï¼š	
+		lpszServerName -- æœåŠ¡å™¨åç§°ï¼ˆåŸŸåï¼‰
 
-·µ»ØÖµ£º
-		0	 -- ³É¹¦£¬Ê¹ÓÃÄ¬ÈÏ SSL Ö¤ÊéË÷Òý
-		ÕýÊý	 -- ³É¹¦£¬Ê¹ÓÃ·µ»ØÖµ¶ÔÓ¦µÄ SNI Ö÷»úÖ¤ÊéË÷Òý
-		¸ºÊý	 -- Ê§°Ü£¬ÖÐ¶Ï SSL ÎÕÊÖ
+è¿”å›žå€¼ï¼š
+		0	 -- æˆåŠŸï¼Œä½¿ç”¨é»˜è®¤ SSL è¯ä¹¦ç´¢å¼•
+		æ­£æ•°	 -- æˆåŠŸï¼Œä½¿ç”¨è¿”å›žå€¼å¯¹åº”çš„ SNI ä¸»æœºè¯ä¹¦ç´¢å¼•
+		è´Ÿæ•°	 -- å¤±è´¥ï¼Œä¸­æ–­ SSL æ¡æ‰‹
 
 ************************************************************************/
 typedef int (__HP_CALL *Fn_SNI_ServerNameCallback)(LPCTSTR lpszServerName, PVOID pContext);
@@ -381,8 +389,8 @@ typedef Fn_SNI_ServerNameCallback	HP_Fn_SNI_ServerNameCallback;
 #ifdef _HTTP_SUPPORT
 
 /************************************************************************
-Ãû³Æ£ºHTTP °æ±¾
-ÃèÊö£ºµÍ×Ö½Ú£ºÖ÷°æ±¾ºÅ£¬¸ß×Ö½Ú£º´Î°æ±¾ºÅ
+åç§°ï¼šHTTP ç‰ˆæœ¬
+æè¿°ï¼šä½Žå­—èŠ‚ï¼šä¸»ç‰ˆæœ¬å·ï¼Œé«˜å­—èŠ‚ï¼šæ¬¡ç‰ˆæœ¬å·
 ************************************************************************/
 
 typedef enum EnHttpVersion
@@ -392,8 +400,8 @@ typedef enum EnHttpVersion
 } En_HP_HttpVersion;
 
 /************************************************************************
-Ãû³Æ£ºURL Óò
-ÃèÊö£ºHTTP ÇëÇóÐÐÖÐ URL ¶ÎÎ»µÄÓò¶¨Òå
+åç§°ï¼šURL åŸŸ
+æè¿°ï¼šHTTP è¯·æ±‚è¡Œä¸­ URL æ®µä½çš„åŸŸå®šä¹‰
 ************************************************************************/
 typedef enum EnHttpUrlField
 { 
@@ -408,32 +416,32 @@ typedef enum EnHttpUrlField
 } En_HP_HttpUrlField;
 
 /************************************************************************
-Ãû³Æ£ºHTTP ½âÎö½á¹û±êÊ¶
-ÃèÊö£ºÖ¸Ê¾ HTTP ½âÎöÆ÷ÊÇ·ñ¼ÌÐøÖ´ÐÐ½âÎö²Ù×÷
+åç§°ï¼šHTTP è§£æžç»“æžœæ ‡è¯†
+æè¿°ï¼šæŒ‡ç¤º HTTP è§£æžå™¨æ˜¯å¦ç»§ç»­æ‰§è¡Œè§£æžæ“ä½œ
 ************************************************************************/
 typedef enum EnHttpParseResult
 {
-	HPR_OK			= 0,	// ½âÎö³É¹¦
-	HPR_SKIP_BODY	= 1,	// Ìø¹ýµ±Ç°ÇëÇó BODY£¨½öÓÃÓÚ OnHeadersComplete ÊÂ¼þ£©
-	HPR_UPGRADE		= 2,	// Éý¼¶Ð­Òé£¨½öÓÃÓÚ OnHeadersComplete ÊÂ¼þ£©
-	HPR_ERROR		= -1,	// ½âÎö´íÎó£¬ÖÕÖ¹½âÎö£¬¶Ï¿ªÁ¬½Ó
+	HPR_OK			= 0,	// è§£æžæˆåŠŸ
+	HPR_SKIP_BODY	= 1,	// è·³è¿‡å½“å‰è¯·æ±‚ BODYï¼ˆä»…ç”¨äºŽ OnHeadersComplete äº‹ä»¶ï¼‰
+	HPR_UPGRADE		= 2,	// å‡çº§åè®®ï¼ˆä»…ç”¨äºŽ OnHeadersComplete äº‹ä»¶ï¼‰
+	HPR_ERROR		= -1,	// è§£æžé”™è¯¯ï¼Œç»ˆæ­¢è§£æžï¼Œæ–­å¼€è¿žæŽ¥
 } En_HP_HttpParseResult;
 
 /************************************************************************
-Ãû³Æ£ºHTTP Ð­ÒéÉý¼¶ÀàÐÍ
-ÃèÊö£º±êÊ¶ HTTP Éý¼¶ÎªÄÄÖÖÐ­Òé
+åç§°ï¼šHTTP åè®®å‡çº§ç±»åž‹
+æè¿°ï¼šæ ‡è¯† HTTP å‡çº§ä¸ºå“ªç§åè®®
 ************************************************************************/
 typedef enum EnHttpUpgradeType
 {
-	HUT_NONE		= 0,	// Ã»ÓÐÉý¼¶
+	HUT_NONE		= 0,	// æ²¡æœ‰å‡çº§
 	HUT_WEB_SOCKET	= 1,	// WebSocket
-	HUT_HTTP_TUNNEL	= 2,	// HTTP ËíµÀ
-	HUT_UNKNOWN		= -1,	// Î´ÖªÀàÐÍ
+	HUT_HTTP_TUNNEL	= 2,	// HTTP éš§é“
+	HUT_UNKNOWN		= -1,	// æœªçŸ¥ç±»åž‹
 } En_HP_HttpUpgradeType;
 
 /************************************************************************
-Ãû³Æ£ºHTTP ×´Ì¬Âë
-ÃèÊö£ºHTTP ±ê×¼×´Ì¬Âë
+åç§°ï¼šHTTP çŠ¶æ€ç 
+æè¿°ï¼šHTTP æ ‡å‡†çŠ¶æ€ç 
 ************************************************************************/
 typedef enum EnHttpStatusCode
 { 
@@ -509,8 +517,8 @@ typedef enum EnHttpStatusCode
 } En_HP_HttpStatusCode;
 
 /************************************************************************
-Ãû³Æ£ºName/Value ½á¹¹Ìå
-ÃèÊö£º×Ö·û´®ÃûÖµ¶Ô½á¹¹Ìå
+åç§°ï¼šName/Value ç»“æž„ä½“
+æè¿°ï¼šå­—ç¬¦ä¸²åå€¼å¯¹ç»“æž„ä½“
 ************************************************************************/
 typedef struct TNVPair
 { 

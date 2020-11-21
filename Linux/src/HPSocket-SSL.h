@@ -32,47 +32,47 @@
 /*****************************************************************************************************************************************************/
 
 /**************************************************/
-/************** HPSocket-SSL µ¼³öº¯Êı **************/
+/************** HPSocket-SSL å¯¼å‡ºå‡½æ•° **************/
 
-// ´´½¨ SSL ITcpServer ¶ÔÏó
+// åˆ›å»º SSL ITcpServer å¯¹è±¡
 HPSOCKET_API ITcpServer* HP_Create_SSLServer(ITcpServerListener* pListener);
-// ´´½¨ SSL ITcpAgent ¶ÔÏó
+// åˆ›å»º SSL ITcpAgent å¯¹è±¡
 HPSOCKET_API ITcpAgent* HP_Create_SSLAgent(ITcpAgentListener* pListener);
-// ´´½¨ SSL ITcpClient ¶ÔÏó
+// åˆ›å»º SSL ITcpClient å¯¹è±¡
 HPSOCKET_API ITcpClient* HP_Create_SSLClient(ITcpClientListener* pListener);
-// ´´½¨ SSL ITcpPullServer ¶ÔÏó
+// åˆ›å»º SSL ITcpPullServer å¯¹è±¡
 HPSOCKET_API ITcpPullServer* HP_Create_SSLPullServer(ITcpServerListener* pListener);
-// ´´½¨ SSL ITcpPullAgent ¶ÔÏó
+// åˆ›å»º SSL ITcpPullAgent å¯¹è±¡
 HPSOCKET_API ITcpPullAgent* HP_Create_SSLPullAgent(ITcpAgentListener* pListener);
-// ´´½¨ SSL ITcpPullClient ¶ÔÏó
+// åˆ›å»º SSL ITcpPullClient å¯¹è±¡
 HPSOCKET_API ITcpPullClient* HP_Create_SSLPullClient(ITcpClientListener* pListener);
-// ´´½¨ SSL ITcpPackServer ¶ÔÏó
+// åˆ›å»º SSL ITcpPackServer å¯¹è±¡
 HPSOCKET_API ITcpPackServer* HP_Create_SSLPackServer(ITcpServerListener* pListener);
-// ´´½¨ SSL ITcpPackAgent ¶ÔÏó
+// åˆ›å»º SSL ITcpPackAgent å¯¹è±¡
 HPSOCKET_API ITcpPackAgent* HP_Create_SSLPackAgent(ITcpAgentListener* pListener);
-// ´´½¨ SSL ITcpPackClient ¶ÔÏó
+// åˆ›å»º SSL ITcpPackClient å¯¹è±¡
 HPSOCKET_API ITcpPackClient* HP_Create_SSLPackClient(ITcpClientListener* pListener);
 
-// Ïú»Ù SSL ITcpServer ¶ÔÏó
+// é”€æ¯ SSL ITcpServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLServer(ITcpServer* pServer);
-// Ïú»Ù SSL ITcpAgent ¶ÔÏó
+// é”€æ¯ SSL ITcpAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLAgent(ITcpAgent* pAgent);
-// Ïú»Ù SSL ITcpClient ¶ÔÏó
+// é”€æ¯ SSL ITcpClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLClient(ITcpClient* pClient);
-// Ïú»Ù SSL ITcpPullServer ¶ÔÏó
+// é”€æ¯ SSL ITcpPullServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLPullServer(ITcpPullServer* pServer);
-// Ïú»Ù SSL ITcpPullAgent ¶ÔÏó
+// é”€æ¯ SSL ITcpPullAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLPullAgent(ITcpPullAgent* pAgent);
-// Ïú»Ù SSL ITcpPullClient ¶ÔÏó
+// é”€æ¯ SSL ITcpPullClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLPullClient(ITcpPullClient* pClient);
-// Ïú»Ù SSL ITcpPackServer ¶ÔÏó
+// é”€æ¯ SSL ITcpPackServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLPackServer(ITcpPackServer* pServer);
-// Ïú»Ù SSL ITcpPackAgent ¶ÔÏó
+// é”€æ¯ SSL ITcpPackAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLPackAgent(ITcpPackAgent* pAgent);
-// Ïú»Ù SSL ITcpPackClient ¶ÔÏó
+// é”€æ¯ SSL ITcpPackClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_SSLPackClient(ITcpPackClient* pClient);
 
-// SSL ITcpServer ¶ÔÏó´´½¨Æ÷
+// SSL ITcpServer å¯¹è±¡åˆ›å»ºå™¨
 struct SSLServer_Creator
 {
 	static ITcpServer* Create(ITcpServerListener* pListener)
@@ -86,7 +86,7 @@ struct SSLServer_Creator
 	}
 };
 
-// SSL ITcpAgent ¶ÔÏó´´½¨Æ÷
+// SSL ITcpAgent å¯¹è±¡åˆ›å»ºå™¨
 struct SSLAgent_Creator
 {
 	static ITcpAgent* Create(ITcpAgentListener* pListener)
@@ -100,7 +100,7 @@ struct SSLAgent_Creator
 	}
 };
 
-// SSL ITcpClient ¶ÔÏó´´½¨Æ÷
+// SSL ITcpClient å¯¹è±¡åˆ›å»ºå™¨
 struct SSLClient_Creator
 {
 	static ITcpClient* Create(ITcpClientListener* pListener)
@@ -114,7 +114,7 @@ struct SSLClient_Creator
 	}
 };
 
-// SSL ITcpPullServer ¶ÔÏó´´½¨Æ÷
+// SSL ITcpPullServer å¯¹è±¡åˆ›å»ºå™¨
 struct SSLPullServer_Creator
 {
 	static ITcpPullServer* Create(ITcpServerListener* pListener)
@@ -128,7 +128,7 @@ struct SSLPullServer_Creator
 	}
 };
 
-// SSL ITcpPullAgent ¶ÔÏó´´½¨Æ÷
+// SSL ITcpPullAgent å¯¹è±¡åˆ›å»ºå™¨
 struct SSLPullAgent_Creator
 {
 	static ITcpPullAgent* Create(ITcpAgentListener* pListener)
@@ -142,7 +142,7 @@ struct SSLPullAgent_Creator
 	}
 };
 
-// SSL ITcpPullClient ¶ÔÏó´´½¨Æ÷
+// SSL ITcpPullClient å¯¹è±¡åˆ›å»ºå™¨
 struct SSLPullClient_Creator
 {
 	static ITcpPullClient* Create(ITcpClientListener* pListener)
@@ -156,7 +156,7 @@ struct SSLPullClient_Creator
 	}
 };
 
-// SSL ITcpPackServer ¶ÔÏó´´½¨Æ÷
+// SSL ITcpPackServer å¯¹è±¡åˆ›å»ºå™¨
 struct SSLPackServer_Creator
 {
 	static ITcpPackServer* Create(ITcpServerListener* pListener)
@@ -170,7 +170,7 @@ struct SSLPackServer_Creator
 	}
 };
 
-// SSL ITcpPackAgent ¶ÔÏó´´½¨Æ÷
+// SSL ITcpPackAgent å¯¹è±¡åˆ›å»ºå™¨
 struct SSLPackAgent_Creator
 {
 	static ITcpPackAgent* Create(ITcpAgentListener* pListener)
@@ -184,7 +184,7 @@ struct SSLPackAgent_Creator
 	}
 };
 
-// SSL ITcpPackClient ¶ÔÏó´´½¨Æ÷
+// SSL ITcpPackClient å¯¹è±¡åˆ›å»ºå™¨
 struct SSLPackClient_Creator
 {
 	static ITcpPackClient* Create(ITcpClientListener* pListener)
@@ -198,23 +198,23 @@ struct SSLPackClient_Creator
 	}
 };
 
-// SSL ITcpServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpServer, ITcpServerListener, SSLServer_Creator>			CSSLServerPtr;
-// SSL ITcpAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, SSLAgent_Creator>			CSSLAgentPtr;
-// SSL ITcpClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpClient, ITcpClientListener, SSLClient_Creator>			CSSLClientPtr;
-// SSL ITcpPullServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpPullServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, SSLPullServer_Creator>	CSSLPullServerPtr;
-// SSL ITcpPullAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpPullAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, SSLPullAgent_Creator>	CSSLPullAgentPtr;
-// SSL ITcpPullClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpPullClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, SSLPullClient_Creator>	CSSLPullClientPtr;
-// SSL ITcpPackServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpPackServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, SSLPackServer_Creator>	CSSLPackServerPtr;
-// SSL ITcpPackAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpPackAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, SSLPackAgent_Creator>	CSSLPackAgentPtr;
-// SSL ITcpPackClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// SSL ITcpPackClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	CSSLPackClientPtr;
 
 /*****************************************************************************************************************************************************/
@@ -222,25 +222,25 @@ typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	
 /*****************************************************************************************************************************************************/
 
 /*
-* Ãû³Æ£ºSNI Ä¬ÈÏ»Øµ÷º¯Êı
-* ÃèÊö£ºHP_SSLServer_SetupSSLContext ·½·¨ÖĞÈç¹û²»Ö¸¶¨ SNI »Øµ÷º¯ÊıÔòÊ¹ÓÃ´Ë SNI Ä¬ÈÏ»Øµ÷º¯Êı
+* åç§°ï¼šSNI é»˜è®¤å›è°ƒå‡½æ•°
+* æè¿°ï¼šHP_SSLServer_SetupSSLContext æ–¹æ³•ä¸­å¦‚æœä¸æŒ‡å®š SNI å›è°ƒå‡½æ•°åˆ™ä½¿ç”¨æ­¤ SNI é»˜è®¤å›è°ƒå‡½æ•°
 *
-* ²ÎÊı£º		lpszServerName	-- ÇëÇóÓòÃû
-*			pContext		-- SSL Context ¶ÔÏó
+* å‚æ•°ï¼š		lpszServerName	-- è¯·æ±‚åŸŸå
+*			pContext		-- SSL Context å¯¹è±¡
 *
-* ·µ»ØÖµ£ºSNI Ö÷»úÖ¤Êé¶ÔÓ¦µÄË÷Òı
+* è¿”å›å€¼ï¼šSNI ä¸»æœºè¯ä¹¦å¯¹åº”çš„ç´¢å¼•
 */
 HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext);
 
 /*
-* Ãû³Æ£ºÇåÀíÏß³Ì¾Ö²¿»·¾³ SSL ×ÊÔ´
-* ÃèÊö£ºÈÎºÎÒ»¸ö²Ù×÷ SSL µÄÏß³Ì£¬Í¨ĞÅ½áÊøÊ±¶¼ĞèÒªÇåÀíÏß³Ì¾Ö²¿»·¾³ SSL ×ÊÔ´
-*		1¡¢Ö÷Ïß³ÌºÍ HP-Socket ¹¤×÷Ïß³ÌÔÚÍ¨ĞÅ½áÊøÊ±»á×Ô¶¯ÇåÀíÏß³Ì¾Ö²¿»·¾³ SSL ×ÊÔ´¡£Òò´Ë£¬Ò»°ãÇé¿öÏÂ²»±ØÊÖ¹¤µ÷ÓÃ±¾·½·¨
-*		2¡¢ÌØÊâÇé¿öÏÂ£¬µ±×Ô¶¨ÒåÏß³Ì²ÎÓë HP-Socket Í¨ĞÅ²Ù×÷²¢¼ì²éµ½ SSL ÄÚ´æĞ¹Â©Ê±£¬ĞèÔÚÃ¿´ÎÍ¨ĞÅ½áÊøÊ±×Ô¶¨ÒåÏß³Ìµ÷ÓÃ±¾·½·¨
+* åç§°ï¼šæ¸…ç†çº¿ç¨‹å±€éƒ¨ç¯å¢ƒ SSL èµ„æº
+* æè¿°ï¼šä»»ä½•ä¸€ä¸ªæ“ä½œ SSL çš„çº¿ç¨‹ï¼Œé€šä¿¡ç»“æŸæ—¶éƒ½éœ€è¦æ¸…ç†çº¿ç¨‹å±€éƒ¨ç¯å¢ƒ SSL èµ„æº
+*		1ã€ä¸»çº¿ç¨‹å’Œ HP-Socket å·¥ä½œçº¿ç¨‹åœ¨é€šä¿¡ç»“æŸæ—¶ä¼šè‡ªåŠ¨æ¸…ç†çº¿ç¨‹å±€éƒ¨ç¯å¢ƒ SSL èµ„æºã€‚å› æ­¤ï¼Œä¸€èˆ¬æƒ…å†µä¸‹ä¸å¿…æ‰‹å·¥è°ƒç”¨æœ¬æ–¹æ³•
+*		2ã€ç‰¹æ®Šæƒ…å†µä¸‹ï¼Œå½“è‡ªå®šä¹‰çº¿ç¨‹å‚ä¸ HP-Socket é€šä¿¡æ“ä½œå¹¶æ£€æŸ¥åˆ° SSL å†…å­˜æ³„æ¼æ—¶ï¼Œéœ€åœ¨æ¯æ¬¡é€šä¿¡ç»“æŸæ—¶è‡ªå®šä¹‰çº¿ç¨‹è°ƒç”¨æœ¬æ–¹æ³•
 *		
-* ²ÎÊı£º		dwThreadID	-- Ïß³Ì ID£¨0£ºµ±Ç°Ïß³Ì£©
+* å‚æ•°ï¼š		dwThreadID	-- çº¿ç¨‹ IDï¼ˆ0ï¼šå½“å‰çº¿ç¨‹ï¼‰
 * 
-* ·µ»ØÖµ£ºÎŞ
+* è¿”å›å€¼ï¼šæ— 
 */
 HPSOCKET_API void HP_SSL_RemoveThreadLocalState(THR_ID dwThreadID);
 
@@ -250,25 +250,25 @@ HPSOCKET_API void HP_SSL_RemoveThreadLocalState(THR_ID dwThreadID);
 
 #ifdef _HTTP_SUPPORT
 
-// ´´½¨ IHttpsServer ¶ÔÏó
+// åˆ›å»º IHttpsServer å¯¹è±¡
 HPSOCKET_API IHttpServer* HP_Create_HttpsServer(IHttpServerListener* pListener);
-// ´´½¨ IHttpsAgent ¶ÔÏó
+// åˆ›å»º IHttpsAgent å¯¹è±¡
 HPSOCKET_API IHttpAgent* HP_Create_HttpsAgent(IHttpAgentListener* pListener);
-// ´´½¨ IHttpsClient ¶ÔÏó
+// åˆ›å»º IHttpsClient å¯¹è±¡
 HPSOCKET_API IHttpClient* HP_Create_HttpsClient(IHttpClientListener* pListener);
-// ´´½¨ IHttpsSyncClient ¶ÔÏó
+// åˆ›å»º IHttpsSyncClient å¯¹è±¡
 HPSOCKET_API IHttpSyncClient* HP_Create_HttpsSyncClient(IHttpClientListener* pListener);
 
-// Ïú»Ù IHttpsServer ¶ÔÏó
+// é”€æ¯ IHttpsServer å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpsServer(IHttpServer* pServer);
-// Ïú»Ù IHttpsAgent ¶ÔÏó
+// é”€æ¯ IHttpsAgent å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpsAgent(IHttpAgent* pAgent);
-// Ïú»Ù IHttpsClient ¶ÔÏó
+// é”€æ¯ IHttpsClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpsClient(IHttpClient* pClient);
-// Ïú»Ù IHttpsSyncClient ¶ÔÏó
+// é”€æ¯ IHttpsSyncClient å¯¹è±¡
 HPSOCKET_API void HP_Destroy_HttpsSyncClient(IHttpSyncClient* pClient);
 
-// IHttpsServer ¶ÔÏó´´½¨Æ÷
+// IHttpsServer å¯¹è±¡åˆ›å»ºå™¨
 struct HttpsServer_Creator
 {
 	static IHttpServer* Create(IHttpServerListener* pListener)
@@ -282,7 +282,7 @@ struct HttpsServer_Creator
 	}
 };
 
-// IHttpsAgent ¶ÔÏó´´½¨Æ÷
+// IHttpsAgent å¯¹è±¡åˆ›å»ºå™¨
 struct HttpsAgent_Creator
 {
 	static IHttpAgent* Create(IHttpAgentListener* pListener)
@@ -296,7 +296,7 @@ struct HttpsAgent_Creator
 	}
 };
 
-// IHttpsClient ¶ÔÏó´´½¨Æ÷
+// IHttpsClient å¯¹è±¡åˆ›å»ºå™¨
 struct HttpsClient_Creator
 {
 	static IHttpClient* Create(IHttpClientListener* pListener)
@@ -310,7 +310,7 @@ struct HttpsClient_Creator
 	}
 };
 
-// IHttpsSyncClient ¶ÔÏó´´½¨Æ÷
+// IHttpsSyncClient å¯¹è±¡åˆ›å»ºå™¨
 struct HttpsSyncClient_Creator
 {
 	static IHttpSyncClient* Create(IHttpClientListener* pListener)
@@ -324,13 +324,13 @@ struct HttpsSyncClient_Creator
 	}
 };
 
-// IHttpsServer ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpsServer å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpServer, IHttpServerListener, HttpsServer_Creator>		CHttpsServerPtr;
-// IHttpsAgent ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpsAgent å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpAgent, IHttpAgentListener, HttpsAgent_Creator>		CHttpsAgentPtr;
-// IHttpsClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpsClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpClient, IHttpClientListener, HttpsClient_Creator>		CHttpsClientPtr;
-// IHttpsSyncClient ¶ÔÏóÖÇÄÜÖ¸Õë
+// IHttpsSyncClient å¯¹è±¡æ™ºèƒ½æŒ‡é’ˆ
 typedef CHPSocketPtr<IHttpSyncClient, IHttpClientListener, HttpsSyncClient_Creator>			CHttpsSyncClientPtr;
 
 #endif

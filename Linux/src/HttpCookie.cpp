@@ -224,7 +224,7 @@ BOOL CCookie::ParseExpires(LPCSTR lpszExpires, __time64_t& tmExpires)
 
 	tm t = {0};
 
-	if(sscanf(	lpszExpires, "%*[^, ]%*[, ]%2d%*[-/ ]%8[^-/ ]%*[-/ ]%4d %2d:%2d:%2d %8c", 
+	if(sscanf(	lpszExpires, "%*[^, ]%*[, ]%2d%*[-/ ]%8[^-/ ]%*[-/ ]%4d %2d:%2d:%2d %8s", 
 				&t.tm_mday, szMonth, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec, szZone) != 7)
 		return FALSE;
 

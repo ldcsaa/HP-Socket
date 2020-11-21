@@ -1,8 +1,8 @@
-/*
+Ôªø/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
- * Website	: http://www.jessma.org
+ * Website	: https://github.com/ldcsaa
  * Project	: https://github.com/ldcsaa/HP-Socket
  * Blog		: http://www.cnblogs.com/ldcsaa
  * Wiki		: http://www.oschina.net/p/hp-socket
@@ -406,6 +406,46 @@ HPSOCKET_API BOOL SYS_Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLen
 	return ::Utf8ToGbk(szSrc, szDest, iDestLength);
 }
 
+HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
+{
+	return ::GuessBase64EncodeBound(dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+{
+	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
+}
+
+HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
+HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+{
+	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+}
+
 #ifdef _ZLIB_SUPPORT
 
 HPSOCKET_API int SYS_Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
@@ -450,45 +490,29 @@ HPSOCKET_API DWORD SYS_GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrc
 
 #endif
 
-HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
+#ifdef _BROTLI_SUPPORT
+
+HPSOCKET_API int SYS_BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::GuessBase64EncodeBound(dwSrcLen);
+	return ::BrotliCompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-HPSOCKET_API DWORD SYS_GuessBase64DecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
+HPSOCKET_API int SYS_BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, int iMode)
 {
-	return ::GuessBase64DecodeBound(lpszSrc, dwSrcLen);
+	return ::BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, iQuality, iWindow , (BrotliEncoderMode)iMode);
 }
 
-HPSOCKET_API int SYS_Base64Encode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+HPSOCKET_API int SYS_BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
-	return ::Base64Encode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+	return ::BrotliUncompress(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
 }
 
-HPSOCKET_API int SYS_Base64Decode(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
+HPSOCKET_API DWORD SYS_BrotliGuessCompressBound(DWORD dwSrcLen)
 {
-	return ::Base64Decode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
+	return ::BrotliGuessCompressBound(dwSrcLen);
 }
 
-HPSOCKET_API DWORD SYS_GuessUrlEncodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessUrlEncodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API DWORD SYS_GuessUrlDecodeBound(const BYTE* lpszSrc, DWORD dwSrcLen)
-{
-	return ::GuessUrlDecodeBound(lpszSrc, dwSrcLen);
-}
-
-HPSOCKET_API int SYS_UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::UrlEncode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
-
-HPSOCKET_API int SYS_UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
-{
-	return ::UrlDecode(lpszSrc, dwSrcLen, lpszDest, dwDestLen);
-}
+#endif
 
 /*****************************************************************************************************************************************************/
 /******************************************************************** HTTP Exports *******************************************************************/
@@ -537,7 +561,7 @@ HPSOCKET_API void HP_Destroy_HttpSyncClient(IHttpSyncClient* pClient)
 }
 
 /**************************************************************************/
-/*************************** HTTP Cookie π‹¿Ì∑Ω∑® **************************/
+/*************************** HTTP Cookie ÁÆ°ÁêÜÊñπÊ≥ï **************************/
 
 HPSOCKET_API BOOL HP_HttpCookie_MGR_LoadFromFile(LPCSTR lpszFile, BOOL bKeepExists)
 {

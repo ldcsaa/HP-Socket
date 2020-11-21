@@ -1,4 +1,4 @@
-/*
+Ôªø/*
  * Copyright: JessMA Open Source (ldcsaa@gmail.com)
  *
  * Author	: Bruce Liang
@@ -128,7 +128,7 @@ typedef C_HP_ObjectT<CSSLPullClient, ITcpClientListener, sizeof(IPullClient)>	C_
 typedef C_HP_ObjectT<CSSLPackClient, ITcpClientListener, sizeof(IPackClient)>	C_HP_SSLPackClient;
 
 /********************************************************/
-/************** HPSocket4C-SSL ∂‘œÛ¥¥Ω®∫Ø ˝ **************/
+/************** HPSocket4C-SSL ÂØπË±°ÂàõÂª∫ÂáΩÊï∞ **************/
 
 HPSOCKET_API HP_SSLServer __HP_CALL Create_HP_SSLServer(HP_TcpServerListener pListener)
 {
@@ -225,7 +225,7 @@ HPSOCKET_API void __HP_CALL Destroy_HP_SSLPackClient(HP_SSLPackClient pClient)
 /*****************************************************************************************************************************************************/
 
 /***************************************************************************************/
-/************************************ SSL ≥ı ºªØ∑Ω∑® ************************************/
+/************************************ SSL ÂàùÂßãÂåñÊñπÊ≥ï ************************************/
 
 HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext)
 {
@@ -298,7 +298,7 @@ HPSOCKET_API void __HP_CALL HP_SSLClient_CleanupSSLContext(HP_SSLClient pClient)
 }
 
 /***************************************************************************************/
-/************************************* SSL ≤Ÿ◊˜∑Ω∑® ************************************/
+/************************************* SSL Êìç‰ΩúÊñπÊ≥ï ************************************/
 
 HPSOCKET_API BOOL __HP_CALL HP_SSLServer_StartSSLHandShake(HP_SSLServer pServer, HP_CONNID dwConnID)
 {
@@ -402,7 +402,7 @@ typedef C_HP_ObjectT<CHttpsClient, IHttpClientListener, sizeof(IHttpRequester)>	
 typedef C_HP_ObjectT<CHttpsSyncClient, IHttpClientListener, sizeof(IHttpSyncRequester)>		C_HP_HttpsSyncClient;
 
 /****************************************************/
-/**************** HTTPS ∂‘œÛ¥¥Ω®∫Ø ˝ *****************/
+/**************** HTTPS ÂØπË±°ÂàõÂª∫ÂáΩÊï∞ *****************/
 
 HPSOCKET_API HP_HttpsServer __HP_CALL Create_HP_HttpsServer(HP_HttpServerListener pListener)
 {

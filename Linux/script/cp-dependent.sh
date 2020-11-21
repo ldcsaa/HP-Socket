@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ];then
-	echo "Usage: $0" "[jemalloc|openssl|zlib]"
+	echo "Usage: $0" "[jemalloc|openssl|zlib|brotli]"
 	exit 1
 fi
 
@@ -27,13 +27,17 @@ do_copy()
 {
 	local _LIB_NAME=$1
 	local _RM_FILES=
+	local _LIB_FIX=
 	
 	if [ $_LIB_NAME == "jemalloc" ]; then
+		_LIB_FIX=_pic
 		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME* $PLATFORM/include/$_LIB_NAME*"
 	elif [ $_LIB_NAME == "openssl" ]; then
 		_RM_FILES="$PLATFORM/lib/libssl* $PLATFORM/lib/libcrypto* $PLATFORM/include/$_LIB_NAME*"
 	elif [ $_LIB_NAME == "zlib" ]; then
 		_RM_FILES="$PLATFORM/lib/libz* $PLATFORM/include/zconf.h $PLATFORM/include/zlib.h"
+	elif [ $_LIB_NAME == "brotli" ]; then
+		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME* $PLATFORM/include/$_LIB_NAME*"
 	fi
 	
 	if [ -n "$_RM_FILES" ]; then
@@ -43,7 +47,7 @@ do_copy()
 	mkdir -p $PLATFORM/lib $PLATFORM/include
 
 	cp -rf $SRC_BASE/$_LIB_NAME/include/* $PLATFORM/include
-	cp -rf $SRC_BASE/$_LIB_NAME/lib/*.a $PLATFORM/lib
+	cp -rf $SRC_BASE/$_LIB_NAME/lib/*$_LIB_FIX.a $PLATFORM/lib
 }
 
 cd $DEST_BASE

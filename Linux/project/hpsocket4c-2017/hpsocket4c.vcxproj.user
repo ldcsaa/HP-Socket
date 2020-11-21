@@ -13,9 +13,9 @@
     <RemoteTarget>460065450;192.168.56.12 (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <RemoteTarget>970599627;192.168.56.11 (username=bruce, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>78784327;192.168.56.101 (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <RemoteTarget>970599627;192.168.56.11 (username=bruce, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>78784327;192.168.56.101 (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
 </Project>

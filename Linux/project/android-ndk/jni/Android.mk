@@ -2,6 +2,7 @@ MY_SSL_DISABLED    := false
 MY_UDP_DISABLED    := false
 MY_HTTP_DISABLED   := false
 MY_ZLIB_DISABLED   := false
+MY_BROTLI_DISABLED := false
 MY_ICONV_DISABLED  := false
 
 LOCAL_PATH         := $(call my-dir)
@@ -27,6 +28,12 @@ endif
 ifdef _ZLIB_DISABLED
   ifeq ($(_ZLIB_DISABLED),true)
     MY_ZLIB_DISABLED := $(_ZLIB_DISABLED)
+  endif
+endif
+
+ifdef _BROTLI_DISABLED
+  ifeq ($(_BROTLI_DISABLED),true)
+    MY_BROTLI_DISABLED := $(_BROTLI_DISABLED)
   endif
 endif
 
@@ -108,6 +115,12 @@ ifneq ($(TARGET_ARCH_ABI),mips)
       MY_WHOLE_STATIC_LIBRARIES += ssl crypto
     endif
 	
+	ifeq ($(MY_BROTLI_DISABLED),true)
+      MY_CFLAGS += -D_BROTLI_DISABLED
+    else
+      MY_WHOLE_STATIC_LIBRARIES += brotli
+    endif
+	
 	ifeq ($(MY_ICONV_DISABLED),true)
       MY_CFLAGS += -D_ICONV_DISABLED
     else
@@ -115,42 +128,58 @@ ifneq ($(TARGET_ARCH_ABI),mips)
     endif
 
   else
-    MY_CFLAGS += -D_SSL_DISABLED -D_ICONV_DISABLED
+    MY_CFLAGS += -D_SSL_DISABLED -D_BROTLI_DISABLED -D_ICONV_DISABLED
   endif
 else
-  MY_CFLAGS += -D_SSL_DISABLED -D_ICONV_DISABLED
+  MY_CFLAGS += -D_SSL_DISABLED -D_BROTLI_DISABLED -D_ICONV_DISABLED
 endif
 
 #$(call __ndk_warning,MY_CFLAGS is value '$(MY_CFLAGS)')
 
 # local lib : charset
-#include $(CLEAR_VARS)
-#LOCAL_MODULE    := charset
-#LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libcharset.a
-#LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-#include $(PREBUILT_STATIC_LIBRARY)
+#ifneq ($(MY_ICONV_DISABLED),true)
+	#include $(CLEAR_VARS)
+	#LOCAL_MODULE    := charset
+	#LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libcharset.a
+	#LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+	#include $(PREBUILT_STATIC_LIBRARY)
+#endif
+
+# local lib : brotli
+ifneq ($(MY_BROTLI_DISABLED),true)
+	include $(CLEAR_VARS)
+	LOCAL_MODULE    := brotli
+	LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libbrotli.a
+	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+	include $(PREBUILT_STATIC_LIBRARY)
+endif
 
 # local lib : iconv
-include $(CLEAR_VARS)
-LOCAL_MODULE    := iconv
-LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libiconv.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-include $(PREBUILT_STATIC_LIBRARY)
+ifneq ($(MY_ICONV_DISABLED),true)
+	include $(CLEAR_VARS)
+	LOCAL_MODULE    := iconv
+	LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libiconv.a
+	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+	include $(PREBUILT_STATIC_LIBRARY)
+endif
 
 # local lib : crypto
-include $(CLEAR_VARS)
-LOCAL_MODULE    := crypto
-LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libcrypto.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-include $(PREBUILT_STATIC_LIBRARY)
+ifneq ($(MY_SSL_DISABLED),true)
+	include $(CLEAR_VARS)
+	LOCAL_MODULE    := crypto
+	LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libcrypto.a
+	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+	include $(PREBUILT_STATIC_LIBRARY)
+endif
 
 # local lib : ssl
-include $(CLEAR_VARS)
-LOCAL_MODULE    := ssl
-LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libssl.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
-include $(PREBUILT_STATIC_LIBRARY)
-
+ifneq ($(MY_SSL_DISABLED),true)
+	include $(CLEAR_VARS)
+	LOCAL_MODULE    := ssl
+	LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libssl.a
+	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+	include $(PREBUILT_STATIC_LIBRARY)
+endif
 
 # target lib : hpsocket.a
 include $(CLEAR_VARS)
