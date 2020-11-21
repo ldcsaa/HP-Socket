@@ -45,16 +45,16 @@ print_usage()
 	echo "----------------------+-------------------------------------------------"
 	printf "  %-19s : %s\n" "-d|--with-debug-lib"	"compile debug libs (default: true)"
 	printf "  %-19s : %s\n" "-j|--use-jemalloc"		"use jemalloc in release libs"
-	printf "  %-19s : %s\n" ""						"(x86/x64 default: true, ARM default: false)"
+	printf "  %-19s : %s\n" ""						"(x86/x64 default: true, arm/arm64 default: false)"
 	printf "  %-19s : %s\n" "-u|--udp-enabled"		"enable UDP components (default: true)"
 	printf "  %-19s : %s\n" "-t|--http-enabled"		"enable HTTP components (default: true)"
 	printf "  %-19s : %s\n" "-s|--ssl-enabled"		"enable SSL components (default: true)"
 	printf "  %-19s : %s\n" "-z|--zlib-enabled"		"enable ZLIB related functions (default: true)"
 	printf "  %-19s : %s\n" "-b|--brotli-enabled"	"enable BROTLI related functions"
-	printf "  %-19s : %s\n" ""						"(x86/x64 default: true, ARM default: false)"
+	printf "  %-19s : %s\n" ""						"(x86/x64 default: true, arm/arm64 default: false)"
 	printf "  %-19s : %s\n" "-i|--iconv-enabled"	"enable ICONV related functions (default: true)"
 	printf "  %-19s : %s\n" "-c|--compiler"			"compiler (default: g++)"
-	printf "  %-19s : %s\n" "-p|--platform"			"platform: x86 / x64 / ARM"
+	printf "  %-19s : %s\n" "-p|--platform"			"platform: x86 / x64 / arm / arm64"
 	printf "  %-19s : %s\n" ""						"(default: current machine arch platform)"
 	printf "  %-19s : %s\n" "-e|--clean"			"clean compilation intermediate temp files"
 	printf "  %-19s : %s\n" "-r|--remove"			"remove all compilation target files"
@@ -211,7 +211,7 @@ parse_args()
 			-p|--platform)
 				PLATFORM="$2"
 				
-				if [[ -z "$PLATFORM" || ("$PLATFORM" != "x64" && "$PLATFORM" != "x86" && "$PLATFORM" != "ARM") ]]; then
+				if [[ -z "$PLATFORM" || ("$PLATFORM" != "x64" && "$PLATFORM" != "x86" && "$PLATFORM" != "arm" && "$PLATFORM" != "arm64") ]]; then
 					printf "Invalid arg value: %s %s\n" "$1" "$2"
 					print_usage
 					exit 2
@@ -260,11 +260,11 @@ parse_args()
 	fi
 	
 	if [ $_SET_JEMALLOC != "true" ]; then
-		USE_JEMALLOC=$([[ $PLATFORM == "ARM" ]] && echo 0 || echo 1)
+		USE_JEMALLOC=$([[ $PLATFORM == "arm" || $PLATFORM == "arm64" ]] && echo 0 || echo 1)
 	fi
 	
 	if [ $_SET_BROTLI != "true" ]; then
-		BROTLI_ENABLED=$([[ $PLATFORM == "ARM" ]] && echo 0 || echo 1)
+		BROTLI_ENABLED=$([[ $PLATFORM == "arm" || $PLATFORM == "arm64" ]] && echo 0 || echo 1)
 	fi
 }
 
