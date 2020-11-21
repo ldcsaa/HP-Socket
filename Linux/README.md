@@ -10,16 +10,16 @@ Usage: compile.sh [...O.P.T.I.O.N.S...]
 ----------------------+-------------------------------------------------
   -d|--with-debug-lib : compile debug libs (default: true)
   -j|--use-jemalloc   : use jemalloc in release libs
-                      : (x86/x64 default: true, ARM default: false)
+                      : (x86/x64 default: true, arm/arm64 default: false)
   -u|--udp-enabled    : enable UDP components (default: true)
   -t|--http-enabled   : enable HTTP components (default: true)
   -s|--ssl-enabled    : enable SSL components (default: true)
   -z|--zlib-enabled   : enable ZLIB related functions (default: true)
   -b|--brotli-enabled : enable BROTLI related functions
-                      : (x86/x64 default: true, ARM default: false)
+                      : (x86/x64 default: true, arm/arm64 default: false)
   -i|--iconv-enabled  : enable ICONV related functions (default: true)
   -c|--compiler       : compiler (default: g++)
-  -p|--platform       : platform: x86 / x64 / ARM
+  -p|--platform       : platform: x86 / x64 / arm / arm64
                       : (default: current machine arch platform)  
   -e|--clean          : clean compilation intermediate temp files
   -r|--remove         : remove all compilation target files
@@ -34,7 +34,7 @@ $ sudo ./install.sh -h
 Usage: install.sh [...O.P.T.I.O.N.S...]
 -----------------+------------------------------------------------------
   -p|--prefix    : install/uninstall path (default: /usr/local)
-  -l|--libdir    : lib dir (x86/ARM default: 'lib', x64 default: 'lib64')
+  -l|--libdir    : lib dir (x86/arm default: 'lib', x64/arm64 default: 'lib64')
   -d|--with-demo : install demos or not (default: false)
   -u|--uninstall : execute uninstall operation from install path
   -v|--version   : print hp-socket version
