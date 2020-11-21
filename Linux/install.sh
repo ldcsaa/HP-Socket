@@ -26,7 +26,7 @@ print_usage()
 	printf "Usage: %s [...O.P.T.I.O.N.S...]\n" "$SH_NAME"
 	echo "-----------------+-------------------------------------------------------"
 	printf "  %-14s : %s\n" "-p|--prefix"	 "install/uninstall path (default: /usr/local)"
-	printf "  %-14s : %s\n" "-l|--libdir"	 "lib dir (x86/ARM default: 'lib', x64 default: 'lib64')"
+	printf "  %-14s : %s\n" "-l|--libdir"	 "lib dir (x86/arm default: 'lib', x64/arm64 default: 'lib64')"
 	printf "  %-14s : %s\n" "-d|--with-demo" "install demos or not (default: false)"
 	printf "  %-14s : %s\n" "-u|--uninstall" "execute uninstall operation from install path"
 	printf "  %-14s : %s\n" "-v|--version"	 "print hp-socket version"
@@ -118,7 +118,7 @@ parse_args()
 	fi
 	
 	if [ -z "$DEST_LIB_DIR" ]; then
-		if [ $PLATFORM == "x64" ]; then
+		if [[ $PLATFORM == "x64" || $PLATFORM == "arm64" ]]; then
 			DEST_LIB_DIR="lib64"
 		else
 			DEST_LIB_DIR="lib"

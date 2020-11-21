@@ -16,10 +16,12 @@ check_platform()
 	
 	if [ "$1" == "x86_64" ]; then
 		PLATFORM="x64"
-	elif [[ "$1" == "i686" || "$1" == "i386" ]]; then
+	elif [[ "$1" == "x86" || "$1" == "i686" || "$1" == "i586" || "$1" == "i386" ]]; then
 		PLATFORM="x86"
-	elif [[ "$1" =~ "arm" ]]; then
-		PLATFORM="ARM"
+	elif [[ "$1" == "arm64" || "$1" == "aarch64" || "$1" =~ "armv8"  || "$1" =~ "armv9" ]]; then
+		PLATFORM="arm64"
+	elif [[ "$1" == "arm" || "$1" == "aarch" || "$1" =~ "armv7" ]]; then
+		PLATFORM="arm"
 	fi
 }
 
@@ -50,6 +52,7 @@ do_copy()
 	cp -rf $SRC_BASE/$_LIB_NAME/lib/*$_LIB_FIX.a $PLATFORM/lib
 }
 
+mkdir -p $DEST_BASE
 cd $DEST_BASE
 
 check_platform "$(arch | tr "[A-Z]" "[a-z]")"
