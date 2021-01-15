@@ -13,4 +13,4 @@
 
 #define _NEED_SSL
 
-#include "../../../Common/Src/GeneralHelper.h"
+#include "../../../Src/Common/GeneralHelper.h"

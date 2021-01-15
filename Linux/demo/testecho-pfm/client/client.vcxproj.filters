@@ -77,10 +77,10 @@
     <ClInclude Include="..\..\..\src\common\GeneralHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\GlobalDef.h">
+    <ClInclude Include="..\..\..\include\hpsocket\GlobalDef.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\GlobalErrno.h">
+    <ClInclude Include="..\..\..\include\hpsocket\GlobalErrno.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\common\IODispatcher.h">
@@ -116,13 +116,13 @@
     <ClInclude Include="..\..\..\src\common\Thread.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\SocketHelper.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\SocketInterface.h">
+    <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Global\helper.h">

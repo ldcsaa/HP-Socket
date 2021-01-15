@@ -54,10 +54,10 @@
     <ClInclude Include="..\..\..\Common\Src\WaitFor.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPSocket.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\SocketInterface.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\SocketInterface.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Common\Src\SysHelper.h">
@@ -66,10 +66,10 @@
     <ClInclude Include="..\..\..\Common\Src\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPSocket-SSL.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket-SSL.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>

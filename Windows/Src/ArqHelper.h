@@ -23,15 +23,15 @@
  
 #pragma once
 
-#include "HPTypeDef.h"
+#include "../Include/HPSocket/HPTypeDef.h"
 
 #ifdef _UDP_SUPPORT
 
 #include "SocketHelper.h"
 
-#include "../Common/Src/WaitFor.h"
-#include "../Common/Src/BufferPool.h"
-#include "../Common/Src/kcp/ikcp.h"
+#include "Common/WaitFor.h"
+#include "Common/BufferPool.h"
+#include "Common/kcp/ikcp.h"
 
 #define DEFAULT_ARQ_NO_DELAY			FALSE
 #define DEFAULT_ARQ_TURNOFF_NC			FALSE

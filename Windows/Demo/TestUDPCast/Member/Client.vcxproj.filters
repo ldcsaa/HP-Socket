@@ -93,7 +93,7 @@
     <ClInclude Include="..\..\..\Src\UdpCast.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>

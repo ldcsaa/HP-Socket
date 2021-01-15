@@ -21,7 +21,7 @@
  * limitations under the License.
  */
  
-#include "HPSocket-SSL.h"
+#include "../include/hpsocket/HPSocket-SSL.h"
 
 #ifdef _SSL_SUPPORT
 

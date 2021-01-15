@@ -29,12 +29,12 @@
 
 #include <atlfile.h>
 
-#include "SocketInterface.h"
-#include "../Common/Src/WaitFor.h"
-#include "../Common/Src/SysHelper.h"
-#include "../Common/Src/FuncHelper.h"
-#include "../Common/Src/BufferPool.h"
-#include "../Common/Src/RingBuffer.h"
+#include "../Include/HPSocket/SocketInterface.h"
+#include "Common/WaitFor.h"
+#include "Common/SysHelper.h"
+#include "Common/FuncHelper.h"
+#include "Common/BufferPool.h"
+#include "Common/RingBuffer.h"
 
 #ifdef _ZLIB_SUPPORT
 #include <zutil.h>

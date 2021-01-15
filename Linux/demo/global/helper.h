@@ -5,7 +5,7 @@
 #ifdef _USE_HP_LIB
 #include <hpsocket/HPTypeDef.h>
 #else
-#include "../../src/HPTypeDef.h"
+#include "../../include/hpsocket/HPTypeDef.h"
 #endif
 
 #include <stdio.h>

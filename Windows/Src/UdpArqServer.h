@@ -28,7 +28,7 @@
 
 #ifdef _UDP_SUPPORT
 
-#include "../Common/Src/STLHelper.h"
+#include "Common/STLHelper.h"
 
 class CUdpArqServer : public IArqSocket, public CUdpServer
 {

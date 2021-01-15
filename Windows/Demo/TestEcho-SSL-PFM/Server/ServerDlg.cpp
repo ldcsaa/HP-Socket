@@ -6,8 +6,8 @@
 #include "Server.h"
 #include "ServerDlg.h"
 #include "afxdialogex.h"
-#include "../../../Common/Src/WaitFor.h"
-#include "../../../Common/Src/SysHelper.h"
+#include "../../../Src/Common/WaitFor.h"
+#include "../../../Src/Common/SysHelper.h"
 
 #ifdef _WIN64
 	#ifdef _DEBUG

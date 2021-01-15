@@ -6,13 +6,13 @@ SCRIPT_DIR=script
 
 source $PACKAGE_PATH/$SCRIPT_DIR/env.sh
 
+MEM_ALLOCATOR=mimalloc
 WITH_DGBUG_LIB=1
-USE_JEMALLOC=
 UDP_ENABLED=1
 HTTP_ENABLED=1
 SSL_ENABLED=1
 ZLIB_ENABLED=1
-BROTLI_ENABLED=
+BROTLI_ENABLED=1
 ICONV_ENABLED=1
 CC=g++
 
@@ -20,12 +20,14 @@ EXEC_FLAG=0
 ACTION_NAME=
 
 LIB_NAME_JEMALLOC=jemalloc_pic
+LIB_NAME_MIMALLOC=mimalloc
 LIB_NAME_SSL_1=ssl
 LIB_NAME_SSL_2=crypto
 LIB_NAME_ZLIB=z
 LIB_NAME_BROTLI=brotli
 
 LIB_FILE_JEMALLOC=lib$LIB_NAME_JEMALLOC.a
+LIB_FILE_MIMALLOC=lib$LIB_NAME_MIMALLOC.a
 LIB_FILE_SSL_1=lib$LIB_NAME_SSL_1.a
 LIB_FILE_SSL_2=lib$LIB_NAME_SSL_2.a
 LIB_FILE_ZLIB=lib$LIB_NAME_ZLIB.a
@@ -34,8 +36,8 @@ LIB_FILE_BROTLI=lib$LIB_NAME_BROTLI.a
 CFG_RELEASE=Release
 CFG_DEBUG=Debug
 
-UDP_EXT_FILES=("ikcp.c")
-HTTP_EXT_FILES=("http_parser.c")
+UDP_EXT_FILES=(ikcp.c)
+HTTP_EXT_FILES=(llhttp_api.c llhttp_url.c llhttp_support.c llhttp_internal.c)
 HPSOCKET_LIB_EXCLUDE_FILES=(HPSocket4C.cpp HPSocket4C-SSL.cpp)
 HPSOCKET4C_LIB_EXCLUDE_FILES=(HPSocket.cpp HPSocket-SSL.cpp)
 
@@ -44,8 +46,8 @@ print_usage()
 	printf "Usage: %s [...O.P.T.I.O.N.S...]\n" "$SH_NAME"
 	echo "----------------------+-------------------------------------------------"
 	printf "  %-19s : %s\n" "-d|--with-debug-lib"	"compile debug libs (default: true)"
-	printf "  %-19s : %s\n" "-j|--use-jemalloc"		"use jemalloc in release libs"
-	printf "  %-19s : %s\n" ""						"(x86/x64 default: true, arm/arm64 default: false)"
+	printf "  %-19s : %s\n" "-m|--mem-allocator"	"memory allocator (default: mimalloc)"
+	printf "  %-19s : %s\n" ""						"(options: mimalloc / jemalloc / system)"
 	printf "  %-19s : %s\n" "-u|--udp-enabled"		"enable UDP components (default: true)"
 	printf "  %-19s : %s\n" "-t|--http-enabled"		"enable HTTP components (default: true)"
 	printf "  %-19s : %s\n" "-s|--ssl-enabled"		"enable SSL components (default: true)"
@@ -73,8 +75,8 @@ print_config()
 		printf "%17s : %s\n" "$ACTION_NAME path" "$PACKAGE_PATH"
 		printf "%17s : %s\n" "--platform" 	"$PLATFORM"
 		printf "%17s : %s\n" "--compiler"		"$CC"
+		printf "%17s : %s\n" "--mem-allocator"	"$MEM_ALLOCATOR"
 		printf "%17s : %s\n" "--with-debug-lib"	"$(int_to_bool "$WITH_DGBUG_LIB")"
-		printf "%17s : %s\n" "--use-jemalloc"	"$(int_to_bool "$USE_JEMALLOC")"
 		printf "%17s : %s\n" "--udp-enabled"	"$(int_to_bool "$UDP_ENABLED")"
 		printf "%17s : %s\n" "--http-enabled"	"$(int_to_bool "$HTTP_ENABLED")"
 		printf "%17s : %s\n" "--ssl-enabled"	"$(int_to_bool "$SSL_ENABLED")"
@@ -92,7 +94,7 @@ print_config()
 
 parse_args()
 {
-	ARGS=$(getopt -o d:j:u:t:s:z:b:i:c:p:ervh -l with-debug-lib:,use-jemalloc:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,brotli-enabled:,iconv-enabled:,compiler:,platform:,clean,remove,version,help -n "$SH_NAME" -- "$@")
+	ARGS=$(getopt -o d:m:u:t:s:z:b:i:c:p:ervh -l with-debug-lib:,mem-allocator:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,brotli-enabled:,iconv-enabled:,compiler:,platform:,clean,remove,version,help -n "$SH_NAME" -- "$@")
 	RS=$?
 	
 	if [ $RS -ne 0 ]; then
@@ -101,9 +103,6 @@ parse_args()
 	fi
 	
 	eval set -- "${ARGS}"
-	
-	local _SET_JEMALLOC="false"
-	local _SET_BROTLI="false"
 	
 	while true; do
 		case "$1" in
@@ -118,11 +117,10 @@ parse_args()
 
 				shift 2
 				;;
-			-j|--use-jemalloc)
-				USE_JEMALLOC=$(bool_to_int "$2")
-				_SET_JEMALLOC="true"
+			-m|--mem-alloctor)
+				MEM_ALLOCATOR="$2"
 				
-				if [[ -z "$USE_JEMALLOC" ]]; then
+				if [[ "$MEM_ALLOCATOR" != "mimalloc" && "$MEM_ALLOCATOR" != "jemalloc" && "$MEM_ALLOCATOR" != "system" ]]; then
 					printf "Invalid arg value: %s %s\n" "$1" "$2"
 					print_usage
 					exit 2
@@ -176,7 +174,6 @@ parse_args()
 				;;
 			-b|--brotli-enabled)
 				BROTLI_ENABLED=$(bool_to_int "$2")
-				_SET_BROTLI="true"
 				
 				if [[ -z "$BROTLI_ENABLED" ]]; then
 					printf "Invalid arg value: %s %s\n" "$1" "$2"
@@ -257,14 +254,6 @@ parse_args()
 		ACTION_NAME="remove"
 	else
 		ACTION_NAME="compile"
-	fi
-	
-	if [ $_SET_JEMALLOC != "true" ]; then
-		USE_JEMALLOC=$([[ $PLATFORM == "arm" || $PLATFORM == "arm64" ]] && echo 0 || echo 1)
-	fi
-	
-	if [ $_SET_BROTLI != "true" ]; then
-		BROTLI_ENABLED=$([[ $PLATFORM == "arm" || $PLATFORM == "arm64" ]] && echo 0 || echo 1)
 	fi
 }
 
@@ -362,10 +351,17 @@ parse_compile_args()
 		_CL_OPTS="-D_BROTLI_DISABLED $_CL_OPTS"
 	fi
 	
-	if [[ $USE_JEMALLOC -eq 1 && $_CFG_NAME == $CFG_RELEASE ]]; then
-		_LN_OPTS="-l$LIB_NAME_JEMALLOC $_LN_OPTS"
-		if [ -f $DEPT_LIB_DIR/$LIB_FILE_JEMALLOC ]; then
-			_AR_FLAG=$(($_AR_FLAG+8))
+	if [[ $_CFG_NAME == $CFG_RELEASE ]]; then
+		if [[ "$MEM_ALLOCATOR" == "mimalloc" ]]; then
+			_LN_OPTS="-l$LIB_NAME_MIMALLOC $_LN_OPTS"
+			if [ -f $DEPT_LIB_DIR/$LIB_FILE_MIMALLOC ]; then
+				_AR_FLAG=$(($_AR_FLAG+8))
+			fi
+		elif [[ "$MEM_ALLOCATOR" == "jemalloc" ]]; then
+			_LN_OPTS="-l$LIB_NAME_JEMALLOC $_LN_OPTS"
+			if [ -f $DEPT_LIB_DIR/$LIB_FILE_JEMALLOC ]; then
+				_AR_FLAG=$(($_AR_FLAG+16))
+			fi
 		fi
 	fi
 	

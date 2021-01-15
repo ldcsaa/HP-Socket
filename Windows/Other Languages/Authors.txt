@@ -1,0 +1,3 @@
+* C# SDK		作者：int 2e (https://gitee.com/int2e/HPSocket.Net)
+* 易语言支持库	作者：Yecate
+* 易语言模块	作者：心冷、鱼儿

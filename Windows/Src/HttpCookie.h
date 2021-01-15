@@ -23,11 +23,11 @@
  
 #pragma once
 
-#include "HPTypeDef.h"
+#include "../Include/HPSocket/HPTypeDef.h"
 
 #ifdef _HTTP_SUPPORT
 
-#include "../Common/Src/RWLock.h"
+#include "Common/RWLock.h"
 
 #define COOKIE_DOMAIN			"domain"
 #define COOKIE_PATH				"path"

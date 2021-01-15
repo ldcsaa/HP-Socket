@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "GlobalDef.h"
+#include "../../include/hpsocket/GlobalDef.h"
 #include "Singleton.h"
 #include "STLHelper.h"
 #include "FuncHelper.h"

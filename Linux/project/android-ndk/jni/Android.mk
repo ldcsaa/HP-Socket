@@ -1,9 +1,10 @@
-MY_SSL_DISABLED    := false
-MY_UDP_DISABLED    := false
-MY_HTTP_DISABLED   := false
-MY_ZLIB_DISABLED   := false
-MY_BROTLI_DISABLED := false
-MY_ICONV_DISABLED  := false
+MY_SSL_DISABLED       := false
+MY_UDP_DISABLED       := false
+MY_HTTP_DISABLED      := false
+MY_ZLIB_DISABLED      := false
+MY_BROTLI_DISABLED    := false
+MY_ICONV_DISABLED     := false
+MY_MIMALLOC_DISABLED  := false
 
 LOCAL_PATH         := $(call my-dir)
 
@@ -43,14 +44,18 @@ ifdef _ICONV_DISABLED
   endif
 endif
 
+ifdef _MIMALLOC_DISABLED
+  ifeq ($(_MIMALLOC_DISABLED),true)
+    MY_MIMALLOC_DISABLED := $(_MIMALLOC_DISABLED)
+  endif
+endif
+
 MY_SRC_FILES := ../../../src/common/BufferPool.cpp \
                 ../../../src/common/crypto/Crypto.cpp \
                 ../../../src/common/Event.cpp \
                 ../../../src/common/FileHelper.cpp \
                 ../../../src/common/FuncHelper.cpp \
-                ../../../src/common/http/http_parser.c \
                 ../../../src/common/IODispatcher.cpp \
-                ../../../src/common/kcp/ikcp.c \
                 ../../../src/common/PollHelper.cpp \
                 ../../../src/common/RWLock.cpp \
                 ../../../src/common/SysHelper.cpp \
@@ -92,10 +97,17 @@ MY_WHOLE_STATIC_LIBRARIES :=
 
 ifeq ($(MY_UDP_DISABLED),true)
   MY_CFLAGS += -D_UDP_DISABLED
+else
+  MY_SRC_FILES += ../../../src/common/kcp/ikcp.c
 endif
 
 ifeq ($(MY_HTTP_DISABLED),true)
   MY_CFLAGS += -D_HTTP_DISABLED
+else
+  MY_SRC_FILES += ../../../src/common/http/llhttp_api.c \
+                  ../../../src/common/http/llhttp_support.c \
+				  ../../../src/common/http/llhttp_internal.c \
+				  ../../../src/common/http/llhttp_url.c
 endif
 
 ifeq ($(MY_ZLIB_DISABLED),true)
@@ -125,6 +137,12 @@ ifneq ($(TARGET_ARCH_ABI),mips)
       MY_CFLAGS += -D_ICONV_DISABLED
     else
       MY_WHOLE_STATIC_LIBRARIES += iconv
+    endif
+
+	ifeq ($(MY_MIMALLOC_DISABLED),true)
+      MY_CFLAGS += -D_MIMALLOC_DISABLED
+    else
+      MY_WHOLE_STATIC_LIBRARIES += mimalloc
     endif
 
   else
@@ -177,6 +195,15 @@ ifneq ($(MY_SSL_DISABLED),true)
 	include $(CLEAR_VARS)
 	LOCAL_MODULE    := ssl
 	LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libssl.a
+	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
+	include $(PREBUILT_STATIC_LIBRARY)
+endif
+
+# local lib : mimalloc
+ifneq ($(MY_MIMALLOC_DISABLED),true)
+	include $(CLEAR_VARS)
+	LOCAL_MODULE    := mimalloc
+	LOCAL_SRC_FILES := ../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/lib/libmimalloc.a
 	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../dependent/android-ndk/$(TARGET_ARCH_ABI)/include
 	include $(PREBUILT_STATIC_LIBRARY)
 endif

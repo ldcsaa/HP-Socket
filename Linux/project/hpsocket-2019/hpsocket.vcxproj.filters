@@ -16,7 +16,7 @@
     <Filter Include="UDP">
       <UniqueIdentifier>{4beac4a5-261d-4f90-b225-bb2cfef419e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Public">
+    <Filter Include="Include">
       <UniqueIdentifier>{cdf7b969-21e7-4291-a055-f81c5011a957}</UniqueIdentifier>
     </Filter>
     <Filter Include="Global">
@@ -36,17 +36,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\common\GlobalDef.h">
-      <Filter>Public</Filter>
+    <ClInclude Include="..\..\include\hpsocket\GlobalDef.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\HPSocket.h">
-      <Filter>Public</Filter>
+    <ClInclude Include="..\..\include\hpsocket\HPSocket.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\HPTypeDef.h">
-      <Filter>Public</Filter>
+    <ClInclude Include="..\..\include\hpsocket\HPTypeDef.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\SocketInterface.h">
-      <Filter>Public</Filter>
+    <ClInclude Include="..\..\include\hpsocket\SocketInterface.h">
+      <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\common\BufferPool.h">
       <Filter>Common</Filter>
@@ -147,8 +147,8 @@
     <ClInclude Include="..\..\src\UdpServer.h">
       <Filter>UDP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\GlobalErrno.h">
-      <Filter>Public</Filter>
+    <ClInclude Include="..\..\include\hpsocket\GlobalErrno.h">
+      <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\SSLAgent.h">
       <Filter>SSL</Filter>
@@ -162,8 +162,8 @@
     <ClInclude Include="..\..\src\SSLServer.h">
       <Filter>SSL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\HPSocket-SSL.h">
-      <Filter>Public</Filter>
+    <ClInclude Include="..\..\include\hpsocket\HPSocket-SSL.h">
+      <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\common\crypto\Crypto.h">
       <Filter>Common\Crypto</Filter>
@@ -183,9 +183,6 @@
     <ClInclude Include="..\..\src\HttpServer.h">
       <Filter>HTTP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\http\http_parser.h">
-      <Filter>Common\Http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\HPThreadPool.h">
       <Filter>Pool</Filter>
     </ClInclude>
@@ -203,6 +200,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\UdpNode.h">
       <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\http\llhttp.h">
+      <Filter>Common\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\http\llhttp_url.h">
+      <Filter>Common\Http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -317,9 +320,6 @@
     <ClCompile Include="..\..\src\common\kcp\ikcp.c">
       <Filter>Common\Kcp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\http\http_parser.c">
-      <Filter>Common\Http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\ArqHelper.cpp">
       <Filter>UDP</Filter>
     </ClCompile>
@@ -331,6 +331,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\UdpNode.cpp">
       <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\http\llhttp_api.c">
+      <Filter>Common\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\http\llhttp_internal.c">
+      <Filter>Common\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\http\llhttp_support.c">
+      <Filter>Common\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\http\llhttp_url.c">
+      <Filter>Common\Http</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

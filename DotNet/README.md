@@ -1,8 +1,12 @@
-# [HPSocket.Net](https://gitee.com/int2e/HPSocket.Net)
+# [HPSocket.Net](https://github.com/int2e/HPSocket.Net)
+
+## Overview
+the C# SDK for [HP-Socket](https://github.com/ldcsaa/HP-Socket)
 
 #### .Net Framework Supported
 * `.Net Framework 2.0+`
 * `.Net Core 2.0+`
+* `.Net 5.0`
 
 #### Platform supported
 * `Windows 7+ x86/x64`
@@ -88,6 +92,7 @@ Basic component is the original component provided by HP-Socket. For related usa
 + `ISslServer<TRequestBodyType>`
 + `ISslClient<TRequestBodyType>`
 + `ISslAgent<TRequestBodyType>`
++ `AsyncQueue`
 
 `HPSocket.Net` provides a TCP port forwarding component` ITcpPortForwarding`, 10 lines of code can complete TCP port forwarding.
 
@@ -102,6 +107,8 @@ Basic component is the original component provided by HP-Socket. For related usa
 + `IWebSocketServer` WebSocket Server
 + `IWebSocketAgent` WebSocket Client (Unlike other Agent components, the WebSocket Agent component does not support connecting to different WebSocket Servers, which means that all connections of the `IWebSocketAgent` component can only connect to the same server)
 
+
+`AsyncQueue` from [qq:842352715](https://gitee.com/zhige777/HPSocket.Net)
 
 ## Instructions
 1. For the use of most components, please refer to the project in the `demo` directory.
@@ -263,9 +270,10 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
         /// Parsing the request body
         /// <remarks>Subclasses must override this method</remarks>
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="header">header</param>
+        /// <param name="data">body data</param>
         /// <returns></returns>
-        protected override Packet ParseRequestBody(byte[] data)
+        protected override Packet ParseRequestBody(byte[] header, byte[] data)
         {
             // Deserialize data into object
             // Here is the object of the Packet class
@@ -410,7 +418,7 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
         public HeadTailDataReceiveAdapter() 
             : base( // For example, the data format is "#* 123456 *#", which starts with #* and ends with *#, and the middle 123456 part is the real data
                 start : Encoding.UTF8.GetBytes("#*"),  // Section start identifier, starting with #* here, pay attention to encoding issues, and be consistent at both sides
-                end : Encoding.UTF8.GetBytes("*#")  // Section end identifier, starting with *# here, pay attention to encoding issues, and be consistent at both sides
+                end : Encoding.UTF8.GetBytes("*#")  // Section end identifier, ends with *# here, pay attention to encoding issues, and be consistent at both sides
                 )
         {
         }
@@ -429,11 +437,3 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
     }
 }
 ```
-
-
-## Contribute
-
-1.  Fork this Repository
-2.  Create a new Feat_xxx branch
-3.  Submit code
-4.  Create a new Pull Request

@@ -22,6 +22,9 @@ extern "C" {
 /* Defined if fallthrough attribute is supported. */
 /* #undef JEMALLOC_HAVE_ATTR_FALLTHROUGH */
 
+/* Defined if cold attribute is supported. */
+#define JEMALLOC_HAVE_ATTR_COLD
+
 /*
  * Define overrides for non-standard allocator-related functions if they are
  * present on the system.
@@ -175,6 +178,7 @@ extern "C" {
 #  else
 #    define JEMALLOC_ALLOCATOR
 #  endif
+#  define JEMALLOC_COLD
 #elif defined(JEMALLOC_HAVE_ATTR)
 #  define JEMALLOC_ATTR(s) __attribute__((s))
 #  define JEMALLOC_ALIGNED(s) JEMALLOC_ATTR(aligned(s))
@@ -210,6 +214,11 @@ extern "C" {
 #  define JEMALLOC_SECTION(s) JEMALLOC_ATTR(section(s))
 #  define JEMALLOC_RESTRICT_RETURN
 #  define JEMALLOC_ALLOCATOR
+#  ifdef JEMALLOC_HAVE_ATTR_COLD
+#    define JEMALLOC_COLD JEMALLOC_ATTR(__cold__)
+#  else
+#    define JEMALLOC_COLD
+#  endif
 #else
 #  define JEMALLOC_ATTR(s)
 #  define JEMALLOC_ALIGNED(s)
@@ -223,6 +232,7 @@ extern "C" {
 #  define JEMALLOC_SECTION(s)
 #  define JEMALLOC_RESTRICT_RETURN
 #  define JEMALLOC_ALLOCATOR
+#  define JEMALLOC_COLD
 #endif
 
 #if defined(__APPLE__) && !defined(JEMALLOC_NO_RENAME)

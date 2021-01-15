@@ -191,24 +191,24 @@
     <None Include="res\Client.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Common\Src\BufferPool.h" />
-    <ClInclude Include="..\..\..\Common\Src\BufferPtr.h" />
-    <ClInclude Include="..\..\..\Common\Src\CriticalSection.h" />
-    <ClInclude Include="..\..\..\Common\Src\Event.h" />
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h" />
-    <ClInclude Include="..\..\..\Common\Src\RingBuffer.h" />
-    <ClInclude Include="..\..\..\Common\Src\RWLock.h" />
-    <ClInclude Include="..\..\..\Common\Src\Semaphore.h" />
-    <ClInclude Include="..\..\..\Common\Src\Singleton.h" />
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\Src\Common\BufferPool.h" />
+    <ClInclude Include="..\..\..\Src\Common\BufferPtr.h" />
+    <ClInclude Include="..\..\..\Src\Common\CriticalSection.h" />
+    <ClInclude Include="..\..\..\Src\Common\Event.h" />
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\PrivateHeap.h" />
+    <ClInclude Include="..\..\..\Src\Common\RingBuffer.h" />
+    <ClInclude Include="..\..\..\Src\Common\RWLock.h" />
+    <ClInclude Include="..\..\..\Src\Common\Semaphore.h" />
+    <ClInclude Include="..\..\..\Src\Common\Singleton.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h" />
     <ClInclude Include="..\..\..\Src\SocketHelper.h" />
-    <ClInclude Include="..\..\..\Src\SocketInterface.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\SocketInterface.h" />
     <ClInclude Include="..\..\..\Src\TcpAgent.h" />
-    <ClInclude Include="..\..\..\Common\Src\STLHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\SysHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\WaitFor.h" />
-    <ClInclude Include="..\..\..\Common\Src\Win32Helper.h" />
+    <ClInclude Include="..\..\..\Src\Common\STLHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\SysHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\WaitFor.h" />
+    <ClInclude Include="..\..\..\Src\Common\Win32Helper.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientDlg.h" />
@@ -216,12 +216,12 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Common\Src\BufferPool.cpp" />
-    <ClCompile Include="..\..\..\Common\Src\RWLock.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\BufferPool.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\RWLock.cpp" />
     <ClCompile Include="..\..\..\Src\SocketHelper.cpp" />
     <ClCompile Include="..\..\..\Src\TcpAgent.cpp" />
-    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp" />
-    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\SysHelper.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientDlg.cpp" />

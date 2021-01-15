@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "GlobalDef.h"
+#include "../../include/hpsocket/GlobalDef.h"
 
 #define SINGLETON_THIS(ClassName)		ClassName::GetThis()
 #define SINGLETON_INSTANCE(ClassName)	ClassName::GetInstance()

@@ -24,7 +24,7 @@
 #pragma once
 
 #include "TcpServer.h"
-#include "../Common/Src/BufferPool.h"
+#include "Common/BufferPool.h"
 
 template<class T> class CTcpPackServerT : public IPackSocket, public T
 {

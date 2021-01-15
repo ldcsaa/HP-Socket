@@ -23,8 +23,8 @@
  
 #pragma once
 
-#include "HPSocket4C.h"
-#include "SocketInterface.h"
+#include "../include/hpsocket/HPSocket4C.h"
+#include "../include/hpsocket/SocketInterface.h"
 #include "common/FuncHelper.h"
 
 class C_HP_Object

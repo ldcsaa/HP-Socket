@@ -23,6 +23,10 @@ for /f "delims=" %%i in ('dir /ad /b /s "obj"') do (
    rd /s /q "%%i"
 )
 
+for /f "delims=" %%i in ('dir /ad /b /s ".vs"') do (
+   rd /s /q "%%i"
+)
+
 for /f "delims=" %%i in ('dir /ad /b /s "netstandard2.0"') do (
    rd /s /q "%%i"
 )

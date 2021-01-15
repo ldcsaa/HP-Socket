@@ -5,11 +5,11 @@
 #pragma once
 #include "afxwin.h"
 
-#include "../../../Common/Src/RingBuffer.h"
-#include "../../../Common/Src/WaitFor.h"
-#include "../../../Common/Src/Thread.h"
-#include "../../../Common/Src/Event.h"
-#include "../../../Src/HPSocket.h"
+#include "../../../Src/Common/RingBuffer.h"
+#include "../../../Src/Common/WaitFor.h"
+#include "../../../Src/Common/Thread.h"
+#include "../../../Src/Common/Event.h"
+#include "../../../Include/HPSocket/HPSocket.h"
 #include "../../Global/helper.h"
 
 struct TDyingConnection

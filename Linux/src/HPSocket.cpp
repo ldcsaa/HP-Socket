@@ -21,7 +21,7 @@
  * limitations under the License.
  */
  
-#include "HPSocket.h"
+#include "../include/hpsocket/HPSocket.h"
 #include "TcpServer.h"
 #include "TcpAgent.h"
 #include "TcpClient.h"

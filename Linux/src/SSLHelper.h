@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "HPTypeDef.h"
+#include "../include/hpsocket/HPTypeDef.h"
 #include "common/BufferPool.h"
 
 #ifdef _SSL_SUPPORT

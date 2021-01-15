@@ -23,7 +23,7 @@
  
 #include "stdafx.h"
 #include "TcpAgent.h"
-#include "../Common/Src/WaitFor.h"
+#include "Common/WaitFor.h"
 
 #include <malloc.h>
 #include <process.h>

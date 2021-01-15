@@ -53,13 +53,13 @@
     <ClInclude Include="..\..\..\src\common\Thread.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\HPSocket.h">
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\SocketInterface.h">
+    <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>

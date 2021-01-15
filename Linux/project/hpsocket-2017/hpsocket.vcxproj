@@ -36,9 +36,10 @@
     <ClInclude Include="..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\src\common\FuncHelper.h" />
     <ClInclude Include="..\..\src\common\GeneralHelper.h" />
-    <ClInclude Include="..\..\src\common\GlobalDef.h" />
-    <ClInclude Include="..\..\src\common\GlobalErrno.h" />
-    <ClInclude Include="..\..\src\common\http\http_parser.h" />
+    <ClInclude Include="..\..\include\hpsocket\GlobalDef.h" />
+    <ClInclude Include="..\..\include\hpsocket\GlobalErrno.h" />
+    <ClInclude Include="..\..\src\common\http\llhttp.h" />
+    <ClInclude Include="..\..\src\common\http\llhttp_url.h" />
     <ClInclude Include="..\..\src\common\IODispatcher.h" />
     <ClInclude Include="..\..\src\common\kcp\ikcp.h" />
     <ClInclude Include="..\..\src\common\PollHelper.h" />
@@ -52,10 +53,10 @@
     <ClInclude Include="..\..\src\common\STLHelper.h" />
     <ClInclude Include="..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\src\common\Thread.h" />
-    <ClInclude Include="..\..\src\HPSocket-SSL.h" />
-    <ClInclude Include="..\..\src\HPSocket.h" />
+    <ClInclude Include="..\..\include\hpsocket\HPSocket-SSL.h" />
+    <ClInclude Include="..\..\include\hpsocket\HPSocket.h" />
     <ClInclude Include="..\..\src\HPThreadPool.h" />
-    <ClInclude Include="..\..\src\HPTypeDef.h" />
+    <ClInclude Include="..\..\include\hpsocket\HPTypeDef.h" />
     <ClInclude Include="..\..\src\HttpAgent.h" />
     <ClInclude Include="..\..\src\HttpClient.h" />
     <ClInclude Include="..\..\src\HttpCookie.h" />
@@ -63,7 +64,7 @@
     <ClInclude Include="..\..\src\HttpServer.h" />
     <ClInclude Include="..\..\src\MiscHelper.h" />
     <ClInclude Include="..\..\src\SocketHelper.h" />
-    <ClInclude Include="..\..\src\SocketInterface.h" />
+    <ClInclude Include="..\..\include\hpsocket\SocketInterface.h" />
     <ClInclude Include="..\..\src\SSLAgent.h" />
     <ClInclude Include="..\..\src\SSLClient.h" />
     <ClInclude Include="..\..\src\SSLHelper.h" />
@@ -91,7 +92,10 @@
     <ClCompile Include="..\..\src\common\Event.cpp" />
     <ClCompile Include="..\..\src\common\FileHelper.cpp" />
     <ClCompile Include="..\..\src\common\FuncHelper.cpp" />
-    <ClCompile Include="..\..\src\common\http\http_parser.c" />
+    <ClCompile Include="..\..\src\common\http\llhttp_api.c" />
+    <ClCompile Include="..\..\src\common\http\llhttp_internal.c" />
+    <ClCompile Include="..\..\src\common\http\llhttp_support.c" />
+    <ClCompile Include="..\..\src\common\http\llhttp_url.c" />
     <ClCompile Include="..\..\src\common\IODispatcher.cpp" />
     <ClCompile Include="..\..\src\common\kcp\ikcp.c" />
     <ClCompile Include="..\..\src\common\PollHelper.cpp" />
@@ -296,7 +300,7 @@
     <RemotePreLinkEvent />
     <Link />
     <Link>
-      <LibraryDependencies>jemalloc_pic;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>mimalloc;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -360,7 +364,7 @@
     <RemotePreLinkEvent />
     <Link />
     <Link>
-      <LibraryDependencies>jemalloc_pic;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>mimalloc;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -424,7 +428,7 @@
     <RemotePreLinkEvent />
     <Link />
     <Link>
-      <LibraryDependencies>jemalloc_pic;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>mimalloc;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>

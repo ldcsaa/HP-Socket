@@ -23,11 +23,11 @@
 
 #pragma once
 
-#include "HPTypeDef.h"
+#include "../Include/HPSocket/HPTypeDef.h"
 
 #ifdef _SSL_SUPPORT
 
-#include "../Common/Src/BufferPool.h"
+#include "Common/BufferPool.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4005)

@@ -27,7 +27,7 @@
 #ifdef _SSL_SUPPORT
 
 #include "SocketHelper.h"
-#include "../Common/Src/WaitFor.h"
+#include "Common/WaitFor.h"
 
 #include <atlpath.h>
 

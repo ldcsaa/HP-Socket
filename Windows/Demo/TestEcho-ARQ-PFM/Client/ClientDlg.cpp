@@ -6,7 +6,7 @@
 #include "Client.h"
 #include "ClientDlg.h"
 #include "afxdialogex.h"
-#include "../../../Common/Src/WaitFor.h"
+#include "../../../Src/Common/WaitFor.h"
 
 #ifdef _WIN64
 	#ifdef _DEBUG

@@ -17,5 +17,5 @@
 #define _ZLIB_DISABLED
 #define _BROTLI_DISABLED
 
-#include "../../../Common/Src/GeneralHelper.h"
+#include "../../../Src/Common/GeneralHelper.h"
 

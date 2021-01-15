@@ -23,7 +23,7 @@
  
 #include "stdafx.h"
 #include "TcpClient.h"
-#include "../Common/Src/WaitFor.h"
+#include "Common/WaitFor.h"
 
 #include <process.h>
 

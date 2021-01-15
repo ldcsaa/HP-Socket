@@ -22,7 +22,7 @@
  */
  
 #include "stdafx.h"
-#include "HPSocket.h"
+#include "../Include/HPSocket/HPSocket.h"
 #include "TcpServer.h"
 #include "TcpAgent.h"
 #include "TcpClient.h"
