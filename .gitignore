@@ -28,8 +28,8 @@ Static/
 static/
 Debug/
 debug/
-!Windows/Common/Src/Debug/
-!Windows/Common/Src/debug/
+!Windows/Src/Common/Debug/
+!Windows/Src/Common/debug/
 !Windows/Other Languages/C#/HPSocketCS/bin/x86/Debug/
 !Windows/Other Languages/C#/HPSocketCS/bin/x64/Debug/
 Obj/
