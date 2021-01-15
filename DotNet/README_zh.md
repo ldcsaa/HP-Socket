@@ -1,8 +1,12 @@
-# [HPSocket.Net](https://gitee.com/int2e/HPSocket.Net)
+# [HPSocket.Net](https://github.com/int2e/HPSocket.Net)
+
+## 概览
+the C# SDK for [HP-Socket](https://github.com/ldcsaa/HP-Socket)
 
 #### .Net 框架支持
 * `.Net Framework 2.0+`
 * `.Net Core 2.0+`
+* `.Net 5.0`
 
 #### 平台支持
 * `Windows 7+ x86/x64`
@@ -88,6 +92,7 @@ Nuget软件包中的`libhpsocket4c.dylib`编译自`HP-Socket`的`macOS分支`[HP
 + `ISslServer<TRequestBodyType>`
 + `ISslClient<TRequestBodyType>`
 + `ISslAgent<TRequestBodyType>`
++ `AsyncQueue`
 
 `HPSocket.Net` 提供一个Tcp端口转发组件`ITcpPortForwarding`，10行代码即可完成TCP端口转发
 
@@ -102,6 +107,8 @@ Nuget软件包中的`libhpsocket4c.dylib`编译自`HP-Socket`的`macOS分支`[HP
 + `IWebSocketServer` WebSocket 服务端
 + `IWebSocketAgent` WebSocket 客户端  （与其他Agent组件不同，WebSocket的Agent组件不支持连接到不同的WebSocket Server，也就是说`IWebSocketAgent`组件所有的连接都只能连接到同一个服务器）
 
+
+`AsyncQueue` 来自 [qq:842352715](https://gitee.com/zhige777/HPSocket.Net)
 
 
 ## 使用说明
@@ -170,7 +177,7 @@ using(IHttpEasyClient httpClient = new HttpEasyClient())
 
 完整示例在`demo/TcpServer-TestEcho-Adapter`
 
-该系列组件是`HPSocket.Net`的`数据接收适配器`扩展组件，用户通过`自定义数据接收适配器`处理TCP通信中可能出现的`粘包`、`半包`等情况。`数据接收适配器`组件看起来这与HP-Socket的`Pack`组件有些相似，但它更加灵活，适配也非常简单方便。
+该系列组件是`HPSocket.Net`的`数据接收适配器`扩展组件，用户通过`自定义数据接收适配器`处理TCP通信中可能出现的应用层所谓的`“粘包”`、`“半包”`等情况。`数据接收适配器`组件看起来这与HP-Socket的`Pack`组件有些相似，但它更加灵活，适配也非常简单方便。
 
 
 + `ITcpServer<TRequestBodyType>`/`ITcpClient<TRequestBodyType>`/`ITcpAgent<TRequestBodyType>`
@@ -265,9 +272,10 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
         /// 解析请求体
         /// <remarks>子类必须覆盖此方法</remarks>
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="header">包头</param>
+        /// <param name="data">包体</param>
         /// <returns></returns>
-        protected override Packet ParseRequestBody(byte[] data)
+        protected override Packet ParseRequestBody(byte[] header, byte[] data)
         {
             // 将data反序列化为对象
             // 这里是Packet类的对象
@@ -412,7 +420,7 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
         public HeadTailDataReceiveAdapter() 
             : base( // 例如数据格式是"#*123456*#"，其中以#*开头，以*#结尾，中间123456部分是真实数据
                 start : Encoding.UTF8.GetBytes("#*")， // 区间起始标志，这里以#*开始，注意编码问题，要两端保持一致
-                end : Encoding.UTF8.GetBytes("*#")  // 区间结束标志，这里以*#开始，注意编码问题，要两端保持一致
+                end : Encoding.UTF8.GetBytes("*#")  // 区间结束标志，这里以*#结束，注意编码问题，要两端保持一致
                 )
         {
         }
@@ -431,11 +439,3 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
     }
 }
 ```
-
-
-## 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
