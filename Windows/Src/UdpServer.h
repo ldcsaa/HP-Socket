@@ -24,11 +24,11 @@
 #pragma once
 
 #include "MiscHelper.h"
-#include "../Common/Src/Event.h"
-#include "../Common/Src/RWLock.h"
-#include "../Common/Src/STLHelper.h"
-#include "../Common/Src/RingBuffer.h"
-#include "../Common/Src/PrivateHeap.h"
+#include "Common/Event.h"
+#include "Common/RWLock.h"
+#include "Common/STLHelper.h"
+#include "Common/RingBuffer.h"
+#include "Common/PrivateHeap.h"
 
 #ifdef _UDP_SUPPORT
 

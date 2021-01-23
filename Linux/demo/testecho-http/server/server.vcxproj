@@ -127,7 +127,10 @@
     <ClCompile Include="..\..\..\src\common\Event.cpp" />
     <ClCompile Include="..\..\..\src\common\FileHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\FuncHelper.cpp" />
-    <ClCompile Include="..\..\..\src\common\http\http_parser.c" />
+    <ClCompile Include="..\..\..\src\common\http\llhttp_api.c" />
+    <ClCompile Include="..\..\..\src\common\http\llhttp_internal.c" />
+    <ClCompile Include="..\..\..\src\common\http\llhttp_support.c" />
+    <ClCompile Include="..\..\..\src\common\http\llhttp_url.c" />
     <ClCompile Include="..\..\..\src\common\IODispatcher.cpp" />
     <ClCompile Include="..\..\..\src\common\PollHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\RWLock.cpp" />
@@ -152,9 +155,10 @@
     <ClInclude Include="..\..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\..\src\common\FuncHelper.h" />
     <ClInclude Include="..\..\..\src\common\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\src\common\GlobalDef.h" />
-    <ClInclude Include="..\..\..\src\common\GlobalErrno.h" />
-    <ClInclude Include="..\..\..\src\common\http\http_parser.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\GlobalDef.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\GlobalErrno.h" />
+    <ClInclude Include="..\..\..\src\common\http\llhttp.h" />
+    <ClInclude Include="..\..\..\src\common\http\llhttp_url.h" />
     <ClInclude Include="..\..\..\src\common\IODispatcher.h" />
     <ClInclude Include="..\..\..\src\common\PollHelper.h" />
     <ClInclude Include="..\..\..\src\common\PrivateHeap.h" />
@@ -167,12 +171,12 @@
     <ClInclude Include="..\..\..\src\common\StringT.h" />
     <ClInclude Include="..\..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\..\src\common\Thread.h" />
-    <ClInclude Include="..\..\..\src\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
     <ClInclude Include="..\..\..\src\HttpCookie.h" />
     <ClInclude Include="..\..\..\src\HttpHelper.h" />
     <ClInclude Include="..\..\..\src\HttpServer.h" />
     <ClInclude Include="..\..\..\src\SocketHelper.h" />
-    <ClInclude Include="..\..\..\src\SocketInterface.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h" />
     <ClInclude Include="..\..\..\src\SSLHelper.h" />
     <ClInclude Include="..\..\..\src\SSLServer.h" />
     <ClInclude Include="..\..\..\src\TcpServer.h" />
@@ -202,7 +206,7 @@
       <PreprocessorDefinitions>_UDP_DISABLED;_NEED_SSL;_NEED_HTTP;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;brotli;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>mimalloc;ssl;crypto;z;brotli;rt;dl;pthread</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -231,7 +235,7 @@
       <PreprocessorDefinitions>_UDP_DISABLED;_NEED_SSL;_NEED_HTTP;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;brotli;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>mimalloc;ssl;crypto;z;brotli;rt;dl;pthread</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -260,7 +264,7 @@
       <PreprocessorDefinitions>_UDP_DISABLED;_NEED_SSL;_NEED_HTTP;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;ssl;crypto;z;brotli;rt;dl;pthread</LibraryDependencies>
+      <LibraryDependencies>mimalloc;ssl;crypto;z;brotli;rt;dl;pthread</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>-L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>

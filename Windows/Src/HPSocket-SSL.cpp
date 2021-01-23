@@ -22,7 +22,7 @@
  */
  
 #include "stdafx.h"
-#include "HPSocket-SSL.h"
+#include "../Include/HPSocket/HPSocket-SSL.h"
 
 #ifdef _SSL_SUPPORT
 

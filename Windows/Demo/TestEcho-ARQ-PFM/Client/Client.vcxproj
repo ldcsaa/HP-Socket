@@ -190,10 +190,10 @@
     <None Include="res\Client.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\WaitFor.h" />
-    <ClInclude Include="..\..\..\Src\HPSocket.h" />
-    <ClInclude Include="..\..\..\Src\SocketInterface.h" />
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\WaitFor.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\SocketInterface.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientDlg.h" />
@@ -201,7 +201,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientDlg.cpp" />

@@ -28,7 +28,15 @@
 
 #ifdef _HTTP_SUPPORT
 
-#include "common/http/http_parser.h"
+#include "./common/http/llhttp.h"
+#include "./common/http/llhttp_url.h"
+
+typedef llhttp_t			http_parser;
+typedef llhttp_settings_t	http_parser_settings;
+
+#define LLHTTP_MAX_ERROR_NUM				23
+#define LLHTTP_MAX_METHOD_NUM				45
+
 
 /************************************************************************
 名称：HTTP 全局常量
@@ -387,26 +395,29 @@ public:
 				return m_pContext->DoFireSuperReceive(m_pSocket, pData, iLength);
 		}
 
-		EnHandleResult hr = HR_OK;
-		int iPased		  = (int)::http_parser_execute(&m_parser, &sm_settings, (LPCSTR)pData, iLength);
+		EnHandleResult hr	= HR_OK;
+		llhttp_errno rs		= ::llhttp_execute(&m_parser, (LPCSTR)pData, iLength);
 
-		if(m_parser.upgrade)
-			hr = Upgrade(pData, iLength, iPased);
-		else if(m_parser.http_errno != HPE_OK)
+		if(rs == HPE_OK)
+			ASSERT(m_parser.error_pos == nullptr);
+		else if(rs == HPE_PAUSED_UPGRADE)
 		{
-			m_pContext->FireParseError(m_pSocket, m_parser.http_errno, ::http_errno_description(HTTP_PARSER_ERRNO(&m_parser)));
-			hr = HR_ERROR;
+			int iPased	= (m_parser.error_pos == nullptr) ? iLength : (int)((const BYTE*)(m_parser.error_pos) - pData);
+			hr			= Upgrade(pData, iLength, iPased);
 		}
 		else
-			ASSERT(iPased == iLength);
+		{
+			m_pContext->FireParseError(m_pSocket, m_parser.error, ::llhttp_get_error_reason(&m_parser));
+			hr = HR_ERROR;
+		}
 
 		return hr;
 	}
 
 	void CheckBodyIdentityEof()
 	{
-		if(m_parser.state == s_body_identity_eof && !m_parser.upgrade)
-			::http_parser_execute(&m_parser, &sm_settings, nullptr, 0);
+		if(!m_parser.upgrade)
+			::llhttp_finish(&m_parser);
 	}
 
 	static int on_message_begin(http_parser* p)
@@ -420,18 +431,18 @@ public:
 
 	static int on_url(http_parser* p, const char* at, size_t length)
 	{
-		EnHttpParseResult hpr	= HPR_OK;
+		Self(p)->AppendBuffer(at, length);
+
+		return HPR_OK;
+	}
+
+	static int on_url_complete(llhttp_t* p)
+	{
 		THttpObjT* pSelf		= Self(p);
-
-		pSelf->AppendBuffer(at, length);
-
-		if(p->state != s_req_http_start)
-			return hpr;
-
-		hpr = pSelf->ParseUrl();
+		EnHttpParseResult hpr	= pSelf->ParseUrl();
 
 		if(hpr == HPR_OK)
-			hpr = pSelf->m_pContext->FireRequestLine(pSelf->m_pSocket, ::http_method_str((http_method)p->method), pSelf->GetBuffer());
+			hpr = pSelf->m_pContext->FireRequestLine(pSelf->m_pSocket, ::llhttp_method_name((llhttp_method_t)p->method), pSelf->GetBuffer());
 
 		pSelf->ResetBuffer();
 
@@ -440,15 +451,16 @@ public:
 
 	static int on_status(http_parser* p, const char* at, size_t length)
 	{
-		EnHttpParseResult hpr	= HPR_OK;
+		Self(p)->AppendBuffer(at, length);
+
+		return HPR_OK;
+	}
+
+	static int on_status_complete(llhttp_t* p)
+	{
 		THttpObjT* pSelf		= Self(p);
+		EnHttpParseResult hpr	= pSelf->m_pContext->FireStatusLine(pSelf->m_pSocket, p->status_code, pSelf->GetBuffer());
 
-		pSelf->AppendBuffer(at, length);
-
-		if(p->state != s_res_line_almost_done)
-			return hpr;
-
-		hpr = pSelf->m_pContext->FireStatusLine(pSelf->m_pSocket, p->status_code, pSelf->GetBuffer());
 		pSelf->ResetBuffer();
 
 		return hpr;
@@ -456,34 +468,36 @@ public:
 
 	static int on_header_field(http_parser* p, const char* at, size_t length)
 	{
-		EnHttpParseResult hpr	= HPR_OK;
+		Self(p)->AppendBuffer(at, length);
+
+		return HPR_OK;
+	}
+
+	static int on_header_field_complete(llhttp_t* p)
+	{
 		THttpObjT* pSelf		= Self(p);
-
-		pSelf->AppendBuffer(at, length);
-
-		if(p->state != s_header_value_discard_ws)
-			return hpr;
-
-		pSelf->m_strCurHeader = pSelf->GetBuffer();
+		pSelf->m_strCurHeader	= pSelf->GetBuffer();
 		pSelf->ResetBuffer();
 
-		return hpr;
+		return HPR_OK;
 	}
 
 	static int on_header_value(http_parser* p, const char* at, size_t length)
 	{
-		EnHttpParseResult hpr	= HPR_OK;
-		THttpObjT* pSelf		= Self(p);
+		Self(p)->AppendBuffer(at, length);
 
-		pSelf->AppendBuffer(at, length);
+		return HPR_OK;
+	}
 
-		if(p->state != s_header_almost_done && p->state != s_header_field_start)
-			return hpr;
+	static int on_header_value_complete(llhttp_t* p)
+	{
+		THttpObjT* pSelf = Self(p);
 
 		pSelf->m_headers.emplace(move(THeaderMap::value_type(pSelf->m_strCurHeader, pSelf->GetBuffer())));
-		hpr = pSelf->m_pContext->FireHeader(pSelf->m_pSocket, pSelf->m_strCurHeader, pSelf->GetBuffer());
 
-		if(hpr != HPR_ERROR && !pSelf->GetBufferRef().Trim().IsEmpty())
+		EnHttpParseResult hpr = pSelf->m_pContext->FireHeader(pSelf->m_pSocket, pSelf->m_strCurHeader, pSelf->GetBuffer());
+
+		if(hpr != HPR_ERROR && !pSelf->GetBufferRef().IsEmpty())
 		{
 			if(pSelf->m_bRequest && pSelf->m_strCurHeader == HTTP_HEADER_COOKIE)
 				hpr = pSelf->ParseCookie();
@@ -522,28 +536,21 @@ public:
 	{
 		THttpObjT* pSelf = Self(p);
 
-		if(p->state == s_chunk_data || p->state == s_header_field_start)
-			return pSelf->m_pContext->FireChunkHeader(pSelf->m_pSocket, (int)p->content_length);
-
-		return HPR_OK;
+		return pSelf->m_pContext->FireChunkHeader(pSelf->m_pSocket, (int)p->content_length);
 	}
 
 	static int on_chunk_complete(http_parser* p)
 	{
 		THttpObjT* pSelf = Self(p);
 
-		if(p->state == s_headers_done || p->state == s_message_done)
-			return pSelf->m_pContext->FireChunkComplete(pSelf->m_pSocket);
-
-		return HPR_OK;
+		return pSelf->m_pContext->FireChunkComplete(pSelf->m_pSocket);
 	}
 
 	static int on_message_complete(http_parser* p)
 	{
-		THttpObjT* pSelf		= Self(p);
-		EnHttpParseResult hpr	= pSelf->m_pContext->FireMessageComplete(pSelf->m_pSocket);
-
-		return hpr;
+		THttpObjT* pSelf = Self(p);
+		
+		return pSelf->m_pContext->FireMessageComplete(pSelf->m_pSocket);
 	}
 
 	EnHandleResult on_ws_message_header(BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)
@@ -607,7 +614,9 @@ private:
 
 		if(rs != HPE_OK)
 		{
-			m_parser.http_errno = HPE_INVALID_URL;
+			m_parser.error	= HPE_INVALID_URL;
+			m_parser.reason	= "Parse url fail";
+
 			return HPR_ERROR;
 		}
 
@@ -687,12 +696,11 @@ public:
 
 	BOOL IsRequest()				{return m_bRequest;}
 	BOOL IsUpgrade()				{return m_parser.upgrade;}
-	BOOL IsKeepAlive()				{return ::http_should_keep_alive(&m_parser);}
+	BOOL IsKeepAlive()				{return ::llhttp_should_keep_alive(&m_parser);}
 	USHORT GetVersion()				{return MAKEWORD(m_parser.http_major, m_parser.http_minor);}
 	ULONGLONG GetContentLength()	{return m_parser.content_length;}
 
 	int GetMethodInt()				{return m_bRequest ? m_parser.method : m_sRequestMethod;}
-	LPCSTR GetMethod()				{return ::http_method_str((http_method)GetMethodInt());}
 	USHORT GetUrlFieldSet()			{return m_usUrlFieldSet;}
 	USHORT GetStatusCode()			{return m_parser.status_code;}
 
@@ -703,6 +711,16 @@ public:
 
 	BOOL HasReleased()				{return m_bReleased;}
 	void Release()					{m_bReleased = TRUE;}
+
+	LPCSTR GetMethod()
+	{
+		int iMethod = GetMethodInt();
+
+		if(iMethod >= 0 && iMethod <= LLHTTP_MAX_METHOD_NUM)
+			return ::llhttp_method_name((llhttp_method)iMethod);
+
+		return nullptr;
+	}
 
 	LPCSTR GetContentType()
 	{
@@ -738,10 +756,22 @@ public:
 
 	USHORT GetParseErrorCode(LPCSTR* lpszErrorDesc = nullptr)
 	{
-		if(lpszErrorDesc)
-			*lpszErrorDesc = ::http_errno_description(HTTP_PARSER_ERRNO(&m_parser));
+		USHORT usError = (USHORT)m_parser.error;
 
-		return m_parser.http_errno;
+		if(lpszErrorDesc)
+		{
+			if(usError == HPE_OK)
+				*lpszErrorDesc = ::llhttp_errno_name((llhttp_errno_t)usError);
+			else
+			{
+				*lpszErrorDesc = ::llhttp_get_error_reason(&m_parser);
+
+				if(::IsStrEmptyA(*lpszErrorDesc) && usError <= LLHTTP_MAX_ERROR_NUM)
+					*lpszErrorDesc = ::llhttp_errno_name((llhttp_errno_t)usError);
+			}
+		}
+
+		return usError;
 	}
 
 	LPCSTR GetUrlField(EnHttpUrlField enField)
@@ -786,26 +816,14 @@ public:
 
 		*m_pstrRequestPath = lpszPath;
 
-		if(stricmp(lpszMethod, HTTP_METHOD_GET) == 0)
-			m_sRequestMethod = HTTP_GET;
-		else if(stricmp(lpszMethod, HTTP_METHOD_POST) == 0)
-			m_sRequestMethod = HTTP_POST;
-		else if(stricmp(lpszMethod, HTTP_METHOD_PUT) == 0)
-			m_sRequestMethod = HTTP_PUT;
-		else if(stricmp(lpszMethod, HTTP_METHOD_DELETE) == 0)
-			m_sRequestMethod = HTTP_DELETE;
-		else if(stricmp(lpszMethod, HTTP_METHOD_HEAD) == 0)
-			m_sRequestMethod = HTTP_HEAD;
-		else if(stricmp(lpszMethod, HTTP_METHOD_PATCH) == 0)
-			m_sRequestMethod = HTTP_PATCH;
-		else if(stricmp(lpszMethod, HTTP_METHOD_TRACE) == 0)
-			m_sRequestMethod = HTTP_TRACE;
-		else if(stricmp(lpszMethod, HTTP_METHOD_OPTIONS) == 0)
-			m_sRequestMethod = HTTP_OPTIONS;
-		else if(stricmp(lpszMethod, HTTP_METHOD_CONNECT) == 0)
-			m_sRequestMethod = HTTP_CONNECT;
+#define HTTP_METHOD_GEN(NUM, NAME, STRING) else if(stricmp(lpszMethod, #STRING) == 0) m_sRequestMethod = HTTP_##NAME;
+
+		if(::IsStrEmptyA(lpszMethod)) m_sRequestMethod = -1;
+		HTTP_METHOD_MAP(HTTP_METHOD_GEN)
 		else
 			m_sRequestMethod = -1;
+
+#undef HTTP_METHOD_GEN
 	}
 
 	BOOL GetHeader(LPCSTR lpszName, LPCSTR* lpszValue)
@@ -1121,7 +1139,7 @@ private:
 
 	void ResetParser()
 	{
-		::http_parser_init(&m_parser, m_bRequest ? HTTP_REQUEST : HTTP_RESPONSE);
+		::llhttp_init(&m_parser, m_bRequest ? HTTP_REQUEST : HTTP_RESPONSE, &sm_settings);
 		m_parser.data = this;		
 	}
 
@@ -1220,7 +1238,11 @@ template<class T, class S> http_parser_settings THttpObjT<T, S>::sm_settings =
 	on_body,
 	on_message_complete,
 	on_chunk_header,
-	on_chunk_complete
+	on_chunk_complete,
+	on_url_complete,
+	on_status_complete,
+	on_header_field_complete,
+	on_header_value_complete
 };
 
 // ------------------------------------------------------------------------------------------------------------- //
@@ -1264,7 +1286,7 @@ public:
 		pHttpObj->SetFree();
 
 		ReleaseGCHttpObj();
-
+		
 		if(!m_lsFreeHttpObj.TryPut(pHttpObj))
 			m_lsGCHttpObj.PushBack(pHttpObj);
 	}

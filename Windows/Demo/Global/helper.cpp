@@ -859,7 +859,7 @@ BOOL SetCurrentPathToModulePath(HMODULE hModule)
 
 #ifdef _NEED_SSL
 
-#include "../../Common/Src/FuncHelper.h"
+#include "../../Src/Common/FuncHelper.h"
 
 #define SSL_CERT_RELATIVE_PATH		_T("\\..\\..\\ssl-cert\\")
 

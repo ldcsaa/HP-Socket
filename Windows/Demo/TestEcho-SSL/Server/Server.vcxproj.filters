@@ -90,7 +90,7 @@
     <ClInclude Include="..\..\..\Src\SocketHelper.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\SocketInterface.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\SocketInterface.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\TcpServer.h">
@@ -105,7 +105,7 @@
     <ClInclude Include="..\..\..\Common\Src\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
   </ItemGroup>

@@ -201,12 +201,12 @@
     <None Include="res\Server.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\Thread.h" />
-    <ClInclude Include="..\..\..\Common\Src\WaitFor.h" />
-    <ClInclude Include="..\..\..\Src\HPSocket.h" />
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
-    <ClInclude Include="..\..\..\Src\SocketInterface.h" />
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\Thread.h" />
+    <ClInclude Include="..\..\..\Src\Common\WaitFor.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\SocketInterface.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />
@@ -214,8 +214,8 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Common\Src\Thread.cpp" />
-    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\Thread.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ServerDlg.cpp" />

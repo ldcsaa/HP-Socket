@@ -39,64 +39,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Global\helper.h">
       <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\BufferPool.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\BufferPtr.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\CriticalSection.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Event.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\RWLock.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Semaphore.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Singleton.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\STLHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\SysHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\WaitFor.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Win32Helper.h">
-      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\SocketHelper.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\SocketInterface.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\SocketInterface.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\TcpServer.h">
@@ -108,29 +57,83 @@
     <ClInclude Include="..\..\..\Src\SSLServer.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\FuncHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Src\HttpHelper.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\HttpServer.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\RingBuffer.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\crypto\crypto.h">
-      <Filter>Common\crypt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\http\http_parser.h">
-      <Filter>Common\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\HttpCookie.h">
       <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\http\llhttp.h">
+      <Filter>Common\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\http\llhttp_url.h">
+      <Filter>Common\http</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\crypto\crypto.h">
+      <Filter>Common\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\BufferPool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Win32Helper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\BufferPtr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\CriticalSection.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Event.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\FuncHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\PrivateHeap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\RingBuffer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\RWLock.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Semaphore.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Singleton.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\STLHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\SysHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\WaitFor.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -146,18 +149,6 @@
     <ClCompile Include="..\..\Global\helper.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\BufferPool.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\RWLock.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Src\SocketHelper.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
@@ -170,23 +161,44 @@
     <ClCompile Include="..\..\..\Src\SSLServer.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\FuncHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Src\HttpHelper.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Src\HttpServer.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\crypto\crypto.cpp">
-      <Filter>Common\crypt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\http\http_parser.c">
-      <Filter>Common\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Src\HttpCookie.cpp">
       <Filter>HPSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\http\llhttp_api.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\http\llhttp_internal.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\http\llhttp_support.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\http\llhttp_url.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\BufferPool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\FuncHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\RWLock.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\SysHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\crypto\crypto.cpp">
+      <Filter>Common\crypt</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

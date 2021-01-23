@@ -5,7 +5,7 @@
 #pragma once
 #include "afxwin.h"
 
-#include "../../../Src/HPSocket-SSL.h"
+#include "../../../Include/HPSocket/HPSocket-SSL.h"
 #include "../../Global/helper.h"
 
 // CServerDlg dialog

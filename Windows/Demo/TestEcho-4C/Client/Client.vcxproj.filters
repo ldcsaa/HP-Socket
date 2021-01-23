@@ -51,10 +51,10 @@
     <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPSocket4C.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket4C.h">
       <Filter>HPSocket4C</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h">
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h">
       <Filter>HPSocket4C</Filter>
     </ClInclude>
   </ItemGroup>

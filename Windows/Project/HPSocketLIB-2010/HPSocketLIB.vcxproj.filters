@@ -22,7 +22,7 @@
     <Filter Include="Common\http">
       <UniqueIdentifier>{ef5a58df-3748-488c-9f4e-63de35d97d07}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HPSocket\Public">
+    <Filter Include="HPSocket\Include">
       <UniqueIdentifier>{d7936ef7-4fdc-4323-bb39-cef6f485346f}</UniqueIdentifier>
     </Filter>
     <Filter Include="HPSocket\TCP">
@@ -54,50 +54,47 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\BufferPool.h">
+    <ClInclude Include="..\..\Src\Common\BufferPool.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\BufferPtr.h">
+    <ClInclude Include="..\..\Src\Common\BufferPtr.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\CriticalSection.h">
+    <ClInclude Include="..\..\Src\Common\CriticalSection.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\Event.h">
+    <ClInclude Include="..\..\Src\Common\Event.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\GeneralHelper.h">
+    <ClInclude Include="..\..\Src\Common\GeneralHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\PrivateHeap.h">
+    <ClInclude Include="..\..\Src\Common\PrivateHeap.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\RWLock.h">
+    <ClInclude Include="..\..\Src\Common\RWLock.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\Semaphore.h">
+    <ClInclude Include="..\..\Src\Common\Semaphore.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\Singleton.h">
+    <ClInclude Include="..\..\Src\Common\Singleton.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\STLHelper.h">
+    <ClInclude Include="..\..\Src\Common\STLHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\SysHelper.h">
+    <ClInclude Include="..\..\Src\Common\SysHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\WaitFor.h">
+    <ClInclude Include="..\..\Src\Common\WaitFor.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\Win32Helper.h">
+    <ClInclude Include="..\..\Src\Common\Win32Helper.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\RingBuffer.h">
+    <ClInclude Include="..\..\Src\Common\RingBuffer.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Src\http\http_parser.h">
-      <Filter>Common\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Src\SSLServer.h">
       <Filter>HPSocket\SSL</Filter>
@@ -111,11 +108,11 @@
     <ClInclude Include="..\..\Src\SSLAgent.h">
       <Filter>HPSocket\SSL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Src\SocketInterface.h">
-      <Filter>HPSocket\Public</Filter>
+    <ClInclude Include="..\..\Include\HPSocket\SocketInterface.h">
+      <Filter>HPSocket\Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Src\HPSocket.h">
-      <Filter>HPSocket\Public</Filter>
+    <ClInclude Include="..\..\Include\HPSocket\HPSocket.h">
+      <Filter>HPSocket\Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Src\TcpServer.h">
       <Filter>HPSocket\TCP</Filter>
@@ -153,8 +150,8 @@
     <ClInclude Include="..\..\Src\UdpClient.h">
       <Filter>HPSocket\UDP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Src\HPTypeDef.h">
-      <Filter>HPSocket\Public</Filter>
+    <ClInclude Include="..\..\Include\HPSocket\HPTypeDef.h">
+      <Filter>HPSocket\Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Src\HttpAgent.h">
       <Filter>HPSocket\HTTP</Filter>
@@ -177,10 +174,10 @@
     <ClInclude Include="..\..\Src\SocketHelper.h">
       <Filter>HPSocket\Global</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Src\HPSocket-SSL.h">
-      <Filter>HPSocket\Public</Filter>
+    <ClInclude Include="..\..\Include\HPSocket\HPSocket-SSL.h">
+      <Filter>HPSocket\Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\FuncHelper.h">
+    <ClInclude Include="..\..\Src\Common\FuncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Src\HPThreadPool.h">
@@ -195,31 +192,34 @@
     <ClInclude Include="..\..\Src\UdpArqServer.h">
       <Filter>HPSocket\UDP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Src\kcp\ikcp.h">
+    <ClInclude Include="..\..\Src\Common\kcp\ikcp.h">
       <Filter>Common\kcp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Src\UdpNode.h">
       <Filter>HPSocket\UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\Common\http\llhttp.h">
+      <Filter>Common\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Src\Common\http\llhttp_url.h">
+      <Filter>Common\http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\BufferPool.cpp">
+    <ClCompile Include="..\..\Src\Common\BufferPool.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\RWLock.cpp">
+    <ClCompile Include="..\..\Src\Common\RWLock.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\SysHelper.cpp">
+    <ClCompile Include="..\..\Src\Common\SysHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\WaitFor.cpp">
+    <ClCompile Include="..\..\Src\Common\WaitFor.cpp">
       <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Src\http\http_parser.c">
-      <Filter>Common\http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\SSLAgent.cpp">
       <Filter>HPSocket\SSL</Filter>
@@ -278,7 +278,7 @@
     <ClCompile Include="..\..\Src\HPSocket-SSL.cpp">
       <Filter>HPSocket\Global</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\FuncHelper.cpp">
+    <ClCompile Include="..\..\Src\Common\FuncHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\HPThreadPool.cpp">
@@ -293,11 +293,23 @@
     <ClCompile Include="..\..\Src\UdpArqServer.cpp">
       <Filter>HPSocket\UDP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Src\kcp\ikcp.c">
+    <ClCompile Include="..\..\Src\Common\kcp\ikcp.c">
       <Filter>Common\kcp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\UdpNode.cpp">
       <Filter>HPSocket\UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Common\http\llhttp_api.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Common\http\llhttp_internal.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Common\http\llhttp_support.c">
+      <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Common\http\llhttp_url.c">
+      <Filter>Common\http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

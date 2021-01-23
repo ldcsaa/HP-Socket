@@ -25,7 +25,7 @@
 
 #include "TcpClient.h"
 #include "MiscHelper.h"
-#include "../Common/Src/BufferPool.h"
+#include "Common/BufferPool.h"
 
 template<class T> class CTcpPullClientT : public IPullClient, public T
 {

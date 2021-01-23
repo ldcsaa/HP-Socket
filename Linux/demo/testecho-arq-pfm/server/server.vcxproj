@@ -135,9 +135,9 @@
     <ClInclude Include="..\..\..\src\common\GeneralHelper.h" />
     <ClInclude Include="..\..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\..\src\common\Thread.h" />
-    <ClInclude Include="..\..\..\src\HPSocket.h" />
-    <ClInclude Include="..\..\..\src\HPTypeDef.h" />
-    <ClInclude Include="..\..\..\src\SocketInterface.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPSocket.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h" />
     <ClInclude Include="..\..\Global\helper.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

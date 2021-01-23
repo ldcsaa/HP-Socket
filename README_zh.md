@@ -140,9 +140,10 @@ int main(int argc, char* const argv[])
 
 ## 引用项目
 
+- *[mimalloc](https://github.com/microsoft/mimalloc)*
 - *[jemalloc](https://github.com/jemalloc/jemalloc)*
 - *[openssl](https://github.com/openssl/openssl)*
-- *[http-parser](https://github.com/nodejs/http-parser)*
+- *[llhttp](https://github.com/nodejs/llhttp)*
 - *[zlib](https://github.com/madler/zlib)*
 - *[brotli](https://github.com/google/brotli)*
 - *[kcp](https://github.com/skywind3000/kcp)*

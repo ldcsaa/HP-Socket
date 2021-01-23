@@ -23,8 +23,8 @@
 
 #pragma once
 
-#include "HPTypeDef.h"
-#include "SocketInterface.h"
+#include "../include/hpsocket/HPTypeDef.h"
+#include "../include/hpsocket/SocketInterface.h"
 #include "common/StringT.h"
 #include "common/SysHelper.h"
 #include "common/BufferPtr.h"

@@ -4,7 +4,7 @@
 
 #pragma once
 #include "afxwin.h"
-#include "../../../Src/HPSocket4C-SSL.h"
+#include "../../../Include/HPSocket/HPSocket4C-SSL.h"
 #include "../../Global/helper.h"
 
 

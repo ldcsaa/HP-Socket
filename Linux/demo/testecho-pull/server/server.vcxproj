@@ -146,8 +146,8 @@
     <ClInclude Include="..\..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\..\src\common\FuncHelper.h" />
     <ClInclude Include="..\..\..\src\common\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\src\common\GlobalDef.h" />
-    <ClInclude Include="..\..\..\src\common\GlobalErrno.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\GlobalDef.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\GlobalErrno.h" />
     <ClInclude Include="..\..\..\src\common\IODispatcher.h" />
     <ClInclude Include="..\..\..\src\common\PollHelper.h" />
     <ClInclude Include="..\..\..\src\common\PrivateHeap.h" />
@@ -160,10 +160,10 @@
     <ClInclude Include="..\..\..\src\common\StringT.h" />
     <ClInclude Include="..\..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\..\src\common\Thread.h" />
-    <ClInclude Include="..\..\..\src\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
     <ClInclude Include="..\..\..\src\MiscHelper.h" />
     <ClInclude Include="..\..\..\src\SocketHelper.h" />
-    <ClInclude Include="..\..\..\src\SocketInterface.h" />
+    <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h" />
     <ClInclude Include="..\..\..\src\TcpPullServer.h" />
     <ClInclude Include="..\..\..\src\TcpServer.h" />
     <ClInclude Include="..\..\Global\helper.h" />
@@ -191,7 +191,7 @@
       <PreprocessorDefinitions>_UDP_DISABLED;_SSL_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
+      <LibraryDependencies>mimalloc;rt;pthread;dl</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -218,7 +218,7 @@
       <PreprocessorDefinitions>_UDP_DISABLED;_SSL_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
+      <LibraryDependencies>mimalloc;rt;pthread;dl</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -245,7 +245,7 @@
       <PreprocessorDefinitions>_UDP_DISABLED;_SSL_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>jemalloc_pic;rt;pthread;dl</LibraryDependencies>
+      <LibraryDependencies>mimalloc;rt;pthread;dl</LibraryDependencies>
       <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

@@ -22,10 +22,12 @@ do_remove()
 
 cd $DEST_BASE
 
+do_remove $PRJ_DIR .vs
 do_remove $PRJ_DIR Debug
 do_remove $PRJ_DIR obj
 do_remove $DEM_DIR Debug
 do_remove $DEM_DIR obj
+do_remove $DEM_DIR .vs
 do_remove $LIB_DIR Debug
 do_remove $LIB_DIR obj
 do_remove $NDK_PRJ_DIR obj

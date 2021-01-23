@@ -16,5 +16,5 @@
 #define _NEED_SSL
 #define _NEED_HTTP
 
-#include "../../../Common/Src/GeneralHelper.h"
+#include "../../../Src/Common/GeneralHelper.h"
 

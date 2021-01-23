@@ -23,8 +23,8 @@
 
 #pragma once
 
-#include "GlobalDef.h"
-#include "GlobalErrno.h"
+#include "../../include/hpsocket/GlobalDef.h"
+#include "../../include/hpsocket/GlobalErrno.h"
 #include "RWLock.h"
 #include "STLHelper.h"
 

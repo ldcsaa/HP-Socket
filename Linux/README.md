@@ -9,8 +9,8 @@ $ ./compile.sh -h
 Usage: compile.sh [...O.P.T.I.O.N.S...]
 ----------------------+-------------------------------------------------
   -d|--with-debug-lib : compile debug libs (default: true)
-  -j|--use-jemalloc   : use jemalloc in release libs
-                      : (x86/x64 default: true, arm/arm64 default: false)
+  -m|--mem-allocator  : memory allocator (default: mimalloc)
+                      : (options: mimalloc / jemalloc / system)
   -u|--udp-enabled    : enable UDP components (default: true)
   -t|--http-enabled   : enable HTTP components (default: true)
   -s|--ssl-enabled    : enable SSL components (default: true)
@@ -20,7 +20,7 @@ Usage: compile.sh [...O.P.T.I.O.N.S...]
   -i|--iconv-enabled  : enable ICONV related functions (default: true)
   -c|--compiler       : compiler (default: g++)
   -p|--platform       : platform: x86 / x64 / arm / arm64
-                      : (default: current machine arch platform)  
+                      : (default: current machine arch platform)
   -e|--clean          : clean compilation intermediate temp files
   -r|--remove         : remove all compilation target files
   -v|--version        : print hp-socket version
@@ -32,14 +32,14 @@ Usage: compile.sh [...O.P.T.I.O.N.S...]
 ```
 $ sudo ./install.sh -h
 Usage: install.sh [...O.P.T.I.O.N.S...]
------------------+------------------------------------------------------
+-----------------+-------------------------------------------------------
   -p|--prefix    : install/uninstall path (default: /usr/local)
   -l|--libdir    : lib dir (x86/arm default: 'lib', x64/arm64 default: 'lib64')
   -d|--with-demo : install demos or not (default: false)
   -u|--uninstall : execute uninstall operation from install path
   -v|--version   : print hp-socket version
   -h|--help      : print this usage message
------------------+------------------------------------------------------
+-----------------+-------------------------------------------------------
 ```
   
 *&nbsp;&nbsp;&nbsp;&nbsp;Note: The **complle.sh** build script depends on the **script/**, **src/**, **include/**, and **dependent/** directories of the distribution; the **install.sh** install script depends on the **script/**, **include/**, and **lib/** directories of the distribution, if you want to install the sample executable files, it also need to depends on the **demo/Release/** directory.*

@@ -33,8 +33,8 @@
 
 #pragma pop_macro("_ATL_NO_DEFAULT_LIBS")
 
-#include "SocketInterface.h"
-#include "../Common/Src/SysHelper.h"
+#include "../Include/HPSocket/SocketInterface.h"
+#include "Common/SysHelper.h"
 
 LPTSocketTask CreateSocketTaskObj(	Fn_SocketTaskProc fnTaskProc,
 									PVOID pSender, CONNID dwConnID,

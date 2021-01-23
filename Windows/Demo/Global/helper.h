@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Src/SocketInterface.h"
+#include "../../Include/HPSocket/SocketInterface.h"
 
 #define USER_INFO_MSG			(WM_USER + 100)
 #define MAX_LOG_RECORD_LENGTH	1000
@@ -214,7 +214,7 @@ extern LPCTSTR g_s_lpszKeyPasswod2;
 
 #ifdef _NEED_HTTP
 
-#include "../../Common/Src/crypto/crypto.h"
+#include "../../Src/Common/crypto/crypto.h"
 
 #define HTTP_NAME					_T("http")
 #define HTTPS_NAME					_T("https")

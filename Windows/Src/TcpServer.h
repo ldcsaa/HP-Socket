@@ -24,10 +24,10 @@
 #pragma once
 
 #include "MiscHelper.h"
-#include "../Common/Src/Event.h"
-#include "../Common/Src/STLHelper.h"
-#include "../Common/Src/RingBuffer.h"
-#include "../Common/Src/PrivateHeap.h"
+#include "Common/Event.h"
+#include "Common/STLHelper.h"
+#include "Common/RingBuffer.h"
+#include "Common/PrivateHeap.h"
 
 class CTcpServer : public ITcpServer
 {

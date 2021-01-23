@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../GlobalDef.h"
+#include "../../../include/hpsocket/GlobalDef.h"
 
 #include <stddef.h>
 

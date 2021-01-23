@@ -11,5 +11,5 @@
 #define _USE_MFC
 #define _DETECT_MEMORY_LEAK
 
-#include "../../../Common/Src/GeneralHelper.h"
+#include "../../../Src/Common/GeneralHelper.h"
 

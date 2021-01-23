@@ -25,7 +25,7 @@
 
 #include "TcpServer.h"
 #include "HttpHelper.h"
-#include "../Common/Src/Thread.h"
+#include "Common/Thread.h"
 
 #ifdef _HTTP_SUPPORT
 

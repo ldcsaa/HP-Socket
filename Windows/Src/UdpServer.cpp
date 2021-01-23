@@ -23,7 +23,7 @@
  
 #include "stdafx.h"
 #include "UdpServer.h"
-#include "../Common/Src/WaitFor.h"
+#include "Common/WaitFor.h"
 
 #ifdef _UDP_SUPPORT
 

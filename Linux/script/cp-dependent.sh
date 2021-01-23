@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ];then
-	echo "Usage: $0" "[jemalloc|openssl|zlib|brotli]"
+	echo "Usage: $0" "[jemalloc|mimalloc|openssl|zlib|brotli]"
 	exit 1
 fi
 
@@ -33,6 +33,8 @@ do_copy()
 	
 	if [ $_LIB_NAME == "jemalloc" ]; then
 		_LIB_FIX=_pic
+		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME* $PLATFORM/include/$_LIB_NAME*"
+	elif [ $_LIB_NAME == "mimalloc" ]; then
 		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME* $PLATFORM/include/$_LIB_NAME*"
 	elif [ $_LIB_NAME == "openssl" ]; then
 		_RM_FILES="$PLATFORM/lib/libssl* $PLATFORM/lib/libcrypto* $PLATFORM/include/$_LIB_NAME*"

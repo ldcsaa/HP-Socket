@@ -23,7 +23,7 @@
  
 #pragma once
 
-#include "HPTypeDef.h"
+#include "../include/hpsocket/HPTypeDef.h"
 
 #ifdef _UDP_SUPPORT
 

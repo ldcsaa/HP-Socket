@@ -1,7 +1,7 @@
 #include "../../global/helper.h"
 
 #include <hpsocket/HPSocket-SSL.h>
-#include <hpsocket/common/GlobalErrno.h>
+#include <hpsocket/GlobalErrno.h>
 
 client_statistics_info s_stat;
 

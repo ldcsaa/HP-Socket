@@ -202,12 +202,12 @@
     <None Include="res\Client.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Common\Src\FuncHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h" />
-    <ClInclude Include="..\..\..\Common\Src\WaitFor.h" />
-    <ClInclude Include="..\..\..\Src\HPSocket4C-SSL.h" />
-    <ClInclude Include="..\..\..\Src\HPSocket4C.h" />
-    <ClInclude Include="..\..\..\Src\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\Src\Common\FuncHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
+    <ClInclude Include="..\..\..\Src\Common\WaitFor.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket4C-SSL.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPSocket4C.h" />
+    <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientDlg.h" />
@@ -215,8 +215,8 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Common\Src\FuncHelper.cpp" />
-    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\FuncHelper.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientDlg.cpp" />
