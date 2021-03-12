@@ -145,12 +145,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
-    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux</RemoteRootDir>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
-    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux</RemoteRootDir>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
@@ -196,23 +196,29 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <OutDir>../../lib/$(ProjectName)/arm/</OutDir>
     <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
     <TargetName>lib$(ProjectName)_d</TargetName>
     <TargetExt>.so</TargetExt>
-    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
-    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+    <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
+    <AdditionalSourcesToCopyMapping>$(ArmDeptToCopyRemotely);$(ArmScriptToCopyRemotely);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <SourcesToCopyRemotelyOverride>@(SourcesToCopyRemotely);@(DataFilesToCopyRemotely)</SourcesToCopyRemotelyOverride>
+    <RemoteDeployDir>$(RemoteProjectDir)/project/$(SolutionName)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
+    <OutDir>../../lib/$(ProjectName)/arm/</OutDir>
     <IntDir>$(OutDir)obj/$(Configuration)/</IntDir>
     <TargetExt>.so</TargetExt>
-    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
-    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+    <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
+    <AdditionalSourcesToCopyMapping>$(ArmDeptToCopyRemotely);$(ArmScriptToCopyRemotely);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <SourcesToCopyRemotelyOverride>@(SourcesToCopyRemotely);@(DataFilesToCopyRemotely)</SourcesToCopyRemotelyOverride>
+    <RemoteDeployDir>$(RemoteProjectDir)/project/$(SolutionName)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -256,11 +262,11 @@
     <ClCompile>
       <PositionIndependentCode>true</PositionIndependentCode>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
-      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../dependent/arm/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
     </ClCompile>
@@ -270,29 +276,28 @@
     <Link>
       <LibraryDependencies>brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/arm/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
       </Command>
     </RemotePreBuildEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 7 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/script/post-link.sh 7 "$(RemoteRootDir)/lib/$(ProjectName)/arm/" $(TargetName) arm $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <RemotePreLinkEvent>
-      <Command>
-      </Command>
+      <Command>chmod a+x $(RemoteRootDir)/*.sh; chmod a+x $(RemoteRootDir)/script/*.sh;</Command>
     </RemotePreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <PositionIndependentCode>true</PositionIndependentCode>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
-      <AdditionalIncludeDirectories>../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../dependent/arm/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
@@ -302,25 +307,24 @@
     <Link>
       <LibraryDependencies>mimalloc;brotli;ssl;crypto;z;rt;dl;pthread</LibraryDependencies>
       <AdditionalOptions>-Wl,-Bsymbolic -Wl,-soname,$(TargetFileName).$(VER_MAJOR) -L"$(RemoteRootDir)/../dependent/$(Platform)/lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../dependent/arm/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>
       </Command>
     </RemotePreBuildEvent>
     <RemotePostBuildEvent>
-      <Command>$(RemoteRootDir)/../script/post-link.sh 15 "$(RemoteProjectDir)/$(OutDir)" $(TargetName) $(Platform) $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
+      <Command>$(RemoteRootDir)/script/post-link.sh 15 "$(RemoteRootDir)/lib/$(ProjectName)/arm/" $(TargetName) arm $(Configuration) $(VER_MAJOR) $(VER_MINOR) $(VER_REVISE)</Command>
     </RemotePostBuildEvent>
     <RemotePreLinkEvent>
-      <Command>
-      </Command>
+      <Command>chmod a+x $(RemoteRootDir)/*.sh; chmod a+x $(RemoteRootDir)/script/*.sh;</Command>
     </RemotePreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PositionIndependentCode>true</PositionIndependentCode>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
@@ -352,7 +356,7 @@
     <ClCompile>
       <PositionIndependentCode>true</PositionIndependentCode>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
@@ -384,7 +388,7 @@
     <ClCompile>
       <PositionIndependentCode>true</PositionIndependentCode>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
@@ -416,7 +420,7 @@
     <ClCompile>
       <PositionIndependentCode>true</PositionIndependentCode>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>

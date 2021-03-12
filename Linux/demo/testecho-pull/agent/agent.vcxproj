@@ -40,11 +40,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
-    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux</RemoteRootDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
-    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/demo</RemoteRootDir>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux</RemoteRootDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -65,25 +65,46 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
-  <ImportGroup Label="PropertySheets" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="..\..\..\project\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="..\..\..\project\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <Import Project="..\..\..\project\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="..\..\..\project\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="..\..\..\project\Version.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <Import Project="..\..\..\project\Version.props" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <OutDir>../../$(Configuration)/arm/</OutDir>
     <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
     <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
     <TargetExt>.exe</TargetExt>
-    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
-    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
+    <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <RemoteDeployDir>$(RemoteProjectDir)/demo/$(SolutionName)/$(ProjectName)</RemoteDeployDir>
+    <AdditionalSourcesToCopyMapping>$(ArmDeptToCopyRemotely)</AdditionalSourcesToCopyMapping>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
+    <OutDir>../../$(Configuration)/arm/</OutDir>
     <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
     <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
     <TargetExt>.exe</TargetExt>
-    <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
-    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
+    <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <RemoteDeployDir>$(RemoteProjectDir)/demo/$(SolutionName)/$(ProjectName)</RemoteDeployDir>
+    <AdditionalSourcesToCopyMapping>$(ArmDeptToCopyRemotely)</AdditionalSourcesToCopyMapping>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
@@ -131,6 +152,7 @@
     <ClCompile Include="..\..\..\src\common\RWLock.cpp" />
     <ClCompile Include="..\..\..\src\common\SysHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\Thread.cpp" />
+    <ClCompile Include="..\..\..\src\MiscHelper.cpp" />
     <ClCompile Include="..\..\..\src\SocketHelper.cpp" />
     <ClCompile Include="..\..\..\src\TcpAgent.cpp" />
     <ClCompile Include="..\..\..\src\TcpPullAgent.cpp" />
@@ -160,6 +182,7 @@
     <ClInclude Include="..\..\..\src\common\SysHelper.h" />
     <ClInclude Include="..\..\..\src\common\Thread.h" />
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
+    <ClInclude Include="..\..\..\src\MiscHelper.h" />
     <ClInclude Include="..\..\..\src\SocketHelper.h" />
     <ClInclude Include="..\..\..\include\hpsocket\SocketInterface.h" />
     <ClInclude Include="..\..\..\src\TcpAgent.h" />
@@ -171,12 +194,12 @@
       <CppAdditionalWarning>no-class-memaccess;no-reorder;switch;no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../dependent/arm/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UDP_DISABLED;_SSL_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/arm/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -185,12 +208,12 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
       <DebugInformationFormat>None</DebugInformationFormat>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
-      <AdditionalIncludeDirectories>../../../dependent/$(Platform)/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../dependent/arm/include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UDP_DISABLED;_SSL_DISABLED;_HTTP_DISABLED;_ZLIB_DISABLED;_BROTLI_DISABLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LibraryDependencies>mimalloc;rt;pthread;dl</LibraryDependencies>
-      <AdditionalLibraryDirectories>../../../dependent/$(Platform)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../dependent/arm/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

@@ -1,7 +1,7 @@
 #ifndef INCLUDE_LLHTTP_H_
 #define INCLUDE_LLHTTP_H_
 
-#define LLHTTP_VERSION_MAJOR 3
+#define LLHTTP_VERSION_MAJOR 4
 #define LLHTTP_VERSION_MINOR 0
 #define LLHTTP_VERSION_PATCH 0
 
@@ -307,6 +307,11 @@ struct llhttp_settings_s {
  */
 void llhttp_init(llhttp_t* parser, llhttp_type_t type,
                  const llhttp_settings_t* settings);
+
+/* Reset an already initialized parser back to the start state, preserving the
+ * existing parser type, callback settings, user data, and lenient flags.
+ */
+void llhttp_reset(llhttp_t* parser);
 
 /* Initialize the settings object */
 void llhttp_settings_init(llhttp_settings_t* settings);

@@ -102,13 +102,13 @@ int main(int argc, char* const argv[])
 	::HP_Set_FN_Agent_OnShutdown(s_listener, OnShutdown);
 	
 	// 3. Start component object
-	if(::HP_Agent_HasStarted(s_agent))
+	if(!::HP_Agent_Start(s_agent, "0.0.0.0", 5555, TRUE))
 		exit(1);
 	
 	// 4. Connect to dest host
-	::HP_Agent_Connect(s_agent, "remote.host.1", REMOTE_PORT_1, nullptr);
-	::HP_Agent_Connect(s_agent, "remote.host.2", REMOTE_PORT_2, nullptr);
-	::HP_Agent_Connect(s_agent, "remote.host.3", REMOTE_PORT_3, nullptr);
+	::HP_Agent_Connect(s_agent, REMOTE_HOST_1, REMOTE_PORT_1, nullptr);
+	::HP_Agent_Connect(s_agent, REMOTE_HOST_2, REMOTE_PORT_2, nullptr);
+	::HP_Agent_Connect(s_agent, REMOTE_HOST_3, REMOTE_PORT_3, nullptr);
 	
 	/* wait for exit */
 	// ... ... 

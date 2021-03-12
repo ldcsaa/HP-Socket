@@ -38,7 +38,7 @@ public:
 	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, CStopWaitingPredicate<IClient>(this));}
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
-	virtual CONNID			GetConnectionID		()	{return m_dwConnID;};
+	virtual CONNID			GetConnectionID		()	{return m_dwConnID;}
 	virtual EnSocketError	GetLastError		()	{return m_enLastError;}
 	virtual LPCTSTR			GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
 

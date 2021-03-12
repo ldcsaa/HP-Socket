@@ -35,7 +35,27 @@
 名称：双接口模版类
 描述：定义双接口转换方法
 ************************************************************************/
+
+#if FALSE
+
+#define __DUAL_VPTR_GAP__	sizeof(PVOID)
+
+class __IFakeDualInterface__
+{
+public:
+	virtual ~__IFakeDualInterface__() {}
+};
+
+template<class F, class S> class DualInterface : public F, private __IFakeDualInterface__, public S
+
+#else
+
+#define __DUAL_VPTR_GAP__	0
+
 template<class F, class S> class DualInterface : public F, public S
+
+#endif
+
 {
 public:
 
@@ -66,13 +86,13 @@ public:
 	/* S* 转换为 F* */
 	inline static F* S2F(S* pS)
 	{
-		return (F*)((char*)pS - sizeof(F));
+		return (F*)((char*)pS - (sizeof(F) + __DUAL_VPTR_GAP__));
 	}
 
 	/* F* 转换为 S* */
 	inline static S* F2S(F* pF)
 	{
-		return (S*)((char*)pF + sizeof(F));
+		return (S*)((char*)pF + (sizeof(F) + __DUAL_VPTR_GAP__));
 	}
 
 public:
@@ -894,11 +914,11 @@ public:
 	virtual void SetFreeBufferPoolHold		(DWORD dwFreeBufferPoolHold)						= 0;
 
 	/* 获取地址重用选项 */
-	virtual EnReuseAddressPolicy GetReuseAddressPolicy()										= 0;
+	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()										= 0;
 	/* 获取内存块缓存池大小 */
-	virtual DWORD GetFreeBufferPoolSize		()													= 0;
+	virtual DWORD GetFreeBufferPoolSize					()										= 0;
 	/* 获取内存块缓存池回收阀值 */
-	virtual DWORD GetFreeBufferPoolHold		()													= 0;
+	virtual DWORD GetFreeBufferPoolHold					()										= 0;
 
 public:
 	virtual ~IClient() {}
