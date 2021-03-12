@@ -1,4 +1,19 @@
 ﻿==========================================================================================
+v5.8.2 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Bug fix: some HP-Socket components raises segment fault in ARM32 platform.
+2. Bug fix: UDP Client component raises segment fault in some special scenarios.
+
+> Third-party library Upadate
+-----------------
+1. mimalloc upgrade to version 1.7.0.
+2. llhttp upgrade to version 4.0.0.
+2. openssl upgrade to version 1.1.1j.
+
+==========================================================================================
 v5.8.1 Update:
 ==========================================================================================
 

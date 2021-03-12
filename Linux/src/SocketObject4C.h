@@ -42,19 +42,7 @@ public:
 
 	template<size_t offset, class T> static inline HP_Object FromSecond(T* pSecond)
 	{
-		return (C_HP_Object*)((char*)pSecond - first - offset);
-
-		/*
-		C_HP_Object* pObj = (C_HP_Object*)((char*)pSecond - first - offset);
-
-		if(pObj->second != first)
-		{
-			pObj = (C_HP_Object*)((char*)pObj - sizeof(HP_Object));
-			ASSERT(pObj->second == first + sizeof(HP_Object));
-		}
-
-		return (HP_Object)pObj;
-		*/
+		return (C_HP_Object*)((char*)pSecond - first - (offset + __DUAL_VPTR_GAP__));
 	}
 
 	template<class T> static inline T* ToSecond(HP_Object pObject)
@@ -63,7 +51,7 @@ public:
 	}
 
 public:
-	C_HP_Object(int offset = 0) : second(first + offset) {}
+	C_HP_Object(int offset = 0) : second(first + (offset + __DUAL_VPTR_GAP__)) {}
 	virtual ~C_HP_Object() {}
 
 private:
@@ -335,6 +323,18 @@ public:
 	HP_FN_Client_OnClose			m_fnOnClose			;
 };
 
+typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener>						C_HP_TcpServerListener;
+typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener, sizeof(IPullSocket)>	C_HP_TcpPullServerListener;
+typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener, sizeof(IPackSocket)>	C_HP_TcpPackServerListener;
+
+typedef C_HP_AgentListenerT<ITcpAgent, ITcpAgentListener>							C_HP_TcpAgentListener;
+typedef C_HP_AgentListenerT<ITcpAgent, ITcpAgentListener, sizeof(IPullSocket)>		C_HP_TcpPullAgentListener;
+typedef C_HP_AgentListenerT<ITcpAgent, ITcpAgentListener, sizeof(IPackSocket)>		C_HP_TcpPackAgentListener;
+
+typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener>						C_HP_TcpClientListener;
+typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPullClient)>	C_HP_TcpPullClientListener;
+typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPackClient)>	C_HP_TcpPackClientListener;
+
 #ifdef _UDP_SUPPORT
 
 template<class T, class L, size_t offset = 0> class C_HP_UdpNodeListenerT : public L
@@ -396,22 +396,6 @@ public:
 	HP_FN_UdpNode_OnError			m_fnOnError			;
 	HP_FN_UdpNode_OnShutdown		m_fnOnShutdown		;
 };
-
-#endif
-
-typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener>						C_HP_TcpServerListener;
-typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener, sizeof(IPullSocket)>	C_HP_TcpPullServerListener;
-typedef C_HP_ServerListenerT<ITcpServer, ITcpServerListener, sizeof(IPackSocket)>	C_HP_TcpPackServerListener;
-
-typedef C_HP_AgentListenerT<ITcpAgent, ITcpAgentListener>							C_HP_TcpAgentListener;
-typedef C_HP_AgentListenerT<ITcpAgent, ITcpAgentListener, sizeof(IPullSocket)>		C_HP_TcpPullAgentListener;
-typedef C_HP_AgentListenerT<ITcpAgent, ITcpAgentListener, sizeof(IPackSocket)>		C_HP_TcpPackAgentListener;
-
-typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener>						C_HP_TcpClientListener;
-typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPullClient)>	C_HP_TcpPullClientListener;
-typedef C_HP_ClientListenerT<ITcpClient, ITcpClientListener, sizeof(IPackClient)>	C_HP_TcpPackClientListener;
-
-#ifdef _UDP_SUPPORT
 
 typedef C_HP_ServerListenerT<IUdpServer, IUdpServerListener>						C_HP_UdpServerListener;
 typedef C_HP_ClientListenerT<IUdpClient, IUdpClientListener>						C_HP_UdpClientListener;

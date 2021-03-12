@@ -227,9 +227,9 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 #endif
 
 #if defined(__arm64__) && !defined(__aarch64__)
-	#define __aarch64__
+	#define __aarch64__	__arm64__
 #elif defined(__aarch64__) && !defined(__arm64__)
-	#define __arm64__
+	#define __arm64__	__aarch64__
 #endif
 
 #ifdef __cplusplus

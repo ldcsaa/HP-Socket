@@ -427,16 +427,33 @@ BOOL CUdpClient::CheckConnection()
 		return FALSE;
 	}
 
-	return VERIFY(DetectConnection());
+	return DetectConnection();
 }
 
 BOOL CUdpClient::DetectConnection()
 {
-	int rc = (int)send(m_soClient, nullptr, 0, 0);
+	BOOL isOK = TRUE;
+	int code  = NO_ERROR;
+	int rc	  = (int)send(m_soClient, nullptr, 0, 0);
+	
+	if(rc == SOCKET_ERROR)
+	{
+		code = ::WSAGetLastError();
 
-	TRACE("<C-CNNID: %zu> send 0 bytes (detect package - %s)", m_dwConnID, IS_HAS_ERROR(rc) ? "fail" : "succ");
+		if(code != ERROR_WOULDBLOCK)
+			isOK = FALSE;
+	}
+	
+	if(isOK)
+	{
+		TRACE("<C-CNNID: %zu> send 0 bytes (detect package succ)", m_dwConnID);
+	}
+	else
+	{
+		TRACE("<C-CNNID: %zu> send 0 bytes (detect package fail [%d])", m_dwConnID, code);
+	}
 
-	return rc >= 0 || IS_WOULDBLOCK_ERROR();
+	return isOK;
 }
 
 BOOL CUdpClient::ProcessNetworkEvent(SHORT events)

@@ -259,11 +259,11 @@ parse_args()
 
 do_build()
 {
-	C_LAN_OPTS="-c -x c -I $DEPT_INC_DIR -Wall -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fPIC -fvisibility=hidden -fexceptions -std=c11"
-	CPP_LAN_OPTS="-c -x c++ -I $DEPT_INC_DIR -Wall -Wno-class-memaccess -Wno-reorder -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fPIC -fthreadsafe-statics -fvisibility=hidden -fexceptions -frtti -std=c++14"
+	C_LAN_OPTS="-c -x c -I $DEPT_INC_DIR -Wall -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fPIC -fvisibility=hidden -fexceptions -std=c17"
+	CPP_LAN_OPTS="-c -x c++ -I $DEPT_INC_DIR -Wall -Wno-class-memaccess -Wno-reorder -Wswitch -Wno-deprecated-declarations -Wempty-body -Wconversion -Wreturn-type -Wparentheses -Wno-format -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -fno-strict-aliasing -fPIC -fthreadsafe-statics -fvisibility=hidden -fexceptions -frtti -std=c++17"
 	LINK_OPTS="-Wl,--no-undefined -Wl,-L$DEPT_LIB_DIR -L$DEPT_LIB_DIR -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -shared -Wl,-Bsymbolic"
 	RELEASE_CFG_OPTS="-g0 -O3 -fomit-frame-pointer -DNDEBUG"
-	DEBUG_CFG_OPTS="-g2 -gdwarf-2 -O0 -fno-omit-frame-pointer -DDEBUG -D_DEBUG"
+	DEBUG_CFG_OPTS="-g3 -gdwarf-2 -O0 -fno-omit-frame-pointer -DDEBUG -D_DEBUG"
 
 	if [ -d $HPSOCKET_LIB_TARGET_DIR ]; then
 		rm -rf $HPSOCKET_LIB_TARGET_DIR

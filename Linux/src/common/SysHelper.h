@@ -78,19 +78,81 @@ inline BOOL IsSameNativeThread(pid_t pid1, pid_t pid2)
 #define IsSelfNativeThread(pid)			IsSameNativeThread((pid), SELF_PROCESS_ID)
 #define DEFAULT_WORKER_THREAD_COUNT		GetDefaultWorkerThreadCount()
 
+// Yield
+#if defined(__cplusplus)
+#include <thread>
+static inline void __atomic_yield()
+{
+	std::this_thread::yield();
+}
+#elif defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+static inline void __atomic_yield()
+{
+	YieldProcessor();
+}
+#elif defined(__SSE2__)
+#include <emmintrin.h>
+static inline void __atomic_yield()
+{
+	_mm_pause();
+}
+#elif   (defined(__GNUC__) || defined(__clang__)) && \
+		(defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__armel__) || defined(__ARMEL__) || \
+		defined(__aarch64__) || defined(__powerpc__) || defined(__ppc__) || defined(__PPC__))
+#if defined(__x86_64__) || defined(__i386__)
+static inline void __atomic_yield()
+{
+	__asm__ volatile ("pause" ::: "memory");
+}
+#elif defined(__aarch64__)
+static inline void __atomic_yield()
+{
+	__asm__ volatile("wfe");
+}
+#elif (defined(__arm__) && __ARM_ARCH__ >= 7)
+static inline void __atomic_yield()
+{
+	__asm__ volatile("yield" ::: "memory");
+}
+#elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)
+static inline void __atomic_yield()
+{
+	__asm__ __volatile__ ("or 27,27,27" ::: "memory");
+}
+#elif defined(__armel__) || defined(__ARMEL__)
+static inline void __atomic_yield()
+{
+	__asm__ volatile ("nop" ::: "memory");
+}
+#endif
+#elif defined(__sun)
+// Fallback for other archs
+#include <synch.h>
+static inline void __atomic_yield()
+{
+	smt_pause();
+}
+#elif defined(__wasi__)
+#include <sched.h>
+static inline void __atomic_yield()
+{
+	sched_yield();
+}
+#else
+#include <unistd.h>
+static inline void __atomic_yield()
+{
+  sleep(0);
+}
+#endif	// Yield
+
+#define YieldProcessor					__atomic_yield
+#define SwitchToThread					sched_yield
+
 inline void __asm_nop()					{__asm__ __volatile__("nop" : : : "memory");}
 inline void __asm_rep_nop()				{__asm__ __volatile__("rep; nop" : : : "memory");}
-
-#if defined(__i386__) || defined(__x86_64__)
-inline void __asm_pause()				{__asm__ __volatile__("pause;");}
-#elif defined(__arm64__)
-inline void __asm_pause()				{__asm__ __volatile__("yield" : : : "memory");}
-#else
-inline void __asm_pause()				{__asm_nop();}
-#endif
-
-#define YieldProcessor					__asm_pause
-#define SwitchToThread					sched_yield
 
 DWORD GetSysPageSize();
 DWORD GetKernelVersion();

@@ -9,8 +9,8 @@
 
 #define CALLBACK_MAYBE(PARSER, NAME, ...)                                     \
   do {                                                                        \
-    llhttp_settings_t* settings;                                              \
-    settings = (llhttp_settings_t*) (PARSER)->settings;                       \
+    const llhttp_settings_t* settings;                                        \
+    settings = (const llhttp_settings_t*) (PARSER)->settings;                 \
     if (settings == NULL || settings->NAME == NULL) {                         \
       err = 0;                                                                \
       break;                                                                  \
@@ -24,6 +24,21 @@ void llhttp_init(llhttp_t* parser, llhttp_type_t type,
 
   parser->type = type;
   parser->settings = (void*) settings;
+}
+
+
+void llhttp_reset(llhttp_t* parser) {
+  llhttp_type_t type = parser->type;
+  const llhttp_settings_t* settings = parser->settings;
+  void* data = parser->data;
+  uint8_t lenient_flags = parser->lenient_flags;
+
+  llhttp__internal_init(parser);
+
+  parser->type = type;
+  parser->settings = (void*) settings;
+  parser->data = data;
+  parser->lenient_flags = lenient_flags;
 }
 
 
