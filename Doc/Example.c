@@ -25,7 +25,7 @@ int main(int argc, char* const argv[])
 	::HP_Set_FN_Agent_OnShutdown(s_listener, OnShutdown);
 	
 	// 3. Start component object
-	if(!::HP_Agent_Start(s_agent, "0.0.0.0", 5555, TRUE))
+	if(!::HP_Agent_Start(s_agent, "0.0.0.0", TRUE))
 		exit(1);
 	
 	// 4. Connect to dest host
