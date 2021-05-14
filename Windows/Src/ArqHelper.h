@@ -215,7 +215,8 @@ public:
 			return FALSE;
 
 		{
-			CCriSecLock locallock(m_cs);
+			CCriSecLock recvlock(m_csRecv);
+			CCriSecLock sendlock(m_csSend);
 
 			if(!IsValid())
 				return FALSE;
@@ -259,7 +260,7 @@ public:
 		unique_ptr<BYTE[]> bufCmdPtr;
 
 		{
-			CCriSecLock locallock(m_cs);
+			CCriSecLock recvlock(m_csRecv);
 
 			if(!IsValid())
 			{
@@ -296,20 +297,25 @@ public:
 		}
 
 		{
-			CCriSecTryLock locallock(m_cs);
+			CCriSecTryLock recvlock(m_csRecv);
 
-			if(locallock.IsValid())
+			if(recvlock.IsValid())
 			{
-				if(!IsReady())
-				{
-					::SetLastError(ERROR_INVALID_STATE);
-					return FALSE;
-				}
+				CCriSecTryLock sendlock(m_csSend);
 
-				if(bForce)
-					::ikcp_flush(m_kcp);
-				else
-					::ikcp_update(m_kcp, ::TimeGetTime());
+				if(sendlock.IsValid())
+				{
+					if(!IsReady())
+					{
+						::SetLastError(ERROR_INVALID_STATE);
+						return FALSE;
+					}
+
+					if(bForce)
+						::ikcp_flush(m_kcp);
+					else
+						::ikcp_update(m_kcp, ::TimeGetTime());
+				}
 			}
 		}
 
@@ -324,7 +330,7 @@ public:
 		int rs = NO_ERROR;
 
 		{
-			CCriSecLock locallock(m_cs);
+			CCriSecLock sendlock(m_csSend);
 
 			if(!IsReady())
 				return ERROR_INVALID_STATE;
@@ -347,7 +353,7 @@ public:
 			return -1;
 		}
 
-		CCriSecLock locallock(m_cs);
+		CCriSecLock sendlock(m_csSend);
 
 		if(!IsValid())
 		{
@@ -383,7 +389,7 @@ public:
 		}
 
 		{
-			CCriSecLock locallock(m_cs);
+			CCriSecLock recvlock(m_csRecv);
 
 			if(!IsValid())
 			{
@@ -454,7 +460,7 @@ public:
 		if(!IsReady()) return HR_IGNORE;
 
 		{
-			CCriSecLock locallock(m_cs);
+			CCriSecLock recvlock(m_csRecv);
 
 			if(!IsReady())
 			{
@@ -534,7 +540,6 @@ public:
 	BOOL		IsValid()		const	{return GetStatus() != ARQ_HSS_INIT;}
 	BOOL		IsHandShaking()	const	{return GetStatus() == ARQ_HSS_PROC;}
 	BOOL		IsReady()		const	{return GetStatus() == ARQ_HSS_SUCC;}
-	CCriSec&	GetLock()				{return m_cs;}
 	IKCPCB*		GetKcp()				{return m_kcp;}
 	DWORD		GetConvID()		const	{if(!IsValid()) return 0; return m_kcp->conv;}
 	DWORD		GetSelfConvID()	const	{return m_dwSelfConvID;}
@@ -586,7 +591,8 @@ private:
 	DWORD	m_dwPeerConvID;
 	EnArqHandShakeStatus m_enStatus;
 
-	CCriSec m_cs;
+	CCriSec m_csRecv;
+	CCriSec m_csSend;
 	IKCPCB* m_kcp;
 };
 

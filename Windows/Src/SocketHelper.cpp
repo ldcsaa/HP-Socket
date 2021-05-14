@@ -151,7 +151,7 @@ BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR&
 	addrinfo* pInfo	= nullptr;
 	addrinfo hints	= {0};
 
-	hints.ai_flags	= AI_ALL;
+	hints.ai_flags	= (AI_V4MAPPED | AI_ADDRCONFIG);
 	hints.ai_family	= addr.family;
 
 	int rs = ::getaddrinfo(CT2A(lpszHost), nullptr, &hints, &pInfo);
