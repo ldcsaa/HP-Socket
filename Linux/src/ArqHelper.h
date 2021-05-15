@@ -220,7 +220,8 @@ public:
 			return FALSE;
 
 		{
-			CReentrantCriSecLock locallock(m_cs);
+			CReentrantCriSecLock recvlock(m_csRecv);
+			CReentrantCriSecLock sendlock(m_csSend);
 
 			if(!IsValid())
 				return FALSE;
@@ -264,7 +265,7 @@ public:
 		unique_ptr<BYTE[]> bufCmdPtr;
 
 		{
-			CReentrantCriSecLock locallock(m_cs);
+			CReentrantCriSecLock recvlock(m_csRecv);
 
 			if(!IsValid())
 			{
@@ -301,20 +302,25 @@ public:
 		}
 
 		{
-			CReentrantCriSecTryLock locallock(m_cs);
+			CReentrantCriSecTryLock recvlock(m_csRecv);
 
-			if(locallock.IsValid())
+			if(recvlock.IsValid())
 			{
-				if(!IsReady())
-				{
-					::SetLastError(ERROR_INVALID_STATE);
-					return FALSE;
-				}
+				CReentrantCriSecTryLock sendlock(m_csSend);
 
-				if(bForce)
-					::ikcp_flush(m_kcp);
-				else
-					::ikcp_update(m_kcp, ::TimeGetTime());
+				if(sendlock.IsValid())
+				{
+					if(!IsReady())
+					{
+						::SetLastError(ERROR_INVALID_STATE);
+						return FALSE;
+					}
+
+					if(bForce)
+						::ikcp_flush(m_kcp);
+					else
+						::ikcp_update(m_kcp, ::TimeGetTime());
+				}
 			}
 		}
 
@@ -329,7 +335,7 @@ public:
 		int rs = NO_ERROR;
 
 		{
-			CReentrantCriSecLock locallock(m_cs);
+			CReentrantCriSecLock sendlock(m_csSend);
 
 			if(!IsReady())
 				return ERROR_INVALID_STATE;
@@ -352,7 +358,7 @@ public:
 			return -1;
 		}
 
-		CReentrantCriSecLock locallock(m_cs);
+		CReentrantCriSecLock sendlock(m_csSend);
 
 		if(!IsValid())
 		{
@@ -388,7 +394,7 @@ public:
 		}
 
 		{
-			CReentrantCriSecLock locallock(m_cs);
+			CReentrantCriSecLock recvlock(m_csRecv);
 
 			if(!IsValid())
 			{
@@ -459,7 +465,7 @@ public:
 		if(!IsReady()) return HR_IGNORE;
 
 		{
-			CReentrantCriSecLock locallock(m_cs);
+			CReentrantCriSecLock recvlock(m_csRecv);
 
 			if(!IsReady())
 			{
@@ -544,8 +550,7 @@ public:
 	DWORD		GetSelfConvID()	const	{return m_dwSelfConvID;}
 	DWORD		GetPeerConvID()	const	{return m_dwPeerConvID;}
 	
-	CReentrantCriSec&		GetLock()			{return m_cs;}
-	EnArqHandShakeStatus	GetStatus()	const	{return m_enStatus;}
+	EnArqHandShakeStatus GetStatus() const {return m_enStatus;}
 
 protected:
 	virtual void RenewExtra(const TArqAttr& attr) {}
@@ -591,8 +596,9 @@ private:
 	DWORD	m_dwPeerConvID;
 	EnArqHandShakeStatus m_enStatus;
 
-	CReentrantCriSec m_cs;
-	IKCPCB*			 m_kcp;
+	CReentrantCriSec m_csRecv;
+	CReentrantCriSec m_csSend;
+	IKCPCB* m_kcp;
 };
 
 template<class T, class S> class CArqSessionPoolT;

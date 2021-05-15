@@ -618,8 +618,10 @@ private:
 
 		if(rs != HPE_OK)
 		{
+			/*
 			m_parser.error	= HPE_INVALID_URL;
 			m_parser.reason	= "Parse url fail";
+			*/
 
 			return HPR_ERROR;
 		}

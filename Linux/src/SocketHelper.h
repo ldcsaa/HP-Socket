@@ -76,7 +76,7 @@ using SOCKADDR_IN6		= sockaddr_in6;
 #define MAX_CONNECTION_COUNT					(5 * 1000 * 1000)
 /* Server/Agent 默认最大连接数 */
 #define DEFAULT_CONNECTION_COUNT				10000
-/* Server/Agent 默认 Socket 缓存对象锁定时间 */
+/* Server/Agent 默认 Socket 对象缓存锁定时间 */
 #define DEFAULT_FREE_SOCKETOBJ_LOCK_TIME		DEFAULT_OBJECT_CACHE_LOCK_TIME
 /* Server/Agent 默认 Socket 缓存池大小 */
 #define DEFAULT_FREE_SOCKETOBJ_POOL				DEFAULT_OBJECT_CACHE_POOL_SIZE

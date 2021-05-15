@@ -36,8 +36,8 @@ using namespace std;
 
 /* 最大工作线程数 */
 #define MAX_WORKER_THREAD_COUNT			512
-/* 默认对象缓存对象锁定时间 */
-#define DEFAULT_OBJECT_CACHE_LOCK_TIME	(20 * 1000)
+/* 默认对象缓存锁定时间 */
+#define DEFAULT_OBJECT_CACHE_LOCK_TIME	(30 * 1000)
 /* 默认对象缓存池大小 */
 #define DEFAULT_OBJECT_CACHE_POOL_SIZE	600
 /* 默认对象缓存池回收阀值 */

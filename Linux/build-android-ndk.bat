@@ -12,7 +12,7 @@ if exist %LIBS_OUT% (
 	rd /s /q %LIBS_OUT%
 )
 
-call ndk-build NDK_PROJECT_PATH=%PROJECT_PATH% NDK_LIBS_OUT=%LIBS_OUT% NDK_OUT=%OBJ_OUT% %*
+call ndk-build NDK_PROJECT_PATH=%PROJECT_PATH% NDK_LIBS_OUT=%LIBS_OUT% NDK_OUT=%OBJ_OUT% _MIMALLOC_DISABLED=true %*
 
 call :cp_static_lib arm64-v8a
 call :cp_static_lib armeabi-v7a

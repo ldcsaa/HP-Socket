@@ -1,4 +1,19 @@
 ﻿==========================================================================================
+v5.8.3 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Bug fix: Deadlock may occur when ARQ UDP components send data.
+2. HP socket for NDK compilation script does not introduce mimalloc by default.
+
+> Third-party library Upadate
+-----------------
+1. mimalloc upgrade to version 1.7.1.
+2. llhttp upgrade to version 6.0.2.
+3. openssl upgrade to version 1.1.1k.
+
+==========================================================================================
 v5.8.2 Update:
 ==========================================================================================
 
@@ -11,7 +26,7 @@ v5.8.2 Update:
 -----------------
 1. mimalloc upgrade to version 1.7.0.
 2. llhttp upgrade to version 4.0.0.
-2. openssl upgrade to version 1.1.1j.
+3. openssl upgrade to version 1.1.1j.
 
 ==========================================================================================
 v5.8.1 Update:
@@ -21,7 +36,7 @@ v5.8.1 Update:
 -----------------
 1. HTTP parser: llhttp replaces http_ parser.
 2. Memory allocator: mimalloc replaces jemalloc.
-2. openssl upgrade to version 1.1.1i.
+3. openssl upgrade to version 1.1.1i.
 
 > Other Upadate
 -----------------

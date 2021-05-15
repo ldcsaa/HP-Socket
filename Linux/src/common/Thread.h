@@ -377,7 +377,7 @@ public:
 		return pValue;
 	}
 
-	template<typename  ... _Con_Param> T* Get(_Con_Param&& ... construct_args)
+	template<typename ... _Con_Param> T* Get(_Con_Param&& ... construct_args)
 	{
 		T* pValue = TryGet();
 
@@ -392,7 +392,7 @@ public:
 		return pValue;
 	}
 
-	template<typename  ... _Con_Param> T& GetRef(_Con_Param&& ... construct_args)
+	template<typename ... _Con_Param> T& GetRef(_Con_Param&& ... construct_args)
 	{
 		return *Get(forward<_Con_Param>(construct_args) ...);
 	}
@@ -471,7 +471,7 @@ private:
 			delete pValue;
 	}
 
-	template<typename  ... _Con_Param> static inline T* Construct(_Con_Param&& ... construct_args)
+	template<typename ... _Con_Param> static inline T* Construct(_Con_Param&& ... construct_args)
 	{
 		return new T(forward<_Con_Param>(construct_args) ...);
 	}
