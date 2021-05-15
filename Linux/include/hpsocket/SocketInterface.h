@@ -34,7 +34,7 @@
 描述：定义双接口转换方法
 ************************************************************************/
 
-#if defined(__arm__)
+#if defined(__arm__) && defined(__GNUC__) && !(defined(__clang__) || defined(__llvm__))
 
 #define __DUAL_VPTR_GAP__	sizeof(PVOID)
 
