@@ -177,7 +177,7 @@ BOOL GetSockAddrByHostNameDirectly(LPCTSTR lpszHost, USHORT usPort, HP_SOCKADDR&
 	addrinfo hints	= {0};
 
 #if defined(__ANDROID__)
-	hints.ai_flags		= AI_DEFAULT;
+	hints.ai_flags		= 0;
 #else
 	hints.ai_flags		= (AI_V4MAPPED | AI_ADDRCONFIG);
 #endif
