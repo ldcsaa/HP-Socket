@@ -151,6 +151,7 @@ BOOL CTcpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 	BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 	VERIFY(::SSO_KeepAliveVals(m_soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
 	VERIFY(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
+	VERIFY(::SSO_NoDelay(m_soClient, m_bNoDelay) == NO_ERROR);
 
 	SetRemoteHost(lpszRemoteAddress, usPort);
 

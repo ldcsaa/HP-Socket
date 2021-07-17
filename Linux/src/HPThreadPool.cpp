@@ -129,13 +129,14 @@ BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 
 		if(!m_lsTasks.empty())
 		{
-			while(!m_lsTasks.empty())
+			do
 			{
 				TTask* pTask = m_lsTasks.front();
 				m_lsTasks.pop();
 
 				TTask::Destruct(pTask);
-			}
+
+			} while(!m_lsTasks.empty());
 
 			::SetLastError(ERROR_CANCELLED);
 			isOK = FALSE;
@@ -190,9 +191,7 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 	else if(m_enRejectedPolicy == TRP_CALLER_RUN)
 	{
-		::InterlockedIncrement(&m_dwTaskCount);
-		fnTaskProc(pvArg);
-		::InterlockedDecrement(&m_dwTaskCount);
+		DoRunTaskProc(fnTaskProc, pvArg);
 	}
 	else
 	{
@@ -203,6 +202,13 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 
 	return TRUE;
+}
+
+void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg)
+{
+	::InterlockedIncrement(&m_dwTaskCount);
+	fnTaskProc(pvArg);
+	::InterlockedDecrement(&m_dwTaskCount);
 }
 
 CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
@@ -404,9 +410,7 @@ int CHPThreadPool::WorkerProc()
 
 		if(pTask != nullptr)
 		{
-			::InterlockedIncrement(&m_dwTaskCount);
-			pTask->fn(pTask->arg);
-			::InterlockedDecrement(&m_dwTaskCount);
+			DoRunTaskProc(pTask->fn, pTask->arg);
 
 			if(pTask->freeArg)
 				::DestroySocketTaskObj((LPTSocketTask)pTask->arg);

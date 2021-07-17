@@ -72,6 +72,7 @@ class __CFakeRunnerClass_ {};
 template<class T, class P = VOID, class R = UINT_PTR> class CThread
 {
 public:
+
 	using F	 = R (T::*)(P*);
 	using SF = R (*)(P*);
 
@@ -85,29 +86,23 @@ public:
 		P*	m_pArg;
 
 	public:
-		static TWorker* Construct(CThread* pThread, T* pRunner, F pFunc, P* pArg)
+
+		TWorker(CThread* pThread, BOOL bDetach = FALSE, T* pRunner = nullptr, F pFunc = nullptr, P* pArg = nullptr)
+		: m_pThread(pThread)
 		{
-			return new TWorker(pRunner, pFunc, pArg);
+			Reset(bDetach, pRunner, pFunc, pArg);
 		}
 
-		static void Destruct(TWorker* pWorker)
+		void Reset(BOOL bDetach = FALSE, T* pRunner = nullptr, F pFunc = nullptr, P* pArg = nullptr)
 		{
-			if(pWorker != nullptr)
-				delete pWorker;
-		}
-
-		void CopyTo(TWorker& worker)
-		{
-			memcpy(&worker, this, sizeof(TWorker));
-		}
-
-		TWorker(CThread* pThread = nullptr, BOOL bDetach = FALSE, T* pRunner = nullptr, F pFunc = nullptr, P* pArg = nullptr)
-		: m_pThread(pThread), m_bDetach(bDetach), m_pRunner(pRunner), m_pFunc(pFunc), m_pArg(pArg)
-		{
-
+			m_bDetach	= bDetach;
+			m_pRunner	= pRunner;
+			m_pFunc		= pFunc;
+			m_pArg		= pArg;
 		}
 
 	public:
+
 		template<typename T_, typename R_, typename = enable_if_t<!is_same<T_, __CFakeRunnerClass_>::value && !is_void<R_>::value>>
 		PVOID Run(T_*, R_*)
 		{
@@ -153,16 +148,13 @@ public:
 			::SetLastError(rs);
 		else
 		{
-			unique_ptr<TWorker> wkPtr = make_unique<TWorker>(this, bDetach, pRunner, pFunc, pArg);
-			wkPtr->CopyTo(m_Worker);
+			m_Worker.Reset(bDetach, pRunner, pFunc, pArg);
 
 			SetRunning(TRUE);
 
-			rs = pthread_create(&m_ulThreadID, pAttr, ThreadProc, (PVOID)wkPtr.get());
+			rs = pthread_create(&m_ulThreadID, pAttr, ThreadProc, (PVOID)(&m_Worker));
 
-			if(rs == NO_ERROR)
-				wkPtr.release();
-			else
+			if(rs != NO_ERROR)
 			{
 				Reset();
 				::SetLastError(rs);
@@ -269,7 +261,7 @@ public:
 		m_ulThreadID	= 0;
 		m_lNativeID		= 0;
 
-		::ZeroObject(m_Worker);
+		m_Worker.Reset();
 	}
 
 	BOOL Interrupt()
@@ -298,6 +290,7 @@ public:
 	BOOL IsMyNativeThreadID	(NTHR_ID lNativeID)	const {return ::IsSameNativeThread(lNativeID, m_lNativeID);}
 
 private:
+
 	static PVOID ThreadProc(LPVOID pv)
 	{
 		UnmaskInterruptSignal();
@@ -313,8 +306,6 @@ private:
 
 		PVOID pResult = pWorker->Run((T*)nullptr, (R*)nullptr);
 
-		TWorker::Destruct(pWorker);
-
 		return pResult;
 	}
 
@@ -329,7 +320,9 @@ private:
 	}
 
 public:
+
 	CThread()
+	: m_Worker(this)
 	{
 		Reset();
 	}
@@ -348,6 +341,7 @@ public:
 	DECLARE_NO_COPY_CLASS(CThread)
 
 private:
+
 	THR_ID	m_ulThreadID;
 	NTHR_ID	m_lNativeID;
 	BOOL	m_bRunning;
@@ -362,6 +356,7 @@ template<class T> class CTlsObj
 	using TLocalMap = unordered_map<THR_ID, T*>;
 
 public:
+
 	T* TryGet()
 	{
 		T* pValue = nullptr;
@@ -459,6 +454,7 @@ public:
 	bool IsEmpty()				const	{return m_map.empty();}
 
 private:
+
 	inline void DoRemove()
 	{
 		CWriteLock locallock(m_lock);
@@ -477,6 +473,7 @@ private:
 	}
 
 public:
+
 	CTlsObj()
 	{
 
@@ -493,6 +490,7 @@ public:
 	}
 
 private:
+
 	CSimpleRWLock	m_lock;
 	TLocalMap		m_map;
 
@@ -506,6 +504,7 @@ template<class T> class CTlsSimple
 	static const T DEFAULT = (T)(0);
 
 public:
+
 	BOOL TryGet(T& tValue)
 	{
 		BOOL isOK = FALSE;
@@ -588,6 +587,7 @@ public:
 	bool IsEmpty()	const	{return m_map.empty();}
 
 public:
+
 	CTlsSimple()
 	{
 
@@ -606,6 +606,7 @@ public:
 	DECLARE_NO_COPY_CLASS(CTlsSimple)
 
 private:
+
 	CSimpleRWLock	m_lock;
 	TLocalMap		m_map;
 };

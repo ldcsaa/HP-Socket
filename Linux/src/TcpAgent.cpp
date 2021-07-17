@@ -304,6 +304,7 @@ int CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCT
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 		VERIFY(IS_NO_ERROR(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
 		VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(soClient, m_enReusePolicy)));
+		VERIFY(IS_NO_ERROR(::SSO_NoDelay(soClient, m_bNoDelay)));
 
 		if(bBind && usLocalPort == 0)
 		{

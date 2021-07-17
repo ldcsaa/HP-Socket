@@ -1170,6 +1170,7 @@ DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LP
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 		ENSURE(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) != SOCKET_ERROR);
 		ENSURE(::SSO_ReuseAddress(soClient, m_enReusePolicy) != SOCKET_ERROR);
+		ENSURE(::SSO_NoDelay(soClient, m_bNoDelay) != SOCKET_ERROR);
 
 		if(usLocalPort == 0)
 		{

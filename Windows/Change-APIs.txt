@@ -1,4 +1,23 @@
 # ======================================== #
+HP-Socket v5.8.4 API 更新列表：
+# ======================================== #
+--------------------
+1、TCP:
+--------------------
+HP_TcpServer_SetNoDelay						(增加)
+HP_TcpAgent_SetNoDelay						(增加)
+HP_TcpClient_SetNoDelay						(增加)
+HP_TcpServer_IsNoDelay						(增加)
+HP_TcpAgent_IsNoDelay						(增加)
+HP_TcpClient_IsNoDelay						(增加)
+
+--------------------
+2、Global:
+--------------------
+SYS_Calloc									(增加)
+SYS_Alloca									(增加)
+
+# ======================================== #
 HP-Socket v5.7.3 API 更新列表：
 # ======================================== #
 --------------------

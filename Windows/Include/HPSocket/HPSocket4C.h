@@ -625,6 +625,8 @@ HPSOCKET_API void __HP_CALL HP_TcpServer_SetSocketBufferSize(HP_TcpServer pServe
 HPSOCKET_API void __HP_CALL HP_TcpServer_SetKeepAliveTime(HP_TcpServer pServer, DWORD dwKeepAliveTime);
 /* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 HPSOCKET_API void __HP_CALL HP_TcpServer_SetKeepAliveInterval(HP_TcpServer pServer, DWORD dwKeepAliveInterval);
+/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+HPSOCKET_API void __HP_CALL HP_TcpServer_SetNoDelay(HP_TcpServer pServer, BOOL bNoDelay);
 
 /* 获取 Accept 预投递数量 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetAcceptSocketCount(HP_TcpServer pServer);
@@ -636,6 +638,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetSocketListenQueue(HP_TcpServer pSer
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveTime(HP_TcpServer pServer);
 /* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveInterval(HP_TcpServer pServer);
+/* 检查是否开启 nodelay 模式 */
+HPSOCKET_API BOOL __HP_CALL HP_TcpServer_IsNoDelay(HP_TcpServer pServer);
 
 #ifdef _UDP_SUPPORT
 
@@ -1039,6 +1043,8 @@ HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSocketBufferSize(HP_TcpAgent pAgent, 
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveTime(HP_TcpAgent pAgent, DWORD dwKeepAliveTime);
 /* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent, DWORD dwKeepAliveInterval);
+/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+HPSOCKET_API void __HP_CALL HP_TcpAgent_SetNoDelay(HP_TcpAgent pAgent, BOOL bNoDelay);
 
 /* 获取通信数据缓冲区大小 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent);
@@ -1046,6 +1052,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent)
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent);
 /* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent);
+/* 检查是否开启 nodelay 模式 */
+HPSOCKET_API BOOL __HP_CALL HP_TcpAgent_IsNoDelay(HP_TcpAgent pAgent);
 
 /******************************************************************************/
 /***************************** Client 组件操作方法 *****************************/
@@ -1224,6 +1232,8 @@ HPSOCKET_API void __HP_CALL HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClien
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveTime(HP_TcpClient pClient, DWORD dwKeepAliveTime);
 /* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClient, DWORD dwKeepAliveInterval);
+/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+HPSOCKET_API void __HP_CALL HP_TcpClient_SetNoDelay(HP_TcpClient pClient, BOOL bNoDelay);
 
 /* 获取通信数据缓冲区大小 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient);
@@ -1231,6 +1241,8 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClie
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient);
 /* 获取异常心跳包间隔 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient);
+/* 检查是否开启 nodelay 模式 */
+HPSOCKET_API BOOL __HP_CALL HP_TcpClient_IsNoDelay(HP_TcpClient pClient);
 
 #ifdef _UDP_SUPPORT
 
@@ -1715,6 +1727,10 @@ HPSOCKET_API LPBYTE __HP_CALL SYS_Malloc(int size);
 HPSOCKET_API LPBYTE __HP_CALL SYS_Realloc(LPBYTE p, int size);
 /* 释放内存 */
 HPSOCKET_API VOID __HP_CALL SYS_Free(LPBYTE p);
+/* 分配内存块 */
+HPSOCKET_API LPVOID __HP_CALL SYS_Calloc(int number, int size);
+/* 分配栈内存 */
+HPSOCKET_API LPBYTE __HP_CALL SYS_Alloca(int size);
 
 // CP_XXX -> UNICODE
 HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int* piDestLength);
@@ -2558,7 +2574,7 @@ HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPool(HP_ThreadPool pThreadPool);
 *							TBT_REFER	：（浅拷贝）pBuffer 不复制到 TSocketTask 对象，需确保 TSocketTask 对象生命周期内 pBuffer 必须有效
 *											-> 适用于 pBuffer 较大或 pBuffer 可重用，并且 pBuffer 生命周期受控的场景
 *							TBT_ATTACH	：（附属）执行浅拷贝，但 TSocketTask 对象会获得 pBuffer 的所有权，并负责释放 pBuffer，避免多次缓冲区拷贝
-*											-> 注意：pBuffer 必须由 SYS_Malloc() 函数分配才能使用本类型，否则可能会发生内存访问错误
+*											-> 注意：pBuffer 必须由 SYS_Malloc()/SYS_Calloc() 函数分配才能使用本类型，否则可能会发生内存访问错误
 *			wParam		-- 自定义参数
 *			lParam		-- 自定义参数
 * 返回值：	HP_LPTSocketTask

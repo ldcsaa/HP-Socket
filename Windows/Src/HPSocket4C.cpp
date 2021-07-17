@@ -248,17 +248,21 @@
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetKeepAliveInterval=_HP_TcpAgent_GetKeepAliveInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetKeepAliveTime=_HP_TcpAgent_GetKeepAliveTime@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetSocketBufferSize=_HP_TcpAgent_GetSocketBufferSize@4")
+	#pragma comment(linker, "/EXPORT:HP_TcpAgent_IsNoDelay=_HP_TcpAgent_IsNoDelay@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SendSmallFile=_HP_TcpAgent_SendSmallFile@20")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetKeepAliveInterval=_HP_TcpAgent_SetKeepAliveInterval@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetKeepAliveTime=_HP_TcpAgent_SetKeepAliveTime@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetSocketBufferSize=_HP_TcpAgent_SetSocketBufferSize@8")
+	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetNoDelay=_HP_TcpAgent_SetNoDelay@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetKeepAliveInterval=_HP_TcpClient_GetKeepAliveInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetKeepAliveTime=_HP_TcpClient_GetKeepAliveTime@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetSocketBufferSize=_HP_TcpClient_GetSocketBufferSize@4")
+	#pragma comment(linker, "/EXPORT:HP_TcpClient_IsNoDelay=_HP_TcpClient_IsNoDelay@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SendSmallFile=_HP_TcpClient_SendSmallFile@16")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetKeepAliveInterval=_HP_TcpClient_SetKeepAliveInterval@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetKeepAliveTime=_HP_TcpClient_SetKeepAliveTime@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetSocketBufferSize=_HP_TcpClient_SetSocketBufferSize@8")
+	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetNoDelay=_HP_TcpClient_SetNoDelay@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpPackAgent_GetMaxPackSize=_HP_TcpPackAgent_GetMaxPackSize@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpPackAgent_GetPackHeaderFlag=_HP_TcpPackAgent_GetPackHeaderFlag@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpPackAgent_SetMaxPackSize=_HP_TcpPackAgent_SetMaxPackSize@8")
@@ -282,12 +286,14 @@
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetKeepAliveTime=_HP_TcpServer_GetKeepAliveTime@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetSocketBufferSize=_HP_TcpServer_GetSocketBufferSize@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_GetSocketListenQueue=_HP_TcpServer_GetSocketListenQueue@4")
+	#pragma comment(linker, "/EXPORT:HP_TcpServer_IsNoDelay=_HP_TcpServer_IsNoDelay@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SendSmallFile=_HP_TcpServer_SendSmallFile@20")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetAcceptSocketCount=_HP_TcpServer_SetAcceptSocketCount@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetKeepAliveInterval=_HP_TcpServer_SetKeepAliveInterval@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetKeepAliveTime=_HP_TcpServer_SetKeepAliveTime@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetSocketBufferSize=_HP_TcpServer_SetSocketBufferSize@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetSocketListenQueue=_HP_TcpServer_SetSocketListenQueue@8")
+	#pragma comment(linker, "/EXPORT:HP_TcpServer_SetNoDelay=_HP_TcpServer_SetNoDelay@8")
 
 #ifdef _UDP_SUPPORT
 	#pragma comment(linker, "/EXPORT:Create_HP_UdpCast=_Create_HP_UdpCast@4")
@@ -473,6 +479,8 @@
 	#pragma comment(linker, "/EXPORT:SYS_Malloc=_SYS_Malloc@4")
 	#pragma comment(linker, "/EXPORT:SYS_Realloc=_SYS_Realloc@8")
 	#pragma comment(linker, "/EXPORT:SYS_Free=_SYS_Free@4")
+	#pragma comment(linker, "/EXPORT:SYS_Calloc=_SYS_Calloc@8")
+	#pragma comment(linker, "/EXPORT:SYS_Alloca=_SYS_Alloca@4")
 
 #ifdef _ZLIB_SUPPORT
 	#pragma comment(linker, "/EXPORT:SYS_Compress=_SYS_Compress@16")
@@ -1494,6 +1502,11 @@ HPSOCKET_API void __HP_CALL HP_TcpServer_SetKeepAliveInterval(HP_TcpServer pServ
 	C_HP_Object::ToSecond<ITcpServer>(pServer)->SetKeepAliveInterval(dwKeepAliveInterval);
 }
 
+HPSOCKET_API void __HP_CALL HP_TcpServer_SetNoDelay(HP_TcpServer pServer, BOOL bNoDelay)
+{
+	C_HP_Object::ToSecond<ITcpServer>(pServer)->SetNoDelay(bNoDelay);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetAcceptSocketCount(HP_TcpServer pServer)
 {
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetAcceptSocketCount();
@@ -1517,6 +1530,11 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveTime(HP_TcpServer pServer)
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveInterval(HP_TcpServer pServer)
 {
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetKeepAliveInterval();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_TcpServer_IsNoDelay(HP_TcpServer pServer)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->IsNoDelay();
 }
 
 #ifdef _UDP_SUPPORT
@@ -1991,6 +2009,11 @@ HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent,
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetKeepAliveInterval(dwKeepAliveInterval);
 }
 
+HPSOCKET_API void __HP_CALL HP_TcpAgent_SetNoDelay(HP_TcpAgent pAgent, BOOL bNoDelay)
+{
+	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetNoDelay(bNoDelay);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent)
 {
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetSocketBufferSize();
@@ -2004,6 +2027,11 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent)
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent)
 {
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetKeepAliveInterval();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_TcpAgent_IsNoDelay(HP_TcpAgent pAgent)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->IsNoDelay();
 }
 
 /******************************************************************************/
@@ -2178,6 +2206,11 @@ HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClie
 	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetKeepAliveInterval(dwKeepAliveInterval);
 }
 
+HPSOCKET_API void __HP_CALL HP_TcpClient_SetNoDelay(HP_TcpClient pClient, BOOL bNoDelay)
+{
+	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetNoDelay(bNoDelay);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetSocketBufferSize();
@@ -2191,6 +2224,11 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient)
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetKeepAliveInterval();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_TcpClient_IsNoDelay(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->IsNoDelay();
 }
 
 #ifdef _UDP_SUPPORT
@@ -2859,12 +2897,22 @@ HPSOCKET_API LPBYTE __HP_CALL SYS_Malloc(int size)
 
 HPSOCKET_API LPBYTE __HP_CALL SYS_Realloc(LPBYTE p, int size)
 {
-	return REALLOC(p, BYTE, size);
+	return REALLOC(BYTE, p, size);
 }
 
 HPSOCKET_API VOID __HP_CALL SYS_Free(LPBYTE p)
 {
 	FREE(p);
+}
+
+HPSOCKET_API LPVOID __HP_CALL SYS_Calloc(int number, int size)
+{
+	return CALLOC(number, size);
+}
+
+HPSOCKET_API LPBYTE __HP_CALL SYS_Alloca(int size)
+{
+	return CreateLocalObjects(BYTE, size);
 }
 
 HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int* piDestLength)

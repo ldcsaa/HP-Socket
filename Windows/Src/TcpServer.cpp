@@ -212,6 +212,7 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 			BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
 			ENSURE(::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
 			ENSURE(::SSO_ReuseAddress(m_soListen, m_enReusePolicy) == NO_ERROR);
+			ENSURE(::SSO_NoDelay(m_soListen, m_bNoDelay) == NO_ERROR);
 			ENSURE(::SSO_NoBlock(m_soListen) == NO_ERROR);
 			
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)

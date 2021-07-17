@@ -313,7 +313,7 @@ void __EXIT_FN_(void (*fn)(int), LPCSTR lpszFnName, int* lpiExitCode, int iErrno
 
 	if(!lpszTitle)
 	{
-		lpszTitle = CreateLocalObjects(char, 50);
+		lpszTitle = CreateLocalObjects(char, 64);
 
 		if(lpiExitCode)
 			sprintf((LPSTR)lpszTitle, "(#%d, 0x%zX) > %s(%d) [%d]", SELF_PROCESS_ID, (SIZE_T)SELF_THREAD_ID, lpszFnName, *lpiExitCode, iErrno);

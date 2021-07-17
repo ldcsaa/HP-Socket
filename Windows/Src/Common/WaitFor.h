@@ -91,7 +91,7 @@ BOOL MsgWaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds = INFINITE, BOO
 描述: 等待指定时间		
 返回值: (无)		
 **********************************/
-void WaitFor(DWORD dwMilliseconds);
+BOOL WaitFor(DWORD dwMilliseconds);
 
 /**********************************
 描述: 等待指定时间, 同时处理Windows消息
@@ -102,7 +102,7 @@ void WaitFor(DWORD dwMilliseconds);
 
 返回值: (无)		
 **********************************/
-void WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask = QS_ALLINPUT);
+BOOL WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask = QS_ALLINPUT);
 
 /**********************************
 描述: 等待某个变量小于指定值

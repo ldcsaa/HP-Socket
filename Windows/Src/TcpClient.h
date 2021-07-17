@@ -73,6 +73,7 @@ public:
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)			{ENSURE_HAS_STOPPED(); m_dwKeepAliveInterval	= dwKeepAliveInterval;}
 	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferPoolSize	= dwFreeBufferPoolSize;}
 	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferPoolHold	= dwFreeBufferPoolHold;}
+	virtual void SetNoDelay				(BOOL bNoDelay)						{ENSURE_HAS_STOPPED(); m_bNoDelay				= bNoDelay;}
 	virtual void SetExtra				(PVOID pExtra)						{m_pExtra										= pExtra;}						
 
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
@@ -81,6 +82,7 @@ public:
 	virtual DWORD GetKeepAliveInterval	()	{return m_dwKeepAliveInterval;}
 	virtual DWORD GetFreeBufferPoolSize	()	{return m_dwFreeBufferPoolSize;}
 	virtual DWORD GetFreeBufferPoolHold	()	{return m_dwFreeBufferPoolHold;}
+	virtual BOOL  IsNoDelay				()	{return m_bNoDelay;}
 	virtual PVOID GetExtra				()	{return m_pExtra;}
 
 protected:
@@ -180,6 +182,7 @@ public:
 	, m_bConnected			(FALSE)
 	, m_enLastError			(SE_OK)
 	, m_enState				(SS_STOPPED)
+	, m_bNoDelay			(FALSE)
 	, m_pExtra				(nullptr)
 	, m_pReserved			(nullptr)
 	, m_enReusePolicy		(RAP_ADDR_ONLY)
@@ -219,6 +222,7 @@ private:
 	DWORD				m_dwFreeBufferPoolHold;
 	DWORD				m_dwKeepAliveTime;
 	DWORD				m_dwKeepAliveInterval;
+	BOOL				m_bNoDelay;
 
 	HANDLE				m_hWorker;
 	UINT				m_dwWorkerID;

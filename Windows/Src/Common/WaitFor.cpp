@@ -82,7 +82,9 @@ DWORD WaitForMultipleObjectsWithMessageLoop(DWORD dwHandles, HANDLE szHandles[],
 	while(TRUE)
 	{
 		int iWaitTime;
-		if(dwBeginTime != INFINITE)
+		if(dwBeginTime == INFINITE)
+			iWaitTime	= INFINITE;
+		else
 		{
 			iWaitTime	= dwMilliseconds - (GetTimeGap32(dwBeginTime));
 
@@ -92,11 +94,8 @@ DWORD WaitForMultipleObjectsWithMessageLoop(DWORD dwHandles, HANDLE szHandles[],
 				break;
 			}
 		}
-		else
-			iWaitTime	= INFINITE;
 
 		dwResult = ::MsgWaitForMultipleObjects(dwHandles, szHandles, bWaitAll, (DWORD)iWaitTime, dwWakeMask);
-		ASSERT(dwResult != WAIT_FAILED);
 
 		if(dwResult == (WAIT_OBJECT_0 + dwHandles))
 			PeekMessageLoop();
@@ -115,9 +114,10 @@ BOOL MsgWaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds, BOOL bWaitAll,
 	{
 	case WAIT_OBJECT_0:
 		return TRUE;
-	case WAIT_FAILED:
-		ENSURE(FALSE);
 	case WAIT_TIMEOUT:
+		::SetLastError(ERROR_TIMEOUT);
+		return FALSE;
+	case WAIT_FAILED:
 		return FALSE;
 	default:
 		ENSURE(FALSE);
@@ -126,20 +126,24 @@ BOOL MsgWaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds, BOOL bWaitAll,
 	return FALSE;
 }
 
-void WaitFor(DWORD dwMilliseconds)
+BOOL WaitFor(DWORD dwMilliseconds)
 {
 	if(dwMilliseconds == 0)
 		::Sleep(0);
 	else
-		ENSURE(::WaitForSingleObject(_s_evWait, dwMilliseconds) == WAIT_TIMEOUT);
+		return (::WaitForSingleObject(_s_evWait, dwMilliseconds) == WAIT_TIMEOUT);
+
+	return TRUE;
 }
 
-void WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask)
+BOOL WaitWithMessageLoop(DWORD dwMilliseconds, DWORD dwWakeMask)
 {
 	if(dwMilliseconds == 0)
 		::Sleep(0);
 	else
-		ENSURE(MsgWaitForSingleObject(_s_evWait, dwMilliseconds, FALSE, dwWakeMask) == FALSE);
+		return (MsgWaitForSingleObject(_s_evWait, dwMilliseconds, FALSE, dwWakeMask) == FALSE);
+
+	return TRUE;
 }
 
 void WaitForWorkingQueue(long* plWorkingItemCount, long lMaxWorkingItemCount, DWORD dwCheckInterval)

@@ -475,6 +475,8 @@ public:
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
 	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
+	/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+	virtual void SetNoDelay				(BOOL bNoDelay)					= 0;
 
 	/* 获取 Accept 预投递数量 */
 	virtual DWORD GetAcceptSocketCount	()	= 0;
@@ -486,6 +488,8 @@ public:
 	virtual DWORD GetKeepAliveTime		()	= 0;
 	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
+	/* 检查是否开启 nodelay 模式 */
+	virtual BOOL IsNoDelay				()	= 0;
 	
 #ifdef _SSL_SUPPORT
 	/* 设置通信组件握手方式（默认：TRUE，自动握手） */
@@ -761,6 +765,8 @@ public:
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)			= 0;
 	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)		= 0;
+	/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+	virtual void SetNoDelay				(BOOL bNoDelay)					= 0;
 
 	/* 获取通信数据缓冲区大小 */
 	virtual DWORD GetSocketBufferSize	()	= 0;
@@ -768,6 +774,8 @@ public:
 	virtual DWORD GetKeepAliveTime		()	= 0;
 	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
+	/* 检查是否开启 nodelay 模式 */
+	virtual BOOL IsNoDelay				()	= 0;
 
 #ifdef _SSL_SUPPORT
 	/* 设置通信组件握手方式（默认：TRUE，自动握手） */
@@ -1012,6 +1020,8 @@ public:
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)		= 0;
 	/* 设置异常心跳包间隔（毫秒，0 不发送心跳包，，默认：20 * 1000，如果超过若干次 [默认：WinXP 5 次, Win7 10 次] 检测不到心跳确认包则认为已断线） */
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)	= 0;
+	/* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
+	virtual void SetNoDelay				(BOOL bNoDelay)				= 0;
 
 	/* 获取通信数据缓冲区大小 */
 	virtual DWORD GetSocketBufferSize	()	= 0;
@@ -1019,6 +1029,8 @@ public:
 	virtual DWORD GetKeepAliveTime		()	= 0;
 	/* 获取异常心跳包间隔 */
 	virtual DWORD GetKeepAliveInterval	()	= 0;
+	/* 检查是否开启 nodelay 模式 */
+	virtual BOOL IsNoDelay				()	= 0;
 
 #ifdef _SSL_SUPPORT
 	/* 设置通信组件握手方式（默认：TRUE，自动握手） */

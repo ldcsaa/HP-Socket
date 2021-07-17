@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
-Copyright (c) 2018, Microsoft Research, Daan Leijen
+Copyright (c) 2018-2021, Microsoft Research, Daan Leijen
 This is free software; you can redistribute it and/or modify it under the
 terms of the MIT license. A copy of the license can be found in the file
 "LICENSE" at the root of this distribution.
@@ -10,7 +10,7 @@ terms of the MIT license. A copy of the license can be found in the file
 
 #include <stddef.h>   // ptrdiff_t
 #include <stdint.h>   // uintptr_t, uint16_t, etc
-#include <mimalloc-atomic.h>  // _Atomic
+#include "mimalloc-atomic.h"  // _Atomic
 
 #ifdef _MSC_VER
 #pragma warning(disable:4214) // bitfield is not int
@@ -270,7 +270,7 @@ typedef struct mi_segment_s {
   struct mi_segment_s* prev;
 
   size_t               abandoned;        // abandoned pages (i.e. the original owning thread stopped) (`abandoned <= used`)
-  size_t               abandoned_visits; // count how often this segment is visited in the abandoned list (to force reclaim it it is too long)
+  size_t               abandoned_visits; // count how often this segment is visited in the abandoned list (to force reclaim if it is too long)
 
   size_t               used;             // count of pages in use (`used <= capacity`)
   size_t               capacity;         // count of available pages (`#free + used`)

@@ -541,6 +541,10 @@ HPSOCKET_API LPBYTE SYS_Malloc(int size);
 HPSOCKET_API LPBYTE SYS_Realloc(LPBYTE p, int size);
 /* 释放内存 */
 HPSOCKET_API VOID SYS_Free(LPBYTE p);
+/* 分配内存块 */
+HPSOCKET_API LPVOID SYS_Calloc(int number, int size);
+/* 分配栈内存 */
+HPSOCKET_API LPBYTE SYS_Alloca(int size);
 
 // CP_XXX -> UNICODE
 HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);
@@ -767,7 +771,7 @@ HPSOCKET_API void HP_Destroy_ThreadPool(IHPThreadPool* pThreadPool);
 *							TBT_REFER	：（浅拷贝）pBuffer 不复制到 TSocketTask 对象，需确保 TSocketTask 对象生命周期内 pBuffer 必须有效
 *											-> 适用于 pBuffer 较大或 pBuffer 可重用，并且 pBuffer 生命周期受控的场景
 *							TBT_ATTACH	：（附属）执行浅拷贝，但 TSocketTask 对象会获得 pBuffer 的所有权，并负责释放 pBuffer，避免多次缓冲区拷贝
-*											-> 注意：pBuffer 必须由 SYS_Malloc() 函数分配才能使用本类型，否则可能会发生内存访问错误
+*											-> 注意：pBuffer 必须由 SYS_Malloc()/SYS_Calloc() 函数分配才能使用本类型，否则可能会发生内存访问错误
 *			wParam		-- 自定义参数
 *			lParam		-- 自定义参数
 * 返回值：	LPTSocketTask
