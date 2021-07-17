@@ -31,6 +31,7 @@
 template<class T, class P = VOID> class CThread
 {
 private:
+
 	typedef UINT (T::*F)(P*);
 
 	struct TWorker
@@ -40,30 +41,22 @@ private:
 		P*	m_pArg;
 
 	public:
-		static TWorker* Construct(T* pRunner, F pFunc, P* pArg)
-		{
-			return new TWorker(pRunner, pFunc, pArg);
-		}
-
-		static void Destruct(TWorker* pWorker)
-		{
-			if(pWorker != nullptr)
-				delete pWorker;
-		}
-
-		void CopyTo(TWorker& worker)
-		{
-			memcpy(&worker, this, sizeof(TWorker));
-		}
 
 		TWorker(T* pRunner = nullptr, F pFunc = nullptr, P* pArg = nullptr)
-		: m_pRunner(pRunner), m_pFunc(pFunc), m_pArg(pArg)
 		{
+			Reset(pRunner, pFunc, pArg);
+		}
 
+		void Reset(T* pRunner = nullptr, F pFunc = nullptr, P* pArg = nullptr)
+		{
+			m_pRunner	= pRunner;
+			m_pFunc		= pFunc;
+			m_pArg		= pArg;
 		}
 	};
 
 public:
+
 	BOOL Start(T* pRunner, F pFunc, P* pArg = nullptr, int iPriority = THREAD_PRIORITY_NORMAL, UINT uiStackSize = 0, LPSECURITY_ATTRIBUTES lpThreadAttributes = nullptr)
 	{
 		BOOL isOK = TRUE;
@@ -72,14 +65,13 @@ public:
 		{
 			Release();
 
-			unique_ptr<TWorker> wkPtr(TWorker::Construct(pRunner, pFunc, pArg));
-			wkPtr->CopyTo(m_Worker);
+			m_Worker.Reset(pRunner, pFunc, pArg);
 
 			if(iPriority == THREAD_PRIORITY_NORMAL)
-				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)wkPtr.get(), 0, &m_uiThreadID);
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)(&m_Worker), 0, &m_uiThreadID);
 			else
 			{
-				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)wkPtr.get(), CREATE_SUSPENDED, &m_uiThreadID);
+				m_hThread = (HANDLE)_beginthreadex(lpThreadAttributes, uiStackSize, ThreadProc, (LPVOID)(&m_Worker), CREATE_SUSPENDED, &m_uiThreadID);
 
 				if(IsValid())
 				{
@@ -88,9 +80,7 @@ public:
 				}
 			}
 
-			if(IsValid())
-				wkPtr.release();
-			else
+			if(!IsValid())
 			{
 				::SetLastError(ERROR_CREATE_FAILED);
 				isOK = FALSE;
@@ -162,6 +152,7 @@ public:
 	const HANDLE& GetThreadHandle	() const	{return m_hThread;}
 
 public:
+
 	CThread()
 	{
 		Reset();
@@ -173,13 +164,12 @@ public:
 	}
 
 private:
+
 	static UINT WINAPI ThreadProc(LPVOID pv)
 	{
 		TWorker* pWorker = (TWorker*)pv;
 
 		UINT rs = ((pWorker->m_pRunner)->*(pWorker->m_pFunc))(pWorker->m_pArg);
-
-		TWorker::Destruct(pWorker);
 
 		return rs;
 	}
@@ -189,10 +179,11 @@ private:
 		m_uiThreadID = 0;
 		m_hThread	 = nullptr;
 
-		::ZeroObject(m_Worker);
+		m_Worker.Reset();
 	}
 
 private:
+
 	UINT	m_uiThreadID;
 	HANDLE	m_hThread;
 
@@ -208,6 +199,7 @@ template<class T, typename construct_param_type = void*> class CTlsObj
 	typedef typename TLocalMap::const_iterator	TLocalMapCI;
 
 public:
+
 	T* TryGet()
 	{
 		T* pValue = nullptr;
@@ -325,6 +317,7 @@ public:
 	bool IsEmpty()				const	{return m_map.empty();}
 
 public:
+
 	CTlsObj()
 	{
 
@@ -341,6 +334,7 @@ public:
 	}
 
 private:
+
 	inline void DoRemove()
 	{
 		CWriteLock locallock(m_lock);
@@ -364,6 +358,7 @@ private:
 	}
 
 private:
+
 	CSimpleRWLock	m_lock;
 	TLocalMap		m_map;
 
@@ -379,6 +374,7 @@ template<class T> class CTlsSimple
 	static const T DEFAULT = (T)(0);
 
 public:
+
 	BOOL TryGet(T& tValue)
 	{
 		BOOL isOK = FALSE;
@@ -461,6 +457,7 @@ public:
 	bool IsEmpty()	const	{return m_map.empty();}
 
 public:
+
 	CTlsSimple()
 	{
 
@@ -479,6 +476,7 @@ public:
 	DECLARE_NO_COPY_CLASS(CTlsSimple)
 
 private:
+
 	CSimpleRWLock	m_lock;
 	TLocalMap		m_map;
 };

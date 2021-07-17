@@ -64,8 +64,9 @@ inline int ENSURE_ERROR(int def_code)	{int __le_ = ::GetLastError(); if(__le_ ==
 #define CallocObjects(T, n)				((T*)calloc((n), sizeof(T)))
 
 #define MALLOC(T, n)					((T*)malloc(sizeof(T) * (n)))
-#define REALLOC(p, T, n)				((T*)realloc((PVOID)(p), sizeof(T) * (n)))
+#define REALLOC(T, p, n)				((T*)realloc((PVOID)(p), sizeof(T) * (n)))
 #define FREE(p)							free((PVOID)(p))
+#define CALLOC(n, s)					calloc((n), (s))
 
 #define ERROR_EXIT2(code, err)			EXIT((code), (err), __FILE__, __LINE__, __FUNCTION__)
 #define ERROR__EXIT2(code, err)			_EXIT((code), (err), __FILE__, __LINE__, __FUNCTION__)

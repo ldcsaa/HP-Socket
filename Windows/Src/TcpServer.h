@@ -99,6 +99,7 @@ public:
 	virtual void SetKeepAliveTime			(DWORD dwKeepAliveTime)			{ENSURE_HAS_STOPPED(); m_dwKeepAliveTime			= dwKeepAliveTime;}
 	virtual void SetKeepAliveInterval		(DWORD dwKeepAliveInterval)		{ENSURE_HAS_STOPPED(); m_dwKeepAliveInterval		= dwKeepAliveInterval;}
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{ENSURE_HAS_STOPPED(); m_bMarkSilence				= bMarkSilence;}
+	virtual void SetNoDelay					(BOOL bNoDelay)					{ENSURE_HAS_STOPPED(); m_bNoDelay					= bNoDelay;}
 
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
 	virtual EnSendPolicy GetSendPolicy					()	{return m_enSendPolicy;}
@@ -116,6 +117,7 @@ public:
 	virtual DWORD GetKeepAliveTime			()	{return m_dwKeepAliveTime;}
 	virtual DWORD GetKeepAliveInterval		()	{return m_dwKeepAliveInterval;}
 	virtual BOOL  IsMarkSilence				()	{return m_bMarkSilence;}
+	virtual BOOL  IsNoDelay					()	{return m_bNoDelay;}
 
 protected:
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
@@ -277,6 +279,7 @@ public:
 	, m_dwKeepAliveTime			(DEFALUT_TCP_KEEPALIVE_TIME)
 	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
 	, m_bMarkSilence			(TRUE)
+	, m_bNoDelay				(FALSE)
 	, m_evWait					(TRUE, TRUE)
 	{
 		ASSERT(sm_wsSocket.IsValid());
@@ -305,6 +308,7 @@ private:
 	DWORD m_dwKeepAliveTime;
 	DWORD m_dwKeepAliveInterval;
 	BOOL  m_bMarkSilence;
+	BOOL  m_bNoDelay;
 
 private:
 	static const CInitSocket	sm_wsSocket;

@@ -1,11 +1,27 @@
 ﻿==========================================================================================
+v5.8.4 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Add global functions: SYS_Calloc(), SYS_Alloca().
+2. TCP series components add interface methods: SetNoDelay(), IsNoDelay().
+3. Bug fix: mimalloc for NDK throws segment fault exception.
+4. HP socket for NDK compilation script enable mimalloc by default.
+
+> Third-party library Upadate
+-----------------
+1. mimalloc upgrade to version 1.7.2.
+2. llhttp upgrade to version 6.0.4.
+
+==========================================================================================
 v5.8.3 Update:
 ==========================================================================================
 
 > Major Upadate
 -----------------
 1. Bug fix: Deadlock may occur when ARQ UDP components send data.
-2. HP socket for NDK compilation script does not introduce mimalloc by default.
+2. HP socket for NDK compilation script disable mimalloc by default.
 
 > Third-party library Upadate
 -----------------

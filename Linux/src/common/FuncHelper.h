@@ -146,8 +146,9 @@ inline void PrintError(LPCSTR subject)	{perror(subject);}
 #define CallocObjects(T, n)				((T*)calloc((n), sizeof(T)))
 
 #define MALLOC(T, n)					((T*)malloc(sizeof(T) * (n)))
-#define REALLOC(p, T, n)				((T*)realloc((PVOID)(p), sizeof(T) * (n)))
+#define REALLOC(T, p, n)				((T*)realloc((PVOID)(p), sizeof(T) * (n)))
 #define FREE(p)							free((PVOID)(p))
+#define CALLOC(n, s)					calloc((n), (s))
 
 #define InterlockedAdd(p, n)			__atomic_fetch_add((p), (n), memory_order_seq_cst)
 #define InterlockedSub(p, n)			__atomic_fetch_sub((p), (n), memory_order_seq_cst)

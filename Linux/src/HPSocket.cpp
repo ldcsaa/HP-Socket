@@ -357,12 +357,22 @@ HPSOCKET_API LPBYTE SYS_Malloc(int size)
 
 HPSOCKET_API LPBYTE SYS_Realloc(LPBYTE p, int size)
 {
-	return REALLOC(p, BYTE, size);
+	return REALLOC(BYTE, p, size);
 }
 
 HPSOCKET_API VOID SYS_Free(LPBYTE p)
 {
 	FREE(p);
+}
+
+HPSOCKET_API LPVOID SYS_Calloc(int number, int size)
+{
+	return CALLOC(number, size);
+}
+
+HPSOCKET_API LPBYTE SYS_Alloca(int size)
+{
+	return CreateLocalObjects(BYTE, size);
 }
 
 HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)

@@ -828,6 +828,11 @@ HPSOCKET_API void __HP_CALL HP_TcpServer_SetKeepAliveInterval(HP_TcpServer pServ
 	C_HP_Object::ToSecond<ITcpServer>(pServer)->SetKeepAliveInterval(dwKeepAliveInterval);
 }
 
+HPSOCKET_API void __HP_CALL HP_TcpServer_SetNoDelay(HP_TcpServer pServer, BOOL bNoDelay)
+{
+	C_HP_Object::ToSecond<ITcpServer>(pServer)->SetNoDelay(bNoDelay);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetAcceptSocketCount(HP_TcpServer pServer)
 {
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetAcceptSocketCount();
@@ -851,6 +856,11 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveTime(HP_TcpServer pServer)
 HPSOCKET_API DWORD __HP_CALL HP_TcpServer_GetKeepAliveInterval(HP_TcpServer pServer)
 {
 	return C_HP_Object::ToSecond<ITcpServer>(pServer)->GetKeepAliveInterval();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_TcpServer_IsNoDelay(HP_TcpServer pServer)
+{
+	return C_HP_Object::ToSecond<ITcpServer>(pServer)->IsNoDelay();
 }
 
 #ifdef _UDP_SUPPORT
@@ -1325,6 +1335,11 @@ HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent,
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetKeepAliveInterval(dwKeepAliveInterval);
 }
 
+HPSOCKET_API void __HP_CALL HP_TcpAgent_SetNoDelay(HP_TcpAgent pAgent, BOOL bNoDelay)
+{
+	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetNoDelay(bNoDelay);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent)
 {
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetSocketBufferSize();
@@ -1338,6 +1353,11 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetKeepAliveTime(HP_TcpAgent pAgent)
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetKeepAliveInterval(HP_TcpAgent pAgent)
 {
 	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetKeepAliveInterval();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_TcpAgent_IsNoDelay(HP_TcpAgent pAgent)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->IsNoDelay();
 }
 
 /******************************************************************************/
@@ -1512,6 +1532,11 @@ HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClie
 	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetKeepAliveInterval(dwKeepAliveInterval);
 }
 
+HPSOCKET_API void __HP_CALL HP_TcpClient_SetNoDelay(HP_TcpClient pClient, BOOL bNoDelay)
+{
+	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetNoDelay(bNoDelay);
+}
+
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetSocketBufferSize();
@@ -1525,6 +1550,11 @@ HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveTime(HP_TcpClient pClient)
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetKeepAliveInterval(HP_TcpClient pClient)
 {
 	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetKeepAliveInterval();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_TcpClient_IsNoDelay(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->IsNoDelay();
 }
 
 #ifdef _UDP_SUPPORT
@@ -2193,12 +2223,22 @@ HPSOCKET_API LPBYTE __HP_CALL SYS_Malloc(int size)
 
 HPSOCKET_API LPBYTE __HP_CALL SYS_Realloc(LPBYTE p, int size)
 {
-	return REALLOC(p, BYTE, size);
+	return REALLOC(BYTE, p, size);
 }
 
 HPSOCKET_API VOID __HP_CALL SYS_Free(LPBYTE p)
 {
 	FREE(p);
+}
+
+HPSOCKET_API LPVOID __HP_CALL SYS_Calloc(int number, int size)
+{
+	return CALLOC(number, size);
+}
+
+HPSOCKET_API LPBYTE __HP_CALL SYS_Alloca(int size)
+{
+	return CreateLocalObjects(BYTE, size);
 }
 
 HPSOCKET_API DWORD __HP_CALL SYS_GuessBase64EncodeBound(DWORD dwSrcLen)

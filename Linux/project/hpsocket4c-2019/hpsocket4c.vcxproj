@@ -205,7 +205,9 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
-    <RemoteDeployDir>$(RemoteProjectDir)/project/$(SolutionName)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteOutRelDir)</RemoteDeployDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(OutDir)</RemoteOutRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <OutDir>../../lib/$(ProjectName)/arm/</OutDir>
@@ -216,7 +218,9 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
-    <RemoteDeployDir>$(RemoteProjectDir)/project/$(SolutionName)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteOutRelDir)</RemoteDeployDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(OutDir)</RemoteOutRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -227,6 +231,9 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -237,6 +244,9 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -247,6 +257,9 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>../../lib/$(ProjectName)/$(Platform)/</OutDir>
@@ -257,6 +270,9 @@
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
     <ExtensionsToDeleteOnClean>*.o;*.d;*.tlog;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)</RemoteProjectDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>

@@ -1,4 +1,23 @@
 ﻿# ======================================== #
+HP-Socket v5.8.4 API Update List:
+# ======================================== #
+--------------------
+1. TCP:
+--------------------
+HP_TcpServer_SetNoDelay						(ADD)
+HP_TcpAgent_SetNoDelay						(ADD)
+HP_TcpClient_SetNoDelay						(ADD)
+HP_TcpServer_IsNoDelay						(ADD)
+HP_TcpAgent_IsNoDelay						(ADD)
+HP_TcpClient_IsNoDelay						(ADD)
+
+--------------------
+2. Global:
+--------------------
+SYS_Calloc									(ADD)
+SYS_Alloca									(ADD)
+
+# ======================================== #
 HP-Socket v5.7.3 API Update List:
 # ======================================== #
 --------------------

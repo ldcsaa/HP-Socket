@@ -114,8 +114,10 @@
     <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
-    <RemoteDeployDir>$(RemoteProjectDir)/demo/$(SolutionName)/$(ProjectName)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
     <AdditionalSourcesToCopyMapping>$(ArmDeptToCopyRemotely)</AdditionalSourcesToCopyMapping>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
@@ -123,10 +125,12 @@
     <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
-    <RemoteDeployDir>$(RemoteProjectDir)/demo/$(SolutionName)/$(ProjectName)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
     <AdditionalSourcesToCopyMapping>$(Arm64DeptToCopyRemotely)</AdditionalSourcesToCopyMapping>
     <OutDir>../../$(Configuration)/arm64/</OutDir>
     <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <OutDir>../../$(Configuration)/arm/</OutDir>
@@ -136,8 +140,10 @@
     <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
-    <RemoteDeployDir>$(RemoteProjectDir)/demo/$(SolutionName)/$(ProjectName)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
     <AdditionalSourcesToCopyMapping>$(ArmDeptToCopyRemotely)</AdditionalSourcesToCopyMapping>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <TargetName>hp-$(SolutionName)-$(ProjectName)</TargetName>
@@ -145,10 +151,12 @@
     <RemoteProjectDir>$(RemoteRootDir)</RemoteProjectDir>
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
-    <RemoteDeployDir>$(RemoteProjectDir)/demo/$(SolutionName)/$(ProjectName)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
     <AdditionalSourcesToCopyMapping>$(Arm64DeptToCopyRemotely)</AdditionalSourcesToCopyMapping>
     <OutDir>../../$(Configuration)/arm64/</OutDir>
     <IntDir>$(OutDir)obj/$(SolutionName)/$(ProjectName)/</IntDir>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
@@ -158,6 +166,9 @@
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
@@ -167,6 +178,9 @@
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
@@ -176,6 +190,9 @@
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>../../$(Configuration)/$(Platform)/</OutDir>
@@ -185,6 +202,9 @@
     <RemoteProjectDir>$(RemoteRootDir)/$(SolutionName)/$(ProjectName)</RemoteProjectDir>
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <RemoteLinkLocalCopyOutput>false</RemoteLinkLocalCopyOutput>
+    <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
+    <RemoteOutRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(OutDir)</RemoteOutRelDir>
+    <RemoteDeployDir>$(RemoteOutputRelDir)</RemoteDeployDir>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\common\BufferPool.cpp" />
