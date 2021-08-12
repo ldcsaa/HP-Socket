@@ -15,12 +15,10 @@
 *.exe.config
 
 # Compiled executable files
-*.exe
 
 # Compiled Dynamic libraries
 #*.so
 #*.dylib
-*.dll
 
 # Compiled Static libraries
 #*.lai
@@ -34,8 +32,6 @@ Debug/
 debug/
 !Windows/Src/Common/Debug/
 !Windows/Src/Common/debug/
-Linux/project/android-ndk/libs/
-Linux/demo/Release/android-ndk/
 
 Obj/
 obj/
