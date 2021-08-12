@@ -14,9 +14,13 @@
 *.cki
 *.exe.config
 
+# Compiled executable files
+*.exe
+
 # Compiled Dynamic libraries
 #*.so
 #*.dylib
+*.dll
 
 # Compiled Static libraries
 #*.lai
@@ -30,24 +34,37 @@ Debug/
 debug/
 !Windows/Src/Common/Debug/
 !Windows/Src/Common/debug/
-!Windows/Other Languages/C#/HPSocketCS/bin/x86/Debug/
-!Windows/Other Languages/C#/HPSocketCS/bin/x64/Debug/
+Linux/project/android-ndk/libs/
+Linux/demo/Release/android-ndk/
+
 Obj/
 obj/
 tlog/
 log/
 readme/
+netstandard2.0/
 
 # IDE Internal Files
 *.xml
 *.layout
 *.sdf
+*.opensdf
 *.VC.db
 *.opendb
 *.aps
 *.swp
 *.suo
 .vs/
+ipch/
+VSMacros80/
 
-# include directory symbolic link files
+# symbolic link files
 Linux/lib/**/*.so.*
+
+# binary output files
+Linux/demo/Release/
+Linux/lib/
+Windows/Demo/Release/
+Windows/Lib/
+Windows/Bin/
+Windows/Other Languages/C#/HPSocketCS/bin/

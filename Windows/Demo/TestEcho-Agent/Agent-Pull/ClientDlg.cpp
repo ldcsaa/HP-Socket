@@ -15,19 +15,19 @@
 #define DEFAULT_PORT	_T("5555")
 #define LOCAL_ADDRESS	_T("0.0.0.0")
 
-// link: ..\..\Bin\HPSocket\x86\HPSocket_UD.lib
+// link: ..\..\Lib\HPSocket\x86\HPSocket_UD.lib
 
 #ifdef _WIN64
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/HPSocket_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x64/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/HPSocket_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x64/HPSocket_U.lib")
 	#endif
 #else
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/HPSocket_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x86/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/HPSocket_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x86/HPSocket_U.lib")
 	#endif
 #endif
 
@@ -247,7 +247,7 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 
 EnHandleResult CClientDlg::OnConnect(ITcpAgent* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

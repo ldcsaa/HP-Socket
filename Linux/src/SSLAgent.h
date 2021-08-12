@@ -33,6 +33,9 @@ class CSSLAgent : public CTcpAgent
 	using __super = CTcpAgent;
 
 public:
+	using __super::Wait;
+
+public:
 	virtual BOOL IsSecure() {return TRUE;}
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 

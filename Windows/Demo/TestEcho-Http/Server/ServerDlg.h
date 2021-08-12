@@ -14,7 +14,7 @@ class CHttpServerListenerImpl : public CHttpServerListener
 {
 private:
 	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen);
-	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient);
+	virtual EnHandleResult OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient);
 	virtual EnHandleResult OnHandShake(ITcpServer* pSender, CONNID dwConnID);
 	virtual EnHandleResult OnReceive(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
 	virtual EnHandleResult OnSend(ITcpServer* pSender, CONNID dwConnID, const BYTE* pData, int iLength);

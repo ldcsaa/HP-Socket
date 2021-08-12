@@ -4,7 +4,7 @@
 
 En_HP_HandleResult __HP_CALL OnPrepareListen(HP_Server pSender, UINT_PTR soListen)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
@@ -17,7 +17,7 @@ En_HP_HandleResult __HP_CALL OnPrepareListen(HP_Server pSender, UINT_PTR soListe
 En_HP_HandleResult __HP_CALL OnAccept(HP_Server pSender, CONNID dwConnID, UINT_PTR soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

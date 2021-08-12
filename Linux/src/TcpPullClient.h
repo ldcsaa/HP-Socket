@@ -33,6 +33,7 @@ template<class T> class CTcpPullClientT : public IPullClient, public T
 
 public:
 	using __super::Stop;
+	using __super::Wait;
 	using __super::GetState;
 
 public:

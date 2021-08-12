@@ -35,6 +35,7 @@
 
 #include "../Include/HPSocket/SocketInterface.h"
 #include "Common/SysHelper.h"
+#include "InternalDef.h"
 
 LPTSocketTask CreateSocketTaskObj(	Fn_SocketTaskProc fnTaskProc,
 									PVOID pSender, CONNID dwConnID,
@@ -137,7 +138,7 @@ public:
 
 	virtual ~CHPThreadPool()
 	{
-		if(GetState() != SS_STOPPED) Stop();
+		ENSURE_STOP();
 	}
 
 private:

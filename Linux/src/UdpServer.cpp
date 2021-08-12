@@ -412,10 +412,13 @@ BOOL CUdpServer::GetLocalAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAdd
 
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TUdpSocketObj::IsValid(pSocketObj))
-		return ::GetSocketLocalAddress(m_soListen, lpszAddress, iAddressLen, usPort);
+	if(!TUdpSocketObj::IsValid(pSocketObj))
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
+	}
 
-	return FALSE;
+	return ::GetSocketLocalAddress(m_soListen, lpszAddress, iAddressLen, usPort);
 }
 
 BOOL CUdpServer::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
@@ -424,13 +427,14 @@ BOOL CUdpServer::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAd
 
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
 	{
-		ADDRESS_FAMILY usFamily;
-		return ::sockaddr_IN_2_A(pSocketObj->remoteAddr, usFamily, lpszAddress, iAddressLen, usPort);
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
 	}
 
-	return FALSE;
+	ADDRESS_FAMILY usFamily;
+	return ::sockaddr_IN_2_A(pSocketObj->remoteAddr, usFamily, lpszAddress, iAddressLen, usPort);
 }
 
 BOOL CUdpServer::SetConnectionExtra(CONNID dwConnID, PVOID pExtra)
@@ -441,7 +445,9 @@ BOOL CUdpServer::SetConnectionExtra(CONNID dwConnID, PVOID pExtra)
 
 BOOL CUdpServer::SetConnectionExtra(TUdpSocketObj* pSocketObj, PVOID pExtra)
 {
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		pSocketObj->extra = pExtra;
 		return TRUE;
@@ -460,7 +466,9 @@ BOOL CUdpServer::GetConnectionExtra(TUdpSocketObj* pSocketObj, PVOID* ppExtra)
 {
 	ASSERT(ppExtra != nullptr);
 
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*ppExtra = pSocketObj->extra;
 		return TRUE;
@@ -477,7 +485,9 @@ BOOL CUdpServer::SetConnectionReserved(CONNID dwConnID, PVOID pReserved)
 
 BOOL CUdpServer::SetConnectionReserved(TUdpSocketObj* pSocketObj, PVOID pReserved)
 {
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		pSocketObj->reserved = pReserved;
 		return TRUE;
@@ -496,7 +506,9 @@ BOOL CUdpServer::GetConnectionReserved(TUdpSocketObj* pSocketObj, PVOID* ppReser
 {
 	ASSERT(ppReserved != nullptr);
 
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*ppReserved = pSocketObj->reserved;
 		return TRUE;
@@ -513,7 +525,9 @@ BOOL CUdpServer::SetConnectionReserved2(CONNID dwConnID, PVOID pReserved2)
 
 BOOL CUdpServer::SetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID pReserved2)
 {
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		pSocketObj->reserved2 = pReserved2;
 		return TRUE;
@@ -532,7 +546,9 @@ BOOL CUdpServer::GetConnectionReserved2(TUdpSocketObj* pSocketObj, PVOID* ppRese
 {
 	ASSERT(ppReserved2 != nullptr);
 
-	if(TUdpSocketObj::IsExist(pSocketObj))
+	if(!TUdpSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*ppReserved2 = pSocketObj->reserved2;
 		return TRUE;
@@ -554,17 +570,22 @@ BOOL CUdpServer::IsConnected(CONNID dwConnID)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TUdpSocketObj::IsValid(pSocketObj))
-		return pSocketObj->HasConnected();
+	if(!TUdpSocketObj::IsValid(pSocketObj))
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
+	}
 
-	return FALSE;
+	return pSocketObj->HasConnected();
 }
 
 BOOL CUdpServer::GetPendingDataLength(CONNID dwConnID, int& iPending)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TUdpSocketObj::IsValid(pSocketObj))
+	if(!TUdpSocketObj::IsValid(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		iPending = pSocketObj->Pending();
 		return TRUE;
@@ -591,7 +612,10 @@ BOOL CUdpServer::GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)
 	if(TUdpSocketObj::IsValid(pSocketObj))
 		dwPeriod = ::GetTimeGap32(pSocketObj->connTime);
 	else
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
 		isOK = FALSE;
+	}
 
 	return isOK;
 }
@@ -607,7 +631,10 @@ BOOL CUdpServer::GetSilencePeriod(CONNID dwConnID, DWORD& dwPeriod)
 	if(TUdpSocketObj::IsValid(pSocketObj))
 		dwPeriod = ::GetTimeGap32(pSocketObj->activeTime);
 	else
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
 		isOK = FALSE;
+	}
 
 	return isOK;
 }

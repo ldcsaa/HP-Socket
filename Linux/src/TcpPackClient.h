@@ -34,6 +34,7 @@ template<class T> class CTcpPackClientT : public IPackClient, public T
 
 public:
 	using __super::Stop;
+	using __super::Wait;
 	using __super::GetState;
 
 public:

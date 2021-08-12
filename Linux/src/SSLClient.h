@@ -33,6 +33,9 @@ class CSSLClient : public CTcpClient
 	using __super = CTcpClient;
 
 public:
+	using __super::Wait;
+
+public:
 	virtual BOOL IsSecure() {return TRUE;}
 	virtual BOOL SendPackets(const WSABUF pBuffers[], int iCount);
 

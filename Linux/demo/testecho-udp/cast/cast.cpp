@@ -12,7 +12,7 @@ public:
 
 	virtual EnHandleResult OnConnect(IUdpCast* pSender, CONNID dwConnID) override
 	{
-		TCHAR szAddress[50];
+		TCHAR szAddress[100];
 		int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 		USHORT usPort;
 
@@ -30,7 +30,7 @@ public:
 
 	virtual EnHandleResult OnReceive(IUdpCast* pSender, CONNID dwConnID, const BYTE* pData, int iLength) override
 	{
-		TCHAR szAddress[50];
+		TCHAR szAddress[100];
 		int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 		USHORT usPort;
 

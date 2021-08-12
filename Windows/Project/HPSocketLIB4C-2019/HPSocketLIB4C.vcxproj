@@ -124,75 +124,75 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x86\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x86\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x86\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x64\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x64\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x64\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x86\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x86\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x86\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x64\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x64\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x64\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x86\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x86\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x86\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x64\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x64\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x64\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x86\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x86\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x86\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x86\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x86\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\Bin\HPSocket4C\x64\static\</OutDir>
+    <OutDir>..\..\Lib\HPSocket4C\x64\static\</OutDir>
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket4C_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\include;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\include;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(VisualStudioVersion)\x64\lib;..\..\Dependent\zlib\$(VisualStudioVersion)\x64\lib;..\..\Dependent\mimalloc\$(VisualStudioVersion)\x64\lib;..\..\Dependent\openssl\$(VisualStudioVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -431,6 +431,7 @@
     <ClInclude Include="..\..\Src\HttpCookie.h" />
     <ClInclude Include="..\..\Src\HttpHelper.h" />
     <ClInclude Include="..\..\Src\HttpServer.h" />
+    <ClInclude Include="..\..\Src\InternalDef.h" />
     <ClInclude Include="..\..\Src\MiscHelper.h" />
     <ClInclude Include="..\..\Src\SocketHelper.h" />
     <ClInclude Include="..\..\Src\SocketObject4C.h" />

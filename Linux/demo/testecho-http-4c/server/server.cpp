@@ -94,7 +94,7 @@ CStringA GetHeaderSummary(HP_HttpServer pSender, CONNID dwConnID, LPCSTR lpszSep
 
 EnHandleResult __HP_CALL OnPrepareListen(HP_HttpServer pSender, UINT_PTR soListen)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 	
@@ -107,7 +107,7 @@ EnHandleResult __HP_CALL OnPrepareListen(HP_HttpServer pSender, UINT_PTR soListe
 EnHandleResult __HP_CALL OnAccept(HP_HttpServer pSender, CONNID dwConnID, UINT_PTR soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

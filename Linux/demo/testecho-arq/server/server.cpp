@@ -7,7 +7,7 @@ class CListenerImpl : public CUdpServerListener
 public:
 	virtual EnHandleResult OnPrepareListen(IUdpServer* pSender, SOCKET soListen) override
 	{
-		TCHAR szAddress[50];
+		TCHAR szAddress[100];
 		int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 		USHORT usPort;
 
@@ -22,7 +22,7 @@ public:
 	virtual EnHandleResult OnAccept(IUdpServer* pSender, CONNID dwConnID, UINT_PTR soClient) override
 	{
 		BOOL bPass = TRUE;
-		TCHAR szAddress[50];
+		TCHAR szAddress[100];
 		int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 		USHORT usPort;
 

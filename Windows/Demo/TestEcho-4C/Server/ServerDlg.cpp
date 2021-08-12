@@ -232,7 +232,7 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 
 En_HP_HandleResult CServerDlg::OnPrepareListen(HP_Server pSender, SOCKET soListen)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 	
@@ -241,10 +241,10 @@ En_HP_HandleResult CServerDlg::OnPrepareListen(HP_Server pSender, SOCKET soListe
 	return HR_OK;
 }
 
-En_HP_HandleResult CServerDlg::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
+En_HP_HandleResult CServerDlg::OnAccept(HP_Server pSender, HP_CONNID dwConnID, UINT_PTR soClient)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

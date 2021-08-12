@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INC_DIR=include/hpsocket
-INC_PATH=$(dirname "$0")/../$INC_DIR
+INC_PATH=$(cd "$(dirname "$0")/.."; pwd)/$INC_DIR
 SRC_DIR=src
 COMM_DIR=common
 

@@ -15,19 +15,19 @@
 #define DEFAULT_PORT	_T("5555")
 #define LOCAL_ADDRESS	_T("0.0.0.0")
 
-// link: ..\..\Bin\HPSocket\x86\HPSocket_UD.lib
+// link: ..\..\Lib\HPSocket\x86\HPSocket_UD.lib
 
 #ifdef _WIN64
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket4C/x64/HPSocket4C_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket4C/x64/HPSocket4C_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket4C/x64/HPSocket4C_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket4C/x64/HPSocket4C_U.lib")
 	#endif
 #else
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket4C/x86/HPSocket4C_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket4C/x86/HPSocket4C_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket4C/x86/HPSocket4C_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket4C/x86/HPSocket4C_U.lib")
 	#endif
 #endif
 
@@ -271,7 +271,7 @@ LRESULT CClientDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 
 En_HP_HandleResult CClientDlg::OnConnect(HP_Agent pSender, HP_CONNID m_dwConnID)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

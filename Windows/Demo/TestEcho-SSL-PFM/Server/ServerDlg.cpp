@@ -11,15 +11,15 @@
 
 #ifdef _WIN64
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x64/static/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/static/HPSocket_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x64/static/HPSocket_U.lib")
 	#endif
 #else
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/static/HPSocket_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x86/static/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/static/HPSocket_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x86/static/HPSocket_U.lib")
 	#endif
 #endif
 
@@ -276,7 +276,7 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 
 EnHandleResult CServerDlg::OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
@@ -328,7 +328,7 @@ EnHandleResult CServerDlg::OnClose(ITcpServer* pSender, CONNID dwConnID, EnSocke
 	return HR_OK;
 }
 
-EnHandleResult CServerDlg::OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient)
+EnHandleResult CServerDlg::OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient)
 {
 	::PostOnAccept2(dwConnID);
 	return HR_OK;

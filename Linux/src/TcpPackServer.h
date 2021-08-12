@@ -42,6 +42,7 @@ template<class T> class CTcpPackServerT : public IPackSocket, public T
 
 public:
 	using __super::Stop;
+	using __super::Wait;
 	using __super::GetState;
 
 public:

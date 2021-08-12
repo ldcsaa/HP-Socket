@@ -9,15 +9,15 @@
 
 #ifdef _WIN64
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/HPSocket_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x64/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x64/HPSocket_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x64/HPSocket_U.lib")
 	#endif
 #else
 	#ifdef _DEBUG
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/HPSocket_UD.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x86/HPSocket_UD.lib")
 	#else
-		#pragma comment(lib, "../../../Bin/HPSocket/x86/HPSocket_U.lib")
+		#pragma comment(lib, "../../../Lib/HPSocket/x86/HPSocket_U.lib")
 	#endif
 #endif
 
@@ -324,7 +324,7 @@ void CServerDlg::WaitForCleanerThreadEnd()
 
 EnHandleResult CHttpServerListenerImpl::OnPrepareListen(ITcpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
@@ -336,7 +336,7 @@ EnHandleResult CHttpServerListenerImpl::OnPrepareListen(ITcpServer* pSender, SOC
 	return HR_OK;
 }
 
-EnHandleResult CHttpServerListenerImpl::OnAccept(ITcpServer* pSender, CONNID dwConnID, SOCKET soClient)
+EnHandleResult CHttpServerListenerImpl::OnAccept(ITcpServer* pSender, CONNID dwConnID, UINT_PTR soClient)
 {
 	//if(m_pDlg->m_bLog) ::PostOnAccept2(dwConnID, SERVER_NAME);
 

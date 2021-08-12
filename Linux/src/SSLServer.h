@@ -33,6 +33,9 @@ class CSSLServer : public CTcpServer
 	using __super = CTcpServer;
 	 
 public:
+	using __super::Wait;
+
+public:
 	virtual BOOL IsSecure() {return TRUE;}
 	virtual BOOL SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 

@@ -248,7 +248,7 @@ EnHandleResult CClientDlg::OnPrepareConnect(IUdpCast* pSender, CONNID dwConnID, 
 
 EnHandleResult CClientDlg::OnConnect(IUdpCast* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
@@ -268,7 +268,7 @@ EnHandleResult CClientDlg::OnSend(IUdpCast* pSender, CONNID dwConnID, const BYTE
 
 EnHandleResult CClientDlg::OnReceive(IUdpCast* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

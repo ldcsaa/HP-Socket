@@ -10,7 +10,7 @@ class CListenerImpl : public CTcpServerListener
 public:
 	virtual EnHandleResult OnPrepareListen(ITcpServer* pSender, SOCKET soListen) override
 	{
-		TCHAR szAddress[50];
+		TCHAR szAddress[100];
 		int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 		USHORT usPort;
 

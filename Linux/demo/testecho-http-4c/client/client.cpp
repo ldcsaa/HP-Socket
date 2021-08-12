@@ -89,7 +89,7 @@ CStringA GetHeaderSummary(HP_HttpClient pSender, LPCSTR lpszSep, int iSepCount, 
 
 EnHandleResult __HP_CALL OnConnect(HP_HttpClient pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

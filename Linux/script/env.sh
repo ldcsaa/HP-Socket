@@ -74,6 +74,8 @@ check_platform()
 
 parse_envs()
 {
+	cd $PACKAGE_PATH
+
 	local OS_NAME=$(uname -s | tr "[A-Z]" "[a-z]")
 
 	if [ "$OS_NAME" != "linux" ]; then
@@ -135,7 +137,5 @@ bool_to_int()
 		echo ""
 	fi
 }
-
-cd $PACKAGE_PATH
 
 parse_envs

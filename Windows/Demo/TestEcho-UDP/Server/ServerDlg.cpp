@@ -217,7 +217,7 @@ LRESULT CServerDlg::OnUserInfoMsg(WPARAM wp, LPARAM lp)
 
 EnHandleResult CServerDlg::OnPrepareListen(IUdpServer* pSender, SOCKET soListen)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 
@@ -232,7 +232,7 @@ EnHandleResult CServerDlg::OnPrepareListen(IUdpServer* pSender, SOCKET soListen)
 EnHandleResult CServerDlg::OnAccept(IUdpServer* pSender, CONNID dwConnID, UINT_PTR pSockAddr)
 {
 	BOOL bPass = TRUE;
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

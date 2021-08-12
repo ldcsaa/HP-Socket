@@ -148,7 +148,7 @@ int main(int argc, char* const argv[])
 - *[brotli](https://github.com/google/brotli)*
 - *[kcp](https://github.com/skywind3000/kcp)*
 
-## 第三方扩展项目
+## 扩展项目
 
 - *[HP-Socket for MacOS](https://gitee.com/xin_chong/HP-Socket-for-macOS)*
 - *[HP-Socket for .Net](https://gitee.com/int2e/HPSocket.Net)*
@@ -157,9 +157,3 @@ int main(int argc, char* const argv[])
 
 - *[怪兽乐园①群](https://shang.qq.com/wpa/qunwpa?idkey=2b69b6331192137e82cf87fc501345f491f53997cd052405cc2f1183c1039b46)*
 - *[怪兽乐园②群](https://shang.qq.com/wpa/qunwpa?idkey=3de8949938b69e213ffc42a18f066abd935f9dd4dc67e6230e7e75450b9a7dee)*
-
-## 捐赠支持
-
-![支付宝](https://images.gitee.com/uploads/images/2019/0918/190004_11ecea7c_81720.jpeg "支付宝")
-&nbsp;&nbsp;&nbsp;&nbsp;
-![微信](https://images.gitee.com/uploads/images/2019/0918/190115_a1fc5ebf_81720.jpeg "微信")

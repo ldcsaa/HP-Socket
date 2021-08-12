@@ -34,6 +34,7 @@ template<class R, class T, USHORT default_port> class CHttpClientT : public R, p
 
 public:
 	using __super::Stop;
+	using __super::Wait;
 	using __super::GetState;
 	using __super::SendPackets;
 	using __super::HasStarted;
@@ -250,6 +251,7 @@ template<class T, USHORT default_port> class CHttpSyncClientT : public CHttpClie
 
 public:
 	using __super::Stop;
+	using __super::Wait;
 	using __super::GetState;
 	using __super::HasStarted;
 	using __super::GetRemoteHost;
@@ -361,7 +363,7 @@ public:
 
 	virtual ~CHttpSyncClientT()
 	{
-		Stop();
+		ENSURE_STOP();
 	}
 
 private:

@@ -23,10 +23,10 @@
 
 #pragma once
 
-#include "SocketHelper.h"
-
+#include "../include/hpsocket/SocketInterface.h"
 #include "common/STLHelper.h"
 #include "common/Semaphore.h"
+#include "InternalDef.h"
 
 LPTSocketTask CreateSocketTaskObj(	Fn_SocketTaskProc fnTaskProc,
 									PVOID pSender, CONNID dwConnID,
@@ -140,7 +140,7 @@ public:
 
 	virtual ~CHPThreadPool()
 	{
-		if(GetState() != SS_STOPPED) Stop();
+		ENSURE_STOP();
 	}
 
 private:

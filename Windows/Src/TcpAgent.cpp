@@ -450,10 +450,13 @@ BOOL CTcpAgent::GetLocalAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddr
 
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
-		return ::GetSocketLocalAddress(pSocketObj->socket, lpszAddress, iAddressLen, usPort);
+	if(!TSocketObj::IsValid(pSocketObj))
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
+	}
 
-	return FALSE;
+	return ::GetSocketLocalAddress(pSocketObj->socket, lpszAddress, iAddressLen, usPort);
 }
 
 BOOL CTcpAgent::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
@@ -462,13 +465,14 @@ BOOL CTcpAgent::GetRemoteAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAdd
 
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
 	{
-		ADDRESS_FAMILY usFamily;
-		return ::sockaddr_IN_2_A(pSocketObj->remoteAddr, usFamily, lpszAddress, iAddressLen, usPort);
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
 	}
 
-	return FALSE;
+	ADDRESS_FAMILY usFamily;
+	return ::sockaddr_IN_2_A(pSocketObj->remoteAddr, usFamily, lpszAddress, iAddressLen, usPort);
 }
 
 BOOL CTcpAgent::GetRemoteHost(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, USHORT& usPort)
@@ -478,7 +482,9 @@ BOOL CTcpAgent::GetRemoteHost(CONNID dwConnID, TCHAR lpszHost[], int& iHostLen, 
 	BOOL isOK				= FALSE;
 	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		int iLen = pSocketObj->host.GetLength() + 1;
 
@@ -501,7 +507,9 @@ BOOL CTcpAgent::GetRemoteHost(CONNID dwConnID, LPCSTR* lpszHost, USHORT* pusPort
 	*lpszHost				= nullptr;
 	TSocketObj* pSocketObj	= FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*lpszHost = pSocketObj->host;
 
@@ -520,7 +528,9 @@ BOOL CTcpAgent::SetConnectionExtra(CONNID dwConnID, PVOID pExtra)
 
 BOOL CTcpAgent::SetConnectionExtra(TSocketObj* pSocketObj, PVOID pExtra)
 {
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		pSocketObj->extra = pExtra;
 		return TRUE;
@@ -539,7 +549,9 @@ BOOL CTcpAgent::GetConnectionExtra(TSocketObj* pSocketObj, PVOID* ppExtra)
 {
 	ASSERT(ppExtra != nullptr);
 
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*ppExtra = pSocketObj->extra;
 		return TRUE;
@@ -556,7 +568,9 @@ BOOL CTcpAgent::SetConnectionReserved(CONNID dwConnID, PVOID pReserved)
 
 BOOL CTcpAgent::SetConnectionReserved(TSocketObj* pSocketObj, PVOID pReserved)
 {
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		pSocketObj->reserved = pReserved;
 		return TRUE;
@@ -575,7 +589,9 @@ BOOL CTcpAgent::GetConnectionReserved(TSocketObj* pSocketObj, PVOID* ppReserved)
 {
 	ASSERT(ppReserved != nullptr);
 
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*ppReserved = pSocketObj->reserved;
 		return TRUE;
@@ -592,7 +608,9 @@ BOOL CTcpAgent::SetConnectionReserved2(CONNID dwConnID, PVOID pReserved2)
 
 BOOL CTcpAgent::SetConnectionReserved2(TSocketObj* pSocketObj, PVOID pReserved2)
 {
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		pSocketObj->reserved2 = pReserved2;
 		return TRUE;
@@ -611,7 +629,9 @@ BOOL CTcpAgent::GetConnectionReserved2(TSocketObj* pSocketObj, PVOID* ppReserved
 {
 	ASSERT(ppReserved2 != nullptr);
 
-	if(TSocketObj::IsExist(pSocketObj))
+	if(!TSocketObj::IsExist(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		*ppReserved2 = pSocketObj->reserved2;
 		return TRUE;
@@ -624,7 +644,9 @@ BOOL CTcpAgent::IsPauseReceive(CONNID dwConnID, BOOL& bPaused)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
+	if(!TSocketObj::IsValid(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		bPaused = pSocketObj->paused;
 		return TRUE;
@@ -637,17 +659,22 @@ BOOL CTcpAgent::IsConnected(CONNID dwConnID)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
-		return pSocketObj->HasConnected();
+	if(!TSocketObj::IsValid(pSocketObj))
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+		return FALSE;
+	}
 
-	return FALSE;
+	return pSocketObj->HasConnected();
 }
 
 BOOL CTcpAgent::GetPendingDataLength(CONNID dwConnID, int& iPending)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
+	if(!TSocketObj::IsValid(pSocketObj))
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
+	else
 	{
 		iPending = pSocketObj->Pending();
 		return TRUE;
@@ -674,7 +701,10 @@ BOOL CTcpAgent::GetConnectPeriod(CONNID dwConnID, DWORD& dwPeriod)
 	if(TSocketObj::IsValid(pSocketObj))
 		dwPeriod = ::GetTimeGap32(pSocketObj->connTime);
 	else
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
 		isOK = FALSE;
+	}
 
 	return isOK;
 }
@@ -690,7 +720,10 @@ BOOL CTcpAgent::GetSilencePeriod(CONNID dwConnID, DWORD& dwPeriod)
 	if(TSocketObj::IsValid(pSocketObj))
 		dwPeriod = ::GetTimeGap32(pSocketObj->activeTime);
 	else
+	{
+		::SetLastError(ERROR_OBJECT_NOT_FOUND);
 		isOK = FALSE;
+	}
 
 	return isOK;
 }

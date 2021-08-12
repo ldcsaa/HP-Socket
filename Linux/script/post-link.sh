@@ -16,7 +16,7 @@ VER_REVISE="$8"
 INTERMEDIATE_DIR="obj/$CONFIGURATION"
 OBJ_TEMP_DIR="obj/$CONFIGURATION/static-tmp"
 DEPENDENT_PATH="$OUT_PATH/../../../dependent/$PLATFORM/lib"
-SCRIPT_PATH=$(dirname $0)
+SCRIPT_PATH=$(cd "$(dirname "$0")"; pwd)
 
 add_dependent()
 {

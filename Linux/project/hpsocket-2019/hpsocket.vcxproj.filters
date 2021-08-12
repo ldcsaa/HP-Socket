@@ -207,6 +207,9 @@
     <ClInclude Include="..\..\src\common\http\llhttp_url.h">
       <Filter>Common\Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\InternalDef.h">
+      <Filter>Global</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\BufferPool.cpp">

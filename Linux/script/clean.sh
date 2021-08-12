@@ -6,7 +6,7 @@ LIB_DIR=lib
 NDK_PRJ_DIR=$PRJ_DIR/android-ndk
 NDK_DEMO_DIR=$DEM_DIR/Release
 RMV_ALL=0
-DEST_BASE=$(dirname "$0")/..
+DEST_BASE=$(cd "$(dirname "$0")/.."; pwd)
 
 for var in "$@"; do
     if [ $var == "-a" ] || [ $var == "--all" ]; then

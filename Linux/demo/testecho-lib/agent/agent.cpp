@@ -20,7 +20,7 @@ void AgentRemovePkgInfo(HP_Agent pSender, CONNID dwConnID)
 
 En_HP_HandleResult __HP_CALL OnConnect(HP_Agent pSender, HP_CONNID dwConnID)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

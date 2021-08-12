@@ -38,6 +38,7 @@ template<class T, USHORT default_port> class CHttpServerT : public IComplexHttpR
 
 public:
 	using __super::Stop;
+	using __super::Wait;
 	using __super::GetState;
 	using __super::SendPackets;
 	using __super::Disconnect;

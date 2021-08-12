@@ -43,7 +43,7 @@ public:
 
 EnHandleResult CHttpClientListenerImpl::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[100];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	USHORT usPort;
 

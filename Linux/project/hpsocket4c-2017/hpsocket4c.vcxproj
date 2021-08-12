@@ -109,6 +109,7 @@
     <ClInclude Include="..\..\src\HttpCookie.h" />
     <ClInclude Include="..\..\src\HttpHelper.h" />
     <ClInclude Include="..\..\src\HttpServer.h" />
+    <ClInclude Include="..\..\src\InternalDef.h" />
     <ClInclude Include="..\..\src\MiscHelper.h" />
     <ClInclude Include="..\..\src\SocketHelper.h" />
     <ClInclude Include="..\..\include\hpsocket\SocketInterface.h" />
