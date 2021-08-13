@@ -87,10 +87,7 @@ void CHPThreadPool::CWorker::Execute(TTask* pTask, PVOID pvWorkerParam, OVERLAPP
 		m_pthPool->m_cvQueue.WakeUp();
 #endif
 	
-	DoRunTaskProc(pTask->fn, pTask->arg, m_pthPool->m_dwTaskCount);
-
-	if(pTask->freeArg)
-		::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
+	DoRunTaskProc(pTask->fn, pTask->arg, pTask->freeArg, m_pthPool->m_dwTaskCount);
 
 	TTask::Destruct(pTask);
 }
@@ -183,7 +180,7 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 	else if(m_enRejectedPolicy == TRP_CALLER_RUN)
 	{
-		DoRunTaskProc(fnTaskProc, pvArg, m_dwTaskCount);
+		DoRunTaskProc(fnTaskProc, pvArg, bFreeArg, m_dwTaskCount);
 	}
 	else
 	{
@@ -196,11 +193,14 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	return TRUE;
 }
 
-void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, volatile DWORD& dwTaskCount)
+void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, volatile DWORD& dwTaskCount)
 {
 	::InterlockedIncrement(&dwTaskCount);
 	fnTaskProc(pvArg);
 	::InterlockedDecrement(&dwTaskCount);
+
+	if(bFreeArg)
+		::DestroySocketTaskObj((LPTSocketTask)pvArg);
 }
 
 CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
@@ -256,17 +256,18 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WS08
 
-	while(CheckStarted()) 
+	while(TRUE) 
 	{
-		CCriSecLock locallock(m_csQueue);
-
 		EnSubmitResult sr = DirectSubmit(fnTaskProc, pvArg, bFreeArg);
 
 		if(sr == SUBMIT_OK)
 			return TRUE;
 		else if(sr == SUBMIT_ERROR)
 			return FALSE;
+		else
 		{
+			CCriSecLock locallock(m_csQueue);
+
 			if(bInfinite)
 				m_cvQueue.Wait(m_csQueue.GetObject());
 			else

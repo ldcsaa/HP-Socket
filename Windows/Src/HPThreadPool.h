@@ -127,7 +127,7 @@ private:
 	BOOL CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait, BOOL bFreeArg);
 	BOOL DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, DWORD dwMaxWait);
 
-	static void DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, volatile DWORD& dwTaskCount);
+	static void DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, volatile DWORD& dwTaskCount);
 
 public:
 	CHPThreadPool()

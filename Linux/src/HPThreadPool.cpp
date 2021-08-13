@@ -109,23 +109,23 @@ BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 
 	if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited)
 	{
-		CMutexLock2 lock(m_mtx);
+		CCriSecLock2 lock(m_csTask);
 		m_cvQueue.notify_all();
 	}
 
 	VERIFY(DoAdjustThreadCount(0));
 
 	if(bInfinite)
-		m_sem.Wait(CShutdownPredicate(this));
+		m_evShutdown.Wait(CShutdownPredicate(this));
 	else
-		m_sem.WaitFor(dwMaxWait, CShutdownPredicate(this));
+		m_evShutdown.WaitFor(dwMaxWait, CShutdownPredicate(this));
 
 	ASSERT(m_lsTasks.size()	  == 0);
 	ASSERT(m_stThreads.size() == 0);
 
 	if(!m_lsTasks.empty())
 	{
-		CMutexLock2 lock(m_mtx);
+		CCriSecLock2 lock(m_csTask);
 
 		if(!m_lsTasks.empty())
 		{
@@ -133,6 +133,9 @@ BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 			{
 				TTask* pTask = m_lsTasks.front();
 				m_lsTasks.pop();
+
+				if(pTask->freeArg)
+					::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
 
 				TTask::Destruct(pTask);
 
@@ -145,7 +148,7 @@ BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 
 	if(!m_stThreads.empty())
 	{
-		CCriSecLock lock(m_cs);
+		CCriSecLock lock(m_csThread);
 
 		if(!m_stThreads.empty())
 		{
@@ -191,7 +194,7 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 	else if(m_enRejectedPolicy == TRP_CALLER_RUN)
 	{
-		DoRunTaskProc(fnTaskProc, pvArg);
+		DoRunTaskProc(fnTaskProc, pvArg, bFreeArg);
 	}
 	else
 	{
@@ -204,16 +207,19 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	return TRUE;
 }
 
-void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg)
+void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
 {
 	::InterlockedIncrement(&m_dwTaskCount);
 	fnTaskProc(pvArg);
 	::InterlockedDecrement(&m_dwTaskCount);
+
+	if(bFreeArg)
+		::DestroySocketTaskObj((LPTSocketTask)pvArg);
 }
 
 CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
 {
-	CMutexLock2 lock(m_mtx);
+	CCriSecLock2 lock(m_csTask);
 
 	return DoDirectSubmit(fnTaskProc, pvArg, bFreeArg);
 }
@@ -247,7 +253,7 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 
 	while(CheckStarted()) 
 	{
-		CMutexLock2 lock(m_mtx);
+		CCriSecLock2 lock(m_csTask);
 
 		EnSubmitResult sr = DoDirectSubmit(fnTaskProc, pvArg, bFreeArg);
 
@@ -302,7 +308,7 @@ BOOL CHPThreadPool::DoAdjustThreadCount(DWORD dwNewThreadCount)
 	DWORD dwThreadCount	= 0;
 
 	{
-		CCriSecLock lock(m_cs);
+		CCriSecLock lock(m_csThread);
 
 		if(dwNewThreadCount > m_dwThreadCount)
 		{
@@ -319,7 +325,7 @@ BOOL CHPThreadPool::DoAdjustThreadCount(DWORD dwNewThreadCount)
 
 	if(bRemove)
 	{
-		CMutexLock2 lock(m_mtx);
+		CCriSecLock2 lock(m_csTask);
 
 		for(DWORD i = 0; i < dwThreadCount; i++)
 			m_cvTask.notify_one();
@@ -388,7 +394,7 @@ int CHPThreadPool::WorkerProc()
 		TTask* pTask = nullptr;
 
 		{
-			CMutexLock2 lock(m_mtx);
+			CCriSecLock2 lock(m_csTask);
 
 			do
 			{
@@ -410,10 +416,7 @@ int CHPThreadPool::WorkerProc()
 
 		if(pTask != nullptr)
 		{
-			DoRunTaskProc(pTask->fn, pTask->arg);
-
-			if(pTask->freeArg)
-				::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
+			DoRunTaskProc(pTask->fn, pTask->arg, pTask->freeArg);
 
 			TTask::Destruct(pTask);
 		}
@@ -434,7 +437,7 @@ BOOL CHPThreadPool::CheckWorkerThreadExit()
 
 	if(m_dwThreadCount < m_stThreads.size())
 	{
-		CCriSecLock lock(m_cs);
+		CCriSecLock lock(m_csThread);
 
 		if(m_dwThreadCount < m_stThreads.size())
 		{
@@ -450,7 +453,7 @@ BOOL CHPThreadPool::CheckWorkerThreadExit()
 		pthread_detach(SELF_THREAD_ID);
 
 		if(bShutdown)
-			m_sem.NotifyOne();
+			m_evShutdown.NotifyOne();
 	}
 
 	return bExit;

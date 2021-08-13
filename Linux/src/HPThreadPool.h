@@ -73,7 +73,7 @@ private:
 	public:
 		BOOL operator()()
 		{
-			CCriSecLock lock(m_pThreadPool->m_cs);
+			CCriSecLock lock(m_pThreadPool->m_csThread);
 
 			return m_pThreadPool->m_stThreads.empty();
 		}
@@ -130,7 +130,7 @@ private:
 	EnSubmitResult DoDirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg);
 	BOOL CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait, BOOL bFreeArg);
 	BOOL DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, DWORD dwMaxWait);
-	void DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg);
+	void DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg);
 
 public:
 	CHPThreadPool()
@@ -147,8 +147,6 @@ private:
 	void Reset(BOOL bSetWaitEvent = TRUE);
 
 private:
-	CSEM					m_evWait;
-
 	DWORD					m_dwStackSize;
 	DWORD					m_dwMaxQueueSize;
 	EnRejectedPolicy		m_enRejectedPolicy;
@@ -157,14 +155,15 @@ private:
 	volatile DWORD			m_dwThreadCount;
 	volatile EnServiceState	m_enState;
 
-	unordered_set<THR_ID>	m_stThreads;
-	queue<TTask*>			m_lsTasks;
-
-	CSEM					m_sem;
-	CCriSec					m_cs;
-	CMTX					m_mtx;
+	CSEM					m_evWait;
+	CSEM					m_evShutdown;
+	CCriSec					m_csThread;
+	CCriSec					m_csTask;
 	condition_variable		m_cvTask;
 	condition_variable		m_cvQueue;
+
+	unordered_set<THR_ID>	m_stThreads;
+	queue<TTask*>			m_lsTasks;
 
 	DECLARE_NO_COPY_CLASS(CHPThreadPool)
 };
