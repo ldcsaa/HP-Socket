@@ -226,10 +226,10 @@ CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc
 
 CHPThreadPool::EnSubmitResult CHPThreadPool::DoDirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
 {
-	BOOL bLimited = (m_dwMaxQueueSize != 0);
-
 	if(!CheckStarted())
 		return SUBMIT_ERROR;
+
+	BOOL bLimited = (m_dwMaxQueueSize != 0);
 
 	if(bLimited && (DWORD)m_lsTasks.size() >= m_dwMaxQueueSize)
 		return SUBMIT_FULL;
@@ -259,20 +259,19 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 
 		if(sr == SUBMIT_OK)
 			return TRUE;
-		else if(sr == SUBMIT_ERROR)
+		if(sr == SUBMIT_ERROR)
 			return FALSE;
-		{
-			if(bInfinite)
-				m_cvQueue.wait(lock);
-			else
-			{
-				DWORD dwNow = ::GetTimeGap32(dwTime);
 
-				if(dwNow > dwMaxWait || m_cvQueue.wait_for(lock, chrono::milliseconds(dwMaxWait - dwNow)) == cv_status::timeout)
-				{
-					::SetLastError(ERROR_TIMEOUT);
-					break;
-				}
+		if(bInfinite)
+			m_cvQueue.wait(lock);
+		else
+		{
+			DWORD dwNow = ::GetTimeGap32(dwTime);
+
+			if(dwNow > dwMaxWait || m_cvQueue.wait_for(lock, chrono::milliseconds(dwMaxWait - dwNow)) == cv_status::timeout)
+			{
+				::SetLastError(ERROR_TIMEOUT);
+				break;
 			}
 		}
 	}

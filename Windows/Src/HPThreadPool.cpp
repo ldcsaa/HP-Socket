@@ -262,23 +262,21 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 
 		if(sr == SUBMIT_OK)
 			return TRUE;
-		else if(sr == SUBMIT_ERROR)
+		if(sr == SUBMIT_ERROR)
 			return FALSE;
+
+		CCriSecLock locallock(m_csQueue);
+
+		if(bInfinite)
+			m_cvQueue.Wait(m_csQueue.GetObject());
 		else
 		{
-			CCriSecLock locallock(m_csQueue);
+			DWORD dwNow = ::GetTimeGap32(dwTime);
 
-			if(bInfinite)
-				m_cvQueue.Wait(m_csQueue.GetObject());
-			else
+			if(dwNow > dwMaxWait || !m_cvQueue.Wait(m_csQueue.GetObject(), dwMaxWait - dwNow))
 			{
-				DWORD dwNow = ::GetTimeGap32(dwTime);
-
-				if(dwNow > dwMaxWait || !m_cvQueue.Wait(m_csQueue.GetObject(), dwMaxWait - dwNow))
-				{
-					::SetLastError(ERROR_TIMEOUT);
-					break;
-				}
+				::SetLastError(ERROR_TIMEOUT);
+				break;
 			}
 		}
 	}
