@@ -3513,7 +3513,7 @@ HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_HasStarted(HP_ThreadPool pThreadPool)
 	return ((IHPThreadPool*)pThreadPool)->HasStarted();
 }
 
-HPSOCKET_API EnServiceState	__HP_CALL HP_ThreadPool_GetState(HP_ThreadPool pThreadPool)
+HPSOCKET_API En_HP_ServiceState	__HP_CALL HP_ThreadPool_GetState(HP_ThreadPool pThreadPool)
 {
 	return ((IHPThreadPool*)pThreadPool)->GetState();
 }
@@ -3538,7 +3538,7 @@ HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetMaxQueueSize(HP_ThreadPool pThread
 	return ((IHPThreadPool*)pThreadPool)->GetMaxQueueSize();
 }
 
-HPSOCKET_API EnRejectedPolicy __HP_CALL HP_ThreadPool_GetRejectedPolicy(HP_ThreadPool pThreadPool)
+HPSOCKET_API En_HP_RejectedPolicy __HP_CALL HP_ThreadPool_GetRejectedPolicy(HP_ThreadPool pThreadPool)
 {
 	return ((IHPThreadPool*)pThreadPool)->GetRejectedPolicy();
 }

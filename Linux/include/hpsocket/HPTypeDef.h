@@ -234,8 +234,8 @@ typedef enum EnIPAddrType
 ************************************************************************/
 typedef struct TIPAddr
 {
-	EnIPAddrType type;
-	LPCTSTR		 address;
+	En_HP_IPAddrType type;
+	LPCTSTR			 address;
 } *LPTIPAddr, HP_TIPAddr, *HP_LPTIPAddr;
 
 /************************************************************************
@@ -287,7 +287,7 @@ struct TSocketTask;
 参数：pTask -- Socket 任务结构体指针
 返回值：（无）
 ************************************************************************/
-typedef VOID (__HP_CALL *Fn_SocketTaskProc)(TSocketTask* pTask);
+typedef VOID (__HP_CALL *Fn_SocketTaskProc)(struct TSocketTask* pTask);
 typedef Fn_SocketTaskProc	HP_Fn_SocketTaskProc;
 
 /************************************************************************
@@ -296,14 +296,14 @@ typedef Fn_SocketTaskProc	HP_Fn_SocketTaskProc;
 ************************************************************************/
 typedef struct TSocketTask
 {
-	Fn_SocketTaskProc	fn;			// 任务处理函数
-	PVOID				sender;		// 发起对象
-	CONNID				connID;		// 连接 ID
-	LPCBYTE				buf;		// 数据缓冲区
-	INT					bufLen;		// 数据缓冲区长度
-	EnTaskBufferType	bufType;	// 缓冲区类型
-	WPARAM				wparam;		// 自定义参数
-	LPARAM				lparam;		// 自定义参数
+	HP_Fn_SocketTaskProc	fn;			// 任务处理函数
+	PVOID					sender;		// 发起对象
+	CONNID					connID;		// 连接 ID
+	LPCBYTE					buf;		// 数据缓冲区
+	INT						bufLen;		// 数据缓冲区长度
+	En_HP_TaskBufferType	bufType;	// 缓冲区类型
+	WPARAM					wparam;		// 自定义参数
+	LPARAM					lparam;		// 自定义参数
 } *LPTSocketTask, HP_TSocketTask, *HP_LPTSocketTask;
 
 /************************************************************************

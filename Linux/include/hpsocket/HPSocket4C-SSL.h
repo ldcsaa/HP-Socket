@@ -126,7 +126,7 @@ HPSOCKET_API void __HP_CALL HP_SSL_RemoveThreadLocalState(THR_ID dwThreadID);
 * 名称：初始化通信组件 SSL 环境参数
 * 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCertFile			-- 证书文件
 *			lpszPemKeyFile			-- 私钥文件
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -142,7 +142,7 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLServer_SetupSSLContext(HP_SSLServer pServer, i
 * 名称：初始化通信组件 SSL 环境参数（通过内存加载证书）
 * 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCert				-- 证书内容
 *			lpszPemKey				-- 私钥内容
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -158,7 +158,7 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLServer_SetupSSLContextByMemory(HP_SSLServer pS
 * 名称：增加 SNI 主机证书
 * 描述：SSL 服务端在 SetupSSLContext() 成功后可以调用本方法增加多个 SNI 主机证书
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCertFile			-- 证书文件
 *			lpszPemKeyFile			-- 私钥文件
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -173,7 +173,7 @@ HPSOCKET_API int __HP_CALL HP_SSLServer_AddSSLContext(HP_SSLServer pServer, int 
 * 名称：增加 SNI 主机证书（通过内存加载证书）
 * 描述：SSL 服务端在 SetupSSLContext() 成功后可以调用本方法增加多个 SNI 主机证书
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCert				-- 证书内容
 *			lpszPemKey				-- 私钥内容
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -212,7 +212,7 @@ HPSOCKET_API void __HP_CALL HP_SSLServer_CleanupSSLContext(HP_SSLServer pServer)
 * 名称：初始化通信组件 SSL 环境参数
 * 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCertFile			-- 证书文件（客户端可选）
 *			lpszPemKeyFile			-- 私钥文件（客户端可选）
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -227,7 +227,7 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_SetupSSLContext(HP_SSLAgent pAgent, int 
 * 名称：初始化通信组件 SSL 环境参数（通过内存加载证书）
 * 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCert				-- 证书内容
 *			lpszPemKey				-- 私钥内容
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -254,7 +254,7 @@ HPSOCKET_API void __HP_CALL HP_SSLAgent_CleanupSSLContext(HP_SSLAgent pAgent);
 * 名称：初始化通信组件 SSL 环境参数
 * 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCertFile			-- 证书文件（客户端可选）
 *			lpszPemKeyFile			-- 私钥文件（客户端可选）
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
@@ -269,7 +269,7 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLClient_SetupSSLContext(HP_SSLClient pClient, i
 * 名称：初始化通信组件 SSL 环境参数（通过内存加载证书）
 * 描述：SSL 环境参数必须在 SSL 通信组件启动前完成初始化，否则启动失败
 *		
-* 参数：		iVerifyMode				-- SSL 验证模式（参考 EnSSLVerifyMode）
+* 参数：		iVerifyMode				-- SSL 验证模式（参考 En_HP_SSLVerifyMode）
 *			lpszPemCert				-- 证书内容
 *			lpszPemKey				-- 私钥内容
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
