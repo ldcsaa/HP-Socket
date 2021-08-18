@@ -69,10 +69,10 @@ public:
 	virtual DWORD GetFlushInterval		()	{return m_arqAttr.dwFlushInterval;}
 	virtual DWORD GetResendByAcks		()	{return m_arqAttr.dwResendByAcks;}
 	virtual DWORD GetSendWndSize		()	{return m_arqAttr.dwSendWndSize;}
-	virtual DWORD GetRecvWndSize		()	{return m_arqAttr.dwRecvWndSize;}
+	virtual DWORD GetRecvWndSize		()	{return m_dwMtu;}
 	virtual DWORD GetMinRto				()	{return m_arqAttr.dwMinRto;}
 	virtual DWORD GetFastLimit			()	{return m_arqAttr.dwFastLimit;}
-	virtual DWORD GetMaxTransUnit		()	{return m_dwMtu;}
+	virtual DWORD GetMaxTransUnit		()	{return m_arqAttr.dwMtu;}
 	virtual DWORD GetMaxMessageSize		()	{return m_arqAttr.dwMaxMessageSize;}
 	virtual DWORD GetHandShakeTimeout	()	{return m_arqAttr.dwHandShakeTimeout;}
 
