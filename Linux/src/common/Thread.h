@@ -47,7 +47,7 @@ using namespace std;
 class __CThread_Interrupt_
 {
 public:
-	static const int SIG_NO = (_NSIG - 5);
+	static const int SIG_NO_INTERRUPT = (_NSIG - 5);
 
 private:
 	friend BOOL IsThreadInterrupted();
@@ -272,7 +272,7 @@ public:
 			return FALSE;
 		}
 
-		return (IS_NO_ERROR(pthread_kill(m_ulThreadID, __CThread_Interrupt_::SIG_NO)));
+		return (IS_NO_ERROR(pthread_kill(m_ulThreadID, __CThread_Interrupt_::SIG_NO_INTERRUPT)));
 	}
 
 	void SetRunning(BOOL bRunning) {m_bRunning = bRunning;}
@@ -314,7 +314,7 @@ private:
 		sigset_t ss;
 
 		sigemptyset(&ss);
-		sigaddset(&ss, __CThread_Interrupt_::SIG_NO);
+		sigaddset(&ss, __CThread_Interrupt_::SIG_NO_INTERRUPT);
 
 		pthread_sigmask(SIG_UNBLOCK, &ss, nullptr);
 	}
