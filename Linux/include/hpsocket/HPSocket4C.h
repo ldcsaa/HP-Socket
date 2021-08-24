@@ -135,6 +135,8 @@ typedef HP_Object	HP_HttpClientListener;
 
 typedef HP_Object	HP_ThreadPool;
 
+typedef HP_Object	HP_ThreadPoolListener;
+
 /*****************************************************************************************************************************************************/
 /****************************************************************** TCP/UDP Exports ******************************************************************/
 /*****************************************************************************************************************************************************/
@@ -2540,11 +2542,22 @@ HPSOCKET_API int __HP_CALL HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpire
 /**************************************************************** Thread Pool Exports ****************************************************************/
 /*****************************************************************************************************************************************************/
 
+/* Thread Pool 回调函数 */
+typedef void (__HP_CALL *HP_FN_ThreadPool_OnStartup)			(HP_ThreadPool pThreadPool);
+typedef void (__HP_CALL *HP_FN_ThreadPool_OnShutdown)			(HP_ThreadPool pThreadPool);
+typedef void (__HP_CALL *HP_FN_ThreadPool_OnWorkerThreadStart)	(HP_ThreadPool pThreadPool, THR_ID dwThreadID);
+typedef void (__HP_CALL *HP_FN_ThreadPool_OnWorkerThreadEnd)	(HP_ThreadPool pThreadPool, THR_ID dwThreadID);
+
 /****************************************************/
 /******************* 对象创建函数 ********************/
 
+// 创建 IHPThreadPoolListener 对象
+HPSOCKET_API HP_ThreadPoolListener __HP_CALL Create_HP_ThreadPoolListener();
+// 销毁 IHPThreadPoolListener 对象
+HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPoolListener(HP_ThreadPoolListener pListener);
+
 // 创建 IHPThreadPool 对象
-HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool();
+HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool(HP_ThreadPoolListener pListener);
 // 销毁 IHPThreadPool 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPool(HP_ThreadPool pThreadPool);
 

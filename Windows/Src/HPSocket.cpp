@@ -653,9 +653,9 @@ HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires)
 /**************************************************************** Thread Pool Exports ****************************************************************/
 /*****************************************************************************************************************************************************/
 
-HPSOCKET_API IHPThreadPool* HP_Create_ThreadPool()
+HPSOCKET_API IHPThreadPool* HP_Create_ThreadPool(IHPThreadPoolListener* pListener)
 {
-	return new CHPThreadPool;
+	return new CHPThreadPool(pListener);
 }
 
 HPSOCKET_API void HP_Destroy_ThreadPool(IHPThreadPool* pThreadPool)

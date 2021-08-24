@@ -2949,3 +2949,66 @@ public:
 public:
 	virtual ~IHPThreadPool() = default;
 };
+
+/************************************************************************
+名称：线程池监听器接口
+描述：定义线程池监听器的所有事件
+************************************************************************/
+class IHPThreadPoolListener
+{
+public:
+
+	/*
+	* 名称：线程池启动通知
+	* 描述：线程池启动时监听器将收到该通知，监听器可以在通知处理方法中执行预处理工作
+	*		
+	* 参数：		pThreadPool		-- 线程池对象
+	* 返回值：	无
+	*/
+	virtual void OnStartup(IHPThreadPool* pThreadPool)								= 0;
+
+	/*
+	* 名称：线程池启动关闭通知
+	* 描述：线程池关闭时监听器将收到该通知，监听器可以在通知处理方法中执行后处理工作
+	*		
+	* 参数：		pThreadPool		-- 线程池对象
+	* 返回值：	无
+	*/
+	virtual void OnShutdown(IHPThreadPool* pThreadPool)								= 0;
+
+	/*
+	* 名称：工作线程启动通知
+	* 描述：工作线程启动时监听器将收到该通知，监听器可以在通知处理方法中执行线程级别预处理工作
+	*		
+	* 参数：		pThreadPool		-- 线程池对象
+	*			dwThreadID		-- 工作线程 ID
+	* 返回值：	无
+	*/
+	virtual void OnWorkerThreadStart(IHPThreadPool* pThreadPool, THR_ID dwThreadID)	= 0;
+
+	/*
+	* 名称：工作线程退出通知
+	* 描述：工作线程退出时监听器将收到该通知，监听器可以在通知处理方法中执行线程级别后处理工作
+	*		
+	* 参数：		pThreadPool		-- 线程池对象
+	*			dwThreadID		-- 工作线程 ID
+	* 返回值：	无
+	*/
+	virtual void OnWorkerThreadEnd(IHPThreadPool* pThreadPool, THR_ID dwThreadID)	= 0;
+
+public:
+	virtual ~IHPThreadPoolListener() {};
+};
+
+/************************************************************************
+名称：线程池监听器抽象基类
+描述：定义某些事件的默认处理方法（忽略事件）
+************************************************************************/
+class CHPThreadPoolListener : public IHPThreadPoolListener
+{
+public:
+	virtual void OnStartup(IHPThreadPool* pThreadPool)								override {}
+	virtual void OnShutdown(IHPThreadPool* pThreadPool)								override {}
+	virtual void OnWorkerThreadStart(IHPThreadPool* pThreadPool, THR_ID dwThreadID)	override {}
+	virtual void OnWorkerThreadEnd(IHPThreadPool* pThreadPool, THR_ID dwThreadID)	override {}
+};

@@ -76,6 +76,8 @@ BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedP
 	m_dwMaxQueueSize	= dwMaxQueueSize;
 	m_enRejectedPolicy	= enRejectedPolicy;
 
+	FireStartup();
+
 	if(!InternalAdjustThreadCount(dwThreadCount))
 	{
 		EXECUTE_RESTORE_ERROR(Stop());
@@ -95,6 +97,8 @@ BOOL CHPThreadPool::Stop(DWORD dwMaxWait)
 	::WaitFor(15);
 
 	Shutdown(dwMaxWait);
+
+	FireShutdown();
 
 	Reset();
 
@@ -380,7 +384,15 @@ BOOL CHPThreadPool::CreateWorkerThreads(DWORD dwThreadCount)
 
 PVOID CHPThreadPool::ThreadProc(LPVOID pv)
 {
-	return (PVOID)(UINT_PTR)(((CHPThreadPool*)pv)->WorkerProc());
+	CHPThreadPool* pThis = (CHPThreadPool*)pv;
+
+	pThis->FireWorkerThreadStart();
+	
+	PVOID rs = (PVOID)(UINT_PTR)(pThis->WorkerProc());
+	
+	pThis->FireWorkerThreadEnd();
+
+	return rs;
 }
 
 int CHPThreadPool::WorkerProc()

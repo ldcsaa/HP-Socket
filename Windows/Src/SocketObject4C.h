@@ -516,6 +516,7 @@ public:
 				? m_fnOnWSMessageComplete(C_HP_Object::FromFirst(pSender), dwConnID)
 				: HR_OK;
 	}
+
 public:
 	C_HP_HttpListenerT()
 	: m_fnOnMessageBegin	(nullptr)
@@ -724,3 +725,45 @@ public:
 };
 
 #endif
+
+class C_HP_ThreadPoolListener : public IHPThreadPoolListener
+{
+public:
+	virtual void OnStartup(IHPThreadPool* pThreadPool)
+	{
+		if(m_fnOnStartup)
+			m_fnOnStartup((HP_ThreadPool)pThreadPool);
+	}
+
+	virtual void OnShutdown(IHPThreadPool* pThreadPool)
+	{
+		if(m_fnOnShutdown)
+			m_fnOnShutdown((HP_ThreadPool)pThreadPool);
+	}
+
+	virtual void OnWorkerThreadStart(IHPThreadPool* pThreadPool, THR_ID dwThreadID)
+	{
+		if(m_fnOnWorkerThreadStart)
+			m_fnOnWorkerThreadStart((HP_ThreadPool)pThreadPool, dwThreadID);
+	}
+	virtual void OnWorkerThreadEnd(IHPThreadPool* pThreadPool, THR_ID dwThreadID)
+	{
+		if(m_fnOnWorkerThreadEnd)
+			m_fnOnWorkerThreadEnd((HP_ThreadPool)pThreadPool, dwThreadID);
+	}
+
+public:
+	C_HP_ThreadPoolListener()
+	: m_fnOnStartup				(nullptr)
+	, m_fnOnShutdown			(nullptr)
+	, m_fnOnWorkerThreadStart	(nullptr)
+	, m_fnOnWorkerThreadEnd		(nullptr)
+	{
+	}
+
+public:
+	HP_FN_ThreadPool_OnStartup				m_fnOnStartup;
+	HP_FN_ThreadPool_OnShutdown				m_fnOnShutdown;
+	HP_FN_ThreadPool_OnWorkerThreadStart	m_fnOnWorkerThreadStart;
+	HP_FN_ThreadPool_OnWorkerThreadEnd		m_fnOnWorkerThreadEnd;
+};

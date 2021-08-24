@@ -23,8 +23,6 @@
 
 #pragma once
 
-typedef DWORD							TID, THR_ID, NTHR_ID, PID, PRO_ID;
-
 /* 最大工作线程数 */
 #define MAX_WORKER_THREAD_COUNT			512
 /* 默认对象缓存锁定时间 */

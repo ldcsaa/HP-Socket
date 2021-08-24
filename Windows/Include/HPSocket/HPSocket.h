@@ -71,10 +71,10 @@ Release:
 /**************************************************/
 /************** HPSocket 对象智能指针 **************/
 
-template<class T, class _Creator> class CHPBasePtr
+template<class T, class _Listener, class _Creator> class CHPObjectPtr
 {
 public:
-	CHPBasePtr& Reset(T* pObj = nullptr)
+	CHPObjectPtr& Reset(T* pObj = nullptr)
 	{
 		if(pObj != m_pObj)
 		{
@@ -87,7 +87,7 @@ public:
 		return *this;
 	}
 
-	CHPBasePtr& Attach(T* pObj)
+	CHPObjectPtr& Attach(T* pObj)
 	{
 		return Reset(pObj);
 	}
@@ -105,51 +105,30 @@ public:
 	T* operator ->	()	const	{return m_pObj				;}
 	operator T*		()	const	{return m_pObj				;}
 
-	CHPBasePtr& operator = (T* pObj)	{return Reset(pObj)	;}
+	CHPObjectPtr& operator = (T* pObj)	{return Reset(pObj)	;}
 
 public:
-	CHPBasePtr() : m_pObj(nullptr)
+	CHPObjectPtr(_Listener* pListener = nullptr)
 	{
-
+		m_pObj = _Creator::Create(pListener);
 	}
 
-	virtual ~CHPBasePtr()
+	CHPObjectPtr(BOOL bCreate, _Listener* pListener = nullptr)
+	{
+		m_pObj = bCreate ? _Creator::Create(pListener) : nullptr;
+	}
+
+	virtual ~CHPObjectPtr()
 	{
 		Reset();
 	}
 
 private:
-	CHPBasePtr(const CHPBasePtr&);
-	CHPBasePtr& operator = (const CHPBasePtr&);
+	CHPObjectPtr(const CHPObjectPtr&);
+	CHPObjectPtr& operator = (const CHPObjectPtr&);
 
 protected:
 	T* m_pObj;
-};
-
-template<class T, class _Listener, class _Creator> class CHPSocketPtr : public CHPBasePtr<T, _Creator>
-{
-public:
-	CHPSocketPtr(_Listener* pListener)
-	{
-		__super::m_pObj = _Creator::Create(pListener);
-	}
-
-	CHPSocketPtr()
-	{
-
-	}
-
-};
-
-template<class T, class _Creator> class CHPObjectPtr : public CHPBasePtr<T, _Creator>
-{
-public:
-	CHPObjectPtr(BOOL bCreate = FALSE)
-	{
-		if(bCreate)
-			__super::m_pObj = _Creator::Create();
-	}
-
 };
 
 /**************************************************/
@@ -350,23 +329,23 @@ struct TcpPackClient_Creator
 };
 
 // ITcpServer 对象智能指针
-typedef CHPSocketPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
+typedef CHPObjectPtr<ITcpServer, ITcpServerListener, TcpServer_Creator>			CTcpServerPtr;
 // ITcpAgent 对象智能指针
-typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
+typedef CHPObjectPtr<ITcpAgent, ITcpAgentListener, TcpAgent_Creator>			CTcpAgentPtr;
 // ITcpClient 对象智能指针
-typedef CHPSocketPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
+typedef CHPObjectPtr<ITcpClient, ITcpClientListener, TcpClient_Creator>			CTcpClientPtr;
 // ITcpPullServer 对象智能指针
-typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
+typedef CHPObjectPtr<ITcpPullServer, ITcpServerListener, TcpPullServer_Creator>	CTcpPullServerPtr;
 // ITcpPullAgent 对象智能指针
-typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
+typedef CHPObjectPtr<ITcpPullAgent, ITcpAgentListener, TcpPullAgent_Creator>	CTcpPullAgentPtr;
 // ITcpPullClient 对象智能指针
-typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
+typedef CHPObjectPtr<ITcpPullClient, ITcpClientListener, TcpPullClient_Creator>	CTcpPullClientPtr;
 // ITcpPackServer 对象智能指针
-typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, TcpPackServer_Creator>	CTcpPackServerPtr;
+typedef CHPObjectPtr<ITcpPackServer, ITcpServerListener, TcpPackServer_Creator>	CTcpPackServerPtr;
 // ITcpPackAgent 对象智能指针
-typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, TcpPackAgent_Creator>	CTcpPackAgentPtr;
+typedef CHPObjectPtr<ITcpPackAgent, ITcpAgentListener, TcpPackAgent_Creator>	CTcpPackAgentPtr;
 // ITcpPackClient 对象智能指针
-typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, TcpPackClient_Creator>	CTcpPackClientPtr;
+typedef CHPObjectPtr<ITcpPackClient, ITcpClientListener, TcpPackClient_Creator>	CTcpPackClientPtr;
 
 #ifdef _UDP_SUPPORT
 
@@ -455,17 +434,17 @@ struct UdpArqClient_Creator
 };
 
 // IUdpServer 对象智能指针
-typedef CHPSocketPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
+typedef CHPObjectPtr<IUdpServer, IUdpServerListener, UdpServer_Creator>			CUdpServerPtr;
 // IUdpClient 对象智能指针
-typedef CHPSocketPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
+typedef CHPObjectPtr<IUdpClient, IUdpClientListener, UdpClient_Creator>			CUdpClientPtr;
 // IUdpCast 对象智能指针
-typedef CHPSocketPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
+typedef CHPObjectPtr<IUdpCast, IUdpCastListener, UdpCast_Creator>				CUdpCastPtr;
 // IUdpNode 对象智能指针
-typedef CHPSocketPtr<IUdpNode, IUdpNodeListener, UdpNode_Creator>				CUdpNodePtr;
+typedef CHPObjectPtr<IUdpNode, IUdpNodeListener, UdpNode_Creator>				CUdpNodePtr;
 // IUdpArqServer 对象智能指针
-typedef CHPSocketPtr<IUdpArqServer, IUdpServerListener, UdpArqServer_Creator>	CUdpArqServerPtr;
+typedef CHPObjectPtr<IUdpArqServer, IUdpServerListener, UdpArqServer_Creator>	CUdpArqServerPtr;
 // IUdpArqClient 对象智能指针
-typedef CHPSocketPtr<IUdpArqClient, IUdpClientListener, UdpArqClient_Creator>	CUdpArqClientPtr;
+typedef CHPObjectPtr<IUdpArqClient, IUdpClientListener, UdpArqClient_Creator>	CUdpArqClientPtr;
 
 #endif
 
@@ -632,7 +611,7 @@ HPSOCKET_API IHttpAgent* HP_Create_HttpAgent(IHttpAgentListener* pListener);
 // 创建 IHttpClient 对象
 HPSOCKET_API IHttpClient* HP_Create_HttpClient(IHttpClientListener* pListener);
 // 创建 IHttpSyncClient 对象
-HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient(IHttpClientListener* pListener);
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpSyncClient(IHttpClientListener* pListener = nullptr);
 
 // 销毁 IHttpServer 对象
 HPSOCKET_API void HP_Destroy_HttpServer(IHttpServer* pServer);
@@ -688,7 +667,7 @@ struct HttpClient_Creator
 // IHttpSyncClient 对象创建器
 struct HttpSyncClient_Creator
 {
-	static IHttpSyncClient* Create(IHttpClientListener* pListener)
+	static IHttpSyncClient* Create(IHttpClientListener* pListener = nullptr)
 	{
 		return HP_Create_HttpSyncClient(pListener);
 	}
@@ -700,13 +679,13 @@ struct HttpSyncClient_Creator
 };
 
 // IHttpServer 对象智能指针
-typedef CHPSocketPtr<IHttpServer, IHttpServerListener, HttpServer_Creator>			CHttpServerPtr;
+typedef CHPObjectPtr<IHttpServer, IHttpServerListener, HttpServer_Creator>			CHttpServerPtr;
 // IHttpAgent 对象智能指针
-typedef CHPSocketPtr<IHttpAgent, IHttpAgentListener, HttpAgent_Creator>				CHttpAgentPtr;
+typedef CHPObjectPtr<IHttpAgent, IHttpAgentListener, HttpAgent_Creator>				CHttpAgentPtr;
 // IHttpClient 对象智能指针
-typedef CHPSocketPtr<IHttpClient, IHttpClientListener, HttpClient_Creator>			CHttpClientPtr;
+typedef CHPObjectPtr<IHttpClient, IHttpClientListener, HttpClient_Creator>			CHttpClientPtr;
 // IHttpSyncClient 对象智能指针
-typedef CHPSocketPtr<IHttpSyncClient, IHttpClientListener, HttpSyncClient_Creator>	CHttpSyncClientPtr;
+typedef CHPObjectPtr<IHttpSyncClient, IHttpClientListener, HttpSyncClient_Creator>	CHttpSyncClientPtr;
 
 /**************************************************************************/
 /*************************** HTTP Cookie 管理方法 **************************/
@@ -752,7 +731,7 @@ HPSOCKET_API int HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpires);
 /*****************************************************************************************************************************************************/
 
 // 创建 IHPThreadPool 对象
-HPSOCKET_API IHPThreadPool* HP_Create_ThreadPool();
+HPSOCKET_API IHPThreadPool* HP_Create_ThreadPool(IHPThreadPoolListener* pListener = nullptr);
 // 销毁 IHPThreadPool 对象
 HPSOCKET_API void HP_Destroy_ThreadPool(IHPThreadPool* pThreadPool);
 
@@ -784,9 +763,9 @@ HPSOCKET_API void HP_Destroy_SocketTaskObj(LPTSocketTask pTask);
 // IHPThreadPool 对象创建器
 struct HPThreadPool_Creator
 {
-	static IHPThreadPool* Create()
+	static IHPThreadPool* Create(IHPThreadPoolListener* pListener = nullptr)
 	{
-		return HP_Create_ThreadPool();
+		return HP_Create_ThreadPool(pListener);
 	}
 
 	static void Destroy(IHPThreadPool* pThreadPool)
@@ -796,4 +775,4 @@ struct HPThreadPool_Creator
 };
 
 // IHPThreadPool 对象智能指针
-typedef CHPObjectPtr<IHPThreadPool, HPThreadPool_Creator>	CHPThreadPoolPtr;
+typedef CHPObjectPtr<IHPThreadPool, IHPThreadPoolListener, HPThreadPool_Creator>	CHPThreadPoolPtr;

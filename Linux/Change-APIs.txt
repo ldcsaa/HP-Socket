@@ -1,4 +1,14 @@
 ﻿# ======================================== #
+HP-Socket v5.8.5 API Update List:
+# ======================================== #
+--------------------
+1、Thread Pool:
+--------------------
+Create_HP_ThreadPoolListener				(ADD)
+Destroy_HP_ThreadPoolListener				(ADD)
+Create_HP_ThreadPool						(UPDATE: add parameter 'HP_ThreadPoolListener pListener')
+
+# ======================================== #
 HP-Socket v5.8.4 API Update List:
 # ======================================== #
 --------------------
