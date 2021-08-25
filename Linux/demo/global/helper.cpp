@@ -111,16 +111,16 @@ void app_arg::ParseArgs(int argc, char* const argv[])
 
 void app_arg::PrintUsage()
 {
-	PRINTLN("-------------------------- Command Line Args -------------------------");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "a", "remote_addr", "b", "bind_addr", "c", "conn_count");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "d", "local_port", "e", "test_times", "h", "(PRINT THIS USAGE)");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "i", "test_interval", "j", "reject_addr", "k", "ttl");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "l", "data_length", "m", "max_conn", "n", "async");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "o", "cast_mode", "p", "port", "q", "keep_alive");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "r", "reuse_addr", "s", "send_policy", "t", "thread_count");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "u", "ip_loop", "v", "(PRINT VERSION)", "w", "http_with_listener");
-	PRINTLN("-%s: %-20s-%s: %-20s-%s: %-20s", "x", "http_port", "y", "https_port", "z", "http_use_cookie");
-	PRINTLN("-----------------------------------------------------------------------");
+	PRINTLN("--------------------------- Command Line Args ---------------------------");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "a", "remote_addr", "b", "bind_addr", "c", "conn_count");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "d", "local_port", "e", "test_times", "h", "(PRINT THIS USAGE)");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "i", "test_interval", "j", "reject_addr", "k", "ttl");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "l", "data_length", "m", "max_conn", "n", "async");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "o", "cast_mode", "p", "port", "q", "keep_alive");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "r", "reuse_addr", "s", "send_policy", "t", "thread_count");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "u", "ip_loop", "v", "(PRINT VERSION)", "w", "http_with_listener");
+	PRINTLN(" -%s: %-20s-%s: %-20s-%s: %-20s", "x", "http_port", "y", "https_port", "z", "http_use_cookie");
+	PRINTLN("-------------------------------------------------------------------------");
 }
 
 void app_arg::PrintVersion()
@@ -137,17 +137,17 @@ void app_arg::PrintVersion()
 void app_arg::ShowPFMTestArgs(BOOL bAgent)
 {
 	PRINTLN("PFM Test Args:");
-	PRINTLN("---------------+---------------");
-	PRINTLN("%14s : %s", "remote_addr",		(LPCTSTR)remote_addr);
-	PRINTLN("%14s : %u", "port",			port);
-	PRINTLN("%14s : %u", "test_times",		test_times);
-	PRINTLN("%14s : %u", "test_interval",	test_interval);
-	PRINTLN("%14s : %u", "conn_count",		conn_count);
-	PRINTLN("%14s : %u", "data_length",		data_length);
+	PRINTLN("-------------------+-------------------");
+	PRINTLN("%18s : %s", "remote_addr",		(LPCTSTR)remote_addr);
+	PRINTLN("%18s : %u", "port",			port);
+	PRINTLN("%18s : %u", "test_times",		test_times);
+	PRINTLN("%18s : %u", "test_interval",	test_interval);
+	PRINTLN("%18s : %u", "conn_count",		conn_count);
+	PRINTLN("%18s : %u", "data_length",		data_length);
 	if(bAgent) {
-	PRINTLN("%14s : %u", "thread_count",	thread_count);
-	PRINTLN("%14s : %u", "max_conn",		max_conn); }
-	PRINTLN("---------------+---------------");
+	PRINTLN("%18s : %u", "thread_count",	thread_count);
+	PRINTLN("%18s : %u", "max_conn",		max_conn); }
+	PRINTLN("-------------------+-------------------");
 }
 
 CCommandParser::CCommandParser(CCommandParser::EnAppType enAppType, CMD_FUNC fnCmds[CT_MAX])
@@ -270,7 +270,7 @@ void CCommandParser::Parse(LPTSTR lpszLine, SSIZE_T nLength)
 			app_arg::PrintUsage();
 		else
 		{
-			PRINTLN("%s: command not FOUND ...", lpszCmd);
+			PRINTLN(" '%s' : command NOT found ~", lpszCmd);
 		}
 
 		return;
@@ -281,13 +281,13 @@ void CCommandParser::Parse(LPTSTR lpszLine, SSIZE_T nLength)
 		|| (m_enAppType == AT_SERVER && type == CT_CONNECT	)
 		|| (m_enAppType != AT_NODE && type == CT_SENDC)		)
 	{
-		PRINTLN("%s: command not SUPPORTED ...", lpszCmd);
+		PRINTLN(" '%s' : command NOT supported ~", lpszCmd);
 		return;
 	}
 	
 	if(m_szCmdNameFuncs[type].func == nullptr)
 	{
-		PRINTLN("%s: command not HANDLED ...", lpszCmd);
+		PRINTLN(" '%s' : command NOT handled ~", lpszCmd);
 		return;
 	}
 
@@ -464,7 +464,7 @@ void CCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 	return;
 
 ERROR_USAGE:
-	PRINTLN("'%s' usage: %s", m_szCmdNameFuncs[type].name, (LPCTSTR)GetCmdUsage(type));
+	PRINTLN(" '%s' usage : %s", m_szCmdNameFuncs[type].name, (LPCTSTR)GetCmdUsage(type));
 }
 
 void CCommandParser::Reset()
@@ -836,7 +836,7 @@ void CHttpCommandParser::ParseCmdArgs(EnCmdType type, LPTSTR lpszArg)
 	return;
 
 ERROR_USAGE:
-	PRINTLN("'%s' usage: %s", m_szCmdNameFuncs[type].name, (LPCTSTR)GetCmdUsage(type));
+	PRINTLN(" '%s' usage : %s", m_szCmdNameFuncs[type].name, (LPCTSTR)GetCmdUsage(type));
 }
 
 BOOL CHttpCommandParser::ParseCmdOptions(LPCTSTR lpszArg, LPCTSTR lpszOptions)

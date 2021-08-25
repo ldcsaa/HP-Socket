@@ -73,6 +73,8 @@ BOOL CHPThreadPool::CWorker::Initialize(PVOID pvWorkerParam)
 
 	m_pthPool = (CHPThreadPool*)pvWorkerParam;
 
+	m_pthPool->FireWorkerThreadStart();
+
 	return TRUE;
 }
 
@@ -95,6 +97,8 @@ void CHPThreadPool::CWorker::Execute(TTask* pTask, PVOID pvWorkerParam, OVERLAPP
 void CHPThreadPool::CWorker::Terminate(PVOID pvWorkerParam)
 {
 	ASSERT(pvWorkerParam == m_pthPool);
+
+	m_pthPool->FireWorkerThreadEnd();
 }
 
 BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedPolicy enRejectedPolicy, DWORD dwStackSize)
@@ -107,6 +111,8 @@ BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedP
 
 	if(dwThreadCount == 0)
 		dwThreadCount = ::GetDefaultWorkerThreadCount();
+
+	FireStartup();
 
 	HRESULT hr = m_thPool.Initialize(this, (int)dwThreadCount, dwStackSize);
 
@@ -143,6 +149,8 @@ BOOL CHPThreadPool::Stop(DWORD dwMaxWait)
 		dwMaxWait = INFINITE;
 
 	m_thPool.Shutdown(dwMaxWait);
+
+	FireShutdown();
 
 	ASSERT(GetQueueSize()	== 0);
 	ASSERT(GetThreadCount()	== 0);

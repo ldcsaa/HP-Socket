@@ -129,9 +129,19 @@ private:
 
 	static void DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, volatile DWORD& dwTaskCount);
 
+	void FireStartup()
+		{if(m_pListener != nullptr) m_pListener->OnStartup(this);}
+	void FireShutdown()
+		{if(m_pListener != nullptr) m_pListener->OnShutdown(this);}
+	void FireWorkerThreadStart()
+		{if(m_pListener != nullptr) m_pListener->OnWorkerThreadStart(this, SELF_THREAD_ID);}
+	void FireWorkerThreadEnd()
+		{if(m_pListener != nullptr) m_pListener->OnWorkerThreadEnd(this, SELF_THREAD_ID);}
+
 public:
-	CHPThreadPool()
-	: m_evWait(TRUE, TRUE)
+	CHPThreadPool(IHPThreadPoolListener* pListener = nullptr)
+	: m_pListener(pListener)
+	, m_evWait(TRUE, TRUE)
 	{
 		Reset(FALSE);
 	}
@@ -145,6 +155,8 @@ private:
 	void Reset(BOOL bSetWaitEvent = TRUE);
 
 private:
+	IHPThreadPoolListener*	m_pListener;
+
 	CEvt					m_evWait;
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WS08

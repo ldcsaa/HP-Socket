@@ -37,7 +37,7 @@ BOOL __CThread_Interrupt_::InitSigAction()
 	act.sa_handler	= SignalHandler;
 	act.sa_flags	= 0;
 
-	if(IS_HAS_ERROR(sigaction(SIG_NO, &act, nullptr)))
+	if(IS_HAS_ERROR(sigaction(SIG_NO_INTERRUPT, &act, nullptr)))
 		ERROR_ABORT();
 
 	return TRUE;
@@ -45,6 +45,6 @@ BOOL __CThread_Interrupt_::InitSigAction()
 
 void __CThread_Interrupt_::SignalHandler(int sig)
 {
-	if(sig == SIG_NO)
+	if(sig == SIG_NO_INTERRUPT)
 		s_tlsInterrupt = TRUE;
 }

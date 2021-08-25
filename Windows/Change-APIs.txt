@@ -1,4 +1,14 @@
 # ======================================== #
+HP-Socket v5.8.5 API 更新列表：
+# ======================================== #
+--------------------
+1、Thread Pool:
+--------------------
+Create_HP_ThreadPoolListener				(增加)
+Destroy_HP_ThreadPoolListener				(增加)
+Create_HP_ThreadPool						(修改：增加参数 HP_ThreadPoolListener pListener)
+
+# ======================================== #
 HP-Socket v5.8.4 API 更新列表：
 # ======================================== #
 --------------------

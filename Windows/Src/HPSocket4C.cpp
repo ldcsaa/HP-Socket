@@ -703,7 +703,9 @@
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_HttpServer_OnWSMessageHeader=_HP_Set_FN_HttpServer_OnWSMessageHeader@8")
 #endif
 
-	#pragma comment(linker, "/EXPORT:Create_HP_ThreadPool=_Create_HP_ThreadPool@0")
+	#pragma comment(linker, "/EXPORT:Create_HP_ThreadPoolListener=_Create_HP_ThreadPoolListener@0")
+	#pragma comment(linker, "/EXPORT:Destroy_HP_ThreadPoolListener=_Destroy_HP_ThreadPoolListener@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_ThreadPool=_Create_HP_ThreadPool@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_ThreadPool=_Destroy_HP_ThreadPool@4")
 	#pragma comment(linker, "/EXPORT:Create_HP_SocketTaskObj=_Create_HP_SocketTaskObj@32")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_SocketTaskObj=_Destroy_HP_SocketTaskObj@4")
@@ -4127,9 +4129,19 @@ HPSOCKET_API int __HP_CALL HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpire
 /****************************************************/
 /******************* 对象创建函数 ********************/
 
-HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool()
+HPSOCKET_API HP_ThreadPoolListener __HP_CALL Create_HP_ThreadPoolListener()
 {
-	return (HP_ThreadPool)(new CHPThreadPool);
+	return (HP_ThreadPoolListener)(new C_HP_ThreadPoolListener);
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPoolListener(HP_ThreadPoolListener pListener)
+{
+	delete (IHPThreadPoolListener*)pListener;
+}
+
+HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool(HP_ThreadPoolListener pListener)
+{
+	return (HP_ThreadPool)(new CHPThreadPool((IHPThreadPoolListener*)pListener));
 }
 
 HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPool(HP_ThreadPool pThreadPool)

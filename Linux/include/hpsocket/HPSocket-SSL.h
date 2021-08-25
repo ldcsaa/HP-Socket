@@ -199,23 +199,23 @@ struct SSLPackClient_Creator
 };
 
 // SSL ITcpServer 对象智能指针
-typedef CHPSocketPtr<ITcpServer, ITcpServerListener, SSLServer_Creator>			CSSLServerPtr;
+typedef CHPObjectPtr<ITcpServer, ITcpServerListener, SSLServer_Creator>			CSSLServerPtr;
 // SSL ITcpAgent 对象智能指针
-typedef CHPSocketPtr<ITcpAgent, ITcpAgentListener, SSLAgent_Creator>			CSSLAgentPtr;
+typedef CHPObjectPtr<ITcpAgent, ITcpAgentListener, SSLAgent_Creator>			CSSLAgentPtr;
 // SSL ITcpClient 对象智能指针
-typedef CHPSocketPtr<ITcpClient, ITcpClientListener, SSLClient_Creator>			CSSLClientPtr;
+typedef CHPObjectPtr<ITcpClient, ITcpClientListener, SSLClient_Creator>			CSSLClientPtr;
 // SSL ITcpPullServer 对象智能指针
-typedef CHPSocketPtr<ITcpPullServer, ITcpServerListener, SSLPullServer_Creator>	CSSLPullServerPtr;
+typedef CHPObjectPtr<ITcpPullServer, ITcpServerListener, SSLPullServer_Creator>	CSSLPullServerPtr;
 // SSL ITcpPullAgent 对象智能指针
-typedef CHPSocketPtr<ITcpPullAgent, ITcpAgentListener, SSLPullAgent_Creator>	CSSLPullAgentPtr;
+typedef CHPObjectPtr<ITcpPullAgent, ITcpAgentListener, SSLPullAgent_Creator>	CSSLPullAgentPtr;
 // SSL ITcpPullClient 对象智能指针
-typedef CHPSocketPtr<ITcpPullClient, ITcpClientListener, SSLPullClient_Creator>	CSSLPullClientPtr;
+typedef CHPObjectPtr<ITcpPullClient, ITcpClientListener, SSLPullClient_Creator>	CSSLPullClientPtr;
 // SSL ITcpPackServer 对象智能指针
-typedef CHPSocketPtr<ITcpPackServer, ITcpServerListener, SSLPackServer_Creator>	CSSLPackServerPtr;
+typedef CHPObjectPtr<ITcpPackServer, ITcpServerListener, SSLPackServer_Creator>	CSSLPackServerPtr;
 // SSL ITcpPackAgent 对象智能指针
-typedef CHPSocketPtr<ITcpPackAgent, ITcpAgentListener, SSLPackAgent_Creator>	CSSLPackAgentPtr;
+typedef CHPObjectPtr<ITcpPackAgent, ITcpAgentListener, SSLPackAgent_Creator>	CSSLPackAgentPtr;
 // SSL ITcpPackClient 对象智能指针
-typedef CHPSocketPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	CSSLPackClientPtr;
+typedef CHPObjectPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	CSSLPackClientPtr;
 
 /*****************************************************************************************************************************************************/
 /*************************************************************** Global Function Exports *************************************************************/
@@ -257,7 +257,7 @@ HPSOCKET_API IHttpAgent* HP_Create_HttpsAgent(IHttpAgentListener* pListener);
 // 创建 IHttpsClient 对象
 HPSOCKET_API IHttpClient* HP_Create_HttpsClient(IHttpClientListener* pListener);
 // 创建 IHttpsSyncClient 对象
-HPSOCKET_API IHttpSyncClient* HP_Create_HttpsSyncClient(IHttpClientListener* pListener);
+HPSOCKET_API IHttpSyncClient* HP_Create_HttpsSyncClient(IHttpClientListener* pListener = nullptr);
 
 // 销毁 IHttpsServer 对象
 HPSOCKET_API void HP_Destroy_HttpsServer(IHttpServer* pServer);
@@ -313,7 +313,7 @@ struct HttpsClient_Creator
 // IHttpsSyncClient 对象创建器
 struct HttpsSyncClient_Creator
 {
-	static IHttpSyncClient* Create(IHttpClientListener* pListener)
+	static IHttpSyncClient* Create(IHttpClientListener* pListener = nullptr)
 	{
 		return HP_Create_HttpsSyncClient(pListener);
 	}
@@ -325,13 +325,13 @@ struct HttpsSyncClient_Creator
 };
 
 // IHttpsServer 对象智能指针
-typedef CHPSocketPtr<IHttpServer, IHttpServerListener, HttpsServer_Creator>		CHttpsServerPtr;
+typedef CHPObjectPtr<IHttpServer, IHttpServerListener, HttpsServer_Creator>			CHttpsServerPtr;
 // IHttpsAgent 对象智能指针
-typedef CHPSocketPtr<IHttpAgent, IHttpAgentListener, HttpsAgent_Creator>		CHttpsAgentPtr;
+typedef CHPObjectPtr<IHttpAgent, IHttpAgentListener, HttpsAgent_Creator>			CHttpsAgentPtr;
 // IHttpsClient 对象智能指针
-typedef CHPSocketPtr<IHttpClient, IHttpClientListener, HttpsClient_Creator>		CHttpsClientPtr;
+typedef CHPObjectPtr<IHttpClient, IHttpClientListener, HttpsClient_Creator>			CHttpsClientPtr;
 // IHttpsSyncClient 对象智能指针
-typedef CHPSocketPtr<IHttpSyncClient, IHttpClientListener, HttpsSyncClient_Creator>			CHttpsSyncClientPtr;
+typedef CHPObjectPtr<IHttpSyncClient, IHttpClientListener, HttpsSyncClient_Creator>	CHttpsSyncClientPtr;
 
 #endif
 
