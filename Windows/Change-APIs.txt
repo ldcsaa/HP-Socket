@@ -4,6 +4,10 @@ HP-Socket v5.8.5 API 更新列表：
 --------------------
 1、Thread Pool:
 --------------------
+HP_Set_FN_ThreadPool_OnStartup				(增加)
+HP_Set_FN_ThreadPool_OnShutdown				(增加)
+HP_Set_FN_ThreadPool_OnWorkerThreadStart	(增加)
+HP_Set_FN_ThreadPool_OnWorkerThreadEnd		(增加)
 Create_HP_ThreadPoolListener				(增加)
 Destroy_HP_ThreadPoolListener				(增加)
 Create_HP_ThreadPool						(修改：增加参数 HP_ThreadPoolListener pListener)

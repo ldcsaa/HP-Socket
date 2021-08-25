@@ -2559,6 +2559,14 @@ typedef void (__HP_CALL *HP_FN_ThreadPool_OnShutdown)			(HP_ThreadPool pThreadPo
 typedef void (__HP_CALL *HP_FN_ThreadPool_OnWorkerThreadStart)	(HP_ThreadPool pThreadPool, THR_ID dwThreadID);
 typedef void (__HP_CALL *HP_FN_ThreadPool_OnWorkerThreadEnd)	(HP_ThreadPool pThreadPool, THR_ID dwThreadID);
 
+/**********************************************************************************/
+/************************** Thread Pool 回调函数设置方法 ***************************/
+
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnStartup(HP_ThreadPoolListener pListener				, HP_FN_ThreadPool_OnStartup fn);
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnShutdown(HP_ThreadPoolListener pListener				, HP_FN_ThreadPool_OnShutdown fn);
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnWorkerThreadStart(HP_ThreadPoolListener pListener	, HP_FN_ThreadPool_OnWorkerThreadStart fn);
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnWorkerThreadEnd(HP_ThreadPoolListener pListener		, HP_FN_ThreadPool_OnWorkerThreadEnd fn);
+
 /****************************************************/
 /******************* 对象创建函数 ********************/
 

@@ -514,27 +514,27 @@ HPSOCKET_API void __HP_CALL HP_Set_FN_Client_OnClose(HP_ClientListener pListener
 /***************************** UdpNode 回调函数设置方法 *****************************/
 
 
-HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnPrepareListen(HP_UdpNodeListener pListener , HP_FN_UdpNode_OnPrepareListen fn)
+HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnPrepareListen(HP_UdpNodeListener pListener, HP_FN_UdpNode_OnPrepareListen fn)
 {
 	((C_HP_UdpNodeListener*)pListener)->m_fnOnPrepareListen = fn;
 }
 
-HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnSend(HP_UdpNodeListener pListener , HP_FN_UdpNode_OnSend fn)
+HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnSend(HP_UdpNodeListener pListener, HP_FN_UdpNode_OnSend fn)
 {
 	((C_HP_UdpNodeListener*)pListener)->m_fnOnSend = fn;
 }
 
-HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnReceive(HP_UdpNodeListener pListener , HP_FN_UdpNode_OnReceive fn)
+HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnReceive(HP_UdpNodeListener pListener, HP_FN_UdpNode_OnReceive fn)
 {
 	((C_HP_UdpNodeListener*)pListener)->m_fnOnReceive = fn;
 }
 
-HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnError(HP_UdpNodeListener pListener , HP_FN_UdpNode_OnError fn)
+HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnError(HP_UdpNodeListener pListener, HP_FN_UdpNode_OnError fn)
 {
 	((C_HP_UdpNodeListener*)pListener)->m_fnOnError = fn;
 }
 
-HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnShutdown(HP_UdpNodeListener pListener , HP_FN_UdpNode_OnShutdown fn)
+HPSOCKET_API void __HP_CALL HP_Set_FN_UdpNode_OnShutdown(HP_UdpNodeListener pListener, HP_FN_UdpNode_OnShutdown fn)
 {
 	((C_HP_UdpNodeListener*)pListener)->m_fnOnShutdown = fn;
 }
@@ -3448,6 +3448,29 @@ HPSOCKET_API int __HP_CALL HP_HttpCookie_HLP_ExpiresToMaxAge(__time64_t tmExpire
 /*****************************************************************************************************************************************************/
 /**************************************************************** Thread Pool Exports ****************************************************************/
 /*****************************************************************************************************************************************************/
+
+/**********************************************************************************/
+/************************** Thread Pool 回调函数设置方法 ***************************/
+
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnStartup(HP_ThreadPoolListener pListener, HP_FN_ThreadPool_OnStartup fn)
+{
+	((C_HP_ThreadPoolListener*)pListener)->m_fnOnStartup = fn;
+}
+
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnShutdown(HP_ThreadPoolListener pListener, HP_FN_ThreadPool_OnShutdown fn)
+{
+	((C_HP_ThreadPoolListener*)pListener)->m_fnOnShutdown = fn;
+}
+
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnWorkerThreadStart(HP_ThreadPoolListener pListener, HP_FN_ThreadPool_OnWorkerThreadStart fn)
+{
+	((C_HP_ThreadPoolListener*)pListener)->m_fnOnWorkerThreadStart = fn;
+}
+
+HPSOCKET_API void __HP_CALL HP_Set_FN_ThreadPool_OnWorkerThreadEnd(HP_ThreadPoolListener pListener, HP_FN_ThreadPool_OnWorkerThreadEnd fn)
+{
+	((C_HP_ThreadPoolListener*)pListener)->m_fnOnWorkerThreadEnd = fn;
+}
 
 /****************************************************/
 /******************* 对象创建函数 ********************/
