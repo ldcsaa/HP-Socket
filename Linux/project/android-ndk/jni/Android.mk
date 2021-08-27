@@ -89,7 +89,7 @@ MY_SRC_FILES := ../../../src/common/BufferPool.cpp \
                 ../../../src/UdpClient.cpp \
                 ../../../src/UdpServer.cpp
 MY_C_INCLUDES := ../../../src
-MY_CFLAGS     := -fPIC -fvisibility=hidden -fno-strict-aliasing -Wall -Wextra -Wswitch -Wno-deprecated-declarations -Wno-empty-body -Wno-conversion -Wno-sign-conversion -Wno-sign-compare -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wno-missing-braces -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -Wno-unused-parameter -Wno-missing-field-initializers
+MY_CFLAGS     := -fPIC -fvisibility=hidden -fno-strict-aliasing -Wall -Wno-pessimizing-move -Wextra -Wswitch -Wno-deprecated-declarations -Wno-empty-body -Wno-conversion -Wno-sign-conversion -Wno-sign-compare -Wreturn-type -Wparentheses -Wno-pointer-sign -Wno-format -Wno-missing-braces -Wuninitialized -Wunreachable-code -Wunused-function -Wunused-value -Wunused-variable -Wno-unused-parameter -Wno-missing-field-initializers
 MY_CPPFLAGS   := -fexceptions -frtti -fthreadsafe-statics -Wno-reorder -Wno-inconsistent-missing-override
 MY_LDFLAGS    := -Wl,--no-undefined -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-Bsymbolic
 MY_LDLIBS     := -ldl

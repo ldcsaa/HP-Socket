@@ -107,47 +107,38 @@ BOOL CHPThreadPool::Stop(DWORD dwMaxWait)
 
 BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 {
-	BOOL isOK		= TRUE;
-	BOOL bLimited	= (m_dwMaxQueueSize != 0);
-	BOOL bInfinite	= (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
+	BOOL isOK		 = TRUE;
+	BOOL bLimited	 = (m_dwMaxQueueSize != 0);
+	BOOL bInfinite	 = (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
+	auto prdShutdown = [&]() {return m_stThreads.empty();};
 
 	if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited)
-	{
-		CCriSecLock2 lock(m_csTask);
-		m_cvQueue.notify_all();
-	}
+		m_evQueue.SyncNotifyAll();
 
 	VERIFY(DoAdjustThreadCount(0));
 
 	if(bInfinite)
-		m_evShutdown.Wait(CShutdownPredicate(this));
+		m_evShutdown.Wait(prdShutdown);
 	else
-		m_evShutdown.WaitFor(dwMaxWait, CShutdownPredicate(this));
+		m_evShutdown.WaitFor(dwMaxWait, prdShutdown);
 
-	ASSERT(m_lsTasks.size()	  == 0);
+	ASSERT(m_lsTasks.Size()	  == 0);
 	ASSERT(m_stThreads.size() == 0);
 
-	if(!m_lsTasks.empty())
+	if(!m_lsTasks.IsEmpty())
 	{
-		CCriSecLock2 lock(m_csTask);
+		TTask* pTask = nullptr;
 
-		if(!m_lsTasks.empty())
+		while(m_lsTasks.PopFront(&pTask))
 		{
-			do
-			{
-				TTask* pTask = m_lsTasks.front();
-				m_lsTasks.pop();
+			if(pTask->freeArg)
+				::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
 
-				if(pTask->freeArg)
-					::DestroySocketTaskObj((LPTSocketTask)pTask->arg);
-
-				TTask::Destruct(pTask);
-
-			} while(!m_lsTasks.empty());
-
-			::SetLastError(ERROR_CANCELLED);
-			isOK = FALSE;
+			TTask::Destruct(pTask);
 		}
+
+		::SetLastError(ERROR_CANCELLED);
+		isOK = FALSE;
 	}
 
 	if(!m_stThreads.empty())
@@ -223,26 +214,19 @@ void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFre
 
 CHPThreadPool::EnSubmitResult CHPThreadPool::DirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
 {
-	CCriSecLock2 lock(m_csTask);
-
-	return DoDirectSubmit(fnTaskProc, pvArg, bFreeArg);
-}
-
-CHPThreadPool::EnSubmitResult CHPThreadPool::DoDirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
-{
 	if(!CheckStarted())
 		return SUBMIT_ERROR;
 
 	BOOL bLimited = (m_dwMaxQueueSize != 0);
 
-	if(bLimited && (DWORD)m_lsTasks.size() >= m_dwMaxQueueSize)
+	if(bLimited && m_lsTasks.Size() >= m_dwMaxQueueSize)
 		return SUBMIT_FULL;
 	else
 	{
 		TTask* pTask = TTask::Construct(fnTaskProc, pvArg, bFreeArg);
 
-		m_lsTasks.push(pTask);
-		m_cvTask.notify_one();
+		m_lsTasks.PushBack(pTask);
+		m_evTask.SyncNotifyOne();
 	}
 
 	return SUBMIT_OK;
@@ -254,12 +238,11 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 
 	DWORD dwTime	= ::TimeGetTime();
 	BOOL bInfinite	= (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
+	auto prdQueue	= [&]() {return	(m_lsTasks.Size() < m_dwMaxQueueSize);};
 
 	while(CheckStarted()) 
 	{
-		CCriSecLock2 lock(m_csTask);
-
-		EnSubmitResult sr = DoDirectSubmit(fnTaskProc, pvArg, bFreeArg);
+		EnSubmitResult sr = DirectSubmit(fnTaskProc, pvArg, bFreeArg);
 
 		if(sr == SUBMIT_OK)
 			return TRUE;
@@ -267,12 +250,12 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 			return FALSE;
 
 		if(bInfinite)
-			m_cvQueue.wait(lock);
+			m_evQueue.Wait(prdQueue);
 		else
 		{
 			DWORD dwNow = ::GetTimeGap32(dwTime);
 
-			if(dwNow > dwMaxWait || m_cvQueue.wait_for(lock, chrono::milliseconds(dwMaxWait - dwNow)) == cv_status::timeout)
+			if(dwNow > dwMaxWait || !m_evQueue.WaitFor(chrono::milliseconds(dwMaxWait - dwNow), prdQueue))
 			{
 				::SetLastError(ERROR_TIMEOUT);
 				break;
@@ -310,28 +293,23 @@ BOOL CHPThreadPool::DoAdjustThreadCount(DWORD dwNewThreadCount)
 	BOOL bRemove		= FALSE;
 	DWORD dwThreadCount	= 0;
 
+	if(dwNewThreadCount > m_dwThreadCount)
 	{
-		CCriSecLock lock(m_csThread);
+		dwThreadCount = dwNewThreadCount - m_dwThreadCount;
+		return CreateWorkerThreads(dwThreadCount);
+	}
+	else if(dwNewThreadCount < m_dwThreadCount)
+	{
+		bRemove		  = TRUE;
+		dwThreadCount = m_dwThreadCount - dwNewThreadCount;
 
-		if(dwNewThreadCount > m_dwThreadCount)
-		{
-			dwThreadCount = dwNewThreadCount - m_dwThreadCount;
-			return CreateWorkerThreads(dwThreadCount);
-		}
-		else if(dwNewThreadCount < m_dwThreadCount)
-		{
-			bRemove			 = TRUE;
-			dwThreadCount	 = m_dwThreadCount - dwNewThreadCount;
-			m_dwThreadCount -= dwThreadCount;
-		}
+		::InterlockedSub(&m_dwThreadCount, dwThreadCount);
 	}
 
 	if(bRemove)
 	{
-		CCriSecLock2 lock(m_csTask);
-
 		for(DWORD i = 0; i < dwThreadCount; i++)
-			m_cvTask.notify_one();
+			m_evTask.SyncNotifyOne();
 	}
 
 	return TRUE;
@@ -372,8 +350,10 @@ BOOL CHPThreadPool::CreateWorkerThreads(DWORD dwThreadCount)
 			break;
 		}
 
+		::InterlockedIncrement(&m_dwThreadCount);
+
+		CCriSecLock lock(m_csThread);
 		m_stThreads.emplace(dwThreadID);
-		++m_dwThreadCount;
 	}
 
 	if(pThreadAttr != nullptr)
@@ -397,45 +377,28 @@ PVOID CHPThreadPool::ThreadProc(LPVOID pv)
 
 int CHPThreadPool::WorkerProc()
 {
-	BOOL bLimited = (m_dwMaxQueueSize != 0);
+	BOOL bLimited	= (m_dwMaxQueueSize != 0);
+	TTask* pTask	= nullptr;
+	auto prdTask	= [&]() {return (!m_lsTasks.IsEmpty()) || (m_dwThreadCount < m_stThreads.size());};
 
 	while(TRUE)
 	{
-		BOOL bExit	 = FALSE;
-		TTask* pTask = nullptr;
+		pTask = nullptr;
 
+		while(m_lsTasks.PopFront(&pTask))
 		{
-			CCriSecLock2 lock(m_csTask);
+			if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited)
+				m_evQueue.SyncNotifyOne();
 
-			do
-			{
-				if(!m_lsTasks.empty())
-				{
-					pTask = m_lsTasks.front();
-					m_lsTasks.pop();
-
-					if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited && pTask != nullptr)
-						m_cvQueue.notify_one();
-				}
-				else if(m_dwThreadCount < m_stThreads.size())
-					bExit = TRUE;
-				else
-					m_cvTask.wait(lock);
-
-			} while(pTask == nullptr && !bExit);
-		}
-
-		if(pTask != nullptr)
-		{
 			DoRunTaskProc(pTask->fn, pTask->arg, pTask->freeArg);
 
 			TTask::Destruct(pTask);
 		}
-		else if(bExit)
-		{
-			if(CheckWorkerThreadExit())
-				break;
-		}
+		
+		if(CheckWorkerThreadExit())
+			break;
+
+		m_evTask.Wait(prdTask);
 	}
 
 	return 0;
@@ -464,7 +427,7 @@ BOOL CHPThreadPool::CheckWorkerThreadExit()
 		pthread_detach(SELF_THREAD_ID);
 
 		if(bShutdown)
-			m_evShutdown.NotifyOne();
+			m_evShutdown.SyncNotifyOne();
 	}
 
 	return bExit;

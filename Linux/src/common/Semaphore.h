@@ -75,7 +75,7 @@ public:
 		if(IS_INFINITE(dwMilliseconds))
 		{
 			Wait(p);
-			return TRUE;
+			return true;
 		}
 
 		return WaitFor(chrono::milliseconds(dwMilliseconds), p);

@@ -26,6 +26,7 @@
 #include "../include/hpsocket/SocketInterface.h"
 #include "common/STLHelper.h"
 #include "common/Semaphore.h"
+#include "common/RingBuffer.h"
 #include "InternalDef.h"
 
 LPTSocketTask CreateSocketTaskObj(	Fn_SocketTaskProc fnTaskProc,
@@ -68,28 +69,7 @@ private:
 		}
 	};
 
-	class CShutdownPredicate
-	{
-	public:
-		BOOL operator()()
-		{
-			CCriSecLock lock(m_pThreadPool->m_csThread);
-
-			return m_pThreadPool->m_stThreads.empty();
-		}
-
-	public:
-		CShutdownPredicate(CHPThreadPool* pThreadPool)
-		: m_pThreadPool(pThreadPool)
-		{
-
-		}
-
-	private:
-		CHPThreadPool* m_pThreadPool;
-	};
-
-	friend class CShutdownPredicate;
+	using CTaskQueue = CCASQueue<TTask>;
 
 public:
 	virtual BOOL Start(DWORD dwThreadCount = 0, DWORD dwMaxQueueSize = 0, EnRejectedPolicy enRejectedPolicy = TRP_CALL_FAIL, DWORD dwStackSize = 0);
@@ -104,7 +84,7 @@ public:
 	virtual BOOL HasStarted()						{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState GetState()				{return m_enState;}
 
-	virtual DWORD GetQueueSize()					{return (DWORD)m_lsTasks.size();}
+	virtual DWORD GetQueueSize()					{return m_lsTasks.Size();}
 	virtual DWORD GetTaskCount()					{return m_dwTaskCount;}
 	virtual DWORD GetThreadCount()					{return m_dwThreadCount;}
 	virtual DWORD GetMaxQueueSize()					{return m_dwMaxQueueSize;}
@@ -127,7 +107,6 @@ private:
 	int WorkerProc();
 
 	EnSubmitResult DirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg);
-	EnSubmitResult DoDirectSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg);
 	BOOL CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait, BOOL bFreeArg);
 	BOOL DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, DWORD dwMaxWait);
 	void DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg);
@@ -169,13 +148,12 @@ private:
 
 	CSEM					m_evWait;
 	CSEM					m_evShutdown;
+	CSEM					m_evTask;
+	CSEM					m_evQueue;
 	CCriSec					m_csThread;
-	CCriSec					m_csTask;
-	condition_variable		m_cvTask;
-	condition_variable		m_cvQueue;
 
+	CTaskQueue				m_lsTasks;
 	unordered_set<THR_ID>	m_stThreads;
-	queue<TTask*>			m_lsTasks;
 
 	DECLARE_NO_COPY_CLASS(CHPThreadPool)
 };

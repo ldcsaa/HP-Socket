@@ -86,10 +86,13 @@ void CHPThreadPool::CWorker::Execute(TTask* pTask, PVOID pvWorkerParam, OVERLAPP
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WS08
 	if(m_pthPool->m_enRejectedPolicy == TRP_WAIT_FOR && m_pthPool->m_dwMaxQueueSize != 0)
+	{
+		CCriSecLock locallock(m_pthPool->m_csQueue);
 		m_pthPool->m_cvQueue.WakeUp();
+	}
 #endif
 	
-	DoRunTaskProc(pTask->fn, pTask->arg, pTask->freeArg, m_pthPool->m_dwTaskCount);
+	m_pthPool->DoRunTaskProc(pTask->fn, pTask->arg, pTask->freeArg);
 
 	TTask::Destruct(pTask);
 }
@@ -188,7 +191,7 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	}
 	else if(m_enRejectedPolicy == TRP_CALLER_RUN)
 	{
-		DoRunTaskProc(fnTaskProc, pvArg, bFreeArg, m_dwTaskCount);
+		DoRunTaskProc(fnTaskProc, pvArg, bFreeArg);
 	}
 	else
 	{
@@ -201,11 +204,11 @@ BOOL CHPThreadPool::DoSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg,
 	return TRUE;
 }
 
-void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg, volatile DWORD& dwTaskCount)
+void CHPThreadPool::DoRunTaskProc(Fn_TaskProc fnTaskProc, PVOID pvArg, BOOL bFreeArg)
 {
-	::InterlockedIncrement(&dwTaskCount);
+	::InterlockedIncrement(&m_dwTaskCount);
 	fnTaskProc(pvArg);
-	::InterlockedDecrement(&dwTaskCount);
+	::InterlockedDecrement(&m_dwTaskCount);
 
 	if(bFreeArg)
 		::DestroySocketTaskObj((LPTSocketTask)pvArg);
@@ -274,6 +277,9 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 			return FALSE;
 
 		CCriSecLock locallock(m_csQueue);
+
+		if(m_dwQueueSize < m_dwMaxQueueSize)
+			continue;
 
 		if(bInfinite)
 			m_cvQueue.Wait(m_csQueue.GetObject());
