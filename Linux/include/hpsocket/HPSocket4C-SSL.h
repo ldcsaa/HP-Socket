@@ -394,8 +394,8 @@ HPSOCKET_API HP_HttpsServer __HP_CALL Create_HP_HttpsServer(HP_HttpServerListene
 HPSOCKET_API HP_HttpsAgent __HP_CALL Create_HP_HttpsAgent(HP_HttpAgentListener pListener);
 // 创建 HP_HttpsClient 对象
 HPSOCKET_API HP_HttpsClient __HP_CALL Create_HP_HttpsClient(HP_HttpClientListener pListener);
-// 创建 HP_HttpsSyncClient 对象
-HPSOCKET_API HP_HttpsSyncClient __HP_CALL Create_HP_HttpsSyncClient(HP_HttpClientListener pListener);
+// 创建 HP_HttpsSyncClient 对象（pListener 参数可传入 nullptr）
+HPSOCKET_API HP_HttpsSyncClient __HP_CALL Create_HP_HttpsSyncClient(HP_HttpClientListener pListener /*= nullptr*/);
 
 // 销毁 HP_HttpsServer 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_HttpsServer(HP_HttpsServer pServer);

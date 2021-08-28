@@ -1913,8 +1913,8 @@ HPSOCKET_API HP_HttpServer __HP_CALL Create_HP_HttpServer(HP_HttpServerListener 
 HPSOCKET_API HP_HttpAgent __HP_CALL Create_HP_HttpAgent(HP_HttpAgentListener pListener);
 // 创建 HP_HttpClient 对象
 HPSOCKET_API HP_HttpClient __HP_CALL Create_HP_HttpClient(HP_HttpClientListener pListener);
-// 创建 HP_HttpSyncClient 对象
-HPSOCKET_API HP_HttpSyncClient __HP_CALL Create_HP_HttpSyncClient(HP_HttpClientListener pListener);
+// 创建 HP_HttpSyncClient 对象（pListener 参数可传入 nullptr）
+HPSOCKET_API HP_HttpSyncClient __HP_CALL Create_HP_HttpSyncClient(HP_HttpClientListener pListener /*= nullptr*/);
 
 // 销毁 HP_HttpServer 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_HttpServer(HP_HttpServer pServer);
@@ -2575,8 +2575,8 @@ HPSOCKET_API HP_ThreadPoolListener __HP_CALL Create_HP_ThreadPoolListener();
 // 销毁 IHPThreadPoolListener 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPoolListener(HP_ThreadPoolListener pListener);
 
-// 创建 IHPThreadPool 对象
-HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool(HP_ThreadPoolListener pListener);
+// 创建 IHPThreadPool 对象（pListener 参数可传入 nullptr）
+HPSOCKET_API HP_ThreadPool __HP_CALL Create_HP_ThreadPool(HP_ThreadPoolListener pListener /*= nullptr*/);
 // 销毁 IHPThreadPool 对象
 HPSOCKET_API void __HP_CALL Destroy_HP_ThreadPool(HP_ThreadPool pThreadPool);
 
