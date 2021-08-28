@@ -97,6 +97,7 @@ typedef HP_Object	HP_PackClient;
 typedef HP_Object	HP_TcpPackServer;
 typedef HP_Object	HP_TcpPackAgent;
 typedef HP_Object	HP_TcpPackClient;
+typedef HP_Object	HP_ThreadPool;
 
 typedef HP_Object	HP_Listener;
 typedef HP_Object	HP_ServerListener;
@@ -115,6 +116,7 @@ typedef HP_Object	HP_PackClientListener;
 typedef HP_Object	HP_TcpPackServerListener;
 typedef HP_Object	HP_TcpPackAgentListener;
 typedef HP_Object	HP_TcpPackClientListener;
+typedef HP_Object	HP_ThreadPoolListener;
 
 #ifdef _UDP_SUPPORT
 
@@ -134,6 +136,8 @@ typedef HP_Object	HP_UdpArqClientListener;
 
 #endif
 
+#ifdef _HTTP_SUPPORT
+
 typedef HP_Object	HP_Http;
 typedef HP_Object	HP_HttpServer;
 typedef HP_Object	HP_HttpAgent;
@@ -144,9 +148,7 @@ typedef HP_Object	HP_HttpServerListener;
 typedef HP_Object	HP_HttpAgentListener;
 typedef HP_Object	HP_HttpClientListener;
 
-typedef HP_Object	HP_ThreadPool;
-
-typedef HP_Object	HP_ThreadPoolListener;
+#endif
 
 /*****************************************************************************************************************************************************/
 /****************************************************************** TCP/UDP Exports ******************************************************************/
