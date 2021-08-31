@@ -74,7 +74,7 @@ private:
 public:
 	virtual BOOL Start(DWORD dwThreadCount = 0, DWORD dwMaxQueueSize = 0, EnRejectedPolicy enRejectedPolicy = TRP_CALL_FAIL, DWORD dwStackSize = 0);
 	virtual BOOL Stop(DWORD dwMaxWait = INFINITE);
-	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, CStopWaitingPredicate<IHPThreadPool>(this));}
+	virtual BOOL Wait(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, WAIT_FOR_STOP_PREDICATE);}
 
 	virtual BOOL Submit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD dwMaxWait = INFINITE);
 	virtual BOOL Submit(LPTSocketTask pTask, DWORD dwMaxWait = INFINITE);

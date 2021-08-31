@@ -277,12 +277,11 @@ void CBufferPool::Prepare()
 
 void CBufferPool::Clear()
 {
-	DWORD size					= 0;
-	unique_ptr<ULONG_PTR[]> ids	= m_bfCache.GetAllElementIndexes(size, FALSE);
+	TBufferCache::IndexSet& indexes = m_bfCache.Indexes();
 
-	for(DWORD i = 0; i < size; i++)
+	for(auto it = indexes.begin(), end = indexes.end(); it != end; ++it)
 	{
-		TBuffer* pBuffer = FindCacheBuffer(ids[i]);
+		TBuffer* pBuffer = FindCacheBuffer(*it);
 		if(pBuffer) TBuffer::Destruct(pBuffer);
 	}
 

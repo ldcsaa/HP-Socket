@@ -36,7 +36,7 @@ public:
 	virtual BOOL Send	(const BYTE* pBuffer, int iLength, int iOffset = 0)	{return DoSend(pBuffer, iLength, iOffset);}
 	virtual BOOL SendPackets	(const WSABUF pBuffers[], int iCount);
 	virtual BOOL PauseReceive	(BOOL bPause = TRUE);
-	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, CStopWaitingPredicate<IClient>(this));}
+	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, WAIT_FOR_STOP_PREDICATE);}
 	virtual BOOL			HasStarted			()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState			()	{return m_enState;}
 	virtual CONNID			GetConnectionID		()	{return m_dwConnID;}

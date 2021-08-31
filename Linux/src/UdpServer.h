@@ -40,7 +40,7 @@ public:
 	virtual BOOL Send	(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset = 0);
 	virtual BOOL SendPackets	(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	virtual BOOL PauseReceive	(CONNID dwConnID, BOOL bPause = TRUE);
-	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, CStopWaitingPredicate<IComplexSocket>(this));}
+	virtual BOOL Wait			(DWORD dwMilliseconds = INFINITE) {return m_evWait.WaitFor(dwMilliseconds, WAIT_FOR_STOP_PREDICATE);}
 	virtual BOOL			HasStarted					()	{return m_enState == SS_STARTED || m_enState == SS_STARTING;}
 	virtual EnServiceState	GetState					()	{return m_enState;}
 	virtual BOOL			Disconnect					(CONNID dwConnID, BOOL bForce = TRUE);

@@ -600,73 +600,69 @@ public:
 	
 	BOOL GetAllElementIndexes(index_type ids[], DWORD& dwCount, BOOL bCopy = TRUE)
 	{
+		DWORD dwSize = Elements();
+
 		if(ids == nullptr || dwCount == 0)
 		{
-			dwCount = Elements();
+			dwCount = dwSize;
 			return FALSE;
 		}
 
-		IndexSet* pIndexes = nullptr;
-		IndexSet indexes;
-
-		if(bCopy)
-			pIndexes = &CopyIndexes(indexes);
-		else
-			pIndexes = &m_indexes;
-
-		BOOL isOK	 = FALSE;
-		DWORD dwSize = (DWORD)pIndexes->size();
-
-		if(dwSize > 0 && dwSize <= dwCount)
+		if(dwSize == 0)
 		{
-			IndexSetCI it  = pIndexes->begin();
-			IndexSetCI end = pIndexes->end();
-
-			for(int i = 0; it != end; ++it, ++i)
-				ids[i] = *it;
-
-			isOK = TRUE;
+			dwCount = 0;
+			return TRUE;
 		}
 
-		dwCount = dwSize;
-		return isOK;
+		IndexSet* pIndexes = &m_indexes;
+
+		if(bCopy)
+		{
+			pIndexes = new IndexSet;
+			CopyIndexes(*pIndexes);
+		}
+
+		DWORD i = 0;
+
+		for(auto it = pIndexes->begin(), end = pIndexes->end(); i < dwCount && it != end; ++i, ++it)
+			ids[i] = *it;
+
+		if(bCopy) delete pIndexes;
+
+		dwCount = i;
+		return TRUE;
 	}
 	
 	unique_ptr<index_type[]> GetAllElementIndexes(DWORD& dwCount, BOOL bCopy = TRUE)
 	{
-		IndexSet* pIndexes = nullptr;
-		IndexSet indexes;
-
-		if(bCopy)
-			pIndexes = &CopyIndexes(indexes);
-		else
-			pIndexes = &m_indexes;
-
-		unique_ptr<index_type[]> ids;
-		dwCount = (DWORD)pIndexes->size();
+		dwCount = (DWORD)m_indexes.size();
+		unique_ptr<index_type[]> ids(new index_type[dwCount]);
 
 		if(dwCount > 0)
-		{
-			ids.reset(new index_type[dwCount]);
-
-			IndexSetCI it  = pIndexes->begin();
-			IndexSetCI end = pIndexes->end();
-
-			for(int i = 0; it != end; ++it, ++i)
-				ids[i] = *it;
-		}
+			GetAllElementIndexes(ids.get(), dwCount, bCopy);
 
 		return ids;
+	}
+	
+	IndexSet& CopyIndexes(IndexSet& indexes)
+	{
+		{
+			CReadLock locallock(m_cs);
+			indexes = m_indexes;
+		}
+
+		return indexes;
 	}
 
 	static BOOL IsValidElement(TPTR pElement) {return pElement > E_MAX_STATUS;}
 
-	DWORD Size		()	{return m_dwSize;}
-	DWORD Elements	()	{return (DWORD)m_indexes.size();}
-	DWORD Spaces	()	{return m_dwSize - m_dwCount;}
-	BOOL HasSpace	()	{return m_dwCount < m_dwSize;}
-	BOOL IsEmpty	()	{return m_dwCount == 0;}
-	BOOL IsValid	()	{return m_pv != nullptr;}
+	IndexSet& Indexes	()	{return m_indexes;}
+	DWORD Size			()	{return m_dwSize;}
+	DWORD Elements		()	{return (DWORD)m_indexes.size();}
+	DWORD Spaces		()	{return m_dwSize - m_dwCount;}
+	BOOL HasSpace		()	{return m_dwCount < m_dwSize;}
+	BOOL IsEmpty		()	{return m_dwCount == 0;}
+	BOOL IsValid		()	{return m_pv != nullptr;}
 
 private:
 
@@ -693,16 +689,6 @@ private:
 		m_dwSize	= 0;
 		m_dwCount	= 0;
 		m_dwCurSeq	= 0;
-	}
-
-	IndexSet& CopyIndexes(IndexSet& indexes)
-	{
-		{
-			CReadLock locallock(m_cs);
-			indexes = m_indexes;
-		}
-
-		return indexes;
 	}
 
 	void EmplaceIndex(index_type dwIndex)
@@ -947,74 +933,69 @@ public:
 	
 	BOOL GetAllElementIndexes(index_type ids[], DWORD& dwCount, BOOL bCopy = TRUE)
 	{
+		DWORD dwSize = Elements();
+
 		if(ids == nullptr || dwCount == 0)
 		{
-			dwCount = Elements();
+			dwCount = dwSize;
 			return FALSE;
 		}
 
-		IndexSet* pIndexes = nullptr;
-		IndexSet indexes;
-
-		if(bCopy)
-			pIndexes = &CopyIndexes(indexes);
-		else
-			pIndexes = &m_indexes;
-
-		BOOL isOK	 = FALSE;
-		DWORD dwSize = (DWORD)pIndexes->size();
-
-		if(dwSize > 0 && dwSize <= dwCount)
+		if(dwSize == 0)
 		{
-			IndexSetCI it  = pIndexes->begin();
-			IndexSetCI end = pIndexes->end();
-
-			for(int i = 0; it != end; ++it, ++i)
-				ids[i] = *it;
-
-			isOK = TRUE;
+			dwCount = 0;
+			return TRUE;
 		}
 
-		dwCount = dwSize;
+		IndexSet* pIndexes = &m_indexes;
 
-		return isOK;
+		if(bCopy)
+		{
+			pIndexes = new IndexSet;
+			CopyIndexes(*pIndexes);
+		}
+
+		DWORD i = 0;
+
+		for(auto it = pIndexes->begin(), end = pIndexes->end(); i < dwCount && it != end; ++i, ++it)
+			ids[i] = *it;
+
+		if(bCopy) delete pIndexes;
+
+		dwCount = i;
+		return TRUE;
 	}
-	
+
 	unique_ptr<index_type[]> GetAllElementIndexes(DWORD& dwCount, BOOL bCopy = TRUE)
 	{
-		IndexSet* pIndexes = nullptr;
-		IndexSet indexes;
-
-		if(bCopy)
-			pIndexes = &CopyIndexes(indexes);
-		else
-			pIndexes = &m_indexes;
-
-		unique_ptr<index_type[]> ids;
-		dwCount = (DWORD)pIndexes->size();
+		dwCount = (DWORD)m_indexes.size();
+		unique_ptr<index_type[]> ids(new index_type[dwCount]);
 
 		if(dwCount > 0)
-		{
-			ids.reset(new index_type[dwCount]);
-
-			IndexSetCI it  = pIndexes->begin();
-			IndexSetCI end = pIndexes->end();
-
-			for(int i = 0; it != end; ++it, ++i)
-				ids[i] = *it;
-		}
+			GetAllElementIndexes(ids.get(), dwCount, bCopy);
 
 		return ids;
 	}
 
+	IndexSet& CopyIndexes(IndexSet& indexes)
+	{
+		{
+			CReadLock locallock(m_cs);
+			indexes = m_indexes;
+		}
+
+		return indexes;
+	}
+
 	static BOOL IsValidElement(TPTR pElement) {return pElement > E_MAX_STATUS;}
 
-	DWORD Size		()	{return m_dwSize;}
-	DWORD Elements	()	{return (DWORD)m_indexes.size();}
-	DWORD Spaces	()	{return m_dwSize - m_dwCount;}
-	BOOL HasSpace	()	{return m_dwCount < m_dwSize;}
-	BOOL IsEmpty	()	{return m_dwCount == 0;}
-	BOOL IsValid	()	{return m_pv != nullptr;}
+	IndexSet& Indexes	()	{return m_indexes;}
+	DWORD Size			()	{return m_dwSize;}
+	DWORD Elements		()	{return (DWORD)m_indexes.size();}
+	DWORD Spaces		()	{return m_dwSize - m_dwCount;}
+	BOOL HasSpace		()	{return m_dwCount < m_dwSize;}
+	BOOL IsEmpty		()	{return m_dwCount == 0;}
+	BOOL IsValid		()	{return m_pv != nullptr;}
 
 private:
 
@@ -1045,16 +1026,6 @@ private:
 		m_dwSize	= 0;
 		m_dwCount	= 0;
 		m_dwCurSeq	= 0;
-	}
-
-	IndexSet& CopyIndexes(IndexSet& indexes)
-	{
-		{
-			CReadLock locallock(m_cs);
-			indexes = m_indexes;
-		}
-
-		return indexes;
 	}
 
 	void EmplaceIndex(index_type dwIndex)

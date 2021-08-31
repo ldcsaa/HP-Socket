@@ -32,6 +32,7 @@
 #include "TcpPackServer.h"
 #include "TcpPackClient.h"
 #include "TcpPackAgent.h"
+#include "HPThreadPool.h"
 
 #ifdef _UDP_SUPPORT
 #include "UdpServer.h"
@@ -47,8 +48,6 @@
 #include "HttpAgent.h"
 #include "HttpClient.h"
 #endif
-
-#include "HPThreadPool.h"
 
 #if !defined(_WIN64) && !defined(HPSOCKET_STATIC_LIB)
 

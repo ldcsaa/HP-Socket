@@ -110,7 +110,7 @@ BOOL CHPThreadPool::Shutdown(DWORD dwMaxWait)
 	BOOL isOK		 = TRUE;
 	BOOL bLimited	 = (m_dwMaxQueueSize != 0);
 	BOOL bInfinite	 = (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
-	auto prdShutdown = [&]() {return m_stThreads.empty();};
+	auto prdShutdown = [this]() {return m_stThreads.empty();};
 
 	if(m_enRejectedPolicy == TRP_WAIT_FOR && bLimited)
 		m_evQueue.SyncNotifyAll();
@@ -238,7 +238,7 @@ BOOL CHPThreadPool::CycleWaitSubmit(Fn_TaskProc fnTaskProc, PVOID pvArg, DWORD d
 
 	DWORD dwTime	= ::TimeGetTime();
 	BOOL bInfinite	= (dwMaxWait == (DWORD)INFINITE || dwMaxWait == 0);
-	auto prdQueue	= [&]() {return	(m_lsTasks.Size() < m_dwMaxQueueSize);};
+	auto prdQueue	= [this]() {return	(m_lsTasks.Size() < m_dwMaxQueueSize);};
 
 	while(CheckStarted()) 
 	{
@@ -379,7 +379,7 @@ int CHPThreadPool::WorkerProc()
 {
 	BOOL bLimited	= (m_dwMaxQueueSize != 0);
 	TTask* pTask	= nullptr;
-	auto prdTask	= [&]() {return (!m_lsTasks.IsEmpty()) || (m_dwThreadCount < m_stThreads.size());};
+	auto prdTask	= [this]() {return (!m_lsTasks.IsEmpty()) || (m_dwThreadCount < m_stThreads.size());};
 
 	while(TRUE)
 	{

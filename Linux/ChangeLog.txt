@@ -8,6 +8,11 @@ v5.8.5 Update:
 2. Add MSBUILD one-click compilation script.
 3. Code optimization to improve code robustness.
 
+> Third-party library Upadate
+-----------------
+1. openssl upgrade to version 1.1.1l.
+2. llhttp upgrade to version 6.0.5.
+
 ==========================================================================================
 v5.8.4 Update:
 ==========================================================================================

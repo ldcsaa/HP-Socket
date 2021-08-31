@@ -120,24 +120,4 @@
 
 #define ENSURE_STOP()							{if(GetState() != SS_STOPPED) {Stop();} Wait();}
 #define ENSURE_HAS_STOPPED()					{ASSERT(GetState() == SS_STOPPED); if(GetState() != SS_STOPPED) return;}
-
-/* 停止等待条件对象 */
-template<typename T> class CStopWaitingPredicate
-{
-public:
-	BOOL operator()()
-	{
-		return m_pThis->GetState() == SS_STOPPED;
-	}
-
-public:
-	CStopWaitingPredicate(T* pThis)
-	: m_pThis(pThis)
-	{
-
-	}
-
-private:
-	T* m_pThis;
-};
-
+#define WAIT_FOR_STOP_PREDICATE					[this]() {return GetState() == SS_STOPPED;}

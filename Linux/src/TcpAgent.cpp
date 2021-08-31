@@ -186,11 +186,14 @@ void CTcpAgent::DisconnectClientSocket()
 {
 	::WaitFor(100);
 
-	DWORD size					= 0;
-	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
+	if(m_bfActiveSockets.Elements() == 0)
+		return;
 
-	for(DWORD i = 0; i < size; i++)
-		Disconnect(ids[i]);
+	TAgentSocketObjPtrPool::IndexSet indexes;
+	m_bfActiveSockets.CopyIndexes(indexes);
+
+	for(auto it = indexes.begin(), end = indexes.end(); it != end; ++it)
+		Disconnect(*it);
 }
 
 void CTcpAgent::WaitForClientSocketClose()
@@ -788,14 +791,17 @@ BOOL CTcpAgent::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
 {
 	if(dwPeriod > MAX_CONNECTION_PERIOD)
 		return FALSE;
+	if(m_bfActiveSockets.Elements() == 0)
+		return TRUE;
 
-	DWORD size					= 0;
-	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
-	DWORD now					= ::TimeGetTime();
+	DWORD now = ::TimeGetTime();
 
-	for(DWORD i = 0; i < size; i++)
+	TAgentSocketObjPtrPool::IndexSet indexes;
+	m_bfActiveSockets.CopyIndexes(indexes);
+
+	for(auto it = indexes.begin(), end = indexes.end(); it != end; ++it)
 	{
-		CONNID connID			= ids[i];
+		CONNID connID				= *it;
 		TAgentSocketObj* pSocketObj	= FindSocketObj(connID);
 
 		if(TAgentSocketObj::IsValid(pSocketObj) && (int)(now - pSocketObj->connTime) >= (int)dwPeriod)
@@ -811,14 +817,17 @@ BOOL CTcpAgent::DisconnectSilenceConnections(DWORD dwPeriod, BOOL bForce)
 		return FALSE;
 	if(dwPeriod > MAX_CONNECTION_PERIOD)
 		return FALSE;
+	if(m_bfActiveSockets.Elements() == 0)
+		return TRUE;
 
-	DWORD size					= 0;
-	unique_ptr<CONNID[]> ids	= m_bfActiveSockets.GetAllElementIndexes(size);
-	DWORD now					= ::TimeGetTime();
+	DWORD now = ::TimeGetTime();
 
-	for(DWORD i = 0; i < size; i++)
+	TAgentSocketObjPtrPool::IndexSet indexes;
+	m_bfActiveSockets.CopyIndexes(indexes);
+
+	for(auto it = indexes.begin(), end = indexes.end(); it != end; ++it)
 	{
-		CONNID connID			= ids[i];
+		CONNID connID				= *it;
 		TAgentSocketObj* pSocketObj	= FindSocketObj(connID);
 
 		if(TAgentSocketObj::IsValid(pSocketObj) && (int)(now - pSocketObj->activeTime) >= (int)dwPeriod)
