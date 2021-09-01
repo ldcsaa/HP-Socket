@@ -4,9 +4,10 @@ v5.8.5 Update:
 
 > Major Upadate
 -----------------
-1. Troubleshooting: When client series components are used as function local variables, they may crash when destroying client objects if they are not used properly.
-2. Add MSBUILD one-click compilation script.
-3. Code optimization to improve code robustness.
+1. Add thread pool listener interface IHPThreadPoolListener to monitor thread pool life cycle events.
+2. Troubleshooting: When client series components are used as function local variables, they may crash when destroying client objects if they are not used properly.
+3. Add MSBUILD one-click compilation script.
+4. Code optimization to improve code robustness.
 
 > Third-party library Upadate
 -----------------
