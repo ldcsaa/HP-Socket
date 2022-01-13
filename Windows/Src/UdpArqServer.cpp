@@ -159,6 +159,8 @@ int CUdpArqServer::SendArq(TUdpSocketObj* pSocketObj, const BYTE* pBuffer, int i
 	if(pSession == nullptr)
 		return ERROR_OBJECT_NOT_FOUND;
 
+	CLocalSafeCounter localcounter(*pSession);
+
 	return pSession->Send(pBuffer, iLength);
 }
 
@@ -194,6 +196,8 @@ EnHandleResult CUdpArqServer::FireReceive(TUdpSocketObj* pSocketObj, const BYTE*
 {
 	CArqSessionEx* pSession = nullptr;
 	GetConnectionReserved(pSocketObj, (PVOID*)&pSession);
+
+	CLocalSafeCounter localcounter(*pSession);
 
 	CBufferPtr& rcBuffer = *m_rcBuffers[SELF_THREAD_ID];
 	return pSession->Receive(pData, iLength, rcBuffer.Ptr(), (int)rcBuffer.Size());
@@ -231,7 +235,11 @@ BOOL CUdpArqServer::GetWaitingSendMessageCount(CONNID dwConnID, int& iCount)
 		return FALSE;
 	}
 
-	iCount = pSession->GetWaitingSend();
+	{
+		CLocalSafeCounter localcounter(*pSession);
+
+		iCount = pSession->GetWaitingSend();
+	}
 
 	return (iCount >= 0);
 }

@@ -974,6 +974,8 @@ void CTcpAgent::HandleError(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 
 void CTcpAgent::HandleConnect(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	::SSO_UpdateConnectContext(pSocketObj->socket, 0);
 
 	pSocketObj->SetConnected();
@@ -989,6 +991,8 @@ void CTcpAgent::HandleConnect(CONNID dwConnID, TSocketObj* pSocketObj, TBufferOb
 
 void CTcpAgent::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	long iLength = -(long)(pBufferObj->buff.len);
 
 	switch(m_enSendPolicy)
@@ -1028,6 +1032,8 @@ void CTcpAgent::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* 
 
 void CTcpAgent::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 
 	EnHandleResult hr = TriggerFireReceive(pSocketObj, pBufferObj);
@@ -1349,6 +1355,7 @@ BOOL CTcpAgent::DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], i
 
 	if(pBuffers && iCount > 0)
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(TSocketObj::IsValid(pSocketObj))
@@ -1469,6 +1476,8 @@ int CTcpAgent::DoSend(CONNID dwConnID)
 
 int CTcpAgent::DoSend(TSocketObj* pSocketObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	switch(m_enSendPolicy)
 	{
 	case SP_PACK:			return DoSendPack(pSocketObj);

@@ -1,4 +1,18 @@
 ﻿==========================================================================================
+v5.8.6 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Optimize the garbage object collection and detection mechanism to improve the robustness of communication components in high load and high concurrency scenarios.
+
+> Third-party library Upadate
+-----------------
+1. openssl upgrade to version 1.1.1m.
+2. llhttp upgrade to version 6.0.6.
+3. mimalloc upgrade to version 1.7.3.
+
+==========================================================================================
 v5.8.5 Update:
 ==========================================================================================
 

@@ -603,7 +603,7 @@ private:
 
 template<class T, class S> class CArqSessionPoolT;
 
-template<class T, class S> class CArqSessionExT : public CArqSessionT<T, S>
+template<class T, class S> class CArqSessionExT : public CArqSessionT<T, S>, public CSafeCounter
 {
 	using __super = CArqSessionT<T, S>;
 
@@ -618,6 +618,8 @@ public:
 protected:
 	virtual void RenewExtra(const TArqAttr& attr)
 	{
+		ResetCount();
+
 		m_fdTimer = m_ioDispatcher.AddTimer(attr.dwFlushInterval, this);
 		ASSERT(IS_VALID_FD(m_fdTimer));
 	}
@@ -727,6 +729,8 @@ private:
 			return FALSE;
 
 		CArqSessionEx* pSession = (CArqSessionEx*)pv;
+
+		CLocalSafeCounter localcounter(*pSession);
 
 		if(!pSession->Check() && pSession->IsValid() && TUdpSocketObj::IsValid(pSession->m_pSocket))
 			pSession->m_pContext->Disconnect(pSession->m_pSocket->connID);

@@ -1079,6 +1079,8 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 
 void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	long iLength = -(long)(pBufferObj->buff.len);
 
 	switch(m_enSendPolicy)
@@ -1118,6 +1120,8 @@ void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 
 void CTcpServer::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 
 	EnHandleResult hr = TriggerFireReceive(pSocketObj, pBufferObj);
@@ -1259,6 +1263,7 @@ BOOL CTcpServer::DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], 
 
 	if(pBuffers && iCount > 0)
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(TSocketObj::IsValid(pSocketObj))
@@ -1379,6 +1384,8 @@ int CTcpServer::DoSend(CONNID dwConnID)
 
 int CTcpServer::DoSend(TSocketObj* pSocketObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	switch(m_enSendPolicy)
 	{
 	case SP_PACK:			return DoSendPack(pSocketObj);

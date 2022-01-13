@@ -703,6 +703,7 @@ public:
 	bool IsValid		()	const	{return id != 0;}
 
 	DWORD GetFreeTime	()	const	{return freeTime;}
+	int GetCount		()	const	{return 0;}
 
 private:
 	int IncreaseLength	(int len)	{return (length += len);}

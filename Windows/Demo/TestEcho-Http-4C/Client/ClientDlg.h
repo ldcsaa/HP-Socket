@@ -88,6 +88,7 @@ private:
 	CListBox m_Headers;
 	CEdit m_Body;
 
+	int m_iMethod;
 	BOOL m_bWebSocket;
 	BOOL m_bUseCookie;
 	BOOL m_bAsyncConn;

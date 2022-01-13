@@ -74,7 +74,8 @@ BOOL CClientDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
-	m_Method.SetCurSel(3);
+	m_iMethod = 3;
+	m_Method.SetCurSel(m_iMethod);
 	m_Schema.SetCurSel(0);
 
 	m_Path.SetWindowText(DEFAULT_PATH);
@@ -158,8 +159,8 @@ void CClientDlg::SetAppState(EnAppState state)
 	m_Schema.EnableWindow(m_enState == ST_STOPPED);
 	m_Address.EnableWindow(m_enState == ST_STOPPED);
 	m_Port.EnableWindow(m_enState == ST_STOPPED);
-	m_Body.EnableWindow(m_Method.GetCurSel() <= 2 || m_bWebSocket);
-	m_Path.EnableWindow(m_Method.GetCurSel() != 8);
+	m_Body.EnableWindow(m_iMethod <= 2 || m_bWebSocket);
+	m_Path.EnableWindow(m_iMethod != 8);
 }
 
 void CClientDlg::OnBnClickedHeaderAdd()
@@ -212,7 +213,7 @@ void CClientDlg::SendHttp()
 	m_Address.GetWindowText(strAddress);
 	m_Port.GetWindowText(strPort);
 
-	if(m_Method.GetCurSel() != 8)
+	if(m_iMethod != 8)
 	{
 		m_Path.GetWindowText(strPath);
 		strPath.Trim();
@@ -240,14 +241,14 @@ void CClientDlg::SendHttp()
 	CStringA strBodyA;
 	CStringA strPathA;
 
-	if(m_Method.GetCurSel() <= 2)
+	if(m_iMethod <= 2)
 	{
 		CString strBody;
 		m_Body.GetWindowText(strBody);
 
 		strBodyA = T2A(strBody);
 	}
-	else if(m_Method.GetCurSel() == 8)
+	else if(m_iMethod == 8)
 	{
 		THttpHeaderMapCI it = headers.find("Host");
 
@@ -358,6 +359,8 @@ void CClientDlg::OnCbnSelchangeMethod()
 {
 	m_Body.EnableWindow(m_Method.GetCurSel() <= 2 || m_bWebSocket);
 	m_Path.EnableWindow(m_Method.GetCurSel() != 8);
+
+	m_iMethod = m_Method.GetCurSel();
 }
 
 int CClientDlg::OnVKeyToItem(UINT nKey, CListBox* pListBox, UINT nIndex)
@@ -458,6 +461,9 @@ EnHttpParseResult CClientDlg::OnHeadersComplete(IHttpClient* pSender, CONNID dwC
 {
 	CStringA strSummary = GetHeaderSummary(pSender, "    ", 0, TRUE);
 	::PostOnHeadersComplete(dwConnID, strSummary);
+
+	if(m_iMethod == 8)
+		return HPR_SKIP_BODY;
 
 	return HPR_OK;
 }

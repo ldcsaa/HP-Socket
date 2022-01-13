@@ -253,7 +253,7 @@ private:
 	Fn_SNI_ServerNameCallback m_fnServerNameCallback;
 };
 
-class CSSLSession
+class CSSLSession : public CSafeCounter
 {
 public:
 

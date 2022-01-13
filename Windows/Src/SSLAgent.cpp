@@ -82,9 +82,12 @@ BOOL CSSLAgent::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount
 	GetConnectionReserved2(pSocketObj, (PVOID*)&pSession);
 
 	if(pSession != nullptr)
+	{
+		CLocalSafeCounter localcounter(*pSession);
 		return ::ProcessSend(this, pSocketObj, pSession, pBuffers, iCount);
-	else
-		return DoSendPackets(pSocketObj, pBuffers, iCount);
+	}
+
+	return DoSendPackets(pSocketObj, pBuffers, iCount);
 }
 
 EnHandleResult CSSLAgent::FireConnect(TSocketObj* pSocketObj)
@@ -103,9 +106,12 @@ EnHandleResult CSSLAgent::FireReceive(TSocketObj* pSocketObj, const BYTE* pData,
 	GetConnectionReserved2(pSocketObj, (PVOID*)&pSession);
 
 	if(pSession != nullptr)
+	{
+		CLocalSafeCounter localcounter(*pSession);
 		return ::ProcessReceive(this, pSocketObj, pSession, pData, iLength);
-	else
-		return DoFireReceive(pSocketObj, pData, iLength);
+	}
+
+	return DoFireReceive(pSocketObj, pData, iLength);
 }
 
 EnHandleResult CSSLAgent::FireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode)
@@ -179,6 +185,8 @@ BOOL CSSLAgent::StartSSLHandShake(TSocketObj* pSocketObj)
 void CSSLAgent::DoSSLHandShake(TSocketObj* pSocketObj)
 {
 	CSSLSession* pSession = m_sslPool.PickFreeSession(pSocketObj->host);
+
+	CLocalSafeCounter localcounter(*pSession);
 
 	ENSURE(SetConnectionReserved2(pSocketObj, pSession));
 	ENSURE(::ProcessHandShake(this, pSocketObj, pSession) == HR_OK);

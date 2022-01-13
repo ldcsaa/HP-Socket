@@ -1677,6 +1677,7 @@ void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 		if(lsGC.IsEmpty() || lsGC.GetCheckTimeGap() < MAX(MIN((int)(dwLockTime / 3), MAX_CHECK_INTERVAL), MIN_CHECK_INTERVAL))
 			return;
 
+		T* pFirst	= nullptr;
 		BOOL bFirst	= TRUE;
 		DWORD now	= 0;
 
@@ -1705,6 +1706,18 @@ void ReleaseGCObj(CCASQueue<T>& lsGC, DWORD dwLockTime, BOOL bForce = FALSE)
 					break;
 
 				lsGC.UnsafePopFrontNotCheck();
+
+				if(pObj->GetCount() > 0)
+				{
+					lsGC.PushBack(pObj);
+
+					if(pFirst == nullptr)
+						pFirst = pObj;
+					else if(pFirst == pObj)
+						break;
+
+					continue;
+				}
 			}
 
 			ASSERT(pObj != nullptr);

@@ -210,3 +210,69 @@ using CReentrantMTX				= CReentrantCriSec;
 using CReentrantMutexLock		= CReentrantCriSecLock;
 using CReentrantMutexLock2		= CReentrantCriSecLock2;
 using CReentrantMutexTryLock	= CReentrantCriSecTryLock;
+
+class CSafeCounter
+{
+public:
+	int Increment()		{return ::InterlockedIncrement(&m_iCount);}
+	int Decrement()		{return ::InterlockedDecrement(&m_iCount);}
+	int Add(int iCount)	{return ::InterlockedAdd(&m_iCount, iCount);}
+	int Sub(int iCount)	{return ::InterlockedSub(&m_iCount, iCount);}
+
+	int SetCount(int iCount)	{return (m_iCount = iCount);}
+	int ResetCount()			{return SetCount(0);}
+	int GetCount()				{return m_iCount;}
+
+	int operator ++ ()				{return Increment();}
+	int operator -- ()				{return Decrement();}
+	int operator += (int iCount)	{return Add(iCount);}
+	int operator -= (int iCount)	{return Sub(iCount);}
+	
+	int operator = (int iCount)		{return SetCount(iCount);}
+	operator int ()					{return GetCount();}
+
+public:
+	CSafeCounter() : m_iCount(0) {}
+
+protected:
+	volatile int m_iCount;
+};
+
+class CUnsafeCounter
+{
+public:
+	int Increment()		{return ++m_iCount;}
+	int Decrement()		{return --m_iCount;}
+	int Add(int iCount)	{return m_iCount += iCount;}
+	int Sub(int iCount)	{return m_iCount -= iCount;}
+
+	int SetCount(int iCount)	{return (m_iCount = iCount);}
+	int ResetCount()			{return SetCount(0);}
+	int GetCount()				{return m_iCount;}
+
+	int operator ++ ()				{return Increment();}
+	int operator -- ()				{return Decrement();}
+	int operator += (int iCount)	{return Add(iCount);}
+	int operator -= (int iCount)	{return Sub(iCount);}
+	
+	int operator = (int iCount)		{return SetCount(iCount);}
+	operator int ()					{return GetCount();}
+
+public:
+	CUnsafeCounter() : m_iCount(0) {}
+
+protected:
+	int m_iCount;
+};
+
+template<class CCounter> class CLocalCounter
+{
+public:
+	CLocalCounter(CCounter& obj) : m_counter(obj) {m_counter.Increment();}
+	~CLocalCounter() {m_counter.Decrement();}
+private:
+	CCounter& m_counter;
+};
+
+using CLocalSafeCounter		= CLocalCounter<CSafeCounter>;
+using CLocalUnsafeCounter	= CLocalCounter<CUnsafeCounter>;

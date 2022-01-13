@@ -856,6 +856,7 @@ BOOL CUdpServer::HandleReceive(int flag)
 			itPtr->Increase(rc);
 			
 			{
+				CLocalSafeCounter localcounter(*pSocketObj);
 				CReentrantReadLock locallock(pSocketObj->lcIo);
 
 				if(!TUdpSocketObj::IsValid(pSocketObj))
@@ -948,6 +949,7 @@ VOID CUdpServer::HandleCmdReceive(CONNID dwConnID, int flag)
 	BOOL bCancel = FALSE;
 
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CReentrantReadLock locallock(pSocketObj->lcIo);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))
@@ -1013,6 +1015,7 @@ VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
 	TItemPtr itPtr(sndBuff);
 
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CReentrantReadLock locallock(pSocketObj->lcSend);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj) || !pSocketObj->IsPending())
@@ -1174,6 +1177,7 @@ int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr)
 	BOOL bPending;
 
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))

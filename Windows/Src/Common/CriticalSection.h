@@ -371,3 +371,74 @@ typedef CLocalTryLock<CMTX>					CMutexTryLock;
 typedef CLocalTryLock<CSpinGuard>			CSpinTryLock;
 typedef CLocalTryLock<CReentrantSpinGuard>	CReentrantSpinTryLock;
 typedef	CLocalTryLock<CFakeGuard>			CFakeTryLock;
+
+class CSafeCounter
+{
+public:
+	int Increment()		{return (int)::InterlockedIncrement((LONG volatile *)&m_iCount);}
+	int Decrement()		{return (int)::InterlockedDecrement((LONG volatile *)&m_iCount);}
+#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+	int Add(int iCount)	{return (int)::InterlockedAdd((LONG volatile *)&m_iCount, iCount);}
+	int Sub(int iCount)	{return (int)::InterlockedAdd((LONG volatile *)&m_iCount, -iCount);}
+#else
+	int Add(int iCount)	{return (int)::InterlockedExchangeAdd((LONG volatile *)&m_iCount, iCount) + iCount;}
+	int Sub(int iCount)	{return (int)::InterlockedExchangeAdd((LONG volatile *)&m_iCount, -iCount) - iCount;}
+#endif
+
+	int SetCount(int iCount)	{return (m_iCount = iCount);}
+	int ResetCount()			{return SetCount(0);}
+	int GetCount()				{return m_iCount;}
+
+	int operator ++ ()				{return Increment();}
+	int operator -- ()				{return Decrement();}
+	int operator += (int iCount)	{return Add(iCount);}
+	int operator -= (int iCount)	{return Sub(iCount);}
+	
+	int operator = (int iCount)		{return SetCount(iCount);}
+	operator int ()					{return GetCount();}
+
+public:
+	CSafeCounter() : m_iCount(0) {}
+
+protected:
+	volatile int m_iCount;
+};
+
+class CUnsafeCounter
+{
+public:
+	int Increment()		{return ++m_iCount;}
+	int Decrement()		{return --m_iCount;}
+	int Add(int iCount)	{return m_iCount += iCount;}
+	int Sub(int iCount)	{return m_iCount -= iCount;}
+
+	int SetCount(int iCount)	{return (m_iCount = iCount);}
+	int ResetCount()			{return SetCount(0);}
+	int GetCount()				{return m_iCount;}
+
+	int operator ++ ()				{return Increment();}
+	int operator -- ()				{return Decrement();}
+	int operator += (int iCount)	{return Add(iCount);}
+	int operator -= (int iCount)	{return Sub(iCount);}
+	
+	int operator = (int iCount)		{return SetCount(iCount);}
+	operator int ()					{return GetCount();}
+
+public:
+	CUnsafeCounter() : m_iCount(0) {}
+
+protected:
+	int m_iCount;
+};
+
+template<class CCounter> class CLocalCounter
+{
+public:
+	CLocalCounter(CCounter& obj) : m_counter(obj) {m_counter.Increment();}
+	~CLocalCounter() {m_counter.Decrement();}
+private:
+	CCounter& m_counter;
+};
+
+typedef CLocalCounter<CSafeCounter>			CLocalSafeCounter;
+typedef CLocalCounter<CUnsafeCounter>		CLocalUnsafeCounter;

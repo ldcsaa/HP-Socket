@@ -1105,6 +1105,8 @@ void CUdpServer::HandleSend(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 		return;
 	}
 
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	long iLength = -(long)(pBufferObj->buff.len);
 
 	switch(m_enSendPolicy)
@@ -1158,6 +1160,8 @@ void CUdpServer::ProcessReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 	if(dwConnID != 0)
 	{
 		TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
+
+		CLocalSafeCounter localcounter(*pSocketObj);
 
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
@@ -1305,6 +1309,7 @@ int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr
 	int result = NO_ERROR;
 
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CCriSecLock locallock(pSocketObj->csSend);
 
 		if(!TUdpSocketObj::IsValid(pSocketObj))
@@ -1383,6 +1388,8 @@ int CUdpServer::DoSend(CONNID dwConnID)
 
 int CUdpServer::DoSend(TUdpSocketObj* pSocketObj)
 {
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	switch(m_enSendPolicy)
 	{
 	case SP_PACK:			return DoSendPack(pSocketObj);

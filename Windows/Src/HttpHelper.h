@@ -697,6 +697,7 @@ private:
 	}
 
 public:
+	int GetCount()		const		{return 0;}
 	DWORD GetFreeTime() const		{return m_dwFreeTime;}
 	void SetFree()					{m_dwFreeTime = ::TimeGetTime();}
 

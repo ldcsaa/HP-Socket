@@ -925,6 +925,8 @@ CSSLSession* CSSLSession::Renew(const CSSLContext& sslCtx, LPCSTR lpszHostName)
 {
 	ASSERT(!IsValid());
 
+	ResetCount();
+
 	m_ssl		= SSL_new(sslCtx.GetDefaultContext());
 	m_bioSend	= BIO_new(BIO_s_mem());
 	m_bioRecv	= BIO_new(BIO_s_mem());

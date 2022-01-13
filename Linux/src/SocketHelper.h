@@ -303,7 +303,7 @@ typedef TReceiveBufferMap::iterator			TReceiveBufferMapI;
 typedef TReceiveBufferMap::const_iterator	TReceiveBufferMapCI;
 
 /* Socket 缓冲区基础结构 */
-struct TSocketObjBase
+struct TSocketObjBase : public CSafeCounter
 {
 	CPrivateHeap& heap;
 
@@ -349,6 +349,8 @@ struct TSocketObjBase
 
 	void Reset(CONNID dwConnID)
 	{
+		ResetCount();
+
 		connID		= dwConnID;
 		connected	= FALSE;
 		valid		= TRUE;

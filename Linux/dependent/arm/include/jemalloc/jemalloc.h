@@ -235,7 +235,7 @@ extern "C" {
 #  define JEMALLOC_COLD
 #endif
 
-#if defined(__APPLE__) && !defined(JEMALLOC_NO_RENAME)
+#if (defined(__APPLE__) || defined(__FreeBSD__)) && !defined(JEMALLOC_NO_RENAME)
 #  define JEMALLOC_SYS_NOTHROW
 #else
 #  define JEMALLOC_SYS_NOTHROW JEMALLOC_NOTHROW
@@ -296,6 +296,10 @@ JEMALLOC_EXPORT void JEMALLOC_NOTHROW	je_malloc_stats_print(
     const char *opts);
 JEMALLOC_EXPORT size_t JEMALLOC_NOTHROW	je_malloc_usable_size(
     JEMALLOC_USABLE_SIZE_CONST void *ptr) JEMALLOC_CXX_THROW;
+#ifdef JEMALLOC_HAVE_MALLOC_SIZE
+JEMALLOC_EXPORT size_t JEMALLOC_NOTHROW	je_malloc_size(
+    const void *ptr);
+#endif
 
 #ifdef JEMALLOC_OVERRIDE_MEMALIGN
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN

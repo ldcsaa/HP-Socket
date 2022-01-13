@@ -596,7 +596,7 @@ private:
 	IKCPCB* m_kcp;
 };
 
-template<class T, class S> class CArqSessionExT : public CArqSessionT<T, S>
+template<class T, class S> class CArqSessionExT : public CArqSessionT<T, S>, public CSafeCounter
 {
 public:
 	DWORD GetFreeTime	()	const	{return m_dwFreeTime;}
@@ -605,6 +605,8 @@ public:
 protected:
 	virtual void RenewExtra(const TArqAttr& attr)
 	{
+		ResetCount();
+
 		m_hTimer = m_tqFlush.CreateTimer(FlushProc, this, attr.dwFlushInterval);
 	}
 
@@ -620,6 +622,8 @@ private:
 	static void WINAPI FlushProc(LPVOID pv, BOOLEAN bTimerFired)
 	{
 		CArqSessionExT* pSession = (CArqSessionExT*)pv;
+
+		CLocalSafeCounter localcounter(*pSession);
 
 		if(!pSession->Check() && pSession->IsValid() && TUdpSocketObj::IsValid(pSession->m_pSocket))
 			pSession->m_pContext->Disconnect(pSession->m_pSocket->connID);

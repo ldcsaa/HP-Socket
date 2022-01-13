@@ -708,11 +708,14 @@ BOOL CTcpServer::OnBeforeProcessIo(PVOID pv, UINT events)
 	if(events & _EPOLL_ALL_ERROR_EVENTS)
 		pSocketObj->SetConnected(FALSE);
 
+	pSocketObj->Increment();
 	pSocketObj->csIo.lock();
 
 	if(!TSocketObj::IsValid(pSocketObj))
 	{
 		pSocketObj->csIo.unlock();
+		pSocketObj->Decrement();
+
 		return FALSE;
 	}
 
@@ -732,6 +735,7 @@ VOID CTcpServer::OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)
 	}
 
 	pSocketObj->csIo.unlock();
+	pSocketObj->Decrement();
 }
 
 VOID CTcpServer::OnCommand(TDispCommand* pCmd)
@@ -1051,6 +1055,7 @@ BOOL CTcpServer::DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], 
 
 	if(pBuffers && iCount > 0)
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CReentrantCriSecLock locallock(pSocketObj->csSend);
 
 		if(TSocketObj::IsValid(pSocketObj))

@@ -150,12 +150,12 @@ inline void PrintError(LPCSTR subject)	{perror(subject);}
 #define FREE(p)							free((PVOID)(p))
 #define CALLOC(n, s)					calloc((n), (s))
 
-#define InterlockedAdd(p, n)			__atomic_fetch_add((p), (n), memory_order_seq_cst)
-#define InterlockedSub(p, n)			__atomic_fetch_sub((p), (n), memory_order_seq_cst)
-#define InterlockedExchangeAdd(p, n)	__atomic_add_fetch((p), (n), memory_order_seq_cst)
-#define InterlockedExchangeSub(p, n)	__atomic_sub_fetch((p), (n), memory_order_seq_cst)
-#define InterlockedIncrement(p)			InterlockedExchangeAdd((p), 1)
-#define InterlockedDecrement(p)			InterlockedExchangeSub((p), 1)
+#define InterlockedExchangeAdd(p, n)	__atomic_fetch_add((p), (n), memory_order_seq_cst)
+#define InterlockedExchangeSub(p, n)	__atomic_fetch_sub((p), (n), memory_order_seq_cst)
+#define InterlockedAdd(p, n)			__atomic_add_fetch((p), (n), memory_order_seq_cst)
+#define InterlockedSub(p, n)			__atomic_sub_fetch((p), (n), memory_order_seq_cst)
+#define InterlockedIncrement(p)			InterlockedAdd((p), 1)
+#define InterlockedDecrement(p)			InterlockedSub((p), 1)
 
 #define ERROR_EXIT2(code, err)			EXIT((code), (err), __FILE__, __LINE__, __PRETTY_FUNCTION__)
 #define ERROR__EXIT2(code, err)			_EXIT((code), (err), __FILE__, __LINE__, __PRETTY_FUNCTION__)

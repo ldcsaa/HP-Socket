@@ -874,11 +874,14 @@ BOOL CTcpAgent::OnBeforeProcessIo(PVOID pv, UINT events)
 	if(events & _EPOLL_ALL_ERROR_EVENTS)
 		pSocketObj->SetConnected(FALSE);
 
+	pSocketObj->Increment();
 	pSocketObj->csIo.lock();
 
 	if(!TAgentSocketObj::IsValid(pSocketObj))
 	{
 		pSocketObj->csIo.unlock();
+		pSocketObj->Decrement();
+
 		return FALSE;
 	}
 
@@ -887,6 +890,8 @@ BOOL CTcpAgent::OnBeforeProcessIo(PVOID pv, UINT events)
 		HandleConnect(pSocketObj, events);
 
 		pSocketObj->csIo.unlock();
+		pSocketObj->Decrement();
+
 		return FALSE;
 	}
 
@@ -906,6 +911,7 @@ VOID CTcpAgent::OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)
 	}
 
 	pSocketObj->csIo.unlock();
+	pSocketObj->Decrement();
 }
 
 VOID CTcpAgent::OnCommand(TDispCommand* pCmd)
@@ -1205,6 +1211,7 @@ BOOL CTcpAgent::DoSendPackets(TAgentSocketObj* pSocketObj, const WSABUF pBuffers
 
 	if(pBuffers && iCount > 0)
 	{
+		CLocalSafeCounter localcounter(*pSocketObj);
 		CReentrantCriSecLock locallock(pSocketObj->csSend);
 
 		if(TAgentSocketObj::IsValid(pSocketObj))

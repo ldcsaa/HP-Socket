@@ -404,7 +404,7 @@ typedef TItemPtrT<TBufferObj>			TBufferObjPtr;
 typedef TItemPtrT<TUdpBufferObj>		TUdpBufferObjPtr;
 
 /* Socket 缓冲区基础结构 */
-struct TSocketObjBase
+struct TSocketObjBase : public CSafeCounter
 {
 	CPrivateHeap& heap;
 
@@ -463,6 +463,8 @@ struct TSocketObjBase
 
 	void Reset(CONNID dwConnID)
 	{
+		ResetCount();
+
 		connID		= dwConnID;
 		connected	= FALSE;
 		valid		= TRUE;
