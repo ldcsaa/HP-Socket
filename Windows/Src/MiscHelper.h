@@ -109,7 +109,7 @@ template<class T, class B, class S> EnHandleResult ParsePack(T* pThis, TPackInfo
 
 		if(pInfo->header)
 		{
-			DWORD header = ::HToLE32(*((DWORD*)(byte*)buffer));
+			DWORD header = ::HToLE32(*((DWORD*)(BYTE*)buffer));
 
 			if(usPackHeaderFlag != 0)
 			{

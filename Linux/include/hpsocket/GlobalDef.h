@@ -137,7 +137,6 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 #define MINDWORD				0x00000000
 #define MAXDWORD				0xFFFFFFFF
 
-
 #ifdef _UNICODE
 	#define __T(x)				L ## x
 #else
@@ -260,4 +259,20 @@ typedef const TCHAR				*PCTSTR, *LPCTSTR;
 
 #if !defined(WINAPI)
 	#define WINAPI
+#endif
+
+#if !defined(FORCEINLINE)
+	#ifdef __GNUC__
+		#define FORCEINLINE		__attribute__ ((always_inline))
+	#else 
+		#define FORCEINLINE		inline
+	#endif
+#endif
+
+#if !defined(STATIC_FORCEINLINE)
+	#define STATIC_FORCEINLINE	static FORCEINLINE
+#endif
+
+#if !defined(EXTERN_FORCEINLINE)
+	#define EXTERN_FORCEINLINE	extern FORCEINLINE
 #endif

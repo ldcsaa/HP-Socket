@@ -211,58 +211,64 @@ using CReentrantMutexLock		= CReentrantCriSecLock;
 using CReentrantMutexLock2		= CReentrantCriSecLock2;
 using CReentrantMutexTryLock	= CReentrantCriSecTryLock;
 
-class CSafeCounter
+template<typename T, typename = enable_if_t<is_arithmetic<T>::value>> class CSafeCounterT
 {
 public:
-	int Increment()		{return ::InterlockedIncrement(&m_iCount);}
-	int Decrement()		{return ::InterlockedDecrement(&m_iCount);}
-	int Add(int iCount)	{return ::InterlockedAdd(&m_iCount, iCount);}
-	int Sub(int iCount)	{return ::InterlockedSub(&m_iCount, iCount);}
+	T Increment()				{return ::InterlockedIncrement(&m_iCount);}
+	T Decrement()				{return ::InterlockedDecrement(&m_iCount);}
+	T AddFetch(T iCount)		{return ::InterlockedAdd(&m_iCount, iCount);}
+	T SubFetch(T iCount)		{return ::InterlockedSub(&m_iCount, iCount);}
+	T FetchAdd(T iCount)		{return ::InterlockedExchangeAdd(&m_iCount, iCount);}
+	T FetchSub(T iCount)		{return ::InterlockedExchangeSub(&m_iCount, iCount);}
 
-	int SetCount(int iCount)	{return (m_iCount = iCount);}
-	int ResetCount()			{return SetCount(0);}
-	int GetCount()				{return m_iCount;}
+	T SetCount(T iCount)		{return (m_iCount = iCount);}
+	T ResetCount()				{return SetCount(0);}
+	T GetCount()				{return m_iCount;}
 
-	int operator ++ ()				{return Increment();}
-	int operator -- ()				{return Decrement();}
-	int operator += (int iCount)	{return Add(iCount);}
-	int operator -= (int iCount)	{return Sub(iCount);}
-	
-	int operator = (int iCount)		{return SetCount(iCount);}
-	operator int ()					{return GetCount();}
+	T operator ++ ()			{return Increment();}
+	T operator -- ()			{return Decrement();}
+	T operator ++ (int)			{return FetchAdd(1);}
+	T operator -- (int)			{return FetchSub(1);}
+	T operator += (T iCount)	{return AddFetch(iCount);}
+	T operator -= (T iCount)	{return SubFetch(iCount);}
+	T operator  = (T iCount)	{return SetCount(iCount);}
+	operator T	  ()			{return GetCount();}
 
 public:
-	CSafeCounter() : m_iCount(0) {}
+	CSafeCounterT(T iCount = 0) : m_iCount(iCount) {}
 
 protected:
-	volatile int m_iCount;
+	volatile T m_iCount;
 };
 
-class CUnsafeCounter
+template<typename T, typename = enable_if_t<is_arithmetic<T>::value>> class CUnsafeCounterT
 {
 public:
-	int Increment()		{return ++m_iCount;}
-	int Decrement()		{return --m_iCount;}
-	int Add(int iCount)	{return m_iCount += iCount;}
-	int Sub(int iCount)	{return m_iCount -= iCount;}
+	T Increment()				{return ++m_iCount;}
+	T Decrement()				{return --m_iCount;}
+	T AddFetch(T iCount)		{return m_iCount += iCount;}
+	T SubFetch(T iCount)		{return m_iCount -= iCount;}
+	T FetchAdd(T iCount)		{T rs = m_iCount; m_iCount += iCount; return rs;}
+	T FetchSub(T iCount)		{T rs = m_iCount; m_iCount -= iCount; return rs;}
 
-	int SetCount(int iCount)	{return (m_iCount = iCount);}
-	int ResetCount()			{return SetCount(0);}
-	int GetCount()				{return m_iCount;}
+	T SetCount(T iCount)		{return (m_iCount = iCount);}
+	T ResetCount()				{return SetCount(0);}
+	T GetCount()				{return m_iCount;}
 
-	int operator ++ ()				{return Increment();}
-	int operator -- ()				{return Decrement();}
-	int operator += (int iCount)	{return Add(iCount);}
-	int operator -= (int iCount)	{return Sub(iCount);}
-	
-	int operator = (int iCount)		{return SetCount(iCount);}
-	operator int ()					{return GetCount();}
+	T operator ++ ()			{return Increment();}
+	T operator -- ()			{return Decrement();}
+	T operator ++ (int)			{return FetchAdd(1);}
+	T operator -- (int)			{return FetchSub(1);}
+	T operator += (T iCount)	{return AddFetch(iCount);}
+	T operator -= (T iCount)	{return SubFetch(iCount);}
+	T operator  = (T iCount)	{return SetCount(iCount);}
+	operator T	  ()			{return GetCount();}
 
 public:
-	CUnsafeCounter() : m_iCount(0) {}
+	CUnsafeCounterT(T iCount = 0) : m_iCount(iCount) {}
 
 protected:
-	int m_iCount;
+	T m_iCount;
 };
 
 template<class CCounter> class CLocalCounter
@@ -274,5 +280,12 @@ private:
 	CCounter& m_counter;
 };
 
-using CLocalSafeCounter		= CLocalCounter<CSafeCounter>;
-using CLocalUnsafeCounter	= CLocalCounter<CUnsafeCounter>;
+using CSafeCounter				= CSafeCounterT<INT>;
+using CSafeBigCounter			= CSafeCounterT<LONGLONG>;
+using CUnsafeCounter			= CUnsafeCounterT<INT>;
+using CUnsafeBigCounter			= CUnsafeCounterT<LONGLONG>;
+
+using CLocalSafeCounter			= CLocalCounter<CSafeCounter>;
+using CLocalSafeBigCounter		= CLocalCounter<CSafeBigCounter>;
+using CLocalUnsafeCounter		= CLocalCounter<CUnsafeCounter>;
+using CLocalUnsafeBigCounter	= CLocalCounter<CUnsafeBigCounter>;

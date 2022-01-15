@@ -222,6 +222,9 @@ protected:
 
 template<class T, USHORT default_port> class CHttpSyncClientT : public CHttpClientT<IHttpSyncRequester, T, default_port>, private CHttpClientListener
 {
+protected:
+	using typename CHttpClientT::THttpObj;
+
 public:
 	virtual BOOL Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect = TRUE, LPCTSTR lpszBindAddress = nullptr, USHORT usLocalPort = 0);
 public:

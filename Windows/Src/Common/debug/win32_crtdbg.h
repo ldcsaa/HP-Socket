@@ -94,6 +94,8 @@ inline void* __cdecl operator new[](size_t nSize)
 	return operator new(nSize, __FILE__, __LINE__);
 }
 
+#if _MSVC_LANG < 201700L
+
 inline void* __cdecl operator new(size_t nSize, const std::nothrow_t&)
 {
 	return operator new(nSize, __FILE__, __LINE__);
@@ -103,6 +105,30 @@ inline void* __cdecl operator new[](size_t nSize, const std::nothrow_t&)
 {
 	return operator new(nSize, __FILE__, __LINE__);
 }
+
+#else
+
+inline void* __cdecl operator new(size_t nSize, const std::nothrow_t&) noexcept
+{
+	return operator new(nSize, __FILE__, __LINE__);
+}
+
+inline void* __cdecl operator new[](size_t nSize, const std::nothrow_t&)  noexcept
+{
+	return operator new(nSize, __FILE__, __LINE__);
+}
+
+inline void* __cdecl operator new(size_t nSize, std::align_val_t)
+{
+	return operator new(nSize, __FILE__, __LINE__);
+}
+
+inline void* __cdecl operator new[](size_t nSize, std::align_val_t)
+{
+	return operator new(nSize, __FILE__, __LINE__);
+}
+
+#endif
 
 inline void __cdecl operator delete(void* p)
 {
