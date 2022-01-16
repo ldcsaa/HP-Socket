@@ -3012,3 +3012,79 @@ public:
 	virtual void OnWorkerThreadStart(IHPThreadPool* pThreadPool, THR_ID dwThreadID)	override {}
 	virtual void OnWorkerThreadEnd(IHPThreadPool* pThreadPool, THR_ID dwThreadID)	override {}
 };
+
+/************************************************************************
+名称：压缩器接口
+描述：定义压缩器的所有操作方法和属性访问方法
+************************************************************************/
+class IHPCompressor
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：执行压缩
+	* 描述：可循环调用以压缩流式或分段数据
+	*		
+	* 参数：		pData		-- 待压缩数据缓冲区
+	*			iLength		-- 待压缩数据长度
+	*			pContext	-- 压缩回调函数 Fn_CompressDataCallback 的上下文参数
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
+	*/
+	virtual BOOL Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext = nullptr)	= 0;
+
+	/* 重置压缩器 */
+	virtual BOOL Reset()																		= 0;
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 检测压缩器是否可用 */
+	virtual BOOL IsValid()																		= 0;
+
+public:
+	virtual ~IHPCompressor() = default;
+};
+
+/************************************************************************
+名称：解压器接口
+描述：定义解压器的所有操作方法和属性访问方法
+************************************************************************/
+class IHPDecompressor
+{
+public:
+
+	/***********************************************************************/
+	/***************************** 组件操作方法 *****************************/
+
+	/*
+	* 名称：执行解压
+	* 描述：可循环调用以解压流式或分段数据
+	*		
+	* 参数：		pData		-- 待解压数据缓冲区
+	*			iLength		-- 待解压数据长度
+	*			pContext	-- 解压回调函数 Fn_DecompressDataCallback 的上下文参数
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
+	*/
+	virtual BOOL Process(const BYTE* pData, int iLength, PVOID pContext = nullptr)	= 0;
+
+	/* 重置解压器 */
+	virtual BOOL Reset()															= 0;
+
+public:
+
+	/***********************************************************************/
+	/***************************** 属性访问方法 *****************************/
+
+	/* 检测解压器是否可用 */
+	virtual BOOL IsValid()															= 0;
+
+public:
+	virtual ~IHPDecompressor() = default;
+};

@@ -4,7 +4,8 @@ v5.8.6 Update:
 
 > Major Upadate
 -----------------
-1. Optimize the garbage object collection and detection mechanism to improve the robustness of communication components in high load and high concurrency scenarios.
+1. Added ZLib/GZip, Brotil streaming compression/decompression components: IHPCompressor and IHPDecompressor.
+2. Optimize the garbage object collection and detection mechanism to improve the robustness of communication components in high load and high concurrency scenarios.
 
 > Third-party library Upadate
 -----------------

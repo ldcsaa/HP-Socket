@@ -534,3 +534,23 @@ THeader, HP_THeader, *LPHEADER, *HP_LPHEADER,
 TCookie, HP_TCookie, *LPCOOKIE, *HP_LPCOOKIE;
 
 #endif
+
+/************************************************************************
+名称：数据回调函数
+描述：回调处理过程中产生的数据输出
+参数：	
+	pData		-- 数据缓冲区
+	iLength		-- 数据长度
+	pContext	-- 回调上下文
+
+返回值：
+		TRUE	-- 成功
+		FALSE	-- 失败
+
+************************************************************************/
+typedef BOOL (__HP_CALL *Fn_DataCallback)(const BYTE* pData, int iLength, PVOID pContext);
+typedef Fn_DataCallback	Fn_CompressDataCallback;
+typedef Fn_DataCallback	Fn_DecompressDataCallback;
+typedef Fn_DataCallback	HP_Fn_DataCallback;
+typedef Fn_DataCallback	HP_Fn_CompressDataCallback;
+typedef Fn_DataCallback	HP_Fn_DecompressDataCallback;

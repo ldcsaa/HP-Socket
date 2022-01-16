@@ -776,3 +776,34 @@ struct HPThreadPool_Creator
 
 // IHPThreadPool 对象智能指针
 typedef CHPObjectPtr<IHPThreadPool, IHPThreadPoolListener, HPThreadPool_Creator>	CHPThreadPoolPtr;
+
+/*****************************************************************************************************************************************************/
+/********************************************************* Compressor / Decompressor Exports *********************************************************/
+/*****************************************************************************************************************************************************/
+
+/* 销毁压缩器对象 */
+HPSOCKET_API void HP_Destroy_Compressor(IHPCompressor* pCompressor);
+/* 销毁解压器对象 */
+HPSOCKET_API void HP_Destroy_Decompressor(IHPDecompressor* pDecompressor);
+
+#ifdef _ZLIB_SUPPORT
+
+/* 创建 ZLib 压缩器对象 */
+HPSOCKET_API IHPCompressor* HP_Create_ZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = 15, int iLevel = -1, int iMethod = 8, int iMemLevel = 8, int iStrategy = 0);
+/* 创建 GZip 压缩器对象 */
+HPSOCKET_API IHPCompressor* HP_Create_GZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel = -1, int iMethod = 8, int iMemLevel = 8, int iStrategy = 0);
+/* 创建 ZLib 解压器对象 */
+HPSOCKET_API IHPDecompressor* HP_Create_ZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = 15);
+/* 创建 GZip 解压器对象 */
+HPSOCKET_API IHPDecompressor* HP_Create_GZipDecompressor(Fn_DecompressDataCallback fnCallback);
+
+#endif
+
+#ifdef _BROTLI_SUPPORT
+
+/* 创建 Brotli 压缩器对象 */
+HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback);
+/* 创建 Brotli 解压器对象 */
+HPSOCKET_API IHPDecompressor* HP_Create_BrotliDecompressor(Fn_DecompressDataCallback fnCallback);
+
+#endif

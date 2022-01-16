@@ -670,3 +670,55 @@ HPSOCKET_API void HP_Destroy_SocketTaskObj(LPTSocketTask pTask)
 {
 	::DestroySocketTaskObj(pTask);
 }
+
+/*****************************************************************************************************************************************************/
+/********************************************************* Compressor / Decompressor Exports *********************************************************/
+/*****************************************************************************************************************************************************/
+
+HPSOCKET_API void HP_Destroy_Compressor(IHPCompressor* pCompressor)
+{
+	::DestroyCompressor(pCompressor);
+}
+
+HPSOCKET_API void HP_Destroy_Decompressor(IHPDecompressor* pDecompressor)
+{
+	::DestroyDecompressor(pDecompressor);
+}
+
+#ifdef _ZLIB_SUPPORT
+
+HPSOCKET_API IHPCompressor* HP_Create_ZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+{
+	return ::CreateZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
+}
+
+HPSOCKET_API IHPCompressor* HP_Create_GZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+{
+	return ::CreateGZipCompressor(fnCallback, iLevel, iMethod, iMemLevel, iStrategy);
+}
+
+HPSOCKET_API IHPDecompressor* HP_Create_ZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits)
+{
+	return ::CreateZLibDecompressor(fnCallback, iWindowBits);
+}
+
+HPSOCKET_API IHPDecompressor* HP_Create_GZipDecompressor(Fn_DecompressDataCallback fnCallback)
+{
+	return ::CreateGZipDecompressor(fnCallback);
+}
+
+#endif
+
+#ifdef _BROTLI_SUPPORT
+
+HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback)
+{
+	return ::CreateBrotliCompressor(fnCallback);
+}
+
+HPSOCKET_API IHPDecompressor* HP_Create_BrotliDecompressor(Fn_DecompressDataCallback fnCallback)
+{
+	return ::CreateBrotliDecompressor(fnCallback);
+}
+
+#endif

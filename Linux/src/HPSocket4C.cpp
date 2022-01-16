@@ -3574,3 +3574,109 @@ HPSOCKET_API En_HP_RejectedPolicy __HP_CALL HP_ThreadPool_GetRejectedPolicy(HP_T
 {
 	return ((IHPThreadPool*)pThreadPool)->GetRejectedPolicy();
 }
+
+/*****************************************************************************************************************************************************/
+/********************************************************* Compressor / Decompressor Exports *********************************************************/
+/*****************************************************************************************************************************************************/
+
+/****************************************************/
+/******************* 对象创建函数 ********************/
+
+HPSOCKET_API void __HP_CALL Destroy_HP_Compressor(HP_Compressor pCompressor)
+{
+	::DestroyCompressor((IHPCompressor*)pCompressor);
+}
+
+HPSOCKET_API void __HP_CALL Destroy_HP_Decompressor(HP_Decompressor pDecompressor)
+{
+	::DestroyDecompressor((IHPDecompressor*)pDecompressor);
+}
+
+#ifdef _ZLIB_SUPPORT
+
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressDataCallback fnCallback)
+{
+	return ::CreateZLibCompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+{
+	return ::CreateZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
+}
+
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressDataCallback fnCallback)
+{
+	return ::CreateGZipCompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+{
+	return ::CreateGZipCompressor(fnCallback, iLevel, iMethod, iMemLevel, iStrategy);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback)
+{
+	return ::CreateZLibDecompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits)
+{
+	return ::CreateZLibDecompressor(fnCallback, iWindowBits);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_DecompressDataCallback fnCallback)
+{
+	return ::CreateGZipDecompressor(fnCallback);
+}
+
+#endif
+
+#ifdef _BROTLI_SUPPORT
+
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDataCallback fnCallback)
+{
+	return ::CreateBrotliCompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback)
+{
+	return ::CreateBrotliDecompressor(fnCallback);
+}
+
+#endif
+
+/***********************************************************************/
+/***************************** 组件操作方法 *****************************/
+
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_Process(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
+{
+	return ((IHPCompressor*)pCompressor)->Process(pData, iLength, bLast, pContext);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_Reset(HP_Compressor pCompressor)
+{
+	return ((IHPCompressor*)pCompressor)->Reset();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Decompressor_Process(HP_Decompressor pDecompressor, const BYTE* pData, int iLength, PVOID pContext)
+{
+	return ((IHPDecompressor*)pDecompressor)->Process(pData, iLength, pContext);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Decompressor_Reset(HP_Decompressor pDecompressor)
+{
+	return ((IHPDecompressor*)pDecompressor)->Reset();
+}
+
+/***********************************************************************/
+/***************************** 属性访问方法 *****************************/
+
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_IsValid(HP_Compressor pCompressor)
+{
+	return ((IHPCompressor*)pCompressor)->IsValid();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Decompressor_IsValid(HP_Decompressor pDecompressor)
+{
+	return ((IHPDecompressor*)pDecompressor)->IsValid();
+}

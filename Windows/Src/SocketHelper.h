@@ -952,10 +952,9 @@ int UrlEncode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
 // URL 解码（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int UrlDecode(BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
 
-
-/* 删除压缩器 */
+/* 销毁压缩器对象 */
 void DestroyCompressor(IHPCompressor* pCompressor);
-/* 删除解压器 */
+/* 销毁解压器对象 */
 void DestroyDecompressor(IHPDecompressor* pDecompressor);
 
 #ifdef _ZLIB_SUPPORT
@@ -996,13 +995,13 @@ private:
 	BOOL m_bValid;
 };
 
-/* 创建 ZLib 压缩器 */
+/* 创建 ZLib 压缩器对象 */
 IHPCompressor* CreateZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
-/* 创建 GZip 压缩器 */
+/* 创建 GZip 压缩器对象 */
 IHPCompressor* CreateGZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
-/* 创建 ZLib 解压器 */
+/* 创建 ZLib 解压器对象 */
 IHPDecompressor* CreateZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS);
-/* 创建 GZip 解压器 */
+/* 创建 GZip 解压器对象 */
 IHPDecompressor* CreateGZipDecompressor(Fn_DecompressDataCallback fnCallback);
 
 // 普通压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
@@ -1063,9 +1062,9 @@ private:
 	BOOL m_bValid;
 };
 
-/* 创建 Brotli 压缩器 */
+/* 创建 Brotli 压缩器对象 */
 IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback);
-/* 创建 Brotli 解压器 */
+/* 创建 Brotli 解压器对象 */
 IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback);
 
 // Brotli 压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）

@@ -98,6 +98,8 @@ typedef HP_Object	HP_TcpPackServer;
 typedef HP_Object	HP_TcpPackAgent;
 typedef HP_Object	HP_TcpPackClient;
 typedef HP_Object	HP_ThreadPool;
+typedef HP_Object	HP_Compressor;
+typedef HP_Object	HP_Decompressor;
 
 typedef HP_Object	HP_Listener;
 typedef HP_Object	HP_ServerListener;
@@ -2705,3 +2707,90 @@ HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetThreadCount(HP_ThreadPool pThreadP
 HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetMaxQueueSize(HP_ThreadPool pThreadPool);
 /* 获取任务拒绝处理策略 */
 HPSOCKET_API En_HP_RejectedPolicy __HP_CALL HP_ThreadPool_GetRejectedPolicy(HP_ThreadPool pThreadPool);
+
+/*****************************************************************************************************************************************************/
+/********************************************************* Compressor / Decompressor Exports *********************************************************/
+/*****************************************************************************************************************************************************/
+
+/****************************************************/
+/******************* 对象创建函数 ********************/
+
+/* 销毁压缩器对象 */
+HPSOCKET_API void __HP_CALL Destroy_HP_Compressor(HP_Compressor pCompressor);
+/* 销毁解压器对象 */
+HPSOCKET_API void __HP_CALL Destroy_HP_Decompressor(HP_Decompressor pDecompressor);
+
+#ifdef _ZLIB_SUPPORT
+
+/* 创建 ZLib 压缩器对象 */
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressDataCallback fnCallback);
+/* 创建 ZLib 压缩器对象 */
+// （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits /*= 15*/, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
+/* 创建 GZip 压缩器对象 */
+// （默认参数：iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressDataCallback fnCallback);
+/* 创建 GZip 压缩器对象 */
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel /*= -1*/, int iMethod /*= */, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
+/* 创建 ZLib 解压器对象 */
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback);
+/* 创建 ZLib 解压器对象 */
+// （默认参数：iWindowBits = 15）
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits /*= 15*/);
+/* 创建 GZip 解压器对象 */
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_DecompressDataCallback fnCallback);
+
+#endif
+
+#ifdef _BROTLI_SUPPORT
+
+/* 创建 Brotli 压缩器对象 */
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDataCallback fnCallback);
+/* 创建 Brotli 解压器对象 */
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback);
+
+#endif
+
+/***********************************************************************/
+/***************************** 组件操作方法 *****************************/
+
+/*
+* 名称：执行压缩
+* 描述：可循环调用以压缩流式或分段数据
+*		
+* 参数：		pData		-- 待压缩数据缓冲区
+*			iLength		-- 待压缩数据长度
+*			pContext	-- 压缩回调函数 Fn_CompressDataCallback 的上下文参数
+*
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
+*/
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_Process(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, PVOID pContext /*= nullptr*/);
+
+/* 重置压缩器 */
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_Reset(HP_Compressor pCompressor);
+
+/*
+* 名称：执行解压
+* 描述：可循环调用以解压流式或分段数据
+*		
+* 参数：		pData		-- 待解压数据缓冲区
+*			iLength		-- 待解压数据长度
+*			pContext	-- 解压回调函数 Fn_DecompressDataCallback 的上下文参数
+*
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
+*/
+HPSOCKET_API BOOL __HP_CALL HP_Decompressor_Process(HP_Decompressor pDecompressor, const BYTE* pData, int iLength, PVOID pContext /*= nullptr*/);
+
+/* 重置解压器 */
+HPSOCKET_API BOOL __HP_CALL HP_Decompressor_Reset(HP_Decompressor pDecompressor);
+
+/***********************************************************************/
+/***************************** 属性访问方法 *****************************/
+
+/* 检测压缩器是否可用 */
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_IsValid(HP_Compressor pCompressor);
+
+/* 检测解压器是否可用 */
+HPSOCKET_API BOOL __HP_CALL HP_Decompressor_IsValid(HP_Decompressor pDecompressor);

@@ -1,4 +1,28 @@
 ﻿# ======================================== #
+HP-Socket v5.8.6 API Update List:
+# ======================================== #
+--------------------
+1、Compress:
+--------------------
+Create_HP_ZLibCompressor					(ADD)
+Create_HP_ZLibCompressorEx					(ADD)
+Create_HP_GZipCompressor					(ADD)
+Create_HP_GZipCompressorEx					(ADD)
+Create_HP_ZLibDecompressor					(ADD)
+Create_HP_ZLibDecompressorEx				(ADD)
+Create_HP_GZipDecompressor					(ADD)
+Create_HP_BrotliCompressor					(ADD)
+Create_HP_BrotliDecompressor				(ADD)
+Destroy_HP_Compressor						(ADD)
+Destroy_HP_Decompressor						(ADD)
+HP_Compressor_Process						(ADD)
+HP_Compressor_Reset							(ADD)
+HP_Compressor_IsValid						(ADD)
+HP_Decompressor_Process						(ADD)
+HP_Decompressor_Reset						(ADD)
+HP_Decompressor_IsValid						(ADD)
+
+# ======================================== #
 HP-Socket v5.8.5 API Update List:
 # ======================================== #
 --------------------
