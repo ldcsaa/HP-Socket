@@ -1533,6 +1533,8 @@ CHPZlibCompressor::CHPZlibCompressor(Fn_CompressDataCallback fnCallback, int iWi
 {
 	ASSERT(m_fnCallback != nullptr);
 
+	::ZeroObject(m_Stream);
+
 	m_bValid = (::deflateInit2(&m_Stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy) == Z_OK);
 }
 CHPZlibCompressor::~CHPZlibCompressor()
@@ -1608,6 +1610,8 @@ CHPZlibDecompressor::CHPZlibDecompressor(Fn_DecompressDataCallback fnCallback, i
 , m_bValid		(FALSE)
 {
 	ASSERT(m_fnCallback != nullptr);
+
+	::ZeroObject(m_Stream);
 
 	m_bValid = (::inflateInit2(&m_Stream, iWindowBits) == Z_OK);
 }
