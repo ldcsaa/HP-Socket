@@ -87,9 +87,6 @@ EnHandleResult CUdpServer::TriggerFireSend(TUdpSocketObj* pSocketObj, TUdpBuffer
 		ASSERT(FALSE);
 	}
 
-	if(pBufferObj->ReleaseSendCounter() == 0)
-		AddFreeBufferObj(pBufferObj);
-
 	return rs;
 }
 
@@ -1099,49 +1096,35 @@ void CUdpServer::HandleSend(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(!TUdpSocketObj::IsValid(pSocketObj))
+	if(TUdpSocketObj::IsValid(pSocketObj))
 	{
-		AddFreeBufferObj(pBufferObj);
-		return;
-	}
+		CLocalSafeCounter localcounter(*pSocketObj);
 
-	CLocalSafeCounter localcounter(*pSocketObj);
+		long iLength = -(long)(pBufferObj->buff.len);
 
-	long iLength = -(long)(pBufferObj->buff.len);
-
-	switch(m_enSendPolicy)
-	{
-	case SP_PACK:
+		switch(m_enSendPolicy)
 		{
+		case SP_PACK:
 			::InterlockedExchangeAdd(&pSocketObj->sndCount, iLength);
-
 			TriggerFireSend(pSocketObj, pBufferObj);
-
 			DoSendPack(pSocketObj);
-		}
-
-		break;
-	case SP_SAFE:
-		{
+			break;
+		case SP_SAFE:
 			::InterlockedExchangeAdd(&pSocketObj->sndCount, iLength);
-
 			TriggerFireSend(pSocketObj, pBufferObj);
-
 			DoSendSafe(pSocketObj);
-		}
-
-		break;
-	case SP_DIRECT:
-		{
+			break;
+		case SP_DIRECT:
 			::InterlockedExchangeAdd(&pSocketObj->pending, iLength);
-
 			TriggerFireSend(pSocketObj, pBufferObj);
+			break;
+		default:
+			ASSERT(FALSE);
 		}
-
-		break;
-	default:
-		ASSERT(FALSE);
 	}
+
+	if(pBufferObj->ReleaseSendCounter() == 0)
+		AddFreeBufferObj(pBufferObj);
 }
 
 void CUdpServer::HandleReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
@@ -1161,10 +1144,10 @@ void CUdpServer::ProcessReceive(CONNID dwConnID, TUdpBufferObj* pBufferObj)
 	{
 		TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-		CLocalSafeCounter localcounter(*pSocketObj);
-
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
+			CLocalSafeCounter localcounter(*pSocketObj);
+
 			pSocketObj->detectFails = 0;
 			if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 
@@ -1388,6 +1371,9 @@ int CUdpServer::DoSend(CONNID dwConnID)
 
 int CUdpServer::DoSend(TUdpSocketObj* pSocketObj)
 {
+	if(!TSocketObj::IsValid(pSocketObj))
+		return ERROR_OBJECT_NOT_FOUND;
+
 	CLocalSafeCounter localcounter(*pSocketObj);
 
 	switch(m_enSendPolicy)

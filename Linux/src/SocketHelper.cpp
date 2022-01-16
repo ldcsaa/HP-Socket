@@ -1059,7 +1059,7 @@ DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
 {
 	DWORD dwBound = (DWORD)::compressBound(dwSrcLen);
 	
-	if(bGZip) dwBound += 11;
+	if(bGZip) dwBound += 16;
 
 	return dwBound;
 }
@@ -1091,10 +1091,10 @@ int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& d
 	return BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, BROTLI_DEFAULT_QUALITY, BROTLI_DEFAULT_WINDOW, BROTLI_DEFAULT_MODE);
 }
 
-int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, BrotliEncoderMode enMode)
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, int iMode)
 {
 	size_t stDestLen = (size_t)dwDestLen;
-	int rs = ::BrotliEncoderCompress(iQuality, iWindow, enMode, (size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
+	int rs = ::BrotliEncoderCompress(iQuality, iWindow, (BrotliEncoderMode)iMode, (size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
 	dwDestLen = (DWORD)stDestLen;
 
 	return (rs == 1) ? 0 : ((rs == 3) ? -5 : -3);

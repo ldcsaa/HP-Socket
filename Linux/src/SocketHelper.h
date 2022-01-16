@@ -312,7 +312,6 @@ struct TSocketObjBase : public CSafeCounter
 	PVOID		extra;
 	PVOID		reserved;
 	PVOID		reserved2;
-	BOOL		valid;
 	DWORD		activeTime;
 
 	union
@@ -321,6 +320,7 @@ struct TSocketObjBase : public CSafeCounter
 		DWORD	connTime;
 	};
 
+	volatile BOOL valid;
 	volatile BOOL connected;
 	volatile BOOL paused;
 
@@ -825,7 +825,7 @@ DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen);
 // Brotli 压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
 // Brotli 高级压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
-int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, BrotliEncoderMode enMode = BROTLI_DEFAULT_MODE);
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE);
 // Brotli 解压（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
 // Brotli 推测压缩结果长度

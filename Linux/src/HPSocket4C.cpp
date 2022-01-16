@@ -2333,7 +2333,7 @@ HPSOCKET_API int __HP_CALL SYS_BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLe
 
 HPSOCKET_API int __HP_CALL SYS_BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen, int iQuality, int iWindow, int iMode)
 {
-	return ::BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, *pdwDestLen, iQuality, iWindow , (BrotliEncoderMode)iMode);
+	return ::BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, *pdwDestLen, iQuality, iWindow , iMode);
 }
 
 HPSOCKET_API int __HP_CALL SYS_BrotliUncompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD* pdwDestLen)

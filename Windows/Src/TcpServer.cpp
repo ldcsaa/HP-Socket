@@ -82,9 +82,6 @@ EnHandleResult CTcpServer::TriggerFireSend(TSocketObj* pSocketObj, TBufferObj* p
 		ASSERT(FALSE);
 	}
 
-	if(pBufferObj->ReleaseSendCounter() == 0)
-		AddFreeBufferObj(pBufferObj);
-
 	return rs;
 }
 
@@ -1079,64 +1076,61 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 
 void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
-	CLocalSafeCounter localcounter(*pSocketObj);
-
-	long iLength = -(long)(pBufferObj->buff.len);
-
-	switch(m_enSendPolicy)
+	if(TSocketObj::IsValid(pSocketObj))
 	{
-	case SP_PACK:
+		CLocalSafeCounter localcounter(*pSocketObj);
+
+		long iLength = -(long)(pBufferObj->buff.len);
+		
+		switch(m_enSendPolicy)
 		{
+		case SP_PACK:
 			::InterlockedExchangeAdd(&pSocketObj->sndCount, iLength);
-
 			TriggerFireSend(pSocketObj, pBufferObj);
-
 			DoSendPack(pSocketObj);
-		}
-
-		break;
-	case SP_SAFE:
-		{
+			break;
+		case SP_SAFE:
 			::InterlockedExchangeAdd(&pSocketObj->sndCount, iLength);
-
 			TriggerFireSend(pSocketObj, pBufferObj);
-
 			DoSendSafe(pSocketObj);
-		}
-
-		break;
-	case SP_DIRECT:
-		{
+			break;
+		case SP_DIRECT:
 			::InterlockedExchangeAdd(&pSocketObj->pending, iLength);
-
 			TriggerFireSend(pSocketObj, pBufferObj);
+			break;
+		default:
+			ASSERT(FALSE);
 		}
-
-		break;
-	default:
-		ASSERT(FALSE);
 	}
+
+	if(pBufferObj->ReleaseSendCounter() == 0)
+		AddFreeBufferObj(pBufferObj);
 }
 
 void CTcpServer::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 {
-	CLocalSafeCounter localcounter(*pSocketObj);
+	EnHandleResult hr = TSocketObj::IsValid(pSocketObj) ? HR_OK : (EnHandleResult)HR_CLOSED;
 
-	if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
-
-	EnHandleResult hr = TriggerFireReceive(pSocketObj, pBufferObj);
-
-	if(hr == HR_OK || hr == HR_IGNORE)
+	if(hr == HR_OK)
 	{
-		if(::ContinueReceive(this, pSocketObj, pBufferObj, hr))
+		CLocalSafeCounter localcounter(*pSocketObj);
+
+		if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
+
+		hr = TriggerFireReceive(pSocketObj, pBufferObj);
+
+		if(hr == HR_OK || hr == HR_IGNORE)
 		{
+			if(::ContinueReceive(this, pSocketObj, pBufferObj, hr))
 			{
-				CSpinLock locallock(pSocketObj->sgPause);
+				{
+					CSpinLock locallock(pSocketObj->sgPause);
 
-				pSocketObj->recving = FALSE;
+					pSocketObj->recving = FALSE;
+				}
+
+				DoReceive(pSocketObj, pBufferObj);
 			}
-
-			DoReceive(pSocketObj, pBufferObj);
 		}
 	}
 
@@ -1384,6 +1378,9 @@ int CTcpServer::DoSend(CONNID dwConnID)
 
 int CTcpServer::DoSend(TSocketObj* pSocketObj)
 {
+	if(!TSocketObj::IsValid(pSocketObj))
+		return ERROR_OBJECT_NOT_FOUND;
+
 	CLocalSafeCounter localcounter(*pSocketObj);
 
 	switch(m_enSendPolicy)

@@ -1515,7 +1515,192 @@ ERROR_DEST_LEN:
 	return -5;
 }
 
+void DestroyCompressor(IHPCompressor* pCompressor)
+{
+	delete pCompressor;
+}
+
+void DestroyDecompressor(IHPDecompressor* pDecompressor)
+{
+	delete pDecompressor;
+}
+
 #ifdef _ZLIB_SUPPORT
+
+CHPZlibCompressor::CHPZlibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+: m_fnCallback	(fnCallback)
+, m_bValid		(FALSE)
+{
+	ASSERT(m_fnCallback != nullptr);
+
+	m_bValid = (::deflateInit2(&m_Stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy) == Z_OK);
+}
+CHPZlibCompressor::~CHPZlibCompressor()
+{
+	if(m_bValid) ::deflateEnd(&m_Stream);
+}
+
+BOOL CHPZlibCompressor::Reset()
+{
+	return (m_bValid = (::deflateReset(&m_Stream) == Z_OK));
+}
+
+BOOL CHPZlibCompressor::Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
+{
+	ASSERT(IsValid() && iLength > 0);
+
+	if(!IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	BYTE szBuff[COMPRESS_BUFFER_SIZE];
+
+	m_Stream.next_in	= (z_const Bytef*)pData;
+	m_Stream.avail_in	= iLength;
+	int rs				= Z_OK;
+	BOOL isOK			= TRUE;
+
+	while(m_Stream.avail_in > 0)
+	{
+		do
+		{
+			m_Stream.next_out  = szBuff;
+			m_Stream.avail_out = COMPRESS_BUFFER_SIZE;
+
+			rs = ::deflate(&m_Stream, bLast ? Z_FINISH : Z_NO_FLUSH);
+
+			if(rs == Z_STREAM_ERROR)
+			{
+				::SetLastError(ERROR_INVALID_DATA);
+				isOK = FALSE;
+				
+				goto ZLIB_COMPRESS_END;
+			}
+
+			int iRead = (int)(COMPRESS_BUFFER_SIZE - m_Stream.avail_out);
+
+			if(iRead == 0)
+				break;
+
+			if(!m_fnCallback(szBuff, iRead, pContext))
+			{
+				::SetLastError(ERROR_CANCELLED);
+				isOK = FALSE;
+
+				goto ZLIB_COMPRESS_END;
+			}
+		} while(m_Stream.avail_out == 0);
+	}
+
+ZLIB_COMPRESS_END:
+
+	ASSERT(!isOK || (rs == Z_OK && !bLast) || (rs == Z_STREAM_END && bLast));
+
+	if(!isOK || bLast) Reset();
+
+	return isOK;
+}
+
+CHPZlibDecompressor::CHPZlibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits)
+: m_fnCallback	(fnCallback)
+, m_bValid		(FALSE)
+{
+	ASSERT(m_fnCallback != nullptr);
+
+	m_bValid = (::inflateInit2(&m_Stream, iWindowBits) == Z_OK);
+}
+CHPZlibDecompressor::~CHPZlibDecompressor()
+{
+	if(m_bValid) ::inflateEnd(&m_Stream);
+}
+
+BOOL CHPZlibDecompressor::Reset()
+{
+	return (m_bValid = (::inflateReset(&m_Stream) == Z_OK));
+}
+
+BOOL CHPZlibDecompressor::Process(const BYTE* pData, int iLength, PVOID pContext)
+{
+	ASSERT(IsValid() && iLength > 0);
+
+	if(!IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	BYTE szBuff[COMPRESS_BUFFER_SIZE];
+
+	m_Stream.next_in	= (z_const Bytef*)pData;
+	m_Stream.avail_in	= iLength;
+	int rs				= Z_OK;
+	BOOL isOK			= TRUE;
+
+	while(m_Stream.avail_in > 0)
+	{
+		do
+		{
+			m_Stream.next_out  = szBuff;
+			m_Stream.avail_out = COMPRESS_BUFFER_SIZE;
+
+			rs = ::inflate(&m_Stream, Z_NO_FLUSH);
+
+			if(rs != Z_OK && rs != Z_STREAM_END)
+			{
+				::SetLastError(ERROR_INVALID_DATA);
+				isOK = FALSE;
+
+				goto ZLIB_DECOMPRESS_END;
+			}
+
+			int iRead = (int)(COMPRESS_BUFFER_SIZE - m_Stream.avail_out);
+
+			if(iRead == 0)
+				break;
+
+			if(!m_fnCallback(szBuff, iRead, pContext))
+			{
+				::SetLastError(ERROR_CANCELLED);
+				isOK = FALSE;
+
+				goto ZLIB_DECOMPRESS_END;
+			}
+		} while(m_Stream.avail_out == 0);
+
+		if(rs == Z_STREAM_END)
+			break;
+	}
+
+ZLIB_DECOMPRESS_END:
+
+	ASSERT(!isOK || rs == Z_OK || rs == Z_STREAM_END);
+
+	if(!isOK || rs == Z_STREAM_END) Reset();
+
+	return isOK;
+}
+
+IHPCompressor* CreateZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+{
+	return new CHPZlibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
+}
+
+IHPCompressor* CreateGZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+{
+	return new CHPZlibCompressor(fnCallback, MAX_WBITS + 16, iLevel, iMethod, iMemLevel, iStrategy);
+}
+
+IHPDecompressor* CreateZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits)
+{
+	return new CHPZlibDecompressor(fnCallback, iWindowBits);
+}
+
+IHPDecompressor* CreateGZipDecompressor(Fn_DecompressDataCallback fnCallback)
+{
+	return new CHPZlibDecompressor(fnCallback, MAX_WBITS + 32);
+}
 
 int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
@@ -1565,7 +1750,7 @@ int UncompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwD
 	z_stream stream;
 
 	stream.next_in	 = (z_const Bytef*)lpszSrc;
-	stream.avail_in	 = (uInt)dwSrcLen;
+	stream.avail_in	 = dwSrcLen;
 	stream.next_out	 = lpszDest;
 	stream.avail_out = dwDestLen;
 	stream.zalloc	 = nullptr;
@@ -1596,7 +1781,7 @@ DWORD GuessCompressBound(DWORD dwSrcLen, BOOL bGZip)
 {
 	DWORD dwBound = ::compressBound(dwSrcLen);
 
-	if(bGZip) dwBound += 11;
+	if(bGZip) dwBound += 16;
 
 	return dwBound;
 }
@@ -1623,15 +1808,184 @@ DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
 
 #ifdef _BROTLI_SUPPORT
 
+CHPBrotliCompressor::CHPBrotliCompressor(Fn_CompressDataCallback fnCallback)
+: m_fnCallback	(fnCallback)
+, m_bValid		(FALSE)
+{
+	ASSERT(m_fnCallback != nullptr);
+
+	Reset();
+}
+CHPBrotliCompressor::~CHPBrotliCompressor()
+{
+	if(m_bValid) ::BrotliEncoderDestroyInstance(m_pState);
+}
+
+BOOL CHPBrotliCompressor::Reset()
+{
+	if(m_bValid) ::BrotliEncoderDestroyInstance(m_pState);
+	m_pState =   ::BrotliEncoderCreateInstance(nullptr, nullptr, nullptr);
+
+	return (m_bValid = (m_pState != nullptr));
+}
+
+BOOL CHPBrotliCompressor::Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
+{
+	ASSERT(IsValid() && iLength > 0);
+
+	if(!IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	BYTE szBuff[COMPRESS_BUFFER_SIZE];
+
+	const BYTE* pNextInData	= pData;
+	size_t iAvlInLen		= (SIZE_T)iLength;
+	BYTE* pNextOutData		= nullptr;
+	size_t iAvlOutLen		= 0;
+	BOOL isOK				= TRUE;
+
+	while(iAvlInLen > 0)
+	{
+		do 
+		{
+			pNextOutData = szBuff;
+			iAvlOutLen	 = COMPRESS_BUFFER_SIZE;
+
+			if(!::BrotliEncoderCompressStream(m_pState, bLast ? BROTLI_OPERATION_FINISH : BROTLI_OPERATION_PROCESS, &iAvlInLen, &pNextInData, &iAvlOutLen, &pNextOutData, nullptr))
+			{
+				::SetLastError(ERROR_INVALID_DATA);
+				isOK = FALSE;
+
+				goto BROTLI_COMPRESS_END;
+			}
+
+			int iRead = (int)(COMPRESS_BUFFER_SIZE - iAvlOutLen);
+
+			if(iRead == 0)
+				break;
+
+			if(!m_fnCallback(szBuff, iRead, pContext))
+			{
+				::SetLastError(ERROR_CANCELLED);
+				isOK = FALSE;
+				
+				goto BROTLI_COMPRESS_END;
+			}
+		} while (iAvlOutLen == 0);
+	}
+
+BROTLI_COMPRESS_END:
+
+	if(!isOK || bLast) Reset();
+
+	return isOK;
+}
+
+CHPBrotliDecompressor::CHPBrotliDecompressor(Fn_DecompressDataCallback fnCallback)
+: m_fnCallback	(fnCallback)
+, m_bValid		(FALSE)
+{
+	ASSERT(m_fnCallback != nullptr);
+
+	Reset();
+}
+CHPBrotliDecompressor::~CHPBrotliDecompressor()
+{
+	if(m_bValid) ::BrotliDecoderDestroyInstance(m_pState);
+}
+
+BOOL CHPBrotliDecompressor::Reset()
+{
+	if(m_bValid) ::BrotliDecoderDestroyInstance(m_pState);
+	m_pState =   ::BrotliDecoderCreateInstance(nullptr, nullptr, nullptr);
+
+	return (m_bValid = (m_pState != nullptr));
+}
+
+BOOL CHPBrotliDecompressor::Process(const BYTE* pData, int iLength, PVOID pContext)
+{
+	ASSERT(IsValid() && iLength > 0);
+
+	if(!IsValid())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	BYTE szBuff[COMPRESS_BUFFER_SIZE];
+
+	const BYTE* pNextInData	= pData;
+	size_t iAvlInLen		= (SIZE_T)iLength;
+	BYTE* pNextOutData		= nullptr;
+	size_t iAvlOutLen		= 0;
+	BOOL isOK				= TRUE;
+	BrotliDecoderResult rs	= BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT;
+
+	do
+	{
+		do 
+		{
+			pNextOutData = szBuff;
+			iAvlOutLen	 = COMPRESS_BUFFER_SIZE;
+
+			rs = ::BrotliDecoderDecompressStream(m_pState, &iAvlInLen, &pNextInData, &iAvlOutLen, &pNextOutData, nullptr);
+
+			if(rs == BROTLI_DECODER_RESULT_ERROR)
+			{
+				::SetLastError(ERROR_INVALID_DATA);
+				isOK = FALSE;
+
+				goto BROTLI_DECOMPRESS_END;
+			}
+
+			int iRead = (int)(COMPRESS_BUFFER_SIZE - iAvlOutLen);
+
+			if(iRead == 0)
+				break;
+
+			if(!m_fnCallback(szBuff, iRead, pContext))
+			{
+				::SetLastError(ERROR_CANCELLED);
+				isOK = FALSE;
+
+				goto BROTLI_DECOMPRESS_END;
+			}
+		} while (iAvlOutLen == 0);
+
+		if(rs == BROTLI_DECODER_RESULT_SUCCESS)
+			break;;
+
+	} while(rs == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT);
+
+BROTLI_DECOMPRESS_END:
+
+	if(!isOK || rs == BROTLI_DECODER_RESULT_SUCCESS) Reset();
+
+	return isOK;
+}
+
+IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback)
+{
+	return new CHPBrotliCompressor(fnCallback);
+}
+
+IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback)
+{
+	return new CHPBrotliDecompressor(fnCallback);
+}
+
 int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
 {
 	return BrotliCompressEx(lpszSrc, dwSrcLen, lpszDest, dwDestLen, BROTLI_DEFAULT_QUALITY, BROTLI_DEFAULT_WINDOW, BROTLI_DEFAULT_MODE);
 }
 
-int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, BrotliEncoderMode enMode)
+int BrotliCompressEx(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen, int iQuality, int iWindow, int iMode)
 {
 	size_t stDestLen = (size_t)dwDestLen;
-	int rs = ::BrotliEncoderCompress(iQuality, iWindow, enMode, (size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
+	int rs = ::BrotliEncoderCompress(iQuality, iWindow, (BrotliEncoderMode)iMode, (size_t)dwSrcLen, lpszSrc, &stDestLen, lpszDest);
 	dwDestLen = (DWORD)stDestLen;
 
 	return (rs == 1) ? 0 : ((rs == 3) ? -5 : -3);
