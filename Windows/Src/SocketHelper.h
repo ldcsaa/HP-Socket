@@ -1035,13 +1035,17 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPBrotliCompressor(Fn_CompressDataCallback fnCallback);
+	CHPBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE);
 	virtual ~CHPBrotliCompressor();
 
 private:
 	Fn_CompressDataCallback m_fnCallback;
 	BrotliEncoderState* m_pState;
 	BOOL m_bValid;
+
+	int m_iQuality;
+	int m_iWindow;
+	int m_iMode;
 };
 
 /* Brotli 解压器 */
@@ -1063,7 +1067,7 @@ private:
 };
 
 /* 创建 Brotli 压缩器对象 */
-IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback);
+IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE);
 /* 创建 Brotli 解压器对象 */
 IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback);
 

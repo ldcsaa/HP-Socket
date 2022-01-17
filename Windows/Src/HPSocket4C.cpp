@@ -747,6 +747,7 @@
 
 #ifdef _BROTLI_SUPPORT
 	#pragma comment(linker, "/EXPORT:Create_HP_BrotliCompressor=_Create_HP_BrotliCompressor@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_BrotliCompressorEx=_Create_HP_BrotliCompressorEx@16")
 	#pragma comment(linker, "/EXPORT:Create_HP_BrotliDecompressor=_Create_HP_BrotliDecompressor@4")
 #endif
 
@@ -4341,6 +4342,11 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_Decompre
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDataCallback fnCallback)
 {
 	return ::CreateBrotliCompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
+{
+	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback)

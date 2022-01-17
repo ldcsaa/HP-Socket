@@ -3638,6 +3638,11 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDa
 	return ::CreateBrotliCompressor(fnCallback);
 }
 
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
+{
+	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode);
+}
+
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback)
 {
 	return ::CreateBrotliDecompressor(fnCallback);

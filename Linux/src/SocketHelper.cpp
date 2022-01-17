@@ -1275,14 +1275,18 @@ DWORD GZipGuessUncompressBound(const BYTE* lpszSrc, DWORD dwSrcLen)
 
 #ifdef _BROTLI_SUPPORT
 
-CHPBrotliCompressor::CHPBrotliCompressor(Fn_CompressDataCallback fnCallback)
+CHPBrotliCompressor::CHPBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
 : m_fnCallback	(fnCallback)
 , m_bValid		(FALSE)
+, m_iQuality	(iQuality)
+, m_iWindow		(iWindow)
+, m_iMode		(iMode)
 {
 	ASSERT(m_fnCallback != nullptr);
 
 	Reset();
 }
+
 CHPBrotliCompressor::~CHPBrotliCompressor()
 {
 	if(m_bValid) ::BrotliEncoderDestroyInstance(m_pState);
@@ -1292,6 +1296,16 @@ BOOL CHPBrotliCompressor::Reset()
 {
 	if(m_bValid) ::BrotliEncoderDestroyInstance(m_pState);
 	m_pState =   ::BrotliEncoderCreateInstance(nullptr, nullptr, nullptr);
+
+	if(m_pState != nullptr)
+	{
+		::BrotliEncoderSetParameter(m_pState, BROTLI_PARAM_QUALITY	, (UINT)m_iQuality);
+		::BrotliEncoderSetParameter(m_pState, BROTLI_PARAM_LGWIN	, (UINT)m_iWindow);
+		::BrotliEncoderSetParameter(m_pState, BROTLI_PARAM_MODE		, (UINT)m_iMode);
+
+		if (m_iWindow > BROTLI_MAX_WINDOW_BITS)
+			::BrotliEncoderSetParameter(m_pState, BROTLI_PARAM_LARGE_WINDOW, BROTLI_TRUE);
+	}
 
 	return (m_bValid = (m_pState != nullptr));
 }
@@ -1434,9 +1448,9 @@ BROTLI_DECOMPRESS_END:
 	return isOK;
 }
 
-IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback)
+IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
 {
-	return new CHPBrotliCompressor(fnCallback);
+	return new CHPBrotliCompressor(fnCallback, iQuality, iWindow, iMode);
 }
 
 IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback)

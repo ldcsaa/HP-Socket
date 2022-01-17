@@ -802,7 +802,8 @@ HPSOCKET_API IHPDecompressor* HP_Create_GZipDecompressor(Fn_DecompressDataCallba
 #ifdef _BROTLI_SUPPORT
 
 /* 创建 Brotli 压缩器对象 */
-HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback);
+//（默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
+HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = 11, int iWindow = 22, int iMode = 0);
 /* 创建 Brotli 解压器对象 */
 HPSOCKET_API IHPDecompressor* HP_Create_BrotliDecompressor(Fn_DecompressDataCallback fnCallback);
 

@@ -711,9 +711,9 @@ HPSOCKET_API IHPDecompressor* HP_Create_GZipDecompressor(Fn_DecompressDataCallba
 
 #ifdef _BROTLI_SUPPORT
 
-HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback)
+HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
 {
-	return ::CreateBrotliCompressor(fnCallback);
+	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode);
 }
 
 HPSOCKET_API IHPDecompressor* HP_Create_BrotliDecompressor(Fn_DecompressDataCallback fnCallback)
