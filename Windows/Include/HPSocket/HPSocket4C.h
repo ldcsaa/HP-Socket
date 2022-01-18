@@ -2731,7 +2731,7 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDa
 // （默认参数：iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 GZip 压缩器对象 */
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel /*= -1*/, int iMethod /*= */, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
 /* 创建 ZLib 解压器对象 */
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback);
 /* 创建 ZLib 解压器对象 */
