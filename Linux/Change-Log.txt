@@ -5,6 +5,7 @@ v5.8.7 Update:
 > Major Upadate
 -----------------
 1. Optimize the garbage object collection and detection mechanism to improve the robustness of communication components in high load and high concurrency scenarios.
+2. VS 2022 IDE supported.
 
 > Third-party library Upadate
 -----------------
