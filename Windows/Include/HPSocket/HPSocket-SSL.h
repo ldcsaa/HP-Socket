@@ -227,7 +227,7 @@ typedef CHPObjectPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	
 *		
 * 参数：		lpszServerName	-- 请求域名
 *			pContext		-- SSL Context 对象
-* 
+*
 * 返回值：SNI 主机证书对应的索引
 */
 HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext);

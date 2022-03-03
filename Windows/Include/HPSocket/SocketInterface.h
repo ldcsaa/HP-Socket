@@ -996,7 +996,7 @@ public:
 	* 
 	* 返回值：无
 	*/
-	virtual void CleanupSSLContext()					= 0;
+	virtual void CleanupSSLContext()		= 0;
 
 	/*
 	* 名称：启动 SSL 握手
@@ -1005,7 +1005,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL StartSSLHandShake()					= 0;
+	virtual BOOL StartSSLHandShake()		= 0;
 
 #endif
 
@@ -2115,7 +2115,7 @@ public:
 	* 返回值：	TRUE			-- 成功
 	*			FALSE			-- 失败
 	*/
-	virtual BOOL SendRequest(CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0)				= 0;
+	virtual BOOL SendRequest(CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszPath, const THeader lpHeaders[] = nullptr, int iHeaderCount = 0, const BYTE* pBody = nullptr, int iLength = 0)	= 0;
 
 	/*
 	* 名称：发送本地文件

@@ -244,7 +244,6 @@ private:
 	int DoUnpause	(CONNID dwConnID);
 	int DoReceive	(TSocketObj* pSocketObj, TBufferObj* pBufferObj);
 	int DoSend		(CONNID dwConnID);
-	int DoSend		(TSocketObj* pSocketObj);
 	int DoSendPack	(TSocketObj* pSocketObj);
 	int DoSendSafe	(TSocketObj* pSocketObj);
 	int SendItem	(TSocketObj* pSocketObj);

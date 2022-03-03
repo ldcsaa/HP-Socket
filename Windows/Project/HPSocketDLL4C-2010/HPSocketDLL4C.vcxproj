@@ -120,7 +120,7 @@
     <TargetName>HPSocket4C_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -129,7 +129,7 @@
     <TargetName>HPSocket4C_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -138,7 +138,7 @@
     <TargetName>HPSocket4C_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -147,7 +147,7 @@
     <TargetName>HPSocket4C_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -156,7 +156,7 @@
     <TargetName>HPSocket4C</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -165,7 +165,7 @@
     <TargetName>HPSocket4C</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -174,7 +174,7 @@
     <TargetName>HPSocket4C_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -183,7 +183,7 @@
     <TargetName>HPSocket4C_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
     <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <LibraryPath>..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\mimalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -853,17 +853,20 @@ BOOL CTcpServer::HandleAccept(UINT events)
 		{
 			int code = ::WSAGetLastError();
 
-			if(code == ERROR_WOULDBLOCK)
-				return TRUE;
-			else if(code == ERROR_CONNABORTED)
-				continue;
-			else if(code == ERROR_HANDLES_CLOSED)
-				return FALSE;
-			
-			ERROR_EXIT2(EXIT_CODE_SOFTWARE, code);
+			switch(code)
+			{
+			case ERROR_WOULDBLOCK		: return TRUE;
+			case ERROR_CONNABORTED		: continue;
+			case ERROR_HANDLES_CLOSED	: return FALSE;
+			default						: ERROR_EXIT2(EXIT_CODE_SOFTWARE, code);
+			}
 		}
 
-		VERIFY(::fcntl_SETFL(soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
+		if(!::fcntl_SETFL(soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC))
+		{
+			::ManualCloseSocket(soClient, SHUT_RDWR);
+			continue;
+		}
 
 		CONNID dwConnID = 0;
 
@@ -884,7 +887,12 @@ BOOL CTcpServer::HandleAccept(UINT events)
 		}
 
 		UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
-		VERIFY(m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj));
+
+		if(!m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj))
+		{
+			AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_ACCEPT, ::WSAGetLastError());
+			continue;
+		}
 	}
 
 	return TRUE;

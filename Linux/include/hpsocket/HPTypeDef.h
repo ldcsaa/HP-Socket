@@ -1,26 +1,26 @@
 /*
-* Copyright: JessMA Open Source (ldcsaa@gmail.com)
-*
-* Author	: Bruce Liang
-* Website	: https://github.com/ldcsaa
-* Project	: https://github.com/ldcsaa/HP-Socket
-* Blog		: http://www.cnblogs.com/ldcsaa
-* Wiki		: http://www.oschina.net/p/hp-socket
-* QQ Group	: 44636872, 75375912
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-
+ * Copyright: JessMA Open Source (ldcsaa@gmail.com)
+ *
+ * Author	: Bruce Liang
+ * Website	: https://github.com/ldcsaa
+ * Project	: https://github.com/ldcsaa/HP-Socket
+ * Blog		: http://www.cnblogs.com/ldcsaa
+ * Wiki		: http://www.oschina.net/p/hp-socket
+ * QQ Group	: 44636872, 75375912
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 #pragma once
 
 #include "GlobalDef.h"
@@ -28,8 +28,8 @@
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR	5	// 主版本号
 #define HP_VERSION_MINOR	8	// 子版本号
-#define HP_VERSION_REVISE	6	// 修正版本号
-#define HP_VERSION_BUILD	3	// 构建编号
+#define HP_VERSION_REVISE	7	// 修正版本号
+#define HP_VERSION_BUILD	1	// 构建编号
 
 //#define _UDP_DISABLED			// 禁用 UDP
 //#define _SSL_DISABLED			// 禁用 SSL
@@ -59,7 +59,6 @@
 	#endif
 #endif
 
-
 /* 是否启用 ZLIB，如果定义了 _ZLIB_DISABLED 则禁用（默认：启用） */
 #if !defined(_ZLIB_DISABLED)
 	#ifndef _ZLIB_SUPPORT
@@ -84,6 +83,10 @@
 #define HPSOCKET_API	EXTERN_C __attribute__ ((__visibility__("default")))
 
 #define __HP_CALL
+
+/*****************************************************************************************************************************************************/
+/**************************************************************** Base Type Definitions **************************************************************/
+/*****************************************************************************************************************************************************/
 
 /************************************************************************
 名称：连接 ID 数据类型

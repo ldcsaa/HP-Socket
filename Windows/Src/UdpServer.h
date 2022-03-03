@@ -229,7 +229,6 @@ private:
 	int DoReceive	(TUdpBufferObj* pBufferObj);
 
 	int DoSend		(CONNID dwConnID);
-	int DoSend		(TUdpSocketObj* pSocketObj);
 	int DoSendPack	(TUdpSocketObj* pSocketObj);
 	int DoSendSafe	(TUdpSocketObj* pSocketObj);
 	int SendItem	(TUdpSocketObj* pSocketObj);

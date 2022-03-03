@@ -127,8 +127,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x86\include;..\..\Dependent\zlib\14x\x86\include;..\..\Dependent\openssl\14x\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x86\lib;..\..\Dependent\zlib\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\mimalloc\14x\x86\lib;..\..\Dependent\openssl\14x\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -136,8 +136,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_D</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x64\include;..\..\Dependent\zlib\14x\x64\include;..\..\Dependent\openssl\14x\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x64\lib;..\..\Dependent\zlib\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\mimalloc\14x\x64\lib;..\..\Dependent\openssl\14x\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -145,8 +145,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x86\include;..\..\Dependent\zlib\14x\x86\include;..\..\Dependent\openssl\14x\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x86\lib;..\..\Dependent\zlib\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\mimalloc\14x\x86\lib;..\..\Dependent\openssl\14x\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uDebug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -154,8 +154,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_UD</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x64\include;..\..\Dependent\zlib\14x\x64\include;..\..\Dependent\openssl\14x\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x64\lib;..\..\Dependent\zlib\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\mimalloc\14x\x64\lib;..\..\Dependent\openssl\14x\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -163,8 +163,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x86\include;..\..\Dependent\zlib\14x\x86\include;..\..\Dependent\openssl\14x\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x86\lib;..\..\Dependent\zlib\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\mimalloc\14x\x86\lib;..\..\Dependent\openssl\14x\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -172,8 +172,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x64\include;..\..\Dependent\zlib\14x\x64\include;..\..\Dependent\openssl\14x\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x64\lib;..\..\Dependent\zlib\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\mimalloc\14x\x64\lib;..\..\Dependent\openssl\14x\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -181,8 +181,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x86\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x86\include;..\..\Dependent\zlib\14x\x86\include;..\..\Dependent\openssl\14x\x86\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdkDir)include</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x86\lib;..\..\Dependent\zlib\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\jemalloc\14x\x86\lib;..\..\Dependent\mimalloc\14x\x86\lib;..\..\Dependent\openssl\14x\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(WindowsSdkDir)lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uRelease|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -190,8 +190,8 @@
     <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
     <TargetName>HPSocket_U</TargetName>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.metagen;*.bi;$(TargetPath)</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\include;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>..\..\Dependent\brotli\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\zlib\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\jemalloc\$(PlatformToolsetVersion)\x64\lib;..\..\Dependent\openssl\$(PlatformToolsetVersion)\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>..\..\Dependent\brotli\14x\x64\include;..\..\Dependent\zlib\14x\x64\include;..\..\Dependent\openssl\14x\x64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\..\Dependent\brotli\14x\x64\lib;..\..\Dependent\zlib\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\jemalloc\14x\x64\lib;..\..\Dependent\mimalloc\14x\x64\lib;..\..\Dependent\openssl\14x\x64\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

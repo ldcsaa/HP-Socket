@@ -437,7 +437,7 @@ struct TSocketObjBase : public CSafeCounter
 		{return pSocketObj != nullptr;}
 
 	static BOOL IsValid(TSocketObjBase* pSocketObj)
-		{return pSocketObj != nullptr && pSocketObj->valid;}
+		{return (IsExist(pSocketObj) && pSocketObj->valid == TRUE);}
 
 	static void Invalid(TSocketObjBase* pSocketObj)
 		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}

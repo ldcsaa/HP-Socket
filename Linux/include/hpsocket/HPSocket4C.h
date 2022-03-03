@@ -24,7 +24,7 @@
 /******************************************************************************
 Module:  HPSocket for C
 
-Desc: 导出纯 C 函数，让其它语言（如：C / C# / Java 等）能方便地使用 HPSocket
+Desc: 导出纯 C 函数，让其它语言（如：C / C# / Delphi 等）能方便地使用 HPSocket
 
 Usage:
 		方法一：
@@ -188,6 +188,7 @@ typedef En_HP_HandleResult (__HP_CALL *HP_FN_UdpNode_OnError)			(HP_UdpNode pSen
 typedef En_HP_HandleResult (__HP_CALL *HP_FN_UdpNode_OnShutdown)		(HP_UdpNode pSender);
 
 #endif
+
 /****************************************************/
 /*************** TCP/UDP 对象创建函数 ****************/
 
@@ -640,7 +641,7 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpServer_IsNoDelay(HP_TcpServer pServer);
 /**********************************************************************************/
 /***************************** UDP Server 属性访问方法 *****************************/
 
-/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 HPSOCKET_API void __HP_CALL HP_UdpServer_SetMaxDatagramSize(HP_UdpServer pServer, DWORD dwMaxDatagramSize);
 /* 获取数据报文最大长度 */
 HPSOCKET_API DWORD __HP_CALL HP_UdpServer_GetMaxDatagramSize(HP_UdpServer pServer);
@@ -1243,7 +1244,7 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpClient_IsNoDelay(HP_TcpClient pClient);
 /**********************************************************************************/
 /***************************** UDP Client 属性访问方法 *****************************/
 
-/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 HPSOCKET_API void __HP_CALL HP_UdpClient_SetMaxDatagramSize(HP_UdpClient pClient, DWORD dwMaxDatagramSize);
 /* 获取数据报文最大长度 */
 HPSOCKET_API DWORD __HP_CALL HP_UdpClient_GetMaxDatagramSize(HP_UdpClient pClient);
@@ -1312,7 +1313,7 @@ HPSOCKET_API BOOL __HP_CALL HP_UdpArqClient_GetWaitingSendMessageCount(HP_UdpArq
 /**********************************************************************************/
 /****************************** UDP Cast 属性访问方法 ******************************/
 
-/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 HPSOCKET_API void __HP_CALL HP_UdpCast_SetMaxDatagramSize(HP_UdpCast pCast, DWORD dwMaxDatagramSize);
 /* 获取数据报文最大长度 */
 HPSOCKET_API DWORD __HP_CALL HP_UdpCast_GetMaxDatagramSize(HP_UdpCast pCast);
@@ -2717,6 +2718,7 @@ HPSOCKET_API void __HP_CALL Destroy_HP_Decompressor(HP_Decompressor pDecompresso
 // （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 ZLib 压缩器对象 */
+// （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits /*= 15*/, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
 /* 创建 GZip 压缩器对象 */
 // （默认参数：iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
@@ -2727,6 +2729,7 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDa
 // （默认参数：iWindowBits = 15）
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback);
 /* 创建 ZLib 解压器对象 */
+// （默认参数：iWindowBits = 15）
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits /*= 15*/);
 /* 创建 GZip 解压器对象 */
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_DecompressDataCallback fnCallback);
@@ -2739,6 +2742,7 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_Decompre
 //（默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 Brotli 压缩器对象 */
+// （默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality /*= 11*/, int iWindow /*= 22*/, int iMode /*= 0*/);
 /* 创建 Brotli 解压器对象 */
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback);

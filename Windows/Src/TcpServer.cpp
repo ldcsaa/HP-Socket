@@ -922,22 +922,20 @@ UINT WINAPI CTcpServer::WorkerThreadProc(LPVOID pv)
 		{
 			DWORD dwFlag	= 0;
 			DWORD dwSysCode = ::GetLastError();
+			dwErrorCode		= dwSysCode;
 
 			if(pServer->HasStarted())
 			{
 				SOCKET sock	= pBufferObj->operation != SO_ACCEPT ? pBufferObj->client : (SOCKET)pSocketObj;
-				result		= ::WSAGetOverlappedResult(sock, &pBufferObj->ov, &dwBytes, FALSE, &dwFlag);
 
-				if (!result)
+				if (!::WSAGetOverlappedResult(sock, &pBufferObj->ov, &dwBytes, FALSE, &dwFlag))
 				{
 					dwErrorCode = ::WSAGetLastError();
 					TRACE("GetQueuedCompletionStatus error (<S-CNNID: %Iu> SYS: %d, SOCK: %d, FLAG: %d)\n", dwConnID, dwSysCode, dwErrorCode, dwFlag);
 				}
 			}
-			else
-				dwErrorCode = dwSysCode;
 
-			ASSERT(dwSysCode != 0 && dwErrorCode != 0);
+			ASSERT(dwSysCode != NO_ERROR && dwErrorCode != NO_ERROR);
 		}
 
 		pServer->HandleIo(dwConnID, pSocketObj, pBufferObj, dwBytes, dwErrorCode);
@@ -978,22 +976,26 @@ void CTcpServer::HandleIo(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* p
 	ASSERT(pBufferObj != nullptr);
 	ASSERT(pSocketObj != nullptr);
 
+	EnSocketOperation enOperation = pBufferObj->operation;
+
 	if(dwErrorCode != NO_ERROR)
 	{
 		HandleError(dwConnID, pSocketObj, pBufferObj, dwErrorCode);
-		return;
+
+		goto END_HANDLE_IO;
 	}
 
-	if(dwBytes == 0 && pBufferObj->operation != SO_ACCEPT)
+	if(dwBytes == 0 && enOperation != SO_ACCEPT)
 	{
 		AddFreeSocketObj(pSocketObj, SCF_CLOSE);
 		AddFreeBufferObj(pBufferObj);
-		return;
+
+		goto END_HANDLE_IO;
 	}
 
 	pBufferObj->buff.len = dwBytes;
 
-	switch(pBufferObj->operation)
+	switch(enOperation)
 	{
 	case SO_ACCEPT:
 		HandleAccept((SOCKET)pSocketObj, pBufferObj);
@@ -1007,6 +1009,11 @@ void CTcpServer::HandleIo(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* p
 	default:
 		ASSERT(FALSE);
 	}
+
+END_HANDLE_IO:
+
+	if(enOperation != SO_ACCEPT)
+		pSocketObj->Decrement();
 }
 
 void CTcpServer::HandleError(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwErrorCode)
@@ -1062,6 +1069,8 @@ void CTcpServer::HandleAccept(SOCKET soListen, TBufferObj* pBufferObj)
 
 	AddClientSocketObj(dwConnID, pSocketObj, *pRemoteSockAddr);
 
+	CLocalSafeCounter localcounter(*pSocketObj);
+
 	::SSO_UpdateAcceptContext(socket, soListen);
 	::CreateIoCompletionPort((HANDLE)socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0);
 
@@ -1078,8 +1087,6 @@ void CTcpServer::HandleSend(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj*
 {
 	if(TSocketObj::IsValid(pSocketObj))
 	{
-		CLocalSafeCounter localcounter(*pSocketObj);
-
 		long iLength = -(long)(pBufferObj->buff.len);
 		
 		switch(m_enSendPolicy)
@@ -1113,8 +1120,6 @@ void CTcpServer::HandleReceive(CONNID dwConnID, TSocketObj* pSocketObj, TBufferO
 
 	if(hr == HR_OK)
 	{
-		CLocalSafeCounter localcounter(*pSocketObj);
-
 		if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 
 		hr = TriggerFireReceive(pSocketObj, pBufferObj);
@@ -1370,14 +1375,6 @@ int CTcpServer::DoSend(CONNID dwConnID)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TSocketObj::IsValid(pSocketObj))
-		return DoSend(pSocketObj);
-
-	return ERROR_OBJECT_NOT_FOUND;
-}
-
-int CTcpServer::DoSend(TSocketObj* pSocketObj)
-{
 	if(!TSocketObj::IsValid(pSocketObj))
 		return ERROR_OBJECT_NOT_FOUND;
 

@@ -675,7 +675,7 @@ void CUdpNode::SetLastError(EnSocketError code, LPCSTR func, int ec)
 
 EnHandleResult CUdpNode::FireSend(TNodeBufferObj* pBufferObj)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[60];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	ADDRESS_FAMILY usFamily;
 	USHORT usPort;
@@ -687,7 +687,7 @@ EnHandleResult CUdpNode::FireSend(TNodeBufferObj* pBufferObj)
 
 EnHandleResult CUdpNode::FireReceive(TNodeBufferObj* pBufferObj)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[60];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	ADDRESS_FAMILY usFamily;
 	USHORT usPort;
@@ -699,7 +699,7 @@ EnHandleResult CUdpNode::FireReceive(TNodeBufferObj* pBufferObj)
 
 EnHandleResult CUdpNode::FireError(TNodeBufferObj* pBufferObj, EnSocketOperation enOperation, int iErrorCode)
 {
-	TCHAR szAddress[50];
+	TCHAR szAddress[60];
 	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
 	ADDRESS_FAMILY usFamily;
 	USHORT usPort;

@@ -223,8 +223,8 @@ typedef CHPObjectPtr<ITcpPackClient, ITcpClientListener, SSLPackClient_Creator>	
 
 /*
 * 名称：SNI 默认回调函数
-* 描述：HP_SSLServer_SetupSSLContext 方法中如果不指定 SNI 回调函数则使用此 SNI 默认回调函数
-*
+* 描述：SSL Server 的 SetupSSLContext 方法中如果不指定 SNI 回调函数则使用此 SNI 默认回调函数
+*		
 * 参数：		lpszServerName	-- 请求域名
 *			pContext		-- SSL Context 对象
 *

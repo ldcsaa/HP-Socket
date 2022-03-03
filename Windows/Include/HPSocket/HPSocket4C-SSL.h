@@ -102,10 +102,10 @@ HPSOCKET_API void __HP_CALL Destroy_HP_SSLPackClient(HP_SSLPackClient pClient);
 /*
 * 名称：SNI 默认回调函数
 * 描述：HP_SSLServer_SetupSSLContext 方法中如果不指定 SNI 回调函数则使用此 SNI 默认回调函数
-*		
+*
 * 参数：		lpszServerName	-- 请求域名
 *			pContext		-- SSL Context 对象
-* 
+*
 * 返回值：SNI 主机证书对应的索引
 */
 HPSOCKET_API int __HP_CALL HP_SSL_DefaultServerNameCallback(LPCTSTR lpszServerName, PVOID pContext);
@@ -187,7 +187,7 @@ HPSOCKET_API int __HP_CALL HP_SSLServer_AddSSLContextByMemory(HP_SSLServer pServ
 /*
 * 名称：绑定 SNI 主机域名
 * 描述：SSL 服务端在 AddSSLContext() 成功后可以调用本方法绑定主机域名到 SNI 主机证书
-*		
+*
 * 参数：		lpszServerName		-- 主机域名
 *			iContextIndex		-- SNI 主机证书对应的索引
 *
@@ -326,7 +326,7 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLServer_GetSSLSessionInfo(HP_SSLServer pServer,
 /*
 * 名称：启动 SSL 握手
 * 描述：当通信组件设置为非自动握手时，需要调用本方法启动 SSL 握手
-*		
+*
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 */
@@ -354,7 +354,7 @@ HPSOCKET_API BOOL __HP_CALL HP_SSLAgent_GetSSLSessionInfo(HP_SSLAgent pAgent, HP
 /*
 * 名称：启动 SSL 握手
 * 描述：当通信组件设置为非自动握手时，需要调用本方法启动 SSL 握手
-*		
+*
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 */

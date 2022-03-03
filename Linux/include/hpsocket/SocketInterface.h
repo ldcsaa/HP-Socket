@@ -271,7 +271,7 @@ public:
 	virtual void SetFreeBufferObjPool		(DWORD dwFreeBufferObjPool)			= 0;
 	/* 设置 Socket 缓存池回收阀值（通常设置为 Socket 缓存池大小的 3 倍） */
 	virtual void SetFreeSocketObjHold		(DWORD dwFreeSocketObjHold)			= 0;
-	/* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
+	/* 设置内存块缓存池回收阀值 */
 	virtual void SetFreeBufferObjHold		(DWORD dwFreeBufferObjHold)			= 0;
 	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)			= 0;
@@ -370,7 +370,7 @@ public:
 	*			lpszPemKeyFile			-- 私钥文件
 	*			lpszKeyPassword			-- 私钥密码（没有密码则为空）
 	*			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
-	*			fnServerNameCallback	-- SNI 回调函数指针（可选）
+	*			fnServerNameCallback	-- SNI 回调函数指针（可选，如果为 nullptr 则使用 SNI 默认回调函数）
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
@@ -530,7 +530,7 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)	= 0;
 	/* 获取数据报文最大长度 */
 	virtual DWORD GetMaxDatagramSize	()							= 0;
@@ -740,7 +740,7 @@ public:
 	* 
 	* 返回值：无
 	*/
-	virtual void CleanupSSLContext()						= 0;
+	virtual void CleanupSSLContext()									= 0;
 
 	/*
 	* 名称：启动 SSL 握手
@@ -749,7 +749,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL StartSSLHandShake(CONNID dwConnID)			= 0;
+	virtual BOOL StartSSLHandShake(CONNID dwConnID)						= 0;
 
 #endif
 
@@ -915,9 +915,9 @@ public:
 
 	/* 设置地址重用选项 */
 	virtual void SetReuseAddressPolicy(EnReuseAddressPolicy enReusePolicy)						= 0;
-	/* 设置内存块缓存池大小（通常设置为 -> PUSH 模型：5 - 10；PULL 模型：10 - 20 ） */
+	/* 设置内存块缓存池大小 */
 	virtual void SetFreeBufferPoolSize		(DWORD dwFreeBufferPoolSize)						= 0;
-	/* 设置内存块缓存池回收阀值（通常设置为内存块缓存池大小的 3 倍） */
+	/* 设置内存块缓存池回收阀值 */
 	virtual void SetFreeBufferPoolHold		(DWORD dwFreeBufferPoolHold)						= 0;
 
 	/* 获取地址重用选项 */
@@ -995,7 +995,7 @@ public:
 	* 
 	* 返回值：无
 	*/
-	virtual void CleanupSSLContext()	= 0;
+	virtual void CleanupSSLContext()		= 0;
 
 	/*
 	* 名称：启动 SSL 握手
@@ -1004,7 +1004,7 @@ public:
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 	*/
-	virtual BOOL StartSSLHandShake()	= 0;
+	virtual BOOL StartSSLHandShake()		= 0;
 
 #endif
 
@@ -1072,7 +1072,7 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)	= 0;
 	/* 获取数据报文最大长度 */
 	virtual DWORD GetMaxDatagramSize()							= 0;
@@ -1103,7 +1103,7 @@ public:
 	/***********************************************************************/
 	/***************************** 属性访问方法 *****************************/
 
-	/* 设置数据报文最大长度（建议在局域网环境下不超过 1472 字节，在广域网环境下不超过 548 字节） */
+	/* 设置数据报文最大长度（建议在局域网环境下不超过 1432 字节，在广域网环境下不超过 548 字节） */
 	virtual void SetMaxDatagramSize	(DWORD dwMaxDatagramSize)		= 0;
 	/* 获取数据报文最大长度 */
 	virtual DWORD GetMaxDatagramSize()								= 0;
@@ -1283,7 +1283,7 @@ public:
 	virtual DWORD GetPostReceiveCount	()									= 0;
 	/* 获取内存块缓存池大小 */
 	virtual DWORD GetFreeBufferPoolSize	()									= 0;
-	/* 获取内存块缓存池回收阀值 */	
+	/* 获取内存块缓存池回收阀值 */
 	virtual DWORD GetFreeBufferPoolHold	()									= 0;
 
 public:
@@ -1582,7 +1582,7 @@ public:
 	* 描述：通信组件关闭时，Socket 监听器将收到该通知
 	*		
 	* 参数：		pSender		-- 事件源对象
-	* 返回值：忽略返回值
+	* 返回值：	忽略返回值
 	*/
 	virtual EnHandleResult OnShutdown(T* pSender)																= 0;
 
@@ -2193,7 +2193,7 @@ public:
 	* 返回值：	TRUE			-- 成功
 	*			FALSE			-- 失败
 	*/
-	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE* pData, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
+	virtual BOOL SendWSMessage(CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE* pData = nullptr, int iLength = 0, ULONGLONG ullBodyLen = 0)	= 0;
 
 	/*
 	* 名称：回复请求

@@ -867,6 +867,7 @@ int PostSendNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 	pBufferObj->operation	= SO_SEND;
 
 	pBufferObj->ResetSendCounter();
+	pSocketObj->Increment();
 
 	if(::WSASend(
 					pBufferObj->client,
@@ -879,6 +880,9 @@ int PostSendNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 				) == SOCKET_ERROR)
 	{
 		result = ::WSAGetLastError();
+
+		if(result != WSA_IO_PENDING)
+			pSocketObj->Decrement();
 	}
 
 	return result;
@@ -902,6 +906,8 @@ int PostReceiveNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 	pBufferObj->client		= pSocketObj->socket;
 	pBufferObj->operation	= SO_RECEIVE;
 
+	pSocketObj->Increment();
+
 	if(::WSARecv(
 					pBufferObj->client,
 					&pBufferObj->buff,
@@ -913,6 +919,9 @@ int PostReceiveNotCheck(TSocketObj* pSocketObj, TBufferObj* pBufferObj)
 				) == SOCKET_ERROR)
 	{
 		result = ::WSAGetLastError();
+
+		if(result != WSA_IO_PENDING)
+			pSocketObj->Decrement();
 	}
 
 	return result;

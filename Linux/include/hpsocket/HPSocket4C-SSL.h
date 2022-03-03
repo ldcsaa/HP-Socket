@@ -131,7 +131,7 @@ HPSOCKET_API void __HP_CALL HP_SSL_RemoveThreadLocalState(THR_ID dwThreadID);
 *			lpszPemKeyFile			-- 私钥文件
 *			lpszKeyPassword			-- 私钥密码（没有密码则为空）
 *			lpszCAPemCertFileOrPath	-- CA 证书文件或目录（单向验证或客户端可选）
-*			fnServerNameCallback	-- SNI 回调函数指针（可选）
+*			fnServerNameCallback	-- SNI 回调函数指针（可选，如果为 nullptr 则使用 SNI 默认回调函数）
 *
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因

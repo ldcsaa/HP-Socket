@@ -42,6 +42,8 @@ _WINSOCK_SUPPORT	: 支持 Windows Socket
 _DETECT_MEMORY_LEAK	: DEBUG 状态下支持内存泄露检查
 _ONLY_DETECT_CONFIRMED_MEMORY_LEAK_	: 只报告能够确认的内存泄露（不能确定的不报告）
 ---------------------------
+VC 2022
+	_MSC_VER == 1930
 VC 2019
 	_MSC_VER == 1920
 VC 2017

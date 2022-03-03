@@ -1,4 +1,16 @@
 ﻿==========================================================================================
+v5.8.7 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Optimize the garbage object collection and detection mechanism to improve the robustness of communication components in high load and high concurrency scenarios.
+
+> Third-party library Upadate
+-----------------
+1. mimalloc upgrade to version 1.7.5.
+
+==========================================================================================
 v5.8.6 Update:
 ==========================================================================================
 

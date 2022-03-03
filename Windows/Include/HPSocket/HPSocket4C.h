@@ -410,7 +410,7 @@ HPSOCKET_API BOOL __HP_CALL HP_Server_Stop(HP_Server pServer);
 /*
 * 名称：等待
 * 描述：等待通信组件停止运行
-*		
+*
 * 参数：		dwMilliseconds	-- 超时时间（毫秒，默认：-1，永不超时）
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
@@ -752,7 +752,7 @@ HPSOCKET_API BOOL __HP_CALL HP_Agent_Stop(HP_Agent pAgent);
 /*
 * 名称：等待
 * 描述：等待通信组件停止运行
-*		
+*
 * 参数：		dwMilliseconds	-- 超时时间（毫秒，默认：-1，永不超时）
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
@@ -1383,7 +1383,7 @@ HPSOCKET_API BOOL __HP_CALL HP_UdpNode_Stop(HP_UdpNode pNode);
 /*
 * 名称：等待
 * 描述：等待通信组件停止运行
-*		
+*
 * 参数：		dwMilliseconds	-- 超时时间（毫秒，默认：-1，永不超时）
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
@@ -2057,7 +2057,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpServer_SendLocalFile(HP_HttpServer pServer, H
 /*
 * 名称：发送 Chunked 数据分片
 * 描述：向对端发送 Chunked 数据分片
-*		
+*
 * 参数：		dwConnID		-- 连接 ID
 *			pData			-- Chunked 数据分片
 *			iLength			-- 数据分片长度（为 0 表示结束分片）
@@ -2100,7 +2100,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpServer_Release(HP_HttpServer pServer, HP_CONN
 /*
 * 名称：启动 HTTP 通信
 * 描述：当通信组件设置为非自动启动 HTTP 通信时，需要调用本方法启动 HTTP 通信
-*		
+*
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 */
@@ -2205,7 +2205,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendLocalFile(HP_HttpAgent pAgent, HP_C
 /*
 * 名称：发送 Chunked 数据分片
 * 描述：向对端发送 Chunked 数据分片
-*		
+*
 * 参数：		dwConnID		-- 连接 ID
 *			pData			-- Chunked 数据分片
 *			iLength			-- 数据分片长度（为 0 表示结束分片）
@@ -2258,7 +2258,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpAgent_SendWSMessage(HP_HttpAgent pAgent, HP_C
 /*
 * 名称：启动 HTTP 通信
 * 描述：当通信组件设置为非自动启动 HTTP 通信时，需要调用本方法启动 HTTP 通信
-*		
+*
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 */
@@ -2356,7 +2356,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendLocalFile(HP_HttpClient pClient, L
 /*
 * 名称：发送 Chunked 数据分片
 * 描述：向对端发送 Chunked 数据分片
-*		
+*
 * 参数：		pData			-- Chunked 数据分片
 *			iLength			-- 数据分片长度（为 0 表示结束分片）
 *			lpszExtensions	-- 扩展属性（默认：nullptr）
@@ -2407,7 +2407,7 @@ HPSOCKET_API BOOL __HP_CALL HP_HttpClient_SendWSMessage(HP_HttpClient pClient, B
 /*
 * 名称：启动 HTTP 通信
 * 描述：当通信组件设置为非自动启动 HTTP 通信时，需要调用本方法启动 HTTP 通信
-*		
+*
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取失败原因
 */
@@ -2683,7 +2683,7 @@ HPSOCKET_API BOOL __HP_CALL HP_ThreadPool_AdjustThreadCount(HP_ThreadPool pThrea
 /*
 * 名称：等待
 * 描述：等待线程池组件停止运行
-*		
+*
 * 参数：		dwMilliseconds	-- 超时时间（毫秒，默认：-1，永不超时）
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
@@ -2723,6 +2723,7 @@ HPSOCKET_API void __HP_CALL Destroy_HP_Decompressor(HP_Decompressor pDecompresso
 #ifdef _ZLIB_SUPPORT
 
 /* 创建 ZLib 压缩器对象 */
+// （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 ZLib 压缩器对象 */
 // （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
@@ -2733,6 +2734,7 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressData
 /* 创建 GZip 压缩器对象 */
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
 /* 创建 ZLib 解压器对象 */
+// （默认参数：iWindowBits = 15）
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback);
 /* 创建 ZLib 解压器对象 */
 // （默认参数：iWindowBits = 15）
@@ -2745,6 +2747,7 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_Decompre
 #ifdef _BROTLI_SUPPORT
 
 /* 创建 Brotli 压缩器对象 */
+//（默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 Brotli 压缩器对象 */
 // （默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）

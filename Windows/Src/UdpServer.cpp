@@ -931,21 +931,18 @@ UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 		{
 			DWORD dwFlag	= 0;
 			DWORD dwSysCode = ::GetLastError();
+			dwErrorCode		= dwSysCode;
 
 			if(pServer->HasStarted())
 			{
-				result = ::WSAGetOverlappedResult((SOCKET)ulCompKey, &pBufferObj->ov, &dwBytes, FALSE, &dwFlag);
-
-				if (!result)
+				if (!::WSAGetOverlappedResult((SOCKET)ulCompKey, &pBufferObj->ov, &dwBytes, FALSE, &dwFlag))
 				{
 					dwErrorCode = ::WSAGetLastError();
 					TRACE("GetQueuedCompletionStatus error (<S-CNNID: %Iu> SYS: %d, SOCK: %d, FLAG: %d)\n", dwConnID, dwSysCode, dwErrorCode, dwFlag);
 				}
 			}
-			else
-				dwErrorCode = dwSysCode;
 
-			ASSERT(dwSysCode != 0 && dwErrorCode != 0);
+			ASSERT(dwSysCode != NO_ERROR && dwErrorCode != NO_ERROR);
 		}
 
 		pServer->HandleIo(dwConnID, pBufferObj, dwBytes, dwErrorCode);
@@ -1363,14 +1360,6 @@ int CUdpServer::DoSend(CONNID dwConnID)
 {
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
-	if(TUdpSocketObj::IsValid(pSocketObj))
-		return DoSend(pSocketObj);
-
-	return ERROR_OBJECT_NOT_FOUND;
-}
-
-int CUdpServer::DoSend(TUdpSocketObj* pSocketObj)
-{
 	if(!TSocketObj::IsValid(pSocketObj))
 		return ERROR_OBJECT_NOT_FOUND;
 

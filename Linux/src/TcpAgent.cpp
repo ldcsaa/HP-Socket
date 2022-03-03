@@ -1035,7 +1035,12 @@ BOOL CTcpAgent::HandleConnect(TAgentSocketObj* pSocketObj, UINT events)
 	}
 
 	UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
-	m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj);
+	
+	if(!m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj))
+	{
+		AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_CONNECT, ::WSAGetLastError());
+		return FALSE;
+	}
 
 	return TRUE;
 }

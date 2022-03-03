@@ -1,9 +1,16 @@
 # HP-Socket for Linux
-&nbsp;&nbsp;&nbsp;&nbsp;The exported API of HP-Socket for Linux is consistent with HP-Socket for Windows, but the implementation code is completely separated. HP-Socket for Linux uses the features of the *C++14* standard, and thus need to be compiled by a compiler which version is *GCC 5.x* and above, and the compilation and execution environments of HP-Socket requires Linux kernel version *2.6.32* and above.   
+&nbsp;&nbsp;&nbsp;&nbsp;The exported API of HP-Socket for Linux is consistent with HP-Socket for Windows, but the implementation code is completely separated. HP-Socket for Linux uses the features of the *C++14* standard, and thus need to be compiled by a compiler which version is *GCC 6.x* and above, and the compilation and execution environments of HP-Socket requires Linux kernel version *2.6.32* and above.  
+
+&nbsp;&nbsp;&nbsp;&nbsp;***HP-Socket Compilation Requirements***  
+&nbsp;&nbsp;&nbsp;&nbsp;*1) Linux kernel version: 2.6.32 and above*  
+&nbsp;&nbsp;&nbsp;&nbsp;*2) GCC version: 6.x and above*  
+&nbsp;&nbsp;&nbsp;&nbsp;*3) glibc version: 2.14.x and above*  
+&nbsp;&nbsp;&nbsp;&nbsp;*4) Dependent libraries: librt, libdl, libpthread*  
+
 ## Compilation
 &nbsp;&nbsp;&nbsp;&nbsp;Binary library files and sample executable files are available in the HP-Socket distribution. These files were compiled with GCC 6.3.1 under Linux kernel version 2.6.32. Alternatively, you can compile these files using the following two options:
-1. **[*Visual C++ for Linux Development*](https://github.com/Microsoft/VSLinux) plug-in:** The HP-Socket distribution contains a series of Visual Studio Solutions, which were used to compile HP-Socket library and demos, you can compile them by yourself after install and configure the *Visual C++ for Linux Development* plug-in.  
-2. ***compile.sh*:** You can compile HP-Socket library files yourself using *compile.sh* shell script. But *compile.sh* only compile library files and will not compile sample executable files.  
+1. ***Windows Remote Compilation:*** HP-Socket distribution package provides visual studio solutions for HP-Socket library and its demo, you can open the corresponding solution to compile them; And you can also compile HP-Socket library or (and) demo by runing *script/ms-build-libs.bat*, *script/ms-build-demos.bat*, *script/ms-build-all.bat*.  
+2. ***compile.sh*:** You can compile HP-Socket library files yourself using *compile.sh* shell script. But *compile.sh* only compiles library files and will not compiles demo executable files.  
 ```
 $ ./compile.sh -h
 Usage: compile.sh [...O.P.T.I.O.N.S...]
@@ -59,13 +66,14 @@ $ ./build-android-ndk.sh
 $ ./build-android-ndk.sh APP_ABI=armeabi-v7a,x86
 ```
 ### Features
-&nbsp;&nbsp;&nbsp;&nbsp;By default, all optional features (*UDP, SSL, HTTP, ZLIB, BROTLI, ICONV*) were enabled. You can set one or more ***_XXX_DISABLED=true*** parameters for *build-android-ndk.sh* to disable corresponding features.  
-  - *_UDP_DISABLED=true*&nbsp;&nbsp;&nbsp;(disable UDP)
-  - *_SSL_DISABLED=true*&nbsp;&nbsp;&nbsp;(disable SSL)
+&nbsp;&nbsp;&nbsp;&nbsp;By default, all optional features (*UDP, SSL, HTTP, ZLIB, BROTLI, ICONV, MIMALLOC*) were enabled. You can set one or more ***_XXX_DISABLED=true*** parameters for *build-android-ndk.sh* to disable corresponding features.  
+  - *_UDP_DISABLED=true*&nbsp;&nbsp;(disable UDP)
+  - *_SSL_DISABLED=true*&nbsp;&nbsp;(disable SSL)
   - *_HTTP_DISABLED=true*&nbsp;&nbsp;(disable HTTP)
   - *_ZLIB_DISABLED=true*&nbsp;&nbsp;(disable ZLIB)
   - *_BROTLI_DISABLED=true*&nbsp;&nbsp;(disable BROTLI)
-  - *_ICONV_DISABLED=true*&nbsp;(disable ICONV)
+  - *_ICONV_DISABLED=true*&nbsp;&nbsp;(disable ICONV)
+  - *_MIMALLOC_DISABLED=true*&nbsp;&nbsp;(disable mimalloc memory allocator)
 
 &nbsp;&nbsp;&nbsp;&nbsp;(for example: disable *SSL* and *ICONV* features):
 ```
