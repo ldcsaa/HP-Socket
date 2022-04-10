@@ -105,6 +105,7 @@
 /* 压缩/解压数据缓冲器长度 */
 #define COMPRESS_BUFFER_SIZE					(16 * 1024)
 
+#define HOST_SEPARATOR_CHAR						'^'
 #define PORT_SEPARATOR_CHAR						':'
 #define IPV6_ADDR_BEGIN_CHAR					'['
 #define IPV6_ADDR_END_CHAR						']'

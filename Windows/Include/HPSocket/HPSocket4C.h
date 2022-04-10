@@ -1739,6 +1739,23 @@ HPSOCKET_API LPVOID __HP_CALL SYS_Calloc(int number, int size);
 HPSOCKET_API LPBYTE __HP_CALL SYS_Alloca(int size);
 
 // CP_XXX -> UNICODE
+HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength);
+// UNICODE -> CP_XXX
+HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToCodePageEx(int iCodePage, const WCHAR szSrc[], int iSrcLength, char szDest[], int* piDestLength);
+// GBK -> UNICODE
+HPSOCKET_API BOOL __HP_CALL SYS_GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength);
+// UNICODE -> GBK
+HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int* piDestLength);
+// UTF8 -> UNICODE
+HPSOCKET_API BOOL __HP_CALL SYS_Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength);
+// UNICODE -> UTF8
+HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int* piDestLength);
+// GBK -> UTF8
+HPSOCKET_API BOOL __HP_CALL SYS_GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int* piDestLength);
+// UTF8 -> GBK
+HPSOCKET_API BOOL __HP_CALL SYS_Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int* piDestLength);
+
+// CP_XXX -> UNICODE
 HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int* piDestLength);
 // UNICODE -> CP_XXX
 HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int* piDestLength);

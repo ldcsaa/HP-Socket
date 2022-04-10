@@ -375,25 +375,25 @@ typedef	CLocalTryLock<CFakeGuard>			CFakeTryLock;
 template<typename T> class CSafeCounterT
 {
 public:
-	T Increment()					{return IncrementImpl<sizeof(T)>();}
-	T Decrement()					{return DecrementImpl<sizeof(T)>();}
-	T FetchAdd(T iCount)			{return FetchAddImpl<sizeof(T)>(iCount);}
-	T FetchSub(T iCount)			{return FetchSubImpl<sizeof(T)>(iCount);}
-	T AddFetch(T iCount)			{return FetchAdd(iCount) + iCount;}
-	T SubFetch(T iCount)			{return FetchSub(iCount) - iCount;}
+	T Increment()				{return IncrementImpl<sizeof(T)>();}
+	T Decrement()				{return DecrementImpl<sizeof(T)>();}
+	T FetchAdd(T iCount)		{return FetchAddImpl<sizeof(T)>(iCount);}
+	T FetchSub(T iCount)		{return FetchSubImpl<sizeof(T)>(iCount);}
+	T AddFetch(T iCount)		{return FetchAdd(iCount) + iCount;}
+	T SubFetch(T iCount)		{return FetchSub(iCount) - iCount;}
 
-	T SetCount(T iCount)			{return (m_iCount = iCount);}
-	T ResetCount()					{return SetCount(0);}
-	T GetCount()					{return m_iCount;}
+	T SetCount(T iCount)		{return (m_iCount = iCount);}
+	T ResetCount()				{return SetCount(0);}
+	T GetCount()				{return m_iCount;}
 
-	T operator ++ ()				{return Increment();}
-	T operator -- ()				{return Decrement();}
-	T operator ++ (int)				{return FetchAdd(1);}
-	T operator -- (int)				{return FetchSub(1);}
-	T operator += (T iCount)		{return AddFetch(iCount);}
-	T operator -= (T iCount)		{return SubFetch(iCount);}
-	T operator  = (T iCount)		{return SetCount(iCount);}
-	operator T	  ()				{return GetCount();}
+	T operator ++ ()			{return Increment();}
+	T operator -- ()			{return Decrement();}
+	T operator ++ (int)			{return FetchAdd(1);}
+	T operator -- (int)			{return FetchSub(1);}
+	T operator += (T iCount)	{return AddFetch(iCount);}
+	T operator -= (T iCount)	{return SubFetch(iCount);}
+	T operator  = (T iCount)	{return SetCount(iCount);}
+	operator T	  ()			{return GetCount();}
 
 public:
 	CSafeCounterT(T iCount = 0) : m_iCount(iCount) {}
@@ -418,25 +418,25 @@ protected:
 template<typename T> class CUnsafeCounterT
 {
 public:
-	T Increment()					{return ++m_iCount;}
-	T Decrement()					{return --m_iCount;}
-	T AddFetch(T iCount)			{return m_iCount += iCount;}
-	T SubFetch(T iCount)			{return m_iCount -= iCount;}
-	T FetchAdd(T iCount)			{T rs = m_iCount; m_iCount += iCount; return rs;}
-	T FetchSub(T iCount)			{T rs = m_iCount; m_iCount -= iCount; return rs;}
+	T Increment()				{return ++m_iCount;}
+	T Decrement()				{return --m_iCount;}
+	T AddFetch(T iCount)		{return m_iCount += iCount;}
+	T SubFetch(T iCount)		{return m_iCount -= iCount;}
+	T FetchAdd(T iCount)		{T rs = m_iCount; m_iCount += iCount; return rs;}
+	T FetchSub(T iCount)		{T rs = m_iCount; m_iCount -= iCount; return rs;}
 
-	T SetCount(T iCount)			{return (m_iCount = iCount);}
-	T ResetCount()					{return SetCount(0);}
-	T GetCount()					{return m_iCount;}
+	T SetCount(T iCount)		{return (m_iCount = iCount);}
+	T ResetCount()				{return SetCount(0);}
+	T GetCount()				{return m_iCount;}
 
-	T operator ++ ()				{return Increment();}
-	T operator -- ()				{return Decrement();}
-	T operator ++ (int)				{return FetchAdd(1);}
-	T operator -- (int)				{return FetchSub(1);}
-	T operator += (T iCount)		{return AddFetch(iCount);}
-	T operator -= (T iCount)		{return SubFetch(iCount);}
-	T operator  = (T iCount)		{return SetCount(iCount);}
-	operator T	  ()				{return GetCount();}
+	T operator ++ ()			{return Increment();}
+	T operator -- ()			{return Decrement();}
+	T operator ++ (int)			{return FetchAdd(1);}
+	T operator -- (int)			{return FetchSub(1);}
+	T operator += (T iCount)	{return AddFetch(iCount);}
+	T operator -= (T iCount)	{return SubFetch(iCount);}
+	T operator  = (T iCount)	{return SetCount(iCount);}
+	operator T	  ()			{return GetCount();}
 
 public:
 	CUnsafeCounterT(T iCount = 0) : m_iCount(iCount) {}

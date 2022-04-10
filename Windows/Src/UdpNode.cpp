@@ -456,7 +456,7 @@ BOOL CUdpNode::DoSendPackets(HP_SOCKADDR& addrRemote, const WSABUF pBuffers[], i
 	ASSERT(pBuffers && iCount > 0);
 
 	if(!pBuffers || iCount <= 0)
-		return ERROR_INVALID_PARAMETER;;
+		return ERROR_INVALID_PARAMETER;
 
 	if(!IsValid())
 	{
@@ -778,7 +778,7 @@ TUdpBufferObj* CUdpNode::GetFreeBufferObj(int iLen)
 {
 	ASSERT(iLen >= -1 && iLen <= (int)m_dwMaxDatagramSize);
 
-	TUdpBufferObj* pBufferObj		= m_bfObjPool.PickFreeItem();;
+	TUdpBufferObj* pBufferObj		= m_bfObjPool.PickFreeItem();
 	if(iLen < 0) iLen				= m_dwMaxDatagramSize;
 	pBufferObj->buff.len			= iLen;
 	pBufferObj->remoteAddr.family	= m_localAddr.family;

@@ -243,6 +243,51 @@ typedef struct hp_sockaddr
 
 } HP_SOCKADDR, *HP_PSOCKADDR;
 
+typedef struct hp_scope_host
+{
+	LPCTSTR addr;
+	LPCTSTR name;
+
+	BOOL bNeedFree;
+
+	hp_scope_host(LPCTSTR lpszOriginAddress)
+	{
+		ASSERT(lpszOriginAddress != nullptr);
+
+		LPCTSTR lpszFind = ::StrChr(lpszOriginAddress, HOST_SEPARATOR_CHAR);
+
+		if(lpszFind == nullptr)
+		{
+			addr		= lpszOriginAddress;
+			name		= lpszOriginAddress;
+			bNeedFree	= FALSE;
+		}
+		else
+		{
+			int i			= (int)(lpszFind - lpszOriginAddress);
+			int iSize		= (int)lstrlen(lpszOriginAddress) + 1;
+			LPTSTR lpszCopy	= new TCHAR[iSize];
+
+			::memcpy((PVOID)lpszCopy, (PVOID)lpszOriginAddress, iSize * sizeof(TCHAR));
+
+			lpszCopy[i]	= 0;
+			addr		= lpszCopy;
+			name		= lpszCopy + i + 1;
+			bNeedFree	= TRUE;
+
+			if(::IsStrEmpty(name))
+				name = addr;
+		}
+	}
+
+	~hp_scope_host()
+	{
+		if(bNeedFree)
+			delete[] addr;
+	}
+
+} HP_SCOPE_HOST, *HP_PSCOPE_HOST;
+
 /* Server 组件和 Agent 组件内部使用的事件处理结果常量 */
 
 // 连接已关闭
@@ -918,6 +963,23 @@ int NoBlockReceiveFromNotCheck(SOCKET sock, TUdpBufferObj* pBufferObj);
 BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const HP_SOCKADDR& castAddr, int iMCTtl, BOOL bMCLoop);
 
 // CP_XXX -> UNICODE
+BOOL CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> CP_XXX
+BOOL UnicodeToCodePageEx(int iCodePage, const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// GBK -> UNICODE
+BOOL GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> GBK
+BOOL UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// UTF8 -> UNICODE
+BOOL Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> UTF8
+BOOL UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// GBK -> UTF8
+BOOL GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// UTF8 -> GBK
+BOOL Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+
+// CP_XXX -> UNICODE
 BOOL CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength);
 // UNICODE -> CP_XXX
 BOOL UnicodeToCodePage(int iCodePage, const WCHAR szSrc[], char szDest[], int& iDestLength);
@@ -960,7 +1022,7 @@ void DestroyDecompressor(IHPDecompressor* pDecompressor);
 #ifdef _ZLIB_SUPPORT
 
 /* ZLib 压缩器 */
-class CHPZlibCompressor : public IHPCompressor
+class CHPZLibCompressor : public IHPCompressor
 {
 public:
 	virtual BOOL Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext = nullptr);
@@ -968,8 +1030,8 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPZlibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
-	virtual ~CHPZlibCompressor();
+	CHPZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
+	virtual ~CHPZLibCompressor();
 
 private:
 	Fn_CompressDataCallback m_fnCallback;
@@ -978,7 +1040,7 @@ private:
 };
 
 /* ZLib 解压器 */
-class CHPZlibDecompressor : public IHPDecompressor
+class CHPZLibDecompressor : public IHPDecompressor
 {
 public:
 	virtual BOOL Process(const BYTE* pData, int iLength, PVOID pContext = nullptr);
@@ -986,8 +1048,8 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPZlibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS);
-	virtual ~CHPZlibDecompressor();
+	CHPZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS);
+	virtual ~CHPZLibDecompressor();
 
 private:
 	Fn_DecompressDataCallback m_fnCallback;

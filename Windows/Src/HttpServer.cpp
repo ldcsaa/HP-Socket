@@ -219,7 +219,7 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 
 	if(result == HR_ERROR)
 	{
-		m_objPool.PutFreeHttpObj(pHttpObj);;
+		m_objPool.PutFreeHttpObj(pHttpObj);
 		SetConnectionReserved(pSocketObj, nullptr);
 	}
 

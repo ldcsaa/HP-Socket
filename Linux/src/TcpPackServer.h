@@ -59,15 +59,25 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
+	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj)
 	{
-		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
+		EnHandleResult result = __super::DoFireAccept(pSocketObj);
 
 		if(result != HR_ERROR)
 		{
 			TBuffer* pBuffer = m_bfPool.PickFreeBuffer(pSocketObj->connID);
-			VERIFY(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
+			ENSURE(SetConnectionReserved(pSocketObj, TBufferPackInfo::Construct(pBuffer)));
 		}
+
+		return result;
+	}
+
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
+	{
+		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
+
+		if(result == HR_ERROR)
+			ReleaseConnectionExtra(pSocketObj);
 
 		return result;
 	}
@@ -88,14 +98,7 @@ protected:
 	{
 		EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
 
-		TBufferPackInfo* pInfo = nullptr;
-		GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
-
-		if(pInfo != nullptr)
-		{
-			m_bfPool.PutFreeBuffer(pInfo->pBuffer);
-			TBufferPackInfo::Destruct(pInfo);
-		}
+		ReleaseConnectionExtra(pSocketObj);
 
 		return result;
 	}
@@ -161,11 +164,24 @@ public:
 	virtual USHORT GetPackHeaderFlag()							{return m_usHeaderFlag;}
 
 private:
+	void ReleaseConnectionExtra(TSocketObj* pSocketObj)
+	{
+		TBufferPackInfo* pInfo = nullptr;
+		GetConnectionReserved(pSocketObj, (PVOID*)&pInfo);
+
+		if(pInfo != nullptr)
+		{
+			m_bfPool.PutFreeBuffer(pInfo->pBuffer);
+			TBufferPackInfo::Destruct(pInfo);
+
+			ENSURE(SetConnectionReserved(pSocketObj, nullptr));
+		}
+	}
+
 	EnHandleResult DoFireSuperReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
 		{return __super::DoFireReceive(pSocketObj, pData, iLength);}
 
-	friend EnHandleResult ParsePack<>	(CTcpPackServerT* pThis, TBufferPackInfo* pInfo, TBuffer* pBuffer, TSocketObj* pSocket,
-										DWORD dwMaxPackSize, USHORT usPackHeaderFlag);
+	friend EnHandleResult ParsePack<>(CTcpPackServerT* pThis, TBufferPackInfo* pInfo, TBuffer* pBuffer, TSocketObj* pSocket, DWORD dwMaxPackSize, USHORT usPackHeaderFlag);
 
 public:
 	CTcpPackServerT(ITcpServerListener* pListener)

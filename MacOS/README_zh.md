@@ -53,10 +53,10 @@ HP-Socket for MacOS版本只是提供与其他平台上相同的回调接口，�
 > CMakeLists.txt
 
 ```
-include_directories(/opt/local/include)
-link_directories(/opt/local/lib)
+find_package(OpenSSL REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(unofficial-iconv CONFIG REQUIRED)
 
-link_libraries(ssl iconv z crypto)
 add_definitions(-D_NEED_HTTP -D_SSL_SUPPORT -D_NEED_SSL)
 ```
 
@@ -81,8 +81,8 @@ HPSocket-SSL.h
 
 #### 相关依赖如何安装？
 
-通过使用brew或MacPort；例子中使用的是MacPort。
+通过使用vcpkg、brew或MacPort；例子中使用的是vcpkg管理toolchain。
 
 具体安装了以下依赖：
 
-`openssl`, `zlib`
+`openssl`, `iconv`, `zlib`

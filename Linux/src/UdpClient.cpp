@@ -127,7 +127,9 @@ BOOL CUdpClient::CheckStoping()
 
 BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addrRemote, USHORT usPort, LPCTSTR lpszBindAddress, HP_SOCKADDR& addrBind)
 {
-	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, addrRemote))
+	HP_SCOPE_HOST host(lpszRemoteAddress);
+
+	if(!::GetSockAddrByHostName(host.addr, usPort, addrRemote))
 		return FALSE;
 
 	if(::IsStrNotEmpty(lpszBindAddress))
@@ -149,7 +151,7 @@ BOOL CUdpClient::CreateClientSocket(LPCTSTR lpszRemoteAddress, HP_SOCKADDR& addr
 
 	VERIFY(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
 
-	SetRemoteHost(lpszRemoteAddress, usPort);
+	SetRemoteHost(host.name, usPort);
 
 	return TRUE;
 }

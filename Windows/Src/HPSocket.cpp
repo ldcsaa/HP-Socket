@@ -376,6 +376,46 @@ HPSOCKET_API LPBYTE SYS_Alloca(int size)
 	return CreateLocalObjects(BYTE, size);
 }
 
+HPSOCKET_API BOOL SYS_CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
+{
+	return ::CodePageToUnicodeEx(iCodePage, szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToCodePageEx(int iCodePage, const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::UnicodeToCodePageEx(iCodePage, szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
+{
+	return ::GbkToUnicodeEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::UnicodeToGbkEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
+{
+	return ::Utf8ToUnicodeEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::UnicodeToUtf8Ex(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::GbkToUtf8Ex(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::Utf8ToGbkEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
 HPSOCKET_API BOOL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int& iDestLength)
 {
 	return ::CodePageToUnicode(iCodePage, szSrc, szDest, iDestLength);

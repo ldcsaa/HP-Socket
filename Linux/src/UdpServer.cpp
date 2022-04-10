@@ -1126,7 +1126,7 @@ BOOL CUdpServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCoun
 	ASSERT(pBuffers && iCount > 0);
 
 	if(!pBuffers || iCount <= 0)
-		return ERROR_INVALID_PARAMETER;;
+		return ERROR_INVALID_PARAMETER;
 
 	TUdpSocketObj* pSocketObj = FindSocketObj(dwConnID);
 

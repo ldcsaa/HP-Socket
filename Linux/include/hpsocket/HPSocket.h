@@ -580,6 +580,20 @@ HPSOCKET_API DWORD SYS_BrotliGuessCompressBound(DWORD dwSrcLen);
 
 // Charset A -> Charset B
 HPSOCKET_API BOOL SYS_CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen);
+
+// GBK -> UNICODE
+HPSOCKET_API BOOL SYS_GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> GBK
+HPSOCKET_API BOOL SYS_UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// UTF8 -> UNICODE
+HPSOCKET_API BOOL SYS_Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> UTF8
+HPSOCKET_API BOOL SYS_UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// GBK -> UTF8
+HPSOCKET_API BOOL SYS_GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// UTF8 -> GBK
+HPSOCKET_API BOOL SYS_Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+
 // GBK -> UNICODE
 HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
 // UNICODE -> GBK

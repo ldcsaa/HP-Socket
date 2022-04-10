@@ -252,7 +252,9 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 		result = ERROR_INVALID_STATE;
 	else
 	{
-		result = CreateClientSocket(lpszRemoteAddress, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
+		HP_SCOPE_HOST host(lpszRemoteAddress);
+
+		result = CreateClientSocket(host.addr, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
 
 		if(result == NO_ERROR)
 		{
@@ -260,7 +262,7 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 
 			if(result == NO_ERROR)
 			{
-				result	 = ConnectToServer(*pdwConnID, lpszRemoteAddress, soClient, addr, pExtra);
+				result	 = ConnectToServer(*pdwConnID, host.name, soClient, addr, pExtra);
 				soClient = INVALID_SOCKET;
 			}
 		}
@@ -342,13 +344,13 @@ int CTcpAgent::PrepareConnect(CONNID& dwConnID, SOCKET soClient)
 	return NO_ERROR;
 }
 
-int CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteAddress, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra)
+int CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra)
 {
 	TAgentSocketObj* pSocketObj = GetFreeSocketObj(dwConnID, soClient);
 
 	CReentrantCriSecLock locallock(pSocketObj->csIo);
 
-	AddClientSocketObj(dwConnID, pSocketObj, addr, lpszRemoteAddress, pExtra);
+	AddClientSocketObj(dwConnID, pSocketObj, addr, lpszRemoteHostName, pExtra);
 
 	int result = HAS_ERROR;
 
@@ -450,13 +452,13 @@ BOOL CTcpAgent::InvalidSocketObj(TAgentSocketObj* pSocketObj)
 	return TAgentSocketObj::InvalidSocketObj(pSocketObj);
 }
 
-void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TAgentSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteAddress, PVOID pExtra)
+void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TAgentSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteHostName, PVOID pExtra)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
 	pSocketObj->connTime	= ::TimeGetTime();
 	pSocketObj->activeTime	= pSocketObj->connTime;
-	pSocketObj->host		= lpszRemoteAddress;
+	pSocketObj->host		= lpszRemoteHostName;
 	pSocketObj->extra		= pExtra;
 
 	pSocketObj->SetConnected(CST_CONNECTING);

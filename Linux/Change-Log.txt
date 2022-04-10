@@ -1,4 +1,19 @@
 ﻿==========================================================================================
+v5.8.8 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Client/Agent components supports specifying host name when connecting to remote server. The format is: '< hostaddress >[^< hostname >]', where '^< hostname >' is optional. One of scenario: pass SSL SNI hostname to target server through proxy server.
+2. Add a series of character encoding conversion functions (Reference: Chang-log.txt), which supports specifying the length of the source string.
+3. Fix the abnormal problem of SSL Pull/Pack Server/Agent components in the scenario of manual start SSL: 'SetSSLAutoStart(FALSE)'.
+
+> Third-party library Upadate
+-----------------
+1. zlib upgrade to version 1.2.12.
+2. openssl upgrade to version 1.1.1n.
+
+==========================================================================================
 v5.8.7 Update:
 ==========================================================================================
 

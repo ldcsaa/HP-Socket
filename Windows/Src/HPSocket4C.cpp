@@ -436,10 +436,13 @@
 	#pragma comment(linker, "/EXPORT:SYS_Base64Decode=_SYS_Base64Decode@16")
 	#pragma comment(linker, "/EXPORT:SYS_Base64Encode=_SYS_Base64Encode@16")
 	#pragma comment(linker, "/EXPORT:SYS_CodePageToUnicode=_SYS_CodePageToUnicode@16")
+	#pragma comment(linker, "/EXPORT:SYS_CodePageToUnicodeEx=_SYS_CodePageToUnicodeEx@20")
 	#pragma comment(linker, "/EXPORT:SYS_EnumHostIPAddresses=_SYS_EnumHostIPAddresses@16")
 	#pragma comment(linker, "/EXPORT:SYS_FreeHostIPAddresses=_SYS_FreeHostIPAddresses@4")
 	#pragma comment(linker, "/EXPORT:SYS_GbkToUnicode=_SYS_GbkToUnicode@12")
+	#pragma comment(linker, "/EXPORT:SYS_GbkToUnicodeEx=_SYS_GbkToUnicodeEx@16")
 	#pragma comment(linker, "/EXPORT:SYS_GbkToUtf8=_SYS_GbkToUtf8@12")
+	#pragma comment(linker, "/EXPORT:SYS_GbkToUtf8Ex=_SYS_GbkToUtf8Ex@16")
 	#pragma comment(linker, "/EXPORT:SYS_GetIPAddress=_SYS_GetIPAddress@16")
 	#pragma comment(linker, "/EXPORT:SYS_GetLastError=_SYS_GetLastError@0")
 	#pragma comment(linker, "/EXPORT:SYS_GetSocketLocalAddress=_SYS_GetSocketLocalAddress@16")
@@ -467,12 +470,17 @@
 	#pragma comment(linker, "/EXPORT:SYS_SSO_SendTimeOut=_SYS_SSO_SendTimeOut@8")
 	#pragma comment(linker, "/EXPORT:SYS_SetSocketOption=_SYS_SetSocketOption@20")
 	#pragma comment(linker, "/EXPORT:SYS_UnicodeToCodePage=_SYS_UnicodeToCodePage@16")
+	#pragma comment(linker, "/EXPORT:SYS_UnicodeToCodePageEx=_SYS_UnicodeToCodePageEx@20")
 	#pragma comment(linker, "/EXPORT:SYS_UnicodeToGbk=_SYS_UnicodeToGbk@12")
+	#pragma comment(linker, "/EXPORT:SYS_UnicodeToGbkEx=_SYS_UnicodeToGbkEx@16")
 	#pragma comment(linker, "/EXPORT:SYS_UnicodeToUtf8=_SYS_UnicodeToUtf8@12")
+	#pragma comment(linker, "/EXPORT:SYS_UnicodeToUtf8Ex=_SYS_UnicodeToUtf8Ex@16")
 	#pragma comment(linker, "/EXPORT:SYS_UrlDecode=_SYS_UrlDecode@16")
 	#pragma comment(linker, "/EXPORT:SYS_UrlEncode=_SYS_UrlEncode@16")
 	#pragma comment(linker, "/EXPORT:SYS_Utf8ToGbk=_SYS_Utf8ToGbk@12")
+	#pragma comment(linker, "/EXPORT:SYS_Utf8ToGbkEx=_SYS_Utf8ToGbkEx@16")
 	#pragma comment(linker, "/EXPORT:SYS_Utf8ToUnicode=_SYS_Utf8ToUnicode@12")
+	#pragma comment(linker, "/EXPORT:SYS_Utf8ToUnicodeEx=_SYS_Utf8ToUnicodeEx@16")
 	#pragma comment(linker, "/EXPORT:SYS_WSAGetLastError=_SYS_WSAGetLastError@0")
 	#pragma comment(linker, "/EXPORT:SYS_WSAIoctl=_SYS_WSAIoctl@28")
 	#pragma comment(linker, "/EXPORT:SYS_Malloc=_SYS_Malloc@4")
@@ -2943,6 +2951,46 @@ HPSOCKET_API LPVOID __HP_CALL SYS_Calloc(int number, int size)
 HPSOCKET_API LPBYTE __HP_CALL SYS_Alloca(int size)
 {
 	return CreateLocalObjects(BYTE, size);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength)
+{
+	return ::CodePageToUnicodeEx(iCodePage, szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToCodePageEx(int iCodePage, const WCHAR szSrc[], int iSrcLength, char szDest[], int* piDestLength)
+{
+	return ::UnicodeToCodePageEx(iCodePage, szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength)
+{
+	return ::GbkToUnicodeEx(szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int* piDestLength)
+{
+	return ::UnicodeToGbkEx(szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength)
+{
+	return ::Utf8ToUnicodeEx(szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int* piDestLength)
+{
+	return ::UnicodeToUtf8Ex(szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int* piDestLength)
+{
+	return ::GbkToUtf8Ex(szSrc, iSrcLength, szDest, *piDestLength);
+}
+
+HPSOCKET_API BOOL __HP_CALL SYS_Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int* piDestLength)
+{
+	return ::Utf8ToGbkEx(szSrc, iSrcLength, szDest, *piDestLength);
 }
 
 HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicode(int iCodePage, const char szSrc[], WCHAR szDest[], int* piDestLength)

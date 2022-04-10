@@ -86,7 +86,7 @@ BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedP
 
 	m_enState = SS_STARTED;
 
-	return TRUE;;
+	return TRUE;
 }
 
 BOOL CHPThreadPool::Stop(DWORD dwMaxWait)

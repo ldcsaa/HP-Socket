@@ -990,7 +990,7 @@ void DestroyDecompressor(IHPDecompressor* pDecompressor)
 
 #ifdef _ZLIB_SUPPORT
 
-CHPZlibCompressor::CHPZlibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+CHPZLibCompressor::CHPZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
 : m_fnCallback	(fnCallback)
 , m_bValid		(FALSE)
 {
@@ -1000,17 +1000,17 @@ CHPZlibCompressor::CHPZlibCompressor(Fn_CompressDataCallback fnCallback, int iWi
 
 	m_bValid = (::deflateInit2(&m_Stream, iLevel, iMethod, iWindowBits, iMemLevel, iStrategy) == Z_OK);
 }
-CHPZlibCompressor::~CHPZlibCompressor()
+CHPZLibCompressor::~CHPZLibCompressor()
 {
 	if(m_bValid) ::deflateEnd(&m_Stream);
 }
 
-BOOL CHPZlibCompressor::Reset()
+BOOL CHPZLibCompressor::Reset()
 {
 	return (m_bValid = (::deflateReset(&m_Stream) == Z_OK));
 }
 
-BOOL CHPZlibCompressor::Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
+BOOL CHPZLibCompressor::Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
 {
 	ASSERT(IsValid() && iLength > 0);
 
@@ -1068,7 +1068,7 @@ ZLIB_COMPRESS_END:
 	return isOK;
 }
 
-CHPZlibDecompressor::CHPZlibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits)
+CHPZLibDecompressor::CHPZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits)
 : m_fnCallback	(fnCallback)
 , m_bValid		(FALSE)
 {
@@ -1078,17 +1078,17 @@ CHPZlibDecompressor::CHPZlibDecompressor(Fn_DecompressDataCallback fnCallback, i
 
 	m_bValid = (::inflateInit2(&m_Stream, iWindowBits) == Z_OK);
 }
-CHPZlibDecompressor::~CHPZlibDecompressor()
+CHPZLibDecompressor::~CHPZLibDecompressor()
 {
 	if(m_bValid) ::inflateEnd(&m_Stream);
 }
 
-BOOL CHPZlibDecompressor::Reset()
+BOOL CHPZLibDecompressor::Reset()
 {
 	return (m_bValid = (::inflateReset(&m_Stream) == Z_OK));
 }
 
-BOOL CHPZlibDecompressor::Process(const BYTE* pData, int iLength, PVOID pContext)
+BOOL CHPZLibDecompressor::Process(const BYTE* pData, int iLength, PVOID pContext)
 {
 	ASSERT(IsValid() && iLength > 0);
 
@@ -1151,22 +1151,22 @@ ZLIB_DECOMPRESS_END:
 
 IHPCompressor* CreateZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
 {
-	return new CHPZlibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
+	return new CHPZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
 }
 
 IHPCompressor* CreateGZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy)
 {
-	return new CHPZlibCompressor(fnCallback, MAX_WBITS + 16, iLevel, iMethod, iMemLevel, iStrategy);
+	return new CHPZLibCompressor(fnCallback, MAX_WBITS + 16, iLevel, iMethod, iMemLevel, iStrategy);
 }
 
 IHPDecompressor* CreateZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits)
 {
-	return new CHPZlibDecompressor(fnCallback, iWindowBits);
+	return new CHPZLibDecompressor(fnCallback, iWindowBits);
 }
 
 IHPDecompressor* CreateGZipDecompressor(Fn_DecompressDataCallback fnCallback)
 {
-	return new CHPZlibDecompressor(fnCallback, MAX_WBITS + 32);
+	return new CHPZLibDecompressor(fnCallback, MAX_WBITS + 32);
 }
 
 int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen)
@@ -1330,7 +1330,7 @@ BOOL CHPBrotliCompressor::Process(const BYTE* pData, int iLength, BOOL bLast, PV
 
 	while(iAvlInLen > 0)
 	{
-		do 
+		do
 		{
 			pNextOutData = szBuff;
 			iAvlOutLen	 = COMPRESS_BUFFER_SIZE;
@@ -1407,7 +1407,7 @@ BOOL CHPBrotliDecompressor::Process(const BYTE* pData, int iLength, PVOID pConte
 
 	do
 	{
-		do 
+		do
 		{
 			pNextOutData = szBuff;
 			iAvlOutLen	 = COMPRESS_BUFFER_SIZE;
@@ -1437,7 +1437,7 @@ BOOL CHPBrotliDecompressor::Process(const BYTE* pData, int iLength, PVOID pConte
 		} while (iAvlOutLen == 0);
 
 		if(rs == BROTLI_DECODER_RESULT_SUCCESS)
-			break;;
+			break;
 
 	} while(rs == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT);
 
@@ -1518,54 +1518,84 @@ BOOL CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInB
 	return !IS_HAS_ERROR(rs);
 }
 
-BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+BOOL GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
 {
-	int iInBufLen	= (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
-	int iOutBufLen	= (int)(iDestLength * sizeof(wchar_t));
+	int iInBufLen	= (int)((iSrcLength > 0) ? iSrcLength : ((szSrc != nullptr) ? strlen(szSrc) + 1 : 0));
+	int iOutBufLen	= (int)(iDestLength * sizeof(WCHAR));
 
-	BOOL isOK	= CharsetConvert(CHARSET_GBK, CHARSET_UTF_32LE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
-	iDestLength	= (int)(iOutBufLen / sizeof(wchar_t));
+	BOOL isOK	= CharsetConvert(CHARSET_GBK, SYSTEM_CHARSET_UNICODE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
+	iDestLength	= (int)(iOutBufLen / sizeof(WCHAR));
 
 	return isOK;
 }
 
-BOOL UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
+BOOL UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
 {
-	int iInBufLen = (szSrc != nullptr) ? (int)((wcslen(szSrc) + 1) * sizeof(wchar_t)) : 0;
+	int iInBufLen = (int)(((iSrcLength > 0) ? iSrcLength : ((szSrc != nullptr) ? wcslen(szSrc) + 1 : 0)) * sizeof(WCHAR));
 
-	return CharsetConvert(CHARSET_UTF_32LE, CHARSET_GBK, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
+	return CharsetConvert(SYSTEM_CHARSET_UNICODE, CHARSET_GBK, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
 }
 
-BOOL Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+BOOL Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
 {
-	int iInBufLen	= (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
-	int iOutBufLen	= (int)(iDestLength * sizeof(wchar_t));
+	int iInBufLen	= (int)((iSrcLength > 0) ? iSrcLength : ((szSrc != nullptr) ? strlen(szSrc) + 1 : 0));
+	int iOutBufLen	= (int)(iDestLength * sizeof(WCHAR));
 
-	BOOL isOK	= CharsetConvert(CHARSET_UTF_8, CHARSET_UTF_32LE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
-	iDestLength	= (int)(iOutBufLen / sizeof(wchar_t));
+	BOOL isOK	= CharsetConvert(CHARSET_UTF_8, SYSTEM_CHARSET_UNICODE, szSrc, iInBufLen, (char*)szDest, iOutBufLen);
+	iDestLength	= (int)(iOutBufLen / sizeof(WCHAR));
 
 	return isOK;
 }
 
-BOOL UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+BOOL UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
 {
-	int iInBufLen = (szSrc != nullptr) ? (int)((wcslen(szSrc) + 1) * sizeof(wchar_t)) : 0;
+	int iInBufLen = (int)(((iSrcLength > 0) ? iSrcLength : ((szSrc != nullptr) ? wcslen(szSrc) + 1 : 0)) * sizeof(WCHAR));
 
-	return CharsetConvert(CHARSET_UTF_32LE, CHARSET_UTF_8, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
+	return CharsetConvert(SYSTEM_CHARSET_UNICODE, CHARSET_UTF_8, (LPCSTR)szSrc, iInBufLen, szDest, iDestLength);
 }
 
-BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+BOOL GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength)
 {
-	int iInBufLen = (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
+	int iInBufLen = (int)((iSrcLength > 0) ? iSrcLength : ((szSrc != nullptr) ? strlen(szSrc) + 1 : 0));
 
 	return CharsetConvert(CHARSET_GBK, CHARSET_UTF_8, szSrc, iInBufLen, szDest, iDestLength);
 }
 
-BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+BOOL Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength)
 {
-	int iInBufLen = (szSrc != nullptr) ? (int)strlen(szSrc) + 1 : 0;
+	int iInBufLen = (int)((iSrcLength > 0) ? iSrcLength : ((szSrc != nullptr) ? strlen(szSrc) + 1 : 0));
 
 	return CharsetConvert(CHARSET_UTF_8, CHARSET_GBK, szSrc, iInBufLen, szDest, iDestLength);
+}
+
+BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return GbkToUnicodeEx(szSrc, -1, szDest, iDestLength);
+}
+
+BOOL UnicodeToGbk(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return UnicodeToGbkEx(szSrc, -1, szDest, iDestLength);
+}
+
+BOOL Utf8ToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
+{
+	return Utf8ToUnicodeEx(szSrc, -1, szDest, iDestLength);
+}
+
+BOOL UnicodeToUtf8(const WCHAR szSrc[], char szDest[], int& iDestLength)
+{
+	return UnicodeToUtf8Ex(szSrc, -1, szDest, iDestLength);
+}
+
+BOOL GbkToUtf8(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return GbkToUtf8Ex(szSrc, -1, szDest, iDestLength);
+}
+
+BOOL Utf8ToGbk(const char szSrc[], char szDest[], int& iDestLength)
+{
+	return Utf8ToGbkEx(szSrc, -1, szDest, iDestLength);
 }
 
 #endif

@@ -366,7 +366,7 @@ BOOL CUdpNode::DoSendPackets(HP_SOCKADDR& addrRemote, const WSABUF pBuffers[], i
 	ASSERT(pBuffers && iCount > 0);
 
 	if(!pBuffers || iCount <= 0)
-		return ERROR_INVALID_PARAMETER;;
+		return ERROR_INVALID_PARAMETER;
 
 	if(!IsValid())
 	{

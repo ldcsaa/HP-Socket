@@ -218,6 +218,51 @@ typedef struct hp_sockaddr
 
 } HP_SOCKADDR, *HP_PSOCKADDR;
 
+typedef struct hp_scope_host
+{
+	LPCTSTR addr;
+	LPCTSTR name;
+
+	BOOL bNeedFree;
+
+	hp_scope_host(LPCTSTR lpszOriginAddress)
+	{
+		ASSERT(lpszOriginAddress != nullptr);
+
+		LPCTSTR lpszFind = ::StrChr(lpszOriginAddress, HOST_SEPARATOR_CHAR);
+
+		if(lpszFind == nullptr)
+		{
+			addr		= lpszOriginAddress;
+			name		= lpszOriginAddress;
+			bNeedFree	= FALSE;
+		}
+		else
+		{
+			int i			= (int)(lpszFind - lpszOriginAddress);
+			int iSize		= (int)lstrlen(lpszOriginAddress) + 1;
+			LPTSTR lpszCopy	= new TCHAR[iSize];
+
+			::memcpy((PVOID)lpszCopy, (PVOID)lpszOriginAddress, iSize * sizeof(TCHAR));
+
+			lpszCopy[i]	= 0;
+			addr		= lpszCopy;
+			name		= lpszCopy + i + 1;
+			bNeedFree	= TRUE;
+
+			if(::IsStrEmpty(name))
+				name = addr;
+		}
+	}
+
+	~hp_scope_host()
+	{
+		if(bNeedFree)
+			delete[] addr;
+	}
+
+} HP_SCOPE_HOST, *HP_PSCOPE_HOST;
+
 struct TNodeBufferObj : public TItem
 {
 	using __super = TItem;
@@ -757,13 +802,33 @@ int ManualCloseSocket(SOCKET sock, int iShutdownFlag = 0xFF, BOOL bGraceful = TR
 
 #ifdef _ICONV_SUPPORT
 
-#define CHARSET_GBK			"GBK"
-#define CHARSET_UTF_8		"UTF-8"
-#define CHARSET_UTF_16LE	"UTF-16LE"
-#define CHARSET_UTF_32LE	"UTF-32LE"
+#define CHARSET_GBK				"GBK"
+#define CHARSET_UTF_8			"UTF-8"
+#define CHARSET_UTF_16LE		"UTF-16LE"
+#define CHARSET_UTF_32LE		"UTF-32LE"
+#define CHARSET_UTF_16BE		"UTF-16BE"
+#define CHARSET_UTF_32BE		"UTF-32BE"
+
+// 系统 UNICODE 字符集
+#define SYSTEM_CHARSET_UNICODE	( (sizeof(WCHAR) == 4)										   \
+									? (IsLittleEndian() ? CHARSET_UTF_32LE : CHARSET_UTF_32BE) \
+									: (IsLittleEndian() ? CHARSET_UTF_16LE : CHARSET_UTF_16BE) )
 
 // Charset A -> Charset B
 BOOL CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharset, LPCSTR lpszInBuf, int iInBufLen, LPSTR lpszOutBuf, int& iOutBufLen);
+
+// GBK -> UNICODE
+BOOL GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> GBK
+BOOL UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// UTF8 -> UNICODE
+BOOL Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);
+// UNICODE -> UTF8
+BOOL UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// GBK -> UTF8
+BOOL GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength);
+// UTF8 -> GBK
+BOOL Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength);
 
 // GBK -> UNICODE
 BOOL GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength);
@@ -806,7 +871,7 @@ void DestroyDecompressor(IHPDecompressor* pDecompressor);
 #ifdef _ZLIB_SUPPORT
 
 /* ZLib 压缩器 */
-class CHPZlibCompressor : public IHPCompressor
+class CHPZLibCompressor : public IHPCompressor
 {
 public:
 	virtual BOOL Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext = nullptr);
@@ -814,8 +879,8 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPZlibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = MAX_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = MAX_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
-	virtual ~CHPZlibCompressor();
+	CHPZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = MAX_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = MAX_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
+	virtual ~CHPZLibCompressor();
 
 private:
 	Fn_CompressDataCallback m_fnCallback;
@@ -824,7 +889,7 @@ private:
 };
 
 /* ZLib 解压器 */
-class CHPZlibDecompressor : public IHPDecompressor
+class CHPZLibDecompressor : public IHPDecompressor
 {
 public:
 	virtual BOOL Process(const BYTE* pData, int iLength, PVOID pContext = nullptr);
@@ -832,8 +897,8 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPZlibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = MAX_WBITS);
-	virtual ~CHPZlibDecompressor();
+	CHPZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = MAX_WBITS);
+	virtual ~CHPZLibDecompressor();
 
 private:
 	Fn_DecompressDataCallback m_fnCallback;
@@ -916,7 +981,6 @@ private:
 IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE);
 /* 创建 Brotli 解压器对象 */
 IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback);
-
 
 // Brotli 压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);

@@ -7,6 +7,7 @@ the C# SDK for [HP-Socket](https://github.com/ldcsaa/HP-Socket)
 * `.Net Framework 2.0+`
 * `.Net Core 2.0+`
 * `.Net 5.0`
+* `.Net 6.0`
 
 #### Platform supported
 * `Windows 7+ x86/x64`
@@ -42,7 +43,7 @@ Basic component is the original component provided by HP-Socket. For related usa
 + `ITcpPullClient`
 + `ITcpPackServer`
 + `ITcpPackAgent`
-+ `ITcpPacClient`
++ `ITcpPackClient`
 
 ##### UDP
 + `IUdpServer`
@@ -437,3 +438,11 @@ namespace TcpServerTestEchoAdapter.DataReceiveAdapter
     }
 }
 ```
+
+
+## Contribute
+
+1.  Fork this Repository
+2.  Create a new Feat_xxx branch
+3.  Submit code
+4.  Create a new Pull Request

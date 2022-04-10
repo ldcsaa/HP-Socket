@@ -42,15 +42,25 @@ public:
 	}
 
 protected:
-	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
+	virtual EnHandleResult DoFireAccept(TSocketObj* pSocketObj)
 	{
-		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
+		EnHandleResult result = __super::DoFireAccept(pSocketObj);
 
 		if(result != HR_ERROR)
 		{
 			TBuffer* pBuffer = m_bfPool.PutCacheBuffer(pSocketObj->connID);
 			ENSURE(SetConnectionReserved(pSocketObj, pBuffer));
 		}
+
+		return result;
+	}
+
+	virtual EnHandleResult DoFireHandShake(TSocketObj* pSocketObj)
+	{
+		EnHandleResult result = __super::DoFireHandShake(pSocketObj);
+
+		if(result == HR_ERROR)
+			ReleaseConnectionExtra(pSocketObj);
 
 		return result;
 	}
@@ -70,11 +80,7 @@ protected:
 	{
 		EnHandleResult result = __super::DoFireClose(pSocketObj, enOperation, iErrorCode);
 
-		TBuffer* pBuffer = nullptr;
-		GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
-
-		if(pBuffer != nullptr)
-			m_bfPool.PutFreeBuffer(pBuffer);
+		ReleaseConnectionExtra(pSocketObj);
 
 		return result;
 	}
@@ -101,6 +107,19 @@ protected:
 		m_bfPool.SetBufferPoolHold	(GetFreeSocketObjHold());
 
 		m_bfPool.Prepare();
+	}
+
+private:
+	void ReleaseConnectionExtra(TSocketObj* pSocketObj)
+	{
+		TBuffer* pBuffer = nullptr;
+		GetConnectionReserved(pSocketObj, (PVOID*)&pBuffer);
+
+		if(pBuffer != nullptr)
+		{
+			m_bfPool.PutFreeBuffer(pBuffer);
+			ENSURE(SetConnectionReserved(pSocketObj, nullptr));
+		}
 	}
 
 public:

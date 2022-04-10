@@ -261,9 +261,15 @@ template<class T, USHORT default_port> BOOL CHttpSyncClientT<T, default_port>::O
 
 			GetRemoteHost(&lpszHost, &usPort2);
 
-			if(strHost.CompareNoCase(lpszHost) != 0 || usPort != usPort2)
+			if(usPort != usPort2)
 				bNeedStop = TRUE;
+			else
+			{
+				HP_SCOPE_HOST host(CA2T((LPCSTR)strHost));
 
+				if(lstrcmpi(host.name, CA2T(lpszHost)) != 0)
+					bNeedStop = TRUE;
+			}
 		}
 
 		if(bNeedStop) Stop();

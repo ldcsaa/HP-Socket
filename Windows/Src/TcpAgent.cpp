@@ -366,13 +366,13 @@ BOOL CTcpAgent::InvalidSocketObj(TSocketObj* pSocketObj)
 	return TSocketObj::InvalidSocketObj(pSocketObj);
 }
 
-void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteAddress, PVOID pExtra)
+void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteHostName, PVOID pExtra)
 {
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
 	pSocketObj->connTime	= ::TimeGetTime();
 	pSocketObj->activeTime	= pSocketObj->connTime;
-	pSocketObj->host		= lpszRemoteAddress;
+	pSocketObj->host		= lpszRemoteHostName;
 	pSocketObj->extra		= pExtra;
 
 	remoteAddr.Copy(pSocketObj->remoteAddr);
@@ -1160,7 +1160,9 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 		result = ERROR_INVALID_STATE;
 	else
 	{
-		result = CreateClientSocket(lpszRemoteAddress, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
+		HP_SCOPE_HOST host(lpszRemoteAddress);
+
+		result = CreateClientSocket(host.addr, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
 
 		if(result == NO_ERROR)
 		{
@@ -1168,7 +1170,7 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 
 			if(result == NO_ERROR)
 			{
-				result	 = ConnectToServer(*pdwConnID, lpszRemoteAddress, soClient, addr, pExtra);
+				result	 = ConnectToServer(*pdwConnID, host.name, soClient, addr, pExtra);
 				soClient = INVALID_SOCKET;
 			}
 		}
@@ -1252,14 +1254,14 @@ DWORD CTcpAgent::PrepareConnect(CONNID& dwConnID, SOCKET soClient)
 	return NO_ERROR;
 }
 
-DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteAddress, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra)
+DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra)
 {
 	TBufferObj* pBufferObj = GetFreeBufferObj();
 	TSocketObj* pSocketObj = GetFreeSocketObj(dwConnID, soClient);
 
 	CCriSecLock locallock(pSocketObj->csRecv);
 
-	AddClientSocketObj(dwConnID, pSocketObj, addr, lpszRemoteAddress, pExtra);
+	AddClientSocketObj(dwConnID, pSocketObj, addr, lpszRemoteHostName, pExtra);
 
 	DWORD result	= NO_ERROR;
 	BOOL bNeedFree	= TRUE;

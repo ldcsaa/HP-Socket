@@ -1,4 +1,17 @@
 ﻿# ======================================== #
+HP-Socket v5.8.8 API Update List:
+# ======================================== #
+--------------------
+1、Global:
+--------------------
+SYS_GbkToUnicodeEx							(ADD)
+SYS_UnicodeToGbkEx							(ADD)
+SYS_Utf8ToUnicodeEx							(ADD)
+SYS_UnicodeToUtf8Ex							(ADD)
+SYS_GbkToUtf8Ex								(ADD)
+SYS_Utf8ToGbkEx								(ADD)
+
+# ======================================== #
 HP-Socket v5.8.6 API Update List:
 # ======================================== #
 --------------------

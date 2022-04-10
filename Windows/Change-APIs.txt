@@ -1,4 +1,19 @@
 # ======================================== #
+HP-Socket v5.8.8 API 更新列表：
+# ======================================== #
+--------------------
+1、Global:
+--------------------
+SYS_CodePageToUnicodeEx					(增加)
+SYS_UnicodeToCodePageEx					(增加)
+SYS_GbkToUnicodeEx						(增加)
+SYS_UnicodeToGbkEx						(增加)
+SYS_Utf8ToUnicodeEx						(增加)
+SYS_UnicodeToUtf8Ex						(增加)
+SYS_GbkToUtf8Ex							(增加)
+SYS_Utf8ToGbkEx							(增加)
+
+# ======================================== #
 HP-Socket v5.8.6 API 更新列表：
 # ======================================== #
 --------------------

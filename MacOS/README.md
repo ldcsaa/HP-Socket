@@ -54,10 +54,10 @@ Note the dependency header files and library paths in the example.
 > CMakeLists.txt
 
 ```
-include_directories(/opt/local/include)
-link_directories(/opt/local/lib)
+find_package(OpenSSL REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(unofficial-iconv CONFIG REQUIRED)
 
-link_libraries(ssl iconv z crypto)
 add_definitions(-D_NEED_HTTP -D_SSL_SUPPORT -D_NEED_SSL)
 ```
 
@@ -82,8 +82,8 @@ Full support for official usage examples
 
 ### How to install related dependencies?
 
-By using `Brew` or `MacPort`; `MacPort` is used in the example.
+By using `vcpkg`, `Brew` or `MacPort`; `vcpkg` is used in the example.
 
 The following dependencies are installed:
 
-`openssl`, `zlib`
+`openssl`, `iconv`, `zlib`

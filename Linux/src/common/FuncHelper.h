@@ -53,10 +53,6 @@ using namespace std;
 #else
 	typedef atomic_long					atomic_tid;
 
-	#if !defined(EFD_SEMAPHORE)
-		#define EFD_SEMAPHORE			00000001
-	#endif
-
 	#if defined(stdout)
 		#undef stdout
 	#endif

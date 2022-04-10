@@ -164,6 +164,10 @@ DWORD GetDefaultWorkerThreadCount();
 
 #include<android/api-level.h>
 
+#if !defined(EFD_SEMAPHORE)
+	#define EFD_SEMAPHORE	00000001
+#endif
+
 #define pthread_cancel(t)
 
 #if defined(__ANDROID_API__)

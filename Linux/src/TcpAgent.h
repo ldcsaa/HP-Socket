@@ -206,13 +206,13 @@ private:
 	void DeleteSocketObj	(TAgentSocketObj* pSocketObj);
 	BOOL InvalidSocketObj	(TAgentSocketObj* pSocketObj);
 	void ReleaseGCSocketObj	(BOOL bForce = FALSE);
-	void AddClientSocketObj	(CONNID dwConnID, TAgentSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteAddress, PVOID pExtra);
+	void AddClientSocketObj	(CONNID dwConnID, TAgentSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteHostName, PVOID pExtra);
 	void CloseClientSocketObj(TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SHUT_WR);
 
 private:
 	int CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszLocalAddress, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
 	int PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
-	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteAddress, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
+	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 
 	VOID HandleCmdSend		(CONNID dwConnID);
 	VOID HandleCmdUnpause	(CONNID dwConnID);

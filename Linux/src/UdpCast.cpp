@@ -132,10 +132,13 @@ BOOL CUdpCast::CheckStoping()
 
 BOOL CUdpCast::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszBindAddress, HP_SOCKADDR& bindAddr)
 {
-	if(m_enCastMode == CM_BROADCAST && ::IsStrEmpty(lpszRemoteAddress))
-		lpszRemoteAddress = DEFAULT_IPV4_BROAD_CAST_ADDRESS;
+	HP_SCOPE_HOST host(lpszRemoteAddress);
+	LPCTSTR lpszRealAddress = host.addr;
 
-	if(!::GetSockAddrByHostName(lpszRemoteAddress, usPort, m_castAddr))
+ 	if(m_enCastMode == CM_BROADCAST && ::IsStrEmpty(lpszRealAddress))
+		lpszRealAddress = DEFAULT_IPV4_BROAD_CAST_ADDRESS;
+
+	if(!::GetSockAddrByHostName(lpszRealAddress, usPort, m_castAddr))
 		return FALSE;
 
 	if(::IsStrEmpty(lpszBindAddress))
@@ -169,7 +172,7 @@ BOOL CUdpCast::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCT
 	VERIFY(::fcntl_SETFL(m_soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
 	VERIFY(::SSO_ReuseAddress(m_soClient, m_enReusePolicy) == NO_ERROR);
 
-	SetRemoteHost(lpszRemoteAddress, usPort);
+	SetRemoteHost(host.name, usPort);
 
 	return TRUE;
 }

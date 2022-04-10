@@ -490,6 +490,36 @@ HPSOCKET_API BOOL SYS_CharsetConvert(LPCSTR lpszFromCharset, LPCSTR lpszToCharse
 	return ::CharsetConvert(lpszFromCharset, lpszToCharset, lpszInBuf, iInBufLen, lpszOutBuf, iOutBufLen);
 }
 
+HPSOCKET_API BOOL SYS_GbkToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
+{
+	return ::GbkToUnicodeEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToGbkEx(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::UnicodeToGbkEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToUnicodeEx(const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
+{
+	return ::Utf8ToUnicodeEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_UnicodeToUtf8Ex(const WCHAR szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::UnicodeToUtf8Ex(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_GbkToUtf8Ex(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::GbkToUtf8Ex(szSrc, iSrcLength, szDest, iDestLength);
+}
+
+HPSOCKET_API BOOL SYS_Utf8ToGbkEx(const char szSrc[], int iSrcLength, char szDest[], int& iDestLength)
+{
+	return ::Utf8ToGbkEx(szSrc, iSrcLength, szDest, iDestLength);
+}
+
 HPSOCKET_API BOOL SYS_GbkToUnicode(const char szSrc[], WCHAR szDest[], int& iDestLength)
 {
 	return ::GbkToUnicode(szSrc, szDest, iDestLength);
