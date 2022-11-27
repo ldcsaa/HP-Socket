@@ -155,5 +155,5 @@ int main(int argc, char* const argv[])
 
 ## 技术交流
 
-- *[怪兽乐园①群](https://shang.qq.com/wpa/qunwpa?idkey=2b69b6331192137e82cf87fc501345f491f53997cd052405cc2f1183c1039b46)*
-- *[怪兽乐园②群](https://shang.qq.com/wpa/qunwpa?idkey=3de8949938b69e213ffc42a18f066abd935f9dd4dc67e6230e7e75450b9a7dee)*
+- *[怪兽乐园①群](https://jq.qq.com/?_wv=1027&k=3UAbrhTG)*
+- *[怪兽乐园②群](https://jq.qq.com/?_wv=1027&k=uYBpc6bG)*
