@@ -1235,17 +1235,26 @@ template<class T, class S> http_parser_settings THttpObjT<T, S>::sm_settings =
 	on_message_begin,
 	on_url,
 	on_status,
+	nullptr,	// on_method
+	nullptr,	// on_version
 	on_header_field,
 	on_header_value,
+	nullptr,	// on_chunk_extension_name
+	nullptr,	// on_chunk_extension_value
 	on_headers_complete,
 	on_body,
 	on_message_complete,
-	on_chunk_header,
-	on_chunk_complete,
 	on_url_complete,
 	on_status_complete,
+	nullptr,	// on_method_complete
+	nullptr,	// on_version_complete
 	on_header_field_complete,
-	on_header_value_complete
+	on_header_value_complete,
+	nullptr,	// on_chunk_extension_name_complete
+	nullptr,	// on_chunk_extension_value_complete
+	on_chunk_header,
+	on_chunk_complete,
+	nullptr		// on_reset
 };
 
 // ------------------------------------------------------------------------------------------------------------- //

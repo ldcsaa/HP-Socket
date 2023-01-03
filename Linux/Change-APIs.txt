@@ -1,4 +1,18 @@
 ﻿# ======================================== #
+HP-Socket v5.9.1 API Update List:
+# ======================================== #
+--------------------
+1、Compress:
+--------------------
+HP_Compressor_ProcessEx						(ADD)
+Create_HP_GZipDecompressorEx				(ADD)
+Create_HP_BrotliDecompressorEx				(ADD)
+Create_HP_ZLibCompressorEx					(UPDATE: add parameter 'DWORD dwBuffSize')
+Create_HP_GZipCompressorEx					(UPDATE: add parameter 'DWORD dwBuffSize')
+Create_HP_ZLibDecompressorEx				(UPDATE: add parameter 'DWORD dwBuffSize')
+Create_HP_BrotliCompressorEx				(UPDATE: add parameter 'DWORD dwBuffSize')
+
+# ======================================== #
 HP-Socket v5.8.8 API Update List:
 # ======================================== #
 --------------------

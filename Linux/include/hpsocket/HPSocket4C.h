@@ -2729,37 +2729,40 @@ HPSOCKET_API void __HP_CALL Destroy_HP_Decompressor(HP_Decompressor pDecompresso
 #ifdef _ZLIB_SUPPORT
 
 /* 创建 ZLib 压缩器对象 */
-// （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
+// （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0, dwBuffSize = 16 * 1024）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 ZLib 压缩器对象 */
-// （默认参数：iWindowBits = 15, iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits /*= 15*/, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits /*= 15*/, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/, DWORD dwBuffSize /*= 16 * 1024*/);
 /* 创建 GZip 压缩器对象 */
-// （默认参数：iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0）
+// （默认参数：iLevel = -1, iMethod = 8, iMemLevel = 8, iStrategy = 0, dwBuffSize = 16 * 1024）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 GZip 压缩器对象 */
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/);
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel /*= -1*/, int iMethod /*= 8*/, int iMemLevel /*= 8*/, int iStrategy /*= 0*/, DWORD dwBuffSize /*= 16 * 1024*/);
 /* 创建 ZLib 解压器对象 */
-// （默认参数：iWindowBits = 15）
+// （默认参数：iWindowBits = 15, dwBuffSize = 16 * 1024）
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback);
 /* 创建 ZLib 解压器对象 */
-// （默认参数：iWindowBits = 15）
-HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits /*= 15*/);
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits /*= 15*/, DWORD dwBuffSize /*= 16 * 1024*/);
 /* 创建 GZip 解压器对象 */
+// （默认参数：dwBuffSize = 16 * 1024）
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_DecompressDataCallback fnCallback);
+/* 创建 GZip 解压器对象 */
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize /*= 16 * 1024*/);
 
 #endif
 
 #ifdef _BROTLI_SUPPORT
 
 /* 创建 Brotli 压缩器对象 */
-//（默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
+//（默认参数：iQuality = 11，iWindow = 22，iMode = 0, dwBuffSize = 16 * 1024）
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDataCallback fnCallback);
 /* 创建 Brotli 压缩器对象 */
-// （默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality /*= 11*/, int iWindow /*= 22*/, int iMode /*= 0*/);
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality /*= 11*/, int iWindow /*= 22*/, int iMode /*= 0*/, DWORD dwBuffSize /*= 16 * 1024*/);
 /* 创建 Brotli 解压器对象 */
+// （默认参数：dwBuffSize = 16 * 1024）
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback);
+/* 创建 Brotli 解压器对象 */
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize /*= 16 * 1024*/);
 
 #endif
 
@@ -2772,12 +2775,28 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_Decomp
 *		
 * 参数：		pData		-- 待压缩数据缓冲区
 *			iLength		-- 待压缩数据长度
+*			bLast		-- 是否最后一段待压缩数据
 *			pContext	-- 压缩回调函数 Fn_CompressDataCallback 的上下文参数
 *
 * 返回值：	TRUE	-- 成功
 *			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
 */
 HPSOCKET_API BOOL __HP_CALL HP_Compressor_Process(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, PVOID pContext /*= nullptr*/);
+
+/*
+* 名称：执行压缩
+* 描述：可循环调用以压缩流式或分段数据
+*		
+* 参数：		pData		-- 待压缩数据缓冲区
+*			iLength		-- 待压缩数据长度
+*			bLast		-- 是否最后一段待压缩数据
+*			bFlush		-- 是否强制刷新（强制刷新会降低压缩效率，但可对数据进行分段压缩）
+*			pContext	-- 压缩回调函数 Fn_CompressDataCallback 的上下文参数
+*
+* 返回值：	TRUE	-- 成功
+*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
+*/
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_ProcessEx(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, BOOL bFlush /*= FALSE*/, PVOID pContext /*= nullptr*/);
 
 /* 重置压缩器 */
 HPSOCKET_API BOOL __HP_CALL HP_Compressor_Reset(HP_Compressor pCompressor);

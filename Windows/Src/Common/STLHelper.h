@@ -25,6 +25,12 @@
 
 #include "GeneralHelper.h"
 
+#if _MSC_VER >= 1930
+	#if !defined(_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS)
+		#define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
+	#endif
+#endif
+
 #include <memory>
 #include <string>
 #include <functional>
@@ -33,9 +39,11 @@
 #include <deque>
 #include <queue>
 #include <stack>
+#include <xhash>
 #include <list>
 #include <set>
 #include <map>
+
 #if _MSC_VER >= 1500
 	#include <unordered_set>
 	#include <unordered_map>
@@ -51,7 +59,6 @@
 	#define unordered_map		hash_map
 	#define unordered_multimap	hash_multimap
 #endif
-
 
 using namespace std;
 using namespace stdext;

@@ -1026,17 +1026,19 @@ class CHPZLibCompressor : public IHPCompressor
 {
 public:
 	virtual BOOL Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext = nullptr);
+	virtual BOOL ProcessEx(const BYTE* pData, int iLength, BOOL bLast, BOOL bFlush = FALSE, PVOID pContext = nullptr);
 	virtual BOOL IsValid() {return m_bValid;}
 	virtual BOOL Reset();
 
 public:
-	CHPZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
+	CHPZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 	virtual ~CHPZLibCompressor();
 
 private:
 	Fn_CompressDataCallback m_fnCallback;
 	z_stream m_Stream;
 	BOOL m_bValid;
+	DWORD m_dwBuffSize;
 };
 
 /* ZLib 解压器 */
@@ -1048,23 +1050,24 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS);
+	CHPZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 	virtual ~CHPZLibDecompressor();
 
 private:
 	Fn_DecompressDataCallback m_fnCallback;
 	z_stream m_Stream;
 	BOOL m_bValid;
+	DWORD m_dwBuffSize;
 };
 
 /* 创建 ZLib 压缩器对象 */
-IHPCompressor* CreateZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
+IHPCompressor* CreateZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 /* 创建 GZip 压缩器对象 */
-IHPCompressor* CreateGZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY);
+IHPCompressor* CreateGZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel = Z_DEFAULT_COMPRESSION, int iMethod = Z_DEFLATED, int iMemLevel = DEF_MEM_LEVEL, int iStrategy = Z_DEFAULT_STRATEGY, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 /* 创建 ZLib 解压器对象 */
-IHPDecompressor* CreateZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS);
+IHPDecompressor* CreateZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = DEF_WBITS, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 /* 创建 GZip 解压器对象 */
-IHPDecompressor* CreateGZipDecompressor(Fn_DecompressDataCallback fnCallback);
+IHPDecompressor* CreateGZipDecompressor(Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 
 // 普通压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int Compress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);
@@ -1093,11 +1096,12 @@ class CHPBrotliCompressor : public IHPCompressor
 {
 public:
 	virtual BOOL Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext = nullptr);
+	virtual BOOL ProcessEx(const BYTE* pData, int iLength, BOOL bLast, BOOL bFlush = FALSE, PVOID pContext = nullptr);
 	virtual BOOL IsValid() {return m_bValid;}
 	virtual BOOL Reset();
 
 public:
-	CHPBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE);
+	CHPBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 	virtual ~CHPBrotliCompressor();
 
 private:
@@ -1108,6 +1112,7 @@ private:
 	int m_iQuality;
 	int m_iWindow;
 	int m_iMode;
+	DWORD m_dwBuffSize;
 };
 
 /* Brotli 解压器 */
@@ -1119,19 +1124,20 @@ public:
 	virtual BOOL Reset();
 
 public:
-	CHPBrotliDecompressor(Fn_DecompressDataCallback fnCallback);
+	CHPBrotliDecompressor(Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 	virtual ~CHPBrotliDecompressor();
 
 private:
 	Fn_DecompressDataCallback m_fnCallback;
 	BrotliDecoderState* m_pState;
 	BOOL m_bValid;
+	DWORD m_dwBuffSize;
 };
 
 /* 创建 Brotli 压缩器对象 */
-IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE);
+IHPCompressor* CreateBrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = BROTLI_DEFAULT_QUALITY, int iWindow = BROTLI_DEFAULT_WINDOW, int iMode = BROTLI_DEFAULT_MODE, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 /* 创建 Brotli 解压器对象 */
-IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback);
+IHPDecompressor* CreateBrotliDecompressor(Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize = DEFAULT_COMPRESS_BUFFER_SIZE);
 
 // Brotli 压缩（返回值：0 -> 成功，-3 -> 输入数据不正确，-5 -> 输出缓冲区不足）
 int BrotliCompress(const BYTE* lpszSrc, DWORD dwSrcLen, BYTE* lpszDest, DWORD& dwDestLen);

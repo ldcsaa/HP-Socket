@@ -1,17 +1,31 @@
 # ======================================== #
+HP-Socket v5.9.1 API 更新列表：
+# ======================================== #
+--------------------
+1、Compress:
+--------------------
+HP_Compressor_ProcessEx						(增加)
+Create_HP_GZipDecompressorEx				(增加)
+Create_HP_BrotliDecompressorEx				(增加)
+Create_HP_ZLibCompressorEx					(修改：增加参数 DWORD dwBuffSize)
+Create_HP_GZipCompressorEx					(修改：增加参数 DWORD dwBuffSize)
+Create_HP_ZLibDecompressorEx				(修改：增加参数 DWORD dwBuffSize)
+Create_HP_BrotliCompressorEx				(修改：增加参数 DWORD dwBuffSize)
+
+# ======================================== #
 HP-Socket v5.8.8 API 更新列表：
 # ======================================== #
 --------------------
 1、Global:
 --------------------
-SYS_CodePageToUnicodeEx					(增加)
-SYS_UnicodeToCodePageEx					(增加)
-SYS_GbkToUnicodeEx						(增加)
-SYS_UnicodeToGbkEx						(增加)
-SYS_Utf8ToUnicodeEx						(增加)
-SYS_UnicodeToUtf8Ex						(增加)
-SYS_GbkToUtf8Ex							(增加)
-SYS_Utf8ToGbkEx							(增加)
+SYS_CodePageToUnicodeEx						(增加)
+SYS_UnicodeToCodePageEx						(增加)
+SYS_GbkToUnicodeEx							(增加)
+SYS_UnicodeToGbkEx							(增加)
+SYS_Utf8ToUnicodeEx							(增加)
+SYS_UnicodeToUtf8Ex							(增加)
+SYS_GbkToUtf8Ex								(增加)
+SYS_Utf8ToGbkEx								(增加)
 
 # ======================================== #
 HP-Socket v5.8.6 API 更新列表：
@@ -19,24 +33,24 @@ HP-Socket v5.8.6 API 更新列表：
 --------------------
 1、Compress:
 --------------------
-Create_HP_ZLibCompressor				(增加)
-Create_HP_ZLibCompressorEx				(增加)
-Create_HP_GZipCompressor				(增加)
-Create_HP_GZipCompressorEx				(增加)
-Create_HP_ZLibDecompressor				(增加)
-Create_HP_ZLibDecompressorEx			(增加)
-Create_HP_GZipDecompressor				(增加)
-Create_HP_BrotliCompressor				(增加)
-Create_HP_BrotliCompressorEx			(增加)
-Create_HP_BrotliDecompressor			(增加)
-Destroy_HP_Compressor					(增加)
-Destroy_HP_Decompressor					(增加)
-HP_Compressor_Process					(增加)
-HP_Compressor_Reset						(增加)
-HP_Compressor_IsValid					(增加)
-HP_Decompressor_Process					(增加)
-HP_Decompressor_Reset					(增加)
-HP_Decompressor_IsValid					(增加)
+Create_HP_ZLibCompressor					(增加)
+Create_HP_ZLibCompressorEx					(增加)
+Create_HP_GZipCompressor					(增加)
+Create_HP_GZipCompressorEx					(增加)
+Create_HP_ZLibDecompressor					(增加)
+Create_HP_ZLibDecompressorEx				(增加)
+Create_HP_GZipDecompressor					(增加)
+Create_HP_BrotliCompressor					(增加)
+Create_HP_BrotliCompressorEx				(增加)
+Create_HP_BrotliDecompressor				(增加)
+Destroy_HP_Compressor						(增加)
+Destroy_HP_Decompressor						(增加)
+HP_Compressor_Process						(增加)
+HP_Compressor_Reset							(增加)
+HP_Compressor_IsValid						(增加)
+HP_Decompressor_Process						(增加)
+HP_Decompressor_Reset						(增加)
+HP_Decompressor_IsValid						(增加)
 
 # ======================================== #
 HP-Socket v5.8.5 API 更新列表：

@@ -3031,12 +3031,28 @@ public:
 	*		
 	* 参数：		pData		-- 待压缩数据缓冲区
 	*			iLength		-- 待压缩数据长度
+	*			bLast		-- 是否最后一段待压缩数据
 	*			pContext	-- 压缩回调函数 Fn_CompressDataCallback 的上下文参数
 	*
 	* 返回值：	TRUE	-- 成功
 	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
 	*/
 	virtual BOOL Process(const BYTE* pData, int iLength, BOOL bLast, PVOID pContext = nullptr)	= 0;
+
+	/*
+	* 名称：执行压缩
+	* 描述：可循环调用以压缩流式或分段数据
+	*		
+	* 参数：		pData		-- 待压缩数据缓冲区
+	*			iLength		-- 待压缩数据长度
+	*			bLast		-- 是否最后一段待压缩数据
+	*			bFlush		-- 是否强制刷新（强制刷新会降低压缩效率，但可对数据进行分段压缩）
+	*			pContext	-- 压缩回调函数 Fn_CompressDataCallback 的上下文参数
+	*
+	* 返回值：	TRUE	-- 成功
+	*			FALSE	-- 失败，可通过 SYS_GetLastError() 获取错误代码
+	*/
+	virtual BOOL ProcessEx(const BYTE* pData, int iLength, BOOL bLast, BOOL bFlush = FALSE, PVOID pContext = nullptr)	= 0;
 
 	/* 重置压缩器 */
 	virtual BOOL Reset()																		= 0;

@@ -28,14 +28,17 @@ check_platform()
 do_copy()
 {
 	local _LIB_NAME=$1
+	local _CPY_INCS=1
 	local _RM_FILES=
 	local _LIB_FIX=
 	
 	if [ $_LIB_NAME == "jemalloc" ]; then
+		_CPY_INCS=0
 		_LIB_FIX=_pic
-		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME* $PLATFORM/include/$_LIB_NAME*"
+		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME*"
 	elif [ $_LIB_NAME == "mimalloc" ]; then
-		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME* $PLATFORM/include/$_LIB_NAME*"
+		_CPY_INCS=0
+		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME*"
 	elif [ $_LIB_NAME == "openssl" ]; then
 		_RM_FILES="$PLATFORM/lib/libssl* $PLATFORM/lib/libcrypto* $PLATFORM/include/$_LIB_NAME*"
 	elif [ $_LIB_NAME == "zlib" ]; then
@@ -48,9 +51,12 @@ do_copy()
 		rm -rf $_RM_FILES
 	fi
 	
-	mkdir -p $PLATFORM/lib $PLATFORM/include
-
-	cp -rf $SRC_BASE/$_LIB_NAME/include/* $PLATFORM/include
+	if [ $_CPY_INCS -eq 1 ]; then
+		mkdir -p $PLATFORM/include
+		cp -rf $SRC_BASE/$_LIB_NAME/include/* $PLATFORM/include
+	fi
+	
+	mkdir -p $PLATFORM/lib
 	cp -rf $SRC_BASE/$_LIB_NAME/lib/*$_LIB_FIX.a $PLATFORM/lib
 }
 

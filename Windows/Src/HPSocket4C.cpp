@@ -737,6 +737,7 @@
 	#pragma comment(linker, "/EXPORT:Destroy_HP_Compressor=_Destroy_HP_Compressor@4")
 	#pragma comment(linker, "/EXPORT:Destroy_HP_Decompressor=_Destroy_HP_Decompressor@4")
 	#pragma comment(linker, "/EXPORT:HP_Compressor_Process=_HP_Compressor_Process@20")
+	#pragma comment(linker, "/EXPORT:HP_Compressor_ProcessEx=_HP_Compressor_ProcessEx@24")
 	#pragma comment(linker, "/EXPORT:HP_Compressor_Reset=_HP_Compressor_Reset@4")
 	#pragma comment(linker, "/EXPORT:HP_Compressor_IsValid=_HP_Compressor_IsValid@4")
 	#pragma comment(linker, "/EXPORT:HP_Decompressor_Process=_HP_Decompressor_Process@16")
@@ -745,18 +746,20 @@
 
 #ifdef _ZLIB_SUPPORT
 	#pragma comment(linker, "/EXPORT:Create_HP_ZLibCompressor=_Create_HP_ZLibCompressor@4")
-	#pragma comment(linker, "/EXPORT:Create_HP_ZLibCompressorEx=_Create_HP_ZLibCompressorEx@24")
+	#pragma comment(linker, "/EXPORT:Create_HP_ZLibCompressorEx=_Create_HP_ZLibCompressorEx@28")
 	#pragma comment(linker, "/EXPORT:Create_HP_GZipCompressor=_Create_HP_GZipCompressor@4")
-	#pragma comment(linker, "/EXPORT:Create_HP_GZipCompressorEx=_Create_HP_GZipCompressorEx@20")
+	#pragma comment(linker, "/EXPORT:Create_HP_GZipCompressorEx=_Create_HP_GZipCompressorEx@24")
 	#pragma comment(linker, "/EXPORT:Create_HP_ZLibDecompressor=_Create_HP_ZLibDecompressor@4")
-	#pragma comment(linker, "/EXPORT:Create_HP_ZLibDecompressorEx=_Create_HP_ZLibDecompressorEx@8")
+	#pragma comment(linker, "/EXPORT:Create_HP_ZLibDecompressorEx=_Create_HP_ZLibDecompressorEx@12")
 	#pragma comment(linker, "/EXPORT:Create_HP_GZipDecompressor=_Create_HP_GZipDecompressor@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_GZipDecompressorEx=_Create_HP_GZipDecompressorEx@8")
 #endif
 
 #ifdef _BROTLI_SUPPORT
 	#pragma comment(linker, "/EXPORT:Create_HP_BrotliCompressor=_Create_HP_BrotliCompressor@4")
-	#pragma comment(linker, "/EXPORT:Create_HP_BrotliCompressorEx=_Create_HP_BrotliCompressorEx@16")
+	#pragma comment(linker, "/EXPORT:Create_HP_BrotliCompressorEx=_Create_HP_BrotliCompressorEx@20")
 	#pragma comment(linker, "/EXPORT:Create_HP_BrotliDecompressor=_Create_HP_BrotliDecompressor@4")
+	#pragma comment(linker, "/EXPORT:Create_HP_BrotliDecompressorEx=_Create_HP_BrotliDecompressorEx@8")
 #endif
 
 #endif
@@ -2818,7 +2821,7 @@ HPSOCKET_API int __HP_CALL SYS_GetSocketOption(SOCKET sock, int level, int name,
 	return ::SSO_GetSocketOption(sock, level, name, val, len);
 }
 
-HPSOCKET_API int __HP_CALL SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg)
+HPSOCKET_API int __HP_CALL SYS_IoctlSocket(SOCKET sock, long cmd, ULONG* arg)
 {
 	return ::SSO_IoctlSocket(sock, cmd, arg);
 }
@@ -4353,9 +4356,9 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressData
 	return ::CreateZLibCompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy, DWORD dwBuffSize)
 {
-	return ::CreateZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
+	return ::CreateZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy, dwBuffSize);
 }
 
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressDataCallback fnCallback)
@@ -4363,9 +4366,9 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressData
 	return ::CreateGZipCompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy, DWORD dwBuffSize)
 {
-	return ::CreateGZipCompressor(fnCallback, iLevel, iMethod, iMemLevel, iStrategy);
+	return ::CreateGZipCompressor(fnCallback, iLevel, iMethod, iMemLevel, iStrategy, dwBuffSize);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback)
@@ -4373,14 +4376,19 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_Decompre
 	return ::CreateZLibDecompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits)
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits, DWORD dwBuffSize)
 {
-	return ::CreateZLibDecompressor(fnCallback, iWindowBits);
+	return ::CreateZLibDecompressor(fnCallback, iWindowBits, dwBuffSize);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_DecompressDataCallback fnCallback)
 {
 	return ::CreateGZipDecompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize)
+{
+	return ::CreateGZipDecompressor(fnCallback, dwBuffSize);
 }
 
 #endif
@@ -4392,14 +4400,19 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDa
 	return ::CreateBrotliCompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode, DWORD dwBuffSize)
 {
-	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode);
+	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode, dwBuffSize);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback)
 {
 	return ::CreateBrotliDecompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize)
+{
+	return ::CreateBrotliDecompressor(fnCallback, dwBuffSize);
 }
 
 #endif
@@ -4410,6 +4423,11 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_Decomp
 HPSOCKET_API BOOL __HP_CALL HP_Compressor_Process(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
 {
 	return ((IHPCompressor*)pCompressor)->Process(pData, iLength, bLast, pContext);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_ProcessEx(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, BOOL bFlush, PVOID pContext)
+{
+	return ((IHPCompressor*)pCompressor)->ProcessEx(pData, iLength, bLast, bFlush, pContext);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_Compressor_Reset(HP_Compressor pCompressor)

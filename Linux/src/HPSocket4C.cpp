@@ -3587,7 +3587,7 @@ HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetQueueSize(HP_ThreadPool pThreadPoo
 
 HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetTaskCount(HP_ThreadPool pThreadPool)
 {
-return ((IHPThreadPool*)pThreadPool)->GetTaskCount();
+	return ((IHPThreadPool*)pThreadPool)->GetTaskCount();
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_ThreadPool_GetThreadCount(HP_ThreadPool pThreadPool)
@@ -3629,9 +3629,9 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressor(HP_Fn_CompressData
 	return ::CreateZLibCompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_ZLibCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iWindowBits, int iLevel, int iMethod, int iMemLevel, int iStrategy, DWORD dwBuffSize)
 {
-	return ::CreateZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy);
+	return ::CreateZLibCompressor(fnCallback, iWindowBits, iLevel, iMethod, iMemLevel, iStrategy, dwBuffSize);
 }
 
 HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressDataCallback fnCallback)
@@ -3639,9 +3639,9 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressor(HP_Fn_CompressData
 	return ::CreateGZipCompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy)
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_GZipCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iLevel, int iMethod, int iMemLevel, int iStrategy, DWORD dwBuffSize)
 {
-	return ::CreateGZipCompressor(fnCallback, iLevel, iMethod, iMemLevel, iStrategy);
+	return ::CreateGZipCompressor(fnCallback, iLevel, iMethod, iMemLevel, iStrategy, dwBuffSize);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_DecompressDataCallback fnCallback)
@@ -3649,14 +3649,19 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressor(HP_Fn_Decompre
 	return ::CreateZLibDecompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits)
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_ZLibDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, int iWindowBits, DWORD dwBuffSize)
 {
-	return ::CreateZLibDecompressor(fnCallback, iWindowBits);
+	return ::CreateZLibDecompressor(fnCallback, iWindowBits, dwBuffSize);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressor(HP_Fn_DecompressDataCallback fnCallback)
 {
 	return ::CreateGZipDecompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_GZipDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize)
+{
+	return ::CreateGZipDecompressor(fnCallback, dwBuffSize);
 }
 
 #endif
@@ -3668,14 +3673,19 @@ HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressor(HP_Fn_CompressDa
 	return ::CreateBrotliCompressor(fnCallback);
 }
 
-HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode)
+HPSOCKET_API HP_Compressor __HP_CALL Create_HP_BrotliCompressorEx(HP_Fn_CompressDataCallback fnCallback, int iQuality, int iWindow, int iMode, DWORD dwBuffSize)
 {
-	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode);
+	return ::CreateBrotliCompressor(fnCallback, iQuality, iWindow, iMode, dwBuffSize);
 }
 
 HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_DecompressDataCallback fnCallback)
 {
 	return ::CreateBrotliDecompressor(fnCallback);
+}
+
+HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressorEx(HP_Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize)
+{
+	return ::CreateBrotliDecompressor(fnCallback, dwBuffSize);
 }
 
 #endif
@@ -3686,6 +3696,11 @@ HPSOCKET_API HP_Decompressor __HP_CALL Create_HP_BrotliDecompressor(HP_Fn_Decomp
 HPSOCKET_API BOOL __HP_CALL HP_Compressor_Process(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, PVOID pContext)
 {
 	return ((IHPCompressor*)pCompressor)->Process(pData, iLength, bLast, pContext);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Compressor_ProcessEx(HP_Compressor pCompressor, const BYTE* pData, int iLength, BOOL bLast, BOOL bFlush, PVOID pContext)
+{
+	return ((IHPCompressor*)pCompressor)->ProcessEx(pData, iLength, bLast, bFlush, pContext);
 }
 
 HPSOCKET_API BOOL __HP_CALL HP_Compressor_Reset(HP_Compressor pCompressor)

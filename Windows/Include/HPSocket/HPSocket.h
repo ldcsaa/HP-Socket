@@ -466,7 +466,7 @@ HPSOCKET_API int SYS_SetSocketOption(SOCKET sock, int level, int name, LPVOID va
 // 调用系统的 getsockopt()
 HPSOCKET_API int SYS_GetSocketOption(SOCKET sock, int level, int name, LPVOID val, int* len);
 // 调用系统的 ioctlsocket()
-HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, u_long* arg);
+HPSOCKET_API int SYS_IoctlSocket(SOCKET sock, long cmd, ULONG* arg);
 // 调用系统的 WSAIoctl()
 HPSOCKET_API int SYS_WSAIoctl(SOCKET sock, DWORD dwIoControlCode, LPVOID lpvInBuffer, DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer, LPDWORD lpcbBytesReturned);
 
@@ -809,22 +809,21 @@ HPSOCKET_API void HP_Destroy_Decompressor(IHPDecompressor* pDecompressor);
 #ifdef _ZLIB_SUPPORT
 
 /* 创建 ZLib 压缩器对象 */
-HPSOCKET_API IHPCompressor* HP_Create_ZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = 15, int iLevel = -1, int iMethod = 8, int iMemLevel = 8, int iStrategy = 0);
+HPSOCKET_API IHPCompressor* HP_Create_ZLibCompressor(Fn_CompressDataCallback fnCallback, int iWindowBits = 15, int iLevel = -1, int iMethod = 8, int iMemLevel = 8, int iStrategy = 0, DWORD dwBuffSize = 16 * 1024);
 /* 创建 GZip 压缩器对象 */
-HPSOCKET_API IHPCompressor* HP_Create_GZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel = -1, int iMethod = 8, int iMemLevel = 8, int iStrategy = 0);
+HPSOCKET_API IHPCompressor* HP_Create_GZipCompressor(Fn_CompressDataCallback fnCallback, int iLevel = -1, int iMethod = 8, int iMemLevel = 8, int iStrategy = 0, DWORD dwBuffSize = 16 * 1024);
 /* 创建 ZLib 解压器对象 */
-HPSOCKET_API IHPDecompressor* HP_Create_ZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = 15);
+HPSOCKET_API IHPDecompressor* HP_Create_ZLibDecompressor(Fn_DecompressDataCallback fnCallback, int iWindowBits = 15, DWORD dwBuffSize = 16 * 1024);
 /* 创建 GZip 解压器对象 */
-HPSOCKET_API IHPDecompressor* HP_Create_GZipDecompressor(Fn_DecompressDataCallback fnCallback);
+HPSOCKET_API IHPDecompressor* HP_Create_GZipDecompressor(Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize = 16 * 1024);
 
 #endif
 
 #ifdef _BROTLI_SUPPORT
 
 /* 创建 Brotli 压缩器对象 */
-//（默认参数：iQuality -> 11，iWindow -> 22，iMode -> 0）
-HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = 11, int iWindow = 22, int iMode = 0);
+HPSOCKET_API IHPCompressor* HP_Create_BrotliCompressor(Fn_CompressDataCallback fnCallback, int iQuality = 11, int iWindow = 22, int iMode = 0, DWORD dwBuffSize = 16 * 1024);
 /* 创建 Brotli 解压器对象 */
-HPSOCKET_API IHPDecompressor* HP_Create_BrotliDecompressor(Fn_DecompressDataCallback fnCallback);
+HPSOCKET_API IHPDecompressor* HP_Create_BrotliDecompressor(Fn_DecompressDataCallback fnCallback, DWORD dwBuffSize = 16 * 1024);
 
 #endif
