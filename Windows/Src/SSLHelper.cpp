@@ -517,7 +517,7 @@ BOOL CSSLContext::SetClientCAListByMemory(SSL_CTX* sslCtx, LPCSTR lpszPemCert)
 	X509_NAME* pName				= nullptr;
 	STACK_OF(X509_NAME)* pStack		= nullptr;
 	BIO* pBIO						= BIO_new_mem_buf(lpszPemCert, -1);
-	OPENSSL_LHASH* pNameHash		= (OPENSSL_LHASH*)OPENSSL_LH_new((OPENSSL_LH_HASHFUNC)X509_NAME_hash, (OPENSSL_LH_COMPFUNC)X509_NAME_cmp);
+	OPENSSL_LHASH* pNameHash		= (OPENSSL_LHASH*)OPENSSL_LH_new((OPENSSL_LH_HASHFUNC)FN_X509_NAME_HASH, (OPENSSL_LH_COMPFUNC)X509_NAME_cmp);
 	
 	if(pBIO == nullptr || pNameHash == nullptr)
 	{

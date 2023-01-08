@@ -38,11 +38,18 @@
 
 #define OPENSSL_VERSION_1_0_2	0x10002000L
 #define OPENSSL_VERSION_1_1_0	0x10100000L
+#define OPENSSL_VERSION_3_0_0	0x30000000L
 
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0
 	#define DEFAULT_CIPHER_LIST	_T("DEFAULT:!aNULL:!eNULL:!SSLv2")
 #else
 	#define DEFAULT_CIPHER_LIST	_T("DEFAULT:!aNULL:!eNULL:!SSLv2:!SSLv3")
+#endif
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_3_0_0
+	#define FN_X509_NAME_HASH	X509_NAME_hash
+#else
+	inline unsigned long FN_X509_NAME_HASH(const X509_NAME *x) {return X509_NAME_hash_ex(x, nullptr, nullptr, nullptr);}
 #endif
 
 /************************************************************************
