@@ -5,6 +5,7 @@ v5.9.1 Update:
 > Major Upadate
 -----------------
 1. Update several APIs related to streaming compression/decompression, and support segmented compression/decompression (refer to Change-APIs.txt).
+2. Update the SSL module to support OpenSSL 3.0.
 
 > Third-party library Upadate
 -----------------
