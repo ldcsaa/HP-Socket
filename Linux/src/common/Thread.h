@@ -135,12 +135,12 @@ public:
 
 public:
 
-	BOOL Start(SF pFunc, P* pArg = nullptr, BOOL bDetach = FALSE, const pthread_attr_t* pAttr = nullptr)
+	BOOL Start(SF pFunc, P* pArg = nullptr, BOOL bDetach = FALSE, const pthread_attr_t* pAttr = nullptr, const char* ThreadName = nullptr)
 	{
-		return Start((__CFakeRunnerClass_*)nullptr, *(F*)&pFunc, pArg, bDetach, pAttr);
+		return Start((__CFakeRunnerClass_*)nullptr, *(F*)&pFunc, pArg, bDetach, pAttr, ThreadName);
 	}
 
-	BOOL Start(T* pRunner, F pFunc, P* pArg = nullptr, BOOL bDetach = FALSE, const pthread_attr_t* pAttr = nullptr)
+	BOOL Start(T* pRunner, F pFunc, P* pArg = nullptr, BOOL bDetach = FALSE, const pthread_attr_t* pAttr = nullptr, const char* ThreadName = nullptr)
 	{
 		int rs = ERROR_INVALID_STATE;
 
@@ -158,6 +158,9 @@ public:
 			{
 				Reset();
 				::SetLastError(rs);
+			}else if (ThreadName) 
+			{
+				pthread_setname_np(m_ulThreadID, ThreadName);
 			}
 		}
 

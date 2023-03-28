@@ -24,6 +24,7 @@
 #include "IODispatcher.h"
 #include "FuncHelper.h"
 
+#include <cstdio>
 #include <signal.h>
 #include <pthread.h>
 
@@ -74,9 +75,11 @@ BOOL CIODispatcher::Start(IIOHandler* pHandler, int iWorkerMaxEvents, int iWorke
 
 	m_pWorkers = make_unique<CWorkerThread[]>(m_iWorkers);
 
+	char ThreadName[16];
 	for(int i = 0; i < m_iWorkers; i++)
 	{
-		if(!VERIFY(m_pWorkers[i].Start(this, &CIODispatcher::WorkerProc)))
+		std::snprintf(ThreadName, sizeof(ThreadName), "Worker-%d", i);
+		if(!VERIFY(m_pWorkers[i].Start(this, &CIODispatcher::WorkerProc, nullptr, FALSE, nullptr, ThreadName)))
 			goto START_ERROR;
 	}
 
