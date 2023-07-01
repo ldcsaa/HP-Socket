@@ -371,11 +371,6 @@ HPSOCKET_API LPVOID SYS_Calloc(int number, int size)
 	return CALLOC(number, size);
 }
 
-HPSOCKET_API LPBYTE SYS_Alloca(int size)
-{
-	return CreateLocalObjects(BYTE, size);
-}
-
 HPSOCKET_API BOOL SYS_CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength)
 {
 	return ::CodePageToUnicodeEx(iCodePage, szSrc, iSrcLength, szDest, iDestLength);

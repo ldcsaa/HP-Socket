@@ -522,8 +522,6 @@ HPSOCKET_API LPBYTE SYS_Realloc(LPBYTE p, int size);
 HPSOCKET_API VOID SYS_Free(LPBYTE p);
 /* 分配内存块 */
 HPSOCKET_API LPVOID SYS_Calloc(int number, int size);
-/* 分配栈内存 */
-HPSOCKET_API LPBYTE SYS_Alloca(int size);
 
 // CP_XXX -> UNICODE
 HPSOCKET_API BOOL SYS_CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int& iDestLength);

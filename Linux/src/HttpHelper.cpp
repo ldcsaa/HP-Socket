@@ -182,7 +182,7 @@ void MakeStatusLine(EnHttpVersion enVersion, USHORT usStatusCode, LPCSTR lpszDes
 
 void MakeHeaderLines(const THeader lpHeaders[], int iHeaderCount, const TCookieMap* pCookies, int iBodyLength, BOOL bRequest, int iConnFlag, LPCSTR lpszDefaultHost, USHORT usPort, CStringA& strValue)
 {
-	unordered_set<LPCSTR, str_hash_func::hash, str_hash_func::equal_to> szHeaderNames;
+	unordered_set<LPCSTR, str_nc_hash_func::hash, str_nc_hash_func::equal_to> szHeaderNames;
 
 	if(iHeaderCount > 0)
 	{

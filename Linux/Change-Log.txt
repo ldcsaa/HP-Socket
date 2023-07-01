@@ -1,4 +1,19 @@
 ﻿==========================================================================================
+v5.9.2 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. HTTP Cookie request and response headers 'Cookie' and 'Set-Cookie' support case-insensitive.
+2. Better support for GCC 11 compiler.
+3. Small scale code optimization.
+
+> Third-party library Upadate
+-----------------
+1. openssl upgrade to version 1.1.1u.
+2. mimalloc upgrade to version 1.8.2.
+
+==========================================================================================
 v5.9.1 Update:
 ==========================================================================================
 

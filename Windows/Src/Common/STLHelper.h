@@ -678,7 +678,7 @@ template<class T> struct char_nc_comparator
 {
 	typedef T	row_type;
 	static row_type row_type_value(const T& v)		{return (row_type)v;}
-	static bool equal_to(const T& v1, const T& v2)	{return stricmp(v1, v2) == 0;}
+	static bool equal_to(const T& v1, const T& v2)	{return _stricmp(v1, v2) == 0;}
 };
 
 template<class T> struct wchar_comparator
@@ -692,7 +692,7 @@ template<class T> struct wchar_nc_comparator
 {
 	typedef T	row_type;
 	static row_type row_type_value(const T& v)		{return (row_type)v;}
-	static bool equal_to(const T& v1, const T& v2)	{return wcsicmp(v1, v2) == 0;}
+	static bool equal_to(const T& v1, const T& v2)	{return _wcsicmp(v1, v2) == 0;}
 };
 
 template<class T> struct cstring_comparator

@@ -503,9 +503,9 @@ public:
 
 		if(hpr != HPR_ERROR && !pSelf->GetBufferRef().IsEmpty())
 		{
-			if(pSelf->m_bRequest && pSelf->m_strCurHeader == HTTP_HEADER_COOKIE)
+			if(pSelf->m_bRequest && pSelf->m_strCurHeader.CompareNoCase(HTTP_HEADER_COOKIE) == 0)
 				hpr = pSelf->ParseCookie();
-			else if(!pSelf->m_bRequest && pSelf->m_strCurHeader == HTTP_HEADER_SET_COOKIE)
+			else if(!pSelf->m_bRequest && pSelf->m_strCurHeader.CompareNoCase(HTTP_HEADER_SET_COOKIE) == 0)
 				hpr = pSelf->ParseSetCookie();
 		}
 

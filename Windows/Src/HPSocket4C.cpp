@@ -487,7 +487,6 @@
 	#pragma comment(linker, "/EXPORT:SYS_Realloc=_SYS_Realloc@8")
 	#pragma comment(linker, "/EXPORT:SYS_Free=_SYS_Free@4")
 	#pragma comment(linker, "/EXPORT:SYS_Calloc=_SYS_Calloc@8")
-	#pragma comment(linker, "/EXPORT:SYS_Alloca=_SYS_Alloca@4")
 
 #ifdef _ZLIB_SUPPORT
 	#pragma comment(linker, "/EXPORT:SYS_Compress=_SYS_Compress@16")
@@ -2949,11 +2948,6 @@ HPSOCKET_API VOID __HP_CALL SYS_Free(LPBYTE p)
 HPSOCKET_API LPVOID __HP_CALL SYS_Calloc(int number, int size)
 {
 	return CALLOC(number, size);
-}
-
-HPSOCKET_API LPBYTE __HP_CALL SYS_Alloca(int size)
-{
-	return CreateLocalObjects(BYTE, size);
 }
 
 HPSOCKET_API BOOL __HP_CALL SYS_CodePageToUnicodeEx(int iCodePage, const char szSrc[], int iSrcLength, WCHAR szDest[], int* piDestLength)

@@ -271,7 +271,7 @@ BOOL RetrieveSockAddrIPAddresses(const vector<HP_PSOCKADDR>& vt, LPTIPAddr** lpp
 	for(int i = 0; i < iIPAddrCount; i++)
 	{
 		pSockAddr	= vt[i];
-		iAddrLength	= HP_SOCKADDR::AddrMinStrLength(pSockAddr->family) + 6;
+		iAddrLength	= HP_SOCKADDR::AddrMinStrLength(pSockAddr->family);
 		lpszAddr	= new TCHAR[iAddrLength];
 
 		ENSURE(sockaddr_IN_2_A(*vt[i], usFamily, lpszAddr, iAddrLength, usPort));

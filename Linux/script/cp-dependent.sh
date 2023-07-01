@@ -29,6 +29,7 @@ do_copy()
 {
 	local _LIB_NAME=$1
 	local _CPY_INCS=1
+	local _SRC_LIB_DIR=lib
 	local _RM_FILES=
 	local _LIB_FIX=
 	
@@ -40,6 +41,10 @@ do_copy()
 		_CPY_INCS=0
 		_RM_FILES="$PLATFORM/lib/lib$_LIB_NAME*"
 	elif [ $_LIB_NAME == "openssl" ]; then
+		if [[ $PLATFORM == "x64" || $PLATFORM == "arm64" ]]; then
+			local REAL_DIR=$(ls -l $SRC_BASE/$_LIB_NAME | awk '{print $NF}')
+			[[ $REAL_DIR =~ openssl-1\..* ]] || _SRC_LIB_DIR=lib64
+		fi
 		_RM_FILES="$PLATFORM/lib/libssl* $PLATFORM/lib/libcrypto* $PLATFORM/include/$_LIB_NAME*"
 	elif [ $_LIB_NAME == "zlib" ]; then
 		_RM_FILES="$PLATFORM/lib/libz* $PLATFORM/include/zconf.h $PLATFORM/include/zlib.h"
@@ -57,7 +62,7 @@ do_copy()
 	fi
 	
 	mkdir -p $PLATFORM/lib
-	cp -rf $SRC_BASE/$_LIB_NAME/lib/*$_LIB_FIX.a $PLATFORM/lib
+	cp -rf $SRC_BASE/$_LIB_NAME/$_SRC_LIB_DIR/*$_LIB_FIX.a $PLATFORM/lib
 }
 
 mkdir -p $DEST_BASE

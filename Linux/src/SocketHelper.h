@@ -162,9 +162,9 @@ typedef struct hp_sockaddr
 	inline static int AddrMinStrLength(ADDRESS_FAMILY f)
 	{
 		if(f == AF_INET)
-			return 16;
+			return INET_ADDRSTRLEN;
 
-		return 46;
+		return INET6_ADDRSTRLEN;
 	}
 
 	inline BOOL IsIPv4()			const	{return family == AF_INET;}

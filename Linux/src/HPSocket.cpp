@@ -370,11 +370,6 @@ HPSOCKET_API LPVOID SYS_Calloc(int number, int size)
 	return CALLOC(number, size);
 }
 
-HPSOCKET_API LPBYTE SYS_Alloca(int size)
-{
-	return CreateLocalObjects(BYTE, size);
-}
-
 HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen)
 {
 	return ::GuessBase64EncodeBound(dwSrcLen);

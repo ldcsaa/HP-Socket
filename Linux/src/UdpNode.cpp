@@ -20,7 +20,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+#if defined(__GNUC__) && __GNUC__ >= 11
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored  "-Wstringop-overflow"
+#endif
+
 #include "UdpNode.h"
 
 #ifdef _UDP_SUPPORT
@@ -714,4 +720,8 @@ EnHandleResult CUdpNode::FireError(TNodeBufferObj* pBufferObj, EnSocketOperation
 	return m_pListener->OnError(this, enOperation, iErrorCode, szAddress, usPort, pBufferObj->Ptr(), pBufferObj->Size());
 }
 
+#endif
+
+#if defined(__GNUC__) && __GNUC__ >= 11
+#pragma GCC diagnostic pop
 #endif

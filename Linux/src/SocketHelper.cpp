@@ -256,7 +256,11 @@ BOOL EnumHostIPAddresses(LPCTSTR lpszHost, EnIPAddrType enType, LPTIPAddr** lppp
 	addrinfo* pInfo	= nullptr;
 	addrinfo hints	= {0};
 
+#if defined(__ANDROID__)
+	hints.ai_flags		= 0;
+#else
 	hints.ai_flags		= AI_ALL;
+#endif
 	hints.ai_family		= usFamily;
 	hints.ai_socktype	= SOCK_STREAM;
 
@@ -302,7 +306,7 @@ BOOL RetrieveSockAddrIPAddresses(const vector<HP_PSOCKADDR>& vt, LPTIPAddr** lpp
 	for(int i = 0; i < iIPAddrCount; i++)
 	{
 		pSockAddr	= vt[i];
-		iAddrLength	= HP_SOCKADDR::AddrMinStrLength(pSockAddr->family) + 6;
+		iAddrLength	= HP_SOCKADDR::AddrMinStrLength(pSockAddr->family);
 		lpszAddr	= new TCHAR[iAddrLength];
 
 		VERIFY(sockaddr_IN_2_A(*vt[i], usFamily, lpszAddr, iAddrLength, usPort));

@@ -514,8 +514,6 @@ HPSOCKET_API LPBYTE SYS_Realloc(LPBYTE p, int size);
 HPSOCKET_API VOID SYS_Free(LPBYTE p);
 /* 分配内存块 */
 HPSOCKET_API LPVOID SYS_Calloc(int number, int size);
-/* 分配栈内存 */
-HPSOCKET_API LPBYTE SYS_Alloca(int size);
 
 // 计算 Base64 编码后长度
 HPSOCKET_API DWORD SYS_GuessBase64EncodeBound(DWORD dwSrcLen);
