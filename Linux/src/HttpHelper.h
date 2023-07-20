@@ -390,9 +390,14 @@ public:
 		if(m_parser.upgrade)
 		{
 			if(m_enUpgrade == HUT_WEB_SOCKET)
-				return m_pwsContext->Parse(pData, iLength);
+			{
+				if(m_pwsContext != nullptr)
+					return m_pwsContext->Parse(pData, iLength);
+			}
 			else
+			{
 				return m_pContext->DoFireSuperReceive(m_pSocket, pData, iLength);
+			}
 		}
 
 		EnHandleResult hr	= HR_OK;
