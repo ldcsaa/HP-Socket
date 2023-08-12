@@ -17,6 +17,7 @@ ICONV_ENABLED=1
 CC=g++
 
 EXEC_FLAG=0
+ASSUME_YES=0
 ACTION_NAME=
 
 LIB_NAME_JEMALLOC=jemalloc_pic
@@ -60,6 +61,7 @@ print_usage()
 	printf "  %-19s : %s\n" ""						"(default: current machine arch platform)"
 	printf "  %-19s : %s\n" "-e|--clean"			"clean compilation intermediate temp files"
 	printf "  %-19s : %s\n" "-r|--remove"			"remove all compilation target files"
+	printf "  %-19s : %s\n" "-y|--assumeyes"		"answer yes for all questions"
 	printf "  %-19s : %s\n" "-v|--version"			"print hp-socket version"
 	printf "  %-19s : %s\n" "-h|--help"				"print this usage message"
 	echo "----------------------+-------------------------------------------------"
@@ -89,12 +91,14 @@ print_config()
 	
 	echo "------------------+---------------------------------------"
 
-	read_confirm
+	if [ $ASSUME_YES -eq 0 ]; then
+		read_confirm
+	fi
 }
 
 parse_args()
 {
-	ARGS=$(getopt -o d:m:u:t:s:z:b:i:c:p:ervh -l with-debug-lib:,mem-allocator:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,brotli-enabled:,iconv-enabled:,compiler:,platform:,clean,remove,version,help -n "$SH_NAME" -- "$@")
+	ARGS=$(getopt -o d:m:u:t:s:z:b:i:c:p:ervhy -l with-debug-lib:,mem-allocator:,udp-enabled:,http-enabled:,ssl-enabled:,zlib-enabled:,brotli-enabled:,iconv-enabled:,compiler:,platform:,clean,remove,version,help,assumeyes -n "$SH_NAME" -- "$@")
 	RS=$?
 	
 	if [ $RS -ne 0 ]; then
@@ -235,6 +239,10 @@ parse_args()
 			-h|--help) 
 				print_usage
 				exit 0
+				;;
+			-y|--assumeyes)
+				ASSUME_YES=1
+				shift
 				;;
 			--)
 				shift

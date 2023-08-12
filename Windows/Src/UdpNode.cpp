@@ -522,6 +522,8 @@ int CUdpNode::SendInternal(HP_SOCKADDR& addrRemote, TUdpBufferObjPtr& bufPtr)
 		iBufferSize	= (int)(bufPtr->buff.len);
 		m_iPending += max(iBufferSize, 1);
 
+		ASSERT(m_iPending > 0);
+
 		m_sndBuff.PushBack(bufPtr.Detach());
 	}
 

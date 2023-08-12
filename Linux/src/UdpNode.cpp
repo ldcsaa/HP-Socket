@@ -439,6 +439,8 @@ int CUdpNode::SendInternal(HP_SOCKADDR& addrRemote, TNodeBufferObjPtr& bufPtr)
 
 		m_sndBuff.PushBack(bufPtr.Detach());
 		if(iBufferSize == 0) m_sndBuff.IncreaseLength(1);
+
+		ASSERT(m_sndBuff.Length() > 0);
 	}
 
 	if(!bPending && IsPending())

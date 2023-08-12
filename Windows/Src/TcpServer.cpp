@@ -1330,6 +1330,8 @@ int CTcpServer::CatAndPost(TSocketObj* pSocketObj, const BYTE* pBuffer, int iLen
 	pSocketObj->sndBuff.Cat(pBuffer, iLength);
 	pSocketObj->pending += iLength;
 
+	ASSERT(pSocketObj->pending > 0);
+
 	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
 		result = ::GetLastError();
 

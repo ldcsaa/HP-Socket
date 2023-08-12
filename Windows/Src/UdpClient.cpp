@@ -344,13 +344,7 @@ BOOL CUdpClient::CheckConnection()
 		return FALSE;
 	}
 
-	int result = DetectConnection();
-
-	if(result != NO_ERROR)
-	{
-		m_ccContext.Reset(TRUE, SO_CLOSE, result);
-		return FALSE;
-	}
+	DetectConnection();
 
 	return TRUE;
 }
@@ -366,7 +360,14 @@ int CUdpClient::DetectConnection()
 			result = NO_ERROR;
 	}
 
-	TRACE("<C-CNNID: %Iu> send 0 bytes (detect package)\n", m_dwConnID);
+	if(result == NO_ERROR)
+	{
+		TRACE("<C-CNNID: %Iu> send 0 bytes (detect package succ)\n", m_dwConnID);
+	}
+	else
+	{
+		TRACE("<C-CNNID: %Iu> send 0 bytes (detect package fail [%d])\n", m_dwConnID, result);
+	}
 
 	return result;
 }
@@ -799,6 +800,8 @@ int CUdpClient::SendInternal(TItemPtr& itPtr)
 
 		iPending	= m_iPending;
 		m_iPending += itPtr->Size();
+
+		ASSERT(m_iPending > 0);
 
 		m_lsSend.PushBack(itPtr.Detach());
 	}

@@ -1094,6 +1094,7 @@ int CTcpServer::SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], in
 			ASSERT(pBuffer);
 
 			pSocketObj->sndBuff.Cat(pBuffer, iBufLen);
+			ASSERT(pSocketObj->sndBuff.Length() > 0);
 		}
 	}
 

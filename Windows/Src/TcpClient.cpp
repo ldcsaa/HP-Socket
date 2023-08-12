@@ -686,6 +686,8 @@ int CTcpClient::SendInternal(const WSABUF pBuffers[], int iCount)
 
 			m_lsSend.Cat(pBuffer, iBufLen);
 			m_iPending += iBufLen;
+
+			ASSERT(m_iPending > 0);
 		}
 	}
 

@@ -1,4 +1,18 @@
 ﻿==========================================================================================
+v5.9.3 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
+1. Bug fix: Upgrading to websocket protocol through HTTP methods such as POST/PUT that with request content, may cause HTTP Server exception.
+2. Failure to send a single heartbeat packet between UDP clients/servers will not immediately disconnect, only detecting whether the heartbeat has timed out to determine whether to disconnect.
+
+> Third-party library Upadate
+-----------------
+1. openssl upgrade to version 1.1.1v.
+2. llhttp upgrade to version 8.1.1.
+
+==========================================================================================
 v5.9.2 Update:
 ==========================================================================================
 

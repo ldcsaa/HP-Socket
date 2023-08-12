@@ -1249,6 +1249,7 @@ int CTcpAgent::SendInternal(TAgentSocketObj* pSocketObj, const WSABUF pBuffers[]
 			ASSERT(pBuffer);
 
 			pSocketObj->sndBuff.Cat(pBuffer, iBufLen);
+			ASSERT(pSocketObj->sndBuff.Length() > 0);
 		}
 	}
 

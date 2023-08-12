@@ -1324,6 +1324,8 @@ int CUdpServer::CatAndPost(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr)
 	pSocketObj->pending += (int)bufPtr->buff.len;
 	pSocketObj->sndBuff.PushBack(bufPtr.Detach());
 
+	ASSERT(pSocketObj->pending > 0);
+
 	if(pSocketObj->IsCanSend() && pSocketObj->IsSmooth() && !::PostIocpSend(m_hCompletePort, pSocketObj->connID))
 		result = ::GetLastError();
 
@@ -1476,22 +1478,16 @@ int CUdpServer::SendItem(TUdpSocketObj* pSocketObj)
 
 BOOL CUdpServer::SendDetectPackage(CONNID dwConnID, TUdpSocketObj* pSocketObj)
 {
-	BOOL isOK = TRUE;
-
 	if(!HasStarted())
+		return FALSE;
+
+	BOOL isOK	= TRUE;
+	int rc		= sendto(m_soListen, nullptr, 0, 0, pSocketObj->remoteAddr.Addr(), pSocketObj->remoteAddr.AddrSize());
+
+	if(rc == SOCKET_ERROR && ::WSAGetLastError() != WSAEWOULDBLOCK)
 		isOK = FALSE;
-	else
-	{
-		int rc = sendto(m_soListen, nullptr, 0, 0, pSocketObj->remoteAddr.Addr(), pSocketObj->remoteAddr.AddrSize());
 
-		if(rc == SOCKET_ERROR && ::WSAGetLastError() != WSAEWOULDBLOCK)
-			isOK = FALSE;
-
-		if(isOK)
-			TRACE("<S-CNNID: %Iu> send 0 bytes (detect package)\n", dwConnID);
-		else
-			ENSURE(!HasStarted());
-	}
+	TRACE("<S-CNNID: %Iu> send 0 bytes (detect ack package - %s)\n", pSocketObj->connID, isOK ? "succ" : "fail");
 
 	return isOK;
 }

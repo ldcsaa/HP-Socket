@@ -661,6 +661,8 @@ int CUdpCast::SendInternal(TItemPtr& itPtr)
 		iBufferSize	= itPtr->Size();
 		m_iPending += max(iBufferSize, 1);
 
+		ASSERT(m_iPending > 0);
+
 		m_lsSend.PushBack(itPtr.Detach());
 	}
 

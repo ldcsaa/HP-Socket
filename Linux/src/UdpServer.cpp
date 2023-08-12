@@ -1186,6 +1186,7 @@ int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr)
 		bPending = pSocketObj->IsPending();
 
 		pSocketObj->sndBuff.PushBack(itPtr.Detach());
+		ASSERT(pSocketObj->sndBuff.Length() > 0);
 	}
 
 	if(!bPending)

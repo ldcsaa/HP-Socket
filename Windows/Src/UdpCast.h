@@ -128,7 +128,6 @@ private:
 	BOOL HandleError(WSANETWORKEVENTS& events);
 	BOOL HandleRead(WSANETWORKEVENTS& events);
 	BOOL HandleWrite(WSANETWORKEVENTS& events);
-	BOOL HandleConnect(WSANETWORKEVENTS& events);
 	BOOL HandleClose(WSANETWORKEVENTS& events);
 
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);

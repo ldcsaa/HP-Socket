@@ -429,22 +429,23 @@ BOOL CUdpClient::CheckConnection()
 		return FALSE;
 	}
 
-	return DetectConnection();
+	DetectConnection();
+
+	return TRUE;
 }
 
 BOOL CUdpClient::DetectConnection()
 {
-	BOOL isOK = TRUE;
-	int code  = NO_ERROR;
-	int rc	  = (int)send(m_soClient, nullptr, 0, 0);
+	int result = NO_ERROR;
 	
-	if(rc == SOCKET_ERROR)
+	if((int)send(m_soClient, nullptr, 0, 0) == SOCKET_ERROR)
 	{
-		code = ::WSAGetLastError();
-
-		if(code != ERROR_WOULDBLOCK)
-			isOK = FALSE;
+		result = ::WSAGetLastError();
+		if(result == ERROR_WOULDBLOCK)
+			result = NO_ERROR;
 	}
+
+	BOOL isOK = (result == NO_ERROR);
 	
 	if(isOK)
 	{
@@ -452,7 +453,7 @@ BOOL CUdpClient::DetectConnection()
 	}
 	else
 	{
-		TRACE("<C-CNNID: %zu> send 0 bytes (detect package fail [%d])", m_dwConnID, code);
+		TRACE("<C-CNNID: %zu> send 0 bytes (detect package fail [%d])", m_dwConnID, result);
 	}
 
 	return isOK;
@@ -763,6 +764,7 @@ int CUdpClient::SendInternal(TItemPtr& itPtr)
 		iPending = m_lsSend.Length();
 
 		m_lsSend.PushBack(itPtr.Detach());
+		ASSERT(m_lsSend.Length() > 0);
 	}
 
 	if(iPending == 0 && m_lsSend.Length() > 0) m_evSend.Set();

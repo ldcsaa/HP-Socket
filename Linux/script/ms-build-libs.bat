@@ -3,7 +3,7 @@
 set version=%1
 
 if "%version%"=="" (
-	set version=2019
+	set version=2022
 )
 
 set prj_dir=%~dp0..\project

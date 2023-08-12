@@ -17,6 +17,7 @@ DEST_CER_DIR=hp-ssl-cert
 DEST_INC_DIR=include
 INSTALL_DEMO=0
 IS_UNINSTALL=0
+ASSUME_YES=0
 ACTION_NAME=
 
 source $PACKAGE_PATH/$SCRIPT_DIR/env.sh
@@ -29,6 +30,7 @@ print_usage()
 	printf "  %-14s : %s\n" "-l|--libdir"	 "lib dir (x86/arm default: 'lib', x64/arm64 default: 'lib64')"
 	printf "  %-14s : %s\n" "-d|--with-demo" "install demos or not (default: false)"
 	printf "  %-14s : %s\n" "-u|--uninstall" "execute uninstall operation from install path"
+	printf "  %-14s : %s\n" "-y|--assumeyes" "answer yes for all questions"
 	printf "  %-14s : %s\n" "-v|--version"	 "print hp-socket version"
 	printf "  %-14s : %s\n" "-h|--help"		 "print this usage message"
 	echo "-----------------+-------------------------------------------------------"
@@ -49,12 +51,14 @@ print_config()
 	
 	echo "---------------+-------------------"
 
-	read_confirm
+	if [ $ASSUME_YES -eq 0 ]; then
+		read_confirm
+	fi
 }
 
 parse_args()
 {
-	ARGS=$(getopt -o hvup:l:d: -l help,version,uninstall,prefix:,libdir:,with-demo: -n "$SH_NAME" -- "$@")
+	ARGS=$(getopt -o hvuyp:l:d: -l help,version,uninstall,assumeyes,prefix:,libdir:,with-demo: -n "$SH_NAME" -- "$@")
 	RS=$?
 	
 	if [ $RS -ne 0 ]; then
@@ -76,6 +80,10 @@ parse_args()
 				;;
 			-u|--uninstall)
 				IS_UNINSTALL=1
+				shift
+				;;
+			-y|--assumeyes)
+				ASSUME_YES=1
 				shift
 				;;
 			-p|--prefix)
