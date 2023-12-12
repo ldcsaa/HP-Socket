@@ -206,12 +206,12 @@ public:
 
 	BOOL WaitToRead(ICVCondition* pCondition, DWORD dwMilliseconds = INFINITE)
 	{
-		Wait(pCondition, dwMilliseconds);
+		return Wait(pCondition, dwMilliseconds);
 	}
 
 	BOOL WaitToWrite(ICVCondition* pCondition, DWORD dwMilliseconds = INFINITE)
 	{
-		Wait(pCondition, dwMilliseconds);
+		return Wait(pCondition, dwMilliseconds);
 	}
 
 	void ReadDone()
