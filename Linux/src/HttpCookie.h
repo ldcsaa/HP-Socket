@@ -37,6 +37,7 @@
 #define COOKIE_SAMESITE			"SameSite"
 #define COOKIE_SAMESITE_STRICT	"Strict"
 #define COOKIE_SAMESITE_LAX		"Lax"
+#define COOKIE_SAMESITE_NONE	"None"
 #define COOKIE_DEFAULT_PATH		"/"
 #define COOKIE_FIELD_SEP		";"
 #define COOKIE_DOMAIN_SEP_CHAR	'.'
@@ -48,9 +49,10 @@ class CCookie
 public:
 	enum EnSameSite
 	{
-		SS_NONE		= 0,
+		SS_UNKNOWN	= 0,
 		SS_STRICT	= 1,
-		SS_LAX		= 2
+		SS_LAX		= 2,
+		SS_NONE		= 3
 	};
 
 	CStringA name;
@@ -62,7 +64,7 @@ public:
 	BOOL secure;
 	EnSameSite sameSite;
 
-	CCookie(LPCSTR lpszName = nullptr, LPCSTR lpszValue = nullptr, LPCSTR lpszDomain = nullptr, LPCSTR lpszPath = nullptr, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, EnSameSite enSameSite = SS_NONE)
+	CCookie(LPCSTR lpszName = nullptr, LPCSTR lpszValue = nullptr, LPCSTR lpszDomain = nullptr, LPCSTR lpszPath = nullptr, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, EnSameSite enSameSite = SS_UNKNOWN)
 	: name		(lpszName)
 	, value		(lpszValue)
 	, domain	(lpszDomain)
@@ -88,8 +90,8 @@ public:
 	static CStringA MakeExpiresStr(__time64_t tmExpires);
 	static BOOL MakeExpiresStr(char lpszBuff[], int& iBuffLen, __time64_t tmExpires);
 	static CCookie* FromString(const CStringA& strCookie, LPCSTR lpszDefaultDomain = nullptr, LPCSTR lpszDefaultPath = nullptr);
-	static CStringA ToString(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, EnSameSite enSameSite = SS_NONE);
-	static BOOL ToString(char lpszBuff[], int& iBuffLen, LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, EnSameSite enSameSite = SS_NONE);
+	static CStringA ToString(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, EnSameSite enSameSite = SS_UNKNOWN);
+	static BOOL ToString(char lpszBuff[], int& iBuffLen, LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, EnSameSite enSameSite = SS_UNKNOWN);
 
 	CStringA ToString();
 	BOOL Match(LPCSTR lpszDomain, LPCSTR lpszPath, BOOL bHttp, BOOL bSecure);
@@ -151,7 +153,7 @@ public:
 	BOOL RemoveExpiredCookies(LPCSTR lpszDomain = nullptr, LPCSTR lpszPath = nullptr);
 
 	BOOL GetCookies(CCookieSet& cookies, LPCSTR lpszDomain, LPCSTR lpszPath, BOOL bHttp, BOOL bSecure);
-	BOOL SetCookie(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, CCookie::EnSameSite enSameSite = CCookie::SS_NONE, BOOL bOnlyUpdateValueIfExists = TRUE);
+	BOOL SetCookie(LPCSTR lpszName, LPCSTR lpszValue, LPCSTR lpszDomain, LPCSTR lpszPath, int iMaxAge = -1, BOOL bHttpOnly = FALSE, BOOL bSecure = FALSE, CCookie::EnSameSite enSameSite = CCookie::SS_UNKNOWN, BOOL bOnlyUpdateValueIfExists = TRUE);
 	BOOL SetCookie(const CStringA& strCookie, BOOL bOnlyUpdateValueIfExists = TRUE);
 	BOOL SetCookie(const CCookie& cookie, BOOL bOnlyUpdateValueIfExists = TRUE);
 	BOOL DeleteCookie(LPCSTR lpszDomain, LPCSTR lpszPath, LPCSTR lpszName);

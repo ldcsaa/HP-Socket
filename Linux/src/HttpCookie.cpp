@@ -40,7 +40,7 @@ CCookie* CCookie::FromString(const CStringA& strCookie, LPCSTR lpszDefaultDomain
 	int iMaxAge			  = -1;
 	BOOL bHttpOnly		  = FALSE;
 	BOOL bSecure		  = FALSE;
-	EnSameSite enSameSite = SS_NONE;
+	EnSameSite enSameSite = SS_UNKNOWN;
 
 	int i		= 0;
 	int iStart	= 0;
@@ -88,10 +88,12 @@ CCookie* CCookie::FromString(const CStringA& strCookie, LPCSTR lpszDefaultDomain
 				bSecure = TRUE;
 			else if(strKey.CompareNoCase(COOKIE_SAMESITE) == 0)
 			{
-				if(strVal.IsEmpty() || strVal.CompareNoCase(COOKIE_SAMESITE_STRICT) == 0)
-					enSameSite = SS_STRICT;
-				else if(strVal.CompareNoCase(COOKIE_SAMESITE_LAX) == 0)
+				if(strVal.IsEmpty() || strVal.CompareNoCase(COOKIE_SAMESITE_LAX) == 0)
 					enSameSite = SS_LAX;
+				else if(strVal.CompareNoCase(COOKIE_SAMESITE_STRICT) == 0)
+					enSameSite = SS_STRICT;
+				else if(strVal.CompareNoCase(COOKIE_SAMESITE_NONE) == 0)
+					enSameSite = SS_NONE;
 			}
 		}
 
@@ -148,8 +150,8 @@ CStringA CCookie::ToString()
 		strCookie.AppendFormat("; %s", COOKIE_HTTPONLY);
 	if(secure)
 		strCookie.AppendFormat("; %s", COOKIE_SECURE);
-	if(sameSite != SS_NONE)
-		strCookie.AppendFormat("; %s=%s", COOKIE_SAMESITE, sameSite == SS_LAX ? COOKIE_SAMESITE_LAX : COOKIE_SAMESITE_STRICT);
+	if(sameSite != SS_UNKNOWN)
+		strCookie.AppendFormat("; %s=%s", COOKIE_SAMESITE, sameSite == SS_LAX ? COOKIE_SAMESITE_LAX : (sameSite == SS_STRICT ? COOKIE_SAMESITE_STRICT : COOKIE_SAMESITE_NONE));
 
 	return strCookie;
 }
@@ -882,7 +884,7 @@ BOOL CCookieMgr::LoadCookie(LPSTR lpszBuff, LPCSTR lpszDomain, LPCSTR lpszPath, 
 	cookie.name.Trim();
 	cookie.value.Trim();
 
-	if(cookie.name.IsEmpty() || cookie.expires <= 0 /*|| cookie.httpOnly < 0 || cookie.secure < 0*/ || cookie.sameSite < CCookie::SS_NONE || cookie.sameSite > CCookie::SS_LAX)
+	if(cookie.name.IsEmpty() || cookie.expires <= 0 /*|| cookie.httpOnly < 0 || cookie.secure < 0*/ || cookie.sameSite < CCookie::SS_UNKNOWN || cookie.sameSite > CCookie::SS_NONE)
 	{
 		::SetLastError(ERROR_INVALID_DATA);
 		return FALSE;
