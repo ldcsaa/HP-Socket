@@ -1,4 +1,4 @@
-![HP-Socket](https://images.gitee.com/uploads/images/2019/0820/112616_5b8b37bf_81720.png "HP-Socket")
+![HP-Socket](Doc/HP-Socket%20Logo.png "HP-Socket")
 ---
 *高性能跨平台网络通信框架*
 ## 描述
@@ -7,15 +7,15 @@
 - ***Client*** 基于Event Select / POLL通信模型，每个组件对象创建一个通信线程并管理一个Socket连接，适用于小规模客户端场景。
 ## 文档
 - HP-Socket开发指南 
-[[pdf]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[pdf]](Doc/HP-Socket%20Development%20Guide.pdf)
 - HP-Socket基础组件类图 
-[[uml]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[uml]](Doc/HP-Socket%20Class%20Diagram.uml)
 - HP-Socket基础组件类图 
-[[jpg]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[jpg]](Doc/HP-Socket%20Class%20Diagram.jpg)
 - HP-Socket SSL组件类图组件 
-[[jpg]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[jpg]](Doc/HP-Socket%20SSL%20Class%20Diagram.jpg)
 - HP-Socket HTTP组件类图
-[[jpg]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[jpg]](Doc/HP-Socket%20HTTP%20Class%20Diagram.jpg)
 ## 工作流程
 1. 创建监听器
 2. 创建通信组件（同时绑定监听器）
@@ -26,7 +26,7 @@
 7. 销毁通信组件
 8. 销毁监听器
 
-![Agent工作流程](https://gitee.com/uploads/images/2017/1213/120601_c0d950fb_81720.jpeg "HP-Socket Agent 示例")
+![Agent工作流程](Doc/HP-Socket-Agent-Demo.jpg "Agent工作流程")
 ## 示例
 - ***C++示例***
 
@@ -128,15 +128,15 @@ int main(int argc, char* const argv[])
 ## 组件列表
 - ***基础组件***
 
-![Basic Component](https://oscimg.oschina.net/oscnet/up-42bad6a83208cda6aaa264ed00e5c328326.JPEG "基础组件")
+![Basic Component](Doc/Basic%20Component%20-%20mini.jpg "基础组件")
 
 - ***SSL组件***
 
-![SSL Component](https://oscimg.oschina.net/oscnet/up-481b7e4181c1e57dbe57cf0f4f328d7d227.JPEG "SSL 组件")
+![SSL Component](Doc/SSL%20Component%20-%20mini.jpg "SSL 组件")
 
 - ***HTTP组件***
 
-![HTTP COmponent](https://oscimg.oschina.net/oscnet/up-83092ff97598f275e3ca6b7abed679d4f61.JPEG "HTTP 组件")
+![HTTP COmponent](Doc/HTTP%20Component%20-%20mini.jpg "HTTP 组件")
 
 ## 引用项目
 

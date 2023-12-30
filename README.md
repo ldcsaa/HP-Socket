@@ -1,4 +1,4 @@
-![HP-Socket](https://images.gitee.com/uploads/images/2019/0820/112616_5b8b37bf_81720.png "HP-Socket")
+![HP-Socket](Doc/HP-Socket%20Logo.png "HP-Socket")
 ---
 *High Performance Network Framework*
 ## Description
@@ -7,15 +7,15 @@
 - ***Client*** Based on Event-Select/POLL communication model, each component object creates a communication thread and manages a Socket connection. Client components are suitable for small-scale client scenarios.
 ## Document
 - HP-Socket Development Guide 
-[[pdf]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[pdf]](Doc/HP-Socket%20Development%20Guide.pdf)
 - HP-Socket Class Diagram 
-[[uml]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[uml]](Doc/HP-Socket%20Class%20Diagram.uml)
 - HP-Socket Class Diagram 
-[[jpg]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[jpg]](Doc/HP-Socket%20Class%20Diagram.jpg)
 - HP-Socket SSL Class Diagram 
-[[jpg]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[jpg]](Doc/HP-Socket%20SSL%20Class%20Diagram.jpg)
 - HP-Socket HTTP Class Diagram 
-[[jpg]](https://github.com/ldcsaa/HP-Socket/tree/master/Doc)
+[[jpg]](Doc/HP-Socket%20HTTP%20Class%20Diagram.jpg)
 ## Workflow
 1. Create listener object
 2. Create component object (and binding with listener object)
@@ -26,7 +26,7 @@
 7. Destroy component object
 8. Destroy listener object
 
-![Agent Workflow](https://gitee.com/uploads/images/2017/1213/120601_c0d950fb_81720.jpeg "HP-Socket Agent Demo")
+![Agent Workflow](Doc/HP-Socket-Agent-Demo.jpg "Agent-Workflow")
 ## Example
 - ***C++ Example***
 
@@ -128,15 +128,15 @@ int main(int argc, char* const argv[])
 ## Component List
 - ***Basic Components***
 
-![Basic Component](https://oscimg.oschina.net/oscnet/up-42bad6a83208cda6aaa264ed00e5c328326.JPEG "Basic Component")
+![Basic Component](Doc/Basic%20Component%20-%20mini.jpg "Basic Component")
 
 - ***SSL Components***
 
-![SSL Component](https://oscimg.oschina.net/oscnet/up-481b7e4181c1e57dbe57cf0f4f328d7d227.JPEG "SSL Component")
+![SSL Component](Doc/SSL%20Component%20-%20mini.jpg "SSL Component")
 
 - ***HTTP Components***
 
-![HTTP COmponent](https://oscimg.oschina.net/oscnet/up-83092ff97598f275e3ca6b7abed679d4f61.JPEG "HTTP Component")
+![HTTP COmponent](Doc/HTTP%20Component%20-%20mini.jpg "HTTP Component")
 
 ## Reference Projects
 
