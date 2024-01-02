@@ -159,6 +159,8 @@ BOOL CIODispatcher::CtlFD(FD fd, int op, UINT mask, PVOID pv)
 
 int CIODispatcher::WorkerProc(PVOID pv)
 {
+	::SetDefaultWorkerThreadName(SELF_THREAD_ID);
+
 	m_pHandler->OnDispatchThreadStart(SELF_THREAD_ID);
 
 	BOOL bRun							= TRUE;

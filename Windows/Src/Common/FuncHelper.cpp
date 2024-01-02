@@ -67,3 +67,43 @@ void ABORT(int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszT
 {
 	__EXIT_FN_((void (*)(int))abort, "abort", nullptr, iErrno, lpszFile, iLine, lpszFunc, lpszTitle);
 }
+
+BOOL SetDefaultWorkerThreadName(HANDLE hThread)
+{
+#if _WIN32_WINNT < _WIN32_WINNT_WIN10
+	::SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+	return FALSE;
+#else
+	static volatile UINT _s_uiSeq = 0;
+
+	UINT uiSequence = ::InterlockedIncrement(&_s_uiSeq);
+
+	return SetWorkerThreadName(hThread, uiSequence);
+#endif
+}
+
+BOOL SetWorkerThreadName(HANDLE hThread, UINT uiSequence)
+{
+	return SetThreadName(hThread, DEFAULT_WORKER_THREAD_PREFIX, uiSequence);
+}
+
+BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszPrefix, UINT uiSequence)
+{
+	TCHAR szName[MAX_PATH];
+	_stprintf(szName, _T("%s%u"), lpszPrefix, uiSequence);
+
+	return SetThreadName(hThread, szName);
+}
+
+BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszName)
+{
+#if _WIN32_WINNT < _WIN32_WINNT_WIN10
+	::SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+	return FALSE;
+#else
+	if(hThread == nullptr)
+		hThread = SELF_THREAD;
+
+	return SUCCEEDED(::SetThreadDescription(hThread, CT2W(lpszName)));
+#endif
+}

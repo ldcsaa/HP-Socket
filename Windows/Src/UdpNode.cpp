@@ -534,6 +534,8 @@ int CUdpNode::SendInternal(HP_SOCKADDR& addrRemote, TUdpBufferObjPtr& bufPtr)
 
 UINT WINAPI CUdpNode::WorkerThreadProc(LPVOID pv)
 {
+	::SetDefaultWorkerThreadName(SELF_THREAD);
+
 	CUdpNode* pNode	= (CUdpNode*)pv;
 	pNode->OnWorkerThreadStart(SELF_THREAD_ID);
 

@@ -42,6 +42,7 @@
 #define DEFAULT_WORKER_THREAD_COUNT		(GetDefaultWorkerThreadCount())
 #define SELF_PROCESS_ID					(::GetCurrentProcessId())
 #define SELF_THREAD_ID					(::GetCurrentThreadId())
+#define SELF_THREAD						(::GetCurrentThread())
 #define IsSameThread(tid1, tid2)		((tid1) == (tid2))
 #define IsSelfThread(tid)				IsSameThread((tid), SELF_THREAD_ID)
 #define IsSameProcess(pid1, pid2)		((pid1) == (pid2))

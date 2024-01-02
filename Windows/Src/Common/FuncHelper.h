@@ -142,3 +142,11 @@ template<typename T1, typename T2> inline void CopyPlainObject(T1* p1, const T2*
 void EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void _EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void ABORT(int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
+
+/* 默认工作线程前缀 */
+#define DEFAULT_WORKER_THREAD_PREFIX	_T("HP-Worker-")
+
+BOOL SetDefaultWorkerThreadName(HANDLE hThread);
+BOOL SetWorkerThreadName(HANDLE hThread, UINT uiSequence);
+BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszPrefix, UINT uiSequence);
+BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszName);

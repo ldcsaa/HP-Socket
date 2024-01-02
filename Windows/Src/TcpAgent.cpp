@@ -838,6 +838,8 @@ void CTcpAgent::CloseCompletePort()
 
 UINT WINAPI CTcpAgent::WorkerThreadProc(LPVOID pv)
 {
+	::SetDefaultWorkerThreadName(SELF_THREAD);
+
 	CTcpAgent* pAgent = (CTcpAgent*)pv;
 	pAgent->OnWorkerThreadStart(SELF_THREAD_ID);
 

@@ -71,11 +71,12 @@ using namespace std;
 
 #if defined(DEBUG) && defined(DEBUG_TRACE)
 	#define TRACE(fmt, ...)				PRINTLN("> TRC (0x%zX, %d) " fmt, (SIZE_T)SELF_THREAD_ID, SELF_NATIVE_THREAD_ID, ##__VA_ARGS__)
+	#define ASSERT(expr)				((expr) ? TRUE : (::PrintStackTrace(), assert((FALSE)), FALSE))
 #else
 	#define TRACE(fmt, ...)
+	#define ASSERT(expr)				assert(expr)
 #endif
 
-#define ASSERT(expr)					((expr) ? TRUE : (::PrintStackTrace(), assert((FALSE)), FALSE))
 #define VERIFY(expr)					((expr) ? TRUE : (::PrintStackTrace(), ERROR_ABORT2(ERROR_VERIFY_CHECK), FALSE))
 #define ASSERT_IS_NO_ERROR(expr)		ASSERT(IS_NO_ERROR(expr))
 #define VERIFY_IS_NO_ERROR(expr)		VERIFY(IS_NO_ERROR(expr))
@@ -315,6 +316,17 @@ void PrintStackTrace();
 void EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void _EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void ABORT(int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
+
+/* 默认工作线程前缀 */
+#define DEFAULT_WORKER_THREAD_PREFIX	"HP-Worker-"
+
+/* 默认工作线程前缀 */
+#define MAX_WORKER_THREAD_NAME_LENGTH	15
+
+BOOL SetDefaultWorkerThreadName(THR_ID tid);
+BOOL SetWorkerThreadName(THR_ID tid, UINT uiSequence);
+BOOL SetThreadName(THR_ID tid, LPCSTR lpszPrefix, UINT uiSequence);
+BOOL SetThreadName(THR_ID tid, LPCSTR lpszName);
 
 template<typename T, typename = enable_if_t<is_integral<T>::value>>
 inline bool IS_INFINITE(T v)

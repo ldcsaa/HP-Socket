@@ -885,6 +885,8 @@ BOOL CTcpServer::DoAccept()
 
 UINT WINAPI CTcpServer::WorkerThreadProc(LPVOID pv)
 {
+	::SetDefaultWorkerThreadName(SELF_THREAD);
+
 	CTcpServer* pServer = (CTcpServer*)pv;
 	pServer->OnWorkerThreadStart(SELF_THREAD_ID);
 

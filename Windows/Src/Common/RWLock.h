@@ -206,12 +206,12 @@ public:
 
 	BOOL WaitToRead(ICVCondition* pCondition, DWORD dwMilliseconds = INFINITE)
 	{
-		Wait(pCondition, dwMilliseconds);
+		return Wait(pCondition, dwMilliseconds);
 	}
 
 	BOOL WaitToWrite(ICVCondition* pCondition, DWORD dwMilliseconds = INFINITE)
 	{
-		Wait(pCondition, dwMilliseconds);
+		return Wait(pCondition, dwMilliseconds);
 	}
 
 	void ReadDone()
@@ -348,12 +348,12 @@ template<class _Lock, class _Var> class CCVGuard
 public:
 	BOOL WaitForProduce(DWORD dwMilliseconds = INFINITE)
 	{
-		m_cvP.WaitToWrite(m_pcdtProduce, dwMilliseconds);
+		return m_cvP.WaitToWrite(m_pcdtProduce, dwMilliseconds);
 	}
 
 	BOOL WaitForConsume(DWORD dwMilliseconds = INFINITE)
 	{
-		m_cvC.WaitToRead(m_pcdtConsume, dwMilliseconds);
+		return m_cvC.WaitToRead(m_pcdtConsume, dwMilliseconds);
 	}
 
 	void ProduceDone()

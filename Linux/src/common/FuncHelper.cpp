@@ -346,3 +346,54 @@ void ABORT(int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszT
 {
 	__EXIT_FN_((void (*)(int))abort, "abort", nullptr, iErrno, lpszFile, iLine, lpszFunc, lpszTitle);
 }
+
+BOOL SetDefaultWorkerThreadName(THR_ID tid)
+{
+	static volatile UINT _s_uiSeq = 0;
+
+	UINT uiSequence = InterlockedIncrement(&_s_uiSeq);
+
+	return SetWorkerThreadName(tid, uiSequence);
+}
+
+BOOL SetWorkerThreadName(THR_ID tid, UINT uiSequence)
+{
+	return SetThreadName(tid, DEFAULT_WORKER_THREAD_PREFIX, uiSequence);
+}
+
+BOOL SetThreadName(THR_ID tid, LPCSTR lpszPrefix, UINT uiSequence)
+{
+	int iMaxSeqLength = (int)(MAX_WORKER_THREAD_NAME_LENGTH - strlen(DEFAULT_WORKER_THREAD_PREFIX));
+
+	if(iMaxSeqLength <= 0)
+	{
+		::SetLastError(ERROR_OUT_OF_RANGE);
+		return FALSE;
+	}
+
+	UINT uiDiv = 1;
+
+	for(int i = 0; i < iMaxSeqLength; i++)
+		uiDiv *= 10;
+
+	uiSequence %= uiDiv;
+
+	TCHAR szName[MAX_WORKER_THREAD_NAME_LENGTH + 1];
+	sprintf(szName, "%s%u", lpszPrefix, uiSequence);
+
+	return SetThreadName(tid, szName);
+}
+
+BOOL SetThreadName(THR_ID tid, LPCSTR lpszName)
+{
+	ASSERT(strlen(lpszName) <= MAX_WORKER_THREAD_NAME_LENGTH);
+
+	if(tid == 0)
+		tid = SELF_THREAD_ID;
+
+	int rs = pthread_setname_np(tid, lpszName);
+
+	CHECK_ERROR_CODE(rs)
+
+	return TRUE;
+}
