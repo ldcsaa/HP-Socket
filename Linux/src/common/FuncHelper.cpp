@@ -351,21 +351,30 @@ BOOL SetDefaultWorkerThreadName(THR_ID tid)
 {
 	static volatile UINT _s_uiSeq = 0;
 
-	UINT uiSequence = InterlockedIncrement(&_s_uiSeq);
-
-	return SetWorkerThreadName(tid, uiSequence);
+	return SetSequenceThreadName(tid, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
 }
 
-BOOL SetWorkerThreadName(THR_ID tid, UINT uiSequence)
+BOOL SetDefaultPoolThreadName(THR_ID tid)
 {
-	return SetThreadName(tid, DEFAULT_WORKER_THREAD_PREFIX, uiSequence);
+	static volatile UINT _s_uiSeq = 0;
+
+	return SetSequenceThreadName(tid, DEFAULT_POOL_THREAD_PREFIX, _s_uiSeq);
+}
+
+BOOL SetSequenceThreadName(THR_ID tid, LPCTSTR lpszPrefix, volatile UINT& vuiSeq)
+{
+	UINT uiSequence = InterlockedIncrement(&vuiSeq);
+
+	return SetThreadName(tid, lpszPrefix, uiSequence);
 }
 
 BOOL SetThreadName(THR_ID tid, LPCSTR lpszPrefix, UINT uiSequence)
 {
-	int iMaxSeqLength = (int)(MAX_WORKER_THREAD_NAME_LENGTH - strlen(DEFAULT_WORKER_THREAD_PREFIX));
+	int iMaxSeqLength = (int)(MAX_WORKER_THREAD_NAME_LENGTH - strlen(lpszPrefix));
 
-	if(iMaxSeqLength <= 0)
+	ASSERT(iMaxSeqLength > 0 && iMaxSeqLength <= 10);
+
+	if(iMaxSeqLength <= 0 || iMaxSeqLength > 10)
 	{
 		::SetLastError(ERROR_OUT_OF_RANGE);
 		return FALSE;

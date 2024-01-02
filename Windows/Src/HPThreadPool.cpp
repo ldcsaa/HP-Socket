@@ -25,7 +25,6 @@
 #include "HPThreadPool.h"
 
 #include "Common/WaitFor.h"
-#include "Common/FuncHelper.h"
 
 LPTSocketTask CreateSocketTaskObj(	Fn_SocketTaskProc fnTaskProc,
 									PVOID pSender, CONNID dwConnID,

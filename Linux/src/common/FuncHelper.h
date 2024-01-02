@@ -319,12 +319,15 @@ void ABORT(int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lps
 
 /* 默认工作线程前缀 */
 #define DEFAULT_WORKER_THREAD_PREFIX	"HP-Worker-"
+/* 默认线程池线程前缀 */
+#define DEFAULT_POOL_THREAD_PREFIX		"HP-Pool-"
 
 /* 默认工作线程前缀 */
 #define MAX_WORKER_THREAD_NAME_LENGTH	15
 
 BOOL SetDefaultWorkerThreadName(THR_ID tid);
-BOOL SetWorkerThreadName(THR_ID tid, UINT uiSequence);
+BOOL SetDefaultPoolThreadName(THR_ID tid);
+BOOL SetSequenceThreadName(THR_ID tid, LPCSTR lpszPrefix, volatile UINT& vuiSeq);
 BOOL SetThreadName(THR_ID tid, LPCSTR lpszPrefix, UINT uiSequence);
 BOOL SetThreadName(THR_ID tid, LPCSTR lpszName);
 

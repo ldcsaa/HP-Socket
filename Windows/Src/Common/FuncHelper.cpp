@@ -70,27 +70,36 @@ void ABORT(int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszT
 
 BOOL SetDefaultWorkerThreadName(HANDLE hThread)
 {
+	static volatile UINT _s_uiSeq = 0;
+
+	return SetSequenceThreadName(hThread, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
+}
+
+BOOL SetDefaultPoolThreadName(HANDLE hThread)
+{
+	static volatile UINT _s_uiSeq = 0;
+
+	return SetSequenceThreadName(hThread, DEFAULT_POOL_THREAD_PREFIX, _s_uiSeq);
+}
+
+BOOL SetSequenceThreadName(HANDLE hThread, LPCTSTR lpszPrefix, volatile UINT& vuiSeq)
+{
 #if _WIN32_WINNT < _WIN32_WINNT_WIN10
 	::SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 	return FALSE;
 #else
-	static volatile UINT _s_uiSeq = 0;
+	UINT uiSequence = ::InterlockedIncrement(&vuiSeq);
 
-	UINT uiSequence = ::InterlockedIncrement(&_s_uiSeq);
-
-	return SetWorkerThreadName(hThread, uiSequence);
+	return SetThreadName(hThread, lpszPrefix, uiSequence);
 #endif
-}
-
-BOOL SetWorkerThreadName(HANDLE hThread, UINT uiSequence)
-{
-	return SetThreadName(hThread, DEFAULT_WORKER_THREAD_PREFIX, uiSequence);
 }
 
 BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszPrefix, UINT uiSequence)
 {
 	TCHAR szName[MAX_PATH];
 	_stprintf(szName, _T("%s%u"), lpszPrefix, uiSequence);
+
+	ASSERT(_tcslen(szName) < MAX_PATH);
 
 	return SetThreadName(hThread, szName);
 }

@@ -34,6 +34,7 @@
 #pragma pop_macro("_ATL_NO_DEFAULT_LIBS")
 
 #include "../Include/HPSocket/SocketInterface.h"
+#include "Common/FuncHelper.h"
 #include "Common/SysHelper.h"
 #include "InternalDef.h"
 
@@ -92,9 +93,19 @@ class CHPThreadPool : public IHPThreadPool
 		CHPThreadPool* m_pthPool;
 	};
 
-	typedef CThreadPool<CWorker> CInnerThreadPool;
-
 	friend class CWorker;
+
+	class CInnerThreadPool : public CThreadPool<CWorker>
+	{
+	protected:
+
+		DWORD ThreadProc() throw()
+		{
+			::SetDefaultPoolThreadName(SELF_THREAD);
+
+			return __super::ThreadProc();
+		}
+	};
 
 private:
 	enum EnSubmitResult{SUBMIT_OK, SUBMIT_FULL, SUBMIT_ERROR};

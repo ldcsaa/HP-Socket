@@ -364,6 +364,8 @@ BOOL CHPThreadPool::CreateWorkerThreads(DWORD dwThreadCount)
 
 PVOID CHPThreadPool::ThreadProc(LPVOID pv)
 {
+	::SetDefaultPoolThreadName(SELF_THREAD_ID);
+
 	CHPThreadPool* pThis = (CHPThreadPool*)pv;
 
 	pThis->FireWorkerThreadStart();
