@@ -1133,6 +1133,18 @@ BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const H
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+BOOL SetCurrentWorkerThreadName()
+{
+	return SetWorkerThreadDefaultName(nullptr);
+}
+
+BOOL SetWorkerThreadDefaultName(HANDLE hThread)
+{
+	static volatile UINT _s_uiSeq = 0;
+
+	return ::SetSequenceThreadName(hThread, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
+}
+
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
 {
 	switch(enCode)

@@ -143,13 +143,6 @@ void EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLi
 void _EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void ABORT(int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 
-/* 默认工作线程前缀 */
-#define DEFAULT_WORKER_THREAD_PREFIX	_T("HP-Worker-")
-/* 默认线程池线程前缀 */
-#define DEFAULT_POOL_THREAD_PREFIX		_T("HP-Pool-")
-
-BOOL SetDefaultWorkerThreadName(HANDLE hThread);
-BOOL SetDefaultPoolThreadName(HANDLE hThread);
 BOOL SetSequenceThreadName(HANDLE hThread, LPCTSTR lpszPrefix, volatile UINT& vuiSeq);
 BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszPrefix, UINT uiSequence);
 BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszName);

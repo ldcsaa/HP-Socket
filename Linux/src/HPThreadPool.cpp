@@ -22,7 +22,6 @@
 */
  
 #include "HPThreadPool.h"
-
 #include "common/FuncHelper.h"
 
 #include <pthread.h>
@@ -66,6 +65,9 @@ void DestroySocketTaskObj(LPTSocketTask pTask)
 		delete pTask;
 	}
 }
+
+volatile UINT CHPThreadPool::sm_uiNum		= 0;
+LPCTSTR CHPThreadPool::POOLED_THREAD_PREFIX	= _T("hp-pool-");
 
 BOOL CHPThreadPool::Start(DWORD dwThreadCount, DWORD dwMaxQueueSize, EnRejectedPolicy enRejectedPolicy, DWORD dwStackSize)
 {
@@ -364,9 +366,9 @@ BOOL CHPThreadPool::CreateWorkerThreads(DWORD dwThreadCount)
 
 PVOID CHPThreadPool::ThreadProc(LPVOID pv)
 {
-	::SetDefaultPoolThreadName(SELF_THREAD_ID);
-
 	CHPThreadPool* pThis = (CHPThreadPool*)pv;
+
+	::SetSequenceThreadName(SELF_THREAD_ID, pThis->m_strPrefix, pThis->m_uiSeq);
 
 	pThis->FireWorkerThreadStart();
 	
@@ -474,6 +476,7 @@ BOOL CHPThreadPool::CheckStoping()
 
 void CHPThreadPool::Reset(BOOL bSetWaitEvent)
 {
+	m_uiSeq				= 0;
 	m_dwStackSize		= 0;
 	m_dwTaskCount		= 0;
 	m_dwThreadCount		= 0;
@@ -483,4 +486,11 @@ void CHPThreadPool::Reset(BOOL bSetWaitEvent)
 
 	if(bSetWaitEvent)
 		m_evWait.SyncNotifyAll();
+}
+
+void CHPThreadPool::MakePrefix()
+{
+	UINT uiNumber = ::InterlockedIncrement(&sm_uiNum);
+
+	m_strPrefix.Format(_T("%s%u-"), POOLED_THREAD_PREFIX, uiNumber);
 }

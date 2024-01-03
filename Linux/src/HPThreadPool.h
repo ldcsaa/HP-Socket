@@ -124,6 +124,7 @@ public:
 	CHPThreadPool(IHPThreadPoolListener* pListener = nullptr)
 	: m_pListener(pListener)
 	{
+		MakePrefix();
 		Reset(FALSE);
 	}
 
@@ -134,6 +135,14 @@ public:
 
 private:
 	void Reset(BOOL bSetWaitEvent = TRUE);
+	void MakePrefix();
+
+private:
+	static LPCTSTR			POOLED_THREAD_PREFIX;
+	static volatile UINT	sm_uiNum;
+
+	volatile UINT			m_uiSeq;
+	CString					m_strPrefix; 
 
 private:
 	IHPThreadPoolListener*	m_pListener;

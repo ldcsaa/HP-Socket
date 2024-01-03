@@ -895,7 +895,7 @@ void CUdpServer::CloseCompletePort()
 
 UINT WINAPI CUdpServer::WorkerThreadProc(LPVOID pv)
 {
-	::SetDefaultWorkerThreadName(SELF_THREAD);
+	::SetCurrentWorkerThreadName();
 
 	CUdpServer* pServer	= (CUdpServer*)pv;
 	pServer->OnWorkerThreadStart(SELF_THREAD_ID);

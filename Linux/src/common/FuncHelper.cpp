@@ -347,20 +347,6 @@ void ABORT(int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszT
 	__EXIT_FN_((void (*)(int))abort, "abort", nullptr, iErrno, lpszFile, iLine, lpszFunc, lpszTitle);
 }
 
-BOOL SetDefaultWorkerThreadName(THR_ID tid)
-{
-	static volatile UINT _s_uiSeq = 0;
-
-	return SetSequenceThreadName(tid, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
-}
-
-BOOL SetDefaultPoolThreadName(THR_ID tid)
-{
-	static volatile UINT _s_uiSeq = 0;
-
-	return SetSequenceThreadName(tid, DEFAULT_POOL_THREAD_PREFIX, _s_uiSeq);
-}
-
 BOOL SetSequenceThreadName(THR_ID tid, LPCTSTR lpszPrefix, volatile UINT& vuiSeq)
 {
 	UINT uiSequence = InterlockedIncrement(&vuiSeq);
@@ -368,39 +354,39 @@ BOOL SetSequenceThreadName(THR_ID tid, LPCTSTR lpszPrefix, volatile UINT& vuiSeq
 	return SetThreadName(tid, lpszPrefix, uiSequence);
 }
 
-BOOL SetThreadName(THR_ID tid, LPCSTR lpszPrefix, UINT uiSequence)
+BOOL SetThreadName(THR_ID tid, LPCTSTR lpszPrefix, UINT uiSequence)
 {
-	int iMaxSeqLength = (int)(MAX_WORKER_THREAD_NAME_LENGTH - strlen(lpszPrefix));
+	int iMaxSeqLength = (int)(MAX_THREAD_NAME_LENGTH - lstrlen(lpszPrefix));
 
-	ASSERT(iMaxSeqLength > 0 && iMaxSeqLength <= 10);
+	ASSERT(iMaxSeqLength > 0);
 
-	if(iMaxSeqLength <= 0 || iMaxSeqLength > 10)
+	if(iMaxSeqLength <= 0)
 	{
 		::SetLastError(ERROR_OUT_OF_RANGE);
 		return FALSE;
 	}
 
-	UINT uiDiv = 1;
+	ULONGLONG uiDiv = 1;
 
 	for(int i = 0; i < iMaxSeqLength; i++)
 		uiDiv *= 10;
 
-	uiSequence %= uiDiv;
+	uiSequence = (UINT)(uiSequence % uiDiv);
 
-	TCHAR szName[MAX_WORKER_THREAD_NAME_LENGTH + 1];
-	sprintf(szName, "%s%u", lpszPrefix, uiSequence);
+	CStringA strName;
+	strName.Format(_T("%s%u"), lpszPrefix, uiSequence);
 
-	return SetThreadName(tid, szName);
+	return SetThreadName(tid, strName);
 }
 
-BOOL SetThreadName(THR_ID tid, LPCSTR lpszName)
+BOOL SetThreadName(THR_ID tid, LPCTSTR lpszName)
 {
-	ASSERT(strlen(lpszName) <= MAX_WORKER_THREAD_NAME_LENGTH);
+	ASSERT(lstrlen(lpszName) <= MAX_THREAD_NAME_LENGTH);
 
 	if(tid == 0)
 		tid = SELF_THREAD_ID;
 
-	int rs = pthread_setname_np(tid, lpszName);
+	int rs = pthread_setname_np(tid, CT2A(lpszName));
 
 	CHECK_ERROR_CODE(rs)
 

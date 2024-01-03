@@ -297,7 +297,7 @@ BOOL CUdpClient::CreateWorkerThread()
 
 UINT WINAPI CUdpClient::WorkerThreadProc(LPVOID pv)
 {
-	::SetDefaultWorkerThreadName(SELF_THREAD_ID);
+	::SetCurrentWorkerThreadName();
 
 	TRACE("---------------> Client Worker Thread 0x%08X started <---------------", SELF_THREAD_ID);
 

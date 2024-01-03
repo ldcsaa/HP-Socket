@@ -95,17 +95,7 @@ class CHPThreadPool : public IHPThreadPool
 
 	friend class CWorker;
 
-	class CInnerThreadPool : public CThreadPool<CWorker>
-	{
-	protected:
-
-		DWORD ThreadProc() throw()
-		{
-			::SetDefaultPoolThreadName(SELF_THREAD);
-
-			return __super::ThreadProc();
-		}
-	};
+	typedef CThreadPool<CWorker>	CInnerThreadPool;
 
 private:
 	enum EnSubmitResult{SUBMIT_OK, SUBMIT_FULL, SUBMIT_ERROR};
@@ -153,6 +143,7 @@ public:
 	: m_pListener(pListener)
 	, m_evWait(TRUE, TRUE)
 	{
+		MakePrefix();
 		Reset(FALSE);
 	}
 
@@ -163,6 +154,14 @@ public:
 
 private:
 	void Reset(BOOL bSetWaitEvent = TRUE);
+	void MakePrefix();
+
+private:
+	static LPCTSTR			POOLED_THREAD_PREFIX;
+	static volatile UINT	sm_uiNum;
+
+	volatile UINT			m_uiSeq;
+	CString					m_strPrefix;
 
 private:
 	IHPThreadPoolListener*	m_pListener;

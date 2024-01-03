@@ -27,6 +27,9 @@
 #include <signal.h>
 #include <pthread.h>
 
+volatile UINT CIODispatcher::sm_uiNum		= 0;
+LPCTSTR CIODispatcher::WORKER_THREAD_PREFIX	= _T("io-disp-");
+
 BOOL CIODispatcher::Start(IIOHandler* pHandler, int iWorkerMaxEvents, int iWorkers, LLONG llTimerInterval)
 {
 	ASSERT_CHECK_EINVAL(pHandler && iWorkerMaxEvents >= 0 && iWorkers >= 0);
@@ -130,6 +133,7 @@ BOOL CIODispatcher::Stop(BOOL bCheck)
 
 VOID CIODispatcher::Reset()
 {
+	m_uiSeq		= 0;
 	m_iWorkers	= 0;
 	m_iMaxEvents= 0;
 	m_pHandler	= nullptr;
@@ -138,6 +142,14 @@ VOID CIODispatcher::Reset()
 	m_evCmd		= INVALID_FD;
 	m_evExit	= INVALID_FD;
 	m_evTimer	= INVALID_FD;
+}
+
+
+void CIODispatcher::MakePrefix()
+{
+	UINT uiNumber = ::InterlockedIncrement(&sm_uiNum);
+
+	m_strPrefix.Format(_T("%s%u-"), WORKER_THREAD_PREFIX, uiNumber);
 }
 
 BOOL CIODispatcher::SendCommand(USHORT t, UINT_PTR wp, UINT_PTR lp)
@@ -159,7 +171,7 @@ BOOL CIODispatcher::CtlFD(FD fd, int op, UINT mask, PVOID pv)
 
 int CIODispatcher::WorkerProc(PVOID pv)
 {
-	::SetDefaultWorkerThreadName(SELF_THREAD_ID);
+	::SetSequenceThreadName(SELF_THREAD_ID, m_strPrefix, m_uiSeq);
 
 	m_pHandler->OnDispatchThreadStart(SELF_THREAD_ID);
 

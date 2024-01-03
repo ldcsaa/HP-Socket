@@ -68,20 +68,6 @@ void ABORT(int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszT
 	__EXIT_FN_((void (*)(int))abort, "abort", nullptr, iErrno, lpszFile, iLine, lpszFunc, lpszTitle);
 }
 
-BOOL SetDefaultWorkerThreadName(HANDLE hThread)
-{
-	static volatile UINT _s_uiSeq = 0;
-
-	return SetSequenceThreadName(hThread, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
-}
-
-BOOL SetDefaultPoolThreadName(HANDLE hThread)
-{
-	static volatile UINT _s_uiSeq = 0;
-
-	return SetSequenceThreadName(hThread, DEFAULT_POOL_THREAD_PREFIX, _s_uiSeq);
-}
-
 BOOL SetSequenceThreadName(HANDLE hThread, LPCTSTR lpszPrefix, volatile UINT& vuiSeq)
 {
 #if _WIN32_WINNT < _WIN32_WINNT_WIN10
@@ -96,12 +82,12 @@ BOOL SetSequenceThreadName(HANDLE hThread, LPCTSTR lpszPrefix, volatile UINT& vu
 
 BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszPrefix, UINT uiSequence)
 {
-	TCHAR szName[MAX_PATH];
-	_stprintf(szName, _T("%s%u"), lpszPrefix, uiSequence);
+	CString strName;
+	strName.Format(_T("%s%u"), lpszPrefix, uiSequence);
 
-	ASSERT(_tcslen(szName) < MAX_PATH);
+	ASSERT(strName.GetLength() < MAX_PATH);
 
-	return SetThreadName(hThread, szName);
+	return SetThreadName(hThread, strName);
 }
 
 BOOL SetThreadName(HANDLE hThread, LPCTSTR lpszName)

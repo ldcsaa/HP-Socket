@@ -164,15 +164,23 @@ private:
 	BOOL ProcessTimer(UINT events);
 	BOOL ProcessCommand(UINT events);
 	BOOL DoProcessIo(PVOID pv, UINT events);
-	
+
 	VOID Reset();
+	VOID MakePrefix();
 
 public:
 	BOOL HasStarted()	{return m_pHandler && m_pWorkers;}
 	const CWorkerThread* GetWorkerThreads() {return m_pWorkers.get();}
 
-	CIODispatcher()		{Reset();}
+	CIODispatcher()		{MakePrefix(); Reset();}
 	~CIODispatcher()	{if(HasStarted()) Stop();}
+
+private:
+	static LPCTSTR WORKER_THREAD_PREFIX;
+	static volatile UINT sm_uiNum;
+
+	volatile UINT	m_uiSeq;
+	CString			m_strPrefix;
 
 private:
 	IIOHandler*	m_pHandler;

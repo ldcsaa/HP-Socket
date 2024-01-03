@@ -770,6 +770,14 @@ struct TClientCloseContext
 /******************************************** 公共帮助方法 ********************************************/
 /*****************************************************************************************************/
 
+/* 默认工作线程前缀 */
+#define DEFAULT_WORKER_THREAD_PREFIX	_T("hp-worker-")
+
+/* 设置当前工作线程名称 */
+BOOL SetCurrentWorkerThreadName();
+/* 设置工作线程默认名称 */
+BOOL SetWorkerThreadDefaultName(HANDLE hThread);
+
 /* 获取错误描述文本 */
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode);
 /* 确定地址簇 */

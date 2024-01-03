@@ -140,7 +140,7 @@ _WIN32_WINNT_WIN10		0x0A00
 
 #ifndef _WIN32_WINNT
 	#if defined (_WIN64)
-		#define _WIN32_WINNT	_WIN32_WINNT_WIN7
+		#define _WIN32_WINNT		_WIN32_WINNT_WIN7
 	#else
 		#if _MSC_VER >= 1910
 			#define _WIN32_WINNT	_WIN32_WINNT_WIN7

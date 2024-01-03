@@ -71,7 +71,7 @@ using namespace std;
 
 #if defined(DEBUG) && defined(DEBUG_TRACE)
 	#define TRACE(fmt, ...)				PRINTLN("> TRC (0x%zX, %d) " fmt, (SIZE_T)SELF_THREAD_ID, SELF_NATIVE_THREAD_ID, ##__VA_ARGS__)
-	#define ASSERT(expr)				((expr) ? TRUE : (::PrintStackTrace(), assert((FALSE)), FALSE))
+	#define ASSERT(expr)				((expr) ? TRUE : (::PrintStackTrace(), assert(FALSE), FALSE))
 #else
 	#define TRACE(fmt, ...)
 	#define ASSERT(expr)				assert(expr)
@@ -317,19 +317,12 @@ void EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLi
 void _EXIT(int iExitCode = 0, int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 void ABORT(int iErrno = -1, LPCSTR lpszFile = nullptr, int iLine = 0, LPCSTR lpszFunc = nullptr, LPCSTR lpszTitle = nullptr);
 
-/* 默认工作线程前缀 */
-#define DEFAULT_WORKER_THREAD_PREFIX	"HP-Worker-"
-/* 默认线程池线程前缀 */
-#define DEFAULT_POOL_THREAD_PREFIX		"HP-Pool-"
+/* 工作线程名称最大长度 */
+#define MAX_THREAD_NAME_LENGTH	15
 
-/* 默认工作线程前缀 */
-#define MAX_WORKER_THREAD_NAME_LENGTH	15
-
-BOOL SetDefaultWorkerThreadName(THR_ID tid);
-BOOL SetDefaultPoolThreadName(THR_ID tid);
-BOOL SetSequenceThreadName(THR_ID tid, LPCSTR lpszPrefix, volatile UINT& vuiSeq);
-BOOL SetThreadName(THR_ID tid, LPCSTR lpszPrefix, UINT uiSequence);
-BOOL SetThreadName(THR_ID tid, LPCSTR lpszName);
+BOOL SetSequenceThreadName(THR_ID tid, LPCTSTR lpszPrefix, volatile UINT& vuiSeq);
+BOOL SetThreadName(THR_ID tid, LPCTSTR lpszPrefix, UINT uiSequence);
+BOOL SetThreadName(THR_ID tid, LPCTSTR lpszName);
 
 template<typename T, typename = enable_if_t<is_integral<T>::value>>
 inline bool IS_INFINITE(T v)

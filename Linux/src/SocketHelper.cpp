@@ -46,6 +46,18 @@ static const int s_iUdpCloseNotifySize = ARRAY_SIZE(s_szUdpCloseNotify);
 const hp_addr hp_addr::ANY_ADDR4(AF_INET, TRUE);
 const hp_addr hp_addr::ANY_ADDR6(AF_INET6, TRUE);
 
+BOOL SetCurrentWorkerThreadName()
+{
+	return SetWorkerThreadDefaultName(0);
+}
+
+BOOL SetWorkerThreadDefaultName(THR_ID tid)
+{
+	static volatile UINT _s_uiSeq = 0;
+
+	return ::SetSequenceThreadName(tid, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
+}
+
 LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
 {
 	switch(enCode)

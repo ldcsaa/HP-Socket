@@ -289,7 +289,7 @@ BOOL CUdpCast::CreateWorkerThread()
 
 UINT WINAPI CUdpCast::WorkerThreadProc(LPVOID pv)
 {
-	::SetDefaultWorkerThreadName(SELF_THREAD_ID);
+	::SetCurrentWorkerThreadName();
 
 	TRACE("---------------> Cast Worker Thread 0x%08X started <---------------", SELF_THREAD_ID);
 
