@@ -722,7 +722,7 @@ private:
 		::ReleaseGCObj(m_lsGCSession, m_dwSessionLockTime, bForce);
 	}
 
-	virtual BOOL OnReadyRead(PVOID pv, UINT events) override
+	virtual BOOL OnReadyRead(const TDispContext* pContext, PVOID pv, UINT events) override
 	{
 
 		if(events & _EPOLL_ALL_ERROR_EVENTS)

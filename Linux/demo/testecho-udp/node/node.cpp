@@ -97,7 +97,7 @@ int main(int argc, char* const argv[])
 
 	g_app_arg.ParseArgs(argc, argv);
 
-	s_node.SetReuseAddressPolicy(g_app_arg.reuse_addr);
+	//s_node.SetReuseAddressPolicy(g_app_arg.reuse_addr);
 	s_node.SetMultiCastLoop(g_app_arg.ip_loop);
 	s_node.SetMultiCastTtl(g_app_arg.ttl);
 

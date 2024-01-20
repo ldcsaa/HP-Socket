@@ -74,15 +74,15 @@ protected:
 #endif
 
 private:
-	virtual BOOL OnBeforeProcessIo(PVOID pv, UINT events)			override;
-	virtual VOID OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)	override;
-	virtual VOID OnCommand(TDispCommand* pCmd)						override;
-	virtual BOOL OnReadyRead(PVOID pv, UINT events)					override;
-	virtual BOOL OnReadyWrite(PVOID pv, UINT events)				override;
-	virtual BOOL OnHungUp(PVOID pv, UINT events)					override;
-	virtual BOOL OnError(PVOID pv, UINT events)						override;
-	virtual VOID OnDispatchThreadStart(THR_ID tid)					override;
-	virtual VOID OnDispatchThreadEnd(THR_ID tid)					override;
+	virtual BOOL OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT events)			override;
+	virtual VOID OnAfterProcessIo(const TDispContext* pContext, PVOID pv, UINT events, BOOL rs)	override;
+	virtual VOID OnCommand(const TDispContext* pContext, TDispCommand* pCmd)					override;
+	virtual BOOL OnReadyRead(const TDispContext* pContext, PVOID pv, UINT events)				override;
+	virtual BOOL OnReadyWrite(const TDispContext* pContext, PVOID pv, UINT events)				override;
+	virtual BOOL OnHungUp(const TDispContext* pContext, PVOID pv, UINT events)					override;
+	virtual BOOL OnError(const TDispContext* pContext, PVOID pv, UINT events)					override;
+	virtual VOID OnDispatchThreadStart(THR_ID tid)												override;
+	virtual VOID OnDispatchThreadEnd(THR_ID tid)												override;
 
 public:
 	virtual BOOL IsSecure				() {return FALSE;}
@@ -214,13 +214,13 @@ private:
 	int PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
 	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 
-	VOID HandleCmdSend		(CONNID dwConnID);
-	VOID HandleCmdUnpause	(CONNID dwConnID);
-	VOID HandleCmdDisconnect(CONNID dwConnID, BOOL bForce);
-	BOOL HandleConnect		(TAgentSocketObj* pSocketObj, UINT events);
-	BOOL HandleReceive		(TAgentSocketObj* pSocketObj, int flag);
-	BOOL HandleSend			(TAgentSocketObj* pSocketObj, int flag);
-	BOOL HandleClose		(TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFlag, UINT events);
+	VOID HandleCmdSend		(const TDispContext* pContext, CONNID dwConnID);
+	VOID HandleCmdUnpause	(const TDispContext* pContext, CONNID dwConnID);
+	VOID HandleCmdDisconnect(const TDispContext* pContext, CONNID dwConnID, BOOL bForce);
+	BOOL HandleConnect		(const TDispContext* pContext, TAgentSocketObj* pSocketObj, UINT events);
+	BOOL HandleReceive		(const TDispContext* pContext, TAgentSocketObj* pSocketObj, int flag);
+	BOOL HandleSend			(const TDispContext* pContext, TAgentSocketObj* pSocketObj, int flag);
+	BOOL HandleClose		(const TDispContext* pContext, TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFlag, UINT events);
 
 	int SendInternal	(TAgentSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	BOOL SendItem		(TAgentSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocked);
@@ -282,6 +282,8 @@ private:
 	EnSocketError			m_enLastError;
 	HP_SOCKADDR				m_soAddr;
 
+	CReceiveBuffersPtr		m_rcBuffers;
+
 	CPrivateHeap			m_phSocket;
 	CBufferObjPool			m_bfObjPool;
 
@@ -291,7 +293,6 @@ private:
 	
 	TAgentSocketObjPtrList	m_lsFreeSocket;
 	TAgentSocketObjPtrQueue	m_lsGCSocket;
-	TReceiveBufferMap		m_rcBufferMap;
 
 	CIODispatcher			m_ioDispatcher;
 };

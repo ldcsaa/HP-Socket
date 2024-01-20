@@ -101,10 +101,8 @@ private:
 
 	BOOL CheckStarting();
 	BOOL CheckStoping();
-	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress);
-	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress, HP_SOCKADDR& bindAddr);
-	BOOL BindListenSocket(HP_SOCKADDR& bindAddr);
-	BOOL ConnectToGroup(const HP_SOCKADDR& bindAddr);
+	BOOL ParseBindAddr(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress, HP_SOCKADDR& bindAddr);
+	BOOL CreateListenSocket(const HP_SOCKADDR& bindAddr);
 	BOOL CreateCompletePort();
 	BOOL CreateWorkerThreads();
 	BOOL StartAccept();

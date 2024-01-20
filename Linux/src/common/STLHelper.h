@@ -31,6 +31,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <random>
 #include <vector>
 #include <deque>
 #include <queue>
@@ -1017,3 +1018,51 @@ typedef str_sort_func<TCHAR*, false, true>		tchar_ptr_desc_case_sort_func;
 typedef str_sort_func<CString, false, true>		string_desc_case_sort_func;
 typedef str_sort_func<TCHAR*, false, false>		tchar_ptr_desc_ucase_sort_func;
 typedef str_sort_func<CString, false, false>	string_desc_ucase_sort_func;
+
+template<typename _IntType = int, typename = enable_if_t<is_integral<_IntType>::value>>
+class CRandomIntegralT
+{
+public:
+	_IntType Generate()		{return dist(gen);}
+	_IntType operator()()	{return Generate();}
+
+public:
+	CRandomIntegralT(_IntType from, _IntType to) : gen(rd()), dist(from, to)
+	{
+
+	}
+
+private:
+	random_device rd;
+	mt19937 gen;
+	uniform_int_distribution<_IntType> dist;
+};
+
+template<typename _RealType = double, typename = enable_if_t<is_floating_point<_RealType>::value>>
+class CRandomRealTypeT
+{
+public:
+	_RealType Generate()	{return dist(gen);}
+	_RealType operator()()	{return Generate();}
+
+public:
+	CRandomRealTypeT(_RealType from, _RealType to) : gen(rd()), dist(from, to)
+	{
+
+	}
+
+private:
+	random_device rd;
+	mt19937 gen;
+	uniform_real_distribution<_RealType> dist;
+};
+
+typedef CRandomIntegralT<int>			CRandomInt;
+typedef CRandomIntegralT<long>			CRandomLong;
+typedef CRandomIntegralT<unsigned int>	CRandomUint;
+typedef CRandomIntegralT<unsigned long>	CRandomUlong;
+typedef CRandomIntegralT<int64_t>		CRandomInt64;
+typedef CRandomIntegralT<uint64_t>		CRandomUint64;
+
+typedef CRandomRealTypeT<float>			CRandomFloat;
+typedef CRandomRealTypeT<double>		CRandomDouble;

@@ -114,8 +114,6 @@ protected:
 
 	virtual BOOL BeforeUnpause(TSocketObj* pSocketObj)
 	{
-		CReentrantCriSecLock locallock(pSocketObj->csIo);
-
 		if(!TSocketObj::IsValid(pSocketObj))
 			return FALSE;
 

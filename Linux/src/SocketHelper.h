@@ -303,10 +303,13 @@ public:
 	DECLARE_NO_COPY_CLASS(TNodeBufferObj)
 };
 
-typedef CCASQueue<TNodeBufferObj>					CNodeRecvQueue;
 typedef TItemPtrT<TNodeBufferObj>					TNodeBufferObjPtr;
 typedef CNodePoolT<TNodeBufferObj>					CNodeBufferObjPool;
+typedef CCASQueue<TNodeBufferObj>					CNodeRecvQueue;
 typedef TItemListExT<TNodeBufferObj, volatile int>	TNodeBufferObjList;
+
+typedef unique_ptr<CCriSec[]>						CNodeCriSecs;
+typedef unique_ptr<TNodeBufferObjList[]>			TNodeBufferObjLists;
 
 /* Server 组件和 Agent 组件内部使用的事件处理结果常量 */
 
@@ -316,11 +319,11 @@ typedef TItemListExT<TNodeBufferObj, volatile int>	TNodeBufferObjList;
 /* 命令类型 */
 enum EnDispCmdType
 {
-	DISP_CMD_SEND		= 0x01,	// 发送数据
-	DISP_CMD_RECEIVE	= 0x02,	// 接收数据
-	DISP_CMD_UNPAUSE	= 0x03,	// 恢复接收数据
-	DISP_CMD_DISCONNECT	= 0x04,	// 断开连接
-	DISP_CMD_TIMEOUT	= 0x05	// 保活超时
+	DISP_CMD_SEND			= 0x01,	// 发送数据
+	DISP_CMD_RECEIVE		= 0x02,	// 接收数据
+	DISP_CMD_UNPAUSE		= 0x03,	// 恢复接收数据
+	DISP_CMD_DISCONNECT		= 0x04,	// 断开连接
+	DISP_CMD_TIMEOUT		= 0x05,	// 保活超时
 };
 
 /* 关闭连接标识 */
@@ -331,14 +334,20 @@ enum EnSocketCloseFlag
 	SCF_ERROR			= 2		// 触发 异常关闭 OnClose 事件
 };
 
+/* 监听 Socket 数组智能指针 */
+typedef unique_ptr<SOCKET[]>	ListenSocketsPtr;
+
 /* 数据缓冲节点 */
-typedef TItem			TBufferObj;
+typedef TItem					TBufferObj;
 /* 数据缓冲节点智能指针 */
-typedef TItemPtr		TBufferObjPtr;
+typedef TItemPtr				TBufferObjPtr;
 /* 数据缓冲区对象池 */
-typedef CItemPool		CBufferObjPool;
+typedef CItemPool				CBufferObjPool;
 /* 数据缓冲区链表模板 */
-typedef TItemListExV	TBufferObjList;
+typedef TItemListExV			TBufferObjList;
+
+/* 接收缓冲区数组智能指针 */
+typedef unique_ptr<CBufferPtr[]>			CReceiveBuffersPtr;
 
 /* 线程 ID - 接收缓冲区哈希表 */
 typedef unordered_map<THR_ID, CBufferPtr*>	TReceiveBufferMap;
@@ -350,7 +359,10 @@ typedef TReceiveBufferMap::const_iterator	TReceiveBufferMapCI;
 /* Socket 缓冲区基础结构 */
 struct TSocketObjBase : public CSafeCounter
 {
-	CPrivateHeap& heap;
+	CPrivateHeap&		heap;
+	CReentrantCriSec	csSend;
+	TBufferObjList		sndBuff;
+
 
 	CONNID		connID;
 	HP_SOCKADDR	remoteAddr;
@@ -369,7 +381,7 @@ struct TSocketObjBase : public CSafeCounter
 	volatile BOOL connected;
 	volatile BOOL paused;
 
-	TSocketObjBase(CPrivateHeap& hp) : heap(hp) {}
+	TSocketObjBase(CPrivateHeap& hp, CBufferObjPool& bfPool) : heap(hp), sndBuff(bfPool) {}
 
 	static BOOL IsExist(TSocketObjBase* pSocketObj)
 		{return pSocketObj != nullptr;}
@@ -381,12 +393,40 @@ struct TSocketObjBase : public CSafeCounter
 		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
 
 	static void Release(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); pSocketObj->freeTime = ::TimeGetTime();}
+	{
+		ASSERT(IsExist(pSocketObj));
+		
+		pSocketObj->freeTime = ::TimeGetTime();
+		pSocketObj->sndBuff.Release();
+	}
+
+	static BOOL InvalidSocketObj(TSocketObjBase* pSocketObj)
+	{
+		BOOL bDone = FALSE;
+
+		if(TSocketObjBase::IsValid(pSocketObj))
+		{
+			pSocketObj->SetConnected(FALSE);
+
+			CReentrantCriSecLock locallock(pSocketObj->csSend);
+
+			if(TSocketObjBase::IsValid(pSocketObj))
+			{
+				TSocketObjBase::Invalid(pSocketObj);
+				bDone = TRUE;
+			}
+		}
+
+		return bDone;
+	}
 
 	DWORD GetConnTime	()	const	{return connTime;}
 	DWORD GetFreeTime	()	const	{return freeTime;}
 	DWORD GetActiveTime	()	const	{return activeTime;}
 	BOOL IsPaused		()	const	{return paused;}
+
+	int Pending			()	const	{return sndBuff.Length();}
+	BOOL IsPending		()	const	{return Pending() > 0;}
 
 	BOOL HasConnected()							{return connected == TRUE;}
 	BOOL IsConnecting()							{return connected == CST_CONNECTING;}
@@ -411,11 +451,7 @@ struct TSocketObj : public TSocketObjBase
 {
 	using __super = TSocketObjBase;
 
-	CReentrantCriSec	csIo;
-	CReentrantCriSec	csSend;
-
-	SOCKET				socket;
-	TBufferObjList		sndBuff;
+	SOCKET socket;
 
 	static TSocketObj* Construct(CPrivateHeap& hp, CBufferObjPool& bfPool)
 	{
@@ -435,39 +471,9 @@ struct TSocketObj : public TSocketObjBase
 	}
 	
 	TSocketObj(CPrivateHeap& hp, CBufferObjPool& bfPool)
-	: __super(hp), sndBuff(bfPool)
+	: __super(hp, bfPool)
 	{
 
-	}
-
-	static void Release(TSocketObj* pSocketObj)
-	{
-		__super::Release(pSocketObj);
-		pSocketObj->sndBuff.Release();
-	}
-
-	int Pending()		{return sndBuff.Length();}
-	BOOL IsPending()	{return Pending() > 0;}
-
-	static BOOL InvalidSocketObj(TSocketObj* pSocketObj)
-	{
-		BOOL bDone = FALSE;
-
-		if(TSocketObjBase::IsValid(pSocketObj))
-		{
-			pSocketObj->SetConnected(FALSE);
-
-			CReentrantCriSecLock locallock(pSocketObj->csIo);
-			CReentrantCriSecLock locallock2(pSocketObj->csSend);
-
-			if(TSocketObjBase::IsValid(pSocketObj))
-			{
-				TSocketObjBase::Invalid(pSocketObj);
-				bDone = TRUE;
-			}
-		}
-
-		return bDone;
 	}
 
 	void Reset(CONNID dwConnID, SOCKET soClient)
@@ -529,22 +535,13 @@ struct TAgentSocketObj : public TSocketObj
 /* UDP 数据缓冲区结构 */
 struct TUdpSocketObj : public TSocketObjBase
 {
-	using __super		= TSocketObjBase;
-	using CRecvQueue	= CCASQueue<TItem>;
+	using __super = TSocketObjBase;
 
-	PVOID				pHolder;
-	FD					fdTimer;
+	int		index;
+	PVOID	pHolder;
+	FD		fdTimer;
 
-	CBufferObjPool&		itPool;
-
-	CRWLock				lcIo;
-	CRWLock				lcSend;
-	CCriSec				csSend;
-
-	TBufferObjList		sndBuff;
-	CRecvQueue			recvQueue;
-
-	volatile DWORD		detectFails;
+	volatile DWORD	detectFails;
 
 	static TUdpSocketObj* Construct(CPrivateHeap& hp, CBufferObjPool& bfPool)
 	{
@@ -564,67 +561,19 @@ struct TUdpSocketObj : public TSocketObjBase
 	}
 	
 	TUdpSocketObj(CPrivateHeap& hp, CBufferObjPool& bfPool)
-	: __super(hp), sndBuff(bfPool), itPool(bfPool)
+	: __super(hp, bfPool)
 	{
 
-	}
-
-	~TUdpSocketObj()
-	{
-		ClearRecvQueue();
-	}
-
-	static void Release(TUdpSocketObj* pSocketObj)
-	{
-		__super::Release(pSocketObj);
-
-		pSocketObj->ClearRecvQueue();
-		pSocketObj->sndBuff.Release();
-	}
-
-	int Pending()		{return sndBuff.Length();}
-	BOOL IsPending()	{return Pending() > 0;}
-	BOOL HasRecvData()	{return !recvQueue.IsEmpty();}
-
-	static BOOL InvalidSocketObj(TUdpSocketObj* pSocketObj)
-	{
-		BOOL bDone = FALSE;
-
-		if(TSocketObjBase::IsValid(pSocketObj))
-		{
-			pSocketObj->SetConnected(FALSE);
-
-			CReentrantWriteLock	 locallock(pSocketObj->lcIo);
-			CReentrantWriteLock	 locallock2(pSocketObj->lcSend);
-			CCriSecLock			 locallock3(pSocketObj->csSend);
-
-			if(TSocketObjBase::IsValid(pSocketObj))
-			{
-				TSocketObjBase::Invalid(pSocketObj);
-				bDone = TRUE;
-			}
-		}
-
-		return bDone;
 	}
 
 	void Reset(CONNID dwConnID)
 	{
 		__super::Reset(dwConnID);
 
-		pHolder		= nullptr;
+		index		= -1;
+		detectFails	= 0;
 		fdTimer		= INVALID_FD;
-		detectFails = 0;
-	}
-
-	void ClearRecvQueue()
-	{
-		TItem* pItem = nullptr;
-
-		while(recvQueue.PopFront(&pItem))
-			itPool.PutFreeItem(pItem);
-
-		VERIFY(recvQueue.IsEmpty());
+		pHolder		= nullptr;
 	}
 };
 

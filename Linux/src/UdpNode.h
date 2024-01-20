@@ -45,23 +45,23 @@ public:
 	virtual BOOL			GetLocalAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 	virtual BOOL			GetCastAddress		(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort);
 
-	virtual BOOL GetPendingDataLength	(int& iPending) {iPending = m_sndBuff.Length(); return HasStarted();}
 	virtual EnSocketError GetLastError	()	{return m_enLastError;}
 	virtual LPCTSTR GetLastErrorDesc	()	{return ::GetSocketErrorDesc(m_enLastError);}
+	virtual BOOL GetPendingDataLength	(int& iPending);
 
 private:
-	virtual BOOL OnBeforeProcessIo(PVOID pv, UINT events)			override;
-	virtual VOID OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)	override;
-	virtual VOID OnCommand(TDispCommand* pCmd)						override;
-	virtual BOOL OnReadyRead(PVOID pv, UINT events)					override;
-	virtual BOOL OnReadyWrite(PVOID pv, UINT events)				override;
-	virtual BOOL OnHungUp(PVOID pv, UINT events)					override;
-	virtual BOOL OnError(PVOID pv, UINT events)						override;
-	virtual VOID OnDispatchThreadStart(THR_ID tid)					override;
-	virtual VOID OnDispatchThreadEnd(THR_ID tid)					override;
+	virtual BOOL OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT events)			override;
+	virtual VOID OnAfterProcessIo(const TDispContext* pContext, PVOID pv, UINT events, BOOL rs)	override;
+	virtual VOID OnCommand(const TDispContext* pContext, TDispCommand* pCmd)					override;
+	virtual BOOL OnReadyRead(const TDispContext* pContext, PVOID pv, UINT events)				override;
+	virtual BOOL OnReadyWrite(const TDispContext* pContext, PVOID pv, UINT events)				override;
+	virtual BOOL OnHungUp(const TDispContext* pContext, PVOID pv, UINT events)					override;
+	virtual BOOL OnError(const TDispContext* pContext, PVOID pv, UINT events)					override;
+	virtual VOID OnDispatchThreadStart(THR_ID tid)												override;
+	virtual VOID OnDispatchThreadEnd(THR_ID tid)												override;
 
 public:
-	virtual void SetReuseAddressPolicy	(EnReuseAddressPolicy enReusePolicy){ENSURE_HAS_STOPPED(); m_enReusePolicy			= enReusePolicy;}
+	virtual void SetReuseAddressPolicy	(EnReuseAddressPolicy enReusePolicy){ENSURE_HAS_STOPPED(); ASSERT(m_enReusePolicy == enReusePolicy);}
 	virtual void SetWorkerThreadCount	(DWORD dwWorkerThreadCount)			{ENSURE_HAS_STOPPED(); m_dwWorkerThreadCount	= dwWorkerThreadCount;}
 	virtual void SetFreeBufferPoolSize	(DWORD dwFreeBufferPoolSize)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferPoolSize	= dwFreeBufferPoolSize;}
 	virtual void SetFreeBufferPoolHold	(DWORD dwFreeBufferPoolHold)		{ENSURE_HAS_STOPPED(); m_dwFreeBufferPoolHold	= dwFreeBufferPoolHold;}
@@ -89,8 +89,8 @@ protected:
 		{return m_pListener->OnShutdown(this);}
 
 	EnHandleResult FireSend(TNodeBufferObj* pBufferObj);
-	EnHandleResult FireReceive(TNodeBufferObj* pBufferObj);
-	EnHandleResult FireError(TNodeBufferObj* pBufferObj, EnSocketOperation enOperation, int iErrorCode);
+	EnHandleResult FireReceive(const HP_SOCKADDR* pRemoteAddr, const BYTE* pData, int iLength);
+	EnHandleResult FireError(const HP_SOCKADDR*	pRemoteAddr, const BYTE* pData, int iLength, EnSocketOperation enOperation, int iErrorCode);
 
 	void SetLastError(EnSocketError code, LPCSTR func, int ec);
 	virtual BOOL CheckParams();
@@ -100,17 +100,15 @@ protected:
 	virtual void OnWorkerThreadStart(THR_ID dwThreadID) {}
 	virtual void OnWorkerThreadEnd(THR_ID dwThreadID) {}
 
-	BOOL DoSend(HP_SOCKADDR& addrRemote, const BYTE* pBuffer, int iLength, int iOffset = 0);
-	BOOL DoSendPackets(HP_SOCKADDR& addrRemote, const WSABUF pBuffers[], int iCount);
-	int SendInternal(HP_SOCKADDR& addrRemote, TNodeBufferObjPtr& bufPtr);
+	BOOL DoSend(const HP_SOCKADDR& addrRemote, const BYTE* pBuffer, int iLength, int iOffset = 0);
+	BOOL DoSendPackets(const HP_SOCKADDR& addrRemote, const WSABUF pBuffers[], int iCount);
+	int SendInternal(const HP_SOCKADDR& addrRemote, TNodeBufferObjPtr& bufPtr);
 
 private:
 	BOOL CheckStarting();
 	BOOL CheckStoping();
-	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress);
-	BOOL CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress, HP_SOCKADDR& bindAddr);
-	BOOL BindListenSocket(HP_SOCKADDR& bindAddr);
-	BOOL ConnectToGroup(const HP_SOCKADDR& bindAddr);
+	BOOL ParseBindAddr(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress, HP_SOCKADDR& bindAddr);
+	BOOL CreateListenSocket(const HP_SOCKADDR& bindAddr);
 	BOOL CreateWorkerThreads();
 	BOOL StartAccept();
 
@@ -118,29 +116,28 @@ private:
 	void WaitForWorkerThreadEnd();
 	void ReleaseFreeBuffer();
 
-private:
-	BOOL HandleReceive(int flag = 0);
-	BOOL HandleSend(int flag = 0, int rd = 0);
-	BOOL HandleClose(TNodeBufferObj* pBufferObj, EnSocketOperation enOperation, int iErrorCode);
-
-	VOID HandleCmdReceive(int flag);
-	VOID HandleCmdSend(int flag);
-
-	BOOL SendItem(TNodeBufferObj* pBufferObj, BOOL& bBlocked);
+	int GenerateBufferIndex(const HP_SOCKADDR& addrRemote);
 
 private:
-	BOOL IsValid			()	{return m_enState == SS_STARTED;}
-	BOOL IsPending			()	{return m_sndBuff.Length() > 0;}
+	BOOL HandleReceive(const TDispContext* pContext, int flag = 0);
+	BOOL HandleSend(const TDispContext* pContext, int flag = 0, int rd = 0);
+	BOOL HandleClose(int idx, TNodeBufferObj* pBufferObj, EnSocketOperation enOperation, int iErrorCode);
+
+	VOID HandleCmdSend(int idx, int flag);
+
+	BOOL SendItem(int idx, TNodeBufferObjList& sndBuff, TNodeBufferObj* pBufferObj, BOOL& bBlocked);
+
+private:
+	BOOL IsValid			()			{return m_enState == SS_STARTED;}
+	BOOL IsPending			(int idx)	{return m_sndBuffs[idx].Length() > 0;}
 
 public:
 	CUdpNode(IUdpNodeListener* pListener)
 	: m_pListener				(pListener)
-	, m_sndBuff					(m_bfObjPool)
-	, m_soListen				(INVALID_SOCKET)
 	, m_iSending				(0)
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
-	, m_enReusePolicy			(RAP_ADDR_ONLY)
+	, m_enReusePolicy			(RAP_ADDR_AND_PORT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwFreeBufferPoolSize	(DEFAULT_FREE_BUFFEROBJ_POOL)
 	, m_dwFreeBufferPoolHold	(DEFAULT_FREE_BUFFEROBJ_HOLD)
@@ -181,15 +178,17 @@ private:
 	HP_SOCKADDR			m_localAddr;
 
 	CNodeBufferObjPool	m_bfObjPool;
-	TNodeBufferObjList	m_sndBuff;
-	CNodeRecvQueue		m_recvQueue;
+	CNodeCriSecs		m_csSends;
+	TNodeBufferObjLists	m_sndBuffs;
 
 	IUdpNodeListener*	m_pListener;
-	SOCKET				m_soListen;
+	ListenSocketsPtr	m_soListens;
 	EnServiceState		m_enState;
 	EnSocketError		m_enLastError;
 
-	CSpinGuard			m_csState;
+	CReceiveBuffersPtr	m_rcBuffers;
+
+	CRWLock				m_lcState;
 
 	volatile long		m_iSending;
 

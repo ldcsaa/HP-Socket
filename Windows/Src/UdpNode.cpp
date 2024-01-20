@@ -40,17 +40,20 @@ BOOL CUdpNode::Start(LPCTSTR lpszBindAddress, USHORT usPort, EnCastMode enCastMo
 
 	PrepareStart();
 
-	if(CreateListenSocket(lpszBindAddress, usPort, lpszCastAddress))
-		if(CreateCompletePort())
-			if(CreateWorkerThreads())
-				if(StartAccept())
-				{
-					m_enState = SS_STARTED;
+	HP_SOCKADDR bindAddr(AF_UNSPEC, TRUE);
 
-					m_evWait.Reset();
+	if(ParseBindAddr(lpszBindAddress, usPort, lpszCastAddress, bindAddr))
+		if(CreateListenSocket(bindAddr))
+			if(CreateCompletePort())
+				if(CreateWorkerThreads())
+					if(StartAccept())
+					{
+						m_enState = SS_STARTED;
 
-					return TRUE;
-				}
+						m_evWait.Reset();
+
+						return TRUE;
+					}
 
 	EXECUTE_RESTORE_ERROR(Stop());
 
@@ -97,37 +100,7 @@ void CUdpNode::PrepareStart()
 	m_bfObjPool.Prepare();
 }
 
-BOOL CUdpNode::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress)
-{
-	HP_SOCKADDR bindAddr(AF_UNSPEC, TRUE);
-
-	if(CreateListenSocket(lpszBindAddress, usPort, lpszCastAddress, bindAddr))
-	{
-		if(BindListenSocket(bindAddr))
-		{
-			if(TRIGGER(FirePrepareListen(m_soListen)) != HR_ERROR)
-			{
-				if(ConnectToGroup(bindAddr))
-				{
-					return TRUE;
-				}
-				else
-					SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
-			}
-			else
-				SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ENSURE_ERROR_CANCELLED);
-		}
-		else
-			SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
-	}
-	else
-		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
-
-	return FALSE;
-}
-
-
-BOOL CUdpNode::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress, HP_SOCKADDR& bindAddr)
+BOOL CUdpNode::ParseBindAddr(LPCTSTR lpszBindAddress, USHORT usPort, LPCTSTR lpszCastAddress, HP_SOCKADDR& bindAddr)
 {
 	if(::IsStrEmpty(lpszCastAddress))
 	{
@@ -135,13 +108,16 @@ BOOL CUdpNode::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTST
 			lpszCastAddress = DEFAULT_IPV4_BROAD_CAST_ADDRESS;
 		else if(m_enCastMode == CM_MULTICAST)
 		{
-			::WSASetLastError(WSAEADDRNOTAVAIL);
+			SetLastError(SE_SOCKET_CREATE, __FUNCTION__, WSAEADDRNOTAVAIL);
 			return FALSE;
 		}
 	}
 
 	if(m_enCastMode != CM_UNICAST && !::sockaddr_A_2_IN(lpszCastAddress, usPort, m_castAddr))
+	{
+		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
 		return FALSE;
+	}
 
 	if(::IsStrEmpty(lpszBindAddress))
 	{
@@ -151,59 +127,74 @@ BOOL CUdpNode::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort, LPCTST
 	else
 	{
 		if(!::sockaddr_A_2_IN(lpszBindAddress, usPort, bindAddr))
+		{
+			SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
 			return FALSE;
+		}
 	}
 
 	if(m_enCastMode == CM_BROADCAST && bindAddr.IsIPv6())
 	{
-		::WSASetLastError(WSAEPROTONOSUPPORT);
+		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, WSAEPROTONOSUPPORT);
 		return FALSE;
 	}
 
 	if(m_enCastMode != CM_UNICAST && m_castAddr.family != bindAddr.family)
 	{
-		::WSASetLastError(WSAEAFNOSUPPORT);
+		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, WSAEAFNOSUPPORT);
 		return FALSE;
 	}
 
+	return TRUE;
+}
+
+BOOL CUdpNode::CreateListenSocket(const HP_SOCKADDR& bindAddr)
+{
 	m_soListen = socket(bindAddr.family, SOCK_DGRAM, IPPROTO_UDP);
 
 	if(m_soListen == INVALID_SOCKET)
+	{
+		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
 		return FALSE;
+	}
 
-	ENSURE(::SSO_UDP_ConnReset(m_soListen, FALSE) == NO_ERROR);
+	ENSURE(IS_NO_ERROR(::SSO_UDP_ConnReset(m_soListen, FALSE)));
 	ENSURE(::SSO_NoBlock(m_soListen) == NO_ERROR);
-	ENSURE(::SSO_ReuseAddress(m_soListen, m_enReusePolicy) == NO_ERROR);
+	ENSURE(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
 
-	return TRUE;
-}
-
-BOOL CUdpNode::BindListenSocket(HP_SOCKADDR& bindAddr)
-{
-	if(::bind(m_soListen, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
+	if(IS_HAS_ERROR(::bind(m_soListen, bindAddr.Addr(), bindAddr.AddrSize())))
+	{
+		SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
 		return FALSE;
+	}
 
 	int iAddrLen = bindAddr.AddrSize();
-	ENSURE(::getsockname(m_soListen, m_localAddr.Addr(), &iAddrLen) != SOCKET_ERROR);
+	ENSURE(IS_NO_ERROR(::getsockname(m_soListen, m_localAddr.Addr(), &iAddrLen)));
 
-	return TRUE;
-}
-
-BOOL CUdpNode::ConnectToGroup(const HP_SOCKADDR& bindAddr)
-{
-	if(m_enCastMode == CM_UNICAST)
-		return TRUE;
-	else if(m_enCastMode == CM_MULTICAST)
+	if(m_enCastMode == CM_MULTICAST)
 	{
 		if(!::SetMultiCastSocketOptions(m_soListen, bindAddr, m_castAddr, m_iMCTtl, m_bMCLoop))
+		{
+			SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
 			return FALSE;
+		}
 	}
-	else
+	else if(m_enCastMode == CM_BROADCAST)
 	{
 		ASSERT(m_castAddr.IsIPv4());
 
 		BOOL bSet = TRUE;
-		ENSURE(::SSO_SetSocketOption(m_soListen, SOL_SOCKET, SO_BROADCAST, &bSet, sizeof(BOOL)) != SOCKET_ERROR);
+		if(IS_HAS_ERROR(::SSO_SetSocketOption(m_soListen, SOL_SOCKET, SO_BROADCAST, &bSet, sizeof(BOOL))))
+		{
+			SetLastError(SE_CONNECT_SERVER, __FUNCTION__, ::WSAGetLastError());
+			return FALSE;
+		}
+	}
+
+	if(TRIGGER(FirePrepareListen(m_soListen)) == HR_ERROR)
+	{
+		SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ENSURE_ERROR_CANCELLED);
+		return FALSE;
 	}
 
 	return TRUE;
@@ -410,7 +401,7 @@ BOOL CUdpNode::SendCastPackets(const WSABUF pBuffers[], int iCount)
 {
 	if(m_enCastMode == CM_UNICAST)
 	{
-		::SetLastError(ERROR_INCORRECT_ADDRESS);
+		::SetLastError(ERROR_INVALID_OPERATION);
 		return FALSE;
 	}
 
@@ -507,11 +498,11 @@ BOOL CUdpNode::DoSendPackets(HP_SOCKADDR& addrRemote, const WSABUF pBuffers[], i
 
 int CUdpNode::SendInternal(HP_SOCKADDR& addrRemote, TUdpBufferObjPtr& bufPtr)
 {
+	BOOL bPending;
+	int iBufferSize = (int)(bufPtr->buff.len);;
+	
 	addrRemote.Copy(bufPtr->remoteAddr);
 
-	BOOL bPending;
-	int iBufferSize;
-	
 	{
 		CSpinLock locallock(m_csState);
 
@@ -519,7 +510,6 @@ int CUdpNode::SendInternal(HP_SOCKADDR& addrRemote, TUdpBufferObjPtr& bufPtr)
 			return ERROR_INVALID_STATE;
 
 		bPending	= IsPending();
-		iBufferSize	= (int)(bufPtr->buff.len);
 		m_iPending += max(iBufferSize, 1);
 
 		ASSERT(m_iPending > 0);

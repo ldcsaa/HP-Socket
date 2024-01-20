@@ -53,7 +53,7 @@ BOOL SetCurrentWorkerThreadName()
 
 BOOL SetWorkerThreadDefaultName(THR_ID tid)
 {
-	static volatile UINT _s_uiSeq = 0;
+	static volatile UINT _s_uiSeq = MAXUINT;
 
 	return ::SetSequenceThreadName(tid, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
 }
@@ -353,10 +353,10 @@ BOOL FreeHostIPAddresses(LPTIPAddr* lppIPAddr)
 
 BOOL sockaddr_IN_2_A(const HP_SOCKADDR& addr, ADDRESS_FAMILY& usFamily, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort)
 {
-	BOOL isOK	= FALSE;
+	BOOL isOK = FALSE;
 
-	usFamily	= addr.family;
-	usPort		= addr.Port();
+	usFamily  = addr.family;
+	usPort	  = addr.Port();
 
 	if(::InetNtop(addr.family, addr.SinAddr(), lpszAddress, iAddressLen))
 	{
@@ -611,7 +611,7 @@ int SSO_ReuseAddress(SOCKET sock, EnReuseAddressPolicy opt)
 
 	BOOL bReusePortSupported =
 #if defined(__linux) || defined(__linux__)
-		::IsKernelVersionAbove(3, 9, 0);
+		::IsKernelVersionAbove(2, 6, 32);
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__APPLE__) || defined(__MACH__)
 		TRUE;
 #else

@@ -66,7 +66,7 @@ void DestroySocketTaskObj(LPTSocketTask pTask)
 	}
 }
 
-volatile UINT CHPThreadPool::sm_uiNum		= 0;
+volatile UINT CHPThreadPool::sm_uiNum		= MAXUINT;
 LPCTSTR CHPThreadPool::POOLED_THREAD_PREFIX	= _T("hp-pool-");
 
 BOOL CHPThreadPool::CWorker::Initialize(PVOID pvWorkerParam)
@@ -378,7 +378,7 @@ BOOL CHPThreadPool::CheckStoping()
 
 void CHPThreadPool::Reset(BOOL bSetWaitEvent)
 {
-	m_uiSeq				= 0;
+	m_uiSeq				= MAXUINT;
 	m_dwQueueSize		= 0;
 	m_dwTaskCount		= 0;
 	m_dwMaxQueueSize	= 0;

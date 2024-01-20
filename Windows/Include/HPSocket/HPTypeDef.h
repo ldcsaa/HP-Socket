@@ -24,10 +24,10 @@
 #pragma once
 
 /* HP-Socket 版本号 */
-#define HP_VERSION_MAJOR		5	// 主版本号
-#define HP_VERSION_MINOR		9	// 子版本号
-#define HP_VERSION_REVISE		5	// 修正版本号
-#define HP_VERSION_BUILD		1	// 构建编号
+#define HP_VERSION_MAJOR		6	// 主版本号
+#define HP_VERSION_MINOR		0	// 子版本号
+#define HP_VERSION_REVISE		1	// 修正版本号
+#define HP_VERSION_BUILD		2	// 构建编号
 
 //#define _UDP_DISABLED				// 禁用 UDP
 //#define _SSL_DISABLED				// 禁用 SSL

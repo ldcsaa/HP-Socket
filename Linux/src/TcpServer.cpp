@@ -83,6 +83,12 @@ void CTcpServer::PrepareStart()
 	m_bfObjPool.SetPoolHold(m_dwFreeBufferObjHold);
 
 	m_bfObjPool.Prepare();
+
+	m_rcBuffers = make_unique<CBufferPtr[]>(m_dwWorkerThreadCount);
+	for_each(m_rcBuffers.get(), m_rcBuffers.get() + m_dwWorkerThreadCount, [this](CBufferPtr& buff) {buff.Malloc(m_dwSocketBufferSize);});
+
+	m_soListens = make_unique<SOCKET[]>(m_dwWorkerThreadCount);
+	for_each(m_soListens.get(), m_soListens.get() + m_dwWorkerThreadCount, [](SOCKET& sock) {sock = INVALID_FD;});
 }
 
 BOOL CTcpServer::CheckStarting()
@@ -120,68 +126,73 @@ BOOL CTcpServer::CheckStoping()
 
 BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 {
-	BOOL isOK = FALSE;
-
 	if(::IsStrEmpty(lpszBindAddress))
 		lpszBindAddress = DEFAULT_IPV4_BIND_ADDRESS;
 
 	HP_SOCKADDR addr;
 
-	if(::sockaddr_A_2_IN(lpszBindAddress, usPort, addr))
+	if(!::sockaddr_A_2_IN(lpszBindAddress, usPort, addr))
 	{
-		m_soListen = socket(addr.family, SOCK_STREAM, IPPROTO_TCP);
-
-		if(m_soListen != INVALID_SOCKET)
-		{
-			::fcntl_SETFL(m_soListen, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
-
-			BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-			VERIFY(IS_NO_ERROR(::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
-			VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
-			VERIFY(IS_NO_ERROR(::SSO_NoDelay(m_soListen, m_bNoDelay)));
-
-			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
-			{
-				if(TRIGGER(FirePrepareListen(m_soListen)) != HR_ERROR)
-				{
-					if(::listen(m_soListen, m_dwSocketListenQueue) != SOCKET_ERROR)
-					{
-						isOK = TRUE;
-					}
-					else
-						SetLastError(SE_SOCKET_LISTEN, __FUNCTION__, ::WSAGetLastError());
-				}
-				else
-					SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ENSURE_ERROR_CANCELLED);
-			}
-			else
-				SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
-		}
-		else
-			SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
-	}
-	else
 		SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
-
-	return isOK;
-}
-
-BOOL CTcpServer::CreateWorkerThreads()
-{
-	if(!m_ioDispatcher.Start(this, m_dwAcceptSocketCount, m_dwWorkerThreadCount))
 		return FALSE;
-
-	const CIODispatcher::CWorkerThread* pWorkerThread = m_ioDispatcher.GetWorkerThreads();
+	}
 
 	for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
-		m_rcBufferMap[pWorkerThread[i].GetThreadID()] = new CBufferPtr(m_dwSocketBufferSize);
+	{
+		m_soListens[i]  = socket(addr.family, SOCK_STREAM, IPPROTO_TCP);
+		SOCKET soListen = m_soListens[i];
+
+		if(IS_INVALID_FD(soListen))
+		{
+			SetLastError(SE_SOCKET_CREATE, __FUNCTION__, ::WSAGetLastError());
+			return FALSE;
+		}
+
+		::fcntl_SETFL(soListen, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
+
+		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
+		VERIFY(IS_NO_ERROR(::SSO_KeepAliveVals(soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
+		VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(soListen, m_enReusePolicy)));
+		VERIFY(IS_NO_ERROR(::SSO_NoDelay(soListen, m_bNoDelay)));
+
+		if(IS_HAS_ERROR(::bind(soListen, addr.Addr(), addr.AddrSize())))
+		{
+			SetLastError(SE_SOCKET_BIND, __FUNCTION__, ::WSAGetLastError());
+			return FALSE;
+		}
+
+		if(TRIGGER(FirePrepareListen(soListen)) == HR_ERROR)
+		{
+			SetLastError(SE_SOCKET_PREPARE, __FUNCTION__, ENSURE_ERROR_CANCELLED);
+			return FALSE;
+		}
+
+		if(IS_HAS_ERROR(::listen(soListen, m_dwSocketListenQueue)))
+		{
+			SetLastError(SE_SOCKET_LISTEN, __FUNCTION__, ::WSAGetLastError());
+			return FALSE;
+		}
+	}
 
 	return TRUE;
 }
 
+BOOL CTcpServer::CreateWorkerThreads()
+{
+	return m_ioDispatcher.Start(this, m_dwAcceptSocketCount, m_dwWorkerThreadCount);
+}
+
 BOOL CTcpServer::StartAccept()
 {
-	return m_ioDispatcher.AddFD(m_soListen, _EPOLL_READ_EVENTS | EPOLLET, TO_PVOID(&m_soListen));
+	for(int i = 0; i < (int)m_dwWorkerThreadCount; i++)
+	{
+		SOCKET& soListen = m_soListens[i];
+
+		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLET, TO_PVOID(&soListen)))
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 BOOL CTcpServer::Stop()
@@ -208,10 +219,16 @@ BOOL CTcpServer::Stop()
 
 void CTcpServer::CloseListenSocket()
 {
-	if(m_soListen != INVALID_SOCKET)
+	if(m_soListens)
 	{
-		::ManualCloseSocket(m_soListen);
-		m_soListen = INVALID_SOCKET;
+		for_each(m_soListens.get(), m_soListens.get() + m_dwWorkerThreadCount, [](SOCKET& sock)
+		{
+			if(sock != INVALID_FD)
+			{
+				::ManualCloseSocket(sock);
+				sock = INVALID_FD;
+			}
+		});
 
 		::WaitFor(100);
 	}
@@ -259,7 +276,8 @@ void CTcpServer::Reset()
 	m_phSocket.Reset();
 	m_bfObjPool.Clear();
 
-	::ClearPtrMap(m_rcBufferMap);
+	m_rcBuffers = nullptr;
+	m_soListens = nullptr;
 
 	m_enState = SS_STOPPED;
 
@@ -366,7 +384,13 @@ BOOL CTcpServer::GetListenAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT&
 {
 	ASSERT(lpszAddress != nullptr && iAddressLen > 0);
 
-	return ::GetSocketLocalAddress(m_soListen, lpszAddress, iAddressLen, usPort);
+	if(!HasStarted())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
+
+	return ::GetSocketLocalAddress(m_soListens[0], lpszAddress, iAddressLen, usPort);
 }
 
 BOOL CTcpServer::GetLocalAddress(CONNID dwConnID, TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)
@@ -618,7 +642,7 @@ BOOL CTcpServer::Disconnect(CONNID dwConnID, BOOL bForce)
 		return FALSE;
 	}
 
-	return m_ioDispatcher.SendCommand(DISP_CMD_DISCONNECT, dwConnID, bForce);
+	return m_ioDispatcher.SendCommandByFD(pSocketObj->socket, DISP_CMD_DISCONNECT, dwConnID, bForce);
 }
 
 BOOL CTcpServer::DisconnectLongConnections(DWORD dwPeriod, BOOL bForce)
@@ -687,16 +711,16 @@ BOOL CTcpServer::PauseReceive(CONNID dwConnID, BOOL bPause)
 	pSocketObj->paused = bPause;
 
 	if(!bPause)
-		return m_ioDispatcher.SendCommand(DISP_CMD_UNPAUSE, pSocketObj->connID);
+		return m_ioDispatcher.SendCommandByFD(pSocketObj->socket, DISP_CMD_UNPAUSE, pSocketObj->connID);
 
 	return TRUE;
 }
 
-BOOL CTcpServer::OnBeforeProcessIo(PVOID pv, UINT events)
+BOOL CTcpServer::OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT events)
 {
-	if(pv == &m_soListen)
+	if(pv == &m_soListens[pContext->GetIndex()])
 	{
-		HandleAccept(events);
+		HandleAccept(pContext, events);
 		return FALSE;
 	}
 
@@ -709,20 +733,17 @@ BOOL CTcpServer::OnBeforeProcessIo(PVOID pv, UINT events)
 		pSocketObj->SetConnected(FALSE);
 
 	pSocketObj->Increment();
-	pSocketObj->csIo.lock();
 
 	if(!TSocketObj::IsValid(pSocketObj))
 	{
-		pSocketObj->csIo.unlock();
 		pSocketObj->Decrement();
-
 		return FALSE;
 	}
 
 	return TRUE;
 }
 
-VOID CTcpServer::OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)
+VOID CTcpServer::OnAfterProcessIo(const TDispContext* pContext, PVOID pv, UINT events, BOOL rs)
 {
 	TSocketObj* pSocketObj = (TSocketObj*)(pv);
 
@@ -734,35 +755,34 @@ VOID CTcpServer::OnAfterProcessIo(PVOID pv, UINT events, BOOL rs)
 		m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj);
 	}
 
-	pSocketObj->csIo.unlock();
 	pSocketObj->Decrement();
 }
 
-VOID CTcpServer::OnCommand(TDispCommand* pCmd)
+VOID CTcpServer::OnCommand(const TDispContext* pContext, TDispCommand* pCmd)
 {
 	switch(pCmd->type)
 	{
 	case DISP_CMD_SEND:
-		HandleCmdSend((CONNID)(pCmd->wParam));
+		HandleCmdSend(pContext, (CONNID)(pCmd->wParam));
 		break;
 	case DISP_CMD_UNPAUSE:
-		HandleCmdUnpause((CONNID)(pCmd->wParam));
+		HandleCmdUnpause(pContext, (CONNID)(pCmd->wParam));
 		break;
 	case DISP_CMD_DISCONNECT:
-		HandleCmdDisconnect((CONNID)(pCmd->wParam), (BOOL)pCmd->lParam);
+		HandleCmdDisconnect(pContext, (CONNID)(pCmd->wParam), (BOOL)pCmd->lParam);
 		break;
 	}
 }
 
-VOID CTcpServer::HandleCmdSend(CONNID dwConnID)
+VOID CTcpServer::HandleCmdSend(const TDispContext* pContext, CONNID dwConnID)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
 	if(TSocketObj::IsValid(pSocketObj) && pSocketObj->IsPending())
-		m_ioDispatcher.ProcessIo(pSocketObj, EPOLLOUT);
+		m_ioDispatcher.ProcessIo(pContext, pSocketObj, EPOLLOUT);
 }
 
-VOID CTcpServer::HandleCmdUnpause(CONNID dwConnID)
+VOID CTcpServer::HandleCmdUnpause(const TDispContext* pContext, CONNID dwConnID)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
@@ -770,37 +790,37 @@ VOID CTcpServer::HandleCmdUnpause(CONNID dwConnID)
 		return;
 
 	if(BeforeUnpause(pSocketObj))
-		m_ioDispatcher.ProcessIo(pSocketObj, EPOLLIN);
+		m_ioDispatcher.ProcessIo(pContext, pSocketObj, EPOLLIN);
 	else
 		AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_RECEIVE, ENSURE_ERROR_CANCELLED);
 }
 
-VOID CTcpServer::HandleCmdDisconnect(CONNID dwConnID, BOOL bForce)
+VOID CTcpServer::HandleCmdDisconnect(const TDispContext* pContext, CONNID dwConnID, BOOL bForce)
 {
 	TSocketObj* pSocketObj = FindSocketObj(dwConnID);
 
 	if(TSocketObj::IsValid(pSocketObj))
-		m_ioDispatcher.ProcessIo(pSocketObj, EPOLLHUP);
+		m_ioDispatcher.ProcessIo(pContext, pSocketObj, EPOLLHUP);
 }
 
-BOOL CTcpServer::OnReadyRead(PVOID pv, UINT events)
+BOOL CTcpServer::OnReadyRead(const TDispContext* pContext, PVOID pv, UINT events)
 {
-	return HandleReceive((TSocketObj*)pv, RETRIVE_EVENT_FLAG_H(events));
+	return HandleReceive(pContext, (TSocketObj*)pv, RETRIVE_EVENT_FLAG_H(events));
 }
 
-BOOL CTcpServer::OnReadyWrite(PVOID pv, UINT events)
+BOOL CTcpServer::OnReadyWrite(const TDispContext* pContext, PVOID pv, UINT events)
 {
-	return HandleSend((TSocketObj*)pv, RETRIVE_EVENT_FLAG_H(events));
+	return HandleSend(pContext, (TSocketObj*)pv, RETRIVE_EVENT_FLAG_H(events));
 }
 
-BOOL CTcpServer::OnHungUp(PVOID pv, UINT events)
+BOOL CTcpServer::OnHungUp(const TDispContext* pContext, PVOID pv, UINT events)
 {
-	return HandleClose((TSocketObj*)pv, SCF_CLOSE, events);
+	return HandleClose(pContext, (TSocketObj*)pv, SCF_CLOSE, events);
 }
 
-BOOL CTcpServer::OnError(PVOID pv, UINT events)
+BOOL CTcpServer::OnError(const TDispContext* pContext, PVOID pv, UINT events)
 {
-	return HandleClose((TSocketObj*)pv, SCF_ERROR, events);
+	return HandleClose(pContext, (TSocketObj*)pv, SCF_ERROR, events);
 }
 
 VOID CTcpServer::OnDispatchThreadStart(THR_ID tid)
@@ -813,7 +833,7 @@ VOID CTcpServer::OnDispatchThreadEnd(THR_ID tid)
 	OnWorkerThreadEnd(tid);
 }
 
-BOOL CTcpServer::HandleClose(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag, UINT events)
+BOOL CTcpServer::HandleClose(const TDispContext* pContext, TSocketObj* pSocketObj, EnSocketCloseFlag enFlag, UINT events)
 {
 	EnSocketOperation enOperation = SO_CLOSE;
 
@@ -834,7 +854,7 @@ BOOL CTcpServer::HandleClose(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag, U
 	return TRUE;
 }
 
-BOOL CTcpServer::HandleAccept(UINT events)
+BOOL CTcpServer::HandleAccept(const TDispContext* pContext, UINT events)
 {
 	if(events & _EPOLL_ALL_ERROR_EVENTS)
 	{
@@ -847,7 +867,7 @@ BOOL CTcpServer::HandleAccept(UINT events)
 		HP_SOCKADDR addr;
 
 		socklen_t addrLen	= (socklen_t)addr.AddrSize();
-		SOCKET soClient		= ::accept(m_soListen, addr.Addr(), &addrLen);
+		SOCKET soClient		= ::accept(m_soListens[pContext->GetIndex()], addr.Addr(), &addrLen);
 
 		if(soClient == INVALID_SOCKET)
 		{
@@ -898,13 +918,13 @@ BOOL CTcpServer::HandleAccept(UINT events)
 	return TRUE;
 }
 
-BOOL CTcpServer::HandleReceive(TSocketObj* pSocketObj, int flag)
+BOOL CTcpServer::HandleReceive(const TDispContext* pContext, TSocketObj* pSocketObj, int flag)
 {
 	ASSERT(TSocketObj::IsValid(pSocketObj));
 
 	if(m_bMarkSilence) pSocketObj->activeTime = ::TimeGetTime();
 
-	CBufferPtr& buffer = *(m_rcBufferMap[SELF_THREAD_ID]);
+	CBufferPtr& buffer = m_rcBuffers[pContext->GetIndex()];
 
 	int reads = flag ? -1 : MAX_CONTINUE_READS;
 
@@ -947,7 +967,7 @@ BOOL CTcpServer::HandleReceive(TSocketObj* pSocketObj, int flag)
 	return TRUE;
 }
 
-BOOL CTcpServer::HandleSend(TSocketObj* pSocketObj, int flag)
+BOOL CTcpServer::HandleSend(const TDispContext* pContext, TSocketObj* pSocketObj, int flag)
 {
 	ASSERT(TSocketObj::IsValid(pSocketObj));
 
@@ -1100,7 +1120,7 @@ int CTcpServer::SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], in
 
 	if(iPending == 0 && pSocketObj->IsPending())
 	{
-		if(!m_ioDispatcher.SendCommand(DISP_CMD_SEND, pSocketObj->connID))
+		if(!m_ioDispatcher.SendCommandByFD(pSocketObj->socket, DISP_CMD_SEND, pSocketObj->connID))
 			return ::GetLastError();
 	}
 

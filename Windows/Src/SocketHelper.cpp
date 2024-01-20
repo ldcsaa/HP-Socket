@@ -1140,7 +1140,7 @@ BOOL SetCurrentWorkerThreadName()
 
 BOOL SetWorkerThreadDefaultName(HANDLE hThread)
 {
-	static volatile UINT _s_uiSeq = 0;
+	static volatile UINT _s_uiSeq = MAXUINT;
 
 	return ::SetSequenceThreadName(hThread, DEFAULT_WORKER_THREAD_PREFIX, _s_uiSeq);
 }
