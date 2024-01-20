@@ -37,9 +37,9 @@
 /* 最大连接时长 */
 #define MAX_CONNECTION_PERIOD					(MAXINT / 2)
 /* 处理接收事件时最大读取次数 */
-#define MAX_CONTINUE_READS						30
+#define MAX_CONTINUE_READS						100
 /* 处理发送事件时最大写入次数 */
-#define MAX_CONTINUE_WRITES						50
+#define MAX_CONTINUE_WRITES						100
 
 /* 默认工作队列等待的最大描述符事件数量 */
 #define DEFAULT_WORKER_MAX_EVENT_COUNT			CIODispatcher::DEF_WORKER_MAX_EVENTS

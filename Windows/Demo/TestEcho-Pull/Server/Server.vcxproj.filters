@@ -48,9 +48,6 @@
     <ClInclude Include="..\..\Global\helper.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Include\HPSocket\HPSocket.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
@@ -59,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Include\HPSocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

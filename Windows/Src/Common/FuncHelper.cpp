@@ -75,7 +75,6 @@ BOOL SetSequenceThreadName(HANDLE hThread, LPCTSTR lpszPrefix, volatile UINT& vu
 	return FALSE;
 #else
 	UINT uiSequence = ::InterlockedIncrement(&vuiSeq);
-
 	return SetThreadName(hThread, lpszPrefix, uiSequence);
 #endif
 }

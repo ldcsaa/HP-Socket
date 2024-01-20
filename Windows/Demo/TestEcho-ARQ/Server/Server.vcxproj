@@ -194,6 +194,7 @@
     <ClInclude Include="..\..\..\Src\Common\BufferPtr.h" />
     <ClInclude Include="..\..\..\Src\Common\CriticalSection.h" />
     <ClInclude Include="..\..\..\Src\Common\Event.h" />
+    <ClInclude Include="..\..\..\Src\Common\FuncHelper.h" />
     <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
     <ClInclude Include="..\..\..\Src\Common\kcp\ikcp.h" />
     <ClInclude Include="..\..\..\Src\Common\PrivateHeap.h" />
@@ -218,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Src\Common\BufferPool.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\Src\Common\kcp\ikcp.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

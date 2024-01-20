@@ -42,53 +42,11 @@
     <ClInclude Include="ServerDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Global\helper.h">
       <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\BufferPool.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\BufferPtr.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\CriticalSection.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Event.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\GeneralHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\PrivateHeap.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\RWLock.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Semaphore.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Singleton.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\STLHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\SysHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\WaitFor.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\Win32Helper.h">
-      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\SocketHelper.h">
       <Filter>HPSocket</Filter>
@@ -108,8 +66,53 @@
     <ClInclude Include="..\..\..\Src\UdpArqServer.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Src\kcp\ikcp.h">
+    <ClInclude Include="..\..\..\Src\Common\BufferPool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Win32Helper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\BufferPtr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\CriticalSection.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Event.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\PrivateHeap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\RWLock.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Semaphore.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\Singleton.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\STLHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\SysHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\WaitFor.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\kcp\ikcp.h">
       <Filter>Common\kcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Src\Common\FuncHelper.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -125,18 +128,6 @@
     <ClCompile Include="..\..\Global\helper.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\BufferPool.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\RWLock.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\SysHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\WaitFor.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Src\SocketHelper.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
@@ -149,8 +140,23 @@
     <ClCompile Include="..\..\..\Src\UdpArqServer.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Src\kcp\ikcp.c">
+    <ClCompile Include="..\..\..\Src\Common\BufferPool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\RWLock.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\SysHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\kcp\ikcp.c">
       <Filter>Common\kcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Src\Common\FuncHelper.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -195,6 +195,7 @@
     <ClInclude Include="..\..\..\Src\Common\BufferPtr.h" />
     <ClInclude Include="..\..\..\Src\Common\CriticalSection.h" />
     <ClInclude Include="..\..\..\Src\Common\Event.h" />
+    <ClInclude Include="..\..\..\Src\Common\FuncHelper.h" />
     <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
     <ClInclude Include="..\..\..\Src\Common\PrivateHeap.h" />
     <ClInclude Include="..\..\..\Src\Common\RingBuffer.h" />
@@ -217,6 +218,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Src\Common\BufferPool.cpp" />
+    <ClCompile Include="..\..\..\Src\Common\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\Src\Common\RWLock.cpp" />
     <ClCompile Include="..\..\..\Src\SocketHelper.cpp" />
     <ClCompile Include="..\..\..\Src\TcpAgent.cpp" />

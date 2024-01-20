@@ -37,7 +37,7 @@
 /* 最大连接时长 */
 #define MAX_CONNECTION_PERIOD					(MAXLONG / 2)
 /* IOCP 处理接收事件时最大额外读取次数 */
-#define MAX_IOCP_CONTINUE_RECEIVE				30
+#define MAX_IOCP_CONTINUE_RECEIVE				100
 
 /* Server/Agent 最大连接数 */
 #define MAX_CONNECTION_COUNT					(5 * 1000 * 1000)

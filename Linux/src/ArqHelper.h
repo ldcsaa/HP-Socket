@@ -341,7 +341,7 @@ public:
 				return ERROR_INVALID_STATE;
 
 			rs = ::ikcp_send(m_kcp, (const char*)pBuffer, iLength);
-			if(rs != NO_ERROR) rs = ERROR_INCORRECT_SIZE;
+			if(rs < 0) rs = ERROR_INCORRECT_SIZE;
 		}
 
 		if(rs == NO_ERROR)

@@ -85,6 +85,10 @@ _WIN32_WINNT_WIN10		0x0A00
 
 #pragma once
 
+#ifndef WINDOWS_ENABLE_CPLUSPLUS
+	#define WINDOWS_ENABLE_CPLUSPLUS
+#endif
+
 #ifndef VC_EXTRALEAN
 	#define VC_EXTRALEAN
 #endif
@@ -140,9 +144,15 @@ _WIN32_WINNT_WIN10		0x0A00
 
 #ifndef _WIN32_WINNT
 	#if defined (_WIN64)
-		#define _WIN32_WINNT		_WIN32_WINNT_WIN7
+		#if _MSC_VER >= 1930
+			#define _WIN32_WINNT	_WIN32_WINNT_WIN10
+		#else
+			#define _WIN32_WINNT	_WIN32_WINNT_WIN7
+		#endif
 	#else
-		#if _MSC_VER >= 1910
+		#if _MSC_VER >= 1930
+			#define _WIN32_WINNT	_WIN32_WINNT_WIN10
+		#elif _MSC_VER >= 1910
 			#define _WIN32_WINNT	_WIN32_WINNT_WIN7
 		#else
 			#define _WIN32_WINNT	_WIN32_WINNT_WINXP
@@ -160,6 +170,14 @@ _WIN32_WINNT_WIN10		0x0A00
 	#if !defined(nullptr)
 		#define nullptr	NULL
 	#endif
+#endif
+
+#ifndef _WIN32_WINNT_WIN8
+	#define _WIN32_WINNT_WIN8	0x0602
+#endif
+
+#ifndef _WIN32_WINNT_WIN10
+	#define _WIN32_WINNT_WIN10	0x0A00
 #endif
 
 #ifdef _DETECT_MEMORY_LEAK

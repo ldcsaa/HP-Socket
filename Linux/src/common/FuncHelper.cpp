@@ -350,7 +350,6 @@ void ABORT(int iErrno, LPCSTR lpszFile, int iLine, LPCSTR lpszFunc, LPCSTR lpszT
 BOOL SetSequenceThreadName(THR_ID tid, LPCTSTR lpszPrefix, volatile UINT& vuiSeq)
 {
 	UINT uiSequence = InterlockedIncrement(&vuiSeq);
-
 	return SetThreadName(tid, lpszPrefix, uiSequence);
 }
 
@@ -373,7 +372,7 @@ BOOL SetThreadName(THR_ID tid, LPCTSTR lpszPrefix, UINT uiSequence)
 
 	uiSequence = (UINT)(uiSequence % uiDiv);
 
-	CStringA strName;
+	CString strName;
 	strName.Format(_T("%s%u"), lpszPrefix, uiSequence);
 
 	return SetThreadName(tid, strName);
