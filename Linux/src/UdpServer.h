@@ -281,8 +281,6 @@ private:
 
 	CSpinGuard				m_csState;
 
-	CCriSec					m_csAccept;
-
 	TUdpSocketObjPtrPool	m_bfActiveSockets;
 
 	CSimpleRWLock			m_csClientSocket;
