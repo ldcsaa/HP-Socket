@@ -1043,6 +1043,8 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpAgent_SendSmallFile(HP_Agent pAgent, HP_CONNID
 /**********************************************************************************/
 /***************************** TCP Agent 属性访问方法 *****************************/
 
+/* 设置同步连接超时时间（毫秒） */
+HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSyncConnectTimeout(HP_TcpAgent pAgent, DWORD dwSyncConnectTimeout);
 /* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为 1024 的倍数） */
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSocketBufferSize(HP_TcpAgent pAgent, DWORD dwSocketBufferSize);
 /* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：60 * 1000） */
@@ -1052,6 +1054,8 @@ HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent,
 /* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetNoDelay(HP_TcpAgent pAgent, BOOL bNoDelay);
 
+/* 获取同步连接超时时间 */
+HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSyncConnectTimeout(HP_TcpAgent pAgent);
 /* 获取通信数据缓冲区大小 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent);
 /* 获取正常心跳包间隔 */
@@ -1232,6 +1236,8 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpClient_SendSmallFile(HP_Client pClient, LPCTST
 /**********************************************************************************/
 /***************************** TCP Client 属性访问方法 *****************************/
 
+/* 设置同步连接超时时间（毫秒） */
+HPSOCKET_API void __HP_CALL HP_TcpClient_SetSyncConnectTimeout(HP_TcpClient pClient, DWORD dwSyncConnectTimeout);
 /* 设置通信数据缓冲区大小（根据平均通信数据包大小调整设置，通常设置为：(N * 1024) - sizeof(TBufferObj)） */
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClient, DWORD dwSocketBufferSize);
 /* 设置正常心跳包间隔（毫秒，0 则不发送心跳包，默认：60 * 1000） */
@@ -1241,6 +1247,8 @@ HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClie
 /* 设置是否开启 nodelay 模式（默认：FALSE，不开启） */
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetNoDelay(HP_TcpClient pClient, BOOL bNoDelay);
 
+/* 获取同步连接超时时间 */
+HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSyncConnectTimeout(HP_TcpClient pClient);
 /* 获取通信数据缓冲区大小 */
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient);
 /* 获取正常心跳包间隔 */

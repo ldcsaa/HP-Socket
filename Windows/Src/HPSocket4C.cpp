@@ -246,20 +246,24 @@
 	#pragma comment(linker, "/EXPORT:HP_Set_FN_Server_OnShutdown=_HP_Set_FN_Server_OnShutdown@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetKeepAliveInterval=_HP_TcpAgent_GetKeepAliveInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetKeepAliveTime=_HP_TcpAgent_GetKeepAliveTime@4")
+	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetSyncConnectTimeout=_HP_TcpAgent_GetSyncConnectTimeout@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_GetSocketBufferSize=_HP_TcpAgent_GetSocketBufferSize@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_IsNoDelay=_HP_TcpAgent_IsNoDelay@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SendSmallFile=_HP_TcpAgent_SendSmallFile@20")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetKeepAliveInterval=_HP_TcpAgent_SetKeepAliveInterval@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetKeepAliveTime=_HP_TcpAgent_SetKeepAliveTime@8")
+	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetSyncConnectTimeout=_HP_TcpAgent_SetSyncConnectTimeout@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetSocketBufferSize=_HP_TcpAgent_SetSocketBufferSize@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpAgent_SetNoDelay=_HP_TcpAgent_SetNoDelay@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetKeepAliveInterval=_HP_TcpClient_GetKeepAliveInterval@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetKeepAliveTime=_HP_TcpClient_GetKeepAliveTime@4")
+	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetSyncConnectTimeout=_HP_TcpClient_GetSyncConnectTimeout@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_GetSocketBufferSize=_HP_TcpClient_GetSocketBufferSize@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_IsNoDelay=_HP_TcpClient_IsNoDelay@4")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SendSmallFile=_HP_TcpClient_SendSmallFile@16")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetKeepAliveInterval=_HP_TcpClient_SetKeepAliveInterval@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetKeepAliveTime=_HP_TcpClient_SetKeepAliveTime@8")
+	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetSyncConnectTimeout=_HP_TcpClient_SetSyncConnectTimeout@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetSocketBufferSize=_HP_TcpClient_SetSocketBufferSize@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpClient_SetNoDelay=_HP_TcpClient_SetNoDelay@8")
 	#pragma comment(linker, "/EXPORT:HP_TcpPackAgent_GetMaxPackSize=_HP_TcpPackAgent_GetMaxPackSize@4")
@@ -2034,6 +2038,11 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpAgent_SendSmallFile(HP_Agent pAgent, HP_CONNID
 /**********************************************************************************/
 /***************************** TCP Agent 属性访问方法 *****************************/
 
+HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSyncConnectTimeout(HP_TcpAgent pAgent, DWORD dwSyncConnectTimeout)
+{
+	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSyncConnectTimeout(dwSyncConnectTimeout);
+}
+
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSocketBufferSize(HP_TcpAgent pAgent, DWORD dwSocketBufferSize)
 {
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSocketBufferSize(dwSocketBufferSize);
@@ -2052,6 +2061,11 @@ HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent,
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetNoDelay(HP_TcpAgent pAgent, BOOL bNoDelay)
 {
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetNoDelay(bNoDelay);
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSyncConnectTimeout(HP_TcpAgent pAgent)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetSyncConnectTimeout();
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent)
@@ -2231,6 +2245,11 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpClient_SendSmallFile(HP_Client pClient, LPCTST
 /**********************************************************************************/
 /***************************** TCP Client 属性访问方法 *****************************/
 
+HPSOCKET_API void __HP_CALL HP_TcpClient_SetSyncConnectTimeout(HP_TcpClient pClient, DWORD dwSyncConnectTimeout)
+{
+	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSyncConnectTimeout(dwSyncConnectTimeout);
+}
+
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClient, DWORD dwSocketBufferSize)
 {
 	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSocketBufferSize(dwSocketBufferSize);
@@ -2249,6 +2268,11 @@ HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClie
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetNoDelay(HP_TcpClient pClient, BOOL bNoDelay)
 {
 	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetNoDelay(bNoDelay);
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSyncConnectTimeout(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetSyncConnectTimeout();
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient)

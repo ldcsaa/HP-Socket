@@ -740,6 +740,17 @@ int SSO_UDP_ConnReset(SOCKET sock, BOOL bNewBehavior)
 	return result;
 }
 
+int SSO_GetError(SOCKET sock)
+{
+	int e;
+	socklen_t len = sizeof(e);
+
+	if(IS_NO_ERROR(SSO_GetSocketOption(sock, SOL_SOCKET, SO_ERROR, &e, &len)))
+		return e;
+
+	return SOCKET_ERROR;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CONNID GenerateConnectionID()
@@ -1129,6 +1140,31 @@ BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const H
 	}
 
 	return TRUE;
+}
+
+int WaitForSocketWrite(SOCKET sock, DWORD dwTimeout)
+{
+	timeval tv = {(long)(dwTimeout / 1000), (long)((dwTimeout % 1000) * 1000)};
+
+	fd_set wfds, efds;
+	FD_ZERO(&wfds);
+	FD_ZERO(&efds);
+	FD_SET(sock, &wfds);
+	FD_SET(sock, &efds);
+
+	int rs = select(0, nullptr, &wfds, &efds, &tv);
+
+	if(rs <= 0) return ((rs == 0) ? ERROR_TIMEOUT : ENSURE_ERROR(ERROR_CANT_WAIT));
+	
+	if(FD_ISSET(sock, &efds))
+	{
+		rs = SSO_GetError(sock);
+		return ((rs != NO_ERROR && rs != SOCKET_ERROR) ? rs : ENSURE_ERROR(ERROR_CANT_WAIT));
+	}
+
+	VERIFY(FD_ISSET(sock, &wfds));
+
+	return NO_ERROR;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

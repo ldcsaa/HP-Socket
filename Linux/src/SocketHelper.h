@@ -319,11 +319,11 @@ typedef unique_ptr<TNodeBufferObjList[]>			TNodeBufferObjLists;
 /* 命令类型 */
 enum EnDispCmdType
 {
-	DISP_CMD_SEND			= 0x01,	// 发送数据
-	DISP_CMD_RECEIVE		= 0x02,	// 接收数据
-	DISP_CMD_UNPAUSE		= 0x03,	// 恢复接收数据
-	DISP_CMD_DISCONNECT		= 0x04,	// 断开连接
-	DISP_CMD_TIMEOUT		= 0x05,	// 保活超时
+	DISP_CMD_SEND		= 0x01,	// 发送数据
+	DISP_CMD_RECEIVE	= 0x02,	// 接收数据
+	DISP_CMD_UNPAUSE	= 0x03,	// 恢复接收数据
+	DISP_CMD_DISCONNECT	= 0x04,	// 断开连接
+	DISP_CMD_TIMEOUT	= 0x05,	// 保活超时
 };
 
 /* 关闭连接标识 */
@@ -696,6 +696,8 @@ BOOL GetSocketLocalAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, 
 BOOL GetSocketRemoteAddress(SOCKET socket, LPTSTR lpszAddress, int& iAddressLen, USHORT& usPort);
 /* 设置组播选项 */
 BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const HP_SOCKADDR& castAddr, int iMCTtl, BOOL bMCLoop);
+/* 等待连接 */
+int WaitForSocketWrite(SOCKET sock, DWORD dwTimeout);
 
 /* 64 位网络字节序转主机字节序 */
 ULONGLONG NToH64(ULONGLONG value);

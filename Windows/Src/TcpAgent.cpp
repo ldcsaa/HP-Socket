@@ -129,6 +129,7 @@ BOOL CTcpAgent::CheckParams()
 {
 	if	((m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)								&&
 		(m_enOnSendSyncPolicy >= OSSP_NONE && m_enOnSendSyncPolicy <= OSSP_RECEIVE)				&&
+		((int)m_dwSyncConnectTimeout > 0)														&&
 		((int)m_dwMaxConnectionCount > 0 && m_dwMaxConnectionCount <= MAX_CONNECTION_COUNT)		&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
 		((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)									&&
@@ -1268,10 +1269,10 @@ DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SO
 	DWORD result	= NO_ERROR;
 	BOOL bNeedFree	= TRUE;
 
+	ENSURE(IS_NO_ERROR(::SSO_NoBlock(pSocketObj->socket)));
+
 	if(m_bAsyncConnect)
 	{
-		ENSURE(::SSO_NoBlock(pSocketObj->socket) == NO_ERROR);
-
 		if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
 			result = ::PostConnect(m_pfnConnectEx, pSocketObj->socket, addr, pBufferObj);
 		else
@@ -1279,24 +1280,30 @@ DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SO
 	}
 	else
 	{
-		if(::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
+		result = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
+
+		if(IS_NO_ERROR(result) || IS_WOULDBLOCK_ERROR())
 		{
-			ENSURE(::SSO_NoBlock(pSocketObj->socket) == NO_ERROR);
+			if(IS_HAS_ERROR(result))
+				result = ::WaitForSocketWrite(pSocketObj->socket, m_dwSyncConnectTimeout);
 
-			if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
+			if(IS_NO_ERROR(result))
 			{
-				pSocketObj->SetConnected();
-
-				if(TriggerFireConnect(pSocketObj) != HR_ERROR)
+				if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
 				{
-					result		= DoReceive(pSocketObj, pBufferObj);
-					bNeedFree	= FALSE;
+					pSocketObj->SetConnected();
+
+					if(TriggerFireConnect(pSocketObj) != HR_ERROR)
+					{
+						result		= DoReceive(pSocketObj, pBufferObj);
+						bNeedFree	= FALSE;
+					}
+					else
+						result = ENSURE_ERROR_CANCELLED;
 				}
 				else
-					result = ENSURE_ERROR_CANCELLED;
+					result = ::GetLastError();
 			}
-			else
-				result = ::GetLastError();
 		}
 		else
 			result = ::WSAGetLastError();

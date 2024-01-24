@@ -102,7 +102,7 @@ using namespace std;
 #define IS_OK(rs)						((BOOL)(rs))
 #define IS_NOT_OK(rs)					(!IS_OK(rs))
 
-#define IS_ERROR(code)					(::GetLastError() == code)
+#define IS_ERROR(code)					(::GetLastError() == (code))
 #define CONTINUE_IF_ERROR(code)			{if(IS_ERROR(code)) continue;}
 #define BREAK_IF_ERROR(code)			{if(IS_ERROR(code)) break;}
 
@@ -133,7 +133,7 @@ inline void PrintError(LPCSTR subject)	{perror(subject);}
 #define EXECUTE_RESTORE_ERROR(expr)		{int __le_ = ::GetLastError(); (expr); ::SetLastError(__le_);}
 #define EXECUTE_RESTORE_ERROR_RT(T, expr)\
 										({int __le_ = ::GetLastError(); T __rs_ = (expr); ::SetLastError(__le_); __rs_;})
-#define ENSURE_ERROR(def_code)			({int __le_ = ::GetLastError(); if(__le_ == 0) __le_ = (def_code);  __le_;})
+#define ENSURE_ERROR(def_code)			({int __le_ = ::GetLastError(); if(__le_ == NO_ERROR) __le_ = (def_code);  __le_;})
 #define ENSURE_ERROR_CANCELLED			ENSURE_ERROR(ERROR_CANCELLED)
 #define TRIGGER(expr)					EXECUTE_RESET_ERROR((expr))
 

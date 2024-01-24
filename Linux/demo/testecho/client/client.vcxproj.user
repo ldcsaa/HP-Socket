@@ -4,13 +4,13 @@
     <RemoteTarget>900728461;192.168.56.12 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-a fe80::a00:27ff:fe87:8fd -t 10 -l 10000 -e 1000 -b fe80::a00:27ff:feac:f66e%eth4 -n 0</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-a 127.0.0.1 -p 80 -n 0</RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <RemoteTarget>900728461;192.168.56.12 (username=bruce, port=22, authentication=Password)</RemoteTarget>
     <RemoteDebuggingMode>gdbserver</RemoteDebuggingMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommandArguments>-a fe80::a00:27ff:fe87:8fd -t 10 -l 10000 -e 1000 -b fe80::a00:27ff:feac:f66e%eth4 -n 0</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-a 127.0.0.1 -p 80 -n 0</RemoteDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <RemoteTarget>279903029;192.168.56.102 (username=, port=22, authentication=Password)</RemoteTarget>

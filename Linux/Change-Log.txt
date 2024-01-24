@@ -6,6 +6,7 @@ v6.0.1 Update:
 -----------------
 1. Optimize epoll multiplexing event processing to avoid the "shock group" problem.
 2. Automatically set unique thread names for HP-Socket worker threads to facilitate tracking and debugging.
+3. When TCP Client/Agent connects to the server synchronously, it supports setting the connection timeout through SetSyncConnectTimeout().
 
 ==========================================================================================
 v5.9.5 Update:

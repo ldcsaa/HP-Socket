@@ -789,7 +789,7 @@ void CUdpNode::AddFreeBufferObj(TUdpBufferObj* pBufferObj)
 EnHandleResult CUdpNode::FireSend(TUdpBufferObj* pBufferObj)
 {
 	TCHAR szAddress[60];
-	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
+	int iAddressLen = ARRAY_SIZE(szAddress);
 	ADDRESS_FAMILY usFamily;
 	USHORT usPort;
 
@@ -801,7 +801,7 @@ EnHandleResult CUdpNode::FireSend(TUdpBufferObj* pBufferObj)
 EnHandleResult CUdpNode::FireReceive(TUdpBufferObj* pBufferObj)
 {
 	TCHAR szAddress[60];
-	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
+	int iAddressLen = ARRAY_SIZE(szAddress);
 	ADDRESS_FAMILY usFamily;
 	USHORT usPort;
 
@@ -813,7 +813,7 @@ EnHandleResult CUdpNode::FireReceive(TUdpBufferObj* pBufferObj)
 EnHandleResult CUdpNode::FireError(TUdpBufferObj* pBufferObj, int iErrorCode)
 {
 	TCHAR szAddress[60];
-	int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
+	int iAddressLen = ARRAY_SIZE(szAddress);
 	ADDRESS_FAMILY usFamily;
 	USHORT usPort;
 

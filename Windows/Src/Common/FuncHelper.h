@@ -39,7 +39,7 @@
 #define ASSERT_CHECK_ERROR(expr, code)	{ASSERT(expr); CHECK_ERROR(expr, code);}
 #define ASSERT_CHECK_EINVAL(expr)		{ASSERT(expr); CHECK_EINVAL(expr);}
 
-#define CHECK_IS_ERROR(code)			(::GetLastError() == code)
+#define CHECK_IS_ERROR(code)			(::GetLastError() == (code))
 #define CONTINUE_IF_ERROR(code)			{if(CHECK_IS_ERROR(code)) continue;}
 #define BREAK_IF_ERROR(code)			{if(CHECK_IS_ERROR(code)) break;}
 
@@ -55,7 +55,7 @@
 
 #define EXECUTE_RESET_ERROR(expr)		(::SetLastError(0), (expr))
 #define EXECUTE_RESTORE_ERROR(expr)		{int __le_ = ::GetLastError(); (expr); ::SetLastError(__le_);}
-inline int ENSURE_ERROR(int def_code)	{int __le_ = ::GetLastError(); if(__le_ == 0) __le_ = (def_code);  return __le_;}
+inline int ENSURE_ERROR(int def_code)	{int __le_ = ::GetLastError(); if(__le_ == NO_ERROR) __le_ = (def_code);  return __le_;}
 #define ENSURE_ERROR_CANCELLED			ENSURE_ERROR(ERROR_CANCELLED)
 #define TRIGGER(expr)					EXECUTE_RESET_ERROR((expr))
 

@@ -56,6 +56,7 @@ BOOL CTcpAgent::CheckParams()
 {
 	if	((m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)								&&
 		(m_enOnSendSyncPolicy >= OSSP_NONE && m_enOnSendSyncPolicy <= OSSP_RECEIVE)				&&
+		((int)m_dwSyncConnectTimeout > 0)														&&
 		((int)m_dwMaxConnectionCount > 0 && m_dwMaxConnectionCount <= MAX_CONNECTION_COUNT)		&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
 		((int)m_dwSocketBufferSize >= MIN_SOCKET_BUFFER_SIZE)									&&
@@ -347,35 +348,35 @@ int CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCK
 
 	int result = HAS_ERROR;
 
-	if(m_bAsyncConnect)
+	VERIFY(::fcntl_SETFL(pSocketObj->socket, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
+
+	int rc = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
+
+	if(IS_NO_ERROR(rc) || IS_IO_PENDING_ERROR())
 	{
-		::fcntl_SETFL(pSocketObj->socket, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
-
-		int rc = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
-
-		if(IS_NO_ERROR(rc) || IS_IO_PENDING_ERROR())
+		if(m_bAsyncConnect)
 		{
 			if(m_ioDispatcher.AddFD(pSocketObj->socket, EPOLLOUT | EPOLLONESHOT, pSocketObj))
 				result = NO_ERROR;
 		}
-	}
-	else
-	{
-		if(::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
+		else
 		{
-			::fcntl_SETFL(pSocketObj->socket, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
+			if(IS_HAS_ERROR(result))
+				result = ::WaitForSocketWrite(pSocketObj->socket, m_dwSyncConnectTimeout);
 
-			pSocketObj->SetConnected();
-
-			if(TRIGGER(FireConnect(pSocketObj)) == HR_ERROR)
-				result = ENSURE_ERROR_CANCELLED;
-			else
+			if(IS_NO_ERROR(result))
 			{
-				UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
+				pSocketObj->SetConnected();
 
-				if(m_ioDispatcher.AddFD(pSocketObj->
-				   socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj))
-					result = NO_ERROR;
+				if(TRIGGER(FireConnect(pSocketObj)) == HR_ERROR)
+					result = ENSURE_ERROR_CANCELLED;
+				else
+				{
+					UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
+
+					if(!m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj))
+						result = HAS_ERROR;
+				}
 			}
 		}
 	}

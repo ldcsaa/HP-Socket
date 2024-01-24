@@ -73,7 +73,8 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 BOOL CTcpClient::CheckParams()
 {
-	if	(((int)m_dwSocketBufferSize > 0)									&&
+	if	(((int)m_dwSyncConnectTimeout > 0)									&&
+		((int)m_dwSocketBufferSize > 0)										&&
 		((int)m_dwFreeBufferPoolSize >= 0)									&&
 		((int)m_dwFreeBufferPoolHold >= 0)									&&
 		((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)			&&
@@ -186,32 +187,36 @@ BOOL CTcpClient::ConnectToServer(const HP_SOCKADDR& addrRemote, BOOL bAsyncConne
 {
 	BOOL isOK = FALSE;
 
-	if(bAsyncConnect)
+	VERIFY(::fcntl_SETFL(m_soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
+
+	int rc = ::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize());
+
+	if(IS_NO_ERROR(rc) || IS_IO_PENDING_ERROR())
 	{
-		VERIFY(::fcntl_SETFL(m_soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
-
-		int rc = ::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize());
-
-		if(IS_NO_ERROR(rc) || IS_IO_PENDING_ERROR())
+		if(bAsyncConnect)
 		{
 			m_nEvents	= POLLOUT;
 			isOK		= TRUE;
 		}
-	}
-	else
-	{
-		if(::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize()) != SOCKET_ERROR)
+		else
 		{
-			VERIFY(::fcntl_SETFL(m_soClient, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
+			if(IS_HAS_ERROR(rc))
+				rc = ::WaitForSocketWrite(m_soClient, m_dwSyncConnectTimeout);
 
-			SetConnected();
-
-			if(TRIGGER(FireConnect()) == HR_ERROR)
-				::WSASetLastError(ENSURE_ERROR_CANCELLED);
+			if(!IS_NO_ERROR(rc))
+				::WSASetLastError(rc);
 			else
 			{
-				m_nEvents = (SHORT)((m_lsSend.IsEmpty() ? 0 : POLLOUT) | (m_bPaused ? 0 : POLLIN) | POLLRDHUP);				
-				isOK	  = TRUE;
+				SetConnected();
+
+				if(TRIGGER(FireConnect()) == HR_ERROR)
+					::WSASetLastError(ENSURE_ERROR_CANCELLED);
+				else
+				{
+					m_nEvents = (SHORT)((m_lsSend.IsEmpty() ? 0 : POLLOUT) | (m_bPaused ? 0 : POLLIN) | POLLRDHUP);				
+					isOK	  = TRUE;
+				}
+
 			}
 		}
 	}

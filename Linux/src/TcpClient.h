@@ -68,6 +68,7 @@ public:
 	virtual BOOL IsSecure				() {return FALSE;}
 
 	virtual void SetReuseAddressPolicy	(EnReuseAddressPolicy enReusePolicy){ENSURE_HAS_STOPPED(); m_enReusePolicy			= enReusePolicy;}
+	virtual void SetSyncConnectTimeout	(DWORD dwSyncConnectTimeout)		{ENSURE_HAS_STOPPED(); m_dwSyncConnectTimeout	= dwSyncConnectTimeout;}
 	virtual void SetSocketBufferSize	(DWORD dwSocketBufferSize)			{ENSURE_HAS_STOPPED(); m_dwSocketBufferSize		= dwSocketBufferSize;}
 	virtual void SetKeepAliveTime		(DWORD dwKeepAliveTime)				{ENSURE_HAS_STOPPED(); m_dwKeepAliveTime		= dwKeepAliveTime;}
 	virtual void SetKeepAliveInterval	(DWORD dwKeepAliveInterval)			{ENSURE_HAS_STOPPED(); m_dwKeepAliveInterval	= dwKeepAliveInterval;}
@@ -77,6 +78,7 @@ public:
 	virtual void SetExtra				(PVOID pExtra)						{m_pExtra										= pExtra;}						
 
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
+	virtual DWORD GetSyncConnectTimeout	()	{return m_dwSyncConnectTimeout;}
 	virtual DWORD GetSocketBufferSize	()	{return m_dwSocketBufferSize;}
 	virtual DWORD GetKeepAliveTime		()	{return m_dwKeepAliveTime;}
 	virtual DWORD GetKeepAliveInterval	()	{return m_dwKeepAliveInterval;}
@@ -181,6 +183,7 @@ public:
 	, m_pExtra				(nullptr)
 	, m_pReserved			(nullptr)
 	, m_enReusePolicy		(RAP_ADDR_ONLY)
+	, m_dwSyncConnectTimeout(DEFAULT_SYNC_CONNECT_TIMEOUT)
 	, m_dwSocketBufferSize	(DEFAULT_TCP_SOCKET_BUFFER_SIZE)
 	, m_dwFreeBufferPoolSize(DEFAULT_CLIENT_FREE_BUFFER_POOL_SIZE)
 	, m_dwFreeBufferPoolHold(DEFAULT_CLIENT_FREE_BUFFER_POOL_HOLD)
@@ -206,6 +209,7 @@ private:
 	CONNID				m_dwConnID;
 
 	EnReuseAddressPolicy m_enReusePolicy;
+	DWORD				m_dwSyncConnectTimeout;
 	DWORD				m_dwSocketBufferSize;
 	DWORD				m_dwFreeBufferPoolSize;
 	DWORD				m_dwFreeBufferPoolHold;

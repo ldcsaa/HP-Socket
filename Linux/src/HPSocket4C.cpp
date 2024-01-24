@@ -1319,6 +1319,11 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpAgent_SendSmallFile(HP_Agent pAgent, HP_CONNID
 /**********************************************************************************/
 /***************************** TCP Agent 属性访问方法 *****************************/
 
+HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSyncConnectTimeout(HP_TcpAgent pAgent, DWORD dwSyncConnectTimeout)
+{
+	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSyncConnectTimeout(dwSyncConnectTimeout);
+}
+
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetSocketBufferSize(HP_TcpAgent pAgent, DWORD dwSocketBufferSize)
 {
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetSocketBufferSize(dwSocketBufferSize);
@@ -1337,6 +1342,11 @@ HPSOCKET_API void __HP_CALL HP_TcpAgent_SetKeepAliveInterval(HP_TcpAgent pAgent,
 HPSOCKET_API void __HP_CALL HP_TcpAgent_SetNoDelay(HP_TcpAgent pAgent, BOOL bNoDelay)
 {
 	C_HP_Object::ToSecond<ITcpAgent>(pAgent)->SetNoDelay(bNoDelay);
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSyncConnectTimeout(HP_TcpAgent pAgent)
+{
+	return C_HP_Object::ToSecond<ITcpAgent>(pAgent)->GetSyncConnectTimeout();
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_TcpAgent_GetSocketBufferSize(HP_TcpAgent pAgent)
@@ -1516,6 +1526,11 @@ HPSOCKET_API BOOL __HP_CALL HP_TcpClient_SendSmallFile(HP_Client pClient, LPCTST
 /**********************************************************************************/
 /***************************** TCP Client 属性访问方法 *****************************/
 
+HPSOCKET_API void __HP_CALL HP_TcpClient_SetSyncConnectTimeout(HP_TcpClient pClient, DWORD dwSyncConnectTimeout)
+{
+	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSyncConnectTimeout(dwSyncConnectTimeout);
+}
+
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetSocketBufferSize(HP_TcpClient pClient, DWORD dwSocketBufferSize)
 {
 	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetSocketBufferSize(dwSocketBufferSize);
@@ -1534,6 +1549,11 @@ HPSOCKET_API void __HP_CALL HP_TcpClient_SetKeepAliveInterval(HP_TcpClient pClie
 HPSOCKET_API void __HP_CALL HP_TcpClient_SetNoDelay(HP_TcpClient pClient, BOOL bNoDelay)
 {
 	C_HP_Object::ToSecond<ITcpClient>(pClient)->SetNoDelay(bNoDelay);
+}
+
+HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSyncConnectTimeout(HP_TcpClient pClient)
+{
+	return C_HP_Object::ToSecond<ITcpClient>(pClient)->GetSyncConnectTimeout();
 }
 
 HPSOCKET_API DWORD __HP_CALL HP_TcpClient_GetSocketBufferSize(HP_TcpClient pClient)

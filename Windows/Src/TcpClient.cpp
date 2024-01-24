@@ -80,7 +80,8 @@ BOOL CTcpClient::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConn
 
 BOOL CTcpClient::CheckParams()
 {
-	if	(((int)m_dwSocketBufferSize > 0)									&&
+	if	(((int)m_dwSyncConnectTimeout > 0)									&&
+		((int)m_dwSocketBufferSize > 0)										&&
 		((int)m_dwFreeBufferPoolSize >= 0)									&&
 		((int)m_dwFreeBufferPoolHold >= 0)									&&
 		((int)m_dwKeepAliveTime >= 1000 || m_dwKeepAliveTime == 0)			&&
@@ -206,17 +207,29 @@ BOOL CTcpClient::ConnectToServer(const HP_SOCKADDR& addrRemote, BOOL bAsyncConne
 	}
 	else
 	{
-		if(::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize()) != SOCKET_ERROR)
-		{
-			if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
-			{
-				SetConnected();
+		ENSURE(::SSO_NoBlock(m_soClient) == NO_ERROR);
 
-				if(TRIGGER(FireConnect()) == HR_ERROR)
-					::WSASetLastError(ENSURE_ERROR_CANCELLED);
-				else
-					isOK = TRUE;
+		int rc = ::connect(m_soClient, addrRemote.Addr(), addrRemote.AddrSize());
+		
+		if(IS_NO_ERROR(rc) || IS_WOULDBLOCK_ERROR())
+		{
+			if(IS_HAS_ERROR(rc))
+				rc = ::WaitForSocketWrite(m_soClient, m_dwSyncConnectTimeout);
+
+			if(IS_NO_ERROR(rc))
+			{
+				if(::WSAEventSelect(m_soClient, m_evSocket, FD_READ | FD_WRITE | FD_CLOSE) != SOCKET_ERROR)
+				{
+					SetConnected();
+
+					if(TRIGGER(FireConnect()) == HR_ERROR)
+						::WSASetLastError(ENSURE_ERROR_CANCELLED);
+					else
+						isOK = TRUE;
+				}
 			}
+			else
+				::WSASetLastError(rc);
 		}
 	}
 

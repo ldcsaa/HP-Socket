@@ -1,4 +1,15 @@
 # ======================================== #
+HP-Socket v6.0.1 API 更新列表：
+# ======================================== #
+--------------------
+1、TCP:
+--------------------
+HP_TcpAgent_SetSyncConnectTimeout			(增加)
+HP_TcpAgent_GetSyncConnectTimeout			(增加)
+HP_TcpClient_SetSyncConnectTimeout			(增加)
+HP_TcpClient_GetSyncConnectTimeout			(增加)
+
+# ======================================== #
 HP-Socket v5.9.2 API 更新列表：
 # ======================================== #
 --------------------
