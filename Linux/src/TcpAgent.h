@@ -91,8 +91,8 @@ public:
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetReuseAddressPolicy		(EnReuseAddressPolicy enReusePolicy)	{ENSURE_HAS_STOPPED(); m_enReusePolicy		= enReusePolicy;}
-	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); m_enSendPolicy		= enSendPolicy;}
-	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); m_enOnSendSyncPolicy	= enOnSendSyncPolicy;}
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); ASSERT(m_enSendPolicy == enSendPolicy);}
+	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); ASSERT(m_enOnSendSyncPolicy == enOnSendSyncPolicy);}
 	virtual void SetSyncConnectTimeout		(DWORD dwSyncConnectTimeout)	{ENSURE_HAS_STOPPED(); m_dwSyncConnectTimeout		= dwSyncConnectTimeout;}
 	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{ENSURE_HAS_STOPPED(); m_dwMaxConnectionCount		= dwMaxConnectionCount;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{ENSURE_HAS_STOPPED(); m_dwWorkerThreadCount		= dwWorkerThreadCount;}
@@ -214,7 +214,7 @@ private:
 private:
 	int CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszLocalAddress, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
 	int PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
-	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
+	int ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET& soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 
 	VOID HandleCmdSend		(const TDispContext* pContext, CONNID dwConnID);
 	VOID HandleCmdUnpause	(const TDispContext* pContext, CONNID dwConnID);
@@ -235,7 +235,7 @@ public:
 	, m_bAsyncConnect			(TRUE)
 	, m_enReusePolicy			(RAP_ADDR_ONLY)
 	, m_enSendPolicy			(SP_PACK)
-	, m_enOnSendSyncPolicy		(OSSP_NONE)
+	, m_enOnSendSyncPolicy		(OSSP_RECEIVE)
 	, m_dwSyncConnectTimeout	(DEFAULT_SYNC_CONNECT_TIMEOUT)
 	, m_dwMaxConnectionCount	(DEFAULT_CONNECTION_COUNT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)

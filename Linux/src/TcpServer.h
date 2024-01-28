@@ -93,8 +93,8 @@ public:
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetReuseAddressPolicy		(EnReuseAddressPolicy enReusePolicy)	{ENSURE_HAS_STOPPED(); ASSERT(m_enReusePolicy == enReusePolicy);}
-	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); m_enSendPolicy		= enSendPolicy;}
-	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); m_enOnSendSyncPolicy	= enOnSendSyncPolicy;}
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); ASSERT(m_enSendPolicy == enSendPolicy);}
+	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); ASSERT(m_enOnSendSyncPolicy == enOnSendSyncPolicy);}
 	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{ENSURE_HAS_STOPPED(); m_dwMaxConnectionCount		= dwMaxConnectionCount;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{ENSURE_HAS_STOPPED(); m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetSocketListenQueue		(DWORD dwSocketListenQueue)		{ENSURE_HAS_STOPPED(); m_dwSocketListenQueue		= dwSocketListenQueue;}
@@ -235,7 +235,7 @@ public:
 	, m_enState					(SS_STOPPED)
 	, m_enReusePolicy			(RAP_ADDR_AND_PORT)
 	, m_enSendPolicy			(SP_PACK)
-	, m_enOnSendSyncPolicy		(OSSP_NONE)
+	, m_enOnSendSyncPolicy		(OSSP_RECEIVE)
 	, m_dwMaxConnectionCount	(DEFAULT_CONNECTION_COUNT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)
 	, m_dwSocketListenQueue		(DEFAULT_TCP_SERVER_SOCKET_LISTEN_QUEUE)

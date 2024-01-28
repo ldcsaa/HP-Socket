@@ -752,7 +752,7 @@ VOID CTcpServer::OnAfterProcessIo(const TDispContext* pContext, PVOID pv, UINT e
 		ASSERT(rs && !(events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP)));
 
 		UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
-		m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj);
+		m_ioDispatcher.ModFD(pSocketObj->socket, evts | EPOLLRDHUP, pSocketObj);
 	}
 
 	pSocketObj->Decrement();
@@ -908,7 +908,7 @@ BOOL CTcpServer::HandleAccept(const TDispContext* pContext, UINT events)
 
 		UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
 
-		if(!m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP | EPOLLONESHOT, pSocketObj))
+		if(!m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP, pSocketObj))
 		{
 			AddFreeSocketObj(pSocketObj, SCF_ERROR, SO_ACCEPT, ::WSAGetLastError());
 			continue;
@@ -1102,7 +1102,7 @@ BOOL CTcpServer::DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], 
 
 int CTcpServer::SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount)
 {
-	int iPending = pSocketObj->Pending();
+	BOOL bPending = pSocketObj->IsPending();
 
 	for(int i = 0; i < iCount; i++)
 	{
@@ -1118,7 +1118,7 @@ int CTcpServer::SendInternal(TSocketObj* pSocketObj, const WSABUF pBuffers[], in
 		}
 	}
 
-	if(iPending == 0 && pSocketObj->IsPending())
+	if(!bPending && pSocketObj->IsPending())
 	{
 		if(!m_ioDispatcher.SendCommandByFD(pSocketObj->socket, DISP_CMD_SEND, pSocketObj->connID))
 			return ::GetLastError();

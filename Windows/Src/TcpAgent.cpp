@@ -1149,34 +1149,29 @@ BOOL CTcpAgent::Connect(LPCTSTR lpszRemoteAddress, USHORT usPort, CONNID* pdwCon
 {
 	ASSERT(lpszRemoteAddress && usPort != 0);
 
-	DWORD result	= NO_ERROR;
-	SOCKET soClient	= INVALID_SOCKET;
+	if(!HasStarted())
+	{
+		::SetLastError(ERROR_INVALID_STATE);
+		return FALSE;
+	}
 
 	if(!pdwConnID)
-		pdwConnID	= CreateLocalObject(CONNID);
+		pdwConnID = CreateLocalObject(CONNID);
 
 	*pdwConnID = 0;
 
 	HP_SOCKADDR addr;
+	HP_SCOPE_HOST host(lpszRemoteAddress);
+	SOCKET soClient = INVALID_SOCKET;
 
-	if(!HasStarted())
-		result = ERROR_INVALID_STATE;
-	else
+	DWORD result = CreateClientSocket(host.addr, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
+
+	if(result == NO_ERROR)
 	{
-		HP_SCOPE_HOST host(lpszRemoteAddress);
-
-		result = CreateClientSocket(host.addr, usPort, lpszLocalAddress, usLocalPort, soClient, addr);
+		result = PrepareConnect(*pdwConnID, soClient);
 
 		if(result == NO_ERROR)
-		{
-			result = PrepareConnect(*pdwConnID, soClient);
-
-			if(result == NO_ERROR)
-			{
-				result	 = ConnectToServer(*pdwConnID, host.name, soClient, addr, pExtra);
-				soClient = INVALID_SOCKET;
-			}
-		}
+			result = ConnectToServer(*pdwConnID, host.name, soClient, addr, pExtra);
 	}
 
 	if(result != NO_ERROR)
@@ -1257,7 +1252,7 @@ DWORD CTcpAgent::PrepareConnect(CONNID& dwConnID, SOCKET soClient)
 	return NO_ERROR;
 }
 
-DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra)
+DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCKET& soClient, const HP_SOCKADDR& addr, PVOID pExtra)
 {
 	TBufferObj* pBufferObj = GetFreeBufferObj();
 	TSocketObj* pSocketObj = GetFreeSocketObj(dwConnID, soClient);
@@ -1316,6 +1311,8 @@ DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SO
 			AddFreeSocketObj(pSocketObj, SCF_NONE);
 			AddFreeBufferObj(pBufferObj);
 		}
+
+		soClient = INVALID_SOCKET;
 	}
 
 	return result;

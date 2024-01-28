@@ -49,7 +49,7 @@
 #define HEAD_HOST		"Host:"
 #define HEAD_CONN		"Connection:"
 #define HEAD_PROXY_CONN	"Proxy-Connection:"
-#define HEAD_PROXY_AUTH	"Prxoy-Authenticate:"
+#define HEAD_PROXY_AUTH	"Proxy-Authorization:"
 #define HTTPS_RESP		"HTTP/1.1 200 Connection Established\r\nContent-Length: 0"
 #define IE_OPT_DIALOG	"rundll32.exe shell32.dll, Control_RunDLL inetcpl.cpl, , 4"
 

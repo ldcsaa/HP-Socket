@@ -73,14 +73,14 @@ private:
 	virtual VOID OnDispatchThreadEnd(THR_ID tid)												override;
 
 public:
-	virtual BOOL IsSecure				() {return FALSE;}
+	virtual BOOL IsSecure					() {return FALSE;}
 
 	virtual BOOL SetConnectionExtra(CONNID dwConnID, PVOID pExtra);
 	virtual BOOL GetConnectionExtra(CONNID dwConnID, PVOID* ppExtra);
 
 	virtual void SetReuseAddressPolicy		(EnReuseAddressPolicy enReusePolicy)	{ENSURE_HAS_STOPPED(); ASSERT(m_enReusePolicy == enReusePolicy);}
-	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); m_enSendPolicy		= enSendPolicy;}
-	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); m_enOnSendSyncPolicy	= enOnSendSyncPolicy;}
+	virtual void SetSendPolicy				(EnSendPolicy enSendPolicy)				{ENSURE_HAS_STOPPED(); ASSERT(m_enSendPolicy == enSendPolicy);}
+	virtual void SetOnSendSyncPolicy		(EnOnSendSyncPolicy enOnSendSyncPolicy)	{ENSURE_HAS_STOPPED(); ASSERT(m_enOnSendSyncPolicy == enOnSendSyncPolicy);}
 	virtual void SetMaxConnectionCount		(DWORD dwMaxConnectionCount)	{ENSURE_HAS_STOPPED(); m_dwMaxConnectionCount		= dwMaxConnectionCount;}
 	virtual void SetWorkerThreadCount		(DWORD dwWorkerThreadCount)		{ENSURE_HAS_STOPPED(); m_dwWorkerThreadCount		= dwWorkerThreadCount;}
 	virtual void SetFreeSocketObjLockTime	(DWORD dwFreeSocketObjLockTime)	{ENSURE_HAS_STOPPED(); m_dwFreeSocketObjLockTime	= dwFreeSocketObjLockTime;}
@@ -224,7 +224,7 @@ public:
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
 	, m_enSendPolicy			(SP_PACK)
-	, m_enOnSendSyncPolicy		(OSSP_NONE)
+	, m_enOnSendSyncPolicy		(OSSP_RECEIVE)
 	, m_enReusePolicy			(RAP_ADDR_AND_PORT)
 	, m_dwMaxConnectionCount	(DEFAULT_CONNECTION_COUNT)
 	, m_dwWorkerThreadCount		(DEFAULT_WORKER_THREAD_COUNT)

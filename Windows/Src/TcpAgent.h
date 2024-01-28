@@ -223,7 +223,7 @@ private:
 
 	DWORD CreateClientSocket( LPCTSTR lpszRemoteAddress, USHORT usPort, LPCTSTR lpszLocalAddress, USHORT usLocalPort, SOCKET& soClient, HP_SOCKADDR& addr);
 	DWORD PrepareConnect	(CONNID& dwConnID, SOCKET soClient);
-	DWORD ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteHosName, SOCKET soClient, const HP_SOCKADDR& addr, PVOID pExtra);
+	DWORD ConnectToServer	(CONNID dwConnID, LPCTSTR lpszRemoteHosName, SOCKET& soClient, const HP_SOCKADDR& addr, PVOID pExtra);
 	void ForceDisconnect	(CONNID dwConnID);
 
 	void HandleIo			(CONNID dwConnID, TSocketObj* pSocketObj, TBufferObj* pBufferObj, DWORD dwBytes, DWORD dwErrorCode);

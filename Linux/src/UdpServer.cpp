@@ -1161,7 +1161,7 @@ int CUdpServer::SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr)
 		ASSERT(pSocketObj->sndBuff.Length() > 0);
 	}
 
-	if(!bPending)
+	if(!bPending && pSocketObj->IsPending())
 		VERIFY(m_ioDispatcher.SendCommandByIndex(pSocketObj->index, DISP_CMD_SEND, pSocketObj->connID));
 
 	return NO_ERROR;
