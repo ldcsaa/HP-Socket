@@ -228,7 +228,7 @@ BOOL CUdpNode::StartAccept()
 	{
 		SOCKET& soListen = m_soListens[i];
 
-		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLET, TO_PVOID(&soListen)))
+		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLOUT | EPOLLET, TO_PVOID(&soListen)))
 			return FALSE;
 	}
 
@@ -603,12 +603,7 @@ BOOL CUdpNode::HandleReceive(const TDispContext* pContext, int flag)
 
 BOOL CUdpNode::HandleSend(const TDispContext* pContext, int flag, int rd)
 {
-	int idx			 = pContext->GetIndex();
-	SOCKET& soListen = m_soListens[idx];
-
-	m_ioDispatcher.ModFD(soListen, EPOLLIN | EPOLLET, TO_PVOID(&soListen));
-
-	HandleCmdSend(idx, flag);
+	HandleCmdSend(pContext->GetIndex(), flag);
 
 	return TRUE;
 }
@@ -639,9 +634,6 @@ VOID CUdpNode::HandleCmdSend(int idx, int flag)
 				CCriSecLock locallock(m_csSends[idx]);
 				sndBuff.PushFront(bufPtr.Detach());
 			}
-
-			SOCKET& soListen = m_soListens[idx];
-			m_ioDispatcher.ModFD(soListen, EPOLLOUT | EPOLLIN | EPOLLET, TO_PVOID(&soListen));
 
 			break;
 		}

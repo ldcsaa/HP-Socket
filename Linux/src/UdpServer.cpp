@@ -186,7 +186,7 @@ BOOL CUdpServer::StartAccept()
 	{
 		SOCKET& soListen = m_soListens[i];
 
-		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLET, TO_PVOID(&soListen)))
+		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLOUT | EPOLLET, TO_PVOID(&soListen)))
 			return FALSE;
 	}
 
@@ -966,13 +966,8 @@ void CUdpServer::HandleZeroBytes(TUdpSocketObj* pSocketObj)
 
 BOOL CUdpServer::HandleSend(const TDispContext* pContext, int flag)
 {
-	int idx				= pContext->GetIndex();
-	SOCKET& soListen	= m_soListens[idx];
-	CSendQueue& quSend	= m_quSends[idx];
-
-	m_ioDispatcher.ModFD(soListen, EPOLLIN | EPOLLET, TO_PVOID(&soListen));
-
-	CONNID dwConnID = 0;
+	CSendQueue& quSend	= m_quSends[pContext->GetIndex()];
+	CONNID dwConnID		= 0;
 
 	while(quSend.PopFront(&dwConnID))
 		HandleCmdSend(dwConnID, flag);
@@ -1016,9 +1011,6 @@ VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
 			}
 
 			m_quSends[pSocketObj->index].PushBack(dwConnID);
-
-			SOCKET& soListen = m_soListens[pSocketObj->index];
-			m_ioDispatcher.ModFD(soListen, EPOLLOUT | EPOLLIN | EPOLLET, TO_PVOID(&soListen));
 
 			break;
 		}
