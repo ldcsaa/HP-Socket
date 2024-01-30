@@ -41,21 +41,24 @@ EnHandleResult CUdpServer::TriggerFireAccept(TUdpSocketObj* pSocketObj)
 EnHandleResult CUdpServer::TriggerFireReceive(TUdpSocketObj* pSocketObj, TUdpBufferObj* pBufferObj)
 {
 	EnHandleResult rs = (EnHandleResult)HR_CLOSED;
+	BOOL bParallel	  = (m_enOnSendSyncPolicy != OSSP_RECEIVE);
 
 	WSABUF& buff = pBufferObj->buff;
 
-	if(!::IsUdpCloseNotify((BYTE*)buff.buf, buff.len))
-	{
-		if(TUdpSocketObj::IsValid(pSocketObj))
-		{
-			CReentrantReadLock locallock(pSocketObj->csRecv);
+	if(::IsUdpCloseNotify((BYTE*)buff.buf, buff.len))
+		return rs;
 
-			if(TUdpSocketObj::IsValid(pSocketObj))
-			{
-				rs = TRIGGER(FireReceive(pSocketObj, (BYTE*)buff.buf, buff.len));
-			}
-		}
+	if(!TUdpSocketObj::IsValid(pSocketObj))
+		return rs;
+
+	bParallel ? pSocketObj->csRecv.WaitToRead() : pSocketObj->csRecv.WaitToWrite();
+
+	if(TUdpSocketObj::IsValid(pSocketObj))
+	{
+		rs = TRIGGER(FireReceive(pSocketObj, (BYTE*)buff.buf, buff.len));
 	}
+
+	bParallel ? pSocketObj->csRecv.ReadDone() : pSocketObj->csRecv.WriteDone();
 
 	return rs;
 }
@@ -68,16 +71,20 @@ EnHandleResult CUdpServer::TriggerFireSend(TUdpSocketObj* pSocketObj, TUdpBuffer
 		rs = TRIGGER(FireSend(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len));
 	else
 	{
-		ASSERT(m_enOnSendSyncPolicy == OSSP_CLOSE);
+		ASSERT(m_enOnSendSyncPolicy >= OSSP_CLOSE && m_enOnSendSyncPolicy <= OSSP_RECEIVE);
 
 		if(TUdpSocketObj::IsValid(pSocketObj))
 		{
-			CCriSecLock locallock(pSocketObj->csSend);
+			BOOL bParallel = (m_enOnSendSyncPolicy != OSSP_RECEIVE);
+
+			bParallel ? pSocketObj->csSend.Lock() : pSocketObj->csRecv.WaitToWrite();
 
 			if(TUdpSocketObj::IsValid(pSocketObj))
 			{
 				rs = TRIGGER(FireSend(pSocketObj, (BYTE*)pBufferObj->buff.buf, pBufferObj->buff.len));
 			}
+
+			bParallel ? pSocketObj->csSend.Unlock() : pSocketObj->csRecv.WriteDone();
 		}
 	}
 
@@ -131,7 +138,7 @@ BOOL CUdpServer::Start(LPCTSTR lpszBindAddress, USHORT usPort)
 BOOL CUdpServer::CheckParams()
 {
 	if	((m_enSendPolicy >= SP_PACK && m_enSendPolicy <= SP_DIRECT)								&&
-		(m_enOnSendSyncPolicy >= OSSP_NONE && m_enOnSendSyncPolicy <= OSSP_CLOSE)				&&
+		(m_enOnSendSyncPolicy >= OSSP_NONE && m_enOnSendSyncPolicy <= OSSP_RECEIVE)				&&
 		((int)m_dwMaxConnectionCount > 0 && m_dwMaxConnectionCount <= MAX_CONNECTION_COUNT)		&&
 		((int)m_dwWorkerThreadCount > 0 && m_dwWorkerThreadCount <= MAX_WORKER_THREAD_COUNT)	&&
 		((int)m_dwFreeSocketObjLockTime >= 1000)												&&
