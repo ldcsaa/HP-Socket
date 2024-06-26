@@ -1,0 +1,13 @@
+authorityKeyIdentifier = keyid,issuer
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+DNS.2 = hpsocket.org
+DNS.3 = *.hpsocket.org
+DNS.4 = hpsocket.com
+DNS.5 = *.hpsocket.com
+DNS.6 = hpsocket.net
+DNS.7 = *.hpsocket.net

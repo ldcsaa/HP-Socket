@@ -205,7 +205,6 @@
     <ClInclude Include="..\..\..\Src\Common\BufferPool.h" />
     <ClInclude Include="..\..\..\Src\Common\BufferPtr.h" />
     <ClInclude Include="..\..\..\Src\Common\CriticalSection.h" />
-    <ClInclude Include="..\..\..\Src\Common\crypto\crypto.h" />
     <ClInclude Include="..\..\..\Src\Common\Event.h" />
     <ClInclude Include="..\..\..\Src\Common\FuncHelper.h" />
     <ClInclude Include="..\..\..\Src\Common\GeneralHelper.h" />
@@ -228,6 +227,7 @@
     <ClInclude Include="..\..\..\Src\Common\SysHelper.h" />
     <ClInclude Include="..\..\..\Src\Common\WaitFor.h" />
     <ClInclude Include="..\..\..\Src\Common\Win32Helper.h" />
+    <ClInclude Include="..\..\Global\crypto.h" />
     <ClInclude Include="..\..\Global\helper.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientDlg.h" />
@@ -236,7 +236,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Src\Common\BufferPool.cpp" />
-    <ClCompile Include="..\..\..\Src\Common\crypto\crypto.cpp" />
     <ClCompile Include="..\..\..\Src\Common\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\Src\Common\http\llhttp_api.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -272,6 +271,7 @@
     <ClCompile Include="..\..\..\Src\SocketHelper.cpp" />
     <ClCompile Include="..\..\..\Src\Common\SysHelper.cpp" />
     <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp" />
+    <ClCompile Include="..\..\Global\crypto.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientDlg.cpp" />

@@ -312,7 +312,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>jemalloc.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -340,7 +340,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>jemalloc.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -368,7 +368,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>jemalloc.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -396,7 +396,7 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>jemalloc.lib;brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>brotli.lib;zlib.lib;crypt32.lib;libssl.lib;libcrypto.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />

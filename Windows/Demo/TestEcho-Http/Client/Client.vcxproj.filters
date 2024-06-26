@@ -25,9 +25,6 @@
     <Filter Include="Common\http">
       <UniqueIdentifier>{a16e6295-bfd3-48b7-a0a1-829f27e46a2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\crypto">
-      <UniqueIdentifier>{769652b3-15d8-4f11-8806-f35c44fff35f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -129,8 +126,8 @@
     <ClInclude Include="Resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\Common\crypto\crypto.h">
-      <Filter>Common\crypto</Filter>
+    <ClInclude Include="..\..\Global\crypto.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -194,8 +191,8 @@
     <ClCompile Include="..\..\..\Src\Common\SysHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Src\Common\crypto\crypto.cpp">
-      <Filter>Common\crypto</Filter>
+    <ClCompile Include="..\..\Global\crypto.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

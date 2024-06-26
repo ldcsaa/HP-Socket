@@ -140,16 +140,15 @@
     <RemoteIntRelDir>$(RemoteProjectRelDir)/$(ProjectName)/$(IntDir)</RemoteIntRelDir>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\common\crypto\Crypto.cpp" />
     <ClCompile Include="..\..\..\src\common\FileHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\FuncHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\SysHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\Thread.cpp" />
+    <ClCompile Include="..\..\global\Crypto.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\common\crypto\Crypto.h" />
     <ClInclude Include="..\..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\..\src\common\FuncHelper.h" />
     <ClInclude Include="..\..\..\src\common\GeneralHelper.h" />
@@ -159,6 +158,7 @@
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h" />
     <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C-SSL.h" />
     <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h" />
+    <ClInclude Include="..\..\global\Crypto.h" />
     <ClInclude Include="..\..\Global\helper.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

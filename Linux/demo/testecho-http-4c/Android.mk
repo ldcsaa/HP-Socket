@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-4c-server
 LOCAL_SRC_FILES  := server/server.cpp \
 					../global/helper.cpp \
-					../../src/common/crypto/Crypto.cpp \
+					../global/Crypto.cpp \
 					../../src/common/FileHelper.cpp \
 					../../src/common/FuncHelper.cpp \
 					../../src/common/SysHelper.cpp \
@@ -22,7 +22,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-4c-client
 LOCAL_SRC_FILES  := client/client.cpp \
 					../global/helper.cpp \
-					../../src/common/crypto/Crypto.cpp \
+					../global/Crypto.cpp \
 					../../src/common/FileHelper.cpp \
 					../../src/common/FuncHelper.cpp \
 					../../src/common/SysHelper.cpp \
@@ -39,7 +39,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-4c-agent
 LOCAL_SRC_FILES  := agent/agent.cpp \
 					../global/helper.cpp \
-					../../src/common/crypto/Crypto.cpp \
+					../global/Crypto.cpp \
 					../../src/common/FileHelper.cpp \
 					../../src/common/FuncHelper.cpp \
 					../../src/common/SysHelper.cpp \
@@ -56,7 +56,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-4c-syncclient
 LOCAL_SRC_FILES  := syncclient/syncclient.cpp \
 					../global/helper.cpp \
-					../../src/common/crypto/Crypto.cpp \
+					../global/Crypto.cpp \
 					../../src/common/FileHelper.cpp \
 					../../src/common/FuncHelper.cpp \
 					../../src/common/SysHelper.cpp \

@@ -25,9 +25,6 @@
     <Filter Include="Common\http">
       <UniqueIdentifier>{a16e6295-bfd3-48b7-a0a1-829f27e46a2a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\crypto">
-      <UniqueIdentifier>{769652b3-15d8-4f11-8806-f35c44fff35e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -117,9 +114,6 @@
     <ClInclude Include="..\..\..\Src\Common\WaitFor.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\Common\crypto\crypto.h">
-      <Filter>Common\crypto</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -131,6 +125,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Src\Common\http\llhttp_url.h">
       <Filter>Common\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Global\crypto.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -179,9 +176,6 @@
     <ClCompile Include="..\..\..\Src\Common\SysHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Src\Common\crypto\crypto.cpp">
-      <Filter>Common\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -196,6 +190,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Src\Common\http\llhttp_url.c">
       <Filter>Common\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Global\crypto.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

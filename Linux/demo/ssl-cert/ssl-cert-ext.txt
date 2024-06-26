@@ -1,0 +1,13 @@
+authorityKeyIdentifier = keyid,issuer
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+DNS.2 = jessma.org
+DNS.3 = *.jessma.org
+DNS.4 = jessma.com
+DNS.5 = *.jessma.com
+DNS.6 = jessma.net
+DNS.7 = *.jessma.net

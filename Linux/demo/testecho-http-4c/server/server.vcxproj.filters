@@ -13,9 +13,6 @@
     <Filter Include="Global">
       <UniqueIdentifier>{88ead97d-e618-4da0-8572-fcfb5e5cd08c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Crypto">
-      <UniqueIdentifier>{7349f651-e17e-46f0-96f2-b4675406db07}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="server.cpp">
@@ -33,11 +30,11 @@
     <ClCompile Include="..\..\Global\helper.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\crypto\Crypto.cpp">
-      <Filter>Common\Crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Thread.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\global\Crypto.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,14 +62,14 @@
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\crypto\Crypto.h">
-      <Filter>Common\Crypto</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C-SSL.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h">
       <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\global\Crypto.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

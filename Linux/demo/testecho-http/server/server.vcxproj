@@ -212,7 +212,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\common\BufferPool.cpp" />
-    <ClCompile Include="..\..\..\src\common\crypto\Crypto.cpp" />
     <ClCompile Include="..\..\..\src\common\Event.cpp" />
     <ClCompile Include="..\..\..\src\common\FileHelper.cpp" />
     <ClCompile Include="..\..\..\src\common\FuncHelper.cpp" />
@@ -232,6 +231,7 @@
     <ClCompile Include="..\..\..\src\SSLHelper.cpp" />
     <ClCompile Include="..\..\..\src\SSLServer.cpp" />
     <ClCompile Include="..\..\..\src\TcpServer.cpp" />
+    <ClCompile Include="..\..\global\Crypto.cpp" />
     <ClCompile Include="..\..\Global\helper.cpp" />
     <ClCompile Include="server.cpp" />
   </ItemGroup>
@@ -239,7 +239,6 @@
     <ClInclude Include="..\..\..\src\common\BufferPool.h" />
     <ClInclude Include="..\..\..\src\common\BufferPtr.h" />
     <ClInclude Include="..\..\..\src\common\CriSec.h" />
-    <ClInclude Include="..\..\..\src\common\crypto\Crypto.h" />
     <ClInclude Include="..\..\..\src\common\Event.h" />
     <ClInclude Include="..\..\..\src\common\FileHelper.h" />
     <ClInclude Include="..\..\..\src\common\FuncHelper.h" />
@@ -269,6 +268,7 @@
     <ClInclude Include="..\..\..\src\SSLHelper.h" />
     <ClInclude Include="..\..\..\src\SSLServer.h" />
     <ClInclude Include="..\..\..\src\TcpServer.h" />
+    <ClInclude Include="..\..\global\Crypto.h" />
     <ClInclude Include="..\..\Global\helper.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

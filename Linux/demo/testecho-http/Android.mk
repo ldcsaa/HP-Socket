@@ -4,7 +4,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-server
 LOCAL_SRC_FILES  := server/server.cpp \
-					../global/helper.cpp
+					../global/helper.cpp \
+					../global/Crypto.cpp
 LOCAL_WHOLE_STATIC_LIBRARIES := $(MY_WHOLE_STATIC_LIBRARIES) hpsocket
 LOCAL_C_INCLUDES := $(MY_C_INCLUDES)
 LOCAL_CFLAGS     := $(MY_CFLAGS) -D_NEED_SSL -D_NEED_HTTP
@@ -16,7 +17,8 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-client
 LOCAL_SRC_FILES  := client/client.cpp \
-					../global/helper.cpp
+					../global/helper.cpp \
+					../global/Crypto.cpp
 LOCAL_WHOLE_STATIC_LIBRARIES := $(MY_WHOLE_STATIC_LIBRARIES) hpsocket
 LOCAL_C_INCLUDES := $(MY_C_INCLUDES)
 LOCAL_CFLAGS     := $(MY_CFLAGS) -D_NEED_SSL -D_NEED_HTTP
@@ -28,7 +30,8 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-agent
 LOCAL_SRC_FILES  := agent/agent.cpp \
-					../global/helper.cpp
+					../global/helper.cpp \
+					../global/Crypto.cpp
 LOCAL_WHOLE_STATIC_LIBRARIES := $(MY_WHOLE_STATIC_LIBRARIES) hpsocket
 LOCAL_C_INCLUDES := $(MY_C_INCLUDES)
 LOCAL_CFLAGS     := $(MY_CFLAGS) -D_NEED_SSL -D_NEED_HTTP
@@ -40,7 +43,8 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE     := hp-testecho-http-syncclient
 LOCAL_SRC_FILES  := syncclient/syncclient.cpp \
-					../global/helper.cpp
+					../global/helper.cpp \
+					../global/Crypto.cpp
 LOCAL_WHOLE_STATIC_LIBRARIES := $(MY_WHOLE_STATIC_LIBRARIES) hpsocket
 LOCAL_C_INCLUDES := $(MY_C_INCLUDES)
 LOCAL_CFLAGS     := $(MY_CFLAGS) -D_NEED_SSL -D_NEED_HTTP

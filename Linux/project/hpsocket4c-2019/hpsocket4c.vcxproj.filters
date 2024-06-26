@@ -22,9 +22,6 @@
     <Filter Include="Global">
       <UniqueIdentifier>{4c9b4352-e894-44ad-ae59-b36cbebb43d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Crypto">
-      <UniqueIdentifier>{4414e583-3d94-4ed4-9450-651bc82f5cef}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Http">
       <UniqueIdentifier>{ff0fa6b2-e08e-4659-a4f3-0cb11a0b9288}</UniqueIdentifier>
     </Filter>
@@ -119,9 +116,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\HPSocket4C-SSL.cpp">
       <Filter>Global</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\crypto\Crypto.cpp">
-      <Filter>Common\Crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\HttpAgent.cpp">
       <Filter>HTTP</Filter>
@@ -304,9 +298,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\hpsocket\HPSocket4C-SSL.h">
       <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\common\crypto\Crypto.h">
-      <Filter>Common\Crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\HttpAgent.h">
       <Filter>HTTP</Filter>

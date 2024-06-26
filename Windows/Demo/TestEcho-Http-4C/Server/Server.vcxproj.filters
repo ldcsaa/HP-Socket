@@ -22,9 +22,6 @@
     <Filter Include="HPSocket">
       <UniqueIdentifier>{f91de9d1-99d3-4318-8989-0a58646693cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\crypto">
-      <UniqueIdentifier>{89ee84e7-6457-4a79-90e6-3f0f1a79c3c2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -69,8 +66,8 @@
     <ClInclude Include="..\..\..\Src\Common\WaitFor.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\Common\crypto\crypto.h">
-      <Filter>Common\crypto</Filter>
+    <ClInclude Include="..\..\Global\crypto.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -92,8 +89,8 @@
     <ClCompile Include="..\..\..\Src\Common\WaitFor.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Src\Common\crypto\crypto.cpp">
-      <Filter>Common\crypto</Filter>
+    <ClCompile Include="..\..\Global\crypto.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

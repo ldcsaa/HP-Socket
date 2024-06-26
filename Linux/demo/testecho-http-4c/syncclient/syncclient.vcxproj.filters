@@ -13,9 +13,6 @@
     <Filter Include="Global">
       <UniqueIdentifier>{88ead97d-e618-4da0-8572-fcfb5e5cd08d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Crypto">
-      <UniqueIdentifier>{755b1b75-9d38-4e86-926f-8a955faf20b7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="syncclient.cpp">
@@ -23,9 +20,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Global\helper.cpp">
       <Filter>Global</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\crypto\Crypto.cpp">
-      <Filter>Common\Crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\FileHelper.cpp">
       <Filter>Common</Filter>
@@ -39,13 +33,13 @@
     <ClCompile Include="..\..\..\src\common\Thread.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\global\Crypto.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Global\helper.h">
       <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\common\crypto\Crypto.h">
-      <Filter>Common\Crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\hpsocket\HPTypeDef.h">
       <Filter>HPSocket</Filter>
@@ -73,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\hpsocket\HPSocket4C.h">
       <Filter>HPSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\global\Crypto.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

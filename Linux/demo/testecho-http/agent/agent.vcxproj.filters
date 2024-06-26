@@ -13,9 +13,6 @@
     <Filter Include="Global">
       <UniqueIdentifier>{88ead97d-e618-4da0-8572-fcfb5e5cd08c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Crypto">
-      <UniqueIdentifier>{0589b081-d548-4a72-a6c3-c5040bc1bfe3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Http">
       <UniqueIdentifier>{2e158545-c647-4024-a9ab-a6f3521358f4}</UniqueIdentifier>
     </Filter>
@@ -66,9 +63,6 @@
     <ClCompile Include="..\..\..\src\HttpHelper.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\crypto\Crypto.cpp">
-      <Filter>Common\Crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\SSLAgent.cpp">
       <Filter>HPSocket</Filter>
     </ClCompile>
@@ -89,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\http\llhttp_url.c">
       <Filter>Common\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\global\Crypto.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,9 +176,6 @@
     <ClInclude Include="..\..\..\src\HttpHelper.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\crypto\Crypto.h">
-      <Filter>Common\Crypto</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\SSLAgent.h">
       <Filter>HPSocket</Filter>
     </ClInclude>
@@ -193,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\common\http\llhttp_url.h">
       <Filter>Common\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\global\Crypto.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
