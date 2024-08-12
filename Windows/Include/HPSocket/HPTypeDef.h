@@ -208,6 +208,7 @@ typedef enum EnSocketError
 	SE_NETWORK					= 12,		// 网络错误
 	SE_DATA_PROC				= 13,		// 数据处理错误
 	SE_DATA_SEND				= 14,		// 数据发送失败
+	SE_GC_START					= 15,		// 垃圾回收启动失败
 
 	/***** SSL Socket 扩展操作结果代码 *****/
 	SE_SSL_ENV_NOT_READY		= 101,		// SSL 环境未就绪

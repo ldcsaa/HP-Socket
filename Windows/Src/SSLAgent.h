@@ -64,6 +64,8 @@ protected:
 
 	virtual void OnWorkerThreadEnd(THR_ID dwThreadID);
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
+
 protected:
 	virtual BOOL StartSSLHandShake(TSocketObj* pSocketObj);
 

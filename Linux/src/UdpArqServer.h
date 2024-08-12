@@ -55,6 +55,8 @@ protected:
 	virtual void Reset();
 	virtual void OnWorkerThreadStart(THR_ID dwThreadID);
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
+
 public:
 	virtual void SetNoDelay				(BOOL bNoDelay)				{ENSURE_HAS_STOPPED(); m_arqAttr.bNoDelay			= bNoDelay;}
 	virtual void SetTurnoffCongestCtrl	(BOOL bTurnOff)				{ENSURE_HAS_STOPPED(); m_arqAttr.bTurnoffNc			= bTurnOff;}

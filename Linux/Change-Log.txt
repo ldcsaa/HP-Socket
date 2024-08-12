@@ -4,6 +4,20 @@ v6.0.1 Update:
 
 > Major Upadate
 -----------------
+1. Supports scheduled garbage memory recovery and passive garbage memory recovery (by default, scheduled recovery is used with a recovery interval of 15 seconds).
+
+> Third-party library Upadate
+-----------------
+1. openssl upgrade to version 3.0.14.
+2. llhttp upgrade to version 9.2.1.
+3. mimalloc upgrade to version 2.1.7.
+
+==========================================================================================
+v6.0.1 Update:
+==========================================================================================
+
+> Major Upadate
+-----------------
 1. Optimize epoll multiplexing event processing to avoid the "shock group" problem.
 2. Automatically set unique thread names for HP-Socket worker threads to facilitate tracking and debugging.
 3. When TCP Client/Agent connects to the server synchronously, it supports setting the connection timeout through SetSyncConnectTimeout().

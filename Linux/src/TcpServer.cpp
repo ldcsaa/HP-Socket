@@ -179,7 +179,19 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 
 BOOL CTcpServer::CreateWorkerThreads()
 {
-	return m_ioDispatcher.Start(this, m_dwAcceptSocketCount, m_dwWorkerThreadCount);
+	DWORD dwWorkerThreadCount = m_dwWorkerThreadCount
+#ifdef USE_EXTERNAL_GC
+														+ 1
+#endif
+														;
+
+	if(!m_ioDispatcher.Start(this, m_dwAcceptSocketCount, dwWorkerThreadCount))
+	{
+		SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 BOOL CTcpServer::StartAccept()
@@ -189,8 +201,21 @@ BOOL CTcpServer::StartAccept()
 		SOCKET& soListen = m_soListens[i];
 
 		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLET, TO_PVOID(&soListen)))
+		{
+			SetLastError(SE_SOCKE_ATTACH_TO_CP, __FUNCTION__, ::WSAGetLastError());
 			return FALSE;
+		}
 	}
+
+#ifdef USE_EXTERNAL_GC
+	m_fdGCTimer = m_ioDispatcher.AddTimer(m_dwWorkerThreadCount, GC_CHECK_INTERVAL, this);
+
+	if(IS_INVALID_FD(m_fdGCTimer))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+#endif
 
 	return TRUE;
 }
@@ -267,6 +292,14 @@ void CTcpServer::ReleaseFreeSocket()
 {
 	m_lsFreeSocket.Clear();
 
+#ifdef USE_EXTERNAL_GC
+	if(IS_VALID_FD(m_fdGCTimer))
+	{
+		close(m_fdGCTimer);
+		m_fdGCTimer = INVALID_FD;
+	}
+#endif
+
 	ReleaseGCSocketObj(TRUE);
 	VERIFY(m_lsGCSocket.IsEmpty());
 }
@@ -326,7 +359,9 @@ void CTcpServer::AddFreeSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFl
 	m_bfActiveSockets.Remove(pSocketObj->connID);
 	TSocketObj::Release(pSocketObj);
 
+#ifndef USE_EXTERNAL_GC
 	ReleaseGCSocketObj();
+#endif
 
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 		m_lsGCSocket.PushBack(pSocketObj);
@@ -721,6 +756,13 @@ BOOL CTcpServer::OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT 
 	if(pv == &m_soListens[pContext->GetIndex()])
 	{
 		HandleAccept(pContext, events);
+		return FALSE;
+	}
+	else if(pv == this)
+	{
+		ReleaseGCSocketObj(FALSE);
+		::ReadTimer(m_fdGCTimer);
+
 		return FALSE;
 	}
 

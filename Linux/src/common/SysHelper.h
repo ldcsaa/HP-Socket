@@ -49,6 +49,9 @@ using namespace std;
 /* 默认内存块缓存池回收阀值 */
 #define DEFAULT_BUFFER_CACHE_POOL_HOLD	1024
 
+/* 使用外部垃圾回收 */
+#define USE_EXTERNAL_GC					1
+
 
 #define SysGetSystemConfig				sysconf
 #define SysGetSystemInfo				sysinfo

@@ -164,6 +164,8 @@ protected:
 	virtual void OnWorkerThreadStart(THR_ID dwThreadID) {}
 	virtual void OnWorkerThreadEnd(THR_ID dwThreadID) {}
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
+
 	BOOL DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	BOOL DoSendPackets(TSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	TSocketObj* FindSocketObj(CONNID dwConnID);
@@ -209,7 +211,6 @@ private:
 	TSocketObj*	CreateSocketObj();
 	void		DeleteSocketObj(TSocketObj* pSocketObj);
 	BOOL		InvalidSocketObj(TSocketObj* pSocketObj);
-	void		ReleaseGCSocketObj(BOOL bForce = FALSE);
 
 	void		AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteHostName, PVOID pExtra);
 	void		CloseClientSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SD_SEND);
@@ -218,6 +219,7 @@ private:
 	friend BOOL ContinueReceive<>(CTcpAgent* pThis, TSocketObj* pSocketObj, TBufferObj* pBufferObj, EnHandleResult& hr);
 
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
+	static void WINAPI GCProc(LPVOID pv, BOOLEAN bTimerFired);
 
 	EnIocpAction CheckIocpCommand(OVERLAPPED* pOverlapped, DWORD dwBytes, ULONG_PTR ulCompKey);
 
@@ -318,6 +320,8 @@ private:
 	EnSocketError		m_enLastError;
 	HP_SOCKADDR			m_soAddr;
 	vector<HANDLE>		m_vtWorkerThreads;
+
+	CGCTimerQueue		m_tqGC;
 
 	CPrivateHeap		m_phSocket;
 	CBufferObjPool		m_bfObjPool;

@@ -155,7 +155,29 @@ BOOL CTcpAgent::ParseBindAddress(LPCTSTR lpszBindAddress)
 
 BOOL CTcpAgent::CreateWorkerThreads()
 {
-	return m_ioDispatcher.Start(this, DEFAULT_WORKER_MAX_EVENT_COUNT, m_dwWorkerThreadCount);
+	DWORD dwWorkerThreadCount = m_dwWorkerThreadCount
+#ifdef USE_EXTERNAL_GC
+														+ 1
+#endif
+														;
+
+	if(!m_ioDispatcher.Start(this, DEFAULT_WORKER_MAX_EVENT_COUNT, dwWorkerThreadCount))
+	{
+		SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+
+#ifdef USE_EXTERNAL_GC
+	m_fdGCTimer = m_ioDispatcher.AddTimer(m_dwWorkerThreadCount, GC_CHECK_INTERVAL, this);
+
+	if(IS_INVALID_FD(m_fdGCTimer))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+#endif
+
+	return TRUE;
 }
 
 BOOL CTcpAgent::Stop()
@@ -212,6 +234,14 @@ void CTcpAgent::ReleaseClientSocket()
 void CTcpAgent::ReleaseFreeSocket()
 {
 	m_lsFreeSocket.Clear();
+
+#ifdef USE_EXTERNAL_GC
+	if(IS_VALID_FD(m_fdGCTimer))
+	{
+		close(m_fdGCTimer);
+		m_fdGCTimer = INVALID_FD;
+	}
+#endif
 
 	ReleaseGCSocketObj(TRUE);
 	VERIFY(m_lsGCSocket.IsEmpty());
@@ -428,7 +458,9 @@ void CTcpAgent::AddFreeSocketObj(TAgentSocketObj* pSocketObj, EnSocketCloseFlag 
 	m_bfActiveSockets.Remove(pSocketObj->connID);
 	TAgentSocketObj::Release(pSocketObj);
 
+#ifndef USE_EXTERNAL_GC
 	ReleaseGCSocketObj();
+#endif
 
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 		m_lsGCSocket.PushBack(pSocketObj);
@@ -860,6 +892,14 @@ BOOL CTcpAgent::PauseReceive(CONNID dwConnID, BOOL bPause)
 
 BOOL CTcpAgent::OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT events)
 {
+	if(pv == this)
+	{
+		ReleaseGCSocketObj(FALSE);
+		::ReadTimer(m_fdGCTimer);
+
+		return FALSE;
+	}
+
 	TAgentSocketObj* pSocketObj = (TAgentSocketObj*)(pv);
 
 	if(!TAgentSocketObj::IsValid(pSocketObj))

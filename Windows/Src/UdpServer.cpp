@@ -252,8 +252,6 @@ BOOL CUdpServer::CreateCompletePort()
 
 BOOL CUdpServer::CreateWorkerThreads()
 {
-	BOOL isOK = TRUE;
-
 	for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
 	{
 		HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, WorkerThreadProc, (LPVOID)this, 0, nullptr);
@@ -263,18 +261,15 @@ BOOL CUdpServer::CreateWorkerThreads()
 		else
 		{
 			SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::GetLastError());
-			isOK = FALSE;
-			break;
+			return FALSE;
 		}
 	}
 
-	return isOK;
+	return TRUE;
 }
 
 BOOL CUdpServer::StartAccept()
 {
-	BOOL isOK = TRUE;
-
 	if(::CreateIoCompletionPort((HANDLE)m_soListen, m_hCompletePort, m_soListen, 0))
 	{
 		m_iRemainPostReceives = m_dwPostReceiveCount;
@@ -285,10 +280,18 @@ BOOL CUdpServer::StartAccept()
 	else
 	{
 		SetLastError(SE_SOCKE_ATTACH_TO_CP, __FUNCTION__, ::GetLastError());
-		isOK = FALSE;
+		return FALSE;
 	}
 
-	return isOK;
+#ifdef USE_EXTERNAL_GC
+	if(IS_NULL(m_tqGC.CreateTimer(GCProc, this, GC_CHECK_INTERVAL, GC_CHECK_INTERVAL, WT_EXECUTEINTIMERTHREAD)))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::GetLastError());
+		return FALSE;
+	}
+#endif
+
+	return TRUE;
 }
 
 BOOL CUdpServer::Stop()
@@ -433,7 +436,9 @@ void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag e
 
 	TUdpSocketObj::Release(pSocketObj);
 
+#ifndef USE_EXTERNAL_GC
 	ReleaseGCSocketObj();
+#endif
 	
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 		m_lsGCSocket.PushBack(pSocketObj);
@@ -454,7 +459,7 @@ void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, 
 	ASSERT(FindSocketObj(dwConnID) == nullptr);
 
 	if(IsNeedDetectConnection())
-		pSocketObj->hTimer	= m_tqDetect.CreateTimer(DetectConnectionProc, pSocketObj, m_dwDetectInterval);
+		pSocketObj->hTimer	= m_tqDetect.CreateTimer(DetectConnectionProc, pSocketObj, m_dwDetectInterval, m_dwDetectInterval, WT_EXECUTEINTIMERTHREAD);
 
 	pSocketObj->pHolder		= this;
 	pSocketObj->connTime	= ::TimeGetTime();
@@ -471,6 +476,7 @@ void CUdpServer::AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, 
 
 void CUdpServer::ReleaseFreeSocket()
 {
+	m_tqGC.Reset();
 	m_lsFreeSocket.Clear();
 
 	ReleaseGCSocketObj(TRUE);
@@ -1514,6 +1520,12 @@ void WINAPI CUdpServer::DetectConnectionProc(LPVOID pv, BOOLEAN bTimerFired)
 		else
 			::InterlockedIncrement(&pSocketObj->detectFails);
 	}
+}
+
+void WINAPI CUdpServer::GCProc(LPVOID pv, BOOLEAN bTimerFired)
+{
+	CUdpServer* pThis = (CUdpServer*)pv;
+	pThis->ReleaseGCSocketObj(FALSE);
 }
 
 #endif

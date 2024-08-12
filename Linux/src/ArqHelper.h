@@ -692,8 +692,9 @@ public:
 	{
 		if(pSession->Reset())
 		{
+#ifndef USE_EXTERNAL_GC
 			ReleaseGCSession();
-
+#endif
 			if(!m_lsFreeSession.TryPut(pSession))
 				m_lsGCSession.PushBack(pSession);
 		}
@@ -716,7 +717,6 @@ public:
 		ENSURE(m_lsGCSession.IsEmpty());
 	}
 
-private:
 	void ReleaseGCSession(BOOL bForce = FALSE)
 	{
 		::ReleaseGCObj(m_lsGCSession, m_dwSessionLockTime, bForce);

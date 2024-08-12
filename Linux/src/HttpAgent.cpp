@@ -197,6 +197,15 @@ template<class T, USHORT default_port> EnHandleResult CHttpAgentT<T, default_por
 	return result;
 }
 
+template<class T, USHORT default_port> void CHttpAgentT<T, default_port>::ReleaseGCSocketObj(BOOL bForce)
+{
+	__super::ReleaseGCSocketObj(bForce);
+
+#ifdef USE_EXTERNAL_GC
+	m_objPool.ReleaseGCHttpObj(bForce);
+#endif
+}
+
 template<class T, USHORT default_port> BOOL CHttpAgentT<T, default_port>::IsUpgrade(CONNID dwConnID)
 {
 	THttpObj* pHttpObj = FindHttpObj(dwConnID);

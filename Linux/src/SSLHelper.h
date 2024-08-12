@@ -336,7 +336,6 @@ public:
 	void			Prepare			();
 	void			Clear			();
 
-private:
 	void ReleaseGCSession	(BOOL bForce = FALSE);
 
 public:

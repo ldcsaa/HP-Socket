@@ -208,8 +208,9 @@ void CBufferPool::PutFreeBuffer(TBuffer* pBuffer)
 	{
 		m_itPool.PutFreeItem(pBuffer->items);
 
+#ifndef USE_EXTERNAL_GC
 		ReleaseGCBuffer();
-
+#endif
 		if(!m_lsFreeBuffer.TryPut(pBuffer))
 			m_lsGCBuffer.PushBack(pBuffer);
 	}

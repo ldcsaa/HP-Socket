@@ -173,6 +173,8 @@ protected:
 	virtual void OnWorkerThreadStart(THR_ID tid) {}
 	virtual void OnWorkerThreadEnd(THR_ID tid) {}
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
+
 	BOOL DoSendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount);
 	BOOL DoSendPackets(TAgentSocketObj* pSocketObj, const WSABUF pBuffers[], int iCount);
 	TAgentSocketObj* FindSocketObj(CONNID dwConnID);
@@ -207,7 +209,6 @@ private:
 	void AddFreeSocketObj	(TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0);
 	void DeleteSocketObj	(TAgentSocketObj* pSocketObj);
 	BOOL InvalidSocketObj	(TAgentSocketObj* pSocketObj);
-	void ReleaseGCSocketObj	(BOOL bForce = FALSE);
 	void AddClientSocketObj	(CONNID dwConnID, TAgentSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr, LPCTSTR lpszRemoteHostName, PVOID pExtra);
 	void CloseClientSocketObj(TAgentSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, int iShutdownFlag = SHUT_WR);
 
@@ -232,6 +233,7 @@ public:
 	: m_pListener				(pListener)
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
+	, m_fdGCTimer				(INVALID_FD)
 	, m_bAsyncConnect			(TRUE)
 	, m_enReusePolicy			(RAP_ADDR_ONLY)
 	, m_enSendPolicy			(SP_PACK)
@@ -292,6 +294,8 @@ private:
 	CBufferObjPool			m_bfObjPool;
 
 	CSpinGuard				m_csState;
+
+	FD						m_fdGCTimer;
 
 	TAgentSocketObjPtrPool	m_bfActiveSockets;
 	

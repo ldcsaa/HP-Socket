@@ -66,6 +66,15 @@ void CSSLServer::OnWorkerThreadEnd(THR_ID dwThreadID)
 	__super::OnWorkerThreadEnd(dwThreadID);
 }
 
+void CSSLServer::ReleaseGCSocketObj(BOOL bForce)
+{
+	__super::ReleaseGCSocketObj(bForce);
+
+#ifdef USE_EXTERNAL_GC
+	m_sslPool.ReleaseGCSession(bForce);
+#endif
+}
+
 BOOL CSSLServer::SendPackets(CONNID dwConnID, const WSABUF pBuffers[], int iCount)
 {
 	ASSERT(pBuffers && iCount > 0);

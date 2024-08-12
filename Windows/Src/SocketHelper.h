@@ -700,6 +700,61 @@ struct TUdpSocketObj : public TSocketObjBase
 	}
 };
 
+/* 虚拟 Timer Queue */
+class _CFakeTimerQueue
+{
+public:
+	_CFakeTimerQueue()
+	{
+
+	}
+
+	~_CFakeTimerQueue()
+	{
+
+	}
+
+	HANDLE CreateTimer(WAITORTIMERCALLBACK fnCallback, PVOID lpParam, DWORD dwPeriod, DWORD dwDueTime = INFINITE, ULONG ulFlags = WT_EXECUTEDEFAULT)
+	{
+		return INVALID_HANDLE_VALUE;
+	}
+
+	BOOL ChangeTimer(HANDLE hTimer, DWORD dwPeriod, DWORD dwDueTime = INFINITE)
+	{
+		return TRUE;
+	}
+
+	BOOL DeleteTimer(HANDLE hTimer, HANDLE hCompletionEvent = INVALID_HANDLE_VALUE)
+	{
+		return TRUE;
+	}
+
+	BOOL Reset()
+	{
+		return TRUE;
+	}
+
+	BOOL IsValid()					{ return TRUE; }
+
+	HANDLE GetHandle()				{ return INVALID_HANDLE_VALUE; }
+	const HANDLE GetHandle() const	{ return INVALID_HANDLE_VALUE; }
+
+	operator HANDLE()				{ return INVALID_HANDLE_VALUE; }
+	operator const HANDLE() const	{ return INVALID_HANDLE_VALUE; }
+
+private:
+	_CFakeTimerQueue(const _CFakeTimerQueue&);
+	_CFakeTimerQueue operator = (const _CFakeTimerQueue&);
+};
+
+/* 垃圾回收 Timer Queue */
+#ifdef USE_EXTERNAL_GC
+typedef CTimerQueue			CGCTimerQueue;
+#else
+typedef _CFakeTimerQueue	CGCTimerQueue;
+#endif
+
+
 /* 有效 TSocketObj 缓存 */
 typedef CRingCache2<TSocketObj, CONNID, true>		TSocketObjPtrPool;
 /* 失效 TSocketObj 缓存 */

@@ -140,6 +140,15 @@ protected:
 		m_bfPool.Prepare();
 	}
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE)
+	{
+		__super::ReleaseGCSocketObj(bForce);
+
+#ifdef USE_EXTERNAL_GC
+		m_bfPool.ReleaseGCBuffer(bForce);
+#endif
+	}
+
 public:
 	virtual void SetMaxPackSize		(DWORD dwMaxPackSize)		{ENSURE_HAS_STOPPED(); m_dwMaxPackSize = dwMaxPackSize;}
 	virtual void SetPackHeaderFlag	(USHORT usPackHeaderFlag)	{ENSURE_HAS_STOPPED(); m_usHeaderFlag  = usPackHeaderFlag;}

@@ -154,8 +154,10 @@ protected:
 	virtual void PrepareStart();
 	virtual void Reset();
 
-	virtual void OnWorkerThreadStart(THR_ID tid) {}
-	virtual void OnWorkerThreadEnd(THR_ID tid) {}
+	virtual void OnWorkerThreadStart(THR_ID tid)	{}
+	virtual void OnWorkerThreadEnd(THR_ID tid)		{}
+
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
 
 	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
 	int				SendInternal(TUdpSocketObj* pSocketObj, TItemPtr& itPtr);
@@ -196,7 +198,6 @@ private:
 	void AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, BOOL bNotify = TRUE);
 	void DeleteSocketObj(TUdpSocketObj* pSocketObj);
 	BOOL InvalidSocketObj(TUdpSocketObj* pSocketObj);
-	void ReleaseGCSocketObj(BOOL bForce = FALSE);
 	void AddClientSocketObj(int idx, CONNID dwConnID, TUdpSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr);
 	void CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, BOOL bNotify = TRUE);
 
@@ -223,6 +224,7 @@ public:
 	: m_pListener				(pListener)
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
+	, m_fdGCTimer				(INVALID_FD)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_RECEIVE)
 	, m_enReusePolicy			(RAP_ADDR_AND_PORT)
@@ -280,6 +282,8 @@ private:
 	CPrivateHeap			m_phSocket;
 
 	CSpinGuard				m_csState;
+
+	FD						m_fdGCTimer;
 
 	TUdpSocketObjPtrPool	m_bfActiveSockets;
 

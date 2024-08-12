@@ -245,8 +245,6 @@ BOOL CTcpAgent::CreateCompletePort()
 
 BOOL CTcpAgent::CreateWorkerThreads()
 {
-	BOOL isOK = TRUE;
-
 	for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
 	{
 		HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, WorkerThreadProc, (LPVOID)this, 0, nullptr);
@@ -256,12 +254,19 @@ BOOL CTcpAgent::CreateWorkerThreads()
 		else
 		{
 			SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::GetLastError());
-			isOK = FALSE;
-			break;
+			return FALSE;
 		}
 	}
 
-	return isOK;
+#ifdef USE_EXTERNAL_GC
+	if(IS_NULL(m_tqGC.CreateTimer(GCProc, this, GC_CHECK_INTERVAL, GC_CHECK_INTERVAL, WT_EXECUTEINTIMERTHREAD)))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::GetLastError());
+		return FALSE;
+	}
+#endif
+
+	return TRUE;
 }
 
 BOOL CTcpAgent::Stop()
@@ -351,7 +356,9 @@ void CTcpAgent::AddFreeSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFla
 	m_bfActiveSockets.Remove(pSocketObj->connID);
 	TSocketObj::Release(pSocketObj);
 
+#ifndef USE_EXTERNAL_GC
 	ReleaseGCSocketObj();
+#endif
 	
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 		m_lsGCSocket.PushBack(pSocketObj);
@@ -383,6 +390,7 @@ void CTcpAgent::AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, cons
 
 void CTcpAgent::ReleaseFreeSocket()
 {
+	m_tqGC.Reset();
 	m_lsFreeSocket.Clear();
 
 	ReleaseGCSocketObj(TRUE);
@@ -1608,4 +1616,10 @@ void CTcpAgent::CheckError(TSocketObj* pSocketObj, EnSocketOperation enOperation
 {
 	if(iErrorCode != WSAENOTSOCK && iErrorCode != ERROR_OPERATION_ABORTED)
 		AddFreeSocketObj(pSocketObj, SCF_ERROR, enOperation, iErrorCode);
+}
+
+void WINAPI CTcpAgent::GCProc(LPVOID pv, BOOLEAN bTimerFired)
+{
+	CTcpAgent* pThis = (CTcpAgent*)pv;
+	pThis->ReleaseGCSocketObj(FALSE);
 }

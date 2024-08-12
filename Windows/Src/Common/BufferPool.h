@@ -754,8 +754,7 @@ public:
 	void		Prepare			();
 	void		Clear			();
 
-private:
-	void ReleaseGCBuffer	(BOOL bForce = FALSE);
+	void ReleaseGCBuffer		(BOOL bForce = FALSE);
 
 public:
 	void SetItemCapacity	(DWORD dwItemCapacity)		{m_itPool.SetItemCapacity(dwItemCapacity);}
