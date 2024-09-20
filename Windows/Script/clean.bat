@@ -23,6 +23,7 @@ del *.cki /f /s /q
 del *.exe.config /f /s /q
 
 del "Other Languages\E\*.exe" /f /s /q
+del "Demo\Release\*.lib" /f /s /q
 
 rd /s /q "Demo\Debug"
 

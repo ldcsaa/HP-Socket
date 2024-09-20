@@ -77,6 +77,7 @@ LPCTSTR GetSocketErrorDesc(EnSocketError enCode)
 	case SE_NETWORK:				return _T("Network Error");
 	case SE_DATA_PROC:				return _T("Process Data Error");
 	case SE_DATA_SEND:				return _T("Send Data Fail");
+	case SE_GC_START:				return _T("Start GC Fail");
 
 	case SE_SSL_ENV_NOT_READY:		return _T("SSL environment not ready");
 

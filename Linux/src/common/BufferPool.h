@@ -800,7 +800,6 @@ public:
 	void		Prepare			();
 	void		Clear			();
 
-private:
 	void ReleaseGCBuffer	(BOOL bForce = FALSE);
 
 public:

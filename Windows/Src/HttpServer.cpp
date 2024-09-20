@@ -284,6 +284,15 @@ template<class T, USHORT default_port> EnHandleResult CHttpServerT<T, default_po
 	return result;
 }
 
+template<class T, USHORT default_port> void CHttpServerT<T, default_port>::ReleaseGCSocketObj(BOOL bForce)
+{
+	__super::ReleaseGCSocketObj(bForce);
+
+#ifdef USE_EXTERNAL_GC
+	m_objPool.ReleaseGCHttpObj(bForce);
+#endif
+}
+
 template<class T, USHORT default_port> void CHttpServerT<T, default_port>::WaitForCleanerThreadEnd()
 {
 	if(m_thCleaner.IsRunning())

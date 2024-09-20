@@ -88,6 +88,9 @@ typedef HANDLE							FD;
 #define TO_PVOID(v)						((PVOID)(UINT_PTR)(v))
 #define FROM_PVOID(T, pv)				((T)(UINT_PTR)(pv))
 
+#define IS_NULL(v)						((v) == nullptr)
+#define IS_NOT_NULL(v)					(!IS_NULL(v))
+
 #define HEX_CHAR_TO_VALUE(c)			(c <= '9' ? c - '0' : (c <= 'F' ? c - 'A' + 0x0A : c - 'a' + 0X0A))
 #define HEX_DOUBLE_CHAR_TO_VALUE(pc)	((BYTE)(((HEX_CHAR_TO_VALUE(*(pc))) << 4) | (HEX_CHAR_TO_VALUE(*((pc) + 1)))))
 #define HEX_VALUE_TO_CHAR(n)			(n <= 9 ? n + '0' : (n <= 'F' ? n + 'A' - 0X0A : n + 'a' - 0X0A))

@@ -177,7 +177,29 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 
 BOOL CUdpServer::CreateWorkerThreads()
 {
-	return m_ioDispatcher.Start(this, m_dwPostReceiveCount, m_dwWorkerThreadCount);
+	DWORD dwWorkerThreadCount = m_dwWorkerThreadCount
+#ifdef USE_EXTERNAL_GC
+														+ 1
+#endif
+														;
+
+	if(!m_ioDispatcher.Start(this, m_dwPostReceiveCount, dwWorkerThreadCount))
+	{
+		SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+
+#ifdef USE_EXTERNAL_GC
+	m_fdGCTimer = m_ioDispatcher.AddTimer(m_dwWorkerThreadCount, GC_CHECK_INTERVAL, this);
+
+	if(IS_INVALID_FD(m_fdGCTimer))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+#endif
+
+	return TRUE;
 }
 
 BOOL CUdpServer::StartAccept()
@@ -187,8 +209,21 @@ BOOL CUdpServer::StartAccept()
 		SOCKET& soListen = m_soListens[i];
 
 		if(!m_ioDispatcher.AddFD(i, soListen, EPOLLIN | EPOLLOUT | EPOLLET, TO_PVOID(&soListen)))
+		{
+			SetLastError(SE_SOCKE_ATTACH_TO_CP, __FUNCTION__, ::WSAGetLastError());
 			return FALSE;
+		}
 	}
+
+#ifdef USE_EXTERNAL_GC
+	m_fdGCTimer = m_ioDispatcher.AddTimer(m_dwWorkerThreadCount, GC_CHECK_INTERVAL, this);
+
+	if(IS_INVALID_FD(m_fdGCTimer))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::WSAGetLastError());
+		return FALSE;
+	}
+#endif
 
 	return TRUE;
 }
@@ -294,6 +329,14 @@ void CUdpServer::ReleaseFreeSocket()
 {
 	m_lsFreeSocket.Clear();
 
+#ifdef USE_EXTERNAL_GC
+	if(IS_VALID_FD(m_fdGCTimer))
+	{
+		close(m_fdGCTimer);
+		m_fdGCTimer = INVALID_FD;
+	}
+#endif
+
 	ReleaseGCSocketObj(TRUE);
 	VERIFY(m_lsGCSocket.IsEmpty());
 }
@@ -366,7 +409,9 @@ void CUdpServer::AddFreeSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag e
 	m_ioDispatcher.DelTimer(pSocketObj->index, pSocketObj->fdTimer);
 	TUdpSocketObj::Release(pSocketObj);
 
+#ifndef USE_EXTERNAL_GC
 	ReleaseGCSocketObj();
+#endif
 
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 		m_lsGCSocket.PushBack(pSocketObj);
@@ -760,6 +805,13 @@ BOOL CUdpServer::OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT 
 {
 	if(pv == &m_soListens[pContext->GetIndex()])
 		return TRUE;
+	else if(pv == this)
+	{
+		ReleaseGCSocketObj(FALSE);
+		::ReadTimer(m_fdGCTimer);
+
+		return FALSE;
+	}
 
 	if(!(events & _EPOLL_ALL_ERROR_EVENTS))
 		DetectConnection(pv);

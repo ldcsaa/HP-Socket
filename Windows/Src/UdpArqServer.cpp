@@ -76,6 +76,15 @@ void CUdpArqServer::OnWorkerThreadStart(THR_ID dwThreadID)
 		::WaitFor(3);
 }
 
+void CUdpArqServer::ReleaseGCSocketObj(BOOL bForce)
+{
+	__super::ReleaseGCSocketObj(bForce);
+
+#ifdef USE_EXTERNAL_GC
+	m_ssPool.ReleaseGCSession(bForce);
+#endif
+}
+
 BOOL CUdpArqServer::Send(CONNID dwConnID, const BYTE* pBuffer, int iLength, int iOffset)
 {
 	ASSERT(pBuffer && iLength > 0 && iLength <= (int)m_arqAttr.dwMaxMessageSize);

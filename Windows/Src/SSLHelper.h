@@ -342,8 +342,7 @@ public:
 	void			Prepare			();
 	void			Clear			();
 
-private:
-	void ReleaseGCSession	(BOOL bForce = FALSE);
+	void ReleaseGCSession			(BOOL bForce = FALSE);
 
 public:
 	void SetItemCapacity	(DWORD dwItemCapacity)		{m_itPool.SetItemCapacity(dwItemCapacity);}

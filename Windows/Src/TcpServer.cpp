@@ -258,8 +258,6 @@ BOOL CTcpServer::CreateCompletePort()
 
 BOOL CTcpServer::CreateWorkerThreads()
 {
-	BOOL isOK = TRUE;
-
 	for(DWORD i = 0; i < m_dwWorkerThreadCount; i++)
 	{
 		HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, WorkerThreadProc, (LPVOID)this, 0, nullptr);
@@ -269,18 +267,15 @@ BOOL CTcpServer::CreateWorkerThreads()
 		else
 		{
 			SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::GetLastError());
-			isOK = FALSE;
-			break;
+			return FALSE;
 		}
 	}
 
-	return isOK;
+	return TRUE;
 }
 
 BOOL CTcpServer::StartAccept()
 {
-	BOOL isOK = TRUE;
-
 	if(::CreateIoCompletionPort((HANDLE)m_soListen, m_hCompletePort, m_soListen, 0))
 	{
 		m_iRemainAcceptSockets = m_dwAcceptSocketCount;
@@ -291,10 +286,18 @@ BOOL CTcpServer::StartAccept()
 	else
 	{
 		SetLastError(SE_SOCKE_ATTACH_TO_CP, __FUNCTION__, ::GetLastError());
-		isOK = FALSE;
+		return FALSE;
 	}
 
-	return isOK;
+#ifdef USE_EXTERNAL_GC
+	if(IS_NULL(m_tqGC.CreateTimer(GCProc, this, GC_CHECK_INTERVAL, GC_CHECK_INTERVAL, WT_EXECUTEINTIMERTHREAD)))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::GetLastError());
+		return FALSE;
+	}
+#endif
+
+	return TRUE;
 }
 
 BOOL CTcpServer::Stop()
@@ -399,7 +402,9 @@ void CTcpServer::AddFreeSocketObj(TSocketObj* pSocketObj, EnSocketCloseFlag enFl
 	m_bfActiveSockets.Remove(pSocketObj->connID);
 	TSocketObj::Release(pSocketObj);
 
+#ifndef USE_EXTERNAL_GC
 	ReleaseGCSocketObj();
+#endif
 	
 	if(!m_lsFreeSocket.TryPut(pSocketObj))
 		m_lsGCSocket.PushBack(pSocketObj);
@@ -430,6 +435,7 @@ void CTcpServer::AddClientSocketObj(CONNID dwConnID, TSocketObj* pSocketObj, con
 
 void CTcpServer::ReleaseFreeSocket()
 {
+	m_tqGC.Reset();
 	m_lsFreeSocket.Clear();
 
 	ReleaseGCSocketObj(TRUE);
@@ -1512,4 +1518,10 @@ void CTcpServer::CheckError(TSocketObj* pSocketObj, EnSocketOperation enOperatio
 {
 	if(iErrorCode != WSAENOTSOCK && iErrorCode != ERROR_OPERATION_ABORTED)
 		AddFreeSocketObj(pSocketObj, SCF_ERROR, enOperation, iErrorCode);
+}
+
+void WINAPI CTcpServer::GCProc(LPVOID pv, BOOLEAN bTimerFired)
+{
+	CTcpServer* pThis = (CTcpServer*)pv;
+	pThis->ReleaseGCSocketObj(FALSE);
 }

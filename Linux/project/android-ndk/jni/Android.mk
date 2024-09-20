@@ -51,7 +51,6 @@ ifdef _MIMALLOC_DISABLED
 endif
 
 MY_SRC_FILES := ../../../src/common/BufferPool.cpp \
-                ../../../src/common/crypto/Crypto.cpp \
                 ../../../src/common/Event.cpp \
                 ../../../src/common/FileHelper.cpp \
                 ../../../src/common/FuncHelper.cpp \

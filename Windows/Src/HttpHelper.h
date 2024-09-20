@@ -91,7 +91,7 @@ typedef llhttp_settings_t	http_parser_settings;
 #define MIN_HTTP_RELEASE_CHECK_INTERVAL		1000
 #define MIN_HTTP_RELEASE_DELAY				100
 #define MAX_HTTP_RELEASE_DELAY				(60 * 1000)
-#define DEFAULT_HTTP_RELEASE_DELAY			(3 * 1000)
+#define DEFAULT_HTTP_RELEASE_DELAY			(5 * 1000)
 #define DEFAULT_HTTP_VERSION				HV_1_1
 
 #define DEFAULT_HTTP_SYNC_CONNECT_TIMEOUT	5000
@@ -1306,8 +1306,9 @@ public:
 	{
 		pHttpObj->SetFree();
 
+#ifndef USE_EXTERNAL_GC
 		ReleaseGCHttpObj();
-		
+#endif
 		if(!m_lsFreeHttpObj.TryPut(pHttpObj))
 			m_lsGCHttpObj.PushBack(pHttpObj);
 	}
@@ -1325,7 +1326,6 @@ public:
 		ENSURE(m_lsGCHttpObj.IsEmpty());
 	}
 
-private:
 	void ReleaseGCHttpObj(BOOL bForce = FALSE)
 	{
 		::ReleaseGCObj(m_lsGCHttpObj, m_dwHttpObjLockTime, bForce);

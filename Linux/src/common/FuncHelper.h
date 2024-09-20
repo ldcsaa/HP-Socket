@@ -171,6 +171,9 @@ inline void PrintError(LPCSTR subject)	{perror(subject);}
 #define TO_PVOID(v)						((PVOID)(UINT_PTR)(v))
 #define FROM_PVOID(T, pv)				((T)(UINT_PTR)(pv))
 
+#define IS_NULL(v)						((v) == nullptr)
+#define IS_NOT_NULL(v)					(!IS_NULL(v))
+
 #define stricmp							strcasecmp
 #define strnicmp						strncasecmp
 #define wcsicmp							wcscasecmp

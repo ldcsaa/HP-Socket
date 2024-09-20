@@ -145,6 +145,8 @@ protected:
 	virtual void OnWorkerThreadStart(THR_ID dwThreadID) {}
 	virtual void OnWorkerThreadEnd(THR_ID dwThreadID) {}
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
+
 	TUdpSocketObj*	FindSocketObj(CONNID dwConnID);
 	int				SendInternal(TUdpSocketObj* pSocketObj, TUdpBufferObjPtr& bufPtr);
 
@@ -173,6 +175,7 @@ private:
 	
 	static UINT WINAPI WorkerThreadProc(LPVOID pv);
 	static void WINAPI DetectConnectionProc(LPVOID pv, BOOLEAN bTimerFired);
+	static void WINAPI GCProc(LPVOID pv, BOOLEAN bTimerFired);
 
 private:
 	BOOL CheckStarting();
@@ -201,7 +204,6 @@ private:
 	TUdpSocketObj*	CreateSocketObj();
 	void			DeleteSocketObj(TUdpSocketObj* pSocketObj);
 	BOOL			InvalidSocketObj(TUdpSocketObj* pSocketObj);
-	void			ReleaseGCSocketObj(BOOL bForce = FALSE);
 
 	void			AddClientSocketObj(CONNID dwConnID, TUdpSocketObj* pSocketObj, const HP_SOCKADDR& remoteAddr);
 	void			CloseClientSocketObj(TUdpSocketObj* pSocketObj, EnSocketCloseFlag enFlag = SCF_NONE, EnSocketOperation enOperation = SO_UNKNOWN, int iErrorCode = 0, BOOL bNotify = TRUE);
@@ -314,6 +316,7 @@ private:
 
 	CCriSec					m_csAccept;
 
+	CGCTimerQueue			m_tqGC;
 	CTimerQueue				m_tqDetect;
 
 	TUdpSocketObjPtrPool	m_bfActiveSockets;

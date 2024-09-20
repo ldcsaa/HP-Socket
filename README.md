@@ -136,7 +136,7 @@ int main(int argc, char* const argv[])
 
 - ***HTTP Components***
 
-![HTTP COmponent](Doc/HTTP%20Component%20-%20mini.jpg "HTTP Component")
+![HTTP Component](Doc/HTTP%20Component%20-%20mini.jpg "HTTP Component")
 
 ## Reference Projects
 

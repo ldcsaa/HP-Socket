@@ -100,6 +100,8 @@ private:
 	virtual EnHandleResult DoFireClose(TSocketObj* pSocketObj, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult DoFireShutdown();
 
+	virtual void ReleaseGCSocketObj(BOOL bForce = FALSE);
+
 	EnHandleResult DoFireSuperReceive(TSocketObj* pSocketObj, const BYTE* pData, int iLength)
 		{return __super::DoFireReceive(pSocketObj, pData, iLength);}
 

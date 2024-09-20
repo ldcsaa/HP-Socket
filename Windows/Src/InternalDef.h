@@ -107,6 +107,9 @@
 /* 默认压缩/解压数据缓冲器长度 */
 #define DEFAULT_COMPRESS_BUFFER_SIZE			(16 * 1024)
 
+/* 垃圾回收检查间隔（毫秒） */
+#define GC_CHECK_INTERVAL						(15 * 1000)
+
 #define HOST_SEPARATOR_CHAR						'^'
 #define PORT_SEPARATOR_CHAR						':'
 #define IPV6_ADDR_BEGIN_CHAR					'['
