@@ -1008,6 +1008,7 @@ VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
 	if(!TUdpSocketObj::IsValid(pSocketObj) || !pSocketObj->IsPending())
 		return;
 
+	BOOL bClose     = FALSE;
 	BOOL bBlocked	= FALSE;
 	int writes		= flag ? -1 : MAX_CONTINUE_WRITES;
 
@@ -1034,7 +1035,10 @@ VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
 			ASSERT(!itPtr->IsEmpty());
 
 			if(!SendItem(pSocketObj, itPtr, bBlocked))
-				return;
+			{
+				bClose = TRUE;
+				break;
+			}
 
 			if(bBlocked)
 			{
@@ -1052,7 +1056,9 @@ VOID CUdpServer::HandleCmdSend(CONNID dwConnID, int flag)
 		}
 	}
 
-	if(!bBlocked && pSocketObj->IsPending())
+	if(bClose)
+		HandleClose(pSocketObj, SO_SEND, ::WSAGetLastError());
+	else if(!bBlocked && pSocketObj->IsPending())
 		VERIFY(m_ioDispatcher.SendCommand(DISP_CMD_SEND, dwConnID));
 }
 
@@ -1076,7 +1082,7 @@ BOOL CUdpServer::SendItem(TUdpSocketObj* pSocketObj, TItem* pItem, BOOL& bBlocke
 
 		if(code == ERROR_WOULDBLOCK)
 			bBlocked = TRUE;
-		else if(!HandleClose(pSocketObj, SO_SEND, code))
+		else
 			return FALSE;
 	}
 	else
