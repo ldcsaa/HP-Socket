@@ -482,7 +482,11 @@ template<class T, class S> BOOL ProcessSend(T* pThis, S* pSocketObj, CSSLSession
 		return FALSE;
 	}
 
-	ENSURE(pSession->WriteSendChannel(pBuffers, iCount));
+	if(!pSession->WriteSendChannel(pBuffers, iCount))
+	{
+		::SetLastError(ERROR_WRITE_FAULT);
+		return FALSE;
+	}
 
 	while(TRUE)
 	{

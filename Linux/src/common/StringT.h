@@ -346,7 +346,7 @@ public:
 			int iNewLength = iLength - iOffset;
 
 			if(iNewLength > 0)
-				memcpy((PXSTR)lpszBegin, lpszEnd, (iLength - iOffset) * sizeof(XCHAR));
+				memmove((PXSTR)lpszBegin, lpszEnd, iNewLength * sizeof(XCHAR));
 
 			ReleaseBufferSetLength(iNewLength);
 		}
@@ -420,7 +420,7 @@ public:
 			int iNewLength = iLength - iOffset;
 
 			if(iNewLength > 0)
-				memcpy((PXSTR)lpszBegin, lpszEnd, (iLength - iOffset) * sizeof(XCHAR));
+				memmove((PXSTR)lpszBegin, lpszEnd, iNewLength * sizeof(XCHAR));
 
 			ReleaseBufferSetLength(iNewLength);
 		}
