@@ -189,16 +189,6 @@ BOOL CUdpServer::CreateWorkerThreads()
 		return FALSE;
 	}
 
-#ifdef USE_EXTERNAL_GC
-	m_fdGCTimer = m_ioDispatcher.AddTimer(m_dwWorkerThreadCount, GC_CHECK_INTERVAL, this);
-
-	if(IS_INVALID_FD(m_fdGCTimer))
-	{
-		SetLastError(SE_GC_START, __FUNCTION__, ::WSAGetLastError());
-		return FALSE;
-	}
-#endif
-
 	return TRUE;
 }
 
