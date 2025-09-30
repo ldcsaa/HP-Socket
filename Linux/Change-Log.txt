@@ -5,7 +5,8 @@ v6.0.5 Update:
 > Major Upadate
 -----------------
 1. Bug fix: Code defects of method Trim()/TrimLeft() at class CString.
-2. Small scale code optimization.
+2. Bug fix: Server components may disconnect unexpectedly.
+3. Small scale code optimization.
 
 > Third-party library Upadate
 -----------------
