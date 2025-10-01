@@ -349,9 +349,7 @@ public:
 		Reset(0);
 	}
 
-private:
-	CRingCache(const CRingCache&);
-	CRingCache operator = (const CRingCache&);
+	DECLARE_NO_COPY_CLASS(CRingCache)
 
 private:
 	DWORD				m_dwSize;
@@ -947,9 +945,7 @@ public:
 		Reset(0);
 	}
 
-private:
-	CRingPool(const CRingPool&);
-	CRingPool operator = (const CRingPool&);
+	DECLARE_NO_COPY_CLASS(CRingPool)
 
 private:
 	DWORD				m_dwSize;

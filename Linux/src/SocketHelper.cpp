@@ -32,6 +32,8 @@
 #include <iconv.h>
 #endif
 
+#include "common/PollHelper.h"
+
 #ifndef SO_REUSEPORT
 	#define SO_REUSEPORT	15
 #endif
@@ -455,25 +457,18 @@ BOOL SetMultiCastSocketOptions(SOCKET sock, const HP_SOCKADDR& bindAddr, const H
 
 int WaitForSocketWrite(SOCKET sock, DWORD dwTimeout)
 {
-	timeval tv = {(__time_t)(dwTimeout / 1000), (__suseconds_t)((dwTimeout % 1000) * 1000)};
+	pollfd pfd	= {sock, _POLL_WRITE_EVENTS | _POLL_ALL_ERROR_EVENTS};
+	int rs		= (int)::PollForSingleObject(pfd, dwTimeout);
 
-	fd_set wfds, efds;
-	FD_ZERO(&wfds);
-	FD_ZERO(&efds);
-	FD_SET(sock, &wfds);
-	FD_SET(sock, &efds);
-
-	int rs = NO_EINTR_INT(select(sock + 1, nullptr, &wfds, &efds, &tv));
-
-	if(rs <= 0) return ((rs == 0) ? ERROR_TIMEOUT : ENSURE_ERROR(ERROR_CANT_WAIT));
-	
-	if(FD_ISSET(sock, &efds))
+	if(rs == TIMEOUT)
+		return ERROR_TIMEOUT;
+	else if(rs < TIMEOUT)
+		return ENSURE_ERROR(ERROR_CANT_WAIT);
+	else if(pfd.revents & _POLL_ALL_ERROR_EVENTS)
 	{
 		rs = SSO_GetError(sock);
 		return ((rs != NO_ERROR && rs != SOCKET_ERROR) ? rs : ENSURE_ERROR(ERROR_CANT_WAIT));
 	}
-
-	VERIFY(FD_ISSET(sock, &wfds));
 
 	rs = SSO_GetError(sock);
 

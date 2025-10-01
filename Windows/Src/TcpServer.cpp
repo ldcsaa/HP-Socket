@@ -271,6 +271,12 @@ BOOL CTcpServer::CreateWorkerThreads()
 		}
 	}
 
+	if(IS_NULL(m_tqGC.CreateTimer(GCProc, this, GC_CHECK_INTERVAL, GC_CHECK_INTERVAL, WT_EXECUTEINTIMERTHREAD)))
+	{
+		SetLastError(SE_GC_START, __FUNCTION__, ::GetLastError());
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
@@ -288,14 +294,6 @@ BOOL CTcpServer::StartAccept()
 		SetLastError(SE_SOCKE_ATTACH_TO_CP, __FUNCTION__, ::GetLastError());
 		return FALSE;
 	}
-
-#ifdef USE_EXTERNAL_GC
-	if(IS_NULL(m_tqGC.CreateTimer(GCProc, this, GC_CHECK_INTERVAL, GC_CHECK_INTERVAL, WT_EXECUTEINTIMERTHREAD)))
-	{
-		SetLastError(SE_GC_START, __FUNCTION__, ::GetLastError());
-		return FALSE;
-	}
-#endif
 
 	return TRUE;
 }

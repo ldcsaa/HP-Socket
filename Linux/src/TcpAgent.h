@@ -29,6 +29,9 @@
 
 class CTcpAgent : public ITcpAgent, private CIOHandler
 {
+	using CGCThread = CGCThreadT<CTcpAgent>;
+	friend class CGCThreadT<CTcpAgent>;
+
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress = nullptr, BOOL bAsyncConnect = TRUE);
 	virtual BOOL Stop	();
@@ -233,7 +236,6 @@ public:
 	: m_pListener				(pListener)
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
-	, m_fdGCTimer				(INVALID_FD)
 	, m_bAsyncConnect			(TRUE)
 	, m_enReusePolicy			(RAP_ADDR_ONLY)
 	, m_enSendPolicy			(SP_PACK)
@@ -252,6 +254,7 @@ public:
 	, m_bMarkSilence			(TRUE)
 	, m_bNoDelay				(FALSE)
 	, m_soAddr					(AF_UNSPEC, TRUE)
+	, m_thGC					(this)
 	{
 		ASSERT(m_pListener);
 	}
@@ -295,7 +298,7 @@ private:
 
 	CSpinGuard				m_csState;
 
-	FD						m_fdGCTimer;
+	CGCThread				m_thGC;
 
 	TAgentSocketObjPtrPool	m_bfActiveSockets;
 	

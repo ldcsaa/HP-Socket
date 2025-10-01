@@ -146,32 +146,38 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux</RemoteRootDir>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteProjectRelDir>$(SolutionName)</RemoteProjectRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux</RemoteRootDir>
+    <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteProjectRelDir>$(SolutionName)</RemoteProjectRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteProjectRelDir>$(SolutionName)</RemoteProjectRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteProjectRelDir>$(SolutionName)</RemoteProjectRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteProjectRelDir>$(SolutionName)</RemoteProjectRelDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <RemoteRootDir>$HOME/MyWork/HP-Socket/Linux/project</RemoteRootDir>
+    <RemoteProjectRelDir>$(SolutionName)</RemoteProjectRelDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />

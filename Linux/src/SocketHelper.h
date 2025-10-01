@@ -25,6 +25,8 @@
 
 #include "../include/hpsocket/HPTypeDef.h"
 #include "../include/hpsocket/SocketInterface.h"
+#include "common/Event.h"
+#include "common/Thread.h"
 #include "common/StringT.h"
 #include "common/SysHelper.h"
 #include "common/BufferPtr.h"
@@ -398,6 +400,7 @@ struct TSocketObjBase : public CSafeCounter
 		
 		pSocketObj->freeTime = ::TimeGetTime();
 		pSocketObj->sndBuff.Release();
+		pSocketObj->Decrement();
 	}
 
 	static BOOL InvalidSocketObj(TSocketObjBase* pSocketObj)
@@ -434,7 +437,7 @@ struct TSocketObjBase : public CSafeCounter
 
 	void Reset(CONNID dwConnID)
 	{
-		ResetCount();
+		ResetCount(1);
 
 		connID		= dwConnID;
 		connected	= FALSE;
@@ -649,6 +652,94 @@ struct TClientCloseContext
 	}
 
 };
+
+/* 真实垃圾回收线程 */
+template<class T> class _CRealGCThreadT
+{
+public:
+	BOOL Start(long lGCCheckInterval = GC_CHECK_INTERVAL)
+	{
+		m_lGCCheckInterval = lGCCheckInterval;
+		return m_thGC.Start(this, &_CRealGCThreadT::GCThreadProc);
+	}
+
+	BOOL Stop()
+	{
+		if(m_thGC.IsRunning())
+		{
+			m_evGC.Set();
+			m_thGC.Join();
+			m_evGC.Reset();
+		}
+
+		return TRUE;
+	}
+
+public:
+	_CRealGCThreadT(T* pOwner) : m_pOwner(pOwner), m_lGCCheckInterval(GC_CHECK_INTERVAL) {}
+	~_CRealGCThreadT() {Stop();}
+
+	DECLARE_NO_COPY_CLASS(_CRealGCThreadT)
+
+private:
+	UINT GCThreadProc(PVOID pv = nullptr)
+	{
+		TRACE("---------------> GC Thread 0x%08X started <---------------", SELF_THREAD_ID);
+
+		while(TRUE)
+		{
+			int rs = (int)m_evGC.Wait(m_lGCCheckInterval);
+			ASSERT(rs >= TIMEOUT);
+
+			if(rs == TIMEOUT)
+			{
+				m_pOwner->ReleaseGCSocketObj(FALSE);
+				continue;
+			}
+						
+			VERIFY(rs == 1);
+			m_evGC.Reset();
+
+			break;
+		}
+
+		TRACE("---------------> GC Thread 0x%08X stoped <---------------", SELF_THREAD_ID);
+
+		return 0;
+	}
+
+private:
+	long	m_lGCCheckInterval;
+	T*		m_pOwner;
+	CEvt	m_evGC;
+	CThread<_CRealGCThreadT, VOID, UINT> m_thGC;
+};
+
+
+/* 虚拟垃圾回收线程 */
+template<class T> class _CFakeGCThreadT
+{
+public:
+	BOOL Start(long lGCCheckInterval = GC_CHECK_INTERVAL)
+	{
+		return TRUE;
+	}
+
+	BOOL Stop()
+	{
+		return TRUE;
+	}
+
+public:
+	_CFakeGCThreadT(T* pOwner) {}
+};
+
+/* 垃圾回收 GC Thread */
+#ifdef USE_EXTERNAL_GC
+	#define CGCThreadT	_CRealGCThreadT
+#else
+	#define CGCThreadT	_CFakeGCThreadT
+#endif
 
 /*****************************************************************************************************/
 /******************************************** 公共帮助方法 ********************************************/

@@ -222,7 +222,7 @@ public:
 	T FetchSub(T iCount)		{return ::InterlockedExchangeSub(&m_iCount, iCount);}
 
 	T SetCount(T iCount)		{return (m_iCount = iCount);}
-	T ResetCount()				{return SetCount(0);}
+	T ResetCount(T iCount = 0)	{return SetCount(iCount);}
 	T GetCount()				{return m_iCount;}
 
 	T operator ++ ()			{return Increment();}
@@ -252,7 +252,7 @@ public:
 	T FetchSub(T iCount)		{T rs = m_iCount; m_iCount -= iCount; return rs;}
 
 	T SetCount(T iCount)		{return (m_iCount = iCount);}
-	T ResetCount()				{return SetCount(0);}
+	T ResetCount(T iCount = 0)	{return SetCount(iCount);}
 	T GetCount()				{return m_iCount;}
 
 	T operator ++ ()			{return Increment();}

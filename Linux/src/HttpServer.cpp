@@ -135,21 +135,17 @@ template<class T, USHORT default_port> UINT CHttpServerT<T, default_port>::Clean
 		int rs = (int)::PollForSingleObject(pfd, dwInterval);
 		ASSERT(rs >= TIMEOUT);
 
-		if(rs < TIMEOUT)
-			ERROR_ABORT();
-
 		if(rs == TIMEOUT)
-			KillDyingConnection();
-		else if(rs == 1)
 		{
-			m_evCleaner.Reset();
-			goto END_DETECTOR;
+			KillDyingConnection();
+			continue;
 		}
-		else
-			ASSERT(FALSE);
-	}
 
-END_DETECTOR:
+		VERIFY(rs == 1);
+		m_evCleaner.Reset();
+
+		break;
+	}
 
 	ReleaseDyingConnection();
 	VERIFY(!HasStarted());

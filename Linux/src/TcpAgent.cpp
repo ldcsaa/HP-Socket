@@ -155,27 +155,17 @@ BOOL CTcpAgent::ParseBindAddress(LPCTSTR lpszBindAddress)
 
 BOOL CTcpAgent::CreateWorkerThreads()
 {
-	DWORD dwWorkerThreadCount = m_dwWorkerThreadCount
-#ifdef USE_EXTERNAL_GC
-														+ 1
-#endif
-														;
-
-	if(!m_ioDispatcher.Start(this, DEFAULT_WORKER_MAX_EVENT_COUNT, dwWorkerThreadCount))
+	if(!m_ioDispatcher.Start(this, DEFAULT_WORKER_MAX_EVENT_COUNT, m_dwWorkerThreadCount))
 	{
 		SetLastError(SE_WORKER_THREAD_CREATE, __FUNCTION__, ::WSAGetLastError());
 		return FALSE;
 	}
 
-#ifdef USE_EXTERNAL_GC
-	m_fdGCTimer = m_ioDispatcher.AddTimer(m_dwWorkerThreadCount, GC_CHECK_INTERVAL, this);
-
-	if(IS_INVALID_FD(m_fdGCTimer))
+	if(!m_thGC.Start())
 	{
 		SetLastError(SE_GC_START, __FUNCTION__, ::WSAGetLastError());
 		return FALSE;
 	}
-#endif
 
 	return TRUE;
 }
@@ -223,6 +213,7 @@ void CTcpAgent::WaitForClientSocketClose()
 void CTcpAgent::WaitForWorkerThreadEnd()
 {
 	m_ioDispatcher.Stop();
+	m_thGC.Stop();
 }
 
 void CTcpAgent::ReleaseClientSocket()
@@ -234,16 +225,8 @@ void CTcpAgent::ReleaseClientSocket()
 void CTcpAgent::ReleaseFreeSocket()
 {
 	m_lsFreeSocket.Clear();
-
-#ifdef USE_EXTERNAL_GC
-	if(IS_VALID_FD(m_fdGCTimer))
-	{
-		close(m_fdGCTimer);
-		m_fdGCTimer = INVALID_FD;
-	}
-#endif
-
 	ReleaseGCSocketObj(TRUE);
+
 	VERIFY(m_lsGCSocket.IsEmpty());
 }
 
@@ -888,14 +871,6 @@ BOOL CTcpAgent::PauseReceive(CONNID dwConnID, BOOL bPause)
 
 BOOL CTcpAgent::OnBeforeProcessIo(const TDispContext* pContext, PVOID pv, UINT events)
 {
-	if(pv == this)
-	{
-		ReleaseGCSocketObj(FALSE);
-		::ReadTimer(m_fdGCTimer);
-
-		return FALSE;
-	}
-
 	TAgentSocketObj* pSocketObj = (TAgentSocketObj*)(pv);
 
 	if(!TAgentSocketObj::IsValid(pSocketObj))

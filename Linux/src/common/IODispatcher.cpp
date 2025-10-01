@@ -153,12 +153,8 @@ TDispContext& CIODispatcher::GetContext(int idx, FD fd)
 	if(idx < 0) idx = fd;
 	ASSERT(idx >= 0);
 
-	if(idx  >= m_iWorkers)
-		idx %= (m_iWorkers
-#ifdef USE_EXTERNAL_GC
-				- 1
-#endif
-				);
+	if(idx >= m_iWorkers)
+		idx %= m_iWorkers;
 
 	return m_pContexts[idx];
 }

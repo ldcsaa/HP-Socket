@@ -29,6 +29,9 @@
 
 class CTcpServer : public ITcpServer, private CIOHandler
 {
+	using CGCThread = CGCThreadT<CTcpServer>;
+	friend class CGCThreadT<CTcpServer>;
+
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort);
 	virtual BOOL Stop	();
@@ -234,7 +237,6 @@ public:
 	: m_pListener				(pListener)
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
-	, m_fdGCTimer				(INVALID_FD)
 	, m_enReusePolicy			(RAP_ADDR_AND_PORT)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_RECEIVE)
@@ -252,6 +254,7 @@ public:
 	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
 	, m_bMarkSilence			(TRUE)
 	, m_bNoDelay				(FALSE)
+	, m_thGC					(this)
 	{
 		ASSERT(m_pListener);
 	}
@@ -295,7 +298,7 @@ private:
 
 	CSpinGuard			m_csState;
 
-	FD					m_fdGCTimer;
+	CGCThread			m_thGC;
 
 	TSocketObjPtrPool	m_bfActiveSockets;
 

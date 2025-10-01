@@ -34,6 +34,9 @@ class CUdpServer : public IUdpServer, private CIOHandler
 	using CWorkerThread	 = CThread<CUdpServer, VOID, UINT>;
 	using CSendQueue	 = CCASSimpleQueue<CONNID>;
 	using CSendQueuesPtr = unique_ptr<CSendQueue[]>;
+	using CGCThread		 = CGCThreadT<CUdpServer>;
+
+	friend class CGCThreadT<CUdpServer>;
 
 public:
 	virtual BOOL Start	(LPCTSTR lpszBindAddress, USHORT usPort);
@@ -224,7 +227,6 @@ public:
 	: m_pListener				(pListener)
 	, m_enLastError				(SE_OK)
 	, m_enState					(SS_STOPPED)
-	, m_fdGCTimer				(INVALID_FD)
 	, m_enSendPolicy			(SP_PACK)
 	, m_enOnSendSyncPolicy		(OSSP_RECEIVE)
 	, m_enReusePolicy			(RAP_ADDR_AND_PORT)
@@ -240,6 +242,7 @@ public:
 	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
 	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
 	, m_bMarkSilence			(TRUE)
+	, m_thGC					(this)
 	{
 		ASSERT(m_pListener);
 	}
@@ -283,7 +286,7 @@ private:
 
 	CSpinGuard				m_csState;
 
-	FD						m_fdGCTimer;
+	CGCThread				m_thGC;
 
 	TUdpSocketObjPtrPool	m_bfActiveSockets;
 

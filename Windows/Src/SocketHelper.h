@@ -488,7 +488,12 @@ struct TSocketObjBase : public CSafeCounter
 		{ASSERT(IsExist(pSocketObj)); pSocketObj->valid = FALSE;}
 
 	static void Release(TSocketObjBase* pSocketObj)
-		{ASSERT(IsExist(pSocketObj)); pSocketObj->freeTime = ::TimeGetTime();}
+	{
+		ASSERT(IsExist(pSocketObj));
+
+		pSocketObj->freeTime = ::TimeGetTime();
+		pSocketObj->Decrement();
+	}
 
 	DWORD GetConnTime	()	const	{return connTime;}
 	DWORD GetFreeTime	()	const	{return freeTime;}
@@ -508,7 +513,7 @@ struct TSocketObjBase : public CSafeCounter
 
 	void Reset(CONNID dwConnID)
 	{
-		ResetCount();
+		ResetCount(1);
 
 		connID		= dwConnID;
 		connected	= FALSE;
