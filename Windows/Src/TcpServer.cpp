@@ -207,10 +207,11 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 		if(m_soListen != INVALID_SOCKET)
 		{
 			BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-			ENSURE(::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) == NO_ERROR);
-			ENSURE(::SSO_ReuseAddress(m_soListen, m_enReusePolicy) == NO_ERROR);
-			ENSURE(::SSO_NoDelay(m_soListen, m_bNoDelay) == NO_ERROR);
-			ENSURE(::SSO_NoBlock(m_soListen) == NO_ERROR);
+			ENSURE(IS_NO_ERROR(::SSO_KeepAliveVals(m_soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
+			ENSURE(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
+			ENSURE(IS_NO_ERROR(::SSO_NoDelay(m_soListen, m_bNoDelay)));
+			ENSURE(IS_NO_ERROR(::SSO_NoBlock(m_soListen)));
+			ENSURE(addr.IsIPv4() || IS_NO_ERROR(::SSO_DualStack(m_soListen, m_bDualStack)));
 			
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
 			{
@@ -867,7 +868,7 @@ BOOL CTcpServer::DoAccept()
 
 		ASSERT(soClient != INVALID_SOCKET);
 
-		isOK = (::PostAccept(m_pfnAcceptEx, m_soListen, soClient, pBufferObj, m_usFamily) == NO_ERROR);
+		isOK = IS_NO_ERROR(::PostAccept(m_pfnAcceptEx, m_soListen, soClient, pBufferObj, m_usFamily));
 
 		if(!isOK)
 		{

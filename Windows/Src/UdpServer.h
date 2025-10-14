@@ -81,6 +81,7 @@ public:
 	virtual void SetDetectAttempts			(DWORD dwDetectAttempts)		{ENSURE_HAS_STOPPED(); m_dwDetectAttempts			= dwDetectAttempts;}
 	virtual void SetDetectInterval			(DWORD dwDetectInterval)		{ENSURE_HAS_STOPPED(); m_dwDetectInterval			= dwDetectInterval;}
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{ENSURE_HAS_STOPPED(); m_bMarkSilence				= bMarkSilence;}
+	virtual void SetDualStack				(BOOL bDualStack)				{ENSURE_HAS_STOPPED(); m_bDualStack					= bDualStack;}
 
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
 	virtual EnSendPolicy GetSendPolicy					()	{return m_enSendPolicy;}
@@ -97,6 +98,7 @@ public:
 	virtual DWORD GetDetectAttempts			()	{return m_dwDetectAttempts;}
 	virtual DWORD GetDetectInterval			()	{return m_dwDetectInterval;}
 	virtual BOOL  IsMarkSilence				()	{return m_bMarkSilence;}
+	virtual BOOL IsDualStack				()	{return m_bDualStack;}
 
 protected:
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
@@ -264,6 +266,7 @@ public:
 	, m_dwDetectAttempts		(DEFAULT_UDP_DETECT_ATTEMPTS)
 	, m_dwDetectInterval		(DEFAULT_UDP_DETECT_INTERVAL)
 	, m_bMarkSilence			(TRUE)
+	, m_bDualStack				(TRUE)
 	, m_evWait					(TRUE, TRUE)
 	{
 		ASSERT(sm_wsSocket.IsValid());
@@ -291,6 +294,7 @@ private:
 	DWORD m_dwDetectAttempts;
 	DWORD m_dwDetectInterval;
 	BOOL  m_bMarkSilence;
+	BOOL  m_bDualStack;
 
 protected:
 	CUdpBufferObjPool		m_bfObjPool;

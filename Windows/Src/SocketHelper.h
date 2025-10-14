@@ -958,6 +958,7 @@ int SSO_UpdateAcceptContext	(SOCKET soClient, SOCKET soBind);
 int SSO_UpdateConnectContext(SOCKET soClient, int iOption);
 int SSO_NoBlock				(SOCKET sock, BOOL bNoBlock = TRUE);
 int SSO_NoDelay				(SOCKET sock, BOOL bNoDelay = TRUE);
+int SSO_DualStack			(SOCKET sock, BOOL bDualStack = TRUE);
 int SSO_DontLinger			(SOCKET sock, BOOL bDont = TRUE);
 int SSO_Linger				(SOCKET sock, USHORT l_onoff, USHORT l_linger);
 int SSO_KeepAlive			(SOCKET sock, BOOL bKeepAlive = TRUE);

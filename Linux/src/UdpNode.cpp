@@ -174,6 +174,7 @@ BOOL CUdpNode::CreateListenSocket(const HP_SOCKADDR& bindAddr)
 
 		::fcntl_SETFL(soListen, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
 		VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(soListen, m_enReusePolicy)));
+		VERIFY(bindAddr.IsIPv4() || IS_NO_ERROR(::SSO_DualStack(soListen, m_bDualStack)));
 
 		if(IS_HAS_ERROR(::bind(soListen, bindAddr.Addr(), bindAddr.AddrSize())))
 		{

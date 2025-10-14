@@ -158,6 +158,7 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 
 		::fcntl_SETFL(soListen, O_NOATIME | O_NONBLOCK | O_CLOEXEC);
 		VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(soListen, m_enReusePolicy)));
+		VERIFY(addr.IsIPv4() || IS_NO_ERROR(::SSO_DualStack(soListen, m_bDualStack)));
 
 		if(IS_HAS_ERROR(::bind(soListen, addr.Addr(), addr.AddrSize())))
 		{

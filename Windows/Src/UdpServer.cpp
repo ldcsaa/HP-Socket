@@ -217,9 +217,10 @@ BOOL CUdpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 
 		if(m_soListen != INVALID_SOCKET)
 		{
-			ENSURE(::SSO_UDP_ConnReset(m_soListen, FALSE) == NO_ERROR);
-			ENSURE(::SSO_ReuseAddress(m_soListen, m_enReusePolicy) == NO_ERROR);
-			ENSURE(::SSO_NoBlock(m_soListen) == NO_ERROR);
+			ENSURE(IS_NO_ERROR(::SSO_UDP_ConnReset(m_soListen, FALSE)));
+			ENSURE(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
+			ENSURE(IS_NO_ERROR(::SSO_NoBlock(m_soListen)));
+			ENSURE(addr.IsIPv4() || IS_NO_ERROR(::SSO_DualStack(m_soListen, m_bDualStack)));
 
 			if(::bind(m_soListen, addr.Addr(), addr.AddrSize()) != SOCKET_ERROR)
 			{

@@ -828,6 +828,7 @@ int SSO_IoctlSocket			(SOCKET sock, long cmd, PVOID arg);
 
 int SSO_NoBlock				(SOCKET sock, BOOL bNoBlock = TRUE);
 int SSO_NoDelay				(SOCKET sock, BOOL bNoDelay = TRUE);
+int SSO_DualStack			(SOCKET sock, BOOL bDualStack = TRUE);
 int SSO_DontLinger			(SOCKET sock, BOOL bDont = TRUE);
 int SSO_Linger				(SOCKET sock, int l_onoff, int l_linger);
 int SSO_KeepAlive			(SOCKET sock, BOOL bKeepAlive = TRUE);

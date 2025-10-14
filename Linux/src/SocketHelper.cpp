@@ -592,6 +592,12 @@ int SSO_NoDelay(SOCKET sock, BOOL bNoDelay)
 	return setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &val, sizeof(int));
 }
 
+int SSO_DualStack(SOCKET sock, BOOL bDualStack)
+{
+	int val = bDualStack ? 0 : 1;
+	return setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(int));
+}
+
 int SSO_DontLinger(SOCKET sock, BOOL bDont)
 {
 	return SSO_Linger(sock, 0, 0);

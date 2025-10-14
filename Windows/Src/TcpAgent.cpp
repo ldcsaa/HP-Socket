@@ -1215,9 +1215,9 @@ DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LP
 	else
 	{
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-		ENSURE(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval) != SOCKET_ERROR);
-		ENSURE(::SSO_ReuseAddress(soClient, m_enReusePolicy) != SOCKET_ERROR);
-		ENSURE(::SSO_NoDelay(soClient, m_bNoDelay) != SOCKET_ERROR);
+		ENSURE(IS_NO_ERROR(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
+		ENSURE(IS_NO_ERROR(::SSO_ReuseAddress(soClient, m_enReusePolicy)));
+		ENSURE(IS_NO_ERROR(::SSO_NoDelay(soClient, m_bNoDelay)));
 
 		if(usLocalPort == 0)
 		{

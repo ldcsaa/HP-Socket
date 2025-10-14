@@ -578,6 +578,8 @@ HPSOCKET_API void __HP_CALL HP_Server_SetMaxConnectionCount(HP_Server pServer, D
 HPSOCKET_API void __HP_CALL HP_Server_SetWorkerThreadCount(HP_Server pServer, DWORD dwWorkerThreadCount);
 /* 设置是否标记静默时间（设置为 TRUE 时 DisconnectSilenceConnections() 和 GetSilencePeriod() 才有效，默认：TRUE） */
 HPSOCKET_API void __HP_CALL HP_Server_SetMarkSilence(HP_Server pServer, BOOL bMarkSilence);
+/* 设置是否开启 IPv4/IPv6 双栈（默认：TRUE） */
+HPSOCKET_API void __HP_CALL HP_Server_SetDualStack(HP_Server pServer, BOOL bDualStack);
 
 /* 获取地址重用选项 */
 HPSOCKET_API En_HP_ReuseAddressPolicy __HP_CALL HP_Server_GetReuseAddressPolicy(HP_Server pServer);
@@ -601,6 +603,8 @@ HPSOCKET_API DWORD __HP_CALL HP_Server_GetMaxConnectionCount(HP_Server pServer);
 HPSOCKET_API DWORD __HP_CALL HP_Server_GetWorkerThreadCount(HP_Server pServer);
 /* 检测是否标记静默时间 */
 HPSOCKET_API BOOL __HP_CALL HP_Server_IsMarkSilence(HP_Server pServer);
+/* 检测是否开启 IPv4/IPv6 双栈 */
+HPSOCKET_API BOOL __HP_CALL HP_Server_IsDualStack(HP_Server pServer);
 
 /**********************************************************************************/
 /******************************* TCP Server 操作方法 *******************************/
@@ -1512,6 +1516,11 @@ HPSOCKET_API int __HP_CALL HP_UdpNode_GetMultiCastTtl(HP_UdpNode pNode);
 HPSOCKET_API void __HP_CALL HP_UdpNode_SetMultiCastLoop(HP_UdpNode pNode, BOOL bMCLoop);
 /* 检测是否启用组播环路 */
 HPSOCKET_API BOOL __HP_CALL HP_UdpNode_IsMultiCastLoop(HP_UdpNode pNode);
+
+/* 设置是否开启 IPv4/IPv6 双栈（默认：TRUE） */
+HPSOCKET_API void __HP_CALL HP_UdpNode_SetDualStack(HP_UdpNode pNode, BOOL bDualStack);
+/* 检测是否开启 IPv4/IPv6 双栈 */
+HPSOCKET_API BOOL __HP_CALL HP_UdpNode_IsDualStack(HP_UdpNode pNode);
 
 /* 设置地址重用选项 */
 HPSOCKET_API void __HP_CALL HP_UdpNode_SetReuseAddressPolicy(HP_UdpNode pNode, En_HP_ReuseAddressPolicy enReusePolicy);

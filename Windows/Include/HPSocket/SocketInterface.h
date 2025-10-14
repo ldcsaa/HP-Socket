@@ -336,6 +336,11 @@ public:
 
 	/* 获取监听 Socket 的地址信息 */
 	virtual BOOL GetListenAddress(TCHAR lpszAddress[], int& iAddressLen, USHORT& usPort)	= 0;
+
+	/* 设置是否开启 IPv4/IPv6 双栈（默认：TRUE） */
+	virtual void SetDualStack(BOOL bDualStack)												= 0;
+	/* 检测是否开启 IPv4/IPv6 双栈 */
+	virtual BOOL IsDualStack()																= 0;
 };
 
 /************************************************************************
@@ -1273,6 +1278,8 @@ public:
 
 	/* 设置地址重用选项 */
 	virtual void SetReuseAddressPolicy(EnReuseAddressPolicy enReusePolicy)	= 0;
+	/* 设置是否开启 IPv4/IPv6 双栈（默认：TRUE） */
+	virtual void SetDualStack(BOOL bDualStack)								= 0;
 	/* 设置工作线程数量（通常设置为 2 * CPU + 2） */
 	virtual void SetWorkerThreadCount	(DWORD dwWorkerThreadCount)			= 0;
 	/* 设置 Receive 预投递数量（根据负载调整设置，Receive 预投递数量越大则丢包概率越小） */
@@ -1284,6 +1291,8 @@ public:
 
 	/* 获取地址重用选项 */
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy()					= 0;
+	/* 检测是否开启 IPv4/IPv6 双栈 */
+	virtual BOOL IsDualStack() = 0;
 	/* 获取工作线程数量 */
 	virtual DWORD GetWorkerThreadCount	()									= 0;
 	/* 获取 Receive 预投递数量 */

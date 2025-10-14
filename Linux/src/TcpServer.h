@@ -112,6 +112,7 @@ public:
 	virtual void SetKeepAliveInterval		(DWORD dwKeepAliveInterval)		{ENSURE_HAS_STOPPED(); m_dwKeepAliveInterval		= dwKeepAliveInterval;}
 	virtual void SetMarkSilence				(BOOL bMarkSilence)				{ENSURE_HAS_STOPPED(); m_bMarkSilence				= bMarkSilence;}
 	virtual void SetNoDelay					(BOOL bNoDelay)					{ENSURE_HAS_STOPPED(); m_bNoDelay					= bNoDelay;}
+	virtual void SetDualStack				(BOOL bDualStack)				{ENSURE_HAS_STOPPED(); m_bDualStack					= bDualStack;}
 
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
 	virtual EnSendPolicy GetSendPolicy					()	{return m_enSendPolicy;}
@@ -130,6 +131,7 @@ public:
 	virtual DWORD GetKeepAliveInterval		()	{return m_dwKeepAliveInterval;}
 	virtual BOOL  IsMarkSilence				()	{return m_bMarkSilence;}
 	virtual BOOL  IsNoDelay					()	{return m_bNoDelay;}
+	virtual BOOL IsDualStack				()	{return m_bDualStack;}
 
 protected:
 	virtual EnHandleResult FirePrepareListen(SOCKET soListen)
@@ -254,6 +256,7 @@ public:
 	, m_dwKeepAliveInterval		(DEFALUT_TCP_KEEPALIVE_INTERVAL)
 	, m_bMarkSilence			(TRUE)
 	, m_bNoDelay				(FALSE)
+	, m_bDualStack				(TRUE)
 	, m_thGC					(this)
 	{
 		ASSERT(m_pListener);
@@ -282,6 +285,7 @@ private:
 	DWORD m_dwKeepAliveInterval;
 	BOOL  m_bMarkSilence;
 	BOOL  m_bNoDelay;
+	BOOL  m_bDualStack;
 
 private:
 	CSEM				m_evWait;

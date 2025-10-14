@@ -154,6 +154,7 @@ BOOL CTcpServer::CreateListenSocket(LPCTSTR lpszBindAddress, USHORT usPort)
 		VERIFY(IS_NO_ERROR(::SSO_KeepAliveVals(soListen, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
 		VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(soListen, m_enReusePolicy)));
 		VERIFY(IS_NO_ERROR(::SSO_NoDelay(soListen, m_bNoDelay)));
+		VERIFY(addr.IsIPv4() || IS_NO_ERROR(::SSO_DualStack(soListen, m_bDualStack)));
 
 		if(IS_HAS_ERROR(::bind(soListen, addr.Addr(), addr.AddrSize())))
 		{

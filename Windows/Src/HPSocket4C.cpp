@@ -199,6 +199,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_GetReuseAddressPolicy=_HP_Server_GetReuseAddressPolicy@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_HasStarted=_HP_Server_HasStarted@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsMarkSilence=_HP_Server_IsMarkSilence@4")
+	#pragma comment(linker, "/EXPORT:HP_Server_IsDualStack=_HP_Server_IsDualStack@4")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsPauseReceive=_HP_Server_IsPauseReceive@12")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsConnected=_HP_Server_IsConnected@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_IsSecure=_HP_Server_IsSecure@4")
@@ -213,6 +214,7 @@
 	#pragma comment(linker, "/EXPORT:HP_Server_SetFreeSocketObjLockTime=_HP_Server_SetFreeSocketObjLockTime@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetFreeSocketObjPool=_HP_Server_SetFreeSocketObjPool@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetMarkSilence=_HP_Server_SetMarkSilence@8")
+	#pragma comment(linker, "/EXPORT:HP_Server_SetDualStack=_HP_Server_SetDualStack@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetMaxConnectionCount=_HP_Server_SetMaxConnectionCount@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetSendPolicy=_HP_Server_SetSendPolicy@8")
 	#pragma comment(linker, "/EXPORT:HP_Server_SetOnSendSyncPolicy=_HP_Server_SetOnSendSyncPolicy@8")
@@ -425,6 +427,8 @@
 	#pragma comment(linker, "/EXPORT:HP_UdpNode_GetMultiCastTtl=_HP_UdpNode_GetMultiCastTtl@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpNode_SetMultiCastLoop=_HP_UdpNode_SetMultiCastLoop@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpNode_IsMultiCastLoop=_HP_UdpNode_IsMultiCastLoop@4")
+	#pragma comment(linker, "/EXPORT:HP_UdpNode_SetDualStack=_HP_UdpNode_SetDualStack@8")
+	#pragma comment(linker, "/EXPORT:HP_UdpNode_IsDualStack=_HP_UdpNode_IsDualStack@4")
 	#pragma comment(linker, "/EXPORT:HP_UdpNode_SetReuseAddressPolicy=_HP_UdpNode_SetReuseAddressPolicy@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpNode_SetWorkerThreadCount=_HP_UdpNode_SetWorkerThreadCount@8")
 	#pragma comment(linker, "/EXPORT:HP_UdpNode_SetPostReceiveCount=_HP_UdpNode_SetPostReceiveCount@8")
@@ -1455,6 +1459,11 @@ HPSOCKET_API void __HP_CALL HP_Server_SetMarkSilence(HP_Server pServer, BOOL bMa
 	C_HP_Object::ToSecond<IServer>(pServer)->SetMarkSilence(bMarkSilence);
 }
 
+HPSOCKET_API void __HP_CALL HP_Server_SetDualStack(HP_Server pServer, BOOL bDualStack)
+{
+	C_HP_Object::ToSecond<IServer>(pServer)->SetDualStack(bDualStack);
+}
+
 HPSOCKET_API En_HP_ReuseAddressPolicy __HP_CALL HP_Server_GetReuseAddressPolicy(HP_Server pServer)
 {
 	return C_HP_Object::ToSecond<IServer>(pServer)->GetReuseAddressPolicy();
@@ -1508,6 +1517,11 @@ HPSOCKET_API DWORD __HP_CALL HP_Server_GetWorkerThreadCount(HP_Server pServer)
 HPSOCKET_API BOOL __HP_CALL HP_Server_IsMarkSilence(HP_Server pServer)
 {
 	return C_HP_Object::ToSecond<IServer>(pServer)->IsMarkSilence();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Server_IsDualStack(HP_Server pServer)
+{
+	return C_HP_Object::ToSecond<IServer>(pServer)->IsDualStack();
 }
 
 /**********************************************************************************/
@@ -2630,6 +2644,16 @@ HPSOCKET_API void __HP_CALL HP_UdpNode_SetMultiCastLoop(HP_UdpNode pNode, BOOL b
 HPSOCKET_API BOOL __HP_CALL HP_UdpNode_IsMultiCastLoop(HP_UdpNode pNode)
 {
 	return C_HP_Object::ToSecond<IUdpNode>(pNode)->IsMultiCastLoop();
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpNode_SetDualStack(HP_UdpNode pNode, BOOL bDualStack)
+{
+	C_HP_Object::ToSecond<IUdpNode>(pNode)->SetDualStack(bDualStack);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpNode_IsDualStack(HP_UdpNode pNode)
+{
+	return C_HP_Object::ToSecond<IUdpNode>(pNode)->IsDualStack();
 }
 
 HPSOCKET_API void __HP_CALL HP_UdpNode_SetReuseAddressPolicy(HP_UdpNode pNode, En_HP_ReuseAddressPolicy enReusePolicy)

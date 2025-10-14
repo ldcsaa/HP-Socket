@@ -736,6 +736,11 @@ HPSOCKET_API void __HP_CALL HP_Server_SetMarkSilence(HP_Server pServer, BOOL bMa
 	C_HP_Object::ToSecond<IServer>(pServer)->SetMarkSilence(bMarkSilence);
 }
 
+HPSOCKET_API void __HP_CALL HP_Server_SetDualStack(HP_Server pServer, BOOL bDualStack)
+{
+	C_HP_Object::ToSecond<IServer>(pServer)->SetDualStack(bDualStack);
+}
+
 HPSOCKET_API En_HP_ReuseAddressPolicy __HP_CALL HP_Server_GetReuseAddressPolicy(HP_Server pServer)
 {
 	return C_HP_Object::ToSecond<IServer>(pServer)->GetReuseAddressPolicy();
@@ -789,6 +794,11 @@ HPSOCKET_API DWORD __HP_CALL HP_Server_GetWorkerThreadCount(HP_Server pServer)
 HPSOCKET_API BOOL __HP_CALL HP_Server_IsMarkSilence(HP_Server pServer)
 {
 	return C_HP_Object::ToSecond<IServer>(pServer)->IsMarkSilence();
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_Server_IsDualStack(HP_Server pServer)
+{
+	return C_HP_Object::ToSecond<IServer>(pServer)->IsDualStack();
 }
 
 /**********************************************************************************/
@@ -1911,6 +1921,16 @@ HPSOCKET_API void __HP_CALL HP_UdpNode_SetMultiCastLoop(HP_UdpNode pNode, BOOL b
 HPSOCKET_API BOOL __HP_CALL HP_UdpNode_IsMultiCastLoop(HP_UdpNode pNode)
 {
 	return C_HP_Object::ToSecond<IUdpNode>(pNode)->IsMultiCastLoop();
+}
+
+HPSOCKET_API void __HP_CALL HP_UdpNode_SetDualStack(HP_UdpNode pNode, BOOL bDualStack)
+{
+	C_HP_Object::ToSecond<IUdpNode>(pNode)->SetDualStack(bDualStack);
+}
+
+HPSOCKET_API BOOL __HP_CALL HP_UdpNode_IsDualStack(HP_UdpNode pNode)
+{
+	return C_HP_Object::ToSecond<IUdpNode>(pNode)->IsDualStack();
 }
 
 HPSOCKET_API void __HP_CALL HP_UdpNode_SetReuseAddressPolicy(HP_UdpNode pNode, En_HP_ReuseAddressPolicy enReusePolicy)

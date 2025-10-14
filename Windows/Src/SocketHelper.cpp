@@ -627,6 +627,16 @@ int SSO_NoDelay(SOCKET sock, BOOL bNoDelay)
 	return setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (CHAR*)&bNoDelay, sizeof(BOOL));
 }
 
+int SSO_DualStack(SOCKET sock, BOOL bDualStack)
+{
+#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+	BOOL bVal = !bDualStack;
+	return setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (CHAR*)&bVal, sizeof(BOOL));
+#else
+	return NO_ERROR;
+#endif
+}
+
 int SSO_DontLinger(SOCKET sock, BOOL bDont)
 {
 	return setsockopt(sock, SOL_SOCKET, SO_DONTLINGER, (CHAR*)&bDont, sizeof(BOOL));

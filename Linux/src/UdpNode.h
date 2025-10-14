@@ -69,6 +69,7 @@ public:
 	virtual void SetMaxDatagramSize		(DWORD dwMaxDatagramSize)			{ENSURE_HAS_STOPPED(); m_dwMaxDatagramSize		= dwMaxDatagramSize;}
 	virtual void SetMultiCastTtl		(int iMCTtl)						{ENSURE_HAS_STOPPED(); m_iMCTtl					= iMCTtl;}
 	virtual void SetMultiCastLoop		(BOOL bMCLoop)						{ENSURE_HAS_STOPPED(); m_bMCLoop				= bMCLoop;}
+	virtual void SetDualStack			(BOOL bDualStack)					{ENSURE_HAS_STOPPED(); m_bDualStack				= bDualStack;}
 	virtual void SetExtra				(PVOID pExtra)						{m_pExtra										= pExtra;}						
 
 	virtual EnReuseAddressPolicy GetReuseAddressPolicy	()	{return m_enReusePolicy;}
@@ -80,6 +81,7 @@ public:
 	virtual EnCastMode GetCastMode		()	{return m_enCastMode;}
 	virtual int GetMultiCastTtl			()	{return m_iMCTtl;}
 	virtual BOOL IsMultiCastLoop		()	{return m_bMCLoop;}
+	virtual BOOL IsDualStack			()	{return m_bDualStack;}
 	virtual PVOID GetExtra				()	{return m_pExtra;}
 
 protected:
@@ -147,6 +149,7 @@ public:
 	, m_iMCTtl					(1)
 	, m_bMCLoop					(FALSE)
 	, m_enCastMode				(CM_UNICAST)
+	, m_bDualStack				(TRUE)
 	, m_castAddr				(AF_UNSPEC, TRUE)
 	, m_localAddr				(AF_UNSPEC, TRUE)
 	{
@@ -170,6 +173,7 @@ private:
 	int					m_iMCTtl;
 	BOOL				m_bMCLoop;
 	EnCastMode			m_enCastMode;
+	BOOL				m_bDualStack;
 
 private:
 	CSEM				m_evWait;

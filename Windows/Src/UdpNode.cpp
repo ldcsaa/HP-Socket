@@ -159,8 +159,9 @@ BOOL CUdpNode::CreateListenSocket(const HP_SOCKADDR& bindAddr)
 	}
 
 	ENSURE(IS_NO_ERROR(::SSO_UDP_ConnReset(m_soListen, FALSE)));
-	ENSURE(::SSO_NoBlock(m_soListen) == NO_ERROR);
+	ENSURE(IS_NO_ERROR(::SSO_NoBlock(m_soListen)));
 	ENSURE(IS_NO_ERROR(::SSO_ReuseAddress(m_soListen, m_enReusePolicy)));
+	ENSURE(bindAddr.IsIPv4() || IS_NO_ERROR(::SSO_DualStack(m_soListen, m_bDualStack)));
 
 	if(IS_HAS_ERROR(::bind(m_soListen, bindAddr.Addr(), bindAddr.AddrSize())))
 	{
