@@ -525,6 +525,7 @@ public:
 
 		pSelf->CheckUpgrade();
 		pSelf->ResetHeaderBuffer();
+		pSelf->SetKeepAlive(::llhttp_should_keep_alive(p));
 
 		EnHttpParseResult rs = pSelf->m_pContext->FireHeadersComplete(pSelf->m_pSocket);
 
@@ -708,7 +709,7 @@ public:
 
 	BOOL IsRequest()				{return m_bRequest;}
 	BOOL IsUpgrade()				{return m_parser.upgrade;}
-	BOOL IsKeepAlive()				{return ::llhttp_should_keep_alive(&m_parser);}
+	BOOL IsKeepAlive()				{return m_bKeepAlive;}
 	USHORT GetVersion()				{return MAKEWORD(m_parser.http_major, m_parser.http_minor);}
 	ULONGLONG GetContentLength()	{return m_parser.content_length;}
 
@@ -1030,6 +1031,7 @@ public:
 	, m_bRequest		(bRequest)
 	, m_bValid			(FALSE)
 	, m_bReleased		(FALSE)
+	, m_bKeepAlive		(FALSE)
 	, m_dwFreeTime		(0)
 	, m_usUrlFieldSet	(m_bRequest ? 0 : -1)
 	, m_pstrUrlFileds	(nullptr)
@@ -1068,6 +1070,7 @@ public:
 
 		m_bValid	 = bValid;
 		m_bReleased  = FALSE;
+		m_bKeepAlive = FALSE;
 		m_enUpgrade  = HUT_NONE;
 		m_dwFreeTime = 0;
 	}
@@ -1200,6 +1203,7 @@ private:
 
 	void AppendBuffer(const char* at, size_t length)	{m_strBuffer.Append(at, (int)length);}
 	void ResetBuffer()									{m_strBuffer.Empty();}
+	void SetKeepAlive(BOOL bKeepAlive)					{m_bKeepAlive = bKeepAlive;}
 	LPCSTR GetBuffer()									{return m_strBuffer;}
 	CStringA& GetBufferRef()							{return m_strBuffer;}
 
@@ -1211,6 +1215,7 @@ private:
 	BOOL		m_bValid;
 	BOOL		m_bRequest;
 	BOOL		m_bReleased;
+	BOOL		m_bKeepAlive;
 	T*			m_pContext;
 	S*			m_pSocket;
 	http_parser	m_parser;
