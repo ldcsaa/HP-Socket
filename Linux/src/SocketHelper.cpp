@@ -677,7 +677,7 @@ int SSO_ReuseAddress(SOCKET sock, EnReuseAddressPolicy opt)
 	else
 	{
 		::SetLastError(ERROR_INVALID_PARAMETER);
-		rs = -1;
+		rs = SOCKET_ERROR;
 	}
 
 	return rs;

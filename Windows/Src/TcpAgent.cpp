@@ -1215,25 +1215,32 @@ DWORD CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LP
 	else
 	{
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-		ENSURE(IS_NO_ERROR(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
-		ENSURE(IS_NO_ERROR(::SSO_ReuseAddress(soClient, m_enReusePolicy)));
-		ENSURE(IS_NO_ERROR(::SSO_NoDelay(soClient, m_bNoDelay)));
 
-		if(usLocalPort == 0)
+		if(
+			(IS_HAS_ERROR(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval))) ||
+			(IS_HAS_ERROR(::SSO_ReuseAddress(soClient, m_enReusePolicy)))									||
+			(IS_HAS_ERROR(::SSO_NoDelay(soClient, m_bNoDelay))))
 		{
-			const HP_SOCKADDR& bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
-
-			if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
-				result = ::WSAGetLastError();
+			result = ::WSAGetLastError();
 		}
 		else
 		{
-			HP_SOCKADDR bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
+			if(usLocalPort == 0)
+			{
+				const HP_SOCKADDR& bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
 
-			bindAddr.SetPort(usLocalPort);
+				if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
+					result = ::WSAGetLastError();
+			}
+			else
+			{
+				HP_SOCKADDR bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
 
-			if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
-				result = ::WSAGetLastError();
+				bindAddr.SetPort(usLocalPort);
+
+				if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
+					result = ::WSAGetLastError();
+			}
 		}
 	}
 
@@ -1263,47 +1270,50 @@ DWORD CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SO
 
 	AddClientSocketObj(dwConnID, pSocketObj, addr, lpszRemoteHostName, pExtra);
 
-	DWORD result	= NO_ERROR;
 	BOOL bNeedFree	= TRUE;
+	DWORD result	= ::SSO_NoBlock(pSocketObj->socket);
 
-	ENSURE(IS_NO_ERROR(::SSO_NoBlock(pSocketObj->socket)));
-
-	if(m_bAsyncConnect)
-	{
-		if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
-			result = ::PostConnect(m_pfnConnectEx, pSocketObj->socket, addr, pBufferObj);
-		else
-			result = ::GetLastError();
-	}
+	if(IS_HAS_ERROR(result))
+		result = ::WSAGetLastError();
 	else
 	{
-		result = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
-
-		if(IS_NO_ERROR(result) || IS_WOULDBLOCK_ERROR())
+		if(m_bAsyncConnect)
 		{
-			if(IS_HAS_ERROR(result))
-				result = ::WaitForSocketWrite(pSocketObj->socket, m_dwSyncConnectTimeout);
-
-			if(IS_NO_ERROR(result))
-			{
-				if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
-				{
-					pSocketObj->SetConnected();
-
-					if(TriggerFireConnect(pSocketObj) != HR_ERROR)
-					{
-						result		= DoReceive(pSocketObj, pBufferObj);
-						bNeedFree	= FALSE;
-					}
-					else
-						result = ENSURE_ERROR_CANCELLED;
-				}
-				else
-					result = ::GetLastError();
-			}
+			if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
+				result = ::PostConnect(m_pfnConnectEx, pSocketObj->socket, addr, pBufferObj);
+			else
+				result = ::GetLastError();
 		}
 		else
-			result = ::WSAGetLastError();
+		{
+			result = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
+
+			if(IS_NO_ERROR(result) || IS_WOULDBLOCK_ERROR())
+			{
+				if(IS_HAS_ERROR(result))
+					result = ::WaitForSocketWrite(pSocketObj->socket, m_dwSyncConnectTimeout);
+
+				if(IS_NO_ERROR(result))
+				{
+					if(::CreateIoCompletionPort((HANDLE)pSocketObj->socket, m_hCompletePort, (ULONG_PTR)pSocketObj, 0))
+					{
+						pSocketObj->SetConnected();
+
+						if(TriggerFireConnect(pSocketObj) != HR_ERROR)
+						{
+							result	  = DoReceive(pSocketObj, pBufferObj);
+							bNeedFree = FALSE;
+						}
+						else
+							result = ENSURE_ERROR_CANCELLED;
+					}
+					else
+						result = ::GetLastError();
+				}
+			}
+			else
+				result = ::WSAGetLastError();
+		}
 	}
 
 	if(result != NO_ERROR)

@@ -307,23 +307,30 @@ int CTcpAgent::CreateClientSocket(LPCTSTR lpszRemoteAddress, USHORT usPort, LPCT
 	else
 	{
 		BOOL bOnOff	= (m_dwKeepAliveTime > 0 && m_dwKeepAliveInterval > 0);
-		VERIFY(IS_NO_ERROR(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)));
-		VERIFY(IS_NO_ERROR(::SSO_ReuseAddress(soClient, m_enReusePolicy)));
-		VERIFY(IS_NO_ERROR(::SSO_NoDelay(soClient, m_bNoDelay)));
 
-		if(bBind && usLocalPort == 0)
+		if(
+			(IS_HAS_ERROR(::SSO_KeepAliveVals(soClient, bOnOff, m_dwKeepAliveTime, m_dwKeepAliveInterval)))	||
+			(IS_HAS_ERROR(::SSO_ReuseAddress(soClient, m_enReusePolicy)))									||
+			(IS_HAS_ERROR(::SSO_NoDelay(soClient, m_bNoDelay))))
 		{
-			if(::bind(soClient, lpBindAddr->Addr(), lpBindAddr->AddrSize()) == SOCKET_ERROR)
-				result = ::WSAGetLastError();
+			result = ::WSAGetLastError();
 		}
-		else if(usLocalPort != 0)
+		else
 		{
-			HP_SOCKADDR bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
+			if(bBind && usLocalPort == 0)
+			{
+				if(::bind(soClient, lpBindAddr->Addr(), lpBindAddr->AddrSize()) == SOCKET_ERROR)
+					result = ::WSAGetLastError();
+			}
+			else if(usLocalPort != 0)
+			{
+				HP_SOCKADDR bindAddr = bBind ? *lpBindAddr : HP_SOCKADDR::AnyAddr(addr.family);
 
-			bindAddr.SetPort(usLocalPort);
+				bindAddr.SetPort(usLocalPort);
 
-			if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
-				result = ::WSAGetLastError();
+				if(::bind(soClient, bindAddr.Addr(), bindAddr.AddrSize()) == SOCKET_ERROR)
+					result = ::WSAGetLastError();
+			}
 		}
 	}
 
@@ -351,34 +358,35 @@ int CTcpAgent::ConnectToServer(CONNID dwConnID, LPCTSTR lpszRemoteHostName, SOCK
 
 	int result = HAS_ERROR;
 
-	VERIFY(::fcntl_SETFL(pSocketObj->socket, O_NOATIME | O_NONBLOCK | O_CLOEXEC));
-
-	int rc = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
-
-	if(IS_NO_ERROR(rc) || IS_IO_PENDING_ERROR())
+	if(IS_NO_ERROR(::fcntl_SETFL(pSocketObj->socket, O_NOATIME | O_NONBLOCK | O_CLOEXEC)))
 	{
-		if(m_bAsyncConnect)
-		{
-			if(m_ioDispatcher.AddFD(pSocketObj->socket, EPOLLOUT, pSocketObj))
-				result = NO_ERROR;
-		}
-		else
-		{
-			if(IS_HAS_ERROR(result))
-				result = ::WaitForSocketWrite(pSocketObj->socket, m_dwSyncConnectTimeout);
+		int rc = ::connect(pSocketObj->socket, addr.Addr(), addr.AddrSize());
 
-			if(IS_NO_ERROR(result))
+		if(IS_NO_ERROR(rc) || IS_IO_PENDING_ERROR())
+		{
+			if(m_bAsyncConnect)
 			{
-				pSocketObj->SetConnected();
+				if(m_ioDispatcher.AddFD(pSocketObj->socket, EPOLLOUT, pSocketObj))
+					result = NO_ERROR;
+			}
+			else
+			{
+				if(IS_HAS_ERROR(result))
+					result = ::WaitForSocketWrite(pSocketObj->socket, m_dwSyncConnectTimeout);
 
-				if(TRIGGER(FireConnect(pSocketObj)) == HR_ERROR)
-					result = ENSURE_ERROR_CANCELLED;
-				else
+				if(IS_NO_ERROR(result))
 				{
-					UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
+					pSocketObj->SetConnected();
 
-					if(!m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP, pSocketObj))
-						result = HAS_ERROR;
+					if(TRIGGER(FireConnect(pSocketObj)) == HR_ERROR)
+						result = ENSURE_ERROR_CANCELLED;
+					else
+					{
+						UINT evts = (pSocketObj->IsPending() ? EPOLLOUT : 0) | (pSocketObj->IsPaused() ? 0 : EPOLLIN);
+
+						if(!m_ioDispatcher.AddFD(pSocketObj->socket, evts | EPOLLRDHUP, pSocketObj))
+							result = HAS_ERROR;
+					}
 				}
 			}
 		}
